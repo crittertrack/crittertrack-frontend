@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
     AlertTriangle, ArrowLeft, CheckCircle, ChevronDown, ChevronUp,
     Download, FileText, Flame, Gem, Globe, Loader2, Mail, Plus, Save,
@@ -388,8 +389,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
-    const [settingsTab, setSettingsTab] = useState('profile');
     const [myReceivedRatings, setMyReceivedRatings] = useState(null);
     const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
 
@@ -399,21 +398,26 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [blSaved, setBlSaved] = useState(false);
     useEffect(() => { setLocalBLDefs(breedingLineDefs); }, [breedingLineDefs]);
 
+    const location = useLocation();
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const activeTab = pathSegments[pathSegments.length - 1] === 'settings' ? 'profile' : pathSegments[pathSegments.length - 1];
+    const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
+
     useEffect(() => {
-        if (settingsTab !== 'ratings' || !userProfile?.id_public) return;
+        if (activeTab !== 'ratings' || !userProfile?.id_public) return;
         setMyReceivedRatingsLoading(true);
         axios.get(`${API_BASE_URL}/public/ratings/${userProfile.id_public}`)
             .then(r => setMyReceivedRatings(r.data))
             .catch(() => setMyReceivedRatings({ ratings: [], average: 0, count: 0 }))
             .finally(() => setMyReceivedRatingsLoading(false));
-    }, [settingsTab, userProfile?.id_public]);
+    }, [activeTab, userProfile?.id_public]);
 
     useEffect(() => {
-        if (settingsTab !== 'data') return;
+        if (activeTab !== 'data') return;
         axios.get(`${API_BASE_URL}/species`, { headers: { Authorization: `Bearer ${authToken}` } })
             .then(r => setZeSpeciesList(Array.isArray(r.data) ? r.data : []))
             .catch(() => {});
-    }, [settingsTab, API_BASE_URL, authToken]);
+    }, [activeTab, API_BASE_URL, authToken]);
 
     // Data Portability ? Export
     const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
@@ -858,13 +862,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { id: 'data',            label: 'Data Portability' },
                     { id: 'account',         label: 'Account' },
                 ].map(tab => (
-                    <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${settingsTab === tab.id ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                    >{tab.label}</button>
+                    <NavLink 
+                        key={tab.id} 
+                        to={tab.id === 'profile' ? '' : tab.id}
+                        end={tab.id === 'profile'}
+                        className={({ isActive }) => `px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >
+                        {tab.label}
+                    </NavLink>
                 ))}
             </div>
 
-            {settingsTab === 'profile' && <>
+            {activeTab === 'profile' && <>
             <form id="profile-info-form" onSubmit={handleProfileUpdate} className="space-y-6 mb-4 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Public Profile Information</h3>
                 
@@ -1087,7 +1096,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
             </>}
 
-            {settingsTab === 'info-adoption' && <>
+            {activeTab === 'info-adoption' && <>
             <form onSubmit={handleBreederInfoSave} className="space-y-4 p-4 sm:p-6 border rounded-lg bg-gray-50">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Info &amp; Adoption</h3>
                 <p className="text-sm text-gray-500">Shown on your public profile under the <strong>Info &amp; Adoption</strong> tab. Leave fields blank to hide them.</p>
@@ -1195,7 +1204,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </form>
             </>}
 
-            {settingsTab === 'directory' && <>
+            {activeTab === 'directory' && <>
             <BreederDirectorySettings
                 authToken={authToken}
                 API_BASE_URL={API_BASE_URL}
@@ -1204,7 +1213,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             />
             </>}
 
-            {settingsTab === 'ratings' && <>
+            {activeTab === 'ratings' && <>
             <div className="p-4 sm:p-6 border rounded-lg bg-gray-50">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Ratings Received</h3>
                 {myReceivedRatingsLoading ? (
@@ -1253,7 +1262,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
             </>}
 
-            {settingsTab === 'breeding-lines' && (
+            {activeTab === 'breeding-lines' && (
                 <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 space-y-5">
                     <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
                     <p className="text-sm text-gray-600">Define up to 10 personal breeding lines. These are private and only visible to you. Assign them to animals in the animal&apos;s detail view under the Identification tab.</p>
@@ -1307,7 +1316,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
             )}
 
-            {settingsTab === 'account' && <>
+            {activeTab === 'account' && <>
             <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Email Address</h3>
                 <input type="email" placeholder="New Email Address *" value={email} onChange={(e) => setEmail(e.target.value)} required 
@@ -1341,7 +1350,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </form>
             </>}
 
-            {settingsTab === 'data' && <>
+            {activeTab === 'data' && <>
             <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden space-y-6">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Data Portability</h3>
                 <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export or another service.</p>
@@ -3090,7 +3099,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
             </>}
 
-            {settingsTab === 'account' && <>
+            {activeTab === 'account' && <>
             <div className="mt-2 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
                 <button type="button" onClick={() => setDangerZoneOpen(v => !v)}
                     className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 transition"

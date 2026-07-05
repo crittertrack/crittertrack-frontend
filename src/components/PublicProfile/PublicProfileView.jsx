@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
     DollarSign, Flame, Gem, Globe, Heart, Key, Link, Loader2,
@@ -285,11 +285,11 @@ const RatingStarRow = ({ score, interactive, onSelect }) => (
 
 const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext, currentUserIdPublic = null, currentUserRole = 'user' }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
-    const [activeTab, setActiveTab] = useState('animals');
     const [animalSearch, setAnimalSearch] = useState('');
     const [bioExpanded, setBioExpanded] = useState(false);
     const [speciesFilter, setSpeciesFilter] = useState('');
@@ -319,6 +319,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         next.has(key) ? next.delete(key) : next.add(key);
         return next;
     });
+
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    let activeTab = 'animals';
+    if (lastSegment && lastSegment.toLowerCase() !== profile.id_public.toLowerCase()) {
+        activeTab = lastSegment;
+    }
 
     const isOwnProfile = currentUserIdPublic === profile.id_public;
     const isModOrAdmin = ['moderator', 'admin'].includes(currentUserRole);
@@ -744,11 +751,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {freshProfile?.id_public || profile.id_public}
                     </span>
                     {ratingData.count > 0 && (
-                        <button onClick={() => setActiveTab('ratings')} className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
+                        <NavLink to="ratings" className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
                             <Star size={12} className="inline-block align-middle fill-current" />
                             <span>{ratingData.average.toFixed(1)}</span>
                             <span className="text-gray-400 font-normal">({ratingData.count})</span>
-                        </button>
+                        </NavLink>
                     )}
                     <span className="text-xs text-gray-500">Member since {memberSince}</span>
                     {(freshProfile?.country || profile.country) && (
@@ -824,50 +831,51 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
             {/* Tab Bar */}
             <div className="flex flex-wrap border-b border-gray-200 mb-6">
-                <button
-                    onClick={() => setActiveTab('animals')}
-                    className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                <NavLink
+                    to=""
+                    end
+                    className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Animals ({animals.filter(a => a.isOwned !== false).length})
-                </button>
+                </NavLink>
                 {hasBreederInfo && (
-                    <button
-                        onClick={() => setActiveTab('info-adoption')}
-                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    <NavLink
+                        to="info-adoption"
+                        className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Info &amp; Adoption
-                    </button>
+                    </NavLink>
                 )}
                 {publicLitters.length > 0 && (
-                    <button
-                        onClick={() => setActiveTab('litters')}
-                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    <NavLink
+                        to="litters"
+                        className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Pairings ({publicLitters.length})
-                    </button>
+                    </NavLink>
                 )}
                 {animals.some(a => a.isForSale || a.availableForBreeding) && (
-                    <button
-                        onClick={() => setActiveTab('for-sale-stud')}
-                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'for-sale-stud' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    <NavLink
+                        to="for-sale-stud"
+                        className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         For Sale / Stud ({animals.filter(a => a.isForSale || a.availableForBreeding).length})
-                    </button>
+                    </NavLink>
                 )}
                 {(freshProfile?.showStatsTab ?? true) && (
-                    <button
-                        onClick={() => setActiveTab('stats')}
-                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    <NavLink
+                        to="stats"
+                        className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Stats
-                    </button>
+                    </NavLink>
                 )}
-                <button
-                    onClick={() => setActiveTab('ratings')}
-                    className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'ratings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                <NavLink
+                    to="ratings"
+                    className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Ratings{ratingData.count > 0 && ` (${ratingData.count})`}
-                </button>
+                </NavLink>
             </div>
 
             {/* Animals Tab */}
