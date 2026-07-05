@@ -73,6 +73,8 @@ const FamilyTreeView = ({
     focusAnimalId,
     onNodeClick,
     authToken,
+    graphMode = 'direct',
+    selectedSpecies,
 }) => {
     const [lineageData, setLineageData] = useState({});
     const [lineageLoading, setLineageLoading] = useState(false);
@@ -142,7 +144,7 @@ const FamilyTreeView = ({
             return;
         }
 
-        const fetchLineage = async () => {
+        const fetchDirectLineage = async () => {
             setLineageLoading(true);
             const nodes = {};
             const visited = new Set();
@@ -216,8 +218,67 @@ const FamilyTreeView = ({
             setLineageLoading(false);
         };
 
-        fetchLineage();
-    }, [focusAnimalId, authToken, animals]);
+        const fetchFullGraph = async () => {
+            setLineageLoading(true);
+            const nodes = {};
+            const visited = new Set();
+
+            const speciesAnimals = animals.filter(a => a.species === selectedSpecies);
+            speciesAnimals.forEach(a => {
+                if (a && a.id_public) {
+                    nodes[a.id_public] = a;
+                    visited.add(a.id_public);
+                }
+            });
+
+            const fetchAnimalData = async (id) => {
+                if (!id) return null;
+                if (nodes[id]) return nodes[id];
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    return response.data;
+                } catch (e) {
+                    console.warn(`Could not fetch animal ${id}`);
+                    return { id_public: id, name: 'Unknown', isPlaceholder: true };
+                }
+            };
+
+            const queue = [];
+            const enqueueParentIfMissing = (id) => {
+                if (!id || visited.has(id)) return;
+                visited.add(id);
+                queue.push(id);
+            };
+
+            speciesAnimals.forEach(a => {
+                enqueueParentIfMissing(a.sireId_public || a.fatherId_public);
+                enqueueParentIfMissing(a.damId_public || a.motherId_public);
+            });
+
+            let guard = 0;
+            while (queue.length > 0 && guard < 1000) {
+                guard++;
+                const currentId = queue.shift();
+                const animalData = await fetchAnimalData(currentId);
+                if (animalData) {
+                    nodes[currentId] = animalData;
+                    enqueueParentIfMissing(animalData.sireId_public || animalData.fatherId_public);
+                    enqueueParentIfMissing(animalData.damId_public || animalData.motherId_public);
+                }
+            }
+
+            setLineageData(nodes);
+            setLineageLoading(false);
+        };
+
+        if (graphMode === 'full' && selectedSpecies) {
+            fetchFullGraph();
+        } else {
+            fetchDirectLineage();
+        }
+    }, [focusAnimalId, authToken, animals, graphMode, selectedSpecies]);
 
     const graphData = useMemo(() => {
         const lineageAnimals = Object.values(lineageData);
@@ -596,6 +657,30 @@ const FamilyTreeView = ({
         lineageData,
         focusAnimalId,
     ]);
+
+    // Effect to center the view on the focus animal when it changes
+    useEffect(() => {
+        const container = containerRef.current;
+        const focusNodePos = graphData.positions && graphData.positions[focusAnimalId];
+
+        if (container && focusNodePos) {
+            const initialZoom = 85;
+            const scale = initialZoom / 100;
+            const nodeCenterX = focusNodePos.x + NODE_W / 2;
+            const nodeCenterY = focusNodePos.y + NODE_H / 2;
+
+            const targetPan = {
+                x: (container.clientWidth / 2) - (nodeCenterX * scale),
+                y: (container.clientHeight / 2) - (nodeCenterY * scale),
+            };
+            
+            setPan(targetPan);
+            setZoom(initialZoom);
+        } else {
+            setPan({ x: 24, y: 24 });
+            setZoom(85);
+        }
+    }, [focusAnimalId, graphData.width, graphData.height]); // Re-center when the animal or graph dimensions change.
 
     useEffect(() => {
         panStateRef.current = pan;
