@@ -3451,6 +3451,59 @@ const AnimalList = ({
         );
     };
 
+    const renderDashboard = () => {
+        const DashboardCard = ({ icon, label, value, colorClass, onClick }) => (
+            <div
+                className={`flex items-center p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
+                onClick={onClick}
+            >
+                {icon}
+                <div className="ml-4">
+                    <div className="text-2xl font-bold">{value}</div>
+                    <div className="text-sm font-medium opacity-90">{label}</div>
+                </div>
+            </div>
+        );
+
+        return (
+            <div className="mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <DashboardCard
+                        icon={<Cat size={32} className="text-blue-800" />}
+                        label="Total Animals"
+                        value={allAnimals.length}
+                        colorClass="bg-blue-100 text-blue-900"
+                    />
+                    <DashboardCard
+                        icon={<Heart size={32} className="text-red-800" />}
+                        label="Owned"
+                        value={ownedCount}
+                        colorClass="bg-red-100 text-red-900"
+                    />
+                    <DashboardCard
+                        icon={<Eye size={32} className="text-green-800" />}
+                        label="Public"
+                        value={publicCount}
+                        colorClass="bg-green-100 text-green-900"
+                    />
+                    <DashboardCard
+                        icon={<ShoppingBag size={32} className="text-purple-800" />}
+                        label="For Sale"
+                        value={availableList.length}
+                        colorClass="bg-purple-100 text-purple-900"
+                        onClick={() => setShowForSaleScreen(true)}
+                    />
+                    <DashboardCard
+                        icon={<AlertCircle size={32} className="text-orange-800" />}
+                        label="Needs Attention"
+                        value={feedDue.length + healthAttentionCount}
+                        colorClass="bg-orange-100 text-orange-900"
+                    />
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
