@@ -320,12 +320,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         return next;
     });
 
-    const pathSegments = location.pathname.split('/').filter(Boolean);
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    let activeTab = 'animals';
-    if (lastSegment && lastSegment.toLowerCase() !== profile.id_public.toLowerCase()) {
-        activeTab = lastSegment;
-    }
+    const activeTab = useMemo(() => {
+        const pathSegments = location.pathname.split('/').filter(Boolean);
+        if (pathSegments.length > 2) return pathSegments[2];
+        return 'animals';
+    }, [location.pathname]);
 
     const isOwnProfile = currentUserIdPublic === profile.id_public;
     const isModOrAdmin = ['moderator', 'admin'].includes(currentUserRole);
@@ -751,7 +750,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {freshProfile?.id_public || profile.id_public}
                     </span>
                     {ratingData.count > 0 && (
-                        <NavLink to="ratings" className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
+                        <NavLink to={`/user/${profile.id_public}/ratings`} className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
                             <Star size={12} className="inline-block align-middle fill-current" />
                             <span>{ratingData.average.toFixed(1)}</span>
                             <span className="text-gray-400 font-normal">({ratingData.count})</span>
@@ -832,7 +831,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             {/* Tab Bar */}
             <div className="flex flex-wrap border-b border-gray-200 mb-6">
                 <NavLink
-                    to=""
+                    to={`/user/${profile.id_public}`}
                     end
                     className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
@@ -840,7 +839,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 </NavLink>
                 {hasBreederInfo && (
                     <NavLink
-                        to="info-adoption"
+                        to={`/user/${profile.id_public}/info-adoption`}
                         className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Info &amp; Adoption
@@ -848,7 +847,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 )}
                 {publicLitters.length > 0 && (
                     <NavLink
-                        to="litters"
+                        to={`/user/${profile.id_public}/litters`}
                         className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Pairings ({publicLitters.length})
@@ -856,7 +855,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 )}
                 {animals.some(a => a.isForSale || a.availableForBreeding) && (
                     <NavLink
-                        to="for-sale-stud"
+                        to={`/user/${profile.id_public}/for-sale-stud`}
                         className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         For Sale / Stud ({animals.filter(a => a.isForSale || a.availableForBreeding).length})
@@ -864,14 +863,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 )}
                 {(freshProfile?.showStatsTab ?? true) && (
                     <NavLink
-                        to="stats"
+                        to={`/user/${profile.id_public}/stats`}
                         className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Stats
                     </NavLink>
                 )}
                 <NavLink
-                    to="ratings"
+                    to={`/user/${profile.id_public}/ratings`}
                     className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Ratings{ratingData.count > 0 && ` (${ratingData.count})`}
