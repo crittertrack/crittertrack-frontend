@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { BookOpen, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { TUTORIAL_LESSONS } from '../../data/tutorialLessonsNew';
 import { getStepScreenshot } from '../../data/tutorialScreenshots';
 
 /**
- * InfoTab (Help/Lessons)
+ * TutorialsPage
  * Simple documentation viewer with screenshots
  * No interactive tutorials - just static guides with images
  */
-export const InfoTab = ({ onClose }) => {
+const TutorialsPage = () => {
   const [expandedSection, setExpandedSection] = useState('getting-started');
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -38,16 +38,7 @@ export const InfoTab = ({ onClose }) => {
   };
 
   return (
-    <>
-      {/* Full-screen backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/50 z-[9998]"
-        onClick={onClose}
-      />
-      
-      {/* Full-screen modal */}
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div className="w-full max-w-7xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl flex flex-col">
+        <div className="w-full h-full bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0 bg-gradient-to-r from-primary/10 to-accent/10">
             <div className="flex items-center gap-3">
@@ -65,12 +56,6 @@ export const InfoTab = ({ onClose }) => {
                 <p className="text-gray-600 text-xs sm:text-sm mt-1">Browse tutorials and guides</p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition flex-shrink-0"
-            >
-              <X size={24} className="text-gray-500" />
-            </button>
           </div>
 
           {/* Main Content: Sidebar + Details */}
@@ -301,9 +286,7 @@ export const InfoTab = ({ onClose }) => {
             </div>
           </div>
         </div>
-      </div>
-    </>
   );
 };
 
-export default InfoTab;
+export default TutorialsPage;
