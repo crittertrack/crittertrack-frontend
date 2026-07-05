@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { BroadcastPoll } from './Banners';
 
 const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
     const [items, setItems] = useState([]);
+    const [expandedItemId, setExpandedItemId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [dismissedBroadcastIds] = useState(() => {
         try {
@@ -76,26 +77,36 @@ const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
 
     return (
         <div className="space-y-3">
-            {items.map(item => {
-                if (item.broadcastType === 'poll' || item.type === 'poll') {
-                    return (
-                        <BroadcastPoll 
-                            key={item._id} 
-                            broadcast={item} 
-                            authToken={authToken} 
-                            API_BASE_URL={API_BASE_URL} 
-                            isEmbedded={true} 
-                        />
-                    );
-                }
-                // Default to announcement rendering
+            {items.map((item) => {
+                const isExpanded = expandedItemId === item._id;
+                const isPoll = item.broadcastType === 'poll' || item.type === 'poll';
+                const title = isPoll ? (item.pollQuestion || item.title) : (item.title || 'Announcement');
+
+                const toggleExpand = () => {
+                    setExpandedItemId(isExpanded ? null : item._id);
+                };
+
                 return (
-                    <div key={item._id} className="bg-cyan-50/50 p-3 rounded-lg border border-cyan-200/60 space-y-1">
-                        <div className="flex justify-between items-start">
-                            <p className="text-sm font-bold text-cyan-800 pr-2">{item.title || 'Announcement'}</p>
-                            <p className="text-xs font-semibold text-cyan-700 flex-shrink-0">{formatTimeAgo(item.createdAt)}</p>
+                    <div key={item._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                        <div 
+                            className="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                            onClick={toggleExpand}
+                        >
+                            <p className="text-sm font-bold text-gray-800 pr-2">{title}</p>
+                            <div className="flex items-center gap-2 text-gray-500 flex-shrink-0">
+                                <p className="text-xs font-medium">{formatTimeAgo(item.createdAt)}</p>
+                                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            </div>
                         </div>
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.message || item.content || ''}</p>
+                        {isExpanded && (
+                            <div className="p-3 border-t border-gray-200">
+                                {isPoll ? (
+                                    <BroadcastPoll broadcast={item} authToken={authToken} API_BASE_URL={API_BASE_URL} isEmbedded={true} />
+                                ) : (
+                                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.message || item.content || ''}</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 );
             })}
