@@ -635,32 +635,6 @@ const FamilyTreeView = ({
         if (viewFrameRef.current) cancelAnimationFrame(viewFrameRef.current);
     }, []);
 
-    useEffect(() => {
-        const modeChanged = previousFocusModeRef.current !== focusMode;
-        previousFocusModeRef.current = focusMode;
-        if (!modeChanged) return;
-
-        const container = containerRef.current;
-        if (!container || !graphData.width || !graphData.height) return;
-
-        const fitPadding = 32;
-        const fitScale = Math.min(
-            (container.clientWidth - fitPadding) / graphData.width,
-            (container.clientHeight - fitPadding) / graphData.height
-        );
-
-        if (!Number.isFinite(fitScale) || fitScale <= 0) return;
-
-        const nextZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.floor(fitScale * 100)));
-        const scale = nextZoom / 100;
-        const targetPan = {
-            x: (container.clientWidth - (graphData.width * scale)) / 2,
-            y: (container.clientHeight - (graphData.height * scale)) / 2,
-        };
-
-        scheduleViewUpdate(targetPan, nextZoom);
-    }, [focusMode, graphData.width, graphData.height]);
-
     const handleWheel = e => {
         if (!e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
