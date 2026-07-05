@@ -9,7 +9,10 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState('all'); // 'all', 'keeper', 'breeder'
     const [searchTerm, setSearchTerm] = useState('');
+    const [countryFilter, setCountryFilter] = useState('');
     const navigate = useNavigate();
+
+    const countries = [...new Set(contacts.map(c => c.address?.country).filter(Boolean))].sort();
 
     useEffect(() => {
         fetchContacts();
@@ -17,7 +20,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
 
     useEffect(() => {
         applyFilters();
-    }, [contacts, filterType, searchTerm]);
+    }, [contacts, filterType, searchTerm, countryFilter]);
 
     const fetchContacts = async () => {
         try {
@@ -49,16 +52,40 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                 (c.breederName && c.breederName.toLowerCase().includes(term))
             );
         }
+
+        if (countryFilter) {
+            filtered = filtered.filter(c => c.address?.country === countryFilter);
+        }
+
         setFilteredContacts(filtered);
     };
 
     const getDisplayName = (contact) => {
-        const parts = [];
-        if (contact.prefix) parts.push(contact.prefix);
-        if (contact.personalName) parts.push(contact.personalName);
-        if (contact.breederName) parts.push(`(${contact.breederName})`);
-        if (contact.suffix) parts.push(contact.suffix);
-        return parts.join(' ') || 'Unnamed Contact';
+        const personalName = contact.personalName;
+
+        const breederInfoParts = [];
+        if (contact.prefix) breederInfoParts.push(contact.prefix);
+        if (contact.breederName) breederInfoParts.push(contact.breederName);
+        if (contact.suffix) breederInfoParts.push(contact.suffix);
+        const breederInfoString = breederInfoParts.join(' • ');
+
+        if (personalName) {
+            if (contact.breederName) { // Only use parens if there is a breeder name
+                return `${personalName} (${breederInfoString})`;
+            }
+            // No breeder name, so format is "Prefix Personal Suffix"
+            const nameParts = [];
+            if (contact.prefix) nameParts.push(contact.prefix);
+            nameParts.push(personalName);
+            if (contact.suffix) nameParts.push(contact.suffix);
+            return nameParts.join(' ');
+        }
+
+        if (breederInfoString) {
+            return breederInfoString;
+        }
+
+        return 'Unnamed Contact';
     };
 
     return (
@@ -92,6 +119,20 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
                             />
                         </div>
+                        <div className="flex-1 md:flex-grow-0 md:w-48">
+                            <select
+                                value={countryFilter}
+                                onChange={(e) => setCountryFilter(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary bg-white"
+                            >
+                                <option value="">All Countries</option>
+                                {countries.map(country => (
+                                    <option key={country} value={country}>
+                                        {country}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                             <button
                                 onClick={() => setFilterType('all')}
@@ -123,11 +164,25 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                             <ul>
                                 {filteredContacts.map(contact => (
                                     <li key={contact._id} className="border-b last:border-b-0">
-                                        <Link to={`/contacts/${contact._id}/overview`} className="block p-4 hover:bg-gray-50">
-                                            <h3 className="font-semibold text-gray-800">{getDisplayName(contact)}</h3>
-                                            <div className="flex gap-2 mt-1">
-                                                {contact.isKeeper && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Keeper</span>}
-                                                {contact.isBreeder && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Breeder</span>}
+                                        <Link to={`/contacts/${contact._id}/overview`} className="block p-4 hover:bg-gray-50 transition-colors">
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <h3 className="font-semibold text-gray-800">{getDisplayName(contact)}</h3>
+                                                    <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                                                        {contact.linkedCTUID && (
+                                                            <span className="flex items-center gap-1 font-mono">
+                                                                <UserCheck size={14} /> {contact.linkedCTUID}
+                                                            </span>
+                                                        )}
+                                                        {contact.address?.country && (
+                                                            <span>{contact.address.country}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2 flex-shrink-0">
+                                                    {contact.isKeeper && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Keeper</span>}
+                                                    {contact.isBreeder && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Breeder</span>}
+                                                </div>
                                             </div>
                                         </Link>
                                     </li>

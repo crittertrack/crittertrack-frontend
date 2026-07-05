@@ -29,12 +29,31 @@ const ContactSelector = ({ onClose, onSelect, API_BASE_URL, authToken }) => {
     }, [searchTerm, contacts]);
 
     const getDisplayName = (contact) => {
-        const parts = [];
-        if (contact.prefix) parts.push(contact.prefix);
-        if (contact.personalName) parts.push(contact.personalName);
-        if (contact.breederName) parts.push(`(${contact.breederName})`);
-        if (contact.suffix) parts.push(contact.suffix);
-        return parts.join(' ') || 'Unnamed Contact';
+        const personalName = contact.personalName;
+
+        const breederInfoParts = [];
+        if (contact.prefix) breederInfoParts.push(contact.prefix);
+        if (contact.breederName) breederInfoParts.push(contact.breederName);
+        if (contact.suffix) breederInfoParts.push(contact.suffix);
+        const breederInfoString = breederInfoParts.join(' • ');
+
+        if (personalName) {
+            if (contact.breederName) { // Only use parens if there is a breeder name
+                return `${personalName} (${breederInfoString})`;
+            }
+            // No breeder name, so format is "Prefix Personal Suffix"
+            const nameParts = [];
+            if (contact.prefix) nameParts.push(contact.prefix);
+            nameParts.push(personalName);
+            if (contact.suffix) nameParts.push(contact.suffix);
+            return nameParts.join(' ');
+        }
+
+        if (breederInfoString) {
+            return breederInfoString;
+        }
+
+        return 'Unnamed Contact';
     };
 
     const fetchContacts = async () => {
