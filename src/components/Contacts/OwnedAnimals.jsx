@@ -42,7 +42,7 @@ const OwnedAnimals = () => {
     const { ownedAnimals } = contactData;
 
     return (
-        <div className="p-4 bg-white rounded-lg shadow">
+        <div>
             <h2 className="text-lg font-semibold mb-4">Owned Animals ({ownedAnimals.length})</h2>
             {ownedAnimals.length === 0 ? (
                 <div className="text-center py-12">

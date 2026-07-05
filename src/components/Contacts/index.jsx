@@ -64,7 +64,7 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
         }`;
 
     return (
-        <div className="p-4 md:p-6">
+        <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
             <header className="mb-6">
                 <h1 className="text-2xl font-bold">{contactData.details.breederName || contactData.details.personalName}</h1>
                 <p className="text-gray-500">Contact Profile</p>

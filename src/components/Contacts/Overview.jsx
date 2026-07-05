@@ -37,7 +37,7 @@ const Overview = () => {
     ].filter(Boolean).join(', ');
 
     return (
-        <div className="p-4 bg-white rounded-lg shadow">
+        <div>
             <h2 className="text-lg font-semibold mb-6 border-b pb-3">Contact Details</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

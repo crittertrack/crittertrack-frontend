@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
+﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -1809,6 +1809,10 @@ const App = () => {
                             <DollarSign size={18} className="mb-1" />
                             <span>Budget</span>
                         </button>
+                        <button onClick={() => navigate('/contacts')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'contacts' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Users size={18} className="mb-1" />
+                            <span>Contacts</span>
+                        </button>
                         <button onClick={() => navigate('/marketplace')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <ShoppingBag size={18} className="mb-1" />
                             <span>Available Animals</span>
@@ -2032,6 +2036,10 @@ const App = () => {
                         <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <DollarSign size={18} className="mb-0.5" />
                             <span>Budget</span>
+                        </button>
+                        <button onClick={() => navigate('/contacts')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'contacts' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Users size={18} className="mb-0.5" />
+                            <span>Contacts</span>
                         </button>
                         <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
