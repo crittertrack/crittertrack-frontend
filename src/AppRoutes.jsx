@@ -205,10 +205,10 @@ export function AppRoutes({
           userProfile={userProfile}
           showModalMessage={showModalMessage}
           onViewAnimal={(animalId) => {
-            window.location.href = `/animal/${animalId}`;
+            navigate(`/animal/${animalId}`);
           }}
           onViewProfile={(userId) => {
-            window.location.href = `/user/${userId}`;
+            navigate(`/user/${userId}`);
           }}
           onStartConversation={handleStartConversation}
         />
