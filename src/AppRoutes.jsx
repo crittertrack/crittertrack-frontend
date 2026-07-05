@@ -1,12 +1,11 @@
 import React, { Suspense, lazy } from 'react';
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes, useNavigate, Navigate } from 'react-router-dom';
 
 // Lazy-loaded views — each page is only downloaded when first visited
 const AnimalList = lazy(() => import('./components/AnimalList'));
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const Marketplace = lazy(() => import('./components/Marketplace'));
 const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
-const ContactsPage = lazy(() => import('./components/Contacts'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
 const LitterManagement = lazy(() => import('./components/LitterManagement'));
@@ -22,6 +21,13 @@ const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPag
 const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
 const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
 const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
+
+// New Contact pages for refactor
+const ContactsListPage = lazy(() => import('./pages/ContactsList'));
+const ContactDetail = lazy(() => import('./pages/ContactDetail'));
+const ContactOverview = lazy(() => import('./pages/ContactDetail/Overview'));
+const ContactOwnedAnimals = lazy(() => import('./pages/ContactDetail/OwnedAnimals'));
+const ContactBredAnimals = lazy(() => import('./pages/ContactDetail/BredAnimals'));
 
 const PageLoader = () => (
     <div className="w-full flex items-center justify-center py-24">
@@ -238,12 +244,18 @@ export function AppRoutes({
 
       {/* Contacts */}
       <Route path="/contacts" element={
-        <ContactsPage
+        <ContactsListPage
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
           showModalMessage={showModalMessage}
         />
       } />
+      <Route path="/contacts/:contactId" element={<ContactDetail />}>
+        <Route index element={<Navigate to="overview" replace />} />
+        <Route path="overview" element={<ContactOverview />} />
+        <Route path="owned" element={<ContactOwnedAnimals />} />
+        <Route path="bred" element={<ContactBredAnimals />} />
+      </Route>
 
       {/* Community */}
       <Route path="/community" element={
