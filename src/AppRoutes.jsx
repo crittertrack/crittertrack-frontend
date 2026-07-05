@@ -20,6 +20,7 @@ const PrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/Private
 const TutorialsPage = lazy(() => import('./components/tools/TutorialsPage'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
 const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
+const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
 const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
 
 const PageLoader = () => (
@@ -410,6 +411,17 @@ export function AppRoutes({
 
       {/* Tutorials Page */}
       <Route path="/tutorials" element={<TutorialsPage />} />
+
+      {/* Family Tree Page */}
+      <Route path="/pedigree" element={
+        <FamilyTreePage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          myAnimals={myAnimalsForCalculator}
+          userProfile={userProfile}
+          onViewAnimal={handleViewAnimal}
+        />
+      } />
 
     </Routes>
     </Suspense>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Calculator, Dna, BookOpen, Target } from 'lucide-react';
+import { Calculator, Dna, BookOpen, Target, TreeDeciduous } from 'lucide-react';
 
 const toolLinks = [
   {
@@ -22,6 +22,11 @@ const toolLinks = [
     href: '/target',
     label: 'Target Outcome',
     icon: <Target size={16} className="mr-2" />,
+  },
+  {
+    href: '/pedigree',
+    label: 'Family Tree',
+    icon: <TreeDeciduous size={16} className="mr-2" />,
   },
 ];
 

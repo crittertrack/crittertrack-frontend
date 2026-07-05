@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
+﻿﻿﻿﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -37,7 +37,6 @@ import ContactsPage from './components/Contacts';
 import AuthView from './components/Auth/AuthView';
 import { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationsHub from './components/Notifications/NotificationsHub';
-import NotificationBar from './components/Notifications/NotificationBar';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
 import PublicProfileView, { QRModal } from './components/PublicProfile/PublicProfileView';
@@ -77,7 +76,6 @@ import { usePrivateAnimalNavigation } from './hooks/usePrivateAnimalNavigation.t
 import { useTransferWorkflow } from './hooks/useTransferWorkflow.ts';
 import { useBreedingLines } from './hooks/useBreedingLines.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
-import { useUnreadMessages, useUnreadNotifications } from './hooks/useNotificationCounts';
 import { AppRoutes } from './AppRoutes';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
@@ -435,14 +433,12 @@ const App = () => {
     // Removed from here to avoid conflicts with hook state
     const [isRegister, setIsRegister] = useState(false); 
     
-    // UI visibility state
     const [showNotifications, setShowNotifications] = useState(false);
+    const [notificationCount, setNotificationCount] = useState(0);
+    
     const [showMessages, setShowMessages] = useState(false);
-
-    // Notification and Message counts from hooks
-    const { count: notificationCount, refetch: fetchNotificationCount } = useUnreadNotifications(authToken, API_BASE_URL);
-    const { count: unreadMessageCount, adminCount: unreadAdminMessageCount, refetch: fetchUnreadMessageCount } = useUnreadMessages(authToken, API_BASE_URL);
-
+    const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+    const [unreadAdminMessageCount, setUnreadAdminMessageCount] = useState(0);
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -1140,6 +1136,49 @@ const App = () => {
         fetchViewBreederInfo();
     }, [animalToView, currentView, API_BASE_URL]);
 
+    const fetchNotificationCount = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setNotificationCount(response.data?.count || 0);
+        } catch (error) {
+            console.error('Failed to fetch notification count:', error);
+        }
+    }, [authToken, API_BASE_URL]);
+
+    const fetchUnreadMessageCount = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const response = await axios.get(`${API_BASE_URL}/messages/unread-count`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setUnreadMessageCount(response.data?.count || 0);
+            setUnreadAdminMessageCount(response.data?.adminCount || 0);
+        } catch (error) {
+            // Silently fail for message count - backend may not have this endpoint yet
+            if (error.response?.status !== 404 && error.response?.status !== 500) {
+                console.error('Failed to fetch message count:', error);
+            }
+            setUnreadMessageCount(0);
+            setUnreadAdminMessageCount(0);
+        }
+    }, [authToken, API_BASE_URL]);
+
+    useEffect(() => {
+        if (authToken) {
+            fetchNotificationCount();
+            fetchUnreadMessageCount();
+            // Poll for new notifications and messages every 60 seconds
+            const interval = setInterval(() => {
+                fetchNotificationCount();
+                fetchUnreadMessageCount();
+            }, 60000);
+            return () => clearInterval(interval);
+        }
+    }, [authToken, fetchNotificationCount, fetchUnreadMessageCount]);
+
     // Mark donation highlight as seen after 8 seconds
     useEffect(() => {
         if (authToken && !hasSeenDonationHighlight) {
@@ -1752,7 +1791,7 @@ const App = () => {
                     <nav className="flex space-x-3">
                         <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Users size={18} className="mb-1" />
-                            <span>Community</span>
+                            <span>My Feed</span>
                         </button>
                         <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-1" />
@@ -1772,10 +1811,10 @@ const App = () => {
                         </button>
                         <button onClick={() => navigate('/marketplace')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <ShoppingBag size={18} className="mb-1" />
-                            <span>Marketplace</span>
+                            <span>Available Animals</span>
                         </button>
                         <div className="relative" ref={toolsMenuDesktopRef}>
-                            <button onClick={() => setShowToolsMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <button onClick={() => setShowToolsMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                 <Wrench size={18} className="mb-1" />
                                 <span>Tools</span>
                             </button>
@@ -1795,6 +1834,7 @@ const App = () => {
                         <button
                             onClick={() => {
                                 setShowNotifications(true);
+                                setNotificationCount(0);
                                 fetchNotificationCount();
                             }}
                             data-tutorial-target="notification-bell"
@@ -1886,6 +1926,7 @@ const App = () => {
                             <button
                                 onClick={() => {
                                     setShowNotifications(true);
+                                    setNotificationCount(0);
                                     fetchNotificationCount();
                                 }}
                                 data-tutorial-target="notification-bell"
@@ -1970,7 +2011,7 @@ const App = () => {
                     <nav className="grid grid-cols-4 gap-1 mb-1">
                         <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Users size={18} className="mb-0.5" />
-                            <span>Community</span>
+                            <span>My Feed</span>
                         </button>
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-0.5" />
@@ -1995,10 +2036,9 @@ const App = () => {
                         <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
                             <span>Available</span>
-                            <span>Marketplace</span>
                         </button>
                         <div className="relative" ref={toolsMenuMobileRef}>
-                            <button onClick={() => setShowToolsMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <button onClick={() => setShowToolsMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                 <Wrench size={18} className="mb-0.5" />
                                 <span>Tools</span>
                             </button>
@@ -2012,11 +2052,21 @@ const App = () => {
                         </button>
                     </nav>
                 </div>
-            </header>
 
-            <div className="w-full max-w-7xl mx-auto -mt-3 mb-3">
-                <NotificationBar authToken={authToken} API_BASE_URL={API_BASE_URL} setShowNotifications={setShowNotifications} setShowMessages={setShowMessages} />
-            </div>
+                {/* Admin message alert ? shown when there are unread moderator messages */}
+                {unreadAdminMessageCount > 0 && (
+                    <div
+                        onClick={() => setShowMessages(true)}
+                        className="mt-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-red-100 transition"
+                    >
+                        <Shield size={15} className="text-red-600 flex-shrink-0" />
+                        <span className="text-sm text-red-700 font-medium flex-1">
+                            You have {unreadAdminMessageCount} unread message{unreadAdminMessageCount > 1 ? 's' : ''} from CritterTrack — please respond
+                        </span>
+                        <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full font-semibold flex-shrink-0">View</span>
+                    </div>
+                )}
+            </header>
 
             {/* Moderator Warning Banner */}
             <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
@@ -2553,7 +2603,7 @@ const AppRouter = () => {
                 const detectedIp = response.data.ip || response.data.clientIp;
                 setClientIp(detectedIp);
             } catch (error) {
-                console.warn('Could not determine IP', error);
+                console.warn('Could not determine IP');
                 setClientIp('unknown');
             }
         };
