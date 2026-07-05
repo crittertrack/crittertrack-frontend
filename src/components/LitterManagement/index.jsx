@@ -2202,7 +2202,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     >
                         <Bell size={14} />
                         <span className="hidden sm:inline">Alerts {urgencyEnabled ? 'On' : 'Off'}</span>
-                    </button>}
+                    </button>
                     {initialView !== 'calendar' && <button
                         onClick={handleRecalculateOffspringCounts}
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
