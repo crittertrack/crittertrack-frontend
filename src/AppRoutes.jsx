@@ -23,11 +23,11 @@ const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
 const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
 
 // New Contact pages for refactor
-const ContactsListPage = lazy(() => import('./pages/ContactsList'));
-const ContactDetail = lazy(() => import('./pages/ContactDetail'));
-const ContactOverview = lazy(() => import('./pages/ContactDetail/Overview'));
-const ContactOwnedAnimals = lazy(() => import('./pages/ContactDetail/OwnedAnimals'));
-const ContactBredAnimals = lazy(() => import('./pages/ContactDetail/BredAnimals'));
+const ContactsPage = lazy(() => import('./components'));
+const ContactDetail = lazy(() => import('./components/Contacts'));
+const ContactOverview = lazy(() => import('./components/Contacts/Overview'));
+const ContactOwnedAnimals = lazy(() => import('./components/Contacts/OwnedAnimals'));
+const ContactBredAnimals = lazy(() => import('./components/Contacts/BredAnimals'));
 
 const PageLoader = () => (
     <div className="w-full flex items-center justify-center py-24">
@@ -244,13 +244,18 @@ export function AppRoutes({
 
       {/* Contacts */}
       <Route path="/contacts" element={
-        <ContactsListPage
+        <ContactsPage
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
           showModalMessage={showModalMessage}
         />
       } />
-      <Route path="/contacts/:contactId" element={<ContactDetail />}>
+      <Route path="/contacts/:contactId" element={
+        <ContactDetail
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+        />
+      }>
         <Route index element={<Navigate to="overview" replace />} />
         <Route path="overview" element={<ContactOverview />} />
         <Route path="owned" element={<ContactOwnedAnimals />} />
