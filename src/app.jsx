@@ -1108,6 +1108,7 @@ const App = () => {
                     console.error('Failed to fetch animals for calculator:', error);
                     setMyAnimalsForCalculator([]);
                 }
+            }
         };
         fetchAnimalsForCalculator();
     }, [currentView, authToken, API_BASE_URL]);
@@ -2602,7 +2603,7 @@ const AppRouter = () => {
                 const detectedIp = response.data.ip || response.data.clientIp;
                 setClientIp(detectedIp);
             } catch (error) {
-                console.warn('Could not determine IP');
+                console.warn('Could not determine IP', error);
                 setClientIp('unknown');
             }
         };
