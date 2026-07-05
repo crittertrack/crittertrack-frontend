@@ -9,17 +9,6 @@ const NotificationBar = ({ authToken, API_BASE_URL, setShowNotifications, setSho
   const isUrgent = adminCount > 0;
   const isLoading = messagesLoading || notificationsLoading;
   
-  // This useEffect hook is for debugging. It will log the component's state to the browser console.
-  useEffect(() => {
-    console.log('[Debug] NotificationBar State:', {
-      authToken: authToken ? 'Provided' : 'MISSING',
-      API_BASE_URL: API_BASE_URL ? 'Provided' : 'MISSING',
-      isLoading,
-      messages: { loading: messagesLoading, total: totalMessageCount, admin: adminCount, regular: regularMessageCount },
-      notifications: { loading: notificationsLoading, count: notificationCount },
-    });
-  }, [authToken, API_BASE_URL, isLoading, messagesLoading, totalMessageCount, adminCount, regularMessageCount, notificationsLoading, notificationCount]);
-  
   // Wait for both counts to load. Only render if there is a token and at least one unread item.
   if (isLoading || !authToken || (totalMessageCount === 0 && notificationCount === 0)) {
     return null;

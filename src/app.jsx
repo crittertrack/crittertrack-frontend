@@ -1772,7 +1772,7 @@ const App = () => {
                         </button>
                         <button onClick={() => navigate('/marketplace')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <ShoppingBag size={18} className="mb-1" />
-                            <span>Available Animals</span>
+                            <span>Marketplace</span>
                         </button>
                         <div className="relative" ref={toolsMenuDesktopRef}>
                             <button onClick={() => setShowToolsMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
@@ -1995,6 +1995,7 @@ const App = () => {
                         <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
                             <span>Available</span>
+                            <span>Marketplace</span>
                         </button>
                         <div className="relative" ref={toolsMenuMobileRef}>
                             <button onClick={() => setShowToolsMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
