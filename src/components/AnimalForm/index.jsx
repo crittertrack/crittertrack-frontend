@@ -1,4 +1,4 @@
-﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
+﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import axios from 'axios';
 import {
     Activity, AlertCircle, AlertTriangle, ArrowLeft, Ban, Camera, Cat,
@@ -2545,6 +2545,7 @@ const ParentSearchModal = ({
 
 
 const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL, modalTarget, userProfile }) => {
+export const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL, modalTarget, userProfile }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchType, setSearchType] = useState('users'); // 'users' or 'animals'
     const [userResults, setUserResults] = useState([]);
@@ -2638,6 +2639,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
             setLoading(false);
         }
     };
+}
 
     const UserResultCard = ({ user }) => {
         const memberSince = user.createdAt 
