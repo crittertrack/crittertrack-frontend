@@ -17,7 +17,7 @@ const FinanceDropdown = ({ onLinkClick }) => {
             <button onClick={() => handleNavigate('/budget')} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                 <DollarSign size={15} /> Budget
             </button>
-            <button onClick={() => handleNavigate('/inventory')} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+            <button onClick={() => handleNavigate('/supplies')} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                 <Package size={15} /> Supplies
             </button>
         </div>

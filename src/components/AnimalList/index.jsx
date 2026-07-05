@@ -19,9 +19,8 @@ const FAMILY_TREE_MIN_WIDTH = 900;
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
-const normalizeAnimalView = (value) => (
-    ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'supplies', 'familyTree'].includes(value) ? value : 'list'
-);
+const normalizeAnimalView = (value) =>
+    ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
 
 const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, birthdate: true, age: true, status: true, reproduction: true, sireName: true, damName: true };
 
@@ -295,192 +294,6 @@ const AnimalList = ({
         } catch {}
     };
 
-    // ---- For Sale screen & My Animals list view ----
-    const [showForSaleScreen, setShowForSaleScreen] = useState(false);
-    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState('cards'); // populated from user-scoped key below
-    const [listViewColumns, setListViewColumns] = useState(DEFAULT_LIST_COLUMNS); // populated from user-scoped key below
-    const [showListColumnConfig, setShowListColumnConfig] = useState(false);
-    const [externalParentsCache, setExternalParentsCache] = useState({});
-    const [familyTreePrefetchBySpecies, setFamilyTreePrefetchBySpecies] = useState(() => _familyTreePrefetchCacheByUser[userKey] || {});
-    const [familyTreePrefetchLoadingBySpecies, setFamilyTreePrefetchLoadingBySpecies] = useState(() => _familyTreePrefetchLoadingByUser[userKey] || {});
-
-    useEffect(() => {
-        const onResize = () => {
-            setIsFamilyTreeEnabled(window.innerWidth >= FAMILY_TREE_MIN_WIDTH);
-        };
-        window.addEventListener('resize', onResize);
-        return () => window.removeEventListener('resize', onResize);
-    }, []);
-
-    useEffect(() => {
-        if (isFamilyTreeEnabled) return;
-
-        if (animalView === 'familyTree') {
-            setAnimalView('list');
-        }
-        if (defaultAnimalView === 'familyTree') {
-            setDefaultAnimalView('list');
-            try { localStorage.setItem('ct_default_animal_view', 'list'); } catch {}
-        }
-    }, [animalView, defaultAnimalView, isFamilyTreeEnabled]);
-
-    const familyTreeAnimals = useMemo(() => (
-        Array.from(
-            new Map(
-                [
-                    ...(animals || []),
-                    ...(soldTransferredRaw || []),
-                    ...(archivedAnimals || []),
-                ]
-                    .filter(a => a?.id_public)
-                    .map(a => [a.id_public, a])
-            ).values()
-        )
-    ), [animals, soldTransferredRaw, archivedAnimals]);
-
-    useEffect(() => {
-        setFamilyTreePrefetchBySpecies(_familyTreePrefetchCacheByUser[userKey] || {});
-        setFamilyTreePrefetchLoadingBySpecies(_familyTreePrefetchLoadingByUser[userKey] || {});
-    }, [userKey]);
-
-    useEffect(() => {
-        _familyTreePrefetchCacheByUser[userKey] = familyTreePrefetchBySpecies;
-    }, [userKey, familyTreePrefetchBySpecies]);
-
-    useEffect(() => {
-        _familyTreePrefetchLoadingByUser[userKey] = familyTreePrefetchLoadingBySpecies;
-    }, [userKey, familyTreePrefetchLoadingBySpecies]);
-
-    const handleFamilyTreeAncestorsResolved = useCallback((species, ancestorsById) => {
-        if (!species || !ancestorsById) return;
-        setFamilyTreePrefetchBySpecies(prev => {
-            if (prev[species]) return prev;
-            return { ...prev, [species]: ancestorsById };
-        });
-        setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
-    }, []);
-
-    // Fetch names for external parent IDs (animals not in the user's own collection)
-    // Runs whenever the animal list or view mode changes
-    useEffect(() => {
-        if (myAnimalsViewMode !== 'list' || !authToken || allAnimalsRaw.length === 0) return;
-        const localIds = new Set([...allAnimalsRaw, ...soldTransferredRaw].map(a => a.id_public).filter(Boolean));
-        const unresolvedIds = [];
-        allAnimalsRaw.forEach(a => {
-            const sireId = a.fatherId_public || a.sireId_public;
-            const damId  = a.motherId_public  || a.damId_public;
-            if (sireId && !localIds.has(sireId) && !externalParentsCache[sireId]) unresolvedIds.push(sireId);
-            if (damId  && !localIds.has(damId)  && !externalParentsCache[damId])  unresolvedIds.push(damId);
-        });
-        const uniqueIds = [...new Set(unresolvedIds)];
-        if (uniqueIds.length === 0) return;
-        axios.post(`${API_BASE_URL}/animals/parents-batch`, { ids: uniqueIds }, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        }).then(res => {
-            const map = {};
-            (res.data || []).forEach(a => { if (a.id_public) map[a.id_public] = a; });
-            setExternalParentsCache(prev => ({ ...prev, ...map }));
-        }).catch(err => console.warn('[parents-batch]', err));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [myAnimalsViewMode, allAnimalsRaw, authToken]);
-
-    useEffect(() => {
-        if (!authToken || familyTreeAnimals.length === 0) return;
-
-        const species = [...new Set(familyTreeAnimals.map(a => a.species).filter(Boolean))].sort()[0];
-        if (!species) return;
-        if (familyTreePrefetchBySpecies[species] || familyTreePrefetchLoadingBySpecies[species]) return;
-
-        let cancelled = false;
-
-        const prefetchSpeciesAncestors = async () => {
-            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: true }));
-
-            const canonicalId = (id) => String(id || '').trim().toLowerCase();
-            const accountIdKeys = new Set(
-                familyTreeAnimals
-                    .map(a => canonicalId(a?.id_public))
-                    .filter(Boolean)
-            );
-            const speciesAnimals = familyTreeAnimals.filter(a => a.species === species && a.id_public);
-            const existing = new Map(speciesAnimals.map(a => [a.id_public, a]));
-            const fetched = {};
-            const visited = new Set(speciesAnimals.map(a => canonicalId(a.id_public)).filter(Boolean));
-            const queue = [];
-
-            const enqueueParentIfMissing = id => {
-                const key = canonicalId(id);
-                if (!key || visited.has(key)) return;
-                visited.add(key);
-                queue.push(id);
-            };
-
-            speciesAnimals.forEach(a => {
-                enqueueParentIfMissing(a.fatherId_public || a.sireId_public);
-                enqueueParentIfMissing(a.motherId_public || a.damId_public);
-            });
-
-            const fetchOne = async (id) => {
-                if (!id) return null;
-                try {
-                    const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    if (r.data) return r.data;
-                } catch {}
-
-                try {
-                    const r = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(id)}`);
-                    return r.data?.[0] || null;
-                } catch {
-                    return null;
-                }
-            };
-
-            let guard = 0;
-            while (queue.length > 0 && guard < 1200) {
-                guard += 1;
-                const id = queue.shift();
-                const node = await fetchOne(id);
-                if (cancelled) return;
-                if (!node) continue;
-
-                const nid = node.id_public || id;
-                const nidKey = canonicalId(nid);
-                const isAlreadyOnAccount = accountIdKeys.has(nidKey);
-                if (!existing.has(nid) && !isAlreadyOnAccount) {
-                    const normalized = { ...node, id_public: nid, isPublicAncestor: true };
-                    existing.set(nid, normalized);
-                    fetched[nid] = normalized;
-                }
-
-                enqueueParentIfMissing(node.fatherId_public || node.sireId_public);
-                enqueueParentIfMissing(node.motherId_public || node.damId_public);
-            }
-
-            if (cancelled) return;
-
-            setFamilyTreePrefetchBySpecies(prev => ({
-                ...prev,
-                [species]: fetched,
-            }));
-            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
-        };
-
-        prefetchSpeciesAncestors().catch(() => {
-            if (cancelled) return;
-            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
-        });
-
-        return () => {
-            cancelled = true;
-            _familyTreePrefetchLoadingByUser[userKey] = {
-                ...(_familyTreePrefetchLoadingByUser[userKey] || {}),
-                [species]: false,
-            };
-        };
-    }, [authToken, familyTreeAnimals, familyTreePrefetchBySpecies, familyTreePrefetchLoadingBySpecies, userKey]);
-
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
         if (!authToken) return;
@@ -538,10 +351,6 @@ const AnimalList = ({
     const [logFilterSearch, setLogFilterSearch] = useState('');
     const [logFilterStartDate, setLogFilterStartDate] = useState('');
     const [logFilterEndDate, setLogFilterEndDate] = useState('');
-    // Supplies & Inventory state
-    const [showSuppliesScreen, setShowSuppliesScreen] = useState(false);
-    const [supplies, setSupplies] = useState([]);
-    const [suppliesLoading, setSuppliesLoading] = useState(false);
     // Duplicates state
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
@@ -550,10 +359,6 @@ const AnimalList = ({
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
     const [supplySaving, setSupplySaving] = useState(false);
-    const [supplyCategoryFilter, setSupplyCategoryFilter] = useState('All');
-    const [restockingSupplyId, setRestockingSupplyId] = useState(null);
-    const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
-    const [restockSaving, setRestockSaving] = useState(false);
 
     // ---- Collections state (user-scoped localStorage + backend sync) ----
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
@@ -588,7 +393,7 @@ const AnimalList = ({
     }, [userKey]);
 
     const isCollectionsView = animalView === 'collections';
-    const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);
+    const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding'].includes(animalView);
     const isListLikeView = animalView === 'list' || isCollectionsView;
 
     useEffect(() => {
@@ -971,19 +776,6 @@ const AnimalList = ({
         } catch (err) { console.error('[fetchEnclosures]', err); }
     }, [authToken]);
     useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
-
-    const fetchSupplies = useCallback(async () => {
-        if (!authToken) return;
-        setSuppliesLoading(true);
-        try {
-            const res = await axios.get(`${API_BASE_URL}/supplies`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            setSupplies(res.data || []);
-        } catch (err) { console.error('[fetchSupplies]', err); }
-        setSuppliesLoading(false);
-    }, [authToken, API_BASE_URL]);
-    useEffect(() => { fetchSupplies(); }, [fetchSupplies]);
 
     // Fetch user's custom species order on mount
     useEffect(() => {
@@ -4399,8 +4191,7 @@ const AnimalList = ({
                                     {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
                                     {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
                                     {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                                    {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
-                                    {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'}
+                                    {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
@@ -4428,8 +4219,7 @@ const AnimalList = ({
                   {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
                   {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
                   {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
-                  {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'}
+                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
                                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}

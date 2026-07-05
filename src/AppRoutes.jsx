@@ -340,6 +340,15 @@ export function AppRoutes({
         />
       } />
 
+      {/* Supplies */}
+      <Route path="/supplies" element={
+        <SuppliesPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          showModalMessage={showModalMessage}
+        />
+      } />
+
       {/* Genetics Calculator */}
       <Route path="/calculator" element={
         <GeneticsCalculator
