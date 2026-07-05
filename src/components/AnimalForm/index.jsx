@@ -2336,7 +2336,7 @@ const ParentSearchModal = ({
     const [loadingLocal, setLoadingLocal] = useState(false);
     const [loadingGlobal, setLoadingGlobal] = useState(false);
     const [scope, setScope] = useState('both'); // 'local' | 'global' | 'both'
-}    
+   
     // Simple component to render a list item
     const SearchResultItem = ({ animal, isGlobal }) => {
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
@@ -2370,7 +2370,7 @@ const ParentSearchModal = ({
             </div>
         );
     };
-
+}
         const handleSearch = async () => {
             setHasSearched(true);
     const handleSearch = async () => {
