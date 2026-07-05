@@ -1097,7 +1097,7 @@ const App = () => {
     // Fetch animals for offspring calculator when needed
     useEffect(() => {
         const fetchAnimalsForCalculator = async () => {
-            if ((currentView === 'calculator' || currentView === 'coi') && authToken) {
+            if ((currentView === 'calculator' || currentView === 'coi' || currentView === 'pedigree') && authToken) {
                 try {
                     const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, {
                         headers: { Authorization: `Bearer ${authToken}` }

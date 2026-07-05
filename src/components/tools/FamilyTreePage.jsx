@@ -20,14 +20,17 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
+
     const filteredAnimals = myAnimals.filter(animal => 
-        animal.name.toLowerCase().includes(searchTerm.toLowerCase())
+        getFullName(animal).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (animal.id_public && animal.id_public.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     const handleSelectAnimal = (animal) => {
         setSelectedAnimal(animal);
         setIsDropdownOpen(false);
-        setSearchTerm(animal.name);
+        setSearchTerm(getFullName(animal));
     };
 
     return (
@@ -49,7 +52,7 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
                                 if (!isDropdownOpen) setIsDropdownOpen(true);
-                                if (selectedAnimal && e.target.value !== selectedAnimal.name) {
+                                if (selectedAnimal && e.target.value !== getFullName(selectedAnimal)) {
                                     setSelectedAnimal(null);
                                 }
                             }}
@@ -69,11 +72,11 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
                             {filteredAnimals.length > 0 ? (
                                 filteredAnimals.map(animal => (
                                     <div
-                                        key={animal._id}
+                                        key={animal.id_public}
                                         onClick={() => handleSelectAnimal(animal)}
                                         className="px-4 py-2.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-dark-text"
                                     >
-                                        {animal.name} ({animal.species})
+                                        {getFullName(animal)} ({animal.id_public})
                                     </div>
                                 ))
                             ) : (
