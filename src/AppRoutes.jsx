@@ -23,11 +23,12 @@ const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
 const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
 
 // New Contact pages for refactor
-const ContactsPage = lazy(() => import('./components'));
-const ContactDetail = lazy(() => import('./components/Contacts'));
+const ContactsListPage = lazy(() => import('./components/ContactsListPage'));
+const ContactDetailPage = lazy(() => import('./components/Contacts/ContactDetailPage'));
 const ContactOverview = lazy(() => import('./components/Contacts/Overview'));
 const ContactOwnedAnimals = lazy(() => import('./components/Contacts/OwnedAnimals'));
 const ContactBredAnimals = lazy(() => import('./components/Contacts/BredAnimals'));
+const AddContactPage = lazy(() => import('./components/Contacts/AddContactPage'));
 
 const PageLoader = () => (
     <div className="w-full flex items-center justify-center py-24">
@@ -244,14 +245,14 @@ export function AppRoutes({
 
       {/* Contacts */}
       <Route path="/contacts" element={
-        <ContactsPage
+        <ContactsListPage
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
           showModalMessage={showModalMessage}
         />
       } />
       <Route path="/contacts/:contactId" element={
-        <ContactDetail
+        <ContactDetailPage
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
         />
@@ -261,6 +262,13 @@ export function AppRoutes({
         <Route path="owned" element={<ContactOwnedAnimals />} />
         <Route path="bred" element={<ContactBredAnimals />} />
       </Route>
+      <Route path="/contacts/new" element={
+        <AddContactPage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          showModalMessage={showModalMessage}
+        />
+      } />
 
       {/* Community */}
       <Route path="/community" element={

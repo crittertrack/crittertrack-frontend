@@ -63,7 +63,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
 
     return (
         <div className="p-4 md:p-6">
-            <header className="flex justify-between items-center mb-6">
+            <header className="bg-white rounded-lg shadow p-4 flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                         <Users size={28} className="text-primary" />
@@ -72,7 +72,10 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                     <p className="text-sm text-gray-600 mt-1">Manage keepers and breeders</p>
                 </div>
                 {/* This button will eventually lead to a new "Add Contact" page or modal */}
-                <button className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2">
+                <button
+                    onClick={() => navigate('/contacts/new')}
+                    className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
+                >
                     <Plus size={18} /> Add Contact
                 </button>
             </header>

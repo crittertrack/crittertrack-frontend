@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
+﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -33,7 +33,6 @@ import Marketplace from './components/Marketplace';
 import LitterManagement from './components/LitterManagement';
 import AnimalForm, { PedigreeChart } from './components/AnimalForm';
 import AnimalList from './components/AnimalList';
-import ContactsPage from './components/Contacts';
 import AuthView from './components/Auth/AuthView';
 import { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationsHub from './components/Notifications/NotificationsHub';
