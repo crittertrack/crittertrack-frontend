@@ -1,14 +1,9 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-// We'll assume you have a central hook for authentication, like `useAuth`.
-// If your app uses a different pattern, you can adapt this.
-// Reverting to prop-based auth token to be consistent with other components.
-// import { useAuth } from '../../contexts/AuthContext';
 import { useUnreadMessages, useUnreadNotifications } from '../../hooks/useNotificationCounts';
 
-const NotificationBar = ({ authToken, API_BASE_URL }) => {
-  const { count: messageCount, isLoading: messagesLoading } = useUnreadMessages(authToken, API_BASE_URL);
-  const { count: notificationCount, isLoading: notificationsLoading } = useUnreadNotifications(authToken, API_BASE_URL);
+const NotificationBar = ({ authToken, API_BASE_URL, setShowNotifications, setShowMessages }) => {
+  const { count: messageCount, isLoading: messagesLoading, refetch: refetchMessages } = useUnreadMessages(authToken, API_BASE_URL);
+  const { count: notificationCount, isLoading: notificationsLoading, refetch: refetchNotifications } = useUnreadNotifications(authToken, API_BASE_URL);
   
     const isLoading = messagesLoading || notificationsLoading;
   
@@ -30,16 +25,28 @@ const NotificationBar = ({ authToken, API_BASE_URL }) => {
     }
   
     return (
-      <div className="bg-accent text-white text-sm py-1.5 px-4 w-full flex justify-center items-center gap-x-6 shadow-md">
+      <div className="bg-purple-600 text-white text-sm py-1.5 px-4 flex justify-center items-center gap-x-6 shadow-md rounded-lg">
         {notificationCount > 0 && (
-          <Link to="/notifications" className="hover:underline font-semibold">
+          <button
+            onClick={() => {
+              if (setShowNotifications) setShowNotifications(true);
+              refetchNotifications();
+            }}
+            className="hover:underline font-semibold"
+          >
             ({notificationCount}) unread Notification{notificationCount > 1 ? 's' : ''}
-          </Link>
+          </button>
         )}
         {messageCount > 0 && (
-          <Link to="/messages" className="hover:underline font-semibold">
+          <button
+            onClick={() => {
+              if (setShowMessages) setShowMessages(true);
+              refetchMessages();
+            }}
+            className="hover:underline font-semibold"
+          >
             ({messageCount}) unread Message{messageCount > 1 ? 's' : ''}
-          </Link>
+          </button>
         )}
       </div>
     );
