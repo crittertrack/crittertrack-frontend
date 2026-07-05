@@ -37,6 +37,7 @@ import ContactsPage from './components/Contacts';
 import AuthView from './components/Auth/AuthView';
 import { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationsHub from './components/Notifications/NotificationsHub';
+import NotificationBar from './components/Notifications/NotificationBar';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
 import PublicProfileView, { QRModal } from './components/PublicProfile/PublicProfileView';
@@ -76,6 +77,7 @@ import { usePrivateAnimalNavigation } from './hooks/usePrivateAnimalNavigation.t
 import { useTransferWorkflow } from './hooks/useTransferWorkflow.ts';
 import { useBreedingLines } from './hooks/useBreedingLines.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
+import { useUnreadMessages, useUnreadNotifications } from './hooks/useNotificationCounts';
 import { AppRoutes } from './AppRoutes';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
@@ -433,12 +435,14 @@ const App = () => {
     // Removed from here to avoid conflicts with hook state
     const [isRegister, setIsRegister] = useState(false); 
     
+    // UI visibility state
     const [showNotifications, setShowNotifications] = useState(false);
-    const [notificationCount, setNotificationCount] = useState(0);
-    
     const [showMessages, setShowMessages] = useState(false);
-    const [unreadMessageCount, setUnreadMessageCount] = useState(0);
-    const [unreadAdminMessageCount, setUnreadAdminMessageCount] = useState(0);
+
+    // Notification and Message counts from hooks
+    const { count: notificationCount, refetch: fetchNotificationCount } = useUnreadNotifications(authToken, API_BASE_URL);
+    const { count: unreadMessageCount, adminCount: unreadAdminMessageCount, refetch: fetchUnreadMessageCount } = useUnreadMessages(authToken, API_BASE_URL);
+
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -1136,49 +1140,6 @@ const App = () => {
         fetchViewBreederInfo();
     }, [animalToView, currentView, API_BASE_URL]);
 
-    const fetchNotificationCount = useCallback(async () => {
-        if (!authToken) return;
-        try {
-            const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            setNotificationCount(response.data?.count || 0);
-        } catch (error) {
-            console.error('Failed to fetch notification count:', error);
-        }
-    }, [authToken, API_BASE_URL]);
-
-    const fetchUnreadMessageCount = useCallback(async () => {
-        if (!authToken) return;
-        try {
-            const response = await axios.get(`${API_BASE_URL}/messages/unread-count`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            setUnreadMessageCount(response.data?.count || 0);
-            setUnreadAdminMessageCount(response.data?.adminCount || 0);
-        } catch (error) {
-            // Silently fail for message count - backend may not have this endpoint yet
-            if (error.response?.status !== 404 && error.response?.status !== 500) {
-                console.error('Failed to fetch message count:', error);
-            }
-            setUnreadMessageCount(0);
-            setUnreadAdminMessageCount(0);
-        }
-    }, [authToken, API_BASE_URL]);
-
-    useEffect(() => {
-        if (authToken) {
-            fetchNotificationCount();
-            fetchUnreadMessageCount();
-            // Poll for new notifications and messages every 60 seconds
-            const interval = setInterval(() => {
-                fetchNotificationCount();
-                fetchUnreadMessageCount();
-            }, 60000);
-            return () => clearInterval(interval);
-        }
-    }, [authToken, fetchNotificationCount, fetchUnreadMessageCount]);
-
     // Mark donation highlight as seen after 8 seconds
     useEffect(() => {
         if (authToken && !hasSeenDonationHighlight) {
@@ -1834,7 +1795,6 @@ const App = () => {
                         <button
                             onClick={() => {
                                 setShowNotifications(true);
-                                setNotificationCount(0);
                                 fetchNotificationCount();
                             }}
                             data-tutorial-target="notification-bell"
@@ -1926,7 +1886,6 @@ const App = () => {
                             <button
                                 onClick={() => {
                                     setShowNotifications(true);
-                                    setNotificationCount(0);
                                     fetchNotificationCount();
                                 }}
                                 data-tutorial-target="notification-bell"
@@ -2067,6 +2026,8 @@ const App = () => {
                     </div>
                 )}
             </header>
+
+            <NotificationBar authToken={authToken} API_BASE_URL={API_BASE_URL} />
 
             {/* Moderator Warning Banner */}
             <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
