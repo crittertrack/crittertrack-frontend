@@ -1,15 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+// We'll assume you have a central hook for authentication, like `useAuth`.
+// If your app uses a different pattern, you can adapt this.
+import { useAuth } from '../../contexts/AuthContext'; // This is an example path
 import { useUnreadMessages, useUnreadNotifications } from '../../hooks/useNotificationCounts';
 
-const NotificationBar = ({ authToken, API_BASE_URL }) => {
+const NotificationBar = ({ API_BASE_URL }) => {
+  // Use a hook to get the auth token directly from context.
+  // The `|| {}` prevents errors if the context isn't ready.
+  const { token: authToken } = useAuth() || {};
   const { count: messageCount, isLoading: messagesLoading } = useUnreadMessages(authToken, API_BASE_URL);
   const { count: notificationCount, isLoading: notificationsLoading } = useUnreadNotifications(authToken, API_BASE_URL);
 
   const hasUnreadMessages = !messagesLoading && messageCount > 0;
   const hasUnreadNotifications = !notificationsLoading && notificationCount > 0;
 
-  if (!hasUnreadMessages && !hasUnreadNotifications) {
+  // Also ensure there's an auth token before trying to render.
+  if (!authToken || (!hasUnreadMessages && !hasUnreadNotifications)) {
     return null;
   }
 

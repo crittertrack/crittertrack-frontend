@@ -5,7 +5,8 @@ export const useUnreadNotifications = (authToken, API_BASE_URL) => {
   const [data, setData] = useState({ count: 0, isLoading: true });
 
   useEffect(() => {
-    if (!authToken) {
+    // Don't fetch if required info is missing
+    if (!authToken || !API_BASE_URL) {
       setData({ count: 0, isLoading: false });
       return;
     }
@@ -42,7 +43,8 @@ export const useUnreadMessages = (authToken, API_BASE_URL) => {
     const [data, setData] = useState({ count: 0, isLoading: true });
 
     useEffect(() => {
-        if (!authToken) {
+        // Don't fetch if required info is missing
+        if (!authToken || !API_BASE_URL) {
             setData({ count: 0, isLoading: false });
             return;
         }
