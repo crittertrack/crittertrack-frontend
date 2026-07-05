@@ -319,6 +319,33 @@ const FamilyTreeView = ({
             });
         });
 
+        const ancestorsOfFocus = new Set();
+        const descendantsOfFocus = new Set();
+
+        if (focusAnimalId && byId[focusAnimalId]) {
+            const collectAncestors = (id, collection) => {
+                const parents = parentLinksByChild[id] || [];
+                parents.forEach(pid => {
+                    if (byId[pid] && !collection.has(pid)) {
+                        collection.add(pid);
+                        collectAncestors(pid, collection);
+                    }
+                });
+            };
+            collectAncestors(focusAnimalId, ancestorsOfFocus);
+
+            const collectDescendants = (id, collection) => {
+                const children = childrenByParent[id] || [];
+                children.forEach(cid => {
+                    if (byId[cid] && !collection.has(cid)) {
+                        collection.add(cid);
+                        collectDescendants(cid, collection);
+                    }
+                });
+            };
+            collectDescendants(focusAnimalId, descendantsOfFocus);
+        }
+
         const g = new dagre.graphlib.Graph();
         g.setGraph({
             rankdir: 'TB',
@@ -650,6 +677,8 @@ const FamilyTreeView = ({
             positions,
             edgeSegments,
             focusId: focusAnimalId,
+            ancestorsOfFocus,
+            descendantsOfFocus,
             width: maxX,
             height: maxY,
         };
@@ -657,6 +686,8 @@ const FamilyTreeView = ({
         lineageData,
         focusAnimalId,
     ]);
+
+    const { ancestorsOfFocus, descendantsOfFocus } = graphData;
 
     // Effect to center the view on the focus animal when it changes
     useEffect(() => {
@@ -680,7 +711,7 @@ const FamilyTreeView = ({
             setPan({ x: 24, y: 24 });
             setZoom(85);
         }
-    }, [focusAnimalId, graphData.width, graphData.height]); // Re-center when the animal or graph dimensions change.
+    }, [focusAnimalId, graphData]); // Re-center when the animal or graph data changes.
 
     useEffect(() => {
         panStateRef.current = pan;
@@ -880,9 +911,32 @@ const FamilyTreeView = ({
                         <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none', shapeRendering: 'geometricPrecision' }}>
                             {graphData.edgeSegments.map(seg => {
                                 const isPairLine = seg.id.includes('partner-network');
-                                const isDescendantLine = /offspring|child|trunk|anchor|single-parent/.test(seg.id);
-                                const baseStroke = isPairLine ? '#6f949d' : isDescendantLine ? '#be185d' : '#64748b';
-                                const activeStroke = isPairLine ? '#7fd4e0' : isDescendantLine ? '#9d174d' : '#334155';
+
+                                let strokeColor = '#64748b'; // Default grey for other lines
+
+                                if (isPairLine) {
+                                    strokeColor = '#6f949d'; // Partner line grey
+                                } else if (ancestorsOfFocus && descendantsOfFocus) {
+                                    // It's a parent-child line.
+                                    let max_y = -1;
+                                    (seg.relatedIds || []).forEach(id => {
+                                        if (graphData.positions[id] && graphData.positions[id].y > max_y) max_y = graphData.positions[id].y;
+                                    });
+                                    const childNodes = (seg.relatedIds || []).filter(id => graphData.positions[id] && graphData.positions[id].y === max_y);
+
+                                    let min_y = Infinity;
+                                    (seg.relatedIds || []).forEach(id => {
+                                        if (graphData.positions[id] && graphData.positions[id].y < min_y) min_y = graphData.positions[id].y;
+                                    });
+                                    const parentNodes = (seg.relatedIds || []).filter(id => graphData.positions[id] && graphData.positions[id].y === min_y);
+
+                                    const isAncestorPath = childNodes.some(id => ancestorsOfFocus.has(id) || id === focusAnimalId);
+                                    const isOffspringPath = parentNodes.some(id => descendantsOfFocus.has(id) || id === focusAnimalId);
+
+                                    if (isOffspringPath) strokeColor = '#ec4899'; // Theme pink
+                                    else if (isAncestorPath) strokeColor = '#3b82f6'; // Theme blue
+                                }
+
                                 const active = false; // Highlighting removed
                                 const opacity = 0.92;
                                 return (
@@ -890,7 +944,7 @@ const FamilyTreeView = ({
                                         key={seg.id}
                                         d={quantizePathData(seg.d)}
                                         fill="none"
-                                        stroke={active ? activeStroke : baseStroke}
+                                        stroke={strokeColor}
                                         strokeWidth={active ? 3.4 : 2.4}
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
