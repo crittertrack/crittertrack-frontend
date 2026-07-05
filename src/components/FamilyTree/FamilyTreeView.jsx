@@ -144,8 +144,11 @@ const FamilyTreeView = ({
             return;
         }
 
+        // Set loading state and clear previous data to prevent showing stale graph
+        setLineageLoading(true);
+        setLineageData({});
+
         const fetchDirectLineage = async () => {
-            setLineageLoading(true);
             const nodes = {};
             const visited = new Set();
             const fetchAnimalData = async (id) => {
@@ -164,12 +167,14 @@ const FamilyTreeView = ({
                 }
             };
 
-            // Fetch ancestors
+            // Phase 1: Fetch all ancestors
+            const ancestors = new Set();
             const ancestorQueue = [focusAnimalId];
             while (ancestorQueue.length > 0) {
                 const currentId = ancestorQueue.shift();
                 if (!currentId || visited.has(currentId)) continue;
                 visited.add(currentId);
+                ancestors.add(currentId);
 
                 const animalData = await fetchAnimalData(currentId);
                 if (animalData) {
@@ -181,37 +186,61 @@ const FamilyTreeView = ({
                 }
             }
 
-            // Fetch direct offspring
-            try {
-                const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${focusAnimalId}/offspring`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                const litters = offspringResponse.data || [];
-                const otherParentIds = new Set();
-                for (const litter of litters) {
-                    if (litter.offspring && Array.isArray(litter.offspring)) {
-                        for (const offspring of litter.offspring) {
-                            if (offspring && offspring.id_public) {
-                                nodes[offspring.id_public] = offspring;
-                                const otherParentId = (litter.sireId === focusAnimalId || litter.sireId_public === focusAnimalId) ? (litter.damId || litter.damId_public) : (litter.sireId || litter.sireId_public);
-                                if (otherParentId) {
-                                    otherParentIds.add(otherParentId);
+            // Phase 2: Identify parents and grandparents to fetch their offspring (siblings, aunts/uncles)
+            const idsToFetchOffspringFor = new Set([focusAnimalId]);
+            const focusAnimalData = nodes[focusAnimalId];
+            if (focusAnimalData) {
+                const parents = [
+                    focusAnimalData.sireId_public,
+                    focusAnimalData.fatherId_public,
+                    focusAnimalData.damId_public,
+                    focusAnimalData.motherId_public
+                ].filter(Boolean);
+
+                parents.forEach(pId => idsToFetchOffspringFor.add(pId));
+
+                for (const parentId of parents) {
+                    const parentNode = nodes[parentId];
+                    if (parentNode) {
+                        const grandparents = [
+                            parentNode.sireId_public,
+                            parentNode.fatherId_public,
+                            parentNode.damId_public,
+                            parentNode.motherId_public
+                        ].filter(Boolean);
+                        grandparents.forEach(gpId => idsToFetchOffspringFor.add(gpId));
+                    }
+                }
+            }
+
+            // Phase 3: Fetch offspring for the identified set of animals
+            for (const animalId of idsToFetchOffspringFor) {
+                try {
+                    const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalId}/offspring`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    const litters = offspringResponse.data || [];
+                    for (const litter of litters) {
+                        // Add other parent if not already present
+                        const otherParentId = (litter.sireId === animalId || litter.sireId_public === animalId) ? (litter.damId || litter.damId_public) : (litter.sireId || litter.sireId_public);
+                        if (otherParentId && !nodes[otherParentId]) {
+                            const parentData = await fetchAnimalData(otherParentId);
+                            if (parentData) nodes[otherParentId] = parentData;
+                        }
+                        // Add all offspring from the litter
+                        if (litter.offspring && Array.isArray(litter.offspring)) {
+                            for (const offspring of litter.offspring) {
+                                if (offspring && offspring.id_public && !nodes[offspring.id_public]) {
+                                    nodes[offspring.id_public] = offspring;
                                 }
                             }
                         }
                     }
-                }
-                
-                for (const parentId of otherParentIds) {
-                    if (!nodes[parentId]) {
-                        const parentData = await fetchAnimalData(parentId);
-                        if (parentData) {
-                            nodes[parentId] = parentData;
-                        }
+                } catch (e) {
+                    if (e.response?.status !== 404) {
+                        console.error(`Failed to fetch offspring for ${animalId}`, e);
                     }
                 }
-            } catch (e) {
-                console.error(`Failed to fetch offspring for ${focusAnimalId}`, e);
             }
 
             setLineageData(nodes);
@@ -219,7 +248,6 @@ const FamilyTreeView = ({
         };
 
         const fetchFullGraph = async () => {
-            setLineageLoading(true);
             const nodes = {};
             const visited = new Set();
 

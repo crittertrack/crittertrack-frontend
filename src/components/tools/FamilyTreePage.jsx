@@ -53,7 +53,7 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
         <div className="p-4 sm:p-6 bg-white dark:bg-dark-surface rounded-xl shadow-lg">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text mb-4">Family Tree Explorer</h1>
             <p className="text-gray-600 dark:text-dark-text-secondary mb-6">
-                Select an animal from your collection to load and explore its pedigree.
+                Select an animal from your collection to load and explore its full pedigree.
             </p>
 
             <div className="max-w-lg mx-auto mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -131,7 +131,7 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
                 </div>
                  <p className="text-xs text-gray-500 dark:text-dark-text-secondary mt-2 text-center">
                     {graphMode === 'direct' 
-                        ? 'Shows only direct ancestors and offspring of the selected animal.' 
+                        ? 'Shows direct ancestors, offspring, siblings, aunts, and uncles.' 
                         : "Shows all related animals of the same species, including siblings and cousins."}
                 </p>
             </div>
