@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
     DollarSign, Flame, Gem, Globe, Heart, Key, Link, Loader2,
     Mail, Mars, MessageSquare, Moon, QrCode, Search, Share2, Sparkles, Sprout,
-    Star, User, Venus, VenusAndMars, X
+    Star, User, Venus, VenusAndMars, X, Settings
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate } from '../../utils/dateFormatter';
@@ -283,6 +284,7 @@ const RatingStarRow = ({ score, interactive, onSelect }) => (
 // Public Profile View Component - Shows a breeder's public animals
 
 const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext, currentUserIdPublic = null, currentUserRole = 'user' }) => {
+    const navigate = useNavigate();
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -318,6 +320,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         return next;
     });
 
+    const isOwnProfile = currentUserIdPublic === profile.id_public;
     const isModOrAdmin = ['moderator', 'admin'].includes(currentUserRole);
 
     // Check if this user is favorited
@@ -660,47 +663,59 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     <ArrowLeft size={18} className="mr-1" /> Back
                 </button>
                 <div className="flex gap-2 flex-wrap">
-                    {onStartMessage && freshProfile?.allowMessages === true && (
+                    {isOwnProfile ? (
                         <button
-                            onClick={onStartMessage}
-                            data-tutorial-target="profile-message-btn"
-                            className="px-3 py-1.5 bg-accent hover:bg-accent/80 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                            onClick={() => navigate('/settings')}
+                            className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                         >
-                            <MessageSquare size={16} />
-                            Message
+                            <Settings size={16} />
+                            Profile Settings
                         </button>
+                    ) : (
+                        <>
+                            {onStartMessage && freshProfile?.allowMessages === true && (
+                                <button
+                                    onClick={onStartMessage}
+                                    data-tutorial-target="profile-message-btn"
+                                    className="px-3 py-1.5 bg-accent hover:bg-accent/80 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                >
+                                    <MessageSquare size={16} />
+                                    Message
+                                </button>
+                            )}
+                            {authToken && (
+                                <button
+                                    onClick={toggleFavorite}
+                                    disabled={favoritePending}
+                                    className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 ${
+                                        isFavorited 
+                                            ? 'bg-purple-100 hover:bg-purple-200 text-purple-700'
+                                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                    } ${favoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                                >
+                                    <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
+                                    {isFavorited ? 'Favorited' : 'Favorite'}
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setShowQR(true)}
+                                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                            >
+                                <QrCode size={16} />
+                                Share Profile
+                            </button>
+                            {showQR && <QRModal url={`${window.location.origin}/user/${freshProfile?.id_public || profile.id_public}`} title={freshProfile?.breederName || freshProfile?.personalName || 'Share Profile'} onClose={() => setShowQR(false)} />}
+                            <ReportButton
+                                contentType="profile"
+                                contentId={profile.id_public}
+                                contentOwnerId={profile.userId_backend}
+                                authToken={authToken}
+                                API_BASE_URL={API_BASE_URL}
+                                tooltipText="Report this profile"
+                            />
+                        </>
                     )}
-                    {authToken && currentUserIdPublic !== profile.id_public && (
-                        <button
-                            onClick={toggleFavorite}
-                            disabled={favoritePending}
-                            className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 ${
-                                isFavorited 
-                                    ? 'bg-purple-100 hover:bg-purple-200 text-purple-700'
-                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                            } ${favoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-                        >
-                            <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
-                            {isFavorited ? 'Favorited' : 'Favorite'}
-                        </button>
-                    )}
-                    <button
-                        onClick={() => setShowQR(true)}
-                        className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                    >
-                        <QrCode size={16} />
-                        Share Profile
-                    </button>
-                    {showQR && <QRModal url={`${window.location.origin}/user/${freshProfile?.id_public || profile.id_public}`} title={freshProfile?.breederName || freshProfile?.personalName || 'Share Profile'} onClose={() => setShowQR(false)} />}
-                    <ReportButton
-                        contentType="profile"
-                        contentId={profile.id_public}
-                        contentOwnerId={profile.userId_backend}
-                        authToken={authToken}
-                        API_BASE_URL={API_BASE_URL}
-                        tooltipText="Report this profile"
-                    />
                 </div>
             </div>
 

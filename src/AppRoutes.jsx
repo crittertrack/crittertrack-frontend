@@ -216,7 +216,7 @@ export function AppRoutes({
       } />
 
       {/* Profile */}
-      <Route path="/profile" element={
+      <Route path="/settings" element={
         <ProfileView 
           userProfile={userProfile} 
           showModalMessage={showModalMessage} 

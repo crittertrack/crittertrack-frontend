@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿// CritterTrack Frontend Application
+﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -1882,7 +1882,7 @@ const App = () => {
                             </button>
                             {showProfileMenu && (
                                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
-                                    <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
+                                    <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <User size={15} /> Profile
                                     </button>
@@ -1982,7 +1982,7 @@ const App = () => {
                                 </button>
                                 {showProfileMenu && (
                                     <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
-                                        <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
+                                        <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <User size={15} /> Profile
                                         </button>
