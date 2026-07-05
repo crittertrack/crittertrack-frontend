@@ -2305,11 +2305,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         onViewAnimal={onViewAnimal}
                     />
                 </div>
-            )}\n        </div>
+            )}
+        </div>
     );
 });
-
-// (Removed unused `AnimalListItem` component to reduce redundancy)
 
 
 const ParentSearchModal = ({ 
@@ -2544,7 +2543,6 @@ const ParentSearchModal = ({
 
 
 
-const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL, modalTarget, userProfile }) => {
 export const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL, modalTarget, userProfile }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchType, setSearchType] = useState('users'); // 'users' or 'animals'
@@ -2821,7 +2819,6 @@ export const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_B
             </div>
         </div>
     );
-};
 
 // Global search bar component with dropdown results
 
