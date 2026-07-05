@@ -9,6 +9,8 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const searchRef = useRef(null);
 
+    const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -45,8 +47,6 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
         setSearchTerm(getFullName(animal));
         setIsDropdownOpen(false);
     };
-
-    const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
 
     return (
         <div className="p-4 sm:p-6 bg-white dark:bg-dark-surface rounded-xl shadow-lg">
