@@ -10,8 +10,8 @@ const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
     useEffect(() => {
         const fetchAnnouncements = async () => {
             try {
-                // Fetch active announcements, info, and polls
-                const response = await axios.get(`${API_BASE_URL}/public/broadcasts?type=announcement&type=poll&type=info&active=true`);
+                // Fetch active announcements, info, and polls using a comma-separated list for the 'type' parameter
+                const response = await axios.get(`${API_BASE_URL}/public/broadcasts?type=announcement,poll,info&active=true`);
                 // Sort by creation date, newest first
                 const sortedItems = (response.data || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 setItems(sortedItems);
