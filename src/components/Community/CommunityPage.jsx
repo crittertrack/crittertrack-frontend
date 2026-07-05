@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Users, Loader2, User, ScrollText } from 'lucide-react';
+import { Users, Loader2, User, Megaphone } from 'lucide-react';
 // import MyFeed from './MyFeed'; // Import the new component
 import BreederDirectory from '../PublicProfile/BreederDirectory';
+import NewsAnnouncements from './NewsAnnouncements';
 
 // Helper to check if a user has a publicly visible name
 const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
@@ -131,17 +132,14 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         {/* News Section */}
                         <div className="lg:col-span-1 bg-white rounded-lg shadow-md p-4">
                             <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                                <ScrollText size={20} className="text-cyan-600" />
+                                <Megaphone size={20} className="text-cyan-600" />
                                 News & Announcements
                             </h2>
-                            <div className="text-center py-16 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
-                                <p className="font-medium">No announcements right now.</p>
-                                <p className="text-sm">Check back later for updates!</p>
-                            </div>
+                            <NewsAnnouncements API_BASE_URL={API_BASE_URL} />
                         </div>
 
                         {/* Breeder Directory Section */}
-                        <div className="lg:col-span-2 bg-white rounded-lg shadow-md">
+                        <div className="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
                             <BreederDirectory
                                 authToken={authToken}
                                 API_BASE_URL={API_BASE_URL}
