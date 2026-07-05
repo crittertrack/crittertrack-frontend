@@ -1,5 +1,4 @@
-﻿﻿﻿﻿// CritterTrack Frontend Application
-﻿﻿﻿﻿// CritterTrack Frontend Application
+﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -38,7 +37,6 @@ import ContactsPage from './components/Contacts';
 import AuthView from './components/Auth/AuthView';
 import { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationsHub from './components/Notifications/NotificationsHub';
-import NotificationBar from './components/Notifications/NotificationBar';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
 import PublicProfileView, { QRModal } from './components/PublicProfile/PublicProfileView';
@@ -1099,7 +1097,6 @@ const App = () => {
     // Fetch animals for offspring calculator when needed
     useEffect(() => {
         const fetchAnimalsForCalculator = async () => {
-            if ((currentView === 'calculator' || currentView === 'coi' || currentView === 'target') && authToken) {
             if ((currentView === 'calculator' || currentView === 'coi') && authToken) {
                 try {
                     const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, {
@@ -1111,7 +1108,6 @@ const App = () => {
                     console.error('Failed to fetch animals for calculator:', error);
                     setMyAnimalsForCalculator([]);
                 }
-            }
         };
         fetchAnimalsForCalculator();
     }, [currentView, authToken, API_BASE_URL]);
@@ -2070,9 +2066,6 @@ const App = () => {
                     </div>
                 )}
             </header>
-
-            {/* Notification Bar */}
-            <NotificationBar authToken={authToken} API_BASE_URL={API_BASE_URL} />
 
             {/* Moderator Warning Banner */}
             <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
