@@ -1752,7 +1752,7 @@ const App = () => {
                     <nav className="flex space-x-3">
                         <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Users size={18} className="mb-1" />
-                            <span>My Feed</span>
+                            <span>Community</span>
                         </button>
                         <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-1" />
@@ -1970,7 +1970,7 @@ const App = () => {
                     <nav className="grid grid-cols-4 gap-1 mb-1">
                         <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Users size={18} className="mb-0.5" />
-                            <span>My Feed</span>
+                            <span>Community</span>
                         </button>
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-0.5" />
