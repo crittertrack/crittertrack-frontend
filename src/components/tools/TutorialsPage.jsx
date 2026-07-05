@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
-import { TUTORIAL_LESSONS } from '../data/tutorialLessonsNew';
+import { TUTORIAL_LESSONS } from '../../data/tutorialLessonsNew';
 import { getStepScreenshot } from '../data/tutorialScreenshots';
 
 /**
