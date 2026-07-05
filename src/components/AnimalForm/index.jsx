@@ -18,7 +18,7 @@ import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import { FamilyTabContent } from '../AnimalDetail/FamilyTabContent';
 import DatePicker from '../DatePicker';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
-import ContactSelector from '../ContactSelector';
+import ContactSelector from '../Contacts/ContactSelector';
 
 const getCountryFlag = (countryCode) => {
     if (!countryCode || countryCode.length !== 2) return '';
