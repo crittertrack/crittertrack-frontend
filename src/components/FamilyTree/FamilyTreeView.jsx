@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 import axios from 'axios';
 import { Loader2, ZoomIn, ZoomOut, Home, Cat } from 'lucide-react';
 import dagre from 'dagre';
@@ -690,7 +690,7 @@ const FamilyTreeView = ({
     const { ancestorsOfFocus, descendantsOfFocus } = graphData;
 
     // Effect to center the view on the focus animal when it changes
-    useEffect(() => {
+    useLayoutEffect(() => {
         const container = containerRef.current;
         const focusNodePos = graphData.positions && graphData.positions[focusAnimalId];
 
@@ -711,7 +711,7 @@ const FamilyTreeView = ({
             setPan({ x: 24, y: 24 });
             setZoom(85);
         }
-    }, [focusAnimalId, graphData]); // Re-center when the animal or graph data changes.
+    }, [focusAnimalId, graphData]); // Re-center when the animal or graph data changes. Using useLayoutEffect to ensure container dimensions are available.
 
     useEffect(() => {
         panStateRef.current = pan;
