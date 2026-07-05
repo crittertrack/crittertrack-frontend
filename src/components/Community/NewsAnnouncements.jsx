@@ -77,7 +77,7 @@ const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
     return (
         <div className="space-y-3">
             {items.map(item => {
-                if (item.type === 'poll') {
+                if (item.broadcastType === 'poll' || item.type === 'poll') {
                     return (
                         <BroadcastPoll 
                             key={item._id} 
@@ -90,9 +90,12 @@ const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
                 }
                 // Default to announcement rendering
                 return (
-                    <div key={item._id} className="bg-cyan-50/50 p-3 rounded-lg border border-cyan-200/60">
-                        <p className="text-xs font-semibold text-cyan-700 mb-1">{formatTimeAgo(item.createdAt)}</p>
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.content}</p>
+                    <div key={item._id} className="bg-cyan-50/50 p-3 rounded-lg border border-cyan-200/60 space-y-1">
+                        <div className="flex justify-between items-start">
+                            <p className="text-sm font-bold text-cyan-800 pr-2">{item.title || 'Announcement'}</p>
+                            <p className="text-xs font-semibold text-cyan-700 flex-shrink-0">{formatTimeAgo(item.createdAt)}</p>
+                        </div>
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.message || item.content || ''}</p>
                     </div>
                 );
             })}
