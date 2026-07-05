@@ -129,7 +129,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     {/* News and Breeder Directory */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* News Section */}
-                        <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-4">
+                        <div className="lg:col-span-1 bg-white rounded-lg shadow-md p-4">
                             <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
                                 <ScrollText size={20} className="text-cyan-600" />
                                 News & Announcements
@@ -141,7 +141,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         </div>
 
                         {/* Breeder Directory Section */}
-                        <div className="lg:col-span-1 bg-white rounded-lg shadow-md">
+                        <div className="lg:col-span-2 bg-white rounded-lg shadow-md">
                             <BreederDirectory
                                 authToken={authToken}
                                 API_BASE_URL={API_BASE_URL}
