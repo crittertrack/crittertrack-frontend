@@ -17,6 +17,7 @@ const SpeciesManager = lazy(() => import('./components/Modals/SpeciesModals').th
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
 const PrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/PrivateAnimalDetail'));
 const TutorialsPage = lazy(() => import('./components/tools/TutorialsPage'));
+const SuppliesPage = lazy(() => import('./components/SuppliesPage'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
 const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
 const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));

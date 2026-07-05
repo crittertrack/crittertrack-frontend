@@ -78,6 +78,7 @@ import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
+import FinanceDropdown from './components/FinanceDropdown';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -812,6 +813,9 @@ const App = () => {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showToolsMenu, setShowToolsMenu] = useState(false);
     const profileMenuDesktopRef = useRef(null);
+    const [showFinanceMenu, setShowFinanceMenu] = useState(false);
+    const financeMenuDesktopRef = useRef(null);
+    const financeMenuMobileRef = useRef(null);
     const profileMenuMobileRef = useRef(null);
     const toolsMenuDesktopRef = useRef(null);
     const toolsMenuMobileRef = useRef(null);
@@ -1196,13 +1200,16 @@ const App = () => {
             const inMobile = profileMenuMobileRef.current?.contains(e.target);
             const inToolsDesktop = toolsMenuDesktopRef.current?.contains(e.target);
             const inToolsMobile = toolsMenuMobileRef.current?.contains(e.target);
+            const inFinanceDesktop = financeMenuDesktopRef.current?.contains(e.target);
+            const inFinanceMobile = financeMenuMobileRef.current?.contains(e.target);
 
             if (!inDesktop && !inMobile) setShowProfileMenu(false);
             if (!inToolsDesktop && !inToolsMobile) setShowToolsMenu(false);
+            if (!inFinanceDesktop && !inFinanceMobile) setShowFinanceMenu(false);
         };
-        if (showProfileMenu || showToolsMenu) document.addEventListener('mousedown', handleClickOutside);
+        if (showProfileMenu || showToolsMenu || showFinanceMenu) document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showProfileMenu, showToolsMenu]);
+    }, [showProfileMenu, showToolsMenu, showFinanceMenu]);
 	
     // Fetch global species list and configs
     useEffect(() => {
@@ -1804,10 +1811,15 @@ const App = () => {
                             <Calendar size={18} className="mb-1" />
                             <span>Calendar</span>
                         </button>
-                        <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <DollarSign size={18} className="mb-1" />
-                            <span>Budget</span>
-                        </button>
+                        <div className="relative" ref={financeMenuDesktopRef}>
+                            <button onClick={() => setShowFinanceMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['budget', 'inventory'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <DollarSign size={18} className="mb-1" />
+                                <span>Finance</span>
+                            </button>
+                            {showFinanceMenu && (
+                                <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
+                            )}
+                        </div>
                         <button onClick={() => navigate('/contacts')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'contacts' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Users size={18} className="mb-1" />
                             <span>Contacts</span>
@@ -1825,10 +1837,6 @@ const App = () => {
                                 <ToolsDropdown onLinkClick={() => setShowToolsMenu(false)} />
                             )}
                         </div>
-                        <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <MoonStar size={18} className="mb-1" />
-                            <span>Breeders</span>
-                        </button>
                     </nav>
 
                     <div className="flex items-center space-x-3">
@@ -2045,10 +2053,6 @@ const App = () => {
                                 <ToolsDropdown onLinkClick={() => setShowToolsMenu(false)} />
                             )}
                         </div>
-                        <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <MoonStar size={18} className="mb-0.5" />
-                            <span>Breeders</span>
-                        </button>
                     </nav>
                 </div>
 

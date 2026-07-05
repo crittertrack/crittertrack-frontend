@@ -86,7 +86,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Breeders Registry</h3>
+                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Breeders</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     In <strong>Profile</strong> (profile image circle → Profile), select your breeding status (Owner, Active Breeder, or Retired Breeder) 
                                     for any <strong>species you have animals for</strong> on the site. This adds you to the public <strong>Breeders</strong> Registry.

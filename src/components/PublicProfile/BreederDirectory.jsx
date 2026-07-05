@@ -395,7 +395,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                         </button>
                         <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                             <Star size={24} className="text-primary" />
-                            Breeders Registry
+                            Breeders
                         </h1>
                     </div>
 
