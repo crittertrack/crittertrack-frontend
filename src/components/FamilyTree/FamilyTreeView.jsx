@@ -9,22 +9,6 @@ const NODE_H = 92;
 const API_BASE_URL = '/api';
 const MIN_ZOOM = 20;
 const MAX_ZOOM = 180;
-const LINEAGE_COLORS = [
-    '#2563eb', '#dc2626', '#059669', '#7c3aed', '#ea580c', '#0f766e', '#c026d3', '#b45309',
-    '#0891b2', '#be123c', '#4f46e5', '#15803d', '#a16207', '#9333ea', '#0ea5e9', '#e11d48'
-];
-
-const hashKey = (key = '') => {
-    let h = 0;
-    for (let i = 0; i < key.length; i += 1) {
-        h = ((h << 5) - h) + key.charCodeAt(i);
-        h |= 0;
-    }
-    return Math.abs(h);
-};
-
-const lineageColorFromKey = (key = '') => LINEAGE_COLORS[hashKey(key) % LINEAGE_COLORS.length];
-const isHexColor = (value = '') => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(String(value).trim());
 
 const parseCtcNumeric = (idPublic = '') => {
     const m = String(idPublic).match(/(\d+)/);
@@ -46,6 +30,7 @@ const compareSiblingOrder = (a, b) => {
 };
 
 const lineLaneOffset = (key = '', spread = 6) => {
+    const hashKey = (k = '') => { let h = 0; for (let i = 0; i < k.length; i++) { h = ((h << 5) - h) + k.charCodeAt(i); h |= 0; } return Math.abs(h); };
     const bucket = hashKey(String(key)) % 3; // 0..2
     return (bucket - 1) * spread;
 };
@@ -480,11 +465,6 @@ const FamilyTreeView = ({
 
             if (!parents.length || !children.length) return;
 
-            const pairColor =
-                parents.map(p => animalLineColorById[p.id]).find(Boolean)
-                || children.map(c => animalLineColorById[c.id]).find(Boolean)
-                || lineageColorFromKey(pairKey);
-
             const laneOffset = lineLaneOffset(pairKey, 5);
             const childBandBaseY = Math.min(...children.map(c => c.yTop)) - 20;
             const litterSpreadY = 26;
@@ -533,7 +513,6 @@ const FamilyTreeView = ({
                             id: `seg-${pairKey}-single-offspring-network-${groupIndex}`,
                             d: `M ${p.x} ${p.yBottom} L ${p.x} ${groupY} L ${minX} ${groupY} L ${maxX} ${groupY}`,
                             relatedIds: [p.id, ...group.children.map(c => c.id)],
-                            color: pairColor,
                         });
                     } else {
                         const onlyChild = group.children[0];
@@ -542,7 +521,6 @@ const FamilyTreeView = ({
                             id: `seg-${pairKey}-single-parent-trunk-${groupIndex}`,
                             d: `M ${p.x} ${p.yBottom} L ${p.x} ${elbowY} L ${onlyChild.x} ${elbowY}`,
                             relatedIds: [p.id, onlyChild.id],
-                            color: pairColor,
                         });
                     }
 
@@ -551,7 +529,6 @@ const FamilyTreeView = ({
                             id: `seg-${pairKey}-single-child-${groupIndex}-${idx}`,
                             d: `M ${c.x} ${groupY} L ${c.x} ${c.yTop}`,
                             relatedIds: [p.id, c.id],
-                            color: pairColor,
                         });
                     });
                 });
@@ -570,7 +547,6 @@ const FamilyTreeView = ({
                 d: `M ${partnerLeftX} ${leftParent.yMid} L ${partnerLeftX} ${partnerLineY} L ${partnerRightX} ${partnerLineY} L ${partnerRightX} ${rightParent.yMid}`,
                 relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                 pairParentIds: [leftParent.id, rightParent.id],
-                color: pairColor,
             });
 
             litterGroups.forEach((group, groupIndex) => {
@@ -584,7 +560,6 @@ const FamilyTreeView = ({
                         id: `seg-${pairKey}-offspring-network-${groupIndex}`,
                         d: `M ${groupTrunkX} ${partnerLineY} L ${groupTrunkX} ${groupY} L ${minX} ${groupY} L ${maxX} ${groupY}`,
                         relatedIds: [leftParent.id, rightParent.id, ...group.children.map(c => c.id)],
-                        color: pairColor,
                     });
                 } else {
                     const onlyChild = group.children[0];
@@ -593,7 +568,6 @@ const FamilyTreeView = ({
                         id: `seg-${pairKey}-trunk-${groupIndex}`,
                         d: `M ${groupTrunkX} ${partnerLineY} L ${groupTrunkX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
                         relatedIds: [leftParent.id, rightParent.id, onlyChild.id],
-                        color: pairColor,
                     });
                 }
 
@@ -602,7 +576,6 @@ const FamilyTreeView = ({
                         id: `seg-${pairKey}-child-drop-${groupIndex}-${idx}`,
                         d: `M ${c.x} ${groupY} L ${c.x} ${c.yTop}`,
                         relatedIds: [leftParent.id, rightParent.id, c.id],
-                        color: pairColor,
                     });
                 });
             });
