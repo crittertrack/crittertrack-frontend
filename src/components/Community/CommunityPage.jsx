@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Users, Loader2, User, Megaphone } from 'lucide-react';
+import { Users, Loader2, User, ScrollText } from 'lucide-react';
 // import MyFeed from './MyFeed'; // Import the new component
 import BreederDirectory from '../PublicProfile/BreederDirectory';
 import NewsAnnouncements from './NewsAnnouncements';
@@ -132,10 +132,10 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         {/* News Section */}
                         <div className="lg:col-span-1 bg-white rounded-lg shadow-md p-4">
                             <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                                <Megaphone size={20} className="text-cyan-600" />
-                                News & Announcements
+                                <ScrollText size={20} className="text-cyan-600" />
+                                News & Polls
                             </h2>
-                            <NewsAnnouncements API_BASE_URL={API_BASE_URL} />
+                            <NewsAnnouncements API_BASE_URL={API_BASE_URL} authToken={authToken} />
                         </div>
 
                         {/* Breeder Directory Section */}
