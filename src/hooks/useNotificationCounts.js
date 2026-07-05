@@ -19,7 +19,7 @@ export const useUnreadNotifications = (authToken, API_BASE_URL) => {
         const notifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
         // Count notifications that are 'pending' and not general broadcasts
         const pendingNotifications = notifications.filter(
-          (n) => n.status === 'pending' && n.type !== 'broadcast' && n.type !== 'announcement'
+          (n) => n.status === 'pending' && n.type !== 'broadcast' && n.type !== 'announcement' && n.type !== 'moderator_message'
         );
         setData({ count: pendingNotifications.length, isLoading: false });
       } catch (error) {
@@ -53,7 +53,16 @@ export const useUnreadMessages = (authToken, API_BASE_URL) => {
                 const response = await axios.get(`${API_BASE_URL}/messages/unread-count`, {
                     headers: { Authorization: `Bearer ${authToken}` },
                 });
-                setData({ count: response.data.count || 0, isLoading: false });
+                // Handle different possible response shapes: { count: 5 } or just 5
+                let count = 0;
+                if (response.data) {
+                    if (typeof response.data.count === 'number') {
+                        count = response.data.count;
+                    } else if (typeof response.data === 'number') {
+                        count = response.data;
+                    }
+                }
+                setData({ count: count, isLoading: false });
             } catch (error) {
                 // Silently fail as this is not a critical feature.
                 console.error('Failed to fetch message count:', error);
