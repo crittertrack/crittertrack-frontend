@@ -23,7 +23,7 @@ const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
 const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
 
 // New Contact pages for refactor
-const ContactsListPage = lazy(() => import('./components/ContactsListPage'));
+const ContactsListPage = lazy(() => import('./components/Contacts/ContactsListPage'));
 const ContactDetailPage = lazy(() => import('./components/Contacts/ContactDetailPage'));
 const ContactOverview = lazy(() => import('./components/Contacts/Overview'));
 const ContactOwnedAnimals = lazy(() => import('./components/Contacts/OwnedAnimals'));
