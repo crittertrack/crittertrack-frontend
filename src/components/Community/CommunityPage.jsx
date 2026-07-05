@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Users, Loader2, User, ScrollText } from 'lucide-react';
-import MyFeed from './MyFeed'; // Import the new component
+// import MyFeed from './MyFeed'; // Import the new component
 import BreederDirectory from '../PublicProfile/BreederDirectory';
 
 // Helper to check if a user has a publicly visible name
@@ -81,8 +81,8 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                 </div>
             ) : (
                 <div className="space-y-6">
-                    {/* MyFeed component will render the user-specific sections */}
-                    <MyFeed authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                    {/* MyFeed component is temporarily disabled for WIP */}
+                    {/* <MyFeed authToken={authToken} API_BASE_URL={API_BASE_URL} /> */}
                     
                     {/* Recent Activity Section */}
                     {recentActivityUsers.length > 0 && (
