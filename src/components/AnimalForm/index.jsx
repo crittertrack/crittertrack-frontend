@@ -2637,7 +2637,6 @@ export const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_B
             setLoading(false);
         }
     };
-}
 
     const UserResultCard = ({ user }) => {
         const memberSince = user.createdAt 
@@ -2819,6 +2818,7 @@ export const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_B
             </div>
         </div>
     );
+};
 
 // Global search bar component with dropdown results
 
