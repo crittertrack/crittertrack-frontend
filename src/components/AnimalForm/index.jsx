@@ -2329,13 +2329,14 @@ const ParentSearchModal = ({
     species         // Filter: Species of the animal being bred
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
-        const [hasSearched, setHasSearched] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
     const [localAnimals, setLocalAnimals] = useState([]);
     const [globalAnimals, setGlobalAnimals] = useState([]);
     const [loadingLocal, setLoadingLocal] = useState(false);
     const [loadingGlobal, setLoadingGlobal] = useState(false);
     const [scope, setScope] = useState('both'); // 'local' | 'global' | 'both'
-    
+}    
     // Simple component to render a list item
     const SearchResultItem = ({ animal, isGlobal }) => {
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
@@ -2372,6 +2373,8 @@ const ParentSearchModal = ({
 
         const handleSearch = async () => {
             setHasSearched(true);
+    const handleSearch = async () => {
+        setHasSearched(true);
         const trimmedSearchTerm = searchTerm.trim();
 
         if (!trimmedSearchTerm || trimmedSearchTerm.length < 1) {
