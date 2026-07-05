@@ -705,13 +705,15 @@ const FamilyTreeView = ({
                 y: (container.clientHeight / 2) - (nodeCenterY * scale),
             };
             
-            setPan(targetPan);
+            const clampedPan = clampPanToViewport(targetPan, initialZoom);
+
+            setPan(clampedPan);
             setZoom(initialZoom);
         } else {
             setPan({ x: 24, y: 24 });
             setZoom(85);
         }
-    }, [focusAnimalId, graphData]); // Re-center when the animal or graph data changes. Using useLayoutEffect to ensure container dimensions are available.
+     }, [focusAnimalId, graphData]); // Re-center when the animal or graph data changes.
 
     useEffect(() => {
         panStateRef.current = pan;
@@ -761,13 +763,6 @@ const FamilyTreeView = ({
         el.addEventListener('wheel', handleWheel, { passive: false });
         return () => el.removeEventListener('wheel', handleWheel);
     }, [handleWheel]);
-
-    useEffect(() => {
-        const clamped = clampPanToViewport(panStateRef.current, zoomStateRef.current);
-        if (Math.abs(clamped.x - panStateRef.current.x) > 0.5 || Math.abs(clamped.y - panStateRef.current.y) > 0.5) {
-            setPan(clamped);
-        }
-    }, [graphData.width, graphData.height, zoom]);
 
     const beginDrag = e => {
         // Left-drag pans when starting from empty canvas space.
