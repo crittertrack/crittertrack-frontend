@@ -353,6 +353,7 @@ const AnimalList = ({
     const [logFilterEndDate, setLogFilterEndDate] = useState('');
     // Duplicates state
     const [showForSaleScreen, setShowForSaleScreen] = useState(false);
+    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState('cards');
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
     const [duplicatesLoading, setDuplicatesLoading] = useState(false);
