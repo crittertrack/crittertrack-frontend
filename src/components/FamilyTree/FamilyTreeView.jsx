@@ -160,8 +160,7 @@ const FamilyTreeView = ({
         const fetchLineage = async () => {
             setLineageLoading(true);
             const nodes = {};
-            const visited = new Set(speciesAnimals.map(a => canonicalId(a.id_public)).filter(Boolean));
-
+            const visited = new Set();
             const fetchAnimalData = async (id) => {
                 if (!id) return null;
                 const localAnimal = (animals || []).find(a => a.id_public === id);
