@@ -32,8 +32,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
-    const [animalLogs, setAnimalLogs] = useState(null); // null = not yet fetched
-    const [animalLogsLoading, setAnimalLogsLoading] = useState(false);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
@@ -408,15 +406,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
             .catch(() => setEnclosureInfo(null));
     }, [animal?.enclosureId, authToken, API_BASE_URL]);
 
-    // Fetch logs when Logs tab is opened (lazy, once per animal)
-    React.useEffect(() => {
-        if (detailViewTab !== 16 || animalLogs !== null || !animal?.id_public || !authToken) return;
-        setAnimalLogsLoading(true);
-        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
-            .then(res => setAnimalLogs(res.data || []))
-            .catch(() => setAnimalLogs([]))
-            .finally(() => setAnimalLogsLoading(false));
-    }, [detailViewTab, animal?.id_public, authToken, API_BASE_URL, animalLogs]);
     
     // Fetch COI when component mounts or animal changes (if animal has both parents)
     React.useEffect(() => {
@@ -627,16 +616,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                             )}
                             {onEdit && (
                                 <button
-                                    onClick={() => setDetailViewTab(16)}
-                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                    title="View activity logs"
-                                >
-                                    <ScrollText size={14} />
-                                    Logs
-                                </button>
-                            )}
-                            {onEdit && (
-                                <button
                                     onClick={() => onEdit(animal)}
                                     className="px-2 py-1 bg-accent hover:bg-accent/90 text-white font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                                 >
@@ -740,14 +719,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                     {animal.archived ? 'Unarchive' : 'Archive'}
                                 </button>
                             )}
-                            <button
-                                onClick={() => setDetailViewTab(16)}
-                                className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                title="View activity logs"
-                            >
-                                <ScrollText size={16} />
-                                Logs
-                            </button>
                             {onEdit && (
                                 <button
                                     onClick={() => onEdit(animal)}
@@ -2760,115 +2731,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                     </div>
                 )}
 
-                {/* -- TAB 16 : Logs -------------------------------------------------- */}
-                {detailViewTab === 16 && (
-                    <div className="space-y-6 p-1">
-                        {animalLogsLoading ? (
-                            <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
-                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
-                                Loading logs...
-                            </div>
-                        ) : !animalLogs || animalLogs.length === 0 ? (
-                            <div className="text-center py-12 text-gray-400 text-sm">No changes recorded yet. Logs are created when you edit or feed this animal.</div>
-                        ) : (() => {
-                            const feedingLogs = animalLogs.filter(l => l.category === 'feeding');
-                            const careLogs    = animalLogs.filter(l => l.category === 'care');
-                            const fieldLogs   = animalLogs.filter(l => l.category === 'field');
-                            const fmtVal = v => v === null || v === undefined ? '?' : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v).slice(0, 80);
-                            return (
-                                <>
-                                    {/* Feeding History */}
-                                    {feedingLogs.length > 0 && (
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2 pb-1 border-b border-green-200">
-                                                <Edit size={16} className="inline-block align-middle" />
-                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Feeding History</h3>
-                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{feedingLogs.length}</span>
-                                            </div>
-                                            {feedingLogs.map(log => {
-                                                const ev = log.changes?.[0]?.newValue || {};
-                                                const foodLabel = ev.supplyName
-                                                    ? `${ev.supplyName}${ev.feederType ? ` (${ev.feederType}${ev.feederSize ? ` · ${ev.feederSize}` : ''})` : ''}`
-                                                    : null;
-                                                const qtyLabel = ev.quantity != null ? `${ev.quantity}${ev.unit ? ` ${ev.unit}` : ''}` : null;
-                                                return (
-                                                    <div key={log._id} className="bg-green-50 border border-green-100 rounded-lg p-3">
-                                                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                                                            <div className="flex items-center gap-2 flex-wrap">
-                                                                <span className="text-green-600 font-medium text-sm flex items-center gap-0.5"><Check size={12} className="flex-shrink-0" /> Fed</span>
-                                                                {foodLabel && <span className="text-gray-700 text-sm font-medium">{foodLabel}</span>}
-                                                                {qtyLabel && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">• {qtyLabel}</span>}
-                                                            </div>
-                                                            <span className="text-xs text-gray-400">{new Date(log.createdAt).toLocaleString()}</span>
-                                                        </div>
-                                                        {!foodLabel && <p className="text-xs text-gray-400 mt-1">No food recorded</p>}
-                                                        {ev.notes && <p className="text-xs text-gray-500 mt-1 italic">"{ev.notes}"</p>}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-
-                                    {/* Care Schedule Updates */}
-                                    {careLogs.length > 0 && (
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2 pb-1 border-b border-blue-200">
-                                                <Edit size={16} className="inline-block align-middle" />
-                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Care Schedule Updates</h3>
-                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{careLogs.length}</span>
-                                            </div>
-                                            {careLogs.map(log => (
-                                                <div key={log._id} className="bg-blue-50 border border-blue-100 rounded-lg p-3 space-y-1.5">
-                                                    <span className="text-xs font-medium text-blue-500">{new Date(log.createdAt).toLocaleString()}</span>
-                                                    {log.changes.map((c, i) => (
-                                                        <div key={i} className="text-sm">
-                                                            <span className="font-medium text-gray-700">{c.label}:</span>{' '}
-                                                            {c.field === 'careTasks' ? (
-                                                                <span className="text-gray-500">Task list updated</span>
-                                                            ) : c.field === 'careTaskDone' ? (
-                                                                <span className="text-green-600 flex items-center gap-0.5"><Check size={12} className="flex-shrink-0" /> Completed: {c.newValue}</span>
-                                                            ) : (
-                                                                <span className="text-gray-500">
-                                                                    {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">none</span>}
-                                                                    <ArrowRight size={14} className="inline-block align-middle mr-0.5" /> <span className="text-green-600">{fmtVal(c.newValue)}</span>
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* Field Edits */}
-                                    {fieldLogs.length > 0 && (
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2 pb-1 border-b border-gray-200">
-                                                <Edit size={16} className="inline-block align-middle" />
-                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Field Edits</h3>
-                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{fieldLogs.length}</span>
-                                            </div>
-                                            {fieldLogs.map(log => (
-                                                <div key={log._id} className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-1.5">
-                                                    <span className="text-xs font-medium text-gray-500">{new Date(log.createdAt).toLocaleString()}</span>
-                                                    {log.changes.map((c, i) => (
-                                                        <div key={i} className="text-sm flex items-start gap-1.5 flex-wrap">
-                                                            <span className="font-medium text-gray-700 shrink-0">{c.label}:</span>
-                                                            <span className="text-gray-500">
-                                                                {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">•</span>}
-                                                                <ArrowRight size={14} className="inline-block align-middle mr-0.5" /> <span className="text-green-600">{fmtVal(c.newValue)}</span>
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </>
-                            );
-                        })()}
-                    </div>
-                )}
 
                 {/* -- TAB 5: Pedigree -- */}
                 {detailViewTab === 5 && (() => {

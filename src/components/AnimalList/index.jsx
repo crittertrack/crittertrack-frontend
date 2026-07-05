@@ -7,7 +7,7 @@ import {
     Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
     Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
     Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin,
-    Network, Package, Plus, PlusCircle, RefreshCw, Save, ScrollText,
+    Network, Package, Plus, PlusCircle, RefreshCw, Save,
     Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
     Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
@@ -341,16 +341,6 @@ const AnimalList = ({
         _saveAnimalCollections({ ...animalCollections, [animalId]: current.filter(cid => cid !== collectionId) });
     };
 
-    // Activity Log state
-    const [activityLogs, setActivityLogs] = useState([]);
-    const [logsLoading, setLogsLoading] = useState(false);
-    const [logsPagination, setLogsPagination] = useState({ page: 1, totalPages: 1, total: 0 });
-    const [logsLoaded, setLogsLoaded] = useState(false);
-    const [showActivityLogScreen, setShowActivityLogScreen] = useState(false);
-    const [logFilterAction, setLogFilterAction] = useState('');
-    const [logFilterSearch, setLogFilterSearch] = useState('');
-    const [logFilterStartDate, setLogFilterStartDate] = useState('');
-    const [logFilterEndDate, setLogFilterEndDate] = useState('');
     // Duplicates state
     const [showForSaleScreen, setShowForSaleScreen] = useState(false);
     const [myAnimalsViewMode, setMyAnimalsViewMode] = useState('cards');
@@ -361,6 +351,12 @@ const AnimalList = ({
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
     const [supplySaving, setSupplySaving] = useState(false);
+    const [supplies, setSupplies] = useState([]);
+    const [suppliesLoading, setSuppliesLoading] = useState(false);
+    const [supplyCategoryFilter, setSupplyCategoryFilter] = useState('All');
+    const [restockingSupplyId, setRestockingSupplyId] = useState(null);
+    const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
+    const [restockSaving, setRestockSaving] = useState(false);
 
     // ---- Collections state (user-scoped localStorage + backend sync) ----
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
@@ -395,7 +391,7 @@ const AnimalList = ({
     }, [userKey]);
 
     const isCollectionsView = animalView === 'collections';
-    const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding'].includes(animalView);
+    const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);
     const isListLikeView = animalView === 'list' || isCollectionsView;
 
     useEffect(() => {
@@ -708,45 +704,9 @@ const AnimalList = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [authToken]);
 
-    // Fetch the current user's activity log (lazy ? only when log screen opens)
-    const fetchActivityLogs = useCallback(async (page = 1, filters = {}) => {
-        if (!authToken) return;
-        setLogsLoading(true);
-        try {
-            const params = new URLSearchParams({ page, limit: 30 });
-            if (filters.targetType) params.set('targetType', filters.targetType);
-            if (filters.action) params.set('action', filters.action);
-            if (filters.search) params.set('search', filters.search);
-            if (filters.startDate) params.set('startDate', filters.startDate);
-            if (filters.endDate) params.set('endDate', filters.endDate);
-            const res = await axios.get(`${API_BASE_URL}/activity-logs?${params}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            if (page === 1) {
-                setActivityLogs(res.data.logs || []);
-            } else {
-                setActivityLogs(prev => [...prev, ...(res.data.logs || [])]);
-            }
-            setLogsPagination(res.data);
-            setLogsLoaded(true);
-        } catch (err) {
-            console.error('[fetchActivityLogs]', err);
-        } finally {
-            setLogsLoading(false);
-        }
-    }, [authToken, API_BASE_URL]);
-
-    // Auto-fetch logs when the activity log screen opens for the first time
+    // Reset management-related screens when navigating away from management view
     useEffect(() => {
-        if (showActivityLogScreen && !logsLoaded && !logsLoading) {
-            fetchActivityLogs(1, { targetType: 'management' });
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showActivityLogScreen]);
-
-    // Reset log screen when navigating away from management view
-    useEffect(() => {
-        if (animalView !== 'management') { setShowActivityLogScreen(false); setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
+        if (animalView !== 'management') { setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
     }, [animalView]);
     
     // Auto-fetch duplicates when duplicates screen opens for the first time
@@ -757,18 +717,6 @@ const AnimalList = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showDuplicatesScreen]);
 
-    // Fire-and-forget management activity logger (called from management handlers)
-    const logManagementActivity = useCallback(async (action, targetId_public, details = {}) => {
-        if (!authToken) return;
-        try {
-            await axios.post(`${API_BASE_URL}/activity-logs`,
-                { action, targetId_public: targetId_public || null, details },
-                { headers: { Authorization: `Bearer ${authToken}` } }
-            );
-        } catch (err) {
-            // Non-critical ? don't surface logging failures to the user
-        }
-    }, [authToken, API_BASE_URL]);
     const fetchEnclosures = useCallback(async () => {
         try {
             const res = await axios.get(`${API_BASE_URL}/enclosures`, {
@@ -778,6 +726,19 @@ const AnimalList = ({
         } catch (err) { console.error('[fetchEnclosures]', err); }
     }, [authToken]);
     useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
+
+    const fetchSupplies = useCallback(async () => {
+        if (!authToken) return;
+        setSuppliesLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/supplies`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setSupplies(res.data || []);
+        } catch (err) { console.error('[fetchSupplies]', err); }
+        setSuppliesLoading(false);
+    }, [authToken, API_BASE_URL]);
+    useEffect(() => { fetchSupplies(); }, [fetchSupplies]);
 
     // Fetch user's custom species order on mount
     useEffect(() => {
@@ -907,6 +868,68 @@ const AnimalList = ({
             return a.localeCompare(b);
         });
     }, [allUserSpecies, userSpeciesOrder]);
+
+    // -- Dashboard & Management Data Calculations --
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const daysSince = (dateStr) => {
+        if (!dateStr) return null;
+        const d = new Date(dateStr);
+        d.setHours(0, 0, 0, 0);
+        return Math.floor((today - d) / 86400000);
+    };
+
+    const isDue = (lastDate, freqDays) => {
+        if (!freqDays) return false;
+        if (!lastDate) return true;
+        const ds = daysSince(lastDate);
+        return ds !== null && ds >= Number(freqDays);
+    };
+
+    const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
+    const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
+    const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
+    const inReproEnclosure = a => a.enclosureId && reproEnclosureIds.has(a.enclosureId);
+    const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
+    const matingList = allAnimals.filter(a => a.isInMating && !inReproEnclosure(a));
+    const nursingList = allAnimals.filter(a => a.isNursing && !inReproEnclosure(a));
+    const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
+    const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
+    const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0);
+    const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+    const supplyReorderDue = supplies.filter(s =>
+        (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
+        (s.nextOrderDate && new Date(s.nextOrderDate) < today)
+    );
+    const healthEnclosures = enclosures.filter(e => e.purpose === 'health');
+    const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
+    const inHealthEnclosure = a => a.enclosureId && healthEnclosureIds.has(a.enclosureId);
+    const quarantineList = allAnimals.filter(a => a.isQuarantine && !inHealthEnclosure(a));
+    const treatmentList = allAnimals.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
+    const healthAttentionCount = quarantineList.length + treatmentList.length;
+    const ownedCount = allAnimalsRaw.filter(a => a.isOwned !== false).length;
+    const publicCount = allAnimalsRaw.filter(a => a.showOnPublicProfile === true).length;
+    const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
+    const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
+    const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
+    const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
+    const animalsWithEnclosureCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.maintenanceFrequencyDays));
+    const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+    const maintMaintenanceDue = allAnimals.filter(a => a.maintenanceFrequencyDays && isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length;
+    const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) + supplyReorderDue.length + enclosureCarTasksDue + maintMaintenanceDue;
+    const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
+    const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
+    const enclosureAnimalMap = {}; // { enclosureId: [animals] }
+    const unassignedAnimals = [];
+    allAnimals.forEach(a => {
+        if (a.enclosureId) {
+            if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
+            enclosureAnimalMap[a.enclosureId].push(a);
+        } else {
+            if (a.status !== 'Rehomed') unassignedAnimals.push(a);
+        }
+    });
 
     // Initialize species filter to "All" on first load only
     // Also add any new species that appear (e.g., after creating a new animal)
@@ -1552,544 +1575,6 @@ const AnimalList = ({
         return formatDateDisplay(dateStr);
     };
 
-    // -- Activity Log Screen ------------------------------------------------------
-    const renderActivityLogScreen = () => {
-        const ACTION_OPTIONS = [
-            { value: '', label: 'All Management Actions' },
-            { value: 'enclosure_create', label: 'Created Enclosure' },
-            { value: 'enclosure_update', label: 'Updated Enclosure' },
-            { value: 'enclosure_delete', label: 'Deleted Enclosure' },
-            { value: 'enclosure_assign', label: 'Assigned to Enclosure' },
-            { value: 'enclosure_unassign', label: 'Removed from Enclosure' },
-            { value: 'animal_fed', label: 'Marked as Fed' },
-            { value: 'care_task_done', label: 'Care Task Completed' },
-            { value: 'enclosure_task_done', label: 'Cleaning Task Completed' },
-            { value: 'reproduction_update', label: 'Reproductive Status Updated' },
-        ];
-
-        // targetType: 'management' is always included to scope logs to management panel only
-        const currentFilters = { targetType: 'management', action: logFilterAction, search: logFilterSearch, startDate: logFilterStartDate, endDate: logFilterEndDate };
-
-        const handleApplyFilters = () => {
-            setActivityLogs([]);
-            setLogsLoaded(false);
-            fetchActivityLogs(1, currentFilters);
-        };
-
-        const handleResetFilters = () => {
-            setLogFilterAction('');
-            setLogFilterSearch('');
-            setLogFilterStartDate('');
-            setLogFilterEndDate('');
-            setActivityLogs([]);
-            setLogsLoaded(false);
-            fetchActivityLogs(1, { targetType: 'management' });
-        };
-
-        return (
-            <div className="mt-4 space-y-4">
-                {/* Back + Refresh row */}
-                <div className="flex items-center justify-between">
-                    <button
-                        onClick={() => setShowActivityLogScreen(false)}
-                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
-                    >
-                        <ChevronLeft size={16} />
-                        Back to Management
-                    </button>
-                    <button
-                        onClick={() => { setLogsLoaded(false); fetchActivityLogs(1, currentFilters); }}
-                        disabled={logsLoading}
-                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
-                    >
-                        <RefreshCw size={12} />
-                        Refresh
-                    </button>
-                </div>
-
-                {/* Title + total */}
-                <div className="flex items-center gap-2">
-                    <ScrollText size={18} className="text-indigo-600" />
-                    <h3 className="text-lg font-semibold text-gray-800">Activity Log</h3>
-                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">{logsPagination.total || 0} entries</span>
-                </div>
-
-                {/* Filter bar */}
-                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 space-y-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">Action Type</label>
-                            <select
-                                value={logFilterAction}
-                                onChange={e => setLogFilterAction(e.target.value)}
-                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
-                            >
-                                {ACTION_OPTIONS.map(opt => (
-                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">Search (animal name / ID)</label>
-                            <input
-                                type="text"
-                                value={logFilterSearch}
-                                onChange={e => setLogFilterSearch(e.target.value)}
-                                onKeyPress={e => { if (e.key === 'Enter') handleApplyFilters(); }}
-                                placeholder="e.g. Pixie or CT-00123"
-                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">From Date</label>
-                            <input
-                                type="date"
-                                value={logFilterStartDate}
-                                onChange={e => setLogFilterStartDate(e.target.value)}
-                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">To Date</label>
-                            <input
-                                type="date"
-                                value={logFilterEndDate}
-                                onChange={e => setLogFilterEndDate(e.target.value)}
-                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
-                            />
-                        </div>
-                    </div>
-                    <div className="flex gap-2 justify-end">
-                        <button
-                            onClick={handleResetFilters}
-                            className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
-                        >
-                            Reset
-                        </button>
-                        <button
-                            onClick={handleApplyFilters}
-                            disabled={logsLoading}
-                            className="text-xs px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
-                        >
-                            {logsLoading ? 'Loading...' : 'Apply Filters'}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Log entries */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {logsLoading && activityLogs.length === 0 ? (
-                        <div className="flex items-center justify-center py-10 text-gray-400 gap-2">
-                            <Loader2 size={18} className="animate-spin" />
-                            <span className="text-sm">Loading activity log...</span>
-                        </div>
-                    ) : activityLogs.length === 0 ? (
-                        <div className="text-sm text-gray-400 text-center py-10">No activity found for the selected filters.</div>
-                    ) : (
-                        <div className="divide-y divide-gray-100">
-                            {activityLogs.map((log) => (
-                                <div key={log._id} className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50">
-                                    <span className={`mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${getActionColor(log.action)}`} />
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm text-gray-800 font-medium">
-                                            {getActionLabel(log.action)}
-                                            {(log.details?.name || log.details?.enclosureName) && <span className="text-gray-500 font-normal"> • <span className="font-medium text-gray-700">{log.details.name || log.details.enclosureName}</span></span>}
-                                            {log.details?.species && !log.details?.name && <span className="text-gray-500 font-normal"> ({log.details.species})</span>}
-                                            {log.details?.status && <span className="text-indigo-500 font-normal text-xs ml-1">({log.details.status})</span>}
-                                        </div>
-                                        {log.targetId_public && (
-                                            <div className="text-xs text-gray-400 mt-0.5">{log.targetId_public}</div>
-                                        )}
-                                        {log.details && Object.keys(log.details).filter(k => !['name', 'species', 'status', 'enclosureName'].includes(k)).length > 0 && (
-                                            <div className="text-xs text-gray-400 mt-0.5">
-                                                {(() => {
-                                                    const entries = Object.entries(log.details)
-                                                        .filter(([k]) => !['name', 'species', 'status', 'enclosureName'].includes(k))
-                                                        .slice(0, 3)
-                                                        .map(([k, v]) => `${k}: ${v}`);
-                                                    const hasDeathField = Object.entries(log.details).some(([k]) => k.toLowerCase().includes('decease') || k.toLowerCase().includes('death'));
-                                                    return entries.join(hasDeathField ? ' † ' : ' • ');
-                                                })()}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="text-xs text-gray-400 flex-shrink-0 text-right ml-2">
-                                        <div className="font-medium">{formatTimeAgo(log.createdAt)}</div>
-                                        <div className="text-gray-300">{log.createdAt ? new Date(log.createdAt).toLocaleDateString() : ''}</div>
-                                        {log.success === false && <div className="text-red-400 font-medium mt-0.5">failed</div>}
-                                    </div>
-                                </div>
-                            ))}
-                            {logsPagination.page < logsPagination.totalPages && (
-                                <div className="p-3">
-                                    <button
-                                        onClick={() => fetchActivityLogs(logsPagination.page + 1, currentFilters)}
-                                        disabled={logsLoading}
-                                        className="w-full py-2 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition flex items-center justify-center gap-1 disabled:opacity-50"
-                                    >
-                                        {logsLoading ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : `Load more (${activityLogs.length} of ${logsPagination.total})`}
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    };
-
-    // -- Supplies & Inventory Screen ---------------------------------------------
-    const renderSuppliesScreen = () => {
-        const CATEGORIES = ['Food', 'Bedding', 'Medication', 'Other'];
-        const CATEGORY_COLORS = {
-            Food: 'bg-green-100 text-green-700',
-            Bedding: 'bg-yellow-100 text-yellow-700',
-            Medication: 'bg-red-100 text-red-700',
-            Other: 'bg-gray-100 text-gray-600',
-        };
-        // Map supply category ? budget expense category
-        const BUDGET_CATEGORY_MAP = { Food: 'food', Bedding: 'housing', Medication: 'medical', Other: 'other' };
-        const isLow = (item) => item.reorderThreshold != null && item.currentStock <= item.reorderThreshold;
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        const isOverdue = (item) => item.nextOrderDate && new Date(item.nextOrderDate) < today;
-        const isDueSoon = (item) => { if (!item.nextOrderDate) return false; const d = new Date(item.nextOrderDate); const diff = (d - today) / (1000 * 60 * 60 * 24); return diff >= 0 && diff <= 14; };
-        const needsAttention = (item) => isLow(item) || isOverdue(item);
-        const filtered = supplyCategoryFilter === 'All' ? supplies : supplies.filter(s => s.category === supplyCategoryFilter);
-        const lowStockItems = supplies.filter(isLow);
-        const overdueItems = supplies.filter(isOverdue);
-        const attentionItems = supplies.filter(needsAttention);
-
-        const handleSupplySubmit = async () => {
-            if (!supplyForm.name.trim()) return;
-            setSupplySaving(true);
-            try {
-                if (editingSupplyId) {
-                    const res = await axios.patch(`${API_BASE_URL}/supplies/${editingSupplyId}`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
-                    setSupplies(prev => prev.map(s => s._id === editingSupplyId ? res.data : s));
-                } else {
-                    const res = await axios.post(`${API_BASE_URL}/supplies`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
-                    setSupplies(prev => [...prev, res.data]);
-                }
-                setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
-                setSupplyFormVisible(false);
-                setEditingSupplyId(null);
-            } catch (err) { console.error(err); }
-            setSupplySaving(false);
-        };
-
-        const handleSupplyDelete = async (id) => {
-            if (!window.confirm('Delete this supply item?')) return;
-            try {
-                await axios.delete(`${API_BASE_URL}/supplies/${id}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                setSupplies(prev => prev.filter(s => s._id !== id));
-            } catch (err) { console.error(err); }
-        };
-
-        const handleSupplyEdit = (item) => {
-            setSupplyForm({
-                name: item.name,
-                category: item.category,
-                currentStock: item.currentStock ?? '',
-                unit: item.unit || '',
-                reorderThreshold: item.reorderThreshold ?? '',
-                notes: item.notes || '',
-                isFeederAnimal: item.isFeederAnimal || false,
-                feederType: item.feederType || '',
-                feederSize: item.feederSize || '',
-                costPerUnit: item.costPerUnit ?? '',
-                nextOrderDate: item.nextOrderDate ? new Date(item.nextOrderDate).toISOString().split('T')[0] : '',
-                orderFrequency: item.orderFrequency ?? '',
-                orderFrequencyUnit: item.orderFrequencyUnit || 'months',
-            });
-            setEditingSupplyId(item._id);
-            setSupplyFormVisible(true);
-        };
-
-        const openRestock = (item) => {
-            setRestockingSupplyId(item._id);
-            // Auto-suggest cost from costPerUnit if it's a feeder animal
-            const suggestCost = item.isFeederAnimal && item.costPerUnit ? '' : '';
-            setRestockForm({ qty: '', cost: suggestCost, date: new Date().toISOString().slice(0, 10), notes: '' });
-            setSupplyFormVisible(false);
-            setEditingSupplyId(null);
-        };
-
-                        const handleRestockSubmit = async (item) => {
-            const qty = parseFloat(restockForm.qty);
-            const cost = parseFloat(restockForm.cost);
-            if (!qty || qty <= 0 || !restockForm.cost || cost < 0) return;
-            setRestockSaving(true);
-            try {
-                // 1. Update supply stock (and advance next order date if a schedule is set)
-                const newStock = (item.currentStock || 0) + qty;
-                const stockPatch = { currentStock: newStock };
-                if (item.orderFrequency && item.orderFrequencyUnit) {
-                    const base = new Date();
-                    if (item.orderFrequencyUnit === 'days') base.setDate(base.getDate() + Number(item.orderFrequency));
-                    else if (item.orderFrequencyUnit === 'weeks') base.setDate(base.getDate() + Number(item.orderFrequency) * 7);
-                    else if (item.orderFrequencyUnit === 'months') base.setMonth(base.getMonth() + Number(item.orderFrequency));
-                    stockPatch.nextOrderDate = base.toISOString().split('T')[0];
-                }
-                const supplyRes = await axios.patch(
-                    `${API_BASE_URL}/supplies/${item._id}`,
-                    stockPatch,
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-                setSupplies(prev => prev.map(s => s._id === item._id ? supplyRes.data : s));
-
-                // 2. Log budget expense
-                const feederLabel = item.isFeederAnimal && (item.feederType || item.feederSize)
-                    ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}`
-                    : '';
-                await axios.post(
-                    `${API_BASE_URL}/budget/transactions`,
-                    {
-                        type: 'expense',
-                        price: cost,
-                        date: restockForm.date || new Date().toISOString().slice(0, 10),
-                        category: BUDGET_CATEGORY_MAP[item.category] || 'other',
-                        description: `Supplies restock: ${item.name}${feederLabel} ($${qty}${item.unit ? ' ' + item.unit : ''})`,
-
-                        notes: restockForm.notes || null,
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-                setRestockingSupplyId(null);
-            } catch (err) { console.error(err); }
-            setRestockSaving(false);
-        };
-
-        return (
-            <div className="mt-4 space-y-4">
-                {/* Refresh */}
-                <div className="flex items-center justify-end">
-                    <button onClick={fetchSupplies} disabled={suppliesLoading}
-                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50">
-                        <RefreshCw size={12} /> Refresh
-                    </button>
-                </div>
-
-                {/* Title + Add button */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Package size={18} className="text-emerald-600" />
-                        <h3 className="text-lg font-semibold text-gray-800">Supplies &amp; Inventory</h3>
-                        <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{supplies.length} item{supplies.length !== 1 ? 's' : ''}</span>
-                    </div>
-                    <button
-                        onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(v => !v); }}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium transition"
-                    >
-                        <Plus size={14} /> Add Item
-                    </button>
-                </div>
-
-                {/* Low stock alert */}
-                {attentionItems.length > 0 && (
-                    <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                        <AlertTriangle size={16} className="text-amber-500 mt-0.5 shrink-0" />
-                        <div className="text-sm text-amber-700 space-y-0.5">
-                            {lowStockItems.length > 0 && <div><span className="font-semibold">Low stock:</span> {lowStockItems.map(i => i.name).join(', ')}</div>}
-                            {overdueItems.length > 0 && <div><span className="font-semibold">Order overdue:</span> {overdueItems.map(i => i.name).join(', ')}</div>}
-                        </div>
-                    </div>
-                )}
-
-                {/* Add / Edit form */}
-                {supplyFormVisible && (
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
-                        <h4 className="text-sm font-semibold text-emerald-800">{editingSupplyId ? 'Edit Item' : 'New Supply Item'}</h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Name *</label>
-                                <input type="text" value={supplyForm.name} onChange={e => setSupplyForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Rat blocks" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Category</label>
-                                <select value={supplyForm.category} onChange={e => setSupplyForm(f => ({ ...f, category: e.target.value, isFeederAnimal: e.target.value === 'Food' ? f.isFeederAnimal : false }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400">
-                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Current Stock</label>
-                                <input type="number" min="0" value={supplyForm.currentStock} onChange={e => setSupplyForm(f => ({ ...f, currentStock: e.target.value }))} placeholder="0" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Unit (e.g. bags, kg, boxes)</label>
-                                <input type="text" value={supplyForm.unit} onChange={e => setSupplyForm(f => ({ ...f, unit: e.target.value }))} placeholder="bags" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Cost per unit</label>
-                                <input type="number" min="0" step="0.01" value={supplyForm.costPerUnit} onChange={e => setSupplyForm(f => ({ ...f, costPerUnit: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Reorder when stock reaches</label>
-                                <input type="number" min="0" value={supplyForm.reorderThreshold} onChange={e => setSupplyForm(f => ({ ...f, reorderThreshold: e.target.value }))} placeholder="e.g. 2" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Notes</label>
-                                    <input type="text" value={supplyForm.notes} onChange={e => setSupplyForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
-                            </div>
-                        </div>
-                        {/* Schedule-based reorder */}
-                        <div className="border-t border-emerald-200 pt-3 space-y-2">
-                            <p className="text-xs font-semibold text-gray-600">Reorder Schedule <span className="font-normal text-gray-400">(optional ? for bulk or timed items)</span></p>
-                            <p className="text-[11px] text-gray-400">Set a date &amp; repeat frequency for items ordered on a schedule, regardless of stock count ? e.g. a 650 L bedding pallet every 3 months.</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Next order date</label>
-                                    <input type="date" value={supplyForm.nextOrderDate} onChange={e => setSupplyForm(f => ({ ...f, nextOrderDate: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Repeat every</label>
-                                    <input type="number" min="1" value={supplyForm.orderFrequency} onChange={e => setSupplyForm(f => ({ ...f, orderFrequency: e.target.value }))} placeholder="e.g. 3" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Frequency unit</label>
-                                    <select value={supplyForm.orderFrequencyUnit} onChange={e => setSupplyForm(f => ({ ...f, orderFrequencyUnit: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-400">
-                                        <option value="days">Days</option>
-                                        <option value="weeks">Weeks</option>
-                                        <option value="months">Months</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        {/* Feeder animal toggle (Food only) */}
-                        {supplyForm.category === 'Food' && (
-                            <div className="col-span-2">
-                                <label className="flex items-center gap-2 cursor-pointer select-none">
-                                    <input type="checkbox" checked={supplyForm.isFeederAnimal} onChange={e => setSupplyForm(f => ({ ...f, isFeederAnimal: e.target.checked }))} className="w-4 h-4 accent-emerald-600" />
-                                    <span className="text-sm font-medium text-gray-700">This is a feeder animal (mice, rats, crickets, etc.)</span>
-                                </label>
-                            </div>
-                        )}
-                        {supplyForm.category === 'Food' && supplyForm.isFeederAnimal && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
-                                <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Feeder Type</label>
-                                    <input type="text" value={supplyForm.feederType} onChange={e => setSupplyForm(f => ({ ...f, feederType: e.target.value }))} list="feeder-type-list" placeholder="e.g. Mice, Rats" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
-                                    <datalist id="feeder-type-list"><option value="Mice" /><option value="Rats" /><option value="Gerbils" /><option value="Crickets" /><option value="Dubia Roaches" /><option value="Mealworms" /><option value="Superworms" /><option value="Waxworms" /><option value="Hornworms" /><option value="Fish" /></datalist>
-                                </div>
-                                <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Size</label>
-                                    <input type="text" value={supplyForm.feederSize} onChange={e => setSupplyForm(f => ({ ...f, feederSize: e.target.value }))} list="feeder-size-list" placeholder="e.g. Pinky, Adult" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
-                                    <datalist id="feeder-size-list"><option value="Pinky" /><option value="Fuzzy" /><option value="Hopper" /><option value="Weaned" /><option value="Adult" /><option value="Small" /><option value="Medium" /><option value="Large" /><option value="XL" /></datalist>
-                                </div>
-                            </div>
-                        )}
-                        <div className="flex gap-2 justify-end pt-1">
-                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); }} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
-                            <button onClick={handleSupplySubmit} disabled={supplySaving || !supplyForm.name.trim()} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1.5">
-                                {supplySaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-                                {editingSupplyId ? 'Save Changes' : 'Add Item'}
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Category filter pills */}
-                <div className="flex gap-1.5 flex-wrap">
-                    {['All', ...CATEGORIES].map(cat => (
-                        <button key={cat} onClick={() => setSupplyCategoryFilter(cat)}
-                            className={`px-3 py-1 text-xs rounded-full font-medium transition ${supplyCategoryFilter === cat ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                        >{cat}</button>
-                    ))}
-                </div>
-
-                {/* Items grid */}
-                {suppliesLoading ? (
-                    <div className="flex items-center justify-center py-12 text-gray-400 gap-2"><Loader2 size={20} className="animate-spin" /> Loading...</div>
-                ) : filtered.length === 0 ? (
-                    <div className="text-center py-12 text-gray-400 text-sm">
-                        {supplies.length === 0 ? 'No supplies added yet. Click "Add Item" to get started.' : `No ${supplyCategoryFilter} items.`}
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {filtered.map(item => (
-                            <div key={item._id} className={`border rounded-xl p-3 bg-white flex flex-col gap-1.5 shadow-sm ${isLow(item) ? 'border-amber-300' : 'border-gray-200'}`}>
-                                <div className="flex items-start justify-between gap-2">
-                                    <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                                        <span className="font-semibold text-sm text-gray-800 truncate">{item.name}</span>
-                                        {isLow(item) && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Low Stock</span>}
-                                        {isOverdue(item) && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Due</span>}
-                                        {!isOverdue(item) && isDueSoon(item) && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Soon</span>}
-                                    </div>
-                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${CATEGORY_COLORS[item.category] || CATEGORY_COLORS.Other}`}>{item.category}</span>
-                                </div>
-                                <div className="flex items-baseline gap-2">
-                                    <span className={`text-lg font-bold ${isLow(item) ? 'text-amber-600' : 'text-gray-800'}`}>{item.currentStock}</span>
-                                    {item.unit && <span className="text-gray-500 text-xs">{item.unit}</span>}
-                                    {item.reorderThreshold != null && <span className="text-gray-400 text-xs ml-auto">Reorder at {item.reorderThreshold}</span>}
-                                </div>
-                                {item.notes && <p className="text-xs text-gray-400 truncate">{item.notes}</p>}
-                                {(item.isFeederAnimal || item.costPerUnit != null) && (
-                                    <div className="flex flex-wrap gap-1.5 mt-0.5">
-                                        {item.isFeederAnimal && item.feederType && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederType}</span>}
-                                        {item.isFeederAnimal && item.feederSize && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederSize}</span>}
-                                        {item.costPerUnit != null && <span className="text-xs text-gray-400">${Number(item.costPerUnit).toFixed(2)} / {item.unit || 'unit'}</span>}
-                                    </div>
-                                )}
-                                {item.nextOrderDate && (
-                                    <div className={`flex items-center gap-1.5 text-xs rounded-lg px-2 py-1.5 mt-0.5 ${isOverdue(item) ? 'bg-red-50 text-red-600' : isDueSoon(item) ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-500'}`}>
-                                        <Calendar size={11} className="shrink-0" />
-                                        <span>Next order: {new Date(item.nextOrderDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                        {item.orderFrequency && <span className="opacity-60"> <RefreshCw size={12} className="inline-block align-middle mr-0.5" /> every {item.orderFrequency} {item.orderFrequencyUnit}</span>}
-                                    </div>
-                                )}
-
-                                {/* Inline restock form */}
-                                {restockingSupplyId === item._id && (
-                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 mt-1 space-y-2">
-                                        <p className="text-xs font-semibold text-blue-700">Restock · logs an expense in Budget{item.isFeederAnimal ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}` : ''}</p>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Qty received *</label>
-                                                <input type="number" min="0.01" step="any" value={restockForm.qty} onChange={e => {
-                                                    const q = e.target.value;
-                                                    const autoCost = item.costPerUnit && q ? (parseFloat(q) * item.costPerUnit).toFixed(2) : restockForm.cost;
-                                                    setRestockForm(f => ({ ...f, qty: q, cost: autoCost }));
-                                                }} placeholder="e.g. 5" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Cost paid *</label>
-                                                <input type="number" min="0" step="0.01" value={restockForm.cost} onChange={e => setRestockForm(f => ({ ...f, cost: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Date</label>
-                                                <input type="date" value={restockForm.date} onChange={e => setRestockForm(f => ({ ...f, date: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Notes</label>
-                                                <input type="text" value={restockForm.notes} onChange={e => setRestockForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2 justify-end">
-                                            <button onClick={() => setRestockingSupplyId(null)} className="px-2.5 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
-                                            <button
-                                                onClick={() => handleRestockSubmit(item)}
-                                                disabled={restockSaving || !restockForm.qty || !restockForm.cost}
-                                                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1"
-                                            >
-                                                {restockSaving ? <Loader2 size={11} className="animate-spin" /> : <ShoppingBag size={11} />}
-                                                Log Restock
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex gap-2 justify-end mt-0.5">
-                                    <button onClick={() => openRestock(item)} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded-lg transition font-medium"><ShoppingBag size={11} /> Restock</button>
-                                    <button onClick={() => handleSupplyEdit(item)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded-lg transition"><Edit size={11} /> Edit</button>
-                                    <button onClick={() => handleSupplyDelete(item._id)} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        );
-    };
-
     // Fetch duplicates from API
     const fetchDuplicates = async () => {
         setDuplicatesLoading(true);
@@ -2654,23 +2139,6 @@ const AnimalList = ({
 
     // -- Management View (view = 'enclosures' | 'reproduction' | 'health' | 'feeding') --
     const renderManagementView = (view = null) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const daysSince = (dateStr) => {
-            if (!dateStr) return null;
-            const d = new Date(dateStr);
-            d.setHours(0, 0, 0, 0);
-            return Math.floor((today - d) / 86400000);
-        };
-
-        const isDue = (lastDate, freqDays) => {
-            if (!freqDays) return false;
-            if (!lastDate) return true;
-            const ds = daysSince(lastDate);
-            return ds !== null && ds >= Number(freqDays);
-        };
-
         const toggleSection = (key) => setCollapsedMgmtSections(prev => ({ ...prev, [key]: !prev[key] }));
         const toggleGroup = (key) => setCollapsedMgmtGroups(prev => ({ ...prev, [key]: !prev[key] }));
 
@@ -2712,11 +2180,9 @@ const AnimalList = ({
                 if (editingEnclosureId) {
                     await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, enclosureFormData,
                         { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                    logManagementActivity('enclosure_update', null, { name: enclosureFormData.name.trim() });
                 } else {
                     await axios.post(`${API_BASE_URL}/enclosures`, enclosureFormData,
                         { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                    logManagementActivity('enclosure_create', null, { name: enclosureFormData.name.trim() });
                 }
                 setEnclosureFormVisible(false);
                 setReproEncFormVisible(false);
@@ -2735,7 +2201,6 @@ const AnimalList = ({
             try {
                 await axios.delete(`${API_BASE_URL}/enclosures/${encId}`,
                     { headers: { 'Authorization': `Bearer ${authToken}` } });
-                logManagementActivity('enclosure_delete', null, { name: encToDelete?.name || encId });
                 fetchEnclosures();
                 fetchAnimals();
             } catch (err) {
@@ -2753,14 +2218,6 @@ const AnimalList = ({
             axios.patch(`${API_BASE_URL}/enclosures/assign-animal`,
                 { animalId_public: animalIdPublic, enclosureId: newEnclosureId },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => {
-                    const encName = newEnclosureId ? (enclosures.find(e => e._id === newEnclosureId)?.name || newEnclosureId) : null;
-                    logManagementActivity(
-                        newEnclosureId ? 'enclosure_assign' : 'enclosure_unassign',
-                        animalIdPublic,
-                        newEnclosureId ? { enclosureName: encName } : {}
-                    );
-                })
                 .catch(err => {
                     console.error('Assign enclosure failed:', err);
                     setAllAnimalsRaw(prevRaw);
@@ -2794,11 +2251,6 @@ const AnimalList = ({
                 // Update supply stock in state
                 if (res.data.supply) setSupplies(prev => prev.map(s => s._id === res.data.supply._id ? res.data.supply : s));
                 const supplyItem = feedingForm.supplyId ? supplies.find(s => s._id === feedingForm.supplyId) : null;
-                logManagementActivity('animal_fed', animal.id_public, {
-                    name: animal.name,
-                    species: animal.species,
-                    ...(supplyItem ? { food: supplyItem.name, qty: `${feedingForm.qty} ${supplyItem.unit || ''}`.trim() } : {})
-                });
             } catch (err) {
                 console.error('Feeding failed:', err);
                 setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: animal.lastFedDate } : a));
@@ -2815,7 +2267,6 @@ const AnimalList = ({
                 await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/feeding`,
                     { skipped: true },
                     { headers: { Authorization: `Bearer ${authToken}` } });
-                logManagementActivity('feeding_skipped', animal.id_public, { name: animal.name, species: animal.species });
             } catch (err) {
                 console.error('Skip feeding failed:', err);
                 setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: animal.lastFedDate } : a));
@@ -2830,7 +2281,6 @@ const AnimalList = ({
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
                 { lastMaintenanceDate: now },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: 'General maintenance' }))
                 .catch(err => { console.error('Mark maintenance failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: animal.lastMaintenanceDate } : a)); });
         };
 
@@ -2868,64 +2318,6 @@ const AnimalList = ({
             return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         };
 
-        // -- Section data ---------------------------------------------------------
-        // Exclude deceased and view-only (transferred/sold) animals from all management sections
-        const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
-        // 1. Enclosures ? grouped by named enclosure (enclosureId)
-        const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
-        const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
-        const healthEnclosures = enclosures.filter(e => e.purpose === 'health');
-        const enclosureAnimalMap = {}; // { enclosureId: [animals] }
-        const unassignedAnimals = [];
-        allAnimals.forEach(a => {
-            if (a.enclosureId) {
-                if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
-                enclosureAnimalMap[a.enclosureId].push(a);
-            } else {
-                if (a.status !== 'Rehomed') unassignedAnimals.push(a);
-            }
-        });
-
-        // 2. Reproduction
-        // Animals in a repro enclosure are shown inside the enclosure card — exclude from section groups
-        const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
-        const inReproEnclosure = a => a.enclosureId && reproEnclosureIds.has(a.enclosureId);
-        const matingList = allAnimals.filter(a => a.isInMating && !inReproEnclosure(a));
-        const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
-        const nursingList = allAnimals.filter(a => a.isNursing && !inReproEnclosure(a));
-        const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
-
-        // 3. Feeding
-        const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
-        const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
-        const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
-
-        // 4. Maintenance ? enclosure cleaning tasks + supply reorders + housing care tasks per animal
-        const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
-        const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0);
-        const animalsWithEnclosureCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.maintenanceFrequencyDays));
-        const todayMaint = new Date(); todayMaint.setHours(0, 0, 0, 0);
-        const supplyReorderDue = supplies.filter(s =>
-            (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
-            (s.nextOrderDate && new Date(s.nextOrderDate) < todayMaint)
-        );
-        const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
-        const maintMaintenanceDue = allAnimals.filter(a => a.maintenanceFrequencyDays && isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length;
-        const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) + supplyReorderDue.length + enclosureCarTasksDue + maintMaintenanceDue;
-        const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
-
-        // 5. Medical ? quarantine and treatment
-        const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
-        const inHealthEnclosure = a => a.enclosureId && healthEnclosureIds.has(a.enclosureId);
-        const quarantineList = allAnimals.filter(a => a.isQuarantine && !inHealthEnclosure(a));
-        const treatmentList = allAnimals.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
-
-        // 6. Available for sale/rehoming ? all user-created animals with status=Available (no ownership filter)
-        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
-
-        // 7. Sold / Transferred ? view-only animals (transferred through the system, original owner retains view access)
-        const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
-
         const handleMarkRehomed = (e, animal) => {
             e.stopPropagation();
             if (!window.confirm(`Mark ${animal.name || 'this animal'} as Rehomed? This will change their status to "Rehomed".`)) return;
@@ -2935,7 +2327,6 @@ const AnimalList = ({
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed' } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { status: 'Rehomed' },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => logManagementActivity('status_change', animal.id_public, { name: animal.name, species: animal.species, status: 'Rehomed' }))
                 .catch(err => {
                     console.error('Mark rehomed failed:', err);
                     // Rollback
@@ -2953,7 +2344,6 @@ const AnimalList = ({
             axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
                 { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => logManagementActivity('enclosure_task_done', null, { name: enc.name, taskName: updated[taskIdx]?.taskName || 'Cleaning task' }))
                 .catch(err => { console.error('Mark enclosure task done failed:', err); fetchEnclosures(); });
         };
 
@@ -2967,7 +2357,6 @@ const AnimalList = ({
             axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
                 { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => logManagementActivity('enclosure_task_skipped', null, { name: enc.name, taskName }))
                 .catch(err => { console.error('Skip enclosure task failed:', err); fetchEnclosures(); });
         };
 
@@ -2981,7 +2370,6 @@ const AnimalList = ({
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' }))
                 .catch(err => { console.error('Mark animal care task done failed:', err); fetchAllAnimals(); });
         };
 
@@ -2996,7 +2384,6 @@ const AnimalList = ({
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => logManagementActivity('care_task_skipped', animal.id_public, { name: animal.name, taskName }))
                 .catch(err => { console.error('Skip animal care task failed:', err); fetchAllAnimals(); });
         };
 
@@ -3008,7 +2395,6 @@ const AnimalList = ({
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, isQuarantine: false } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isQuarantine: false },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => logManagementActivity('quarantine_released', animal.id_public, { name: animal.name, species: animal.species }))
                 .catch(err => { console.error('Unquarantine failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, isQuarantine: true } : a)); });
         };
 
@@ -3021,7 +2407,6 @@ const AnimalList = ({
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => logManagementActivity('treatment_discharged', animal.id_public, { name: animal.name, species: animal.species }))
                 .catch(err => { console.error('Discharge failed:', err); setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...prev } : a)); });
         };
 
@@ -3032,15 +2417,6 @@ const AnimalList = ({
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => {
-                    let reproStatus = 'Status changed';
-                    if (patch.isInMating === false && patch.isPregnant === true) reproStatus = 'Confirmed Pregnant';
-                    else if (patch.isPregnant === false && patch.isNursing === true) reproStatus = 'Started Nursing';
-                    else if (patch.isInMating === false) reproStatus = 'Cleared Mating';
-                    else if (patch.isPregnant === false) reproStatus = 'Cleared Pregnancy';
-                    else if (patch.isNursing === false) reproStatus = 'Cleared Nursing';
-                    logManagementActivity('reproduction_update', animal.id_public, { name: animal.name, species: animal.species, status: reproStatus });
-                })
                 .catch(err => { console.error('Repro status update failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...Object.fromEntries(Object.keys(patch).map(k => [k, animal[k]])) } : a)); });
         };
 
@@ -4082,7 +3458,7 @@ const AnimalList = ({
                     <div className='flex items-center gap-2 min-w-0 flex-1'>
                         <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
                         <span className="truncate">
-                            {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
+                            {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                         </span>
                         {isListLikeView && hasActiveFilters && (
                             <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
@@ -4107,7 +3483,7 @@ const AnimalList = ({
                     {/* For Sale */}
                     {!showArchiveScreen && !showDuplicatesScreen && (
                         <button
-                            onClick={() => { setShowForSaleScreen(v => !v); setShowActivityLogScreen(false); }}
+                            onClick={() => { setShowForSaleScreen(v => !v); }}
                             className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showForSaleScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800'}`}
                             title="For Sale / Available"
                         >
@@ -4115,21 +3491,10 @@ const AnimalList = ({
                             <span className="font-medium hidden sm:inline">For Sale</span>
                         </button>
                     )}
-                    {/* Activity Log */}
-                    {!showArchiveScreen && !showDuplicatesScreen && (
-                        <button
-                            onClick={() => { setShowActivityLogScreen(v => { if (!v) { setActivityLogs([]); setLogsLoaded(false); } return !v; }); setShowForSaleScreen(false); }}
-                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showActivityLogScreen ? 'bg-indigo-600 text-white border-indigo-600' : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800'}`}
-                            title="Activity Log"
-                        >
-                            <ScrollText size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium hidden sm:inline">Activity Log</span>
-                        </button>
-                    )}
                     {/* Archive */}
                     {!showDuplicatesScreen && (
                         <button
-                            onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
+                            onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); }}
                             className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showArchiveScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800'}`}
                             title="Archive"
                         >
@@ -4140,7 +3505,7 @@ const AnimalList = ({
                     {/* Find Duplicates */}
                     {!showArchiveScreen && (
                         <button
-                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
+                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); }}
                             className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
                             title="Find Duplicate Animals"
                         >
@@ -4184,6 +3549,8 @@ const AnimalList = ({
                 </div>
             </h2>
 
+            {renderDashboard()}
+
             {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
             <div className="mb-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
@@ -4192,8 +3559,7 @@ const AnimalList = ({
                                     {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
                                     {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
                                     {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
-                                    {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                                    {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
+                                    {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'}
                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
@@ -4220,8 +3586,7 @@ const AnimalList = ({
                   {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
                   {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
                   {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
-                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
+                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'}
                                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
@@ -4552,7 +3917,7 @@ const AnimalList = ({
             </div>
             )}
 
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (
