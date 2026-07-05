@@ -6,14 +6,37 @@ import { BroadcastPoll } from './Banners';
 const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [dismissedBroadcastIds] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dismissedBroadcasts');
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
+    });
 
     useEffect(() => {
         const fetchAnnouncements = async () => {
+            if (!authToken) {
+                setLoading(false);
+                return;
+            }
             try {
-                // Fetch active announcements, info, and polls using a comma-separated list for the 'type' parameter
-                const response = await axios.get(`${API_BASE_URL}/public/broadcasts?type=announcement,poll,info&active=true`);
+                // Fetch all notifications and filter for public broadcasts, similar to NotificationsHub
+                const response = await axios.get(`${API_BASE_URL}/notifications`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
+
+                const publicBroadcasts = allNotifications.filter(n => {
+                    const isPublicType = ['announcement', 'poll', 'info', 'broadcast'].includes(n.type);
+                    const isNotUrgent = n.broadcastType !== 'warning' && n.broadcastType !== 'alert';
+                    const isNotDismissed = !dismissedBroadcastIds.includes(n._id);
+                    return isPublicType && isNotUrgent && isNotDismissed;
+                });
+
                 // Sort by creation date, newest first
-                const sortedItems = (response.data || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const sortedItems = publicBroadcasts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 setItems(sortedItems);
             } catch (error) {
                 console.error("Error fetching announcements & polls:", error);
@@ -24,7 +47,7 @@ const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
         };
 
         fetchAnnouncements();
-    }, [API_BASE_URL]);
+    }, [API_BASE_URL, authToken, dismissedBroadcastIds]);
 
     const formatTimeAgo = (dateString) => {
         if (!dateString) return '';
