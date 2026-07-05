@@ -222,18 +222,13 @@ const FamilyTreeView = ({
             setLineageLoading(true);
             const nodes = {};
             const visited = new Set();
-
-            const speciesAnimals = animals.filter(a => a.species === selectedSpecies);
-            speciesAnimals.forEach(a => {
-                if (a && a.id_public) {
-                    nodes[a.id_public] = a;
-                    visited.add(a.id_public);
-                }
-            });
+            const queue = [focusAnimalId]; // Start traversal from the selected animal
 
             const fetchAnimalData = async (id) => {
                 if (!id) return null;
                 if (nodes[id]) return nodes[id];
+                const localAnimal = (animals || []).find(a => a.id_public === id);
+                if (localAnimal) return localAnimal;
                 try {
                     const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
                         headers: { Authorization: `Bearer ${authToken}` }
@@ -245,27 +240,56 @@ const FamilyTreeView = ({
                 }
             };
 
-            const queue = [];
-            const enqueueParentIfMissing = (id) => {
-                if (!id || visited.has(id)) return;
-                visited.add(id);
-                queue.push(id);
-            };
-
-            speciesAnimals.forEach(a => {
-                enqueueParentIfMissing(a.sireId_public || a.fatherId_public);
-                enqueueParentIfMissing(a.damId_public || a.motherId_public);
-            });
-
             let guard = 0;
-            while (queue.length > 0 && guard < 1000) {
+            while (queue.length > 0 && guard < 1000) { // Safety guard
                 guard++;
                 const currentId = queue.shift();
+
+                if (!currentId || visited.has(currentId)) {
+                    continue;
+                }
+                visited.add(currentId);
+
                 const animalData = await fetchAnimalData(currentId);
-                if (animalData) {
-                    nodes[currentId] = animalData;
-                    enqueueParentIfMissing(animalData.sireId_public || animalData.fatherId_public);
-                    enqueueParentIfMissing(animalData.damId_public || animalData.motherId_public);
+                if (!animalData) {
+                    continue;
+                }
+                nodes[currentId] = animalData;
+
+                // Enqueue parents
+                const sireId = animalData.sireId_public || animalData.fatherId_public;
+                const damId = animalData.damId_public || animalData.motherId_public;
+                if (sireId && !visited.has(sireId)) {
+                    queue.push(sireId);
+                }
+                if (damId && !visited.has(damId)) {
+                    queue.push(damId);
+                }
+
+                // Fetch and enqueue offspring and their other parents (partners)
+                try {
+                    const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${currentId}/offspring`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    const litters = offspringResponse.data || [];
+                    for (const litter of litters) {
+                        const otherParentId = (litter.sireId === currentId || litter.sireId_public === currentId) ? (litter.damId || litter.damId_public) : (litter.sireId || litter.sireId_public);
+                        if (otherParentId && !visited.has(otherParentId)) {
+                            queue.push(otherParentId);
+                        }
+
+                        if (litter.offspring && Array.isArray(litter.offspring)) {
+                            for (const offspring of litter.offspring) {
+                                if (offspring && offspring.id_public && !visited.has(offspring.id_public)) {
+                                    queue.push(offspring.id_public);
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    if (e.response?.status !== 404) {
+                         console.error(`Failed to fetch offspring for ${currentId}`, e);
+                    }
                 }
             }
 
