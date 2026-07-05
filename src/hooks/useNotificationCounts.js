@@ -15,9 +15,11 @@ export const useUnreadNotifications = (authToken, API_BASE_URL) => {
         const response = await axios.get(`${API_BASE_URL}/notifications`, {
           headers: { Authorization: `Bearer ${authToken}` },
         });
+        // Handle both array response and object response { notifications: [...] }
+        const notifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
         // Count notifications that are 'pending' and not general broadcasts
-        const pendingNotifications = (response.data || []).filter(
-          n => n.status === 'pending' && n.type !== 'broadcast' && n.type !== 'announcement'
+        const pendingNotifications = notifications.filter(
+          (n) => n.status === 'pending' && n.type !== 'broadcast' && n.type !== 'announcement'
         );
         setData({ count: pendingNotifications.length, isLoading: false });
       } catch (error) {

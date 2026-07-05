@@ -92,7 +92,8 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                 const response = await axios.get(`${API_BASE_URL}/notifications`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
-                const broadcastNotifications = (response.data || []).filter(n => {
+            const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
+            const broadcastNotifications = allNotifications.filter(n => {
                     const isBroadcastType = n.type === 'broadcast' || n.type === 'announcement';
                     const isNotUrgent = n.broadcastType !== 'warning' && n.broadcastType !== 'alert';
                     const isNotDismissed = !dismissedBroadcastIds.includes(n._id);

@@ -99,8 +99,8 @@ const InformBanner = ({ authToken, API_BASE_URL }) => {
             const response = await axios.get(`${API_BASE_URL}/notifications`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            const all = response.data?.notifications || response.data || [];
-            setMessages(all.filter(n => n.type === 'moderator_message' && n.status === 'pending'));
+        const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
+        setMessages(allNotifications.filter(n => n.type === 'moderator_message' && n.status === 'pending'));
         } catch (error) {
             console.error('Failed to fetch moderator messages:', error);
         }
@@ -729,8 +729,9 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 const response = await axios.get(`${API_BASE_URL}/notifications`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
+            const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
                 // Filter for broadcast/announcement types that are NOT warning/alert (show info, announcement, or undefined)
-                const broadcastNotifications = (response.data || []).filter(n => {
+            const broadcastNotifications = allNotifications.filter(n => {
                     const isBroadcastType = n.type === 'broadcast' || n.type === 'announcement';
                     const isNotUrgent = n.broadcastType !== 'warning' && n.broadcastType !== 'alert';
                     const isNotDismissed = !dismissedIds.includes(n._id);
@@ -939,8 +940,9 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                 const response = await axios.get(`${API_BASE_URL}/notifications`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
+            const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
                 // Filter for urgent broadcast types (warning/alert) - these MUST have explicit broadcastType
-                const urgentNotifications = (response.data || []).filter(n => {
+            const urgentNotifications = allNotifications.filter(n => {
                     const isBroadcastType = n.type === 'broadcast' || n.type === 'announcement';
                     const isUrgent = n.broadcastType === 'warning' || n.broadcastType === 'alert';
                     const isNotAcknowledged = !acknowledgedIds.includes(n._id);
