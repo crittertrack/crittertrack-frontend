@@ -1,4 +1,4 @@
-﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import axios from 'axios';
 import {
     Activity, AlertCircle, AlertTriangle, ArrowLeft, Ban, Camera, Cat,
@@ -2330,7 +2330,6 @@ const ParentSearchModal = ({
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [hasSearched, setHasSearched] = useState(false);
-    const [hasSearched, setHasSearched] = useState(false);
     const [localAnimals, setLocalAnimals] = useState([]);
     const [globalAnimals, setGlobalAnimals] = useState([]);
     const [loadingLocal, setLoadingLocal] = useState(false);
@@ -2371,8 +2370,6 @@ const ParentSearchModal = ({
         );
     };
 
-        const handleSearch = async () => {
-            setHasSearched(true);
     const handleSearch = async () => {
         setHasSearched(true);
         const trimmedSearchTerm = searchTerm.trim();
@@ -9828,4 +9825,3 @@ const AnimalForm = ({
 
 export default AnimalForm;
 export { PedigreeChart, prefetchPedigreeTree };
-}
