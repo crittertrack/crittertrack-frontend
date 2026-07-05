@@ -2370,7 +2370,7 @@ const ParentSearchModal = ({
             </div>
         );
     };
-}
+
         const handleSearch = async () => {
             setHasSearched(true);
     const handleSearch = async () => {
@@ -9828,3 +9828,4 @@ const AnimalForm = ({
 
 export default AnimalForm;
 export { PedigreeChart, prefetchPedigreeTree };
+}
