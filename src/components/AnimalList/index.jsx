@@ -4400,9 +4400,8 @@ const AnimalList = ({
                                     {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
                                     {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
                                     {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
-                                    {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
-                                    {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
-                ].filter(tab => isFamilyTreeEnabled || tab.key !== 'familyTree').map(tab => (
+                                    {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'}
+                ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                                                 className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 text-[10px] font-semibold transition ${
@@ -4430,9 +4429,8 @@ const AnimalList = ({
                   {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
                   {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
                   {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
-                  {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
-                  {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
-                                ].filter(tab => isFamilyTreeEnabled || tab.key !== 'familyTree').map(tab => (
+                  {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'}
+                                ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                         className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${
