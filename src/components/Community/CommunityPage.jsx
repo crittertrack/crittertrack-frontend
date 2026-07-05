@@ -142,9 +142,11 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
 
                         {/* Breeder Directory Section */}
                         <div className="lg:col-span-2 bg-white rounded-lg shadow-md">
-                            <div className="bg-red-100 h-96 flex items-center justify-center text-red-500">
-                                Breeder Directory Placeholder (2/3 width)
-                            </div>
+                            <BreederDirectory
+                                authToken={authToken}
+                                API_BASE_URL={API_BASE_URL}
+                                isEmbedded={true}
+                            />
                         </div>
                     </div>
                 </div>
