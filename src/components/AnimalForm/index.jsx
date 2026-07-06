@@ -6336,6 +6336,36 @@ const AnimalForm = ({
                                     <p className="text-xs text-gray-500 mt-1">
                                         Status tracks the animal's current state. Use "For Sale" or "For Stud" options in the Privacy tab to control showcase visibility.
                                     </p>
+                                    {/* For Sale Section - Duplicated from Ownership tab, shown only when status is Available */}
+                                    {formData.status === 'Available' && !isFieldHidden('isForSale') && (
+                                        <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-3 mt-4">
+                                            <div className="flex items-center space-x-2">
+                                                <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} 
+                                                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                                <span className="text-sm font-medium text-gray-700"><Tag size={14} className="inline-block align-middle mr-1" /> Available for Sale</span>
+                                            </div>
+                                            {formData.isForSale && (
+                                                <div className="ml-7 flex gap-2">
+                                                    <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} 
+                                                        className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                        <option value="USD">USD ($)</option>
+                                                        <option value="EUR">EUR (€)</option>
+                                                        <option value="GBP">GBP (£)</option>
+                                                        <option value="CAD">CAD (C$)</option>
+                                                        <option value="AUD">AUD (A$)</option>
+                                                        <option value="JPY">JPY (¥)</option>
+                                                        <option value="Negotiable">Negotiable</option>
+                                                    </select>
+                                                    <input type="number" name="salePriceAmount" value={formData.salePriceAmount || ''} onChange={handleChange} 
+                                                        className="block flex-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                        placeholder="Price amount" min="0" step="0.01" disabled={formData.salePriceCurrency === 'Negotiable'} />
+                                                </div>
+                                            )}
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                This animal will appear in the public Marketplace if its profile is also set to Public (Eye toggle in the top right of the detail view).
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

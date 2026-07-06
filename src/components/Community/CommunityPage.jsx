@@ -130,23 +130,8 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     {/* News and Breeder Directory */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* News Section */}
-                        {/* <div className="lg:col-span-1 bg-white rounded-lg shadow-md p-4">
-                            <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                                <ScrollText size={20} className="text-cyan-600" />
-                                News & Polls
-                            </h2>
-                            <NewsAnnouncements API_BASE_URL={API_BASE_URL} authToken={authToken} />
-                        </div>
+                        {/* The News Section and the original Breeder Directory section are removed */}
 
-                        Breeder Directory Section
-                        <div className="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
-                            <BreederDirectory
-                                authToken={authToken}
-                                API_BASE_URL={API_BASE_URL}
-                                isEmbedded={true}
-                            />
-                        </div>
-                        */}
                         {/* Breeder Directory Section */}
                         <div className="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden">
                             <BreederDirectory
