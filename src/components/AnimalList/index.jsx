@@ -920,6 +920,12 @@ const AnimalList = ({
         );
     }, [allAnimalsRaw]);
 
+    const soldOrArchivedCount = useMemo(() => {
+        return allAnimalsRaw.filter(a =>
+            a.status === 'Sold' || a.status === 'Transferred' || a.archived
+        ).length;
+    }, [allAnimalsRaw]);
+
     // Dashboard Counters
     const totalDashboardAnimalsCount = dashboardAnimals.length;
     const ownedDashboardCount = dashboardAnimals.filter(a => a.isOwned !== false).length;
@@ -3810,8 +3816,7 @@ const AnimalList = ({
                   {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
                   {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
                   {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
-                                ].map(tab => (
+                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                         className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${
