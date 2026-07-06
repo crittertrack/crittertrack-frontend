@@ -3828,23 +3828,6 @@ const AnimalList = ({
                         <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         {!allAnimalsFetched ? 'Loading...' : showUnowned ? 'Showing Unowned' : 'Show Unowned'}
                     </button>
-                    <span className="hidden sm:inline mx-1 text-gray-300">|</span>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(true)}
-                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm"
-                        title="Make All Animals Public"
-                    >
-                        <Eye size={14} className="sm:w-4 sm:h-4" />
-                        <span>Set All Public</span>
-                    </button>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(false)}
-                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm"
-                        title="Make All Animals Private"
-                    >
-                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
-                        <span>Set All Private</span>
-                    </button>
                 </div>
 
                 {/* Search + Filters toggle + View mode toggle */}
