@@ -182,6 +182,21 @@ const AnimalList = ({
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals ? shown in Management > Sold/Transferred section
+    const [showAlertsDropdown, setShowAlertsDropdown] = useState(false);
+    const alertsDropdownRef = useRef(null);
+    const [alertSettings, setAlertSettings] = useState(() => Object.keys(ALERT_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+    const [showListColumnConfig, setShowListColumnConfig] = useState(false);
+    const [listViewColumns, setListViewColumns] = useState(DEFAULT_LIST_COLUMNS);
+
+    const toggleAlertCategory = (key) => {
+        setAlertSettings(prev => {
+            const next = { ...prev, [key]: !prev[key] };
+            try {
+                localStorage.setItem(`ct_alert_settings_${userKey}`, JSON.stringify(next));
+            } catch {}
+            return next;
+        });
+    };
     const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
     const [loading, setLoading] = useState(() => !_alCache);
     const [allAnimalsFetched, setAllAnimalsFetched] = useState(false); // true once Phase 2 (all animals) fetch completes
@@ -386,6 +401,8 @@ const AnimalList = ({
             const saved = localStorage.getItem(`ct_list_view_columns_${userKey}`);
             if (saved) setListViewColumns({ ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) });
         } catch {}
+        try {
+        } catch {}
         // Alert settings
         try {
             const saved = localStorage.getItem(`ct_alert_settings_${userKey}`);
@@ -426,7 +443,6 @@ const AnimalList = ({
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
-    const [editingEnclosureId, setEditingEnclosureId] = useState(null);
     const [enclosureSaving, setEnclosureSaving] = useState(false);
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
@@ -944,6 +960,8 @@ const AnimalList = ({
     const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
 
     // The original 'allAnimals' variable (used for the main list and management views) remains unchanged.
+    const quarantineList = allAnimalsRaw.filter(a => a.isQuarantine && !inHealthEnclosure(a));
+    const treatmentList = allAnimalsRaw.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
     const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
 
     // Other lists that might depend on 'allAnimals' for management views
@@ -4150,6 +4168,7 @@ const AnimalList = ({
                         <tbody className="divide-y divide-gray-100">
                             {(() => {
                                 const parentLookup = {};
+                                const externalParentsCache = {};
                                 [...allAnimalsRaw, ...soldTransferredRaw].forEach(a => { if (a.id_public) parentLookup[a.id_public] = a; });
                                 Object.assign(parentLookup, externalParentsCache);
                                 const resolveParent = (id) => {
