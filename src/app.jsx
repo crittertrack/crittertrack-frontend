@@ -2347,20 +2347,6 @@ const App = () => {
                 />
             )}
 
-
-
-            {/* Notifications area - shown only on desktop in list view */}
-            {currentView === 'list' && currentView !== 'profile' && userProfile && (
-                <>
-                    <div className="w-full max-w-7xl mb-6 hidden sm:block">
-                        <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                    </div>
-                    <div className="w-full max-w-7xl mb-4 sm:hidden">
-                        <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                    </div>
-                </>
-            )}
-
             {/* Animal detail overlay - renders on top of whatever route is active */}
             {animalToView && (() => {
                 const iCurrentlyOwn = animalToView.ownerId_public === userProfile?.id_public;

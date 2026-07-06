@@ -887,32 +887,66 @@ const AnimalList = ({
         return ds !== null && ds >= Number(freqDays);
     };
 
-    const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
+    // Filtered list of animals for dashboard counters, excluding 'Deceased', 'Sold', 'Transferred', 'isViewOnly', and 'archived: true'
+    const dashboardAnimals = useMemo(() => {
+        return allAnimalsRaw.filter(a =>
+            a.status !== 'Deceased' &&
+            a.status !== 'Sold' &&
+            a.status !== 'Transferred' &&
+            !a.isViewOnly &&
+            !a.archived
+        );
+    }, [allAnimalsRaw]);
+
+    // Dashboard Counters
+    const totalDashboardAnimalsCount = dashboardAnimals.length;
+    const ownedDashboardCount = dashboardAnimals.filter(a => a.isOwned !== false).length;
+    const publicDashboardCount = dashboardAnimals.filter(a => a.showOnPublicProfile === true).length;
+
+    const availableDashboardList = useMemo(() => {
+        return availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly && !a.archived);
+    }, [availableAnimalsRaw]);
+
+    const feedDueDashboard = useMemo(() => {
+        return dashboardAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
+    }, [dashboardAnimals]);
+
     const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
     const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
     const inReproEnclosure = a => a.enclosureId && reproEnclosureIds.has(a.enclosureId);
-    const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
-    const matingList = allAnimals.filter(a => a.isInMating && !inReproEnclosure(a));
-    const nursingList = allAnimals.filter(a => a.isNursing && !inReproEnclosure(a));
-    const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
-    const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
-    const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0);
-    const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+
     const supplyReorderDue = supplies.filter(s =>
         (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
         (s.nextOrderDate && new Date(s.nextOrderDate) < today)
     );
     const healthEnclosures = enclosures.filter(e => e.purpose === 'health');
     const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
-    const inHealthEnclosure = a => a.enclosureId && healthEnclosureIds.has(a.enclosureId);
-    const quarantineList = allAnimals.filter(a => a.isQuarantine && !inHealthEnclosure(a));
-    const treatmentList = allAnimals.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
-    const healthAttentionCount = quarantineList.length + treatmentList.length;
-    const ownedCount = allAnimalsRaw.filter(a => a.isOwned !== false).length;
-    const publicCount = allAnimalsRaw.filter(a => a.showOnPublicProfile === true).length;
+    const inHealthEnclosure = useCallback(a => a.enclosureId && healthEnclosureIds.has(a.enclosureId), [healthEnclosureIds]);
+
+    const quarantineDashboardList = useMemo(() => {
+        return dashboardAnimals.filter(a => a.isQuarantine && !inHealthEnclosure(a));
+    }, [dashboardAnimals, inHealthEnclosure]);
+
+    const treatmentDashboardList = useMemo(() => {
+        return dashboardAnimals.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
+    }, [dashboardAnimals, inHealthEnclosure]);
+
+    const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
+
+    // The original 'allAnimals' variable (used for the main list and management views) remains unchanged.
+    const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
+
+    // Other lists that might depend on 'allAnimals' for management views
+    const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
+    const matingList = allAnimals.filter(a => a.isInMating && !inReproEnclosure(a));
+    const nursingList = allAnimals.filter(a => a.isNursing && !inReproEnclosure(a));
+    const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
+    const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays)); // This is for the Feeding management view
+    const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
+    const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+    const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
     const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
     const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
-    const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
     const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
     const animalsWithEnclosureCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.maintenanceFrequencyDays));
     const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
@@ -3471,32 +3505,32 @@ const AnimalList = ({
                     <DashboardCard
                         icon={<Cat size={32} className="text-blue-800" />}
                         label="Total Animals"
-                        value={allAnimals.length}
+                        value={totalDashboardAnimalsCount}
                         colorClass="bg-blue-100 text-blue-900"
                     />
                     <DashboardCard
                         icon={<Heart size={32} className="text-red-800" />}
                         label="Owned"
-                        value={ownedCount}
+                        value={ownedDashboardCount}
                         colorClass="bg-red-100 text-red-900"
                     />
                     <DashboardCard
                         icon={<Eye size={32} className="text-green-800" />}
                         label="Public"
-                        value={publicCount}
+                        value={publicDashboardCount}
                         colorClass="bg-green-100 text-green-900"
                     />
                     <DashboardCard
                         icon={<ShoppingBag size={32} className="text-purple-800" />}
                         label="For Sale"
-                        value={availableList.length}
+                        value={availableDashboardList.length}
                         colorClass="bg-purple-100 text-purple-900"
                         onClick={() => setShowForSaleScreen(true)}
                     />
                     <DashboardCard
                         icon={<AlertCircle size={32} className="text-orange-800" />}
                         label="Needs Attention"
-                        value={feedDue.length + healthAttentionCount}
+                        value={feedDueDashboard.length + healthAttentionDashboardCount}
                         colorClass="bg-orange-100 text-orange-900"
                     />
                 </div>
