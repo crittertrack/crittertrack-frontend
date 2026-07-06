@@ -6333,9 +6333,7 @@ const AnimalForm = ({
                                         <option value="Rehomed">Rehomed - Sold/given to new home</option>
                                         <option value="Unknown">Unknown</option>
                                     </select>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Status tracks the animal's current state. Use "For Sale" or "For Stud" options in the Privacy tab to control showcase visibility.
-                                    </p>
+                                    
                                     {/* For Sale Section - Duplicated from Ownership tab, shown only when status is Available */}
                                     {formData.status === 'Available' && !isFieldHidden('isForSale') && (
                                         <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-3 mt-4">

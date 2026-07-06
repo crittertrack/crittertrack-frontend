@@ -3523,19 +3523,87 @@ const AnimalList = ({
                     <DashboardCard
                         icon={<ShoppingBag size={32} className="text-purple-800" />}
                         label="For Sale"
-                        value={availableDashboardList.length}
-                        colorClass="bg-purple-100 text-purple-900"
-                        onClick={() => setShowForSaleScreen(true)}
-                    />
-                    <DashboardCard
-                        icon={<AlertCircle size={32} className="text-orange-800" />}
-                        label="Needs Attention"
                         value={feedDueDashboard.length + healthAttentionDashboardCount}
                         colorClass="bg-orange-100 text-orange-900"
                     />
                 </div>
+
+                {/* Bulk Actions Bar */}
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                    <button
+                        onClick={() => toggleAllAnimalsOwned(true)}
+                        className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200"
+                        title="Mark All Animals as Owned"
+                    >
+                        <Heart size={14} /> Set All Owned
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsOwned(false)}
+                        className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        title="Mark All Animals as Unowned"
+                    >
+                        <HeartOff size={14} /> Set All Unowned
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(true)}
+                        className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-green-100 text-green-700 hover:bg-green-200"
+                        title="Make All Animals Public"
+                    >
+                        <Eye size={14} /> Set All Public
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(false)}
+                        className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        title="Make All Animals Private"
+                    >
+                        <EyeOff size={14} /> Set All Private
+                    </button>
+                </div>
             </div>
         );
+    };
+
+    const toggleAllAnimalsOwned = async (makeOwned) => {
+        if (animals.length === 0) {
+            showModalMessage('No Animals', 'No animals found.');
+            return;
+        }
+
+        const action = makeOwned ? 'owned' : 'unowned';
+        const confirmChange = window.confirm(`Are you sure you want to mark ALL ${animals.length} animals as ${action}?`);
+        if (!confirmChange) return;
+
+        // Update local state immediately for instant UI feedback
+        const updatedAnimals = animals.map(animal => ({
+            ...animal,
+            isOwned: makeOwned,
+        }));
+        setAnimals(updatedAnimals);
+
+        // Update database in the background
+        let failedUpdates = 0;
+        for (const animal of animals) {
+            try {
+                await fetch(`${API_BASE_URL}/animals/${animal.id_public}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        isOwned: makeOwned,
+                    })
+                });
+            } catch (error) {
+                console.error(`Error updating animal ${animal.id_public}:`, error);
+                failedUpdates++;
+            }
+        }
+
+        // Show notification if there were failures
+        if (failedUpdates > 0) {
+            showModalMessage('Partial Success', `Updated locally, but ${failedUpdates} animal(s) failed to sync with the server. They will be updated on next refresh.`);
+        }
     };
 
     return (
@@ -3544,8 +3612,8 @@ const AnimalList = ({
                 <div className="flex items-center justify-between w-full sm:w-auto gap-2 min-w-0">
                     <div className='flex items-center gap-2 min-w-0 flex-1'>
                         <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
-                        <span className="truncate">
-                            {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
+                        <span className="truncate" data-tutorial-target="my-animals-title">
+                            {animalView === 'list' ? `My Animals` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                         </span>
                         {isListLikeView && hasActiveFilters && (
                             <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
@@ -3567,17 +3635,6 @@ const AnimalList = ({
                 </div>
                 {/* Universal top-bar action buttons */}
                 <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap" data-tutorial-target="bulk-privacy-controls">
-                    {/* For Sale */}
-                    {!showArchiveScreen && !showDuplicatesScreen && (
-                        <button
-                            onClick={() => { setShowForSaleScreen(v => !v); }}
-                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showForSaleScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800'}`}
-                            title="For Sale / Available"
-                        >
-                            <ShoppingBag size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium hidden sm:inline">For Sale</span>
-                        </button>
-                    )}
                     {/* Archive */}
                     {!showDuplicatesScreen && (
                         <button
@@ -4003,8 +4060,7 @@ const AnimalList = ({
                 )}
             </div>
             )}
-
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (
