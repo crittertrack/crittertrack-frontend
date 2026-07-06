@@ -3512,49 +3512,67 @@ const AnimalList = ({
                     />
                 </div>
 
-                {/* Bulk Actions Bar */}
                 <div className="mt-4 flex flex-wrap items-center justify-start sm:justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        {/* Ownership filter toggle */}
+                        <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0" data-tutorial-target="ownership-visibility-filter">
+                            <button
+                                onClick={() => setOwnedFilterMode('owned')}
+                                className={`px-3 py-1.5 transition text-xs font-medium flex items-center gap-1.5 ${ownedFilterMode === 'owned' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                title="Show only animals you own"
+                            >
+                                <Heart size={14} /> Show Owned
+                            </button>
+                            <button
+                                onClick={() => setOwnedFilterMode('all')}
+                                className={`px-3 py-1.5 transition text-xs font-medium flex items-center gap-1.5 border-l border-gray-200 ${ownedFilterMode === 'all' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                title="Show all animals (owned and unowned)"
+                            >
+                                Show All
+                            </button>
+                        </div>
+                        <span className="hidden sm:inline mx-1 text-gray-300">|</span>
+                        <button
+                            onClick={() => toggleAllAnimalsOwned(true)}
+                            className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200"
+                            title="Mark All Animals as Owned"
+                        >
+                            <Heart size={14} /> Set All Owned
+                        </button>
+                        <button
+                            onClick={() => toggleAllAnimalsOwned(false)}
+                            className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            title="Mark All Animals as Unowned"
+                        >
+                            <HeartOff size={14} /> Set All Unowned
+                        </button>
+                        <button
+                            onClick={() => toggleAllAnimalsPrivacy(true)}
+                            className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-green-100 text-green-700 hover:bg-green-200"
+                            title="Make All Animals Public"
+                        >
+                            <Eye size={14} /> Set All Public
+                        </button>
+                        <button
+                            onClick={() => toggleAllAnimalsPrivacy(false)}
+                            className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            title="Make All Animals Private"
+                        >
+                            <EyeOff size={14} /> Set All Private
+                        </button>
+                    </div>
                     <button
-                        onClick={() => toggleAllAnimalsOwned(true)}
-                        className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200"
-                        title="Mark All Animals as Owned"
+                        onClick={toggleMgmtAlerts}
+                        title={mgmtAlertsEnabled ? 'Alerts on — click to disable' : 'Alerts off — click to enable'}
+                        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${mgmtAlertsEnabled ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-800 text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30' : 'bg-white dark:bg-dark-surface border-gray-200 dark:border-dark-border text-gray-400 dark:text-dark-text-muted hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
                     >
-                        <Heart size={14} /> Set All Owned
+                        <Bell size={14} className="sm:w-4 sm:h-4" />
+                        <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
                     </button>
-                    <button
-                        onClick={() => toggleAllAnimalsOwned(false)}
-                        className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        title="Mark All Animals as Unowned"
-                    >
-                        <HeartOff size={14} /> Set All Unowned
-                    </button>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(true)}
-                        className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-green-100 text-green-700 hover:bg-green-200"
-                        title="Make All Animals Public"
-                    >
-                        <Eye size={14} /> Set All Public
-                    </button>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(false)}
-                        className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        title="Make All Animals Private"
-                    >
-                        <EyeOff size={14} /> Set All Private
-                    </button>
-                    {/* Alerts On/Off */}
                 </div>
             </div>
         );
     };
-
-    // Alerts On/Off button moved to the main header section
-    // This change is already reflected in the provided code, so no diff is needed here.
-    // The button is now part of the `h2` element's sibling `div` with `data-tutorial-target="bulk-privacy-controls"`.
-    // The original request was to move it to be in the same line as the bulk actions, but lined all the way on the right side.
-    // Looking at the current code, the button is already in the header section, which is a common place for such controls.
-    // The `renderDashboard` function also has an "Alerts On/Off" button. The request is to move the one in the dashboard to the right.
-    // The `renderDashboard` function's bulk actions bar is a flex container. I will add `ml-auto` to the Alerts button to push it to the right.
 
     const toggleAllAnimalsOwned = async (makeOwned) => {
         if (animals.length === 0) {
@@ -3660,15 +3678,6 @@ const AnimalList = ({
                             <span className="font-medium hidden sm:inline">Find Duplicates</span>
                         </button>
                     )}
-                    {/* Alerts On/Off */}
-                    <button
-                        onClick={toggleMgmtAlerts}
-                        title={mgmtAlertsEnabled ? 'Alerts on — click to disable' : 'Alerts off — click to enable'}
-                        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${mgmtAlertsEnabled ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-800 text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30' : 'bg-white dark:bg-dark-surface border-gray-200 dark:border-dark-border text-gray-400 dark:text-dark-text-muted hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
-                    >
-                        <Bell size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
-                    </button>
                     {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
                     {isListLikeView && !showArchiveScreen && (
                         <button
@@ -3810,25 +3819,6 @@ const AnimalList = ({
                         <Search size={16} />
                         <span className="hidden sm:inline">Search</span>
                     </button>
-                    {/* Ownership filter toggle */}
-                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0" data-tutorial-target="ownership-visibility-filter">
-                        <button
-                            onClick={() => setOwnedFilterMode('owned')}
-                            className={`px-3 py-2 transition text-xs font-medium flex items-center gap-1.5 ${ownedFilterMode === 'owned' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                            title="Show only animals you own"
-                        >
-                            <Heart size={14} /> Owned
-                        </button>
-                        <button
-                            onClick={() => setOwnedFilterMode('all')}
-                            className={`px-3 py-2 transition text-xs font-medium flex items-center gap-1.5 border-l border-gray-200 ${ownedFilterMode === 'all' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                            title="Show all animals (owned and unowned)"
-                        >
-                            All
-                        </button>
-                    </div>
-
-
                     <button
                         onClick={() => setFiltersExpanded(prev => !prev)}
                         className={`relative py-2 px-3 rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 text-sm font-semibold shrink-0 ${
