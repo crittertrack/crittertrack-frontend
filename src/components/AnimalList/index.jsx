@@ -37,6 +37,16 @@ const getSpeciesDisplayName = (species) => {
     return displayNames[species] || species;
 };
 
+const ALERT_CATEGORIES = {
+    feeding: 'Feeding Reminders',
+    care: 'Care Reminders',
+    maintenance: 'Maintenance Reminders',
+    supplies: 'Supply Reminders',
+    breeding: 'Breeding & Births',
+    medical: 'Medical Alerts',
+    custom: 'Milestones'
+};
+
 const normalizeSpeciesForFilter = (species) => {
     const value = (species || '').toString().trim().toLowerCase();
     if (['rat', 'rats', 'fancy rat', 'fancy rats'].includes(value)) return 'fancy rat';
@@ -376,6 +386,15 @@ const AnimalList = ({
             const saved = localStorage.getItem(`ct_list_view_columns_${userKey}`);
             if (saved) setListViewColumns({ ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) });
         } catch {}
+        // Alert settings
+        try {
+            const saved = localStorage.getItem(`ct_alert_settings_${userKey}`);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                const defaults = Object.keys(ALERT_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: true }), {});
+                setAlertSettings({ ...defaults, ...parsed });
+            }
+        } catch {}
     }, [userKey]);
 
     const isCollectionsView = animalView === 'collections';
@@ -396,6 +415,17 @@ const AnimalList = ({
     const [reproEncFormVisible, setReproEncFormVisible] = useState(false);
     const [healthEncFormVisible, setHealthEncFormVisible] = useState(false);
     const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' });
+    const [editingEnclosureId, setEditingEnclosureId] = useState(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (alertsDropdownRef.current && !alertsDropdownRef.current.contains(event.target)) {
+                setShowAlertsDropdown(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
     const [enclosureSaving, setEnclosureSaving] = useState(false);
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
@@ -3515,17 +3545,17 @@ const AnimalList = ({
                 <div className="mt-4 flex flex-wrap items-center justify-start sm:justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
                         {/* Ownership filter toggle */}
-                        <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0" data-tutorial-target="ownership-visibility-filter">
+                        <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm" data-tutorial-target="ownership-visibility-filter">
                             <button
                                 onClick={() => setOwnedFilterMode('owned')}
-                                className={`px-3 py-1.5 transition text-xs font-medium flex items-center gap-1.5 ${ownedFilterMode === 'owned' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                className={`px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-primary text-black' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                                 title="Show only animals you own"
                             >
                                 <Heart size={14} /> Show Owned
                             </button>
                             <button
                                 onClick={() => setOwnedFilterMode('all')}
-                                className={`px-3 py-1.5 transition text-xs font-medium flex items-center gap-1.5 border-l border-gray-200 ${ownedFilterMode === 'all' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                className={`px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center gap-1 border-l border-gray-300 ${ownedFilterMode === 'all' ? 'bg-primary text-black' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                                 title="Show all animals (owned and unowned)"
                             >
                                 Show All
@@ -3561,14 +3591,38 @@ const AnimalList = ({
                             <EyeOff size={14} /> Set All Private
                         </button>
                     </div>
-                    <button
-                        onClick={toggleMgmtAlerts}
-                        title={mgmtAlertsEnabled ? 'Alerts on — click to disable' : 'Alerts off — click to enable'}
-                        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${mgmtAlertsEnabled ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-800 text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30' : 'bg-white dark:bg-dark-surface border-gray-200 dark:border-dark-border text-gray-400 dark:text-dark-text-muted hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
-                    >
-                        <Bell size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
-                    </button>
+                    <div className="relative" ref={alertsDropdownRef}>
+                        <button
+                            onClick={() => setShowAlertsDropdown(prev => !prev)}
+                            title="Configure alerts"
+                            className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${mgmtAlertsEnabled ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                        >
+                            <Bell size={14} className="sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
+                            <ChevronDown size={14} className={`ml-1 transition-transform ${showAlertsDropdown ? 'rotate-180' : ''}`} />
+                        </button>
+                        {showAlertsDropdown && (
+                            <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl z-10">
+                                <div className="p-3 border-b">
+                                    <h4 className="font-semibold text-sm text-gray-800">Notification Settings</h4>
+                                    <p className="text-xs text-gray-500">Select which alerts to show.</p>
+                                </div>
+                                <div className="p-3 space-y-2">
+                                    {Object.entries(ALERT_CATEGORIES).map(([key, label]) => (
+                                        <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                            <input
+                                                type="checkbox"
+                                                checked={!!alertSettings[key]}
+                                                onChange={() => toggleAlertCategory(key)}
+                                                className="w-4 h-4 rounded text-primary focus:ring-primary"
+                                            />
+                                            {label}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         );
