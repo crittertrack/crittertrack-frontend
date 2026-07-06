@@ -908,8 +908,8 @@ const AnimalList = ({
     // They must be 'Available', not 'isViewOnly', not 'archived', AND explicitly marked 'isForSale'.
     const availableDashboardList = useMemo(() => {
         // Filter from dashboardAnimals to ensure they are already non-deceased, non-sold/transferred, non-viewOnly, and non-archived
-        return dashboardAnimals.filter(a => a.status === 'Available' && a.isForSale);
-    }, [availableAnimalsRaw]);
+          return dashboardAnimals.filter(a => a.status === 'Available' && a.isForSale); // Filter from dashboardAnimals
+    }, [dashboardAnimals]); // Dependency should be dashboardAnimals
 
     const feedDueDashboard = useMemo(() => {
         return dashboardAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
@@ -3533,6 +3533,7 @@ const AnimalList = ({
                     <DashboardCard
                         icon={<AlertCircle size={32} className="text-orange-800" />}
                         label="Needs Attention"
+                        value={feedDueDashboard.length + healthAttentionDashboardCount}
                         colorClass="bg-orange-100 text-orange-900"
                     />
                 </div>
