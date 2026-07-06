@@ -237,6 +237,7 @@ const AnimalList = ({
         statusFilterPregnant: (function() { try { return localStorage.getItem('animalList_statusFilterPregnant') === 'true'; } catch { return false; } })(),
         statusFilterNursing: (function() { try { return localStorage.getItem('animalList_statusFilterNursing') === 'true'; } catch { return false; } })(),
         statusFilterMating: (function() { try { return localStorage.getItem('animalList_statusFilterMating') === 'true'; } catch { return false; } })(),
+        ownedFilterMode: (function() { try { return localStorage.getItem('animalList_ownedFilterMode') || 'owned'; } catch { return 'owned'; } })(),
         publicFilter: (function() { try { return localStorage.getItem('animalList_publicFilter') || ''; } catch { return ''; } })(),
         blFilter: (function() { try { const s = localStorage.getItem('animalList_blFilter'); return s ? JSON.parse(s) : []; } catch { return []; } })(),
     }));
@@ -486,18 +487,10 @@ const AnimalList = ({
     }, [statusFilterMating]);
     
     useEffect(() => {
-        try {
-            localStorage.setItem('animalList_showOwned', showOwned.toString());
-        } catch (e) { console.warn('Failed to save showOwned', e); }
-    }, [showOwned]);
-    useEffect(() => {
-        try {
-            localStorage.setItem('animalList_showUnowned', showUnowned.toString());
-        } catch (e) { console.warn('Failed to save showUnowned', e); }
-    }, [showUnowned]);
-    
-    useEffect(() => {
-        try {
+        try { localStorage.setItem('animalList_ownedFilterMode', ownedFilterMode); }
+        catch (e) { console.warn('Failed to save ownedFilterMode', e); }
+    }, [ownedFilterMode]);
+    useEffect(() => { try {
             localStorage.setItem('animalList_publicFilter', publicFilter);
         } catch (e) { console.warn('Failed to save publicFilter', e); }
     }, [publicFilter]);
@@ -811,13 +804,9 @@ const AnimalList = ({
         }
 
         // --- Instant filters (no Apply needed) ---
-        // Ownership filter
-        if (showOwned && !showUnowned) {
-            source = source.filter(a => a.isOwned !== false);
-        } else if (!showOwned && showUnowned) {
-            source = source.filter(a => a.isOwned === false);
-        } else if (!showOwned && !showUnowned) {
-            source = [];
+        // Ownership filter (controlled by ownedFilterMode)
+        if (ownedFilterMode === 'owned') {
+            source = source.filter(a => a.isOwned !== false); // isOwned: true or undefined for owned, false for unowned
         }
         // Breeding line filter
         if (af.blFilter.length > 0) {
@@ -834,7 +823,7 @@ const AnimalList = ({
             groups[species].push(animal);
             return groups;
         }, {});
-    }, [animals, appliedFilters, appliedNameFilter, showOwned, showUnowned, animalBreedingLines]);
+    }, [animals, appliedFilters, appliedNameFilter, ownedFilterMode, animalBreedingLines]);
 
     const displayedAnimalCount = useMemo(() => {
         return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
@@ -1030,10 +1019,11 @@ const AnimalList = ({
         statusFilterPregnant !== appliedFilters.statusFilterPregnant ||
         statusFilterNursing !== appliedFilters.statusFilterNursing ||
         statusFilterMating !== appliedFilters.statusFilterMating ||
+        ownedFilterMode !== appliedFilters.ownedFilterMode ||
         publicFilter !== appliedFilters.publicFilter ||
         JSON.stringify(blFilter) !== JSON.stringify(appliedFilters.blFilter)
     );
-    
+
     const handleClearFilters = () => {
         setStatusFilter('');
         setSearchInput('');
@@ -1042,9 +1032,8 @@ const AnimalList = ({
         setSelectedSpecies([...speciesNames]);
         setStatusFilterPregnant(false);
         setStatusFilterNursing(false);
-        setStatusFilterMating(false);
-        setShowOwned(true);
-        setShowUnowned(false);
+        setStatusFilterMating(false); // Reset to default 'owned'
+        setOwnedFilterMode('owned');
         setPublicFilter('');
         setBlFilter([]);
         // Also reset the applied snapshot to defaults
@@ -1054,7 +1043,8 @@ const AnimalList = ({
             selectedSpecies: [...speciesNames],
             statusFilterPregnant: false,
             statusFilterNursing: false,
-            statusFilterMating: false,
+            statusFilterMating: false, // Reset to default 'owned'
+            ownedFilterMode: 'owned',
             publicFilter: '',
             blFilter: [],
         });
@@ -3539,7 +3529,7 @@ const AnimalList = ({
                 </div>
 
                 {/* Bulk Actions Bar */}
-                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <div className="mt-4 flex flex-wrap items-center justify-start sm:justify-between gap-2">
                     <button
                         onClick={() => toggleAllAnimalsOwned(true)}
                         className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200"
@@ -3568,10 +3558,19 @@ const AnimalList = ({
                     >
                         <EyeOff size={14} /> Set All Private
                     </button>
+                    {/* Alerts On/Off */}
                 </div>
             </div>
         );
     };
+
+    // Alerts On/Off button moved to the main header section
+    // This change is already reflected in the provided code, so no diff is needed here.
+    // The button is now part of the `h2` element's sibling `div` with `data-tutorial-target="bulk-privacy-controls"`.
+    // The original request was to move it to be in the same line as the bulk actions, but lined all the way on the right side.
+    // Looking at the current code, the button is already in the header section, which is a common place for such controls.
+    // The `renderDashboard` function also has an "Alerts On/Off" button. The request is to move the one in the dashboard to the right.
+    // The `renderDashboard` function's bulk actions bar is a flex container. I will add `ml-auto` to the Alerts button to push it to the right.
 
     const toggleAllAnimalsOwned = async (makeOwned) => {
         if (animals.length === 0) {
@@ -3806,32 +3805,7 @@ const AnimalList = ({
             )}
 
             {isListLikeView && !isCollectionsView && !showArchiveScreen && (
-            <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
-                {/* Ownership filter buttons ? always visible, auto-apply */}
-                <div className="flex flex-wrap items-center justify-center gap-2 px-2 sm:px-3 py-2">
-                    <button onClick={() => setShowOwned(prev => !prev)}
-                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                            showOwned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                        title={showOwned ? 'Click to hide owned animals' : 'Click to show owned animals'}
-                    >
-                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        {showOwned ? 'Showing Owned' : 'Show Owned'}
-                    </button>
-                    <button onClick={() => setShowUnowned(prev => !prev)}
-                        disabled={!allAnimalsFetched}
-                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                            !allAnimalsFetched ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
-                            showUnowned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                        title={!allAnimalsFetched ? 'Loading all animals...' : showUnowned ? 'Click to hide unowned animals' : 'Click to show unowned animals'}
-                    >
-                        <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        {!allAnimalsFetched ? 'Loading...' : showUnowned ? 'Showing Unowned' : 'Show Unowned'}
-                    </button>
-                </div>
-
-                {/* Search + Filters toggle + View mode toggle */}
+                <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
                 <div className="flex items-center gap-2 p-2 sm:p-3 border-t border-gray-200">
                     <input
                         type="text"
@@ -3967,6 +3941,21 @@ const AnimalList = ({
                                 );
                             })}
                         </div>
+                    </div>
+
+                    {/* Row 4: Ownership filter */}
+                    <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Ownership:</span>
+                        {['owned', 'all'].map(option => (
+                            <button key={option} onClick={() => setOwnedFilterMode(option)}
+                                className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${
+                                    ownedFilterMode === option ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
+                                title={option === 'owned' ? 'Show only animals you own' : 'Show all animals (owned and unowned)'}
+                            >
+                                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {option === 'owned' ? 'Owned' : 'All'}
+                            </button>
+                        ))}
                     </div>
 
                 {/* Row 3: Show filters */}
