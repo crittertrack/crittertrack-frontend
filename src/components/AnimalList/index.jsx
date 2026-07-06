@@ -903,8 +903,12 @@ const AnimalList = ({
     const ownedDashboardCount = dashboardAnimals.filter(a => a.isOwned !== false).length;
     const publicDashboardCount = dashboardAnimals.filter(a => a.showOnPublicProfile === true).length;
 
+    
+    // This list should reflect animals that are truly ready for the public marketplace.
+    // They must be 'Available', not 'isViewOnly', not 'archived', AND explicitly marked 'isForSale'.
     const availableDashboardList = useMemo(() => {
-        return availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly && !a.archived);
+        // Filter from dashboardAnimals to ensure they are already non-deceased, non-sold/transferred, non-viewOnly, and non-archived
+        return dashboardAnimals.filter(a => a.status === 'Available' && a.isForSale);
     }, [availableAnimalsRaw]);
 
     const feedDueDashboard = useMemo(() => {
@@ -3523,7 +3527,12 @@ const AnimalList = ({
                     <DashboardCard
                         icon={<ShoppingBag size={32} className="text-purple-800" />}
                         label="For Sale"
-                        value={feedDueDashboard.length + healthAttentionDashboardCount}
+                        value={availableDashboardList.length}
+                        colorClass="bg-purple-100 text-purple-900"
+                    />
+                    <DashboardCard
+                        icon={<AlertCircle size={32} className="text-orange-800" />}
+                        label="Needs Attention"
                         colorClass="bg-orange-100 text-orange-900"
                     />
                 </div>
@@ -3615,6 +3624,16 @@ const AnimalList = ({
                         <span className="truncate" data-tutorial-target="my-animals-title">
                             {animalView === 'list' ? `My Animals` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                         </span>
+                        {/* Refresh button moved here */}
+                        <button
+                            onClick={handleRefresh}
+                            disabled={loading}
+                            className="text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs font-medium"
+                            title="Refresh"
+                        >
+                            {loading ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                            <span className="hidden sm:inline">Refresh</span>
+                        </button>
                         {isListLikeView && hasActiveFilters && (
                             <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
                                 Filtered
@@ -3665,16 +3684,6 @@ const AnimalList = ({
                     >
                         <Bell size={14} className="sm:w-4 sm:h-4" />
                         <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
-                    </button>
-                    {/* Refresh */}
-                    <button
-                        onClick={handleRefresh}
-                        disabled={loading}
-                        className="text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs sm:text-sm font-medium"
-                        title="Refresh"
-                    >
-                        {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
-                        <span className="hidden sm:inline">Refresh</span>
                     </button>
                     {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
                     {isListLikeView && !showArchiveScreen && (
