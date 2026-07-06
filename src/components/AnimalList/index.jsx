@@ -229,6 +229,11 @@ const AnimalList = ({
     const [pendingFilters, setPendingFilters] = useState(false); // true when filters changed but not yet applied
 
     const filterMountedRef = useRef(false); // tracks initial mount for pending-filters detection
+    const [ownedFilterMode, setOwnedFilterMode] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_ownedFilterMode') || 'owned';
+        } catch { return 'owned'; }
+    });
     // Applied filter snapshot ? groupedAnimals reads from this, only updated on "Apply Filters" click
     const [appliedFilters, setAppliedFilters] = useState(() => ({
         statusFilter: (function() { try { return localStorage.getItem('animalList_statusFilter') || ''; } catch { return ''; } })(),
@@ -236,27 +241,9 @@ const AnimalList = ({
         selectedSpecies: [], // will be filled on first species load
         statusFilterPregnant: (function() { try { return localStorage.getItem('animalList_statusFilterPregnant') === 'true'; } catch { return false; } })(),
         statusFilterNursing: (function() { try { return localStorage.getItem('animalList_statusFilterNursing') === 'true'; } catch { return false; } })(),
-        statusFilterMating: (function() { try { return localStorage.getItem('animalList_statusFilterMating') === 'true'; } catch { return false; } })(),
-        ownedFilterMode: (function() { try { return localStorage.getItem('animalList_ownedFilterMode') || 'owned'; } catch { return 'owned'; } })(),
         publicFilter: (function() { try { return localStorage.getItem('animalList_publicFilter') || ''; } catch { return ''; } })(),
         blFilter: (function() { try { const s = localStorage.getItem('animalList_blFilter'); return s ? JSON.parse(s) : []; } catch { return []; } })(),
     }));
-    const [showOwned, setShowOwned] = useState(() => {
-        try {
-            const saved = localStorage.getItem('animalList_showOwned');
-            return saved !== null ? saved === 'true' : true;
-        } catch { return true; }
-    });
-    const [showUnowned, setShowUnowned] = useState(() => {
-        try {
-            const saved = localStorage.getItem('animalList_showUnowned');
-            return saved !== null ? saved === 'true' : false;
-        } catch { return false; }
-    });
-    // Archive section collapse states
-    const [archiveSoldCollapsed, setArchiveSoldCollapsed] = useState(false);
-    const [archiveArchivedCollapsed, setArchiveArchivedCollapsed] = useState(false);
-    
     const [publicFilter, setPublicFilter] = useState(() => {
         try {
             return localStorage.getItem('animalList_publicFilter') || '';
@@ -559,12 +546,12 @@ const AnimalList = ({
     // Apply filters: snapshot current UI filter state into appliedFilters
     const applyFilters = useCallback(() => {
         setAppliedFilters({
-            statusFilter, selectedGenders, selectedSpecies, ownedFilterMode, // Include ownedFilterMode in the snapshot
+            statusFilter, selectedGenders, selectedSpecies,
             statusFilterPregnant, statusFilterNursing, statusFilterMating,
             publicFilter, blFilter,
         });
         setPendingFilters(false);
-    }, [statusFilter, selectedGenders, selectedSpecies, ownedFilterMode, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
+    }, [statusFilter, selectedGenders, selectedSpecies, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
 
     // Species list is now derived from the fetchAnimals result - no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
@@ -757,7 +744,7 @@ const AnimalList = ({
         // --- Applied panel filters (only update on "Apply Filters" click) ---
         const af = appliedFilters;
 
-        // Status filter
+        // Status filter (appliedFilters)
         if (af.statusFilter) {
             source = source.filter(a => a.status === af.statusFilter);
         }
@@ -775,20 +762,20 @@ const AnimalList = ({
             });
         }
 
-        // Species filter
+        // Species filter (appliedFilters)
         if (af.selectedSpecies.length > 0) {
             const selectedSpeciesKeys = new Set(af.selectedSpecies.map(normalizeSpeciesForFilter));
             source = source.filter(a => selectedSpeciesKeys.has(normalizeSpeciesForFilter(a.species)));
         }
 
-        // Gender filter
+        // Gender filter (appliedFilters)
         if (af.selectedGenders.length === 0) {
             source = [];
         } else if (af.selectedGenders.length < GENDER_OPTIONS.length) {
             source = source.filter(a => af.selectedGenders.includes(a.gender));
         }
 
-        // Pregnant / Nursing / Mating filters
+        // Pregnant / Nursing / Mating filters (appliedFilters)
         if (af.statusFilterPregnant || af.statusFilterNursing) {
             source = source.filter(a => (a.gender || '').toLowerCase() !== 'male');
         }
@@ -796,16 +783,16 @@ const AnimalList = ({
         if (af.statusFilterNursing) source = source.filter(a => a.isNursing === true);
         if (af.statusFilterMating) source = source.filter(a => a.isInMating === true);
 
-        // Public/private filter
+        // Public/private filter (appliedFilters)
         if (af.publicFilter === 'public') {
             source = source.filter(a => a.showOnPublicProfile === true);
         } else if (af.publicFilter === 'private') {
             source = source.filter(a => !a.showOnPublicProfile);
         }
 
-        // --- Instant filters (no Apply needed) ---
-        // Ownership filter (controlled by ownedFilterMode)
-        if (af.ownedFilterMode === 'owned') { // Use appliedFilters.ownedFilterMode for consistency
+        // --- Instant filters (no Apply needed, use direct state) ---
+        // Ownership filter
+        if (ownedFilterMode === 'owned') {
             source = source.filter(a => a.isOwned !== false); // isOwned: true or undefined for owned, false for unowned
         }
         // Breeding line filter
@@ -815,7 +802,7 @@ const AnimalList = ({
                 return af.blFilter.some(lineId => assigned.includes(lineId));
             });
         }
-        return source.reduce((groups, animal) => {
+        return source.reduce((groups, animal) => { // ownedFilterMode is a direct dependency now
             const species = animal.species || 'Unspecified Species';
             if (!groups[species]) {
                 groups[species] = [];
@@ -823,7 +810,7 @@ const AnimalList = ({
             groups[species].push(animal);
             return groups;
         }, {});
-    }, [animals, appliedFilters, appliedNameFilter, animalBreedingLines]); // Remove ownedFilterMode from dependencies as it's now part of appliedFilters
+    }, [animals, appliedFilters, appliedNameFilter, animalBreedingLines, ownedFilterMode]);
 
     const displayedAnimalCount = useMemo(() => {
         return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
@@ -1019,7 +1006,6 @@ const AnimalList = ({
         statusFilterPregnant !== appliedFilters.statusFilterPregnant ||
         statusFilterNursing !== appliedFilters.statusFilterNursing ||
         statusFilterMating !== appliedFilters.statusFilterMating ||
-        ownedFilterMode !== appliedFilters.ownedFilterMode ||
         publicFilter !== appliedFilters.publicFilter ||
         JSON.stringify(blFilter) !== JSON.stringify(appliedFilters.blFilter)
     );
@@ -1032,8 +1018,8 @@ const AnimalList = ({
         setSelectedSpecies([...speciesNames]);
         setStatusFilterPregnant(false);
         setStatusFilterNursing(false);
-        setStatusFilterMating(false); // Reset to default 'owned'
-        setOwnedFilterMode('owned');
+        setStatusFilterMating(false);
+        setOwnedFilterMode('owned'); // Reset to default 'owned'
         setPublicFilter('');
         setBlFilter([]);
         // Also reset the applied snapshot to defaults
@@ -1043,9 +1029,6 @@ const AnimalList = ({
             selectedSpecies: [...speciesNames],
             statusFilterPregnant: false,
             statusFilterNursing: false,
-            statusFilterMating: false, // Reset to default 'owned'
-            ownedFilterMode: 'owned', // Reset to default 'owned'
-            ownedFilterMode: 'owned',
             publicFilter: '',
             blFilter: [],
         });
@@ -3827,6 +3810,25 @@ const AnimalList = ({
                         <Search size={16} />
                         <span className="hidden sm:inline">Search</span>
                     </button>
+                    {/* Ownership filter toggle */}
+                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0" data-tutorial-target="ownership-visibility-filter">
+                        <button
+                            onClick={() => setOwnedFilterMode('owned')}
+                            className={`px-3 py-2 transition text-xs font-medium flex items-center gap-1.5 ${ownedFilterMode === 'owned' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="Show only animals you own"
+                        >
+                            <Heart size={14} /> Owned
+                        </button>
+                        <button
+                            onClick={() => setOwnedFilterMode('all')}
+                            className={`px-3 py-2 transition text-xs font-medium flex items-center gap-1.5 border-l border-gray-200 ${ownedFilterMode === 'all' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="Show all animals (owned and unowned)"
+                        >
+                            All
+                        </button>
+                    </div>
+
+
                     <button
                         onClick={() => setFiltersExpanded(prev => !prev)}
                         className={`relative py-2 px-3 rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 text-sm font-semibold shrink-0 ${
@@ -3942,21 +3944,6 @@ const AnimalList = ({
                                 );
                             })}
                         </div>
-                    </div>
-
-                    {/* Row 4: Ownership filter */}
-                    <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Ownership:</span>
-                        {['owned', 'all'].map(option => (
-                            <button key={option} onClick={() => setOwnedFilterMode(option)}
-                                className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${
-                                    ownedFilterMode === option ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
-                                title={option === 'owned' ? 'Show only animals you own' : 'Show all animals (owned and unowned)'}
-                            >
-                                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {option === 'owned' ? 'Owned' : 'All'}
-                            </button>
-                        ))}
                     </div>
 
                 {/* Row 3: Show filters */}
