@@ -928,9 +928,12 @@ const AnimalList = ({
     
     // This list should reflect animals that are truly ready for the public marketplace.
     // They must be 'Available', not 'isViewOnly', not 'archived', AND explicitly marked 'isForSale'.
+    // This list should reflect animals that are available for new homes.
+    // It counts animals with status 'Available' from the main dashboard animal list.
     const availableDashboardList = useMemo(() => {
         // Filter from dashboardAnimals to ensure they are already non-deceased, non-sold/transferred, non-viewOnly, and non-archived
           return dashboardAnimals.filter(a => a.status === 'Available' && a.isForSale); // Filter from dashboardAnimals
+          return dashboardAnimals.filter(a => a.status === 'Available');
     }, [dashboardAnimals]); // Dependency should be dashboardAnimals
 
     const feedDueDashboard = useMemo(() => {
@@ -3547,10 +3550,10 @@ const AnimalList = ({
                         colorClass="bg-green-100 text-green-900"
                     />
                     <DashboardCard
-                        icon={<ShoppingBag size={32} className="text-purple-800" />}
-                        label="For Sale"
-                        value={availableDashboardList.length}
-                        colorClass="bg-purple-100 text-purple-900"
+                        icon={<Archive size={32} className="text-gray-800" />}
+                        label="Sold / Archived"
+                        value={soldOrArchivedCount}
+                        colorClass="bg-gray-100 text-gray-900"
                     />
                     <DashboardCard
                         icon={<AlertCircle size={32} className="text-orange-800" />}
@@ -3566,14 +3569,14 @@ const AnimalList = ({
                         <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm" data-tutorial-target="ownership-visibility-filter">
                             <button
                                 onClick={() => setOwnedFilterMode('owned')}
-                                className={`px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-primary text-black' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                                 title="Show only animals you own"
                             >
                                 <Heart size={14} /> Show Owned
                             </button>
                             <button
                                 onClick={() => setOwnedFilterMode('all')}
-                                className={`px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center gap-1 border-l border-gray-300 ${ownedFilterMode === 'all' ? 'bg-primary text-black' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center gap-1 border-l border-gray-300 ${ownedFilterMode === 'all' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                                 title="Show all animals (owned and unowned)"
                             >
                                 Show All
@@ -3609,37 +3612,49 @@ const AnimalList = ({
                             <EyeOff size={14} /> Set All Private
                         </button>
                     </div>
-                    <div className="relative" ref={alertsDropdownRef}>
-                        <button
-                            onClick={() => setShowAlertsDropdown(prev => !prev)}
-                            title="Configure alerts"
-                            className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${mgmtAlertsEnabled ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                        >
-                            <Bell size={14} className="sm:w-4 sm:h-4" />
-                            <span className="hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
-                            <ChevronDown size={14} className={`ml-1 transition-transform ${showAlertsDropdown ? 'rotate-180' : ''}`} />
-                        </button>
-                        {showAlertsDropdown && (
-                            <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl z-10">
-                                <div className="p-3 border-b">
-                                    <h4 className="font-semibold text-sm text-gray-800">Notification Settings</h4>
-                                    <p className="text-xs text-gray-500">Select which alerts to show.</p>
-                                </div>
-                                <div className="p-3 space-y-2">
-                                    {Object.entries(ALERT_CATEGORIES).map(([key, label]) => (
-                                        <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
-                                            <input
-                                                type="checkbox"
-                                                checked={!!alertSettings[key]}
-                                                onChange={() => toggleAlertCategory(key)}
-                                                className="w-4 h-4 rounded text-primary focus:ring-primary"
-                                            />
-                                            {label}
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
+                    <div className="flex items-center gap-2">
+                        {!showDuplicatesScreen && (
+                            <button
+                                onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); }}
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${showArchiveScreen ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                title="Archive"
+                            >
+                                <Archive size={14} className="sm:w-4 sm:h-4" />
+                                <span className="hidden sm:inline">Archive</span>
+                            </button>
                         )}
+                        <div className="relative" ref={alertsDropdownRef}>
+                            <button
+                                onClick={() => setShowAlertsDropdown(prev => !prev)}
+                                title="Configure alerts"
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${mgmtAlertsEnabled ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                <Bell size={14} className="sm:w-4 sm:h-4" />
+                                <span className="hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
+                                <ChevronDown size={14} className={`ml-1 transition-transform ${showAlertsDropdown ? 'rotate-180' : ''}`} />
+                            </button>
+                            {showAlertsDropdown && (
+                                <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl z-10">
+                                    <div className="p-3 border-b">
+                                        <h4 className="font-semibold text-sm text-gray-800">Notification Settings</h4>
+                                        <p className="text-xs text-gray-500">Select which alerts to show.</p>
+                                    </div>
+                                    <div className="p-3 space-y-2">
+                                        {Object.entries(ALERT_CATEGORIES).map(([key, label]) => (
+                                            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!!alertSettings[key]}
+                                                    onChange={() => toggleAlertCategory(key)}
+                                                    className="w-4 h-4 rounded text-primary focus:ring-primary"
+                                                />
+                                                {label}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3728,17 +3743,6 @@ const AnimalList = ({
                 </div>
                 {/* Universal top-bar action buttons */}
                 <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap" data-tutorial-target="bulk-privacy-controls">
-                    {/* Archive */}
-                    {!showDuplicatesScreen && (
-                        <button
-                            onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); }}
-                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showArchiveScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800'}`}
-                            title="Archive"
-                        >
-                            <Archive size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium hidden sm:inline">Archive</span>
-                        </button>
-                    )}
                     {/* Find Duplicates */}
                     {!showArchiveScreen && (
                         <button
@@ -3772,12 +3776,13 @@ const AnimalList = ({
             {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
             <div className="mb-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="grid grid-cols-4 sm:hidden">
+                <div className="grid grid-cols-3 sm:hidden">
                                 {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
                                     {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
                                     {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
                                     {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
-                                    {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'}
+                                    {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
+                                    {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
@@ -3804,7 +3809,8 @@ const AnimalList = ({
                   {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
                   {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
                   {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
-                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'}
+                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
+                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
                                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
