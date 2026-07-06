@@ -559,12 +559,12 @@ const AnimalList = ({
     // Apply filters: snapshot current UI filter state into appliedFilters
     const applyFilters = useCallback(() => {
         setAppliedFilters({
-            statusFilter, selectedGenders, selectedSpecies,
+            statusFilter, selectedGenders, selectedSpecies, ownedFilterMode, // Include ownedFilterMode in the snapshot
             statusFilterPregnant, statusFilterNursing, statusFilterMating,
             publicFilter, blFilter,
         });
         setPendingFilters(false);
-    }, [statusFilter, selectedGenders, selectedSpecies, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
+    }, [statusFilter, selectedGenders, selectedSpecies, ownedFilterMode, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
 
     // Species list is now derived from the fetchAnimals result - no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
@@ -805,7 +805,7 @@ const AnimalList = ({
 
         // --- Instant filters (no Apply needed) ---
         // Ownership filter (controlled by ownedFilterMode)
-        if (ownedFilterMode === 'owned') {
+        if (af.ownedFilterMode === 'owned') { // Use appliedFilters.ownedFilterMode for consistency
             source = source.filter(a => a.isOwned !== false); // isOwned: true or undefined for owned, false for unowned
         }
         // Breeding line filter
@@ -823,7 +823,7 @@ const AnimalList = ({
             groups[species].push(animal);
             return groups;
         }, {});
-    }, [animals, appliedFilters, appliedNameFilter, ownedFilterMode, animalBreedingLines]);
+    }, [animals, appliedFilters, appliedNameFilter, animalBreedingLines]); // Remove ownedFilterMode from dependencies as it's now part of appliedFilters
 
     const displayedAnimalCount = useMemo(() => {
         return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
@@ -1044,6 +1044,7 @@ const AnimalList = ({
             statusFilterPregnant: false,
             statusFilterNursing: false,
             statusFilterMating: false, // Reset to default 'owned'
+            ownedFilterMode: 'owned', // Reset to default 'owned'
             ownedFilterMode: 'owned',
             publicFilter: '',
             blFilter: [],
