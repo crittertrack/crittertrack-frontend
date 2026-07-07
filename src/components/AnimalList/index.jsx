@@ -754,6 +754,20 @@ const AnimalList = ({
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
 
+    // ---- Refetch data periodically for dashboard counters ----
+    useEffect(() => {
+        const refetchInterval = 5 * 60 * 1000; // 5 minutes
+        const intervalId = setInterval(() => {
+            if (authToken) {
+                fetchAllAnimals();
+                fetchEnclosures();
+                fetchSupplies();
+            }
+        }, refetchInterval);
+
+        return () => clearInterval(intervalId);
+    }, [authToken, fetchAllAnimals, fetchEnclosures, fetchSupplies]);
+
     // Load collections from API on auth change — always overwrite state from server to prevent cross-user leakage
     useEffect(() => {
         if (!authToken) return;
