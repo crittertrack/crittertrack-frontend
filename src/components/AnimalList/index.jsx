@@ -616,7 +616,7 @@ const AnimalList = ({
             const archivedRes = await axios.get(`${API_BASE_URL}/animals/archived`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            const archivedData = archivedRes.data?.archived || [];
+          const archivedData = archivedRes.data?.archived || [];
             const soldTransferredData = archivedRes.data?.soldTransferred || [];
             const combinedData = [...(res.data || []), ...archivedData, ...soldTransferredData];
             const uniqueData = Array.from(new Map(combinedData.map(item => [item.id_public || item._id, item])).values());
@@ -919,20 +919,14 @@ const AnimalList = ({
     // Filtered list of animals for dashboard counters, excluding 'Deceased', 'Sold', 'Transferred', 'isViewOnly', and 'archived: true'
     const dashboardAnimals = useMemo(() => {
         return allAnimalsRaw.filter(a =>
-            a.status !== 'Deceased' &&
-            a.status !== 'Sold' &&
-            a.status !== 'Transferred' &&
             !a.isViewOnly &&
-            !a.archived &&
-            !a.isTransferred
+            !a.archived
         );
     }, [allAnimalsRaw]);
 
     const soldOrArchivedCount = useMemo(() => {
-        return allAnimalsRaw.filter(a =>
-            a.status === 'Sold' || a.status === 'Transferred' || a.archived || a.isTransferred || a.isViewOnly
-        ).length;
-    }, [allAnimalsRaw]);
+         return allAnimalsRaw.filter(a => a.archived || a.isViewOnly).length;
+}, [allAnimalsRaw]);
 
     // Dashboard Counters
     const totalDashboardAnimalsCount = dashboardAnimals.length;
@@ -1456,8 +1450,8 @@ const AnimalList = ({
                         </div>
                     )}
                     {/* Transfer icon top-left */}
-                    {(animal.soldStatus || animal.isViewOnly) && !isSelectable && (
-                        <div className="absolute top-1 sm:top-2 left-1 sm:left-2 text-black" title="Transferred Animal">
+                    {animal.originalOwnerId && !isSelectable && (
+                        <div className="absolute top-1 sm:top-2 left-1 sm:left-2 text-black" title="Received Animal">
                             <ArrowLeftRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
                         </div>
                     )}

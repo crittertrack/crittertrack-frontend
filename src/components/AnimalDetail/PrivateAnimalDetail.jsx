@@ -542,6 +542,29 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
+                                // If this is a view-only record for the current user (e.g., after a transfer)
+                                if (animal.isViewOnly) {
+                                    // Check if the current user is the *original* owner of this transferred animal.
+                                    const iAmTheOriginalOwner = animal.originalOwnerId === userProfile?._id;
+
+                                    if (iAmTheOriginalOwner) {
+                                        // The original owner should see a "Recall" button.
+                                        // TODO: This requires a new `handleRecallTransfer` function and backend endpoint.
+                                        return (
+                                            <button
+                                                // onClick={handleRecallTransfer}
+                                                disabled // Feature not yet implemented
+                                                className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Recall transfer (feature coming soon)"
+                                            >
+                                                <RotateCcw size={14} />
+                                                Recall
+                                            </button>
+                                        );
+                                    }
+                                    // For any other view-only case, there are no actions.
+                                    return null;
+                                }
                              const iWasTransferredThisAnimal =
                             animal.originalOwnerId &&
                             animal.ownerId_public === userProfile?.id_public;
@@ -653,6 +676,29 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
+                                // If this is a view-only record for the current user (e.g., after a transfer)
+                                if (animal.isViewOnly) {
+                                    // Check if the current user is the *original* owner of this transferred animal.
+                                    const iAmTheOriginalOwner = animal.originalOwnerId === userProfile?._id;
+
+                                    if (iAmTheOriginalOwner) {
+                                        // The original owner should see a "Recall" button.
+                                        // TODO: This requires a new `handleRecallTransfer` function and backend endpoint.
+                                        return (
+                                            <button
+                                                // onClick={handleRecallTransfer}
+                                                disabled // Feature not yet implemented
+                                                className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Recall transfer (feature coming soon)"
+                                            >
+                                                <RotateCcw size={16} />
+                                                Recall
+                                            </button>
+                                        );
+                                    }
+                                    // For any other view-only case, there are no actions.
+                                    return null;
+                                }
                                 const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
                                     return (
