@@ -603,8 +603,7 @@ const AnimalList = ({
 
             const combinedData = [...(res.data || []), ...archivedData, ...soldTransferredData];
             const uniqueData = Array.from(new Map(combinedData.map(item => [item.id_public || item._id, item])).values());
-            const correctedData = uniqueData.map(a => a.status === 'Rehomed' ? { ...a, isViewOnly: false } : a);
-            setAllAnimalsRaw(correctedData);
+            setAllAnimalsRaw(uniqueData);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
