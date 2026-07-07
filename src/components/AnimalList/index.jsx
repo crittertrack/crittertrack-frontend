@@ -22,6 +22,13 @@ const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sol
 const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
 
+const ALERT_CATEGORIES = {
+    feeding: 'Feeding Due',
+    reproduction: 'Reproduction',
+    health: 'Medical / Quarantine',
+    maintenance: 'Maintenance'
+};
+
 const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, birthdate: true, age: true, status: true, reproduction: true, sireName: true, damName: true };
 
 const getSpeciesDisplayName = (species) => {
