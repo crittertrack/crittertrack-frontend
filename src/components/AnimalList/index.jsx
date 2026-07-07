@@ -1566,12 +1566,10 @@ const AnimalList = ({
                         </div>
                     )}
                     {/* Status bar at bottom */}
-                    <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto ${
-                        animal.isViewOnly && animal.status !== 'Rehomed' ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-gray-100 dark:bg-dark-surface-hover'
-                    }`}>
-                        <div className={`text-[10px] sm:text-xs font-medium capitalize ${
-                            animal.isViewOnly && animal.status !== 'Rehomed' ? 'text-orange-800 dark:text-orange-400' : 'text-gray-700 dark:text-dark-text-secondary'
-                        }`}>{animal.status || 'Unknown'}</div>
+                    <div className="w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto bg-gray-100 dark:bg-dark-surface-hover">
+                        <div className="text-[10px] sm:text-xs font-medium capitalize text-gray-700 dark:text-dark-text-secondary">
+                            {animal.status || 'Unknown'}
+                        </div>
                     </div>
                 </div>
             </div>

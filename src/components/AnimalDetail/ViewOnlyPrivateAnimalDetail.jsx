@@ -349,16 +349,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="text-sm font-medium text-gray-700">
-                                            {animal.breederId_public && animal.ownerId_public && animal.breederId_public !== animal.ownerId_public ? (
-                                                <div className="space-y-0.5 text-center">
-                                                    <div>Sold</div>
-                                                    {animal.status && <div>{animal.status}</div>}
-                                                </div>
-                                            ) : (
-                                                <span>{animal.status || 'Unknown'}</span>
-                                            )}
-                                        </div>
+                                        <div className="text-sm font-medium text-gray-700">{animal.status || 'Unknown'}</div>
                                         {animal.isForSale && (
                                             <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
                                                 <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}

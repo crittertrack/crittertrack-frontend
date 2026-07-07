@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
+﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -565,68 +565,64 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                     // For any other view-only case, there are no actions.
                                     return null;
                                 }
-                             const iWasTransferredThisAnimal =
-                            animal.originalOwnerId &&
-                            animal.ownerId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
 
-                            // Recipient owns it
-                            if (iWasTransferredThisAnimal) {
-                            return (
-                           <button
-                            onClick={() => handleReturnTransferredAnimal()}
-                            disabled={returningAnimal}
-                            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                             title="Return to breeder"
-                            >
-                            <RotateCcw size={14} />
-                            {returningAnimal ? "Returning..." : "Return"}
-                            </button>
-                         );
-                     }
+                                // Recipient owns it
+                                if (iWasTransferredThisAnimal) {
+                                    return (
+                                        <button
+                                            onClick={() => handleReturnTransferredAnimal()}
+                                            disabled={returningAnimal}
+                                            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                            title="Return to breeder"
+                                        >
+                                            <RotateCcw size={14} />
+                                            {returningAnimal ? "Returning..." : "Return"}
+                                        </button>
+                                    );
+                                }
 
-                     // Transfer request exists
-                     if (animal.pendingTransfer) {
+                                // Transfer request exists
+                                if (animal.pendingTransfer) {
+                                    // If current user is the SENDER → show Withdraw
+                                    if (animal.pendingTransfer.fromUserId === userProfile?._id) {
+                                        return (
+                                            <button
+                                                onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
+                                                className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                                title="Withdraw transfer request"
+                                            >
+                                                <X size={14} />
+                                                Withdraw
+                                            </button>
+                                        );
+                                    }
 
-                       // 🆕 If current user is the SENDER → show Withdraw
-                     if (animal.pendingTransfer.fromUserId === userProfile?._id) {
-                       return (
-                      <button
-                onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
-                className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                title="Withdraw transfer request"
-                  >
-                <X size={14} />
-                Withdraw
-              </button>
-             );
-            }
+                                    // Recipient view → still pending approval
+                                    return (
+                                        <button
+                                            disabled
+                                            className="px-2 py-1 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-1 text-xs cursor-not-allowed"
+                                            title="Transfer request pending"
+                                        >
+                                            <ArrowLeftRight size={14} />
+                                            Pending
+                                        </button>
+                                    );
+                                }
 
-    
-
-              // Recipient view → still pending approval
-              return (
-             <button
-            disabled
-            className="px-2 py-1 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-1 text-xs cursor-not-allowed"
-            title="Transfer request pending"
-             >
-            <ArrowLeftRight size={14} />
-            Pending
-           </button>
-            );
-              }
-
-               // Original owner (no transfer)
-              return (
-            <button
-             onClick={() => onTransfer(animal)}
-             className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-             title="Transfer this animal"
-               >
-             <ArrowLeftRight size={14} />
-              Transfer
-               </button>
-                       );})()}
+                                // Original owner (no transfer)
+                                return (
+                                    <button
+                                        onClick={() => onTransfer(animal)}
+                                        className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                        title="Transfer this animal"
+                                    >
+                                        <ArrowLeftRight size={14} />
+                                        Transfer
+                                    </button>
+                                );
+                            })()}
                             {onArchive && (
                                 <button
                                     onClick={() => onArchive(animal)}
