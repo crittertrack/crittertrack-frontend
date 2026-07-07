@@ -44,61 +44,6 @@ const getSpeciesDisplayName = (species) => {
     return displayNames[species] || species;
 };
 
-const getActionLabel = (action) => {
-    const labels = {
-        login: 'Logged in', logout: 'Logged out', password_change: 'Changed password',
-        profile_update: 'Updated profile', profile_image_change: 'Changed profile photo',
-        privacy_settings_change: 'Updated privacy settings',
-        animal_create: 'Added a new animal', animal_update: 'Updated animal',
-        animal_delete: 'Deleted animal', animal_image_upload: 'Uploaded animal photo',
-        animal_image_delete: 'Deleted animal photo', animal_visibility_change: 'Changed animal visibility',
-        animal_transfer_initiate: 'Initiated animal transfer', animal_transfer_accept: 'Accepted animal transfer',
-        animal_transfer_reject: 'Rejected animal transfer', litter_create: 'Recorded a new litter',
-        litter_update: 'Updated litter', litter_delete: 'Deleted litter',
-        message_send: 'Sent a message', message_delete: 'Deleted a message',
-        report_submit: 'Submitted a report', transaction_create: 'Added a budget transaction',
-        transaction_delete: 'Deleted a budget transaction',
-        login: 'Logged in',
-        logout: 'Logged out',
-        password_change: 'Changed password',
-        profile_update: 'Updated profile',
-        profile_image_change: 'Changed profile image',
-        privacy_settings_change: 'Changed privacy settings',
-        animal_create: 'Added animal',
-        animal_update: 'Updated animal',
-        animal_delete: 'Deleted animal',
-        animal_image_upload: 'Uploaded animal image',
-        animal_image_delete: 'Deleted animal image',
-        animal_visibility_change: 'Changed animal visibility',
-        animal_transfer_initiate: 'Initiated animal transfer',
-        animal_transfer_accept: 'Accepted animal transfer',
-        animal_transfer_reject: 'Rejected animal transfer',
-        litter_create: 'Created litter',
-        litter_update: 'Updated litter',
-        litter_delete: 'Deleted litter',
-        message_send: 'Sent message',
-        message_delete: 'Deleted message',
-        report_submit: 'Submitted report',
-        transaction_create: 'Created transaction',
-        transaction_delete: 'Deleted transaction',
-        // Management panel
-        enclosure_create: 'Created enclosure',
-        enclosure_update: 'Updated enclosure',
-        enclosure_delete: 'Deleted enclosure',
-        enclosure_assign: 'Assigned to enclosure',
-        enclosure_unassign: 'Removed from enclosure',
-        animal_fed: 'Marked as fed',
-        care_task_done: 'Care task completed',
-        enclosure_task_done: 'Cleaning task completed',
-        reproduction_update: 'Reproductive status updated',
-    };
-    return labels[action] || (action && action.replace(/_/g, ' ')) || 'Unknown action';
-    if (!action) return 'Unknown action';
-    const key = action.replace(/_failed$/, '');
-    const base = labels[key] || action.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    return action.endsWith('_failed') ? `${base} (failed)` : base;
-};
-
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
     const [imageSrc, setImageSrc] = React.useState(src);
