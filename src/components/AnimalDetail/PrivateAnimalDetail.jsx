@@ -1,4 +1,4 @@
-﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
+﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -542,29 +542,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                // If this is a view-only record for the current user (e.g., after a transfer)
-                                if (animal.isViewOnly) {
-                                    // Check if the current user is the *original* owner of this transferred animal.
-                                    const iAmTheOriginalOwner = animal.originalOwnerId === userProfile?._id;
-
-                                    if (iAmTheOriginalOwner) {
-                                        // The original owner should see a "Recall" button.
-                                        // TODO: This requires a new `handleRecallTransfer` function and backend endpoint.
-                                        return (
-                                            <button
-                                                // onClick={handleRecallTransfer}
-                                                disabled // Feature not yet implemented
-                                                className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                                                title="Recall transfer (feature coming soon)"
-                                            >
-                                                <RotateCcw size={14} />
-                                                Recall
-                                            </button>
-                                        );
-                                    }
-                                    // For any other view-only case, there are no actions.
-                                    return null;
-                                }
+                                
                                 const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
 
                                 // Recipient owns it
@@ -598,17 +576,29 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                         );
                                     }
 
-                                    // Recipient view → still pending approval
-                                    return (
-                                        <button
-                                            disabled
-                                            className="px-2 py-1 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-1 text-xs cursor-not-allowed"
-                                            title="Transfer request pending"
-                                        >
-                                            <ArrowLeftRight size={14} />
-                                            Pending
-                                        </button>
-                                    );
+                                    // If current user is the RECIPIENT -> show Accept/Reject
+                                    if (animal.pendingTransfer.toUserId === userProfile?._id) {
+                                        return (
+                                            <div className="flex gap-1.5">
+                                                <button
+                                                    onClick={() => handleAcceptTransfer(animal.pendingTransfer._id)}
+                                                    className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                                    title="Accept transfer"
+                                                >
+                                                    <Check size={14} />
+                                                    Accept
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRejectTransfer(animal.pendingTransfer._id)}
+                                                    className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                                    title="Reject transfer"
+                                                >
+                                                    <X size={14} />
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        );
+                                    }
                                 }
 
                                 // Original owner (no transfer)
@@ -672,29 +662,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                // If this is a view-only record for the current user (e.g., after a transfer)
-                                if (animal.isViewOnly) {
-                                    // Check if the current user is the *original* owner of this transferred animal.
-                                    const iAmTheOriginalOwner = animal.originalOwnerId === userProfile?._id;
-
-                                    if (iAmTheOriginalOwner) {
-                                        // The original owner should see a "Recall" button.
-                                        // TODO: This requires a new `handleRecallTransfer` function and backend endpoint.
-                                        return (
-                                            <button
-                                                // onClick={handleRecallTransfer}
-                                                disabled // Feature not yet implemented
-                                                className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                title="Recall transfer (feature coming soon)"
-                                            >
-                                                <RotateCcw size={16} />
-                                                Recall
-                                            </button>
-                                        );
-                                    }
-                                    // For any other view-only case, there are no actions.
-                                    return null;
-                                }
+                                
                                 const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
                                     return (
@@ -726,17 +694,29 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                         );
                                     }
 
-                                    // Recipient view → still pending approval
-                                    return (
-                                        <button
-                                            disabled
-                                            className="px-3 py-1.5 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-2 cursor-not-allowed"
-                                            title="Transfer request pending"
-                                        >
-                                            <ArrowLeftRight size={16} />
-                                            Pending
-                                        </button>
-                                    );
+                                    // If current user is the RECIPIENT -> show Accept/Reject
+                                    if (animal.pendingTransfer.toUserId === userProfile?._id) {
+                                        return (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleAcceptTransfer(animal.pendingTransfer._id)}
+                                                    className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                                    title="Accept transfer"
+                                                >
+                                                    <Check size={16} />
+                                                    Accept
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRejectTransfer(animal.pendingTransfer._id)}
+                                                    className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                                    title="Reject transfer"
+                                                >
+                                                    <X size={16} />
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        );
+                                    }
                                 }
 
                                 // Original owner (no transfer)

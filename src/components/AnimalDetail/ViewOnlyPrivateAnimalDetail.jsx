@@ -1,4 +1,4 @@
-﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -9,7 +9,21 @@ import { useDetailFieldTemplate, parseJsonField, DetailJsonList, ViewOnlyParentC
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
-import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
+import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
+const ViewOnlyPrivateAnimalDetail = ({
+    animal,
+    onClose,
+    onCloseAll,
+    API_BASE_URL,
+    authToken,
+    setShowImageModal,
+    setEnlargedImageUrl,
+    showModalMessage,
+    onViewAnimal,
+    userProfile, // This prop is needed for button logic
+    initialTab = 1,
+    initialBetaView = 'vertical'
+}) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
@@ -29,6 +43,26 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
     const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
     const [showHorizCert, setShowHorizCert] = useState(false);
     const [showVertCert, setShowVertCert] = useState(false);
+
+    const handleRecallTransfer = useCallback(async () => {
+        if (!animal?.id_public) return;
+
+        if (!window.confirm(`Are you sure you want to recall this transfer? The animal will be returned to your account.`)) {
+            return;
+        }
+
+        try {
+            await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/recall`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Transfer recalled! The animal is now back in your collection.');
+            window.dispatchEvent(new Event('animals-changed'));
+            (onCloseAll || onClose)?.();
+        } catch (err) {
+            console.error('Failed to recall transfer:', err);
+            showModalMessage('Error', `Failed to recall transfer: ${err.response?.data?.message || err.message}`);
+        }
+    }, [animal, API_BASE_URL, authToken, showModalMessage, onCloseAll, onClose]);
 
     // Warm pedigree cache shortly after opening details so Pedigree tab opens faster.
     useEffect(() => {
@@ -270,6 +304,40 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                             <ArrowLeft size={18} className="mr-1" /> Back
                         </button>
                         <div className="flex items-center gap-2">
+                            {(() => {
+                                // This component is for view-only animals.
+                                // Check if the current user is the *original* owner of this transferred animal.
+                                const iAmTheOriginalOwner = animal.originalOwnerId === userProfile?._id;
+
+                                if (iAmTheOriginalOwner) {
+                                    return (
+                                        <button
+                                            onClick={handleRecallTransfer}
+                                            className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                            title="Recall this transfer"
+                                        >
+                                            <RotateCcw size={16} />
+                                            Recall
+                                        </button>
+                                    );
+                                }
+
+                                // If current user is the RECIPIENT of a pending transfer, show the disabled "Pending" button.
+                                if (animal.pendingTransfer && animal.pendingTransfer.toUserId === userProfile?._id) {
+                                    return (
+                                        <button
+                                            disabled
+                                            className="px-3 py-1.5 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-2 cursor-not-allowed"
+                                            title="Transfer request pending approval via notifications"
+                                        >
+                                            <ArrowLeftRight size={16} />
+                                            Pending
+                                        </button>
+                                    );
+                                }
+
+                                return null; // No actions for other view-only cases.
+                            })()}
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
