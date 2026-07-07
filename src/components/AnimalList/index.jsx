@@ -1873,8 +1873,8 @@ const AnimalList = ({
             <ArchiveScreen
                 onBack={() => setShowArchiveScreen(false)}
                 archiveLoading={archiveLoading}
-                archivedAnimals={archivedAnimals}
-                soldTransferredAnimals={soldTransferredRaw.filter(a => a.isViewOnly)}
+                archivedAnimals={archivedAnimals} // This is correct
+                soldTransferredAnimals={soldTransferredAnimals} // Use the correct prop
                 soldOwnerFilter={soldOwnerFilter}
                 setSoldOwnerFilter={setSoldOwnerFilter}
                 collapsedMgmtSections={collapsedMgmtSections}
