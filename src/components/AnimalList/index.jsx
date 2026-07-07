@@ -616,8 +616,11 @@ const AnimalList = ({
             const archivedRes = await axios.get(`${API_BASE_URL}/animals/archived`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            const archivedData = archivedRes.data.archived || [];
-            setAllAnimalsRaw([...(res.data || []), ...archivedData]);
+            const archivedData = archivedRes.data?.archived || [];
+            const soldTransferredData = archivedRes.data?.soldTransferred || [];
+            const combinedData = [...(res.data || []), ...archivedData, ...soldTransferredData];
+            const uniqueData = Array.from(new Map(combinedData.map(item => [item.id_public || item._id, item])).values());
+            setAllAnimalsRaw(uniqueData);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
@@ -927,7 +930,7 @@ const AnimalList = ({
 
     const soldOrArchivedCount = useMemo(() => {
         return allAnimalsRaw.filter(a =>
-            a.status === 'Sold' || a.status === 'Transferred' || a.archived || a.isTransferred
+            a.status === 'Sold' || a.status === 'Transferred' || a.archived || a.isTransferred || a.isViewOnly
         ).length;
     }, [allAnimalsRaw]);
 
