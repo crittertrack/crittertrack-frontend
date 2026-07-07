@@ -1083,6 +1083,7 @@ const AnimalList = ({
 
             // Re-fetch the animal list from the server
             await fetchAnimals();
+            await fetchAllAnimals();
         } catch (error) {
             console.error('Error refreshing:', error);
         } finally {
@@ -1265,6 +1266,11 @@ const AnimalList = ({
                 : animal
         );
         setAnimals(updatedAnimals);
+        setAllAnimalsRaw(prev => prev.map(animal =>
+            animalIds.includes(animal.id_public)
+                ? { ...animal, showOnPublicProfile: makePublic, isDisplay: makePublic }
+                : animal
+        ));
 
         // Update database in the background
         let failedUpdates = 0;
@@ -1310,6 +1316,11 @@ const AnimalList = ({
             isDisplay: makePublic
         }));
         setAnimals(updatedAnimals);
+        setAllAnimalsRaw(prev => prev.map(animal => ({
+            ...animal,
+            showOnPublicProfile: makePublic,
+            isDisplay: makePublic
+        })));
 
         // Update database in the background
         let failedUpdates = 0;
@@ -1359,6 +1370,7 @@ const AnimalList = ({
             setBulkDeleteMode(prev => ({ ...prev, [species]: false }));
             setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
             await fetchAnimals();
+            await fetchAllAnimals();
         } catch (error) {
             console.error('Error deleting animals:', error);
             showModalMessage('Error', 'Failed to delete some animals. Please try again.');
@@ -1388,6 +1400,7 @@ const AnimalList = ({
             setBulkArchiveMode(prev => ({ ...prev, [species]: false }));
             setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
             await fetchAnimals();
+            await fetchAllAnimals();
             if (showArchiveScreen) {
                 await fetchArchiveData();
             }
@@ -3675,6 +3688,10 @@ const AnimalList = ({
             isOwned: makeOwned,
         }));
         setAnimals(updatedAnimals);
+        setAllAnimalsRaw(prev => prev.map(animal => ({
+            ...animal,
+            isOwned: makeOwned,
+        })));
 
         // Update database in the background
         let failedUpdates = 0;
