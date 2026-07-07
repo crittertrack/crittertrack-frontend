@@ -656,7 +656,8 @@ const AnimalList = ({
             const soldTransferredData = archivedRes.data?.soldTransferred || [];
             const combinedData = [...(res.data || []), ...archivedData, ...soldTransferredData];
             const uniqueData = Array.from(new Map(combinedData.map(item => [item.id_public || item._id, item])).values());
-            setAllAnimalsRaw(uniqueData);
+            const correctedData = uniqueData.map(a => a.status === 'Rehomed' ? { ...a, isViewOnly: false } : a);
+            setAllAnimalsRaw(correctedData);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
@@ -1036,7 +1037,7 @@ const AnimalList = ({
             if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
             enclosureAnimalMap[a.enclosureId].push(a);
         } else {
-            if (a.status !== 'Rehomed') unassignedAnimals.push(a);
+            unassignedAnimals.push(a);
         }
     });
 
@@ -1607,9 +1608,9 @@ const AnimalList = ({
                     <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto ${
                         animal.isViewOnly ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-gray-100 dark:bg-dark-surface-hover'
                     }`}>
-                        <div className={`text-[10px] sm:text-xs font-medium ${
+                        <div className={`text-[10px] sm:text-xs font-medium capitalize ${
                             animal.isViewOnly ? 'text-orange-800 dark:text-orange-400' : 'text-gray-700 dark:text-dark-text-secondary'
-                        }`}>{animal.isViewOnly ? 'Sold' : (animal.status || 'Unknown')}</div>
+                        }`}>{animal.status || 'Unknown'}</div>
                     </div>
                 </div>
             </div>
