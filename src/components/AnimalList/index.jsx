@@ -920,13 +920,14 @@ const AnimalList = ({
             a.status !== 'Sold' &&
             a.status !== 'Transferred' &&
             !a.isViewOnly &&
-            !a.archived
+            !a.archived &&
+            !a.isTransferred
         );
     }, [allAnimalsRaw]);
 
     const soldOrArchivedCount = useMemo(() => {
         return allAnimalsRaw.filter(a =>
-            a.status === 'Sold' || a.status === 'Transferred' || a.archived
+            a.status === 'Sold' || a.status === 'Transferred' || a.archived || a.isTransferred
         ).length;
     }, [allAnimalsRaw]);
 
