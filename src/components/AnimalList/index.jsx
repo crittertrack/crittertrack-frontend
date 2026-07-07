@@ -896,37 +896,39 @@ const AnimalList = ({
         return ds !== null && ds >= Number(freqDays);
     };
 
-    // Filtered list of animals for dashboard counters, excluding 'Deceased', 'Sold', 'Transferred', 'isViewOnly', and 'archived: true'
-    const dashboardAnimals = useMemo(() => {
+    // --- Dashboard Counter Calculations ---
+    // Per your instructions, these counters strictly follow these rules:
+    // - Total = All animals excluding sold/archived.
+    // - Owned = All owned animals excluding sold/archived.
+    // - Public = All public animals excluding sold/archived.
+    // - Sold/Archived = All animals that are sold (transferred) or archived.
+    // - DECEASED animals are NOT excluded from any of these counts.
+
+    // Base list for "active" animals (not sold or archived).
+    const activeAnimalsForDashboard = useMemo(() => {
         return allAnimalsRaw.filter(a =>
             !a.isViewOnly &&
             !a.archived
         );
     }, [allAnimalsRaw]);
 
+    // Sold/Archived = all transferred (isViewOnly) + Archived.
     const soldOrArchivedCount = useMemo(() => {
          return allAnimalsRaw.filter(a => a.archived || a.isViewOnly).length;
 }, [allAnimalsRaw]);
 
     // Dashboard Counters
-    const totalDashboardAnimalsCount = dashboardAnimals.length;
-    const ownedDashboardCount = dashboardAnimals.filter(a => a.isOwned !== false).length;
-    const publicDashboardCount = dashboardAnimals.filter(a => a.showOnPublicProfile === true).length;
+    const totalDashboardAnimalsCount = activeAnimalsForDashboard.length;
+    const ownedDashboardCount = activeAnimalsForDashboard.filter(a => a.isOwned !== false).length;
+    const publicDashboardCount = activeAnimalsForDashboard.filter(a => a.showOnPublicProfile === true).length;
 
-    
-    // This list should reflect animals that are truly ready for the public marketplace.
-    // They must be 'Available', not 'isViewOnly', not 'archived', AND explicitly marked 'isForSale'.
-    // This list should reflect animals that are available for new homes.
-    // It counts animals with status 'Available' from the main dashboard animal list.
     const availableDashboardList = useMemo(() => {
-        // Filter from dashboardAnimals to ensure they are already non-deceased, non-sold/transferred, non-viewOnly, and non-archived
-          return dashboardAnimals.filter(a => a.status === 'Available' && a.isForSale); // Filter from dashboardAnimals
-          return dashboardAnimals.filter(a => a.status === 'Available');
-    }, [dashboardAnimals]); // Dependency should be dashboardAnimals
+        return activeAnimalsForDashboard.filter(a => a.status === 'Available');
+    }, [activeAnimalsForDashboard]);
 
     const feedDueDashboard = useMemo(() => {
-        return dashboardAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
-    }, [dashboardAnimals]);
+        return activeAnimalsForDashboard.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
+    }, [activeAnimalsForDashboard]);
 
     const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
     const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
@@ -941,19 +943,19 @@ const AnimalList = ({
     const inHealthEnclosure = useCallback(a => a.enclosureId && healthEnclosureIds.has(a.enclosureId), [healthEnclosureIds]);
 
     const quarantineDashboardList = useMemo(() => {
-        return dashboardAnimals.filter(a => a.isQuarantine && !inHealthEnclosure(a));
-    }, [dashboardAnimals, inHealthEnclosure]);
+        return activeAnimalsForDashboard.filter(a => a.isQuarantine && !inHealthEnclosure(a));
+    }, [activeAnimalsForDashboard, inHealthEnclosure]);
 
     const treatmentDashboardList = useMemo(() => {
-        return dashboardAnimals.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
-    }, [dashboardAnimals, inHealthEnclosure]);
+        return activeAnimalsForDashboard.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
+    }, [activeAnimalsForDashboard, inHealthEnclosure]);
 
     const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
 
     // The original 'allAnimals' variable (used for the main list and management views) remains unchanged.
     const quarantineList = allAnimalsRaw.filter(a => a.isQuarantine && !inHealthEnclosure(a));
     const treatmentList = allAnimalsRaw.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
-    const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
+    const allAnimals = allAnimalsRaw.filter(a => !a.isViewOnly);
 
     // Other lists that might depend on 'allAnimals' for management views
     const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
