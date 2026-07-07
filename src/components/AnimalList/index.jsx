@@ -613,7 +613,11 @@ const AnimalList = ({
                 headers: { Authorization: `Bearer ${authToken}` },
                 params: { slim: 'true' }
             });
-            setAllAnimalsRaw(res.data || []);
+            const archivedRes = await axios.get(`${API_BASE_URL}/animals/archived`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            const archivedData = archivedRes.data.archived || [];
+            setAllAnimalsRaw([...(res.data || []), ...archivedData]);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
@@ -3556,10 +3560,10 @@ const AnimalList = ({
                         colorClass="bg-green-100 text-green-900"
                     />
                     <DashboardCard
-                        icon={<Archive size={32} className="text-gray-800" />}
+                        icon={<Archive size={32} className="text-purple-800" />}
                         label="Sold / Archived"
                         value={soldOrArchivedCount}
-                        colorClass="bg-gray-100 text-gray-900"
+                        colorClass="bg-purple-100 text-purple-900"
                     />
                     <DashboardCard
                         icon={<AlertCircle size={32} className="text-orange-800" />}
@@ -3622,7 +3626,7 @@ const AnimalList = ({
                         {!showDuplicatesScreen && (
                             <button
                                 onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); }}
-                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${showArchiveScreen ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${showArchiveScreen ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
                                 title="Archive"
                             >
                                 <Archive size={14} className="sm:w-4 sm:h-4" />
