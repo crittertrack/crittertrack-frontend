@@ -457,6 +457,42 @@ const AnimalList = ({
             });
             setArchivedAnimals(res.data.archived || []);
             setSoldTransferredAnimals(res.data.soldTransferred || []);
+
+            const sold = res.data.soldTransferred || [];
+            if (sold.length > 0) {
+                // Get unique owner IDs from the sold animals
+                const ownerIds = [...new Set(sold.map(a => a.ownerId_public).filter(Boolean))];
+
+                if (ownerIds.length > 0) {
+                    // Fetch all owner profiles in parallel for efficiency
+                    const profilePromises = ownerIds.map(id =>
+                        axios.get(`${API_BASE_URL}/public/profiles/search?query=${id}&limit=1`)
+                            .then(res => res.data?.[0])
+                            .catch(() => null) // Ignore errors for individual profile fetches
+                    );
+                    const profiles = (await Promise.all(profilePromises)).filter(Boolean);
+                    const profilesMap = new Map(profiles.map(p => [p.id_public, p]));
+
+                    // Enrich the animal objects with owner details for display
+                    const enrichedSold = sold.map(animal => {
+                        const ownerProfile = profilesMap.get(animal.ownerId_public);
+                        if (ownerProfile) {
+                            return {
+                                ...animal,
+                                ownerName: ownerProfile.breederName || ownerProfile.personalName,
+                                ownerAvatar: ownerProfile.profileImage,
+                                ownerIdPublic: ownerProfile.id_public
+                            };
+                        }
+                        return animal;
+                    });
+                    setSoldTransferredAnimals(enrichedSold);
+                } else {
+                    setSoldTransferredAnimals(sold);
+                }
+            } else {
+                setSoldTransferredAnimals([]);
+            }
         } catch (err) {
             console.error('Failed to fetch archive data:', err);
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to load archive');
