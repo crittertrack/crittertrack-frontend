@@ -595,8 +595,12 @@ const AnimalList = ({
             const archivedRes = await axios.get(`${API_BASE_URL}/animals/archived`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-          const archivedData = archivedRes.data?.archived || [];
-            const soldTransferredData = archivedRes.data?.soldTransferred || [];
+            // Manually add `archived: true` to animals from the archived list,
+            // as the backend doesn't seem to include this flag, which breaks counter logic.
+            const archivedData = (archivedRes.data?.archived || []).map(a => ({ ...a, archived: true }));
+            // Also ensure sold/transferred animals are correctly marked as view-only for the counters.
+            const soldTransferredData = (archivedRes.data?.soldTransferred || []).map(a => ({ ...a, isViewOnly: true }));
+
             const combinedData = [...(res.data || []), ...archivedData, ...soldTransferredData];
             const uniqueData = Array.from(new Map(combinedData.map(item => [item.id_public || item._id, item])).values());
             const correctedData = uniqueData.map(a => a.status === 'Rehomed' ? { ...a, isViewOnly: false } : a);
