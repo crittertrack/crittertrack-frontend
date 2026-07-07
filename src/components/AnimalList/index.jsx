@@ -44,6 +44,8 @@ const getSpeciesDisplayName = (species) => {
     return displayNames[species] || species;
 };
 
+const normalizeSpeciesForFilter = (species) => (species || '').toLowerCase();
+
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
     const [imageSrc, setImageSrc] = React.useState(src);
