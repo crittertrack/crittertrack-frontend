@@ -37,42 +37,6 @@ const getSpeciesDisplayName = (species) => {
     return displayNames[species] || species;
 };
 
-const ALERT_CATEGORIES = {
-    feeding: 'Feeding Reminders',
-    care: 'Care Reminders',
-    maintenance: 'Maintenance Reminders',
-    supplies: 'Supply Reminders',
-    breeding: 'Breeding & Births',
-    medical: 'Medical Alerts',
-    custom: 'Milestones'
-};
-
-const normalizeSpeciesForFilter = (species) => {
-    const value = (species || '').toString().trim().toLowerCase();
-    if (['rat', 'rats', 'fancy rat', 'fancy rats'].includes(value)) return 'fancy rat';
-    if (['mouse', 'mice', 'fancy mouse', 'fancy mice'].includes(value)) return 'fancy mouse';
-    return value;
-};
-
-const formatTimeAgo = (dateStr) => {
-    if (!dateStr) return '';
-    const now = new Date();
-    const then = new Date(dateStr);
-    if (isNaN(then.getTime())) return '';
-    const diffMs = now - then;
-    const diffSec = Math.floor(diffMs / 1000);
-    if (diffSec < 60) return 'just now';
-    const diffMin = Math.floor(diffSec / 60);
-    if (diffMin < 60) return diffMin + 'm ago';
-    const diffHr = Math.floor(diffMin / 60);
-    if (diffHr < 24) return diffHr + 'h ago';
-    const diffDays = Math.floor(diffHr / 24);
-    if (diffDays < 30) return diffDays + 'd ago';
-    const diffMo = Math.floor(diffDays / 30);
-    if (diffMo < 12) return diffMo + 'mo ago';
-    return Math.floor(diffMo / 12) + 'y ago';
-};
-
 const getActionLabel = (action) => {
     const labels = {
         login: 'Logged in', logout: 'Logged out', password_change: 'Changed password',
@@ -89,18 +53,6 @@ const getActionLabel = (action) => {
         transaction_delete: 'Deleted a budget transaction',
     };
     return labels[action] || (action && action.replace(/_/g, ' ')) || 'Unknown action';
-};
-
-const getActionColor = (action) => {
-    if (!action) return 'bg-gray-300';
-    if (action.startsWith('animal_')) return 'bg-accent';
-    if (action.startsWith('litter_')) return 'bg-purple-400';
-    if (action.startsWith('transaction_')) return 'bg-emerald-400';
-    if (action.startsWith('message_')) return 'bg-blue-400';
-    if (action === 'login' || action === 'logout') return 'bg-gray-400';
-    if (action.startsWith('profile_') || action.startsWith('privacy_')) return 'bg-yellow-400';
-    if (action === 'report_submit') return 'bg-red-400';
-    return 'bg-gray-300';
 };
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
