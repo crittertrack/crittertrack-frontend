@@ -3541,106 +3541,116 @@ const AnimalList = ({
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <DashboardCard
-                        icon={<Cat size={32} className="text-blue-800" />}
-                        label="Total Animals"
-                        value={totalDashboardAnimalsCount}
-                        colorClass="bg-blue-100 text-blue-900"
-                    />
-                    <DashboardCard
-                        icon={<Heart size={32} className="text-red-800" />}
-                        label="Owned"
-                        value={ownedDashboardCount}
-                        colorClass="bg-red-100 text-red-900"
-                    />
-                    <DashboardCard
-                        icon={<Eye size={32} className="text-green-800" />}
-                        label="Public"
-                        value={publicDashboardCount}
-                        colorClass="bg-green-100 text-green-900"
-                    />
-                    <DashboardCard
-                        icon={<Archive size={32} className="text-purple-800" />}
-                        label="Sold / Archived"
-                        value={soldOrArchivedCount}
-                        colorClass="bg-purple-100 text-purple-900"
-                    />
-                    <DashboardCard
-                        icon={<AlertCircle size={32} className="text-orange-800" />}
-                        label="Needs Attention"
-                        value={feedDueDashboard.length + healthAttentionDashboardCount}
-                        colorClass="bg-orange-100 text-orange-900"
-                    />
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center justify-start sm:justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                        {/* Ownership filter toggle */}
-                        <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm" data-tutorial-target="ownership-visibility-filter">
+                    {/* Column 1: Total Animals */}
+                    <div className="flex flex-col gap-2">
+                        <DashboardCard
+                            icon={<Cat size={32} className="text-blue-800" />}
+                            label="Total Animals"
+                            value={totalDashboardAnimalsCount}
+                            colorClass="bg-blue-100 text-blue-900"
+                        />
+                        <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm w-full" data-tutorial-target="ownership-visibility-filter">
                             <button
                                 onClick={() => setOwnedFilterMode('owned')}
-                                className={`px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                                 title="Show only animals you own"
                             >
-                                <Heart size={14} /> Show Owned
+                                <Heart size={14} /> Owned
                             </button>
                             <button
                                 onClick={() => setOwnedFilterMode('all')}
-                                className={`px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center gap-1 border-l border-gray-300 ${ownedFilterMode === 'all' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 border-l border-gray-300 ${ownedFilterMode === 'all' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                                 title="Show all animals (owned and unowned)"
                             >
-                                Show All
+                                All
                             </button>
                         </div>
-                        <span className="hidden sm:inline mx-1 text-gray-300">|</span>
+                    </div>
+
+                    {/* Column 2: Owned */}
+                    <div className="flex flex-col gap-2">
+                        <DashboardCard
+                            icon={<Heart size={32} className="text-red-800" />}
+                            label="Owned"
+                            value={ownedDashboardCount}
+                            colorClass="bg-red-100 text-red-900"
+                        />
                         <button
                             onClick={() => toggleAllAnimalsOwned(true)}
-                            className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-red-100 text-red-700 hover:bg-red-200"
                             title="Mark All Animals as Owned"
                         >
                             <Heart size={14} /> Set All Owned
                         </button>
                         <button
                             onClick={() => toggleAllAnimalsOwned(false)}
-                            className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
                             title="Mark All Animals as Unowned"
                         >
                             <HeartOff size={14} /> Set All Unowned
                         </button>
+                    </div>
+
+                    {/* Column 3: Public */}
+                    <div className="flex flex-col gap-2">
+                        <DashboardCard
+                            icon={<Eye size={32} className="text-green-800" />}
+                            label="Public"
+                            value={publicDashboardCount}
+                            colorClass="bg-green-100 text-green-900"
+                        />
                         <button
                             onClick={() => toggleAllAnimalsPrivacy(true)}
-                            className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-green-100 text-green-700 hover:bg-green-200"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-green-100 text-green-700 hover:bg-green-200"
                             title="Make All Animals Public"
                         >
                             <Eye size={14} /> Set All Public
                         </button>
                         <button
                             onClick={() => toggleAllAnimalsPrivacy(false)}
-                            className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
                             title="Make All Animals Private"
                         >
                             <EyeOff size={14} /> Set All Private
                         </button>
                     </div>
-                    <div className="flex items-center gap-2">
+
+                    {/* Column 4: Sold/Archived */}
+                    <div className="flex flex-col gap-2">
+                        <DashboardCard
+                            icon={<Archive size={32} className="text-purple-800" />}
+                            label="Sold / Archived"
+                            value={soldOrArchivedCount}
+                            colorClass="bg-purple-100 text-purple-900"
+                        />
                         {!showDuplicatesScreen && (
                             <button
                                 onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); }}
-                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${showArchiveScreen ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
+                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${showArchiveScreen ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
                                 title="Archive"
                             >
                                 <Archive size={14} className="sm:w-4 sm:h-4" />
-                                <span className="hidden sm:inline">Archive</span>
+                                <span>Archive</span>
                             </button>
                         )}
-                        <div className="relative" ref={alertsDropdownRef}>
+                    </div>
+
+                    {/* Column 5: Needs Attention */}
+                    <div className="flex flex-col gap-2">
+                        <DashboardCard
+                            icon={<AlertCircle size={32} className="text-orange-800" />}
+                            label="Needs Attention"
+                            value={feedDueDashboard.length + healthAttentionDashboardCount}
+                            colorClass="bg-orange-100 text-orange-900"
+                        />
+                        <div className="relative w-full" ref={alertsDropdownRef}>
                             <button
                                 onClick={() => setShowAlertsDropdown(prev => !prev)}
                                 title="Configure alerts"
-                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${mgmtAlertsEnabled ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${mgmtAlertsEnabled ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
                                 <Bell size={14} className="sm:w-4 sm:h-4" />
-                                <span className="hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
+                                <span>Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
                                 <ChevronDown size={14} className={`ml-1 transition-transform ${showAlertsDropdown ? 'rotate-180' : ''}`} />
                             </button>
                             {showAlertsDropdown && (
