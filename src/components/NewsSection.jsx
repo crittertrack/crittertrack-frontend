@@ -46,18 +46,20 @@ const NewsSection = ({ API_BASE_URL, authToken }) => {
     }, [API_BASE_URL, authToken]);
 
     return (
-        <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+        <div className="p-4 h-full flex flex-col">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4 flex-shrink-0">
                 <Rss className="text-orange-500" />
                 News & Announcements
             </h2>
-            {loading ? (
-                <div className="flex justify-center items-center py-8">
-                    <Loader2 className="animate-spin text-gray-400" size={32} />
-                </div>
-            ) : news.length > 0 ? (
-                <div className="space-y-4">{news.map(item => <NewsItem key={item.id} item={item} />)}</div>
-            ) : <div className="text-center py-8 bg-gray-50 rounded-lg"><p className="text-gray-500">No news to display at the moment.</p></div>}
+            <div className="flex-grow overflow-y-auto -mr-4 pr-4">
+                {loading ? (
+                    <div className="flex justify-center items-center py-8 h-full">
+                        <Loader2 className="animate-spin text-gray-400" size={32} />
+                    </div>
+                ) : news.length > 0 ? (
+                    <div className="space-y-4">{news.map(item => <NewsItem key={item.id} item={item} />)}</div>
+                ) : <div className="text-center py-8 bg-gray-50 rounded-lg h-full flex items-center justify-center"><p className="text-gray-500">No news to display at the moment.</p></div>}
+            </div>
         </div>
     );
 };
