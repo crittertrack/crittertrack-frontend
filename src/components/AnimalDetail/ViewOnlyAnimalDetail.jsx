@@ -505,7 +505,6 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                     <div className="flex flex-wrap gap-1 sm:gap-2 px-0.5 sm:px-4 py-2 justify-center">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
-                            { id: 2, label: 'Status', icon: Lock, color: 'text-slate-500' },
                             { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },

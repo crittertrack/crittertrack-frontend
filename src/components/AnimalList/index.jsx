@@ -1436,6 +1436,14 @@ const AnimalList = ({
                         className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
                             isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 dark:border-dark-border bg-gray-50 dark:bg-dark-surface-hover' : 'border-gray-300 dark:border-dark-border'
                         }`}
+                        className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${(() => {
+                            if (isSelected) return 'border-red-500';
+                            // Only apply darker border for isViewOnly if the animal's status is 'Sold'
+                            if (animal.isViewOnly && animal.status === 'Sold') {
+                                return 'border-gray-400 dark:border-dark-border bg-gray-50 dark:bg-dark-surface-hover';
+                            }
+                            return 'border-gray-300 dark:border-dark-border';
+                        })()}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
