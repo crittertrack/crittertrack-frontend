@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -76,6 +76,7 @@ import { useTransferWorkflow } from './hooks/useTransferWorkflow.ts';
 import { useBreedingLines } from './hooks/useBreedingLines.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
+import NewsTickerBanner from './components/NewsTickerBanner';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
 import FinanceDropdown from './components/FinanceDropdown';
@@ -1781,6 +1782,8 @@ const App = () => {
 />
             )}
             
+            <NewsTickerBanner />
+
             <header className="w-full bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible transition-colors duration-200">
                 {/* Desktop: Two row layout with search bar on top */}
                 <div className="hidden md:block mb-3">
