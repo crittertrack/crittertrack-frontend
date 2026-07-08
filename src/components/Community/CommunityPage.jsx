@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Users, Loader2, User, ScrollText } from 'lucide-react';
 // import MyFeed from './MyFeed'; // Import the new component
 import BreederDirectory from '../PublicProfile/BreederDirectory';
-import NewsSection from './NewsSection';
+import NewsSection from '../NewsSection';
 
 // Helper to check if a user has a publicly visible name
 const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
