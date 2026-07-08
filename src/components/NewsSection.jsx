@@ -5,28 +5,54 @@ import { BroadcastPoll } from './Community/Banners';
 
 const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
     const isPoll = item.broadcastType === 'poll' || item.type === 'poll';
+    const isAnnouncement = item.broadcastType === 'announcement' || item.type === 'announcement';
     const title = isPoll ? (item.pollQuestion || item.title) : (item.title || 'Announcement');
 
+    const getCardStyles = () => {
+        if (isPoll) {
+            return {
+                card: 'bg-cyan-50 border-cyan-200',
+                header: 'hover:bg-cyan-100',
+                title: 'text-cyan-800',
+                meta: 'text-cyan-600',
+                border: 'border-cyan-200',
+            };
+        }
+        if (isAnnouncement) {
+            return {
+                card: 'bg-purple-50 border-purple-200',
+                header: 'hover:bg-purple-100',
+                title: 'text-purple-800',
+                meta: 'text-purple-600',
+                border: 'border-purple-200',
+            };
+        }
+        // Default to info style
+        return { card: 'bg-blue-50 border-blue-200', header: 'hover:bg-blue-100', title: 'text-blue-800', meta: 'text-blue-600', border: 'border-blue-200' };
+    };
+
+    const styles = getCardStyles();
+
     return (
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex justify-between items-center cursor-pointer" onClick={onToggle}>
-                <h3 className="font-bold text-md text-gray-800">{title}</h3>
-                <div className="flex items-center gap-2 text-gray-500">
-                    <p className="text-xs">
+        <div className={`rounded-lg shadow-sm border overflow-hidden ${styles.card}`}>
+            <div className={`flex justify-between items-center p-3 cursor-pointer transition-colors ${styles.header}`} onClick={onToggle}>
+                <h3 className={`font-semibold text-sm pr-2 ${styles.title}`}>{title}</h3>
+                <div className={`flex items-center gap-2 flex-shrink-0 ${styles.meta}`}>
+                    <p className="text-xs font-medium">
                         {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </p>
                     {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </div>
             </div>
             {isExpanded && (
-                 <div className="mt-3 pt-3 border-t border-gray-200">
+                 <div className={`p-3 border-t bg-white ${styles.border}`}>
                     {isPoll ? (
                         <BroadcastPoll broadcast={item} authToken={authToken} API_BASE_URL={API_BASE_URL} isEmbedded={true} />
                     ) : (
                         <>
-                            <div className="text-sm text-gray-700 prose max-w-none" dangerouslySetInnerHTML={{ __html: item.message || item.content }} />
+                            <div className="text-xs text-gray-700 prose max-w-none" dangerouslySetInnerHTML={{ __html: item.message || item.content }} />
                             {item.link && (
-                                <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline mt-2 inline-block">
+                                <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline mt-2 inline-block">
                                     Read more
                                 </a>
                             )}
