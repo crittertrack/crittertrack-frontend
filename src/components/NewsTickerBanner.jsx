@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './NewsTickerBanner.css';
 
 const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -38,9 +40,12 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
       <div className="news-ticker-container whitespace-nowrap">
         {news.map((item, index) => (
           <span key={item.id} className="inline-block px-4">
-            <a href={item.link} className="hover:underline">
+            <button
+              onClick={() => navigate('/community')}
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer"
+            >
               {item.title}
-            </a>
+            </button>
             {index < news.length - 1 && <span className="mx-2">|</span>}
           </span>
         ))}

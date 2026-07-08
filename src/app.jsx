@@ -1783,7 +1783,7 @@ const App = () => {
             )}
             
              <div className="w-full max-w-7xl mx-auto">
-                <NewsTickerBanner />
+                <NewsTickerBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
             </div>
 
             <header className="w-full bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible transition-colors duration-200">
