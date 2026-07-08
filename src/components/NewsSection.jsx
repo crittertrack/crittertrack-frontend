@@ -1,19 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, Rss } from 'lucide-react';
+import { Loader2, Rss, ChevronDown, ChevronUp } from 'lucide-react';
+import { BroadcastPoll } from './Community/Banners';
 
-const NewsItem = ({ item }) => {
+const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
+    const isPoll = item.broadcastType === 'poll' || item.type === 'poll';
+    const title = isPoll ? (item.pollQuestion || item.title) : (item.title || 'Announcement');
+
     return (
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="font-bold text-md text-gray-800 mb-1">{item.title}</h3>
-            <p className="text-xs text-gray-500 mb-2">
-                {new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
-            <div className="text-sm text-gray-700 prose max-w-none" dangerouslySetInnerHTML={{ __html: item.content }} />
-            {item.link && (
-                <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline mt-2 inline-block">
-                    Read more
-                </a>
+            <div className="flex justify-between items-center cursor-pointer" onClick={onToggle}>
+                <h3 className="font-bold text-md text-gray-800">{title}</h3>
+                <div className="flex items-center gap-2 text-gray-500">
+                    <p className="text-xs">
+                        {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </p>
+                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </div>
+            </div>
+            {isExpanded && (
+                 <div className="mt-3 pt-3 border-t border-gray-200">
+                    {isPoll ? (
+                        <BroadcastPoll broadcast={item} authToken={authToken} API_BASE_URL={API_BASE_URL} isEmbedded={true} />
+                    ) : (
+                        <>
+                            <div className="text-sm text-gray-700 prose max-w-none" dangerouslySetInnerHTML={{ __html: item.message || item.content }} />
+                            {item.link && (
+                                <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline mt-2 inline-block">
+                                    Read more
+                                </a>
+                            )}
+                        </>
+                    )}
+                </div>
             )}
         </div>
     );
@@ -22,6 +41,15 @@ const NewsItem = ({ item }) => {
 const NewsSection = ({ API_BASE_URL, authToken }) => {
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [expandedItemId, setExpandedItemId] = useState(null);
+    const [dismissedBroadcastIds] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dismissedBroadcasts');
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
+    });
 
     useEffect(() => {
         const fetchNews = async () => {
@@ -30,20 +58,32 @@ const NewsSection = ({ API_BASE_URL, authToken }) => {
                 return;
             }
             try {
-                const response = await axios.get(`${API_BASE_URL}/news`, {
+                const response = await axios.get(`${API_BASE_URL}/notifications`, {
                     headers: { Authorization: `Bearer ${authToken}` },
                 });
-                // Assuming the API returns news sorted by date descending
-                setNews(response.data || []);
+                const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
+
+                const publicBroadcasts = allNotifications.filter(n => {
+                    const isPublicType = ['announcement', 'poll', 'info', 'broadcast'].includes(n.type);
+                    const isNotUrgent = n.broadcastType !== 'warning' && n.broadcastType !== 'alert';
+                    const isNotDismissed = !dismissedBroadcastIds.includes(n._id);
+                    return isPublicType && isNotUrgent && isNotDismissed;
+                });
+
+                const sortedItems = publicBroadcasts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                setNews(sortedItems);
             } catch (err) {
                 console.error('Failed to fetch news:', err);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchNews();
-    }, [API_BASE_URL, authToken]);
+    }, [API_BASE_URL, authToken, dismissedBroadcastIds]);
+
+    const toggleExpand = (itemId) => {
+        setExpandedItemId(prevId => (prevId === itemId ? null : itemId));
+    };
 
     return (
         <div className="p-4 h-full flex flex-col">
@@ -57,7 +97,18 @@ const NewsSection = ({ API_BASE_URL, authToken }) => {
                         <Loader2 className="animate-spin text-gray-400" size={32} />
                     </div>
                 ) : news.length > 0 ? (
-                    <div className="space-y-4">{news.map(item => <NewsItem key={item.id} item={item} />)}</div>
+                    <div className="space-y-4">
+                        {news.map(item => (
+                            <NewsItem
+                                key={item._id}
+                                item={item}
+                                isExpanded={expandedItemId === item._id}
+                                onToggle={() => toggleExpand(item._id)}
+                                API_BASE_URL={API_BASE_URL}
+                                authToken={authToken}
+                            />
+                        ))}
+                    </div>
                 ) : <div className="text-center py-8 bg-gray-50 rounded-lg h-full flex items-center justify-center"><p className="text-gray-500">No news to display at the moment.</p></div>}
             </div>
         </div>
