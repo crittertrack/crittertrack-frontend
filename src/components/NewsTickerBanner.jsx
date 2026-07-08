@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Rss, BarChart2, Info } from 'lucide-react';
 import './NewsTickerBanner.css';
 
 const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
@@ -47,6 +48,20 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
     return null; // Don't render the banner if there's no news
   }
 
+  const getBroadcastIcon = (item) => {
+    const isPoll = item.broadcastType === 'poll' || item.type === 'poll';
+    const isAnnouncement = item.broadcastType === 'announcement' || item.type === 'announcement';
+
+    if (isPoll) {
+        return <BarChart2 size={14} className="inline-block mr-1.5 text-cyan-300 flex-shrink-0" />;
+    }
+    if (isAnnouncement) {
+        return <Rss size={14} className="inline-block mr-1.5 text-purple-300 flex-shrink-0" />;
+    }
+    // Default to info
+    return <Info size={14} className="inline-block mr-1.5 text-blue-300 flex-shrink-0" />;
+  };
+
   const animationDuration = news.length * 10; // 10 seconds per item
 
   return (
@@ -59,8 +74,9 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
           <span key={item._id} className="inline-block px-4">
             <button
               onClick={() => navigate('/community')}
-              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer"
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
             >
+              {getBroadcastIcon(item)}
               {item.pollQuestion || item.title}
             </button>
             {index < news.length - 1 && <span className="mx-2">|</span>}

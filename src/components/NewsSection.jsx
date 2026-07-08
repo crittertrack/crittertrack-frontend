@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, Rss, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Rss, ChevronDown, ChevronUp, BarChart2, Info } from 'lucide-react';
 import { BroadcastPoll } from './Community/Banners';
 
 const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
@@ -33,10 +33,24 @@ const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
 
     const styles = getCardStyles();
 
+    const getBroadcastIcon = () => {
+        if (isPoll) {
+            return <BarChart2 size={16} className="inline-block mr-2 text-cyan-600 flex-shrink-0" />;
+        }
+        if (isAnnouncement) {
+            return <Rss size={16} className="inline-block mr-2 text-purple-600 flex-shrink-0" />;
+        }
+        // Default to info
+        return <Info size={16} className="inline-block mr-2 text-blue-600 flex-shrink-0" />;
+    };
+
     return (
         <div className={`rounded-lg shadow-sm border overflow-hidden ${styles.card}`}>
             <div className={`flex justify-between items-center p-3 cursor-pointer transition-colors ${styles.header}`} onClick={onToggle}>
-                <h3 className={`font-semibold text-sm pr-2 ${styles.title}`}>{title}</h3>
+                <h3 className={`font-semibold text-sm pr-2 ${styles.title} flex items-center`}>
+                    {getBroadcastIcon()}
+                    <span>{title}</span>
+                </h3>
                 <div className={`flex items-center gap-2 flex-shrink-0 ${styles.meta}`}>
                     <p className="text-xs font-medium">
                         {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
