@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Users, Loader2, User, ScrollText } from 'lucide-react';
-import MyFeed from './MyFeed';
-import BreederDirectory from '../PublicProfile/BreederDirectory';
+import MyFeed from './MyFeed'; // Assuming MyFeed is in the same directory
+import BreederDirectory from './BreederDirectory'; // Corrected import path
 import NewsSection from '../NewsSection';
 
 // Helper to check if a user has a publicly visible name
