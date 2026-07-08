@@ -47,7 +47,7 @@ const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
             {isExpanded && (
                  <div className={`p-3 border-t bg-white ${styles.border}`}>
                     {isPoll ? (
-                        <BroadcastPoll broadcast={item} authToken={authToken} API_BASE_URL={API_BASE_URL} isEmbedded={true} />
+                        <BroadcastPoll broadcast={item} authToken={authToken} API_BASE_URL={API_BASE_URL} isEmbedded={true} hideTitle={true} />
                     ) : (
                         <>
                             <div className="text-xs text-gray-700 prose max-w-none" dangerouslySetInnerHTML={{ __html: item.message || item.content }} />

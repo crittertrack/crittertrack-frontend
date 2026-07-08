@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Check, Loader2 } from 'lucide-react';
 
-export const BroadcastPoll = ({ broadcast, isEmbedded, authToken, API_BASE_URL }) => {
+export const BroadcastPoll = ({ broadcast, isEmbedded, authToken, API_BASE_URL, hideTitle = false }) => {
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [hasVoted, setHasVoted] = useState(false);
     const [pollResults, setPollResults] = useState(broadcast.pollOptions || []);
@@ -60,7 +60,7 @@ export const BroadcastPoll = ({ broadcast, isEmbedded, authToken, API_BASE_URL }
 
     return (
         <div className={`border rounded-lg p-4 ${isEmbedded ? 'bg-white border-gray-200' : 'bg-blue-50 border-blue-200'}`}>
-            <h4 className="font-bold text-gray-800">{broadcast.pollQuestion || broadcast.title}</h4>
+            {!hideTitle && <h4 className="font-bold text-gray-800 mb-2">{broadcast.pollQuestion || broadcast.title}</h4>}
             {broadcast.content && <p className="text-sm text-gray-600 my-2">{broadcast.content}</p>}
             <div className="mt-2 space-y-2">
                 {pollResults.map((option, index) => {
