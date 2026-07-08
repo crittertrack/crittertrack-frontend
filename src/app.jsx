@@ -1782,7 +1782,9 @@ const App = () => {
 />
             )}
             
-            <NewsTickerBanner />
+             <div className="w-full max-w-7xl mx-auto">
+                <NewsTickerBanner />
+            </div>
 
             <header className="w-full bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible transition-colors duration-200">
                 {/* Desktop: Two row layout with search bar on top */}

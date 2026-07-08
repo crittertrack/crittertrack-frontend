@@ -1,27 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import './NewsTickerBanner.css'; // Import the CSS file for animation
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import './NewsTickerBanner.css';
 
-// Mock data for news titles. In a real application, this would be fetched from a backend.
-const mockNewsTitles = [
-  { id: 1, title: 'New Feature: Advanced Analytics Dashboard Released!', link: '/community/news/1' },
-  { id: 2, title: 'Community Event: CritterTrack Annual Meetup - Register Now!', link: '/community/news/2' },
-  { id: 3, title: 'Maintenance Alert: Scheduled Downtime on July 15th', link: '/community/news/3' },
-  { id: 4, title: 'Tip of the Week: Optimize Your Animal Records for Better Insights', link: '/community/news/4' },
-];
-
-const NewsTickerBanner = () => {
+const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
   const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setNews(mockNewsTitles);
-  }, []);
+    const fetchNews = async () => {
+      if (!authToken) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const response = await axios.get(`${API_BASE_URL}/news`, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        setNews(response.data);
+      } catch (err) {
+        console.error('Failed to fetch news:', err);
+        setError(err);
+        // Optionally, fall back to mock data or display a message
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNews();
+  }, [authToken, API_BASE_URL]);
 
-  if (news.length === 0) {
+  if (loading || error || news.length === 0) {
     return null; // Don't render the banner if there's no news
   }
 
   return (
-    <div className="w-full bg-purple-700 text-white text-sm py-1 overflow-hidden relative">
+    <div className="w-full bg-gradient-to-r from-blue-600 to-purple-700 text-white text-sm py-1 overflow-hidden relative">
       <div className="news-ticker-container whitespace-nowrap">
         {news.map((item, index) => (
           <span key={item.id} className="inline-block px-4">
