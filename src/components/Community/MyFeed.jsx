@@ -8,8 +8,6 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
     const navigate = useNavigate();
     const [favoriteAnimals, setFavoriteAnimals] = useState([]);
     const [favoriteUsers, setFavoriteUsers] = useState([]);
-    const [recentEdits, setRecentEdits] = useState([]);
-    const [newAvailableAnimals, setNewAvailableAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [animalSearch, setAnimalSearch] = useState('');
     const [breederSearch, setBreederSearch] = useState('');
@@ -34,25 +32,6 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                 const favUsers = favUsersRes.data || [];
                 setFavoriteAnimals(favAnimals);
                 setFavoriteUsers(favUsers);
-
-                // Available animals from favorited users – use marketplace endpoint (known working)
-                const favUserIds = new Set(favUsers.map(u => u.id_public).filter(Boolean));
-                if (favUserIds.size > 0) {
-                    const availRes = await axios.get(
-                        `${API_BASE_URL}/public/marketplace?limit=100&type=all`
-                    ).catch(() => ({ data: { animals: [] } }));
-                    const allAvailable = availRes.data?.animals || availRes.data || [];
-                    const fromFavUsers = allAvailable.filter(a => favUserIds.has(a.ownerId_public));
-                    setNewAvailableAnimals(fromFavUsers);
-                } else {
-                    setNewAvailableAnimals([]);
-                }
-
-                // Derive recently updated from already-fetched favorite animals – only animals with a valid updatedAt
-                const sorted = [...favAnimals]
-                    .filter(a => a.updatedAt && !isNaN(new Date(a.updatedAt)))
-                    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-                setRecentEdits(sorted);
 
             } catch (error) {
                 console.error('Error fetching community data:', error);
@@ -112,18 +91,6 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
         }
     };
 
-    const formatTimeAgo = (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const seconds = Math.floor((now - date) / 1000);
-        
-        if (seconds < 60) return 'just now';
-        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-        if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-        return date.toLocaleDateString();
-    };
-
     if (loading) {
         return (
             <div className="flex justify-center items-center py-12">
@@ -133,13 +100,16 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow-md p-4">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Heart className="text-purple-500" />
+                Favorites
+            </h2>
             {/* Favorite Animals */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <Heart size={20} className="text-purple-500" />
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-700 mb-3">
                     Favorite Animals ({favoriteAnimals.length})
-                </h2>
+                </h3>
                 {favoriteAnimals.length === 0 ? (
                     <p className="text-gray-500 text-sm">No favorite animals yet. Visit animal profiles to add favorites!</p>
                 ) : (
@@ -206,11 +176,10 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
             </div>
 
             {/* Favorite Users */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <Heart size={20} className="text-purple-500" />
+            <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-3">
                     Favorite Breeders ({favoriteUsers.length})
-                </h2>
+                </h3>
                 {favoriteUsers.length === 0 ? (
                     <p className="text-gray-500 text-sm">No favorite breeders yet. Visit breeder profiles to add favorites!</p>
                 ) : (
@@ -251,7 +220,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-gray-800 truncate">{displayName}</p>
+                                        <p className="font-semibold text-sm text-gray-800 truncate">{displayName}</p>
                                         <p className="text-xs text-gray-500 truncate">{user.id_public}</p>
                                     </div>
                                     <button
@@ -268,109 +237,6 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                         })}
                         </div>
                     </>
-                )}
-            </div>
-
-            {/* Recently Edited Favorite Animals */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <Edit size={20} className="text-blue-500" />
-                    Recently Updated Favorites
-                </h2>
-                {recentEdits.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No recent updates to your favorite animals.</p>
-                ) : (
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                        {recentEdits.slice(0, 10).map(animal => {
-                            const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
-                            const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
-                            const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
-                            const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];
-                            return (
-                                <div
-                                    key={animal.id_public}
-                                    className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
-                                    onClick={() => navigate(`/animal/${animal.id_public}`)}
-                                >
-                                    <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                        {imgSrc ? (
-                                            <img src={imgSrc} alt={fullName} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                <Cat size={20} />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-gray-800 text-sm truncate flex items-center gap-1">
-                                            {fullName}
-                                            {animal.gender === 'Male' ? <Mars size={13} strokeWidth={2.5} className="text-primary flex-shrink-0" /> : animal.gender === 'Female' ? <Venus size={13} strokeWidth={2.5} className="text-accent flex-shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={13} strokeWidth={2.5} className="text-purple-500 flex-shrink-0" /> : <Circle size={13} strokeWidth={2.5} className="text-gray-400 flex-shrink-0" />}
-                                        </p>
-                                        {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
-                                        <p className="text-xs text-gray-500">Updated {formatTimeAgo(animal.updatedAt)}</p>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
-
-            {/* Available from Favorited Breeders */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <ShoppingBag size={20} className="text-green-500" />
-                    Available from Favorited Breeders
-                </h2>
-                {newAvailableAnimals.length === 0 ? (
-                    <p className="text-gray-500 text-sm">{favoriteUsers.length === 0 ? 'Favorite some breeders to see their available animals here.' : 'No available animals from your favorite breeders.'}</p>
-                ) : (
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                        {newAvailableAnimals.map(animal => {
-                            const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
-                            const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
-                            const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
-                            const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];
-                            return (
-                                <div
-                                    key={animal.id_public}
-                                    className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
-                                    onClick={() => navigate(`/animal/${animal.id_public}`)}
-                                >
-                                    <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                        {imgSrc ? (
-                                            <img src={imgSrc} alt={fullName} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                <Cat size={20} />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-gray-800 text-sm truncate flex items-center gap-1">
-                                            {fullName}
-                                            {animal.gender === 'Male' ? <Mars size={13} strokeWidth={2.5} className="text-primary flex-shrink-0" /> : animal.gender === 'Female' ? <Venus size={13} strokeWidth={2.5} className="text-accent flex-shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={13} strokeWidth={2.5} className="text-purple-500 flex-shrink-0" /> : <Circle size={13} strokeWidth={2.5} className="text-gray-400 flex-shrink-0" />}
-                                        </p>
-                                        <p className="text-xs text-gray-500">{animal.species}</p>
-                                        {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
-                                    </div>
-                                    <div className="flex flex-col gap-1 items-end flex-shrink-0">
-                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">{animal.isForSale ? 'For Sale' : 'For Stud'}</span>
-                                        {animal.isForSale && (
-                                            <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                                                {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}`}
-                                            </span>
-                                        )}
-                                        {!animal.isForSale && animal.availableForBreeding && animal.studFeeAmount && (
-                                            <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                                                {animal.studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}`}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
                 )}
             </div>
         </div>

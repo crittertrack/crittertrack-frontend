@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Users, Loader2, User, ScrollText } from 'lucide-react';
-// import MyFeed from './MyFeed'; // Import the new component
+import MyFeed from './MyFeed';
 import BreederDirectory from '../PublicProfile/BreederDirectory';
 import NewsSection from '../NewsSection';
 
@@ -83,8 +83,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
             ) : (
                 <div className="space-y-6">
                     {/* MyFeed component is temporarily disabled for WIP */}
-                    {/* <MyFeed authToken={authToken} API_BASE_URL={API_BASE_URL} /> */}
-                    
+
                     {/* Recent Activity Section */}
                     {recentActivityUsers.length > 0 && (
                         <div className="bg-white rounded-lg shadow-md p-4">
@@ -128,19 +127,23 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     )}
 
                     {/* News and Breeder Directory */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
                         {/* News Section */}
                         <div className="lg:col-span-1 bg-white rounded-lg shadow-md overflow-hidden">
                             <NewsSection API_BASE_URL={API_BASE_URL} authToken={authToken} />
                         </div>
 
                         {/* Breeder Directory Section */}
-                        <div className="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
+                        <div className="lg:col-span-1 bg-white rounded-lg shadow-md overflow-hidden">
                             <BreederDirectory
                                 authToken={authToken}
                                 API_BASE_URL={API_BASE_URL}
                                 isEmbedded={true}
                             />
+                        </div>
+                        {/* My Feed Section */}
+                        <div className="md:col-span-2 lg:col-span-1">
+                            <MyFeed authToken={authToken} API_BASE_URL={API_BASE_URL} />
                         </div>
                     </div>
                 </div>
