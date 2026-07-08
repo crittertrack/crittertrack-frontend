@@ -290,15 +290,6 @@ export function AppRoutes({
         />
       } />
 
-      {/* Breeder Directory */}
-      <Route path="/breeder-directory" element={
-        <BreederDirectory
-          authToken={authToken}
-          API_BASE_URL={API_BASE_URL}
-          onBack={() => navigate('/')}
-        />
-      } />
-
       {/* Litters */}
       <Route path="/litters" element={
         <LitterManagement

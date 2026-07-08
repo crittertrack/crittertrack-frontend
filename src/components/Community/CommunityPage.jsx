@@ -138,7 +138,6 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                             <BreederDirectory
                                 authToken={authToken}
                                 API_BASE_URL={API_BASE_URL}
-                                isEmbedded={true}
                             />
                         </div>
                         {/* My Feed Section */}

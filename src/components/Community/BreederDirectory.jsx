@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Users, Loader2, Search, X, ChevronLeft } from 'lucide-react';
+import { Users, Loader2, Search, X } from 'lucide-react';
 import 'flag-icons/css/flag-icons.min.css';
 import { getCountryFlag, getCountryName } from '../../utils/locationUtils';
 
@@ -49,7 +49,7 @@ const BreederCard = ({ user, navigate }) => {
     );
 };
 
-const BreederDirectory = ({ authToken, API_BASE_URL, isEmbedded = false, onBack }) => {
+const BreederDirectory = ({ authToken, API_BASE_URL }) => {
     const navigate = useNavigate();
     const [breeders, setBreeders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -84,25 +84,19 @@ const BreederDirectory = ({ authToken, API_BASE_URL, isEmbedded = false, onBack 
     const hasFilters = searchTerm || speciesFilter || countryFilter;
 
     return (
-        <div className={`h-full flex flex-col ${isEmbedded ? 'p-4' : 'p-2 sm:p-4'}`}>
+        <div className="h-full flex flex-col p-4">
             {/* Header */}
-            <div className={`flex-shrink-0 ${isEmbedded ? 'mb-4' : 'mb-6'}`}>
+            <div className="flex-shrink-0 mb-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                         <Users className="text-primary" />
                         Breeder Directory
                     </h2>
-                    {!isEmbedded && onBack && (
-                         <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800">
-                            <ChevronLeft size={16} /> Back
-                        </button>
-                    )}
                 </div>
-                {!isEmbedded && <p className="text-gray-600 mt-1">Discover and connect with breeders in the community.</p>}
             </div>
 
             {/* Filters */}
-            <div className={`grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 flex-shrink-0 ${isEmbedded ? 'sm:grid-cols-1' : ''}`}>
+            <div className="grid grid-cols-1 sm:grid-cols-1 gap-2 mb-4 flex-shrink-0">
                 <div className="relative">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -140,7 +134,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, isEmbedded = false, onBack 
                         {hasFilters && <p className="text-sm mt-1">Try adjusting your filters.</p>}
                     </div>
                 ) : (
-                    <div className={`grid gap-4 ${isEmbedded ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+                    <div className="grid gap-4 grid-cols-1">
                         {breeders.map(user => (
                             <BreederCard key={user.id_public} user={user} navigate={navigate} />
                         ))}
