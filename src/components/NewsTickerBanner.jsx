@@ -65,13 +65,13 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
   const animationDuration = news.length * 10; // 10 seconds per item
 
   return (
-    <div className="w-full bg-gradient-to-r from-blue-600 to-purple-700 text-white text-sm py-1 overflow-hidden relative">
+    <div className="w-full bg-gradient-to-r from-blue-600 to-purple-700 text-white text-sm py-1 overflow-hidden relative rounded-lg">
       <div 
         className="news-ticker-container whitespace-nowrap"
         style={{ animationDuration: `${animationDuration}s` }}
       >
         {news.map((item, index) => (
-          <span key={item._id} className="inline-block px-4">
+          <span key={item._id} className="inline-flex items-center px-4">
             <button
               onClick={() => navigate('/community')}
               className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
