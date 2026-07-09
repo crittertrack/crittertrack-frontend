@@ -1800,10 +1800,6 @@ const App = () => {
                     <CustomAppLogo size="w-10 h-10" />
                     
                     <nav className="flex space-x-3">
-                        <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Users size={18} className="mb-1" />
-                            <span>Community</span>
-                        </button>
                         <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Animals</span>
@@ -1812,19 +1808,6 @@ const App = () => {
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
                         </button>
-                        <button onClick={() => navigate('/calendar')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Calendar size={18} className="mb-1" />
-                            <span>Calendar</span>
-                        </button>
-                        <div className="relative" ref={financeMenuDesktopRef}>
-                            <button onClick={() => setShowFinanceMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['budget', 'inventory'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                                <DollarSign size={18} className="mb-1" />
-                                <span>Finance</span>
-                            </button>
-                            {showFinanceMenu && (
-                                <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
-                            )}
-                        </div>
                         <button onClick={() => navigate('/contacts')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'contacts' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Users size={18} className="mb-1" />
                             <span>Contacts</span>
@@ -1833,6 +1816,14 @@ const App = () => {
                             <ShoppingBag size={18} className="mb-1" />
                             <span>Marketplace</span>
                         </button>
+                        <button onClick={() => navigate('/calendar')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Calendar size={18} className="mb-1" />
+                            <span>Calendar</span>
+                        </button>
+                        <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Users size={18} className="mb-1" />
+                            <span>Community</span>
+                        </button>
                         <div className="relative" ref={toolsMenuDesktopRef}>
                             <button onClick={() => setShowToolsMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                 <Wrench size={18} className="mb-1" />
@@ -1840,6 +1831,15 @@ const App = () => {
                             </button>
                             {showToolsMenu && (
                                 <ToolsDropdown onLinkClick={() => setShowToolsMenu(false)} />
+                            )}
+                        </div>
+                        <div className="relative" ref={financeMenuDesktopRef}>
+                            <button onClick={() => setShowFinanceMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['budget', 'inventory'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <DollarSign size={18} className="mb-1" />
+                                <span>Finance</span>
+                            </button>
+                            {showFinanceMenu && (
+                                <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
                             )}
                         </div>
                     </nav>
@@ -2017,10 +2017,6 @@ const App = () => {
 
                     {/* Third row: Navigation row 1 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1 mb-1">
-                        <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Users size={18} className="mb-0.5" />
-                            <span>Community</span>
-                        </button>
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-0.5" />
                             <span>Animals</span>
@@ -2029,18 +2025,6 @@ const App = () => {
                             <BookOpen size={18} className="mb-0.5" />
                             <span>Litters</span>
                         </button>
-                        <button onClick={() => navigate('/calendar')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Calendar size={18} className="mb-0.5" />
-                            <span>Calendar</span>
-                        </button>
-                    </nav>
-
-                    {/* Fourth row: Navigation row 2 (4 buttons) */}
-                    <nav className="grid grid-cols-4 gap-1">
-                        <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <DollarSign size={18} className="mb-0.5" />
-                            <span>Budget</span>
-                        </button>
                         <button onClick={() => navigate('/contacts')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'contacts' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Users size={18} className="mb-0.5" />
                             <span>Contacts</span>
@@ -2048,6 +2032,18 @@ const App = () => {
                         <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
                             <span>Available</span>
+                        </button>
+                    </nav>
+
+                    {/* Fourth row: Navigation row 2 (4 buttons) */}
+                    <nav className="grid grid-cols-4 gap-1">
+                        <button onClick={() => navigate('/calendar')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Calendar size={18} className="mb-0.5" />
+                            <span>Calendar</span>
+                        </button>
+                        <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Users size={18} className="mb-0.5" />
+                            <span>Community</span>
                         </button>
                         <div className="relative" ref={toolsMenuMobileRef}>
                             <button onClick={() => setShowToolsMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
@@ -2058,6 +2054,10 @@ const App = () => {
                                 <ToolsDropdown onLinkClick={() => setShowToolsMenu(false)} />
                             )}
                         </div>
+                        <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <DollarSign size={18} className="mb-0.5" />
+                            <span>Budget</span>
+                        </button>
                     </nav>
                 </div>
 
