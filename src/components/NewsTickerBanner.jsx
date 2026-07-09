@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Rss, BarChart2, Info } from 'lucide-react';
+import { Rss, BarChart2, Info, Heart } from 'lucide-react';
 import './NewsTickerBanner.css';
 
 const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
@@ -62,7 +62,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
     return <Info size={14} className="inline-block mr-1.5 text-blue-300 flex-shrink-0" />;
   };
 
-  const animationDuration = news.length * 10; // 10 seconds per item
+  const animationDuration = (news.length + 1) * 10; // 10 seconds per item
 
   return (
     <div className="w-full bg-gradient-to-r from-blue-600 to-purple-700 text-white text-sm py-1 overflow-hidden relative rounded-lg">
@@ -70,6 +70,18 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
         className="news-ticker-container whitespace-nowrap"
         style={{ animationDuration: `${animationDuration}s` }}
       >
+        <span className="inline-flex items-center px-4 font-semibold">
+          <a
+            href="https://ko-fi.com/crittertrack"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline flex items-center"
+          >
+            <Heart size={14} className="inline-block mr-1.5 text-pink-400 fill-current" />
+            Support CritterTrack on Ko-fi!
+          </a>
+          <span className="mx-4">|</span>
+        </span>
         {news.map((item, index) => (
           <span key={item._id} className="inline-flex items-center px-4">
             <button
