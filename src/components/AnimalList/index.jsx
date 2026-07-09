@@ -513,6 +513,15 @@ const AnimalList = ({
         return 'Other';
     };
 
+    // Base list for "active" animals (not sold or archived) for dashboard counts.
+    const activeAnimalsForDashboard = useMemo(() => {
+        return allAnimalsRaw.filter(a =>
+            !a.isViewOnly &&
+            !a.archived
+        );
+    }, [allAnimalsRaw]);
+
+
     const categoryBreakdown = useMemo(() => {
         const breakdown = { 'Mammal': 0, 'Reptile': 0, 'Bird': 0, 'Amphibian': 0, 'Fish': 0, 'Invertebrate': 0, 'Other': 0 };
         activeAnimalsForDashboard.forEach(animal => {
