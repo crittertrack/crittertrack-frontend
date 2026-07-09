@@ -4206,11 +4206,10 @@ const AnimalList = ({
                                                     </div>
                                                 </td>
                                             )}
-                                            {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600">{animal.species || '—'}</td>}
                                             {listViewColumns.species && (
                                                 <td className="px-3 py-1.5 text-gray-600">
                                                     <div>{animal.species || '—'}</div>
-                                                    {animal.speciesScientificName && <div className="text-xs text-gray-400">{animal.speciesScientificName}</div>}
+                                                    {animal.latinName && <div className="text-xs text-gray-400">{animal.latinName}</div>}
                                                 </td>
                                             )}
                                             {listViewColumns.variety && (
