@@ -601,23 +601,26 @@ const BreederBioSection = ({ bio }) => {
 
     useEffect(() => {
         if (bioRef.current) {
-            // Check if the content overflows, indicating need for toggle
-            setShowToggle(bioRef.current.scrollHeight > bioRef.current.clientHeight);
+            // text-xs (12px) with leading-relaxed (1.625) is a line-height of ~19.5px.
+            // We show the button if the content is taller than 3 lines.
+            const approxThreeLinesHeight = 19.5 * 3;
+            if (bioRef.current.scrollHeight > approxThreeLinesHeight) {
+                setShowToggle(true);
+            }
         }
     }, [bio]);
 
     return (
         <div className="mb-4">
-            <p
-                ref={bioRef}
-                className={`text-xs text-gray-700 leading-relaxed ${expanded ? '' : 'line-clamp-3'}`}
-            >
-                {bio}
-            </p>
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expanded ? 'max-h-[1000px]' : 'max-h-[58px]'}`}>
+                <p ref={bioRef} className="text-xs text-gray-700 leading-relaxed">
+                    {bio}
+                </p>
+            </div>
             {showToggle && (
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="text-xs text-primary hover:underline mt-1 relative z-10"
+                    className="text-xs text-primary hover:underline mt-1"
                 >
                     {expanded ? 'Show less' : 'Read more'}
                 </button>
