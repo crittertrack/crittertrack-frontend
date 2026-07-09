@@ -3657,12 +3657,12 @@ const AnimalList = ({
                     <div className="text-2xl font-bold">{value}</div>
                     <div className="text-sm font-medium opacity-90">{label}</div>
                 </div>
+                {hasDropdown && (
+                    <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-2 right-2 p-1 text-inherit opacity-60 hover:opacity-100">
+                        <ChevronDown size={20} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                )}
             </div>
-            {hasDropdown && (
-                <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-2 right-2 p-1 text-inherit opacity-60 hover:opacity-100">
-                    <ChevronDown size={20} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-            )}
         );
 
         return (
