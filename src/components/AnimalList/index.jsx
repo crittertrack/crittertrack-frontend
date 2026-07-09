@@ -3906,7 +3906,7 @@ const AnimalList = ({
     return (
         <>
             {/* Notification banner */}
-            <div className="w-full max-w-7xl mx-auto p-6 mb-4">
+            <div className="w-full max-w-7xl mx-auto mb-4">
                 <NotificationBar
                     authToken={authToken}
                     API_BASE_URL={API_BASE_URL}
