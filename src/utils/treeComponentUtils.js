@@ -2,8 +2,7 @@
  * Shared utilities for tree components (FamilyTree)
  * Extracted to reduce duplication (~50+ lines saved per component)
  */
-import { formatAnimalAge } from './ageUtils';
-import { formatDateShort } from './dateFormatter';
+import { formatAnimalAge, formatDateShort } from './dateFormatter';
 
 /**
  * Get border color based on animal gender
