@@ -990,14 +990,6 @@ const AnimalList = ({
     // - Sold/Archived = All animals that are sold (transferred) or archived.
     // - DECEASED animals are NOT excluded from any of these counts.
 
-    // Base list for "active" animals (not sold or archived).
-    const activeAnimalsForDashboard = useMemo(() => {
-        return allAnimalsRaw.filter(a =>
-            !a.isViewOnly &&
-            !a.archived
-        );
-    }, [allAnimalsRaw]);
-
     // Sold/Archived = all transferred (isViewOnly) + Archived.
     const soldOrArchivedCount = useMemo(() => {
          return allAnimalsRaw.filter(a => a.archived || a.isViewOnly).length;
