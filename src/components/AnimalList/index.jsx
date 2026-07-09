@@ -29,7 +29,7 @@ const ALERT_CATEGORIES = {
     maintenance: 'Maintenance'
 };
 
-const DEFAULT_LIST_COLUMNS = { animal: true, variety: true, enclosure: true, lifeStage: true, status: true, birthdateAge: true, breedingLines: true };
+const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, birthdateAge: true, breedingLines: true };
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -1143,17 +1143,6 @@ const AnimalList = ({
         });
     };
 
-    const toggleAllInSpecies = (species) => {
-        const speciesAnimalIds = (groupedAnimals[species] || []).map(a => a.id_public);
-        const currentSelected = selectedAnimals[species] || [];
-        const allSelected = speciesAnimalIds.length > 0 && speciesAnimalIds.every(id => currentSelected.includes(id));
-        
-        setSelectedAnimals(prev => ({
-            ...prev,
-            [species]: allSelected ? [] : speciesAnimalIds
-        }));
-    };
-
     const toggleAnimalPrivacy = async (animalId, newPrivacyValue) => {
         // Update local state immediately for instant UI feedback
         const updatedAnimals = animals.map(animal => 
@@ -1244,34 +1233,6 @@ const AnimalList = ({
             );
             setAnimals(revertedAnimals);
             showModalMessage('Error', 'Failed to update owned status.');
-        }
-    };
-
-    const moveSpecies = async (species, direction) => {
-        const currentIndex = speciesNames.indexOf(species);
-        if (currentIndex === -1) return;
-
-        const newOrder = [...speciesNames];
-        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-
-        // Check bounds
-        if (newIndex < 0 || newIndex >= newOrder.length) return;
-
-        // Swap
-        [newOrder[newIndex], newOrder[currentIndex]] = [newOrder[currentIndex], newOrder[newIndex]];
-
-        // Update local state immediately
-        setUserSpeciesOrder(newOrder);
-
-        // Save to backend
-        try {
-            await axios.post(`${API_BASE_URL}/users/species-order`, 
-                { speciesOrder: newOrder },
-                { headers: { Authorization: `Bearer ${authToken}` } }
-            );
-        } catch (error) {
-            console.error('[SPECIES ORDER] Error saving:', error);
-            showModalMessage('Error', 'Failed to save species order.');
         }
     };
 
@@ -4155,7 +4116,7 @@ const AnimalList = ({
                     {showListColumnConfig && (
                         <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
                             <span className="text-xs font-semibold text-gray-600 mr-2">Show columns:</span>
-                            {Object.entries({ animal: 'Animal', variety: 'Variety', enclosure: 'Enclosure', lifeStage: 'Life Stage', status: 'Status', birthdateAge: 'Birthdate / Age', breedingLines: 'Breeding Lines' }).map(([key, label]) => (
+                            {Object.entries({ animal: 'Animal', species: 'Species', variety: 'Variety', enclosure: 'Enclosure', lifeStage: 'Life Stage', status: 'Status', birthdateAge: 'Birthdate / Age', breedingLines: 'Breeding Lines' }).map(([key, label]) => (
                                 <label key={key} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -4175,8 +4136,9 @@ const AnimalList = ({
                     <table className="min-w-full text-sm divide-y divide-gray-200">
                         <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
                             <tr>
-                                <th className="px-4 py-2 w-12"> {/* Checkbox */} </th>
+                                <th className="px-4 py-2 w-12"></th>
                                 {listViewColumns.animal && <th className="px-3 py-2 text-left">Animal</th>}
+                                {listViewColumns.species && <th className="px-3 py-2 text-left">Species</th>}
                                 {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
                                 {listViewColumns.enclosure && <th className="px-3 py-2 text-left">Enclosure</th>}
                                 {listViewColumns.lifeStage && <th className="px-3 py-2 text-left">Life Stage</th>}
@@ -4194,113 +4156,87 @@ const AnimalList = ({
                                 </th>
                             </tr>
                         </thead>
-                        {speciesNames.map(species => {
-                            const speciesAnimals = groupedAnimals[species] || [];
-                            if (speciesAnimals.length === 0) return null;
-
-                            const isBulkMode = bulkDeleteMode[species] || bulkArchiveMode[species];
-                            const selectedIds = selectedAnimals[species] || [];
+                        <tbody className="divide-y divide-gray-100">
+                            {(() => {
+                                const displayedAnimals = speciesNames.flatMap(species => (groupedAnimals[species] || []));
+                                const isBulkMode = Object.values(bulkDeleteMode).some(v => v) || Object.values(bulkArchiveMode).some(v => v);
+                                const selectedIds = Object.values(selectedAnimals).flat();
                             const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
-                            const colCount = 2 + Object.values(listViewColumns).filter(Boolean).length;
+                                return displayedAnimals.map(animal => {
+                                    const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
+                                    const ageStr = birthDateObj ? (() => {
+                                        const birth = birthDateObj;
+                                        const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                        let years = endDate.getFullYear() - birth.getFullYear();
+                                        let months = endDate.getMonth() - birth.getMonth();
+                                        let days = endDate.getDate() - birth.getDate();
+                                        if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                        if (months < 0) { years--; months += 12; }
+                                        return years > 0 ? `${years}y ${months}m` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                    })() : '—';
+                                    const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                    const assignedIds = animalBreedingLines[animal.id_public] || [];
+                                    const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
 
-                            return (
-                                <tbody key={species}>
-                                    <tr className="bg-gray-100">
-                                        <th colSpan={colCount} className="px-4 py-2 text-left">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    {!isBulkMode && (
-                                                        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                                                            <button onClick={() => moveSpecies(species, 'up')} disabled={speciesNames.indexOf(species) === 0} className="p-1.5 hover:bg-gray-200 transition disabled:opacity-30 border-r border-gray-300" title="Move Up"><ChevronUp className="w-4 h-4 text-gray-600" /></button>
-                                                            <button onClick={() => moveSpecies(species, 'down')} disabled={speciesNames.indexOf(species) === speciesNames.length - 1} className="p-1.5 hover:bg-gray-200 transition disabled:opacity-30" title="Move Down"><ChevronDown className="w-4 h-4 text-gray-600" /></button>
+                                    return (
+                                        <tr key={animal.id_public || animal._id} className="hover:bg-gray-50">
+                                            <td className="px-4 py-1.5 text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 cursor-pointer rounded"
+                                                    onClick={e => e.stopPropagation()}
+                                                />
+                                            </td>
+                                            {listViewColumns.animal && (
+                                                <td className="px-3 py-1.5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                                                            <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
                                                         </div>
-                                                    )}
-                                                     {isBulkMode && <input type="checkbox" className="w-4 h-4 rounded" checked={selectedIds.length === speciesAnimals.length && speciesAnimals.length > 0} onChange={() => toggleAllInSpecies(species)}/>}
-                                                    <span className="text-lg font-bold text-gray-700">{getSpeciesDisplayName(species)}</span>
-                                                </div>
-                                                {/* Bulk action buttons here */}
-                                            </div>
-                                        </th>
-                                    </tr>
-                                    {speciesAnimals.map(animal => {
-                                        const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
-                                        const ageStr = birthDateObj ? (() => {
-                                            const birth = birthDateObj;
-                                            const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
-                                            let years = endDate.getFullYear() - birth.getFullYear();
-                                            let months = endDate.getMonth() - birth.getMonth();
-                                            let days = endDate.getDate() - birth.getDate();
-                                            if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
-                                            if (months < 0) { years--; months += 12; }
-                                            return years > 0 ? `${years}y ${months}m` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
-                                        })() : '—';
-                                        const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
-                                        const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                        const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
-
-                                        return (
-                                            <tr key={animal.id_public || animal._id} className="hover:bg-gray-50">
-                                                <td className="px-4 py-1.5 text-center">
-                                                    {isBulkMode && (
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedIds.includes(animal.id_public)}
-                                                            onChange={() => toggleAnimalSelection(species, animal.id_public)}
-                                                            className="w-4 h-4 cursor-pointer rounded"
-                                                            onClick={e => e.stopPropagation()}
-                                                        />
-                                                    )}
-                                                </td>
-                                                {listViewColumns.animal && (
-                                                    <td className="px-3 py-1.5">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden cursor-pointer" onClick={() => onViewAnimal(animal)}>
-                                                                <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
+                                                        <div>
+                                                            <div className="font-medium text-gray-800 flex items-center gap-1.5">
+                                                                <span className="cursor-pointer hover:underline" onClick={() => onViewAnimal(animal)}>
+                                                                    {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
+                                                                </span>
+                                                                {animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}
                                                             </div>
-                                                            <div>
-                                                                <div className="font-medium text-gray-800 flex items-center gap-1.5">
-                                                                    <span className="cursor-pointer hover:underline" onClick={() => onViewAnimal(animal)}>
-                                                                        {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
-                                                                    </span>
-                                                                    {animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}
-                                                                </div>
-                                                                <div className="text-xs text-gray-500 font-mono">{animal.id_public}</div>
-                                                            </div>
+                                                            <div className="text-xs text-gray-500 font-mono">{animal.id_public}</div>
                                                         </div>
-                                                    </td>
-                                                )}
-                                                {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{varietyStr}</td>}
-                                                {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
-                                                {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>}
-                                                {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
-                                                {listViewColumns.birthdateAge && (
-                                                    <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">
-                                                        <div>{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</div>
-                                                        <div className="text-xs text-gray-400">{ageStr}</div>
-                                                    </td>
-                                                )}
-                                                {listViewColumns.breedingLines && (
-                                                    <td className="px-3 py-1.5">
-                                                        {activeLines.length > 0 ? (
-                                                            <div className="flex flex-wrap gap-1">
-                                                                {activeLines.map(l => (
-                                                                    <span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>
-                                                                ))}
-                                                            </div>
-                                                        ) : '—'}
-                                                    </td>
-                                                )}
-                                                <td className="px-3 py-1.5 text-right">
-                                                    <button className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" onClick={(e) => {e.stopPropagation(); setOpenActionMenu(animal.id_public); }}>
-                                                        <MoreVertical size={16} />
-                                                    </button>
+                                                    </div>
                                                 </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            );
-                        })}
+                                            )}
+                                            {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600">{animal.species || '—'}</td>}
+                                            {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{varietyStr}</td>}
+                                            {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
+                                            {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>}
+                                            {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
+                                            {listViewColumns.birthdateAge && (
+                                                <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">
+                                                    <div>{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</div>
+                                                    <div className="text-xs text-gray-400">{ageStr}</div>
+                                                </td>
+                                            )}
+                                            {listViewColumns.breedingLines && (
+                                                <td className="px-3 py-1.5">
+                                                    {activeLines.length > 0 ? (
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {activeLines.map(l => (
+                                                                <span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>
+                                                            ))}
+                                                        </div>
+                                                    ) : '—'}
+                                                </td>
+                                            )}
+                                            <td className="px-3 py-1.5 text-right">
+                                                <button className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" onClick={(e) => {e.stopPropagation(); setOpenActionMenu(animal.id_public); }}>
+                                                    <MoreVertical size={16} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                });
+                            })()}
+                        </tbody>
                     </table>
                 </div>
             ) : (
