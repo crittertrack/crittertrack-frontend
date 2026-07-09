@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Scale, Dna, Loader2, Search } from 'lucide-react';
 
@@ -50,6 +50,21 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
   const [coiResult, setCoiResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedSpecies, setSelectedSpecies] = useState('All');
+
+  const speciesOptions = useMemo(() => {
+    if (!myAnimals) return [];
+    const allSpecies = [...new Set(myAnimals.map(animal => animal.species))];
+    return ['All', ...allSpecies.sort()];
+  }, [myAnimals]);
+
+  const filteredAnimals = useMemo(() => {
+    if (!myAnimals) return [];
+    if (selectedSpecies === 'All') {
+        return myAnimals;
+    }
+    return myAnimals.filter(animal => animal.species === selectedSpecies);
+  }, [myAnimals, selectedSpecies]);
 
   const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
 
@@ -104,16 +119,41 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         <div className="max-w-4xl mx-auto">
+          <div className="mb-6">
+            <label htmlFor="species-selector" className="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Species
+            </label>
+            <select
+              id="species-selector"
+              value={selectedSpecies}
+              onChange={e => {
+                setSelectedSpecies(e.target.value);
+                setSire(null);
+                setDam(null);
+                setCoiResult(null);
+                setError('');
+              }}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+            >
+              {speciesOptions.map(species => (
+                <option key={species} value={species}>{species}</option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Select a species to narrow down the animal lists below.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <AnimalSelector
-              animals={myAnimals.filter(a => a.gender === 'Male')}
+              animals={filteredAnimals.filter(a => a.gender === 'Male')}
               selectedAnimal={sire}
               onSelect={setSire}
               title="Select Sire"
               disabled={isLoading}
             />
             <AnimalSelector
-              animals={myAnimals.filter(a => a.gender === 'Female')}
+              animals={filteredAnimals.filter(a => a.gender === 'Female')}
               selectedAnimal={dam}
               onSelect={setDam}
               title="Select Dam"
