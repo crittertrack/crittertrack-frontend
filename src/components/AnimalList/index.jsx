@@ -3918,9 +3918,9 @@ const AnimalList = ({
             {/* Animal List section */}
             <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
                 <div className="flex items-center justify-between w-full gap-2 min-w-0 mb-4">
-                    <div className='flex items-center gap-2 min-w-0 flex-1'>
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                         <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-dark-text truncate" data-tutorial-target="my-animals-title">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text truncate" data-tutorial-target="my-animals-title">
                             {animalView === 'list' ? `My Animals` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                         </h2>
                         {/* Refresh button */}
