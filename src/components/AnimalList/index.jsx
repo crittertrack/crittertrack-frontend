@@ -4,7 +4,7 @@ import ArchiveScreen from '../ArchiveScreen';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight,
-    Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
+    Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, MoreVertical,
     Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
     Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin,
     Network, Package, Plus, PlusCircle, RefreshCw, Save,
@@ -313,6 +313,8 @@ const AnimalList = ({
     const [restockingSupplyId, setRestockingSupplyId] = useState(null);
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
+    const [openActionMenu, setOpenActionMenu] = useState(null); // For list view action dropdown
+    const actionMenuRef = useRef(null);
 
     // ---- Collections state (user-scoped localStorage + backend sync) ----
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
@@ -323,6 +325,17 @@ const AnimalList = ({
     const [renamingCollectionName, setRenamingCollectionName] = useState('');
     const [collapsedCollections, setCollapsedCollections] = useState({});
     const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
+
+    // Close action menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
+                setOpenActionMenu(null);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [actionMenuRef]);
 
     // ---- Re-load user-scoped prefs & collections whenever the logged-in user changes ----
     // This prevents one user's data from leaking into another account after switching.
