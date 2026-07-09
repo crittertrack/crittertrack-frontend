@@ -617,7 +617,7 @@ const BreederBioSection = ({ bio }) => {
             {showToggle && (
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="text-xs text-primary hover:underline mt-1"
+                    className="text-xs text-primary hover:underline mt-1 relative z-10"
                 >
                     {expanded ? 'Show less' : 'Read more'}
                 </button>
