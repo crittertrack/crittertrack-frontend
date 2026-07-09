@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
+import { calculateBreedingAge, formatLocalDate } from '../../utils/ageUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
 
 const API_BASE_URL = '/api';
@@ -4135,6 +4136,8 @@ const AnimalList = ({
                             <tr>
                                 <th className="px-4 py-2 w-12"></th>                                
                                 {listViewColumns.animal && <th className="px-3 py-2 text-left"><button onClick={() => requestSort('name')} className="flex items-center gap-1 group"><span className="group-hover:text-gray-800">Animal</span>{sortConfig.key === 'name' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
+                                <th className="px-4 py-2 w-12"></th>
+                                {listViewColumns.animal && <th className="px-3 py-2 text-left"><button onClick={() => requestSort('name')} className="flex items-center gap-1 group"><span className={sortConfig.key === 'name' ? 'text-gray-800 font-bold' : ''}>Animal</span>{sortConfig.key === 'name' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
                                 {listViewColumns.species && <th className="px-3 py-2 text-left">Species</th>}
                                 {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
                                 {listViewColumns.enclosure && <th className="px-3 py-2 text-left">Enclosure</th>}
@@ -4142,6 +4145,7 @@ const AnimalList = ({
                                 {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
                                 {listViewColumns.health && <th className="px-3 py-2 text-left">Health</th>}
                                 {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left whitespace-nowrap"><button onClick={() => requestSort('birthdate')} className="flex items-center gap-1 group"><span className="group-hover:text-gray-800">Birthdate / Age</span>{sortConfig.key === 'birthdate' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
+                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left whitespace-nowrap"><button onClick={() => requestSort('birthdate')} className="flex items-center gap-1 group"><span className={sortConfig.key === 'birthdate' ? 'text-gray-800 font-bold' : ''}>Birthdate / Age</span>{sortConfig.key === 'birthdate' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
                                 {listViewColumns.breedingLines && <th className="px-3 py-2 text-left">Breeding Lines</th>}
                                 {listViewColumns.tags && <th className="px-3 py-2 text-left">Tags</th>}
                                 <th className="px-3 py-2 text-right w-12"></th>
@@ -4186,16 +4190,7 @@ const AnimalList = ({
                             const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
                                 return displayedAnimals.map(animal => {
                                     const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
-                                    const ageStr = birthDateObj ? (() => {
-                                        const birth = birthDateObj;
-                                        const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
-                                        let years = endDate.getFullYear() - birth.getFullYear();
-                                        let months = endDate.getMonth() - birth.getMonth();
-                                        let days = endDate.getDate() - birth.getDate();
-                                        if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
-                                        if (months < 0) { years--; months += 12; }
-                                        return years > 0 ? `${years}y ${months}m` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
-                                    })() : '—';
+                                    const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
                                     const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                     const assignedIds = animalBreedingLines[animal.id_public] || [];
                                     const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
@@ -4240,7 +4235,7 @@ const AnimalList = ({
                                         }</td>}
                                         {listViewColumns.birthdateAge && (
                                             <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">
-                                                <div>{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</div>
+                                                <div>{formatLocalDate(animal.birthDate)}</div>
                                                 <div className="text-xs text-gray-400">{ageStr}</div>
                                             </td>
                                         )}
