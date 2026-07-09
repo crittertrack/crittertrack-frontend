@@ -1964,7 +1964,7 @@ const AnimalList = ({
     const renderCollectionsView = () => {
         const searchTerm = searchInput.trim().toLowerCase();
         const allOwnedAnimals = (allAnimalsRaw.length > 0 ? allAnimalsRaw : animals)
-            .filter(a => !a.isViewOnly)
+            .filter(a => !a.isViewOnly && !a.archived)
             .filter(a => !searchTerm || [
                 a.name, a.prefix, a.suffix, a.id_public, a.breederAssignedId
             ].some(v => v && v.toString().toLowerCase().includes(searchTerm)));
