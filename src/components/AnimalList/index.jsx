@@ -4,8 +4,8 @@ import ArchiveScreen from '../ArchiveScreen';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight,
-    Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, MoreVertical,
-    Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
+    ArrowDown, ArrowUp, Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
+    MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
     Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin,
     Network, Package, Plus, PlusCircle, RefreshCw, Save,
     Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
@@ -30,7 +30,7 @@ const ALERT_CATEGORIES = {
     maintenance: 'Maintenance'
 };
 
-const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, birthdateAge: true, breedingLines: true, tags: true };
+const DEFAULT_LIST_COLUMNS = { animal: true, species: true, health: true, variety: true, enclosure: true, lifeStage: true, status: true, birthdateAge: true, breedingLines: true, tags: true };
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -128,9 +128,31 @@ const AnimalList = ({
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals ? shown in Management > Sold/Transferred section
     const [showAlertsDropdown, setShowAlertsDropdown] = useState(false);
     const alertsDropdownRef = useRef(null);
-    const [alertSettings, setAlertSettings] = useState(() => Object.keys(ALERT_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
-    const [showListColumnConfig, setShowListColumnConfig] = useState(false);
+    const [alertSettings, setAlertSettings] = useState(() => Object.keys(ALERT_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: true }), {}));    
     const [listViewColumns, setListViewColumns] = useState(DEFAULT_LIST_COLUMNS);
+
+    const [sortConfig, setSortConfig] = useState(() => {
+        try {
+            const saved = localStorage.getItem(`ct_list_sort_config_${userKey}`);
+            return saved ? JSON.parse(saved) : { key: 'name', direction: 'ascending' };
+        } catch {
+            return { key: 'name', direction: 'ascending' };
+        }
+    });
+
+    const requestSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        } else if (sortConfig.key === key && sortConfig.direction === 'descending') {
+            direction = 'ascending';
+        } else if (key === 'birthdate') {
+            direction = 'descending'; // Default for birthdate is oldest first
+        }
+        const newSortConfig = { key, direction };
+        setSortConfig(newSortConfig);
+        try { localStorage.setItem(`ct_list_sort_config_${userKey}`, JSON.stringify(newSortConfig)); } catch {}
+    };
 
     const toggleAlertCategory = (key) => {
         setAlertSettings(prev => {
@@ -353,12 +375,6 @@ const AnimalList = ({
         try {
             const vm = localStorage.getItem(`ct_my_animals_view_mode_${userKey}`);
             if (vm) setMyAnimalsViewMode(vm);
-        } catch {}
-        try {
-            const saved = localStorage.getItem(`ct_list_view_columns_${userKey}`);
-            if (saved) setListViewColumns({ ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) });
-        } catch {}
-        try {
         } catch {}
         // Alert settings
         try {
@@ -4113,54 +4129,27 @@ const AnimalList = ({
             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
-                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-                    {showListColumnConfig && (
-                        <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
-                            <span className="text-xs font-semibold text-gray-600 mr-2">Show columns:</span>
-                            {Object.entries({ animal: 'Animal', species: 'Species', variety: 'Variety', enclosure: 'Enclosure', lifeStage: 'Life Stage', status: 'Status', birthdateAge: 'Birthdate / Age', breedingLines: 'Breeding Lines', tags: 'Tags' }).map(([key, label]) => (
-                                <label key={key} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={!!listViewColumns[key]}
-                                        onChange={() => setListViewColumns(prev => {
-                                            const next = { ...prev, [key]: !prev[key] };
-                                            try { localStorage.setItem(`ct_list_view_columns_${userKey}`, JSON.stringify(next)); } catch {}
-                                            return next;
-                                        })}
-                                        className="rounded"
-                                    />
-                                    {label}
-                                </label>
-                            ))}
-                        </div>
-                    )}
+                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">                    
                     <table className="min-w-full text-xs divide-y divide-gray-200">
                         <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
                             <tr>
-                                <th className="px-4 py-2 w-12"></th>
-                                {listViewColumns.animal && <th className="px-3 py-2 text-left">Animal</th>}
+                                <th className="px-4 py-2 w-12"></th>                                
+                                {listViewColumns.animal && <th className="px-3 py-2 text-left"><button onClick={() => requestSort('name')} className="flex items-center gap-1 group"><span className="group-hover:text-gray-800">Animal</span>{sortConfig.key === 'name' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
                                 {listViewColumns.species && <th className="px-3 py-2 text-left">Species</th>}
+                                {listViewColumns.health && <th className="px-3 py-2 text-left">Health</th>}
                                 {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
                                 {listViewColumns.enclosure && <th className="px-3 py-2 text-left">Enclosure</th>}
                                 {listViewColumns.lifeStage && <th className="px-3 py-2 text-left">Life Stage</th>}
                                 {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
-                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left whitespace-nowrap">Birthdate / Age</th>}
+                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left whitespace-nowrap"><button onClick={() => requestSort('birthdate')} className="flex items-center gap-1 group"><span className="group-hover:text-gray-800">Birthdate / Age</span>{sortConfig.key === 'birthdate' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
                                 {listViewColumns.breedingLines && <th className="px-3 py-2 text-left">Breeding Lines</th>}
                                 {listViewColumns.tags && <th className="px-3 py-2 text-left">Tags</th>}
-                                <th className="px-3 py-2 text-right w-12">
-                                    <button
-                                        onClick={() => setShowListColumnConfig(v => !v)}
-                                        className="text-gray-400 hover:text-gray-700 transition"
-                                        title="Configure columns"
-                                    >
-                                        <SlidersHorizontal size={13} />
-                                    </button>
-                                </th>
+                                <th className="px-3 py-2 text-right w-12"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {(() => {
-                                const displayedAnimals = speciesNames.flatMap(species => (groupedAnimals[species] || []));
+                                let displayedAnimals = speciesNames.flatMap(species => (groupedAnimals[species] || []));
                                 const isBulkMode = Object.values(bulkDeleteMode).some(v => v) || Object.values(bulkArchiveMode).some(v => v);
                                 const selectedIds = Object.values(selectedAnimals).flat();
                             const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
