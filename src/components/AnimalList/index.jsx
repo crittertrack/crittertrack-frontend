@@ -11,9 +11,8 @@ import {
     Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
     Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
-import { formatDate, formatDateShort } from '../../utils/dateFormatter';
+import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
-import { calculateBreedingAge, formatLocalDate } from '../../utils/ageUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
 
 const API_BASE_URL = '/api';
