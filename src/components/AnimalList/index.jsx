@@ -350,6 +350,10 @@ const AnimalList = ({
     const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
 
     // Close action menu when clicking outside
+    const [collectionsViewMode, setCollectionsViewMode] = useState(() => {
+        try { return localStorage.getItem(`ct_collections_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
+    });
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
@@ -375,6 +379,8 @@ const AnimalList = ({
         try {
             const vm = localStorage.getItem(`ct_my_animals_view_mode_${userKey}`);
             if (vm) setMyAnimalsViewMode(vm);
+            const cvm = localStorage.getItem(`ct_collections_view_mode_${userKey}`);
+            if (cvm) setCollectionsViewMode(cvm);
         } catch {}
         // Alert settings
         try {
@@ -1968,10 +1974,12 @@ const AnimalList = ({
             .filter(a => !searchTerm || [
                 a.name, a.prefix, a.suffix, a.id_public, a.breederAssignedId
             ].some(v => v && v.toString().toLowerCase().includes(searchTerm)));
+        const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
         return (
             <div className="space-y-4">
                 {/* Collections Manager Header */}
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                    <div className="flex items-center gap-2">
                     <button
                         onClick={() => setShowCollectionManager(prev => !prev)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition ${
@@ -1981,6 +1989,23 @@ const AnimalList = ({
                         <FolderOpen size={14} />
                         {showCollectionManager ? 'Close Manager' : 'Manage Collections'}
                     </button>
+                    </div>
+                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                        <button
+                            onClick={() => { setCollectionsViewMode('cards'); try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'cards'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${collectionsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="Card view"
+                        >
+                            <LayoutGrid size={14} />
+                        </button>
+                        <button
+                            onClick={() => { setCollectionsViewMode('list'); try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'list'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${collectionsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="List view"
+                        >
+                            <ClipboardList size={14} />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Collection Manager Panel */}
@@ -2078,7 +2103,7 @@ const AnimalList = ({
                                         <div className="p-1.5 sm:p-4">
                                             {colAnimals.length === 0 ? (
                                                 <p className="text-sm text-gray-400 text-center py-4">No animals yet. Assign animals from the Uncategorized section below.</p>
-                                            ) : (
+                                            ) : collectionsViewMode === 'cards' ? (
                                                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
                                                     {colAnimals.map(animal => (
                                                         <div key={animal.id_public} className="relative">
@@ -2092,6 +2117,51 @@ const AnimalList = ({
                                                             </button>
                                                         </div>
                                                     ))}
+                                                </div>
+                                            ) : (
+                                                <div className="overflow-x-auto">
+                                                    <table className="min-w-full text-xs divide-y divide-gray-200">
+                                                        <thead className="bg-gray-50 text-gray-500 uppercase text-[10px]">
+                                                            <tr>
+                                                                <th className="px-3 py-2 text-left font-semibold">Animal</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Species</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Variety</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Enclosure</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Life Stage</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Status</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Health</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Birthdate / Age</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Lines</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Tags</th>
+                                                                <th className="px-3 py-2 text-right w-12"></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-100">
+                                                            {colAnimals.map(animal => {
+                                                                const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
+                                                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                                                const assignedIds = animalBreedingLines[animal.id_public] || [];
+                                                                const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
+                                                                return (
+                                                                    <tr key={animal.id_public} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                                                                        <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 font-mono">{animal.id_public}</div></div></div></td>
+                                                                        <td className="px-3 py-1.5 text-gray-600"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400">{getSpeciesLatinName(animal.species)}</div>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 font-mono">{animal.geneticCode}</div>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.isQuarantine ? <span className="font-medium text-orange-600">Quarantine</span> : animal.isInTreatment ? <span className="font-medium text-red-600">Treatment</span> : animal.status === 'Deceased' ? <span className="text-gray-500">Deceased</span> : <span className="text-green-600">OK</span>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400">{ageStr}</div></td>
+                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-500">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-right">
+                                                                            <button onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }} className="bg-white hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-1 shadow-sm border border-gray-200" title="Remove from this collection"><X size={11} /></button>
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             )}
                                         </div>
@@ -2123,42 +2193,69 @@ const AnimalList = ({
                                     </div>
                                     {!isUncatCollapsed && (
                                         <div className="p-1.5 sm:p-4">
-                                            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
-                                                {uncategorized.map(animal => (
-                                                    <div key={animal.id_public} className="relative" onClick={e => { if (assigningCollectionAnimalId === animal.id_public) e.stopPropagation(); }}>
-                                                        {/* grey overlay */}
-                                                        <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
-                                                        <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
-                                                        <div className="absolute top-2 left-2 z-20">
-                                                            {assigningCollectionAnimalId === animal.id_public && (
-                                                                <div
-                                                                    className="absolute left-0 top-9 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30"
-                                                                    onClick={e => e.stopPropagation()}
-                                                                >
-                                                                    <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
-                                                                    {userCollections.map(col => (
-                                                                        <button
-                                                                            key={col.id}
-                                                                            onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }}
-                                                                            className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded flex items-center gap-1.5 text-gray-700"
-                                                                        >
-                                                                            <FolderOpen size={11} className="text-amber-500" /> {col.name}
-                                                                        </button>
-                                                                    ))}
-                                                                    <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
-                                                                </div>
-                                                            )}
-                                                            <button
-                                                                onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }}
-                                                                className="bg-white/90 hover:bg-amber-50 text-amber-500 hover:text-amber-700 rounded-full p-1 shadow-sm border border-gray-200"
-                                                                title="Add to a collection"
-                                                            >
-                                                                <Plus size={16} />
-                                                            </button>
+                                            {collectionsViewMode === 'cards' ? (
+                                                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+                                                    {uncategorized.map(animal => (
+                                                        <div key={animal.id_public} className="relative" onClick={e => { if (assigningCollectionAnimalId === animal.id_public) e.stopPropagation(); }}>
+                                                            <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
+                                                            <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
+                                                            <div className="absolute top-2 left-2 z-20">
+                                                                {assigningCollectionAnimalId === animal.id_public && (
+                                                                    <div className="absolute left-0 top-9 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30" onClick={e => e.stopPropagation()}>
+                                                                        <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
+                                                                        {userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded flex items-center gap-1.5 text-gray-700"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}
+                                                                        <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
+                                                                    </div>
+                                                                )}
+                                                                <button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="bg-white/90 hover:bg-amber-50 text-amber-500 hover:text-amber-700 rounded-full p-1 shadow-sm border border-gray-200" title="Add to a collection"><Plus size={16} /></button>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="overflow-x-auto">
+                                                    <table className="min-w-full text-xs divide-y divide-gray-200">
+                                                        <thead className="bg-gray-50 text-gray-500 uppercase text-[10px]">
+                                                            <tr>
+                                                                <th className="px-3 py-2 text-left font-semibold">Animal</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Species</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Variety</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Enclosure</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Life Stage</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Status</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Health</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Birthdate / Age</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Lines</th>
+                                                                <th className="px-3 py-2 text-left font-semibold">Tags</th>
+                                                                <th className="px-3 py-2 text-right w-12"></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-100">
+                                                            {uncategorized.map(animal => {
+                                                                const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
+                                                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                                                const assignedIds = animalBreedingLines[animal.id_public] || [];
+                                                                const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
+                                                                return (
+                                                                    <tr key={animal.id_public} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                                                                        <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 font-mono">{animal.id_public}</div></div></div></td>
+                                                                        <td className="px-3 py-1.5 text-gray-600"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400">{getSpeciesLatinName(animal.species)}</div>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 font-mono">{animal.geneticCode}</div>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.isQuarantine ? <span className="font-medium text-orange-600">Quarantine</span> : animal.isInTreatment ? <span className="font-medium text-red-600">Treatment</span> : animal.status === 'Deceased' ? <span className="text-gray-500">Deceased</span> : <span className="text-green-600">OK</span>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400">{ageStr}</div></td>
+                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-500">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
+                                                                        <td className="px-3 py-1.5 text-right"><div className="relative inline-block text-left"><button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Plus size={16} /></button>{assigningCollectionAnimalId === animal.id_public && (<div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-30" onClick={e => e.stopPropagation()}><div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"><p className="text-xs font-semibold text-gray-600 px-3 py-1">Add to collection:</p>{userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-3 py-2 hover:bg-gray-100 flex items-center gap-1.5 text-gray-700"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}</div></div>)}</div></td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
