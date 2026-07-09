@@ -3,13 +3,12 @@ import axios from 'axios';
 import ArchiveScreen from '../ArchiveScreen';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import {
-    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight,
-    ArrowDown, ArrowUp, Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
-    MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
-    Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin,
-    Network, Package, Plus, PlusCircle, RefreshCw, Save,
-    Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
-    Venus, VenusAndMars, Wrench, X
+    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
+    Bean, Bell, Bird, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
+    ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Frog, Heart, HeartOff,
+    Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin, Network,
+    Package, Plus, PlusCircle, RefreshCw, Save, Search, ShoppingBag, SlidersHorizontal,
+    Sparkles, Trash2, Turtle, Utensils, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
@@ -3648,6 +3647,16 @@ const AnimalList = ({
     };
 
     const renderDashboard = () => {
+        const categoryIcons = {
+            'Mammal': <Cat size={16} className="mr-1.5 text-gray-500" />,
+            'Reptile': <Turtle size={16} className="mr-1.5 text-gray-500" />,
+            'Bird': <Bird size={16} className="mr-1.5 text-gray-500" />,
+            'Amphibian': <Frog size={16} className="mr-1.5 text-gray-500" />,
+            'Fish': <Fish size={16} className="mr-1.5 text-gray-500" />,
+            'Invertebrate': <Bug size={16} className="mr-1.5 text-gray-500" />,
+            'Other': <Sparkles size={16} className="mr-1.5 text-gray-500" />
+        };
+
         const DashboardCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => (
             <div
                 className={`relative flex items-center p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
@@ -3687,7 +3696,10 @@ const AnimalList = ({
                                     <ul className="text-xs space-y-1">
                                         {categoryBreakdown.map(cat => (
                                             <li key={cat.name} className="flex justify-between items-center">
-                                                <span className="text-gray-600">{cat.name}{cat.count !== 1 && cat.name !== 'Fish' ? 's' : ''}</span>
+                                                <span className="flex items-center text-gray-600">
+                                                    {categoryIcons[cat.name]}
+                                                    {cat.name}{cat.count !== 1 && cat.name !== 'Fish' ? 's' : ''}
+                                                </span>
                                                 <span className="font-medium text-gray-800">{cat.count} <span className="text-gray-400">({cat.percentage}%)</span></span>
                                             </li>
                                         ))}
