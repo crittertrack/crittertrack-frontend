@@ -4138,7 +4138,6 @@ const AnimalList = ({
                                 {listViewColumns.animal && <th className="px-3 py-2 text-left"><button onClick={() => requestSort('name')} className="flex items-center gap-1 group"><span className={sortConfig.key === 'name' ? 'text-gray-800 font-bold' : ''}>Animal</span>{sortConfig.key === 'name' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400" />)}</button></th>}
                                 {listViewColumns.species && <th className="px-3 py-2 text-left">Species</th>}
                                 {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
-                                {listViewColumns.variety && <th className="px-3 py-2 text-left w-48">Variety</th>}
                                 {listViewColumns.enclosure && <th className="px-3 py-2 text-left">Enclosure</th>}
                                 {listViewColumns.lifeStage && <th className="px-3 py-2 text-left">Life Stage</th>}
                                 {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
