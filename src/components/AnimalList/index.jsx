@@ -1978,8 +1978,7 @@ const AnimalList = ({
         return (
             <div className="space-y-4">
                 {/* Collections Manager Header */}
-                <div className="flex items-center justify-between gap-2 mb-1">
-                    <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-1">
                     <button
                         onClick={() => setShowCollectionManager(prev => !prev)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition ${
@@ -1989,23 +1988,6 @@ const AnimalList = ({
                         <FolderOpen size={14} />
                         {showCollectionManager ? 'Close Manager' : 'Manage Collections'}
                     </button>
-                    </div>
-                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
-                        <button
-                            onClick={() => { setCollectionsViewMode('cards'); try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'cards'); } catch {} }}
-                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${collectionsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                            title="Card view"
-                        >
-                            <LayoutGrid size={14} />
-                        </button>
-                        <button
-                            onClick={() => { setCollectionsViewMode('list'); try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'list'); } catch {} }}
-                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${collectionsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                            title="List view"
-                        >
-                            <ClipboardList size={14} />
-                        </button>
-                    </div>
                 </div>
 
                 {/* Collection Manager Panel */}
@@ -3963,6 +3945,22 @@ const AnimalList = ({
             {isCollectionsView && !showArchiveScreen && (
             <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
                 <div className="flex items-center gap-2 p-2 sm:p-3">
+                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                        <button
+                            onClick={() => { setCollectionsViewMode('cards'); try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'cards'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${collectionsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="Card view"
+                        >
+                            <LayoutGrid size={14} />
+                        </button>
+                        <button
+                            onClick={() => { setCollectionsViewMode('list'); try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'list'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${collectionsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="List view"
+                        >
+                            <ClipboardList size={14} />
+                        </button>
+                    </div>
                     <input
                         type="text"
                         placeholder="Search by name..."
