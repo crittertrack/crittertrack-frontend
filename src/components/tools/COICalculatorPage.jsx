@@ -51,6 +51,10 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedSpecies, setSelectedSpecies] = useState('All');
+  const isSpeciesSupported = useMemo(() => {
+    // Currently, COI calculations are supported for Fancy Mouse and Fancy Rat.
+    return ['Fancy Mouse', 'Fancy Rat'].includes(selectedSpecies);
+  }, [selectedSpecies]);
 
   const speciesOptions = useMemo(() => {
     if (!myAnimals) return [];
@@ -142,6 +146,12 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
             <p className="text-xs text-gray-500 mt-1">
               Select a species to narrow down the animal lists below.
             </p>
+            {!isSpeciesSupported && selectedSpecies !== 'All' && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
+                <p>COI calculation is currently available for Fancy Mouse and Fancy Rat. Support for other species is in development!</p>
+              </div>
+            )}
+
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -150,21 +160,21 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
               selectedAnimal={sire}
               onSelect={setSire}
               title="Select Sire"
-              disabled={isLoading}
+              disabled={isLoading || !isSpeciesSupported}
             />
             <AnimalSelector
               animals={filteredAnimals.filter(a => a.gender === 'Female')}
               selectedAnimal={dam}
               onSelect={setDam}
               title="Select Dam"
-              disabled={isLoading}
+              disabled={isLoading || !isSpeciesSupported}
             />
           </div>
 
           <div className="text-center mb-6">
             <button
               onClick={handleCalculate}
-              disabled={!sire || !dam || isLoading}
+              disabled={!sire || !dam || isLoading || !isSpeciesSupported}
               className="px-8 py-3 bg-primary text-black font-semibold rounded-lg shadow-md hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
             >
               {isLoading ? (

@@ -445,6 +445,10 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
   const [results, setResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const isSpeciesSupported = useMemo(() => {
+    // Currently, detailed trait and genetic code calculations are supported for Fancy Mouse and Fancy Rat.
+    return ['Fancy Mouse', 'Fancy Rat'].includes(selectedSpecies);
+  }, [selectedSpecies]);
 
   const availableSpecies = useMemo(() => {
     if (!myAnimals) return [];
@@ -689,7 +693,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
                 id="species-select"
                 value={selectedSpecies}
                 onChange={(e) => setSelectedSpecies(e.target.value)}
-                disabled={isLoading || availableSpecies.length <= 1}
+                disabled={isLoading}
                 className="w-full p-2 border border-gray-300 rounded-lg bg-white"
               >
                 <option value="" disabled>Select a species</option>
@@ -722,7 +726,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
                   species={selectedSpecies}
                   selectedTraits={selectedTraits}
                   onTraitChange={handleTraitChange}
-                  disabled={isLoading}
+                  disabled={isLoading || !isSpeciesSupported}
                 />
               </div>
             ) : (
@@ -737,12 +741,19 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
                     placeholder="e.g., a/a d/d e/e"
                     value={targetGenetics}
                     onChange={(e) => setTargetGenetics(e.target.value)}
-                    disabled={isLoading}
+                    disabled={isLoading || !isSpeciesSupported}
                     className="w-full p-3 border border-gray-300 rounded-lg"
                   />
                   <Dna size={20} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 </div>
                 <p className="text-xs text-gray-500 mt-2">Enter the genetic combination you want to achieve in the offspring.</p>
+              </div>
+            )}
+            {!isSpeciesSupported && selectedSpecies && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
+                <p>
+                  Detailed trait and genetic code calculations are currently available for Fancy Mouse and Fancy Rat. Support for other species is in development!
+                </p>
               </div>
             )}
           </div>
