@@ -555,46 +555,42 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                             View Profile
                                         </button>
                                     </div>
-                            {/* Bio and Expand/Collapse button */}
-                            {breeder.bio && ( // Only show bio section if bio exists
-                                <BreederBioSection bio={breeder.bio} />
-                            )}
+                                    {/* Bio and Expand/Collapse button */}
+                                    {breeder.bio && ( // Only show bio section if bio exists
+                                        <BreederBioSection bio={breeder.bio} />
+                                    )}
 
-                                    {/* Bio */}
-                                    {breeder.bio && (
-                                        <p className="text-xs text-gray-700 mb-4 leading-relaxed">
-                                            {breeder.bio}
-                                        </p>
-                            {/* Breeding Species */}
-                            <div className="flex flex-wrap gap-3">
-                                {breeder.breedingStatus && Object.entries(breeder.breedingStatus).map(([species, status]) => {
-                                    if (status !== 'breeder' && status !== 'retired') return null;
-                                    
-                                    return (
-                                        <div 
-                                            key={species} 
-                                            className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200"
-                                        >
-                                            {status === 'breeder' ? (
-                                                <Star size={14} className="text-primary" />
-                                            ) : (
-                                                <Moon size={14} className="text-gray-500" />
-                                            )}
-                                            <span className="text-xs font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
-                                            <span className="text-xs text-gray-500">
-                                                ({status === 'breeder' ? 'Active' : 'Retired'})
-                                            </span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    );
-                })}
+                                    {/* Breeding Species */}
+                                    <div className="flex flex-wrap gap-3">
+                                        {breeder.breedingStatus && Object.entries(breeder.breedingStatus).map(([species, status]) => {
+                                            if (status !== 'breeder' && status !== 'retired') return null;
+
+                                            return (
+                                                <div
+                                                    key={species}
+                                                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200"
+                                                >
+                                                    {status === 'breeder' ? (
+                                                        <Star size={14} className="text-primary" />
+                                                    ) : (
+                                                        <Moon size={14} className="text-gray-500" />
+                                                    )}
+                                                    <span className="text-xs font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
+                                                    <span className="text-xs text-gray-500">
+                                                        ({status === 'breeder' ? 'Active' : 'Retired'})
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
-        )}
-    </div>
-);
+        </div>
+    );
 };
 
 // New component for the expandable bio section
@@ -626,44 +622,6 @@ const BreederBioSection = ({ bio }) => {
                     {expanded ? 'Show less' : 'Read more'}
                 </button>
             )}
-        </div>
-    );
-};
-
-
-export { BreederDirectorySettings };
-export default BreederDirectory;
-                                    )}
-
-                                    {/* Breeding Species */}
-                                    <div className="flex flex-wrap gap-3">
-                                        {breeder.breedingStatus && Object.entries(breeder.breedingStatus).map(([species, status]) => {
-                                            if (status !== 'breeder' && status !== 'retired') return null;
-                                            
-                                            return (
-                                                <div 
-                                                    key={species} 
-                                                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200"
-                                                >
-                                                    {status === 'breeder' ? (
-                                                        <Star size={14} className="text-primary" />
-                                                    ) : (
-                                                        <Moon size={14} className="text-gray-500" />
-                                                    )}
-                                                    <span className="text-xs font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
-                                                    <span className="text-xs text-gray-500">
-                                                        ({status === 'breeder' ? 'Active' : 'Retired'})
-                                                    </span>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
         </div>
     );
 };
