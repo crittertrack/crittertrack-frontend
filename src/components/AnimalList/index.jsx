@@ -12,6 +12,7 @@ import {
     Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
+import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
 
 const API_BASE_URL = '/api';
@@ -4180,75 +4181,65 @@ const AnimalList = ({
                                     const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
 
                                     return (
-                                        <tr key={animal.id_public || animal._id} className="hover:bg-gray-50">
-                                            <td className="px-4 py-1.5 text-center">
-                                                <input
-                                                    type="checkbox"
-                                                    className="w-4 h-4 cursor-pointer rounded"
-                                                    onClick={e => e.stopPropagation()}
-                                                />
-                                            </td>
-                                            {listViewColumns.animal && (
-                                                <td className="px-3 py-1.5">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden cursor-pointer" onClick={() => onViewAnimal(animal)}>
-                                                            <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-medium text-gray-800 flex items-center gap-1.5 text-sm">
-                                                                <span className="cursor-pointer hover:underline" onClick={() => onViewAnimal(animal)}>
-                                                                    {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
-                                                                </span>
-                                                                {animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}
-                                                            </div>
-                                                            <div className="text-xs text-gray-500 font-mono">{animal.id_public}</div>
-                                                        </div>
+                                        <tr key={animal.id_public || animal._id} className="hover:bg-gray-50" onClick={() => onViewAnimal(animal)}>
+                                        <td className="px-4 py-1.5 text-center">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 cursor-pointer rounded"
+                                                onClick={e => e.stopPropagation()}
+                                            />
+                                        </td>
+                                        {listViewColumns.animal && (
+                                            <td className="px-3 py-1.5">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden cursor-pointer" onClick={(e) => {e.stopPropagation(); onViewAnimal(animal);}}>
+                                                        <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
                                                     </div>
-                                                </td>
-                                            )}
-                                            {listViewColumns.species && (
-                                                <td className="px-3 py-1.5 text-gray-600">
-                                                    <div>{animal.species || '—'}</div>
-                                                    {animal.latinName && <div className="text-xs text-gray-400">{animal.latinName}</div>}
-                                                </td>
-                                            )}
-                                            {listViewColumns.variety && (
-                                                <td className="px-3 py-1.5 text-gray-600">
-                                                    <div>{varietyStr}</div>
-                                                    {animal.geneticCode && <div className="text-xs text-gray-400 font-mono">{animal.geneticCode}</div>}
-                                                </td>
-                                            )}
-                                            {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
-                                            {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>}
-                                            {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
-                                            {listViewColumns.birthdateAge && (
-                                                <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">
-                                                    <div>{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</div>
-                                                    <div className="text-xs text-gray-400">{ageStr}</div>
-                                                </td>
-                                            )}
-                                            {listViewColumns.breedingLines && (
-                                                <td className="px-3 py-1.5">
-                                                    {activeLines.length > 0 ? (
-                                                        <div className="flex flex-wrap gap-1">
-                                                            {activeLines.map(l => (
-                                                                <span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>
-                                                            ))}
+                                                    <div>
+                                                        <div className="font-medium text-gray-800 flex items-center gap-1.5 text-sm">
+                                                            <span className="cursor-pointer hover:underline" onClick={(e) => {e.stopPropagation(); onViewAnimal(animal);}}>
+                                                                {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
+                                                            </span>
+                                                            {animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}
                                                         </div>
-                                                    ) : '—'}
-                                                </td>
-                                            )}
-                                            {listViewColumns.tags && (
-                                                <td className="px-3 py-1.5 text-gray-500">
-                                                    {(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}
-                                                </td>
-                                            )}
-                                            <td className="px-3 py-1.5 text-right">
-                                                <button className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" onClick={(e) => {e.stopPropagation(); setOpenActionMenu(animal.id_public); }}>
-                                                    <MoreVertical size={16} />
-                                                </button>
+                                                        <div className="text-xs text-gray-500 font-mono">{animal.id_public}</div>
+                                                    </div>
+                                                </div>
                                             </td>
-                                        </tr>
+                                        )}
+                                        {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400">{getSpeciesLatinName(animal.species)}</div>}</td>}
+                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 font-mono">{animal.geneticCode}</div>}</td>}
+                                        {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
+                                        {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>}
+                                        {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
+                                        {listViewColumns.birthdateAge && (
+                                            <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">
+                                                <div>{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</div>
+                                                <div className="text-xs text-gray-400">{ageStr}</div>
+                                            </td>
+                                        )}
+                                        {listViewColumns.breedingLines && (
+                                            <td className="px-3 py-1.5">
+                                                {activeLines.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {activeLines.map(l => (
+                                                            <span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>
+                                                        ))}
+                                                    </div>
+                                                ) : '—'}
+                                            </td>
+                                        )}
+                                        {listViewColumns.tags && (
+                                            <td className="px-3 py-1.5 text-gray-500">
+                                                {(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}
+                                            </td>
+                                        )}
+                                        <td className="px-3 py-1.5 text-right">
+                                            <button className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" onClick={(e) => {e.stopPropagation(); setOpenActionMenu(animal.id_public); }}>
+                                                <MoreVertical size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
                                     );
                                 });
                             })()}
