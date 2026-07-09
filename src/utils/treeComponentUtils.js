@@ -2,6 +2,8 @@
  * Shared utilities for tree components (FamilyTree)
  * Extracted to reduce duplication (~50+ lines saved per component)
  */
+import { formatAnimalAge } from './ageUtils';
+import { formatDateShort } from './dateFormatter';
 
 /**
  * Get border color based on animal gender
@@ -22,49 +24,6 @@ export const getGenderBorderColor = (gender) => {
         default:
             return 'border-gray-400';
     }
-};
-
-/**
- * Format animal age from birth date
- * @param {string|Date} birthDate - Animal birth date
- * @returns {object} Object with years, months, label
- */
-export const formatAnimalAge = (birthDate) => {
-    if (!birthDate) return null;
-    
-    const birth = new Date(birthDate);
-    const today = new Date();
-    
-    let years = today.getFullYear() - birth.getFullYear();
-    let months = today.getMonth() - birth.getMonth();
-    
-    if (months < 0) {
-        years--;
-        months += 12;
-    }
-    
-    if (years < 0) return null;
-    
-    const ageLabel = years > 0 
-        ? `${years}y ${months}m`
-        : `${months}m`;
-    
-    return { years, months, label: ageLabel };
-};
-
-/**
- * Format date in short form (e.g., "Jan 15, 2026")
- * @param {string|Date} dateString - Date to format
- * @returns {string|null} Formatted date string
- */
-export const formatDateShort = (dateString) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-    });
 };
 
 /**
@@ -246,9 +205,10 @@ export const getSpeciesOptions = (animals) => {
 };
 
 export default {
-    getGenderBorderColor,
+    // Re-exporting for convenience where treeComponentUtils is already imported
     formatAnimalAge,
     formatDateShort,
+    getGenderBorderColor,
     createNodeData,
     handleNodeSelection,
     buildTreeGraph,

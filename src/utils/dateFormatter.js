@@ -8,7 +8,7 @@
  * Date-only strings (YYYY-MM-DD) are parsed as midnight local time.
  * Full ISO strings and Date objects are handled normally.
  */
-const parseLocalDate = (date) => {
+export const parseLocalDate = (date) => {
     if (date instanceof Date) return date;
     if (typeof date === 'string') {
         // Match YYYY-MM-DD (no time component) — parse as local midnight
@@ -52,38 +52,15 @@ export const formatDateShort = (date) => {
     }).format(d);
 };
 
-// Helper function to format date strings for display
-export const formatDateDisplay = (dateString) => {
-    if (!dateString) return '';
-    try {
-        // Pass the raw string to formatDateShort so it can parse as local time
-        return formatDateShort(dateString);
-    } catch (e) {
-        return dateString; // Return as-is if parsing fails
-    }
-};
-
-// Returns a human-friendly age string from a birth date, matching the animal age format (e.g. "9d", "3m 5d", "1y 2m 10d")
-export const litterAge = (birthDate) => {
-    if (!birthDate) return null;
-    const born = new Date(birthDate);
-    const now = new Date();
-    if (isNaN(born.getTime()) || born > now) return null;
-    let years = now.getFullYear() - born.getFullYear();
-    let months = now.getMonth() - born.getMonth();
-    let days = now.getDate() - born.getDate();
-    if (days < 0) {
-        months--;
-        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-        days += prevMonth.getDate();
-    }
-    if (months < 0) {
-        years--;
-        months += 12;
-    }
-    if (years > 0) return `${years}y ${months}m ${days}d`;
-    if (months > 0) return `${months}m ${days}d`;
-    return `${days}d`;
+/**
+ * Formats a date string into the user's local date format (e.g., MM/DD/YYYY or DD/MM/YYYY).
+ * @param {string | Date | null} date - The date to format.
+ * @returns {string} The locally formatted date string, or '—' if invalid.
+ */
+export const formatLocalDate = (date) => {
+    if (!date) return '—';
+    const dateObj = parseLocalDate(date);
+    return !isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString() : '—';
 };
 
 // Formats a date/ISO string as a relative time phrase (e.g. "2 hours ago")
