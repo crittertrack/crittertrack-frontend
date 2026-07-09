@@ -113,6 +113,7 @@ const AnimalList = ({
     // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
     // so that switching accounts never leaks one user's collections/prefs into another's.
     const userKey = useMemo(() => getUserKey(authToken), [authToken]);
+    const [showCategoryBreakdown, setShowCategoryBreakdown] = useState(false);
     useEffect(() => { showModalMessageRef.current = showModalMessage; });
 
     const [animals, setAnimalsRaw] = useState(() => _alCache || []);
@@ -488,6 +489,43 @@ const AnimalList = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showArchiveScreen]);
     
+    const getSpeciesCategory = (species) => {
+        if (!species) return 'Other';
+        const s = species.toLowerCase();
+        if (s.includes('mouse') || s.includes('rat') || s.includes('hamster') || s.includes('guinea pig')) {
+            return 'Mammal';
+        }
+        if (s.includes('snake') || s.includes('lizard') || s.includes('gecko') || s.includes('turtle')) {
+            return 'Reptile';
+        }
+        if (s.includes('parrot') || s.includes('finch') || s.includes('bird')) {
+            return 'Bird';
+        }
+        if (s.includes('frog') || s.includes('salamander') || s.includes('axolotl')) {
+            return 'Amphibian';
+        }
+        if (s.includes('fish')) {
+            return 'Fish';
+        }
+        if (s.includes('tarantula') || s.includes('scorpion') || s.includes('spider') || s.includes('invertebrate')) {
+            return 'Invertebrate';
+        }
+        return 'Other';
+    };
+
+    const categoryBreakdown = useMemo(() => {
+        const breakdown = { 'Mammal': 0, 'Reptile': 0, 'Bird': 0, 'Amphibian': 0, 'Fish': 0, 'Invertebrate': 0, 'Other': 0 };
+        activeAnimalsForDashboard.forEach(animal => {
+            const category = getSpeciesCategory(animal.species);
+            breakdown[category]++;
+        });
+
+        const total = activeAnimalsForDashboard.length;
+        if (total === 0) return [];
+
+        return Object.entries(breakdown).map(([name, count]) => ({ name, count, percentage: ((count / total) * 100).toFixed(1) })).filter(cat => cat.count > 0);
+    }, [activeAnimalsForDashboard]);
+
     // Save filters to localStorage whenever they change
     useEffect(() => {
         try {
@@ -3609,10 +3647,10 @@ const AnimalList = ({
     };
 
     const renderDashboard = () => {
-        const DashboardCard = ({ icon, label, value, colorClass, onClick }) => (
+        const DashboardCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => (
             <div
-                className={`flex items-center p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
-                onClick={onClick}
+                className={`relative flex items-center p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
+                onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
             >
                 {icon}
                 <div className="ml-4">
@@ -3620,6 +3658,11 @@ const AnimalList = ({
                     <div className="text-sm font-medium opacity-90">{label}</div>
                 </div>
             </div>
+            {hasDropdown && (
+                <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-2 right-2 p-1 text-inherit opacity-60 hover:opacity-100">
+                    <ChevronDown size={20} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+            )}
         );
 
         return (
@@ -3632,7 +3675,27 @@ const AnimalList = ({
                             label="Total Animals"
                             value={totalDashboardAnimalsCount}
                             colorClass="bg-blue-100 text-blue-900"
+                            hasDropdown={true}
+                            isDropdownOpen={showCategoryBreakdown}
+                            onDropdownToggle={() => setShowCategoryBreakdown(prev => !prev)}
                         />
+                        {showCategoryBreakdown && (
+                            <div className="bg-white border border-gray-200 rounded-lg p-3 -mt-1 shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-2">Category Breakdown</h4>
+                                {categoryBreakdown.length > 0 ? (
+                                    <ul className="text-xs space-y-1">
+                                        {categoryBreakdown.map(cat => (
+                                            <li key={cat.name} className="flex justify-between items-center">
+                                                <span className="text-gray-600">{cat.name}{cat.count !== 1 && cat.name !== 'Fish' ? 's' : ''}</span>
+                                                <span className="font-medium text-gray-800">{cat.count} <span className="text-gray-400">({cat.percentage}%)</span></span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-xs text-gray-400 text-center">No animals to categorize.</p>
+                                )}
+                            </div>
+                        )}
                         <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm w-full" data-tutorial-target="ownership-visibility-filter">
                             <button
                                 onClick={() => setOwnedFilterMode('owned')}
