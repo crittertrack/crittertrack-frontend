@@ -29,7 +29,7 @@ const ALERT_CATEGORIES = {
     maintenance: 'Maintenance'
 };
 
-const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, birthdateAge: true, breedingLines: true };
+const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, birthdateAge: true, breedingLines: true, tags: true };
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -4116,7 +4116,7 @@ const AnimalList = ({
                     {showListColumnConfig && (
                         <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
                             <span className="text-xs font-semibold text-gray-600 mr-2">Show columns:</span>
-                            {Object.entries({ animal: 'Animal', species: 'Species', variety: 'Variety', enclosure: 'Enclosure', lifeStage: 'Life Stage', status: 'Status', birthdateAge: 'Birthdate / Age', breedingLines: 'Breeding Lines' }).map(([key, label]) => (
+                            {Object.entries({ animal: 'Animal', species: 'Species', variety: 'Variety', enclosure: 'Enclosure', lifeStage: 'Life Stage', status: 'Status', birthdateAge: 'Birthdate / Age', breedingLines: 'Breeding Lines', tags: 'Tags' }).map(([key, label]) => (
                                 <label key={key} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -4133,7 +4133,7 @@ const AnimalList = ({
                             ))}
                         </div>
                     )}
-                    <table className="min-w-full text-sm divide-y divide-gray-200">
+                    <table className="min-w-full text-xs divide-y divide-gray-200">
                         <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
                             <tr>
                                 <th className="px-4 py-2 w-12"></th>
@@ -4145,6 +4145,7 @@ const AnimalList = ({
                                 {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
                                 {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left whitespace-nowrap">Birthdate / Age</th>}
                                 {listViewColumns.breedingLines && <th className="px-3 py-2 text-left">Breeding Lines</th>}
+                                {listViewColumns.tags && <th className="px-3 py-2 text-left">Tags</th>}
                                 <th className="px-3 py-2 text-right w-12">
                                     <button
                                         onClick={() => setShowListColumnConfig(v => !v)}
@@ -4194,7 +4195,7 @@ const AnimalList = ({
                                                             <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
                                                         </div>
                                                         <div>
-                                                            <div className="font-medium text-gray-800 flex items-center gap-1.5">
+                                                            <div className="font-medium text-gray-800 flex items-center gap-1.5 text-sm">
                                                                 <span className="cursor-pointer hover:underline" onClick={() => onViewAnimal(animal)}>
                                                                     {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
                                                                 </span>
@@ -4206,7 +4207,18 @@ const AnimalList = ({
                                                 </td>
                                             )}
                                             {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600">{animal.species || '—'}</td>}
-                                            {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{varietyStr}</td>}
+                                            {listViewColumns.species && (
+                                                <td className="px-3 py-1.5 text-gray-600">
+                                                    <div>{animal.species || '—'}</div>
+                                                    {animal.speciesScientificName && <div className="text-xs text-gray-400">{animal.speciesScientificName}</div>}
+                                                </td>
+                                            )}
+                                            {listViewColumns.variety && (
+                                                <td className="px-3 py-1.5 text-gray-600">
+                                                    <div>{varietyStr}</div>
+                                                    {animal.geneticCode && <div className="text-xs text-gray-400 font-mono">{animal.geneticCode}</div>}
+                                                </td>
+                                            )}
                                             {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
                                             {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>}
                                             {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
@@ -4225,6 +4237,11 @@ const AnimalList = ({
                                                             ))}
                                                         </div>
                                                     ) : '—'}
+                                                </td>
+                                            )}
+                                            {listViewColumns.tags && (
+                                                <td className="px-3 py-1.5 text-gray-500">
+                                                    {(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}
                                                 </td>
                                             )}
                                             <td className="px-3 py-1.5 text-right">
