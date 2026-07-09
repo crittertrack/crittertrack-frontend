@@ -4131,20 +4131,20 @@ const AnimalList = ({
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">                    
                     <table className="min-w-full text-xs divide-y divide-gray-200">
-                        <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
+                        <thead className="bg-gray-100 text-gray-600 text-xs">
                             <tr>
                                 <th className="px-4 py-2 w-12"></th>                                
 
-                                {listViewColumns.animal && <th className="px-3 py-2 text-left"><button onClick={() => requestSort('name')} className="flex items-center gap-1 group"><span className={sortConfig.key === 'name' ? 'text-gray-800 font-bold' : ''}>Animal</span>{sortConfig.key === 'name' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
-                                {listViewColumns.species && <th className="px-3 py-2 text-left">Species</th>}
-                                {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
-                                {listViewColumns.enclosure && <th className="px-3 py-2 text-left">Enclosure</th>}
-                                {listViewColumns.lifeStage && <th className="px-3 py-2 text-left">Life Stage</th>}
-                                {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
-                                {listViewColumns.health && <th className="px-3 py-2 text-left">Health</th>}
-                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left whitespace-nowrap"><button onClick={() => requestSort('birthdate')} className="flex items-center gap-1 group"><span className={sortConfig.key === 'birthdate' ? 'text-gray-800 font-bold' : ''}>Birthdate / Age</span>{sortConfig.key === 'birthdate' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
-                                {listViewColumns.breedingLines && <th className="px-3 py-2 text-left">Breeding Lines</th>}
-                                {listViewColumns.tags && <th className="px-3 py-2 text-left">Tags</th>}
+                                {listViewColumns.animal && <th className="px-3 py-2 text-left"><button onClick={() => requestSort('name')} className="flex items-center gap-1 group"><span className={sortConfig.key === 'name' ? 'text-gray-800 font-bold' : ''}>animal</span>{sortConfig.key === 'name' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400" />)}</button></th>}
+                                {listViewColumns.species && <th className="px-3 py-2 text-left">species</th>}
+                                {listViewColumns.variety && <th className="px-3 py-2 text-left">variety</th>}
+                                {listViewColumns.enclosure && <th className="px-3 py-2 text-left">enclosure</th>}
+                                {listViewColumns.lifeStage && <th className="px-3 py-2 text-left">life stage</th>}
+                                {listViewColumns.status && <th className="px-3 py-2 text-left">status</th>}
+                                {listViewColumns.health && <th className="px-3 py-2 text-left">health</th>}
+                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left whitespace-nowrap"><button onClick={() => requestSort('birthdate')} className="flex items-center gap-1 group"><span className={sortConfig.key === 'birthdate' ? 'text-gray-800 font-bold' : ''}>birthdate / age</span>{sortConfig.key === 'birthdate' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400" />)}</button></th>}
+                                {listViewColumns.breedingLines && <th className="px-3 py-2 text-left">breeding lines</th>}
+                                {listViewColumns.tags && <th className="px-3 py-2 text-left">tags</th>}
                                 <th className="px-3 py-2 text-right w-12"></th>
                             </tr>
                         </thead>
