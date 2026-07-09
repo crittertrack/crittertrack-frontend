@@ -5,6 +5,15 @@ const NotificationBar = ({ authToken, API_BASE_URL, setShowNotifications, setSho
   const { count: totalMessageCount, adminCount, isLoading: messagesLoading, refetch: refetchMessages } = useUnreadMessages(authToken, API_BASE_URL);
   const { count: notificationCount, isLoading: notificationsLoading, refetch: refetchNotifications } = useUnreadNotifications(authToken, API_BASE_URL);
   
+  useEffect(() => {
+    const handleNotificationsChanged = () => {
+      if (refetchMessages) refetchMessages();
+      if (refetchNotifications) refetchNotifications();
+    };
+    window.addEventListener('notifications-changed', handleNotificationsChanged);
+    return () => window.removeEventListener('notifications-changed', handleNotificationsChanged);
+  }, [refetchMessages, refetchNotifications]);
+
   const regularMessageCount = totalMessageCount > adminCount ? totalMessageCount - adminCount : 0;
   const isUrgent = adminCount > 0;
   const isLoading = messagesLoading || notificationsLoading;

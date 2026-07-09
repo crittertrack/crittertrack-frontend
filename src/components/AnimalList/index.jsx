@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import axios from 'axios';
+import NotificationBar from '../Notifications/NotificationBar';
 import ArchiveScreen from '../ArchiveScreen';
+import NotificationPanel from '../Notifications/NotificationPanel';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
@@ -112,6 +114,8 @@ const AnimalList = ({
     // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
     // so that switching accounts never leaks one user's collections/prefs into another's.
     const userKey = useMemo(() => getUserKey(authToken), [authToken]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [showMessages, setShowMessages] = useState(false);
     const [showCategoryBreakdown, setShowCategoryBreakdown] = useState(false);
     useEffect(() => { showModalMessageRef.current = showModalMessage; });
 
@@ -3888,6 +3892,17 @@ const AnimalList = ({
         }
     };
 
+    const handleViewAnimalFromNotification = useCallback((animalId) => {
+        const animal = allAnimalsRaw.find(a => a.id_public === animalId);
+        if (animal) {
+            onViewAnimal(animal);
+        } else {
+            // Fallback for animals not in the current list (e.g., transferred)
+            showModalMessageRef.current('Info', 'Navigating to animal...');
+            navigate(`/animals/${animalId}`);
+        }
+    }, [allAnimalsRaw, onViewAnimal, navigate, showModalMessageRef]);
+
     return (
         <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -3954,6 +3969,15 @@ const AnimalList = ({
                     )}
                 </div>
             </h2>
+
+            <div className="my-4">
+                <NotificationBar
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    setShowNotifications={setShowNotifications}
+                    setShowMessages={setShowMessages}
+                />
+            </div>
 
             {renderDashboard()}
 
@@ -4593,6 +4617,16 @@ const AnimalList = ({
                         );
                     })}
                 </div>
+            )}
+            {showNotifications && (
+                <NotificationPanel
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    onClose={() => setShowNotifications(false)}
+                    showModalMessage={showModalMessage}
+                    onNotificationChange={() => window.dispatchEvent(new CustomEvent('notifications-changed'))}
+                    onViewAnimal={handleViewAnimalFromNotification}
+                />
             )}
         </div>
     );
