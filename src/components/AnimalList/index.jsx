@@ -5,8 +5,8 @@ import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
     Bean, Bell, Bird, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
-    ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Frog, Heart, HeartOff,
-    Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin, Network,
+    ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff,
+    Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin, Network,    
     Package, Plus, PlusCircle, RefreshCw, Save, Search, ShoppingBag, SlidersHorizontal,
     Sparkles, Trash2, Turtle, Utensils, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
@@ -3651,7 +3651,7 @@ const AnimalList = ({
             'Mammal': <Cat size={16} className="mr-1.5 text-gray-500" />,
             'Reptile': <Turtle size={16} className="mr-1.5 text-gray-500" />,
             'Bird': <Bird size={16} className="mr-1.5 text-gray-500" />,
-            'Amphibian': <Frog size={16} className="mr-1.5 text-gray-500" />,
+            'Amphibian': <Circle size={16} className="mr-1.5 text-gray-500" />,
             'Fish': <Fish size={16} className="mr-1.5 text-gray-500" />,
             'Invertebrate': <Bug size={16} className="mr-1.5 text-gray-500" />,
             'Other': <Sparkles size={16} className="mr-1.5 text-gray-500" />
