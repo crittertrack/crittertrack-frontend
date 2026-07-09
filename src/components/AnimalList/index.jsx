@@ -30,7 +30,7 @@ const ALERT_CATEGORIES = {
     maintenance: 'Maintenance'
 };
 
-const DEFAULT_LIST_COLUMNS = { animal: true, species: true, health: true, variety: true, enclosure: true, lifeStage: true, status: true, birthdateAge: true, breedingLines: true, tags: true };
+const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, health: true, birthdateAge: true, breedingLines: true, tags: true };
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -4136,11 +4136,11 @@ const AnimalList = ({
                                 <th className="px-4 py-2 w-12"></th>                                
                                 {listViewColumns.animal && <th className="px-3 py-2 text-left"><button onClick={() => requestSort('name')} className="flex items-center gap-1 group"><span className="group-hover:text-gray-800">Animal</span>{sortConfig.key === 'name' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
                                 {listViewColumns.species && <th className="px-3 py-2 text-left">Species</th>}
-                                {listViewColumns.health && <th className="px-3 py-2 text-left">Health</th>}
                                 {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
                                 {listViewColumns.enclosure && <th className="px-3 py-2 text-left">Enclosure</th>}
                                 {listViewColumns.lifeStage && <th className="px-3 py-2 text-left">Life Stage</th>}
                                 {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
+                                {listViewColumns.health && <th className="px-3 py-2 text-left">Health</th>}
                                 {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left whitespace-nowrap"><button onClick={() => requestSort('birthdate')} className="flex items-center gap-1 group"><span className="group-hover:text-gray-800">Birthdate / Age</span>{sortConfig.key === 'birthdate' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400 opacity-0 group-hover:opacity-100" />)}</button></th>}
                                 {listViewColumns.breedingLines && <th className="px-3 py-2 text-left">Breeding Lines</th>}
                                 {listViewColumns.tags && <th className="px-3 py-2 text-left">Tags</th>}
@@ -4150,6 +4150,37 @@ const AnimalList = ({
                         <tbody className="divide-y divide-gray-100">
                             {(() => {
                                 let displayedAnimals = speciesNames.flatMap(species => (groupedAnimals[species] || []));
+                                
+                                // Sorting logic
+                                if (sortConfig.key) {
+                                    displayedAnimals.sort((a, b) => {
+                                        const dir = sortConfig.direction === 'ascending' ? 1 : -1;
+                                        let valA, valB;
+
+                                        if (sortConfig.key === 'name') {
+                                            valA = (a.name || '').toLowerCase();
+                                            valB = (b.name || '').toLowerCase();
+                                        } else if (sortConfig.key === 'birthdate') {
+                                            const dateA = a.birthDate ? new Date(a.birthDate) : null;
+                                            const dateB = b.birthDate ? new Date(b.birthDate) : null;
+                                            if (dateA === dateB) return 0;
+                                            if (dateA === null) return 1; // nulls/invalid dates last
+                                            if (dateB === null) return -1;
+                                            valA = dateA.getTime();
+                                            valB = dateB.getTime();
+                                        }
+
+                                        if (valA < valB) return -1 * dir;
+                                        if (valA > valB) return 1 * dir;
+                                        
+                                        // Secondary sort for stability
+                                        if ((a.name || '').toLowerCase() < (b.name || '').toLowerCase()) return -1;
+                                        if ((a.name || '').toLowerCase() > (b.name || '').toLowerCase()) return 1;
+
+                                        return 0;
+                                    });
+                                }
+
                                 const isBulkMode = Object.values(bulkDeleteMode).some(v => v) || Object.values(bulkArchiveMode).some(v => v);
                                 const selectedIds = Object.values(selectedAnimals).flat();
                             const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
@@ -4201,6 +4232,12 @@ const AnimalList = ({
                                         {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
                                         {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>}
                                         {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
+                                        {listViewColumns.health && <td className="px-3 py-1.5 text-gray-600 text-xs">{
+                                            animal.isQuarantine ? <span className="font-medium text-orange-600">Quarantine</span> :
+                                            animal.isInTreatment ? <span className="font-medium text-red-600">Treatment</span> :
+                                            animal.status === 'Deceased' ? <span className="text-gray-500">Deceased</span> :
+                                            <span className="text-green-600">OK</span>
+                                        }</td>}
                                         {listViewColumns.birthdateAge && (
                                             <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">
                                                 <div>{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</div>
