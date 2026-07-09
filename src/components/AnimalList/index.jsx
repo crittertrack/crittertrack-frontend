@@ -3904,8 +3904,19 @@ const AnimalList = ({
     }, [allAnimalsRaw, onViewAnimal, navigate, showModalMessageRef]);
 
     return (
-        <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <>
+            {/* Purple notification banner */}
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+                <NotificationBar
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    setShowNotifications={setShowNotifications}
+                    setShowMessages={setShowMessages}
+                />
+            </div>
+
+            {/* Animal List section */}
+            <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
                 <div className="flex items-center justify-between w-full sm:w-auto gap-2 min-w-0">
                     <div className='flex items-center gap-2 min-w-0 flex-1'>
                         <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
@@ -3968,20 +3979,10 @@ const AnimalList = ({
                         <></> /* placeholder — privacy buttons moved to filter bar below */
                     )}
                 </div>
-            </h2>
 
-            <div className="my-4">
-                <NotificationBar
-                    authToken={authToken}
-                    API_BASE_URL={API_BASE_URL}
-                    setShowNotifications={setShowNotifications}
-                    setShowMessages={setShowMessages}
-                />
-            </div>
+                {renderDashboard()}
 
-            {renderDashboard()}
-
-            {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
+                {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
             <div className="mb-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="grid grid-cols-3 sm:hidden">
@@ -4628,7 +4629,8 @@ const AnimalList = ({
                     onViewAnimal={handleViewAnimalFromNotification}
                 />
             )}
-        </div>
+            </div>
+        </>
     );
 };
 
