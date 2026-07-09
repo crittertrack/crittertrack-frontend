@@ -3905,8 +3905,8 @@ const AnimalList = ({
 
     return (
         <>
-            {/* Purple notification banner */}
-            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+            {/* Notification banner */}
+            <div className="w-full max-w-7xl mx-auto p-6 mb-4">
                 <NotificationBar
                     authToken={authToken}
                     API_BASE_URL={API_BASE_URL}
@@ -3917,20 +3917,20 @@ const AnimalList = ({
 
             {/* Animal List section */}
             <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
-                <div className="flex items-center justify-between w-full sm:w-auto gap-2 min-w-0">
+                <div className="flex items-center justify-between w-full gap-2 min-w-0 mb-4">
                     <div className='flex items-center gap-2 min-w-0 flex-1'>
                         <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
-                        <span className="truncate" data-tutorial-target="my-animals-title">
+                        <h2 className="truncate" data-tutorial-target="my-animals-title">
                             {animalView === 'list' ? `My Animals` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
-                        </span>
-                        {/* Refresh button moved here */}
+                        </h2>
+                        {/* Refresh button */}
                         <button
                             onClick={handleRefresh}
                             disabled={loading}
                             className="text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs font-medium"
                             title="Refresh"
                         >
-                            {loading ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                            {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
                             <span className="hidden sm:inline">Refresh</span>
                         </button>
                         {isListLikeView && hasActiveFilters && (
@@ -3939,45 +3939,41 @@ const AnimalList = ({
                             </span>
                         )}
                     </div>
-                    {/* Add Animal — icon-only on mobile, hidden on sm+ (desktop has full button in buttons row) */}
-                    {isListLikeView && !showArchiveScreen && (
+                    {/* Right-aligned action buttons */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
+                        {/* Find Duplicates */}
+                        {!showArchiveScreen && (
+                            <button
+                                onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); }}
+                                className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
+                                title="Find Duplicate Animals"
+                            >
+                                <Search size={14} className="sm:w-4 sm:h-4" />
+                                <span className="font-medium hidden sm:inline">Find Duplicates</span>
+                            </button>
+                        )}
+                        {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
+                        {isListLikeView && !showArchiveScreen && (
+                            <button
+                                onClick={() => navigate('/select-species')}
+                                className="hidden sm:flex bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                                data-tutorial-target="add-animal-btn"
+                            >
+                                <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
+                            </button>
+                        )}
+                        {/* Mobile Add Animal button — icon-only on mobile, hidden on sm+ */}
+                        {isListLikeView && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
                             className="sm:hidden bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
                             data-tutorial-target="add-animal-btn"
                             title="Add Animal"
                         >
-                            <PlusCircle size={14} /> Add
+                            <PlusCircle size={14} /> <span className="sm:hidden">Add</span>
                         </button>
-                    )}
-                </div>
-                {/* Universal top-bar action buttons */}
-                <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap" data-tutorial-target="bulk-privacy-controls">
-                    {/* Find Duplicates */}
-                    {!showArchiveScreen && (
-                        <button
-                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); }}
-                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
-                            title="Find Duplicate Animals"
-                        >
-                            <Search size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium hidden sm:inline">Find Duplicates</span>
-                        </button>
-                    )}
-                    {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
-                    {isListLikeView && !showArchiveScreen && (
-                        <button
-                            onClick={() => navigate('/select-species')}
-                            className="hidden sm:flex bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
-                            data-tutorial-target="add-animal-btn"
-                        >
-                            <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
-                        </button>
-                    )}
-                    {/* Bulk privacy controls (list view only) */}
-                    {isListLikeView && !showArchiveScreen && !showDuplicatesScreen && (
-                        <></> /* placeholder — privacy buttons moved to filter bar below */
-                    )}
+                        )}
+                    </div>
                 </div>
 
                 {renderDashboard()}
