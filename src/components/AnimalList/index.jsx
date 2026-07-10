@@ -480,13 +480,8 @@ const AnimalList = ({
             const res = await axios.get(`${API_BASE_URL}/animals/archived`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            setArchivedAnimals(res.data.archived || []);
-            setSoldTransferredAnimals(res.data.soldTransferred || []);
             const responseData = res.data || {};
             setArchivedAnimals(responseData.archived || []);
-            setSoldTransferredAnimals(responseData.soldTransferred || []);
-
-            const sold = res.data.soldTransferred || [];
             const sold = responseData.soldTransferred || [];
             if (sold.length > 0) {
                 // Get unique owner IDs from the sold animals
