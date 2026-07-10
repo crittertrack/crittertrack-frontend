@@ -458,8 +458,10 @@ const AnimalList = ({
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [reproEncFormVisible, setReproEncFormVisible] = useState(false);
     const [healthEncFormVisible, setHealthEncFormVisible] = useState(false);
-    const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' });
+    const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'general' });
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
+    const [newEnclosureTag, setNewEnclosureTag] = useState('');
+    const [newEnclosureSpeciesLabel, setNewEnclosureSpeciesLabel] = useState('');
 
     const [enclosureSaving, setEnclosureSaving] = useState(false);
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
@@ -2462,10 +2464,22 @@ useEffect(() => {
         const EnclosureCard = ({ enclosure }) => {
             const occupants = enclosureAnimalMap[enclosure._id] || [];
             const occupancyStatus = occupants.length > 0 ? 'Occupied' : 'Empty';
+            const capacity = parseInt(enclosure.capacity, 10);
+            const occupancyPercentage = capacity > 0 ? (occupants.length / capacity) * 100 : 0;
+
             const lastCleaned = (enclosure.cleaningTasks || [])
                 .map(t => t.lastDoneDate)
                 .filter(Boolean)
                 .sort((a, b) => new Date(b) - new Date(a))[0];
+
+            const tempRange = (enclosure.tempMin != null && enclosure.tempMax != null)
+                ? `${enclosure.tempMin}° - ${enclosure.tempMax}°`
+                : 'N/A';
+
+            const humidityRange = (enclosure.humidityMin != null && enclosure.humidityMax != null)
+                ? `${enclosure.humidityMin}% - ${enclosure.humidityMax}%`
+                : 'N/A';
+
 
             const needsCleaning = (enclosure.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
 
@@ -2485,10 +2499,20 @@ useEffect(() => {
                         <p className="text-sm text-gray-500 dark:text-dark-text-secondary">{enclosure.enclosureType || 'N/A'}</p>
                         
                         <div className="mt-4 space-y-2 text-xs text-gray-600 dark:text-dark-text-secondary">
-                            <div className="flex justify-between"><span>Animal Count:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{occupants.length}</span></div>
-                            <div className="flex justify-between"><span>Occupancy:</span> <span className="font-medium text-gray-800 dark:text-dark-text">N/A</span></div>
-                            <div className="flex justify-between"><span>Temp Range:</span> <span className="font-medium text-gray-800 dark:text-dark-text">N/A</span></div>
-                            <div className="flex justify-between"><span>Last Cleaned:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{lastCleaned ? formatDateShort(lastCleaned) : 'Never'}</span></div>
+                            <div className="flex justify-between items-center">
+                                <span>Occupancy:</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-800 dark:text-dark-text">{occupants.length}{capacity > 0 ? ` / ${capacity}`: ''}</span>
+                                    {capacity > 0 && (
+                                        <div className="w-12 bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                                            <div className="bg-green-600 h-1.5 rounded-full" style={{ width: `${Math.min(occupancyPercentage, 100)}%` }}></div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex justify-between"><span>Temperature:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{tempRange}</span></div>
+                            <div className="flex justify-between"><span>Humidity:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{humidityRange}</span></div>
+                            <div className="flex justify-between"><span>Last Cleaned:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{lastCleaned ? formatDateShort(lastCleaned) : 'N/A'}</span></div>
                         </div>
 
                         <div className="mt-4 flex flex-wrap gap-2">
@@ -2554,6 +2578,26 @@ useEffect(() => {
             </div>
         );
     };
+
+    const handleEnclosureTagAdd = () => {
+        if (newEnclosureTag.trim() && !enclosureFormData.tags.includes(newEnclosureTag.trim())) {
+            setEnclosureFormData(p => ({ ...p, tags: [...p.tags, newEnclosureTag.trim()] }));
+        }
+        setNewEnclosureTag('');
+    };
+    const handleEnclosureTagRemove = (tagToRemove) => {
+        setEnclosureFormData(p => ({ ...p, tags: p.tags.filter(tag => tag !== tagToRemove) }));
+    };
+    const handleEnclosureSpeciesLabelAdd = () => {
+        if (newEnclosureSpeciesLabel.trim() && !enclosureFormData.speciesLabels.includes(newEnclosureSpeciesLabel.trim())) {
+            setEnclosureFormData(p => ({ ...p, speciesLabels: [...p.speciesLabels, newEnclosureSpeciesLabel.trim()] }));
+        }
+        setNewEnclosureSpeciesLabel('');
+    };
+    const handleEnclosureSpeciesLabelRemove = (labelToRemove) => {
+        setEnclosureFormData(p => ({ ...p, speciesLabels: p.speciesLabels.filter(label => label !== labelToRemove) }));
+    };
+
 
     // -- For Sale Screen ----------------------------------------------------------
     const renderForSaleScreen = () => {
@@ -2647,7 +2691,7 @@ useEffect(() => {
                     await axios.post(`${API_BASE_URL}/enclosures`, enclosureFormData,
                         { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
                 }
-                setEnclosureFormVisible(false);
+                setEnclosureFormVisible(false); // This should be here
                 setReproEncFormVisible(false);
                 setHealthEncFormVisible(false);
                 setEditingEnclosureId(null);
@@ -2910,7 +2954,7 @@ useEffect(() => {
                         >
                             <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
                         </button>
-                    </div>}
+                    </div>} 
                     {/* Add button shown standalone when on dedicated tab */}
                     {view && <div className="flex justify-end px-3 py-2 border-b bg-blue-50/40">
                         <button
@@ -2925,37 +2969,98 @@ useEffect(() => {
                     {enclosureFormVisible && (!collapsedMgmtSections['enclosures'] || !!view) && (
                         <div className="p-3 border-b bg-blue-50/40 space-y-2">
                             <div className="text-xs font-semibold text-blue-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
                                     <input type="text" value={enclosureFormData.name}
                                         onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))}
                                         placeholder="e.g. Tank 1, Vivarium A, Colony Room 3"
-                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
                                     <input type="text" value={enclosureFormData.enclosureType}
                                         onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))}
                                         placeholder="e.g. Tank, Cage, Vivarium, Pond, Room"
-                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Size</label>
-                                    <input type="text" value={enclosureFormData.size}
-                                        onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))}
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Location</label>
+                                    <input type="text" value={enclosureFormData.location}
+                                        onChange={e => setEnclosureFormData(p => ({...p, location: e.target.value}))}
+                                        placeholder="e.g. Reptile Room, Fish House"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Dimensions</label>
+                                    <input type="text" value={enclosureFormData.dimensions}
+                                        onChange={e => setEnclosureFormData(p => ({...p, dimensions: e.target.value}))}
                                         placeholder="e.g. 40 gallon, 48?24?24, 10 sq ft"
-                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Capacity</label>
+                                    <input type="number" value={enclosureFormData.capacity}
+                                        onChange={e => setEnclosureFormData(p => ({...p, capacity: e.target.value}))}
+                                        placeholder="Max animals"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Lighting Schedule</label>
+                                    <input type="text" value={enclosureFormData.lightingSchedule}
+                                        onChange={e => setEnclosureFormData(p => ({...p, lightingSchedule: e.target.value}))}
+                                        placeholder="e.g. 12h on / 12h off"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div className="flex gap-2">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Temp Min</label>
+                                        <input type="number" value={enclosureFormData.tempMin} onChange={e => setEnclosureFormData(p => ({...p, tempMin: e.target.value}))} placeholder="e.g. 22" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Temp Max</label>
+                                        <input type="number" value={enclosureFormData.tempMax} onChange={e => setEnclosureFormData(p => ({...p, tempMax: e.target.value}))} placeholder="e.g. 28" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Humidity Min</label>
+                                        <input type="number" value={enclosureFormData.humidityMin} onChange={e => setEnclosureFormData(p => ({...p, humidityMin: e.target.value}))} placeholder="e.g. 40" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Humidity Max</label>
+                                        <input type="number" value={enclosureFormData.humidityMax} onChange={e => setEnclosureFormData(p => ({...p, humidityMax: e.target.value}))} placeholder="e.g. 60" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    </div>
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
                                     <input type="text" value={enclosureFormData.notes}
                                         onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))}
                                         placeholder="Optional notes"
-                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Tags</label>
+                                    <div className="flex items-center gap-2">
+                                        <input type="text" value={newEnclosureTag} onChange={e => setNewEnclosureTag(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleEnclosureTagAdd()} placeholder="Add tag..." className="flex-1 p-2 text-sm border border-gray-300 rounded-lg" />
+                                        <button type="button" onClick={handleEnclosureTagAdd} className="px-3 py-2 text-sm bg-gray-200 rounded-lg">+</button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 mt-1.5">
+                                        {enclosureFormData.tags.map(tag => <span key={tag} className="text-xs bg-gray-200 px-2 py-1 rounded-full flex items-center gap-1">{tag} <button type="button" onClick={() => handleEnclosureTagRemove(tag)} className="text-gray-500 hover:text-red-500">?</button></span>)}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Suitable Species</label>
+                                    <div className="flex items-center gap-2">
+                                        <input type="text" value={newEnclosureSpeciesLabel} onChange={e => setNewEnclosureSpeciesLabel(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleEnclosureSpeciesLabelAdd()} placeholder="Add species..." className="flex-1 p-2 text-sm border border-gray-300 rounded-lg" />
+                                        <button type="button" onClick={handleEnclosureSpeciesLabelAdd} className="px-3 py-2 text-sm bg-gray-200 rounded-lg">+</button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 mt-1.5">
+                                        {enclosureFormData.speciesLabels.map(label => <span key={label} className="text-xs bg-gray-200 px-2 py-1 rounded-full flex items-center gap-1">{label} <button type="button" onClick={() => handleEnclosureSpeciesLabelRemove(label)} className="text-gray-500 hover:text-red-500">?</button></span>)}
+                                    </div>
                                 </div>
                                 {/* Cleaning Tasks */}
-                                <div className="col-span-full">
+                                <div className="sm:col-span-2">
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Cleaning Tasks</label>
                                     {(enclosureFormData.cleaningTasks || []).length > 0 && (
                                         <div className="space-y-1 mb-2">
@@ -2963,7 +3068,7 @@ useEffect(() => {
                                                 <div key={idx} className="flex items-center gap-2 text-xs bg-white rounded border border-gray-200 px-2 py-1.5">
                                                     <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
                                                     {task.frequencyDays && <span className="text-gray-400">Every {task.frequencyDays}d</span>}
-                                                    <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, cleaningTasks: (p.cleaningTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-0.5" title="Remove"><Trash2 size={14} /></button>
+                                                    <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, cleaningTasks: (p.cleaningTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-0.5" title="Remove"><X size={14} /></button>
                                                 </div>
                                             ))}
                                         </div>
@@ -2971,10 +3076,10 @@ useEffect(() => {
                                     <div className="flex items-center gap-2">
                                         <input type="text" value={newCleaningTaskName} onChange={e => setNewCleaningTaskName(e.target.value)}
                                             placeholder="e.g. Spot clean, Full clean, Bulb change"
-                                            className="flex-1 p-1.5 text-xs border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                            className="flex-1 p-1.5 text-xs border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
                                         <input type="number" value={newCleaningTaskFreq} onChange={e => setNewCleaningTaskFreq(e.target.value)}
                                             placeholder="Days" min="1"
-                                            className="w-16 p-1.5 text-xs border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                            className="w-16 p-1.5 text-xs border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
                                         <button type="button" onClick={() => {
                                             if (!newCleaningTaskName.trim()) return;
                                             setEnclosureFormData(p => ({ ...p, cleaningTasks: [...(p.cleaningTasks || []), { taskName: newCleaningTaskName.trim(), frequencyDays: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, lastDoneDate: null }] }));
@@ -2983,7 +3088,7 @@ useEffect(() => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-2 pt-2">
                                 <button onClick={() => { setEnclosureFormVisible(false); setEditingEnclosureId(null); }}
                                     className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
                                     Cancel
@@ -3026,7 +3131,20 @@ useEffect(() => {
                                                     <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
                                                         <button
                                                             onClick={() => {
-                                                                setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'general' });
+                                                                setEnclosureFormData({
+                                                                    name: enc.name,
+                                                                    enclosureType: enc.enclosureType || '',
+                                                                    location: enc.location || '',
+                                                                    dimensions: enc.dimensions || enc.size || '',
+                                                                    capacity: enc.capacity || '',
+                                                                    tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
+                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '',
+                                                                    lightingSchedule: enc.lightingSchedule || '',
+                                                                    notes: enc.notes || '',
+                                                                    tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
+                                                                    cleaningTasks: enc.cleaningTasks || [],
+                                                                    purpose: enc.purpose || 'general'
+                                                                });
                                                                 setEditingEnclosureId(enc._id);
                                                                 setEnclosureFormVisible(true);
                                                                 setCollapsedMgmtSections(p => ({...p, enclosures: false}));
@@ -3227,12 +3345,12 @@ useEffect(() => {
                                 </div>
                                 {reproEncFormVisible && (
                                     <div className="p-3 border-b bg-blue-50/40 space-y-2">
-                                        <div className="text-xs font-semibold text-blue-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
+                                        <div className="text-xs font-semibold text-blue-700 mb-1">{editingEnclosureId ? 'Edit Reproduction Enclosure' : 'New Reproduction Enclosure'}</div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input type="text" value={enclosureFormData.name} onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))} placeholder="e.g. Breeding Pair Tank A" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label><input type="text" value={enclosureFormData.enclosureType} onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Size</label><input type="text" value={enclosureFormData.size} onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))} placeholder="e.g. 40 gallon" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Notes</label><input type="text" value={enclosureFormData.notes} onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))} placeholder="Optional notes" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input type="text" value={enclosureFormData.name} onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))} placeholder="e.g. Breeding Pair Tank A" className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label><input type="text" value={enclosureFormData.enclosureType} onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Dimensions</label><input type="text" value={enclosureFormData.dimensions} onChange={e => setEnclosureFormData(p => ({...p, dimensions: e.target.value}))} placeholder="e.g. 40 gallon" className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Notes</label><input type="text" value={enclosureFormData.notes} onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))} placeholder="Optional notes" className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" /></div>
                                         </div>
                                         <div className="flex justify-end gap-2">
                                             <button onClick={() => { setReproEncFormVisible(false); setEditingEnclosureId(null); }} className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
@@ -3258,8 +3376,21 @@ useEffect(() => {
                                                             {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
                                                             <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                                            <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'reproduction' }); setEditingEnclosureId(enc._id); setReproEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit"><Edit size={13} /></button>
+                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>                                                            <button onClick={() => {
+                                                                setEnclosureFormData({
+                                                                    name: enc.name,
+                                                                    enclosureType: enc.enclosureType || '',
+                                                                    location: enc.location || '',
+                                                                    dimensions: enc.dimensions || enc.size || '',
+                                                                    capacity: enc.capacity || '',
+                                                                    tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
+                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '',
+                                                                    lightingSchedule: enc.lightingSchedule || '',
+                                                                    notes: enc.notes || '',
+                                                                    tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
+                                                                    cleaningTasks: enc.cleaningTasks || [],
+                                                                    purpose: enc.purpose || 'reproduction'
+                                                                }); setEditingEnclosureId(enc._id); setReproEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit"><Edit size={13} /></button>
                                                             <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={13} /></button>
                                                         </div>
                                                     </div>
@@ -3390,12 +3521,12 @@ useEffect(() => {
                                 </div>
                                 {healthEncFormVisible && (
                                     <div className="p-3 border-b bg-orange-50/40 space-y-2">
-                                        <div className="text-xs font-semibold text-orange-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
+                                        <div className="text-xs font-semibold text-orange-700 mb-1">{editingEnclosureId ? 'Edit Health Enclosure' : 'New Health Enclosure'}</div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input type="text" value={enclosureFormData.name} onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))} placeholder="e.g. Quarantine Tank 1" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label><input type="text" value={enclosureFormData.enclosureType} onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Size</label><input type="text" value={enclosureFormData.size} onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))} placeholder="e.g. 40 gallon" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Notes</label><input type="text" value={enclosureFormData.notes} onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))} placeholder="Optional notes" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input type="text" value={enclosureFormData.name} onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))} placeholder="e.g. Quarantine Tank 1" className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label><input type="text" value={enclosureFormData.enclosureType} onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Dimensions</label><input type="text" value={enclosureFormData.dimensions} onChange={e => setEnclosureFormData(p => ({...p, dimensions: e.target.value}))} placeholder="e.g. 40 gallon" className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Notes</label><input type="text" value={enclosureFormData.notes} onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))} placeholder="Optional notes" className="block w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-orange-400 focus:border-orange-400" /></div>
                                         </div>
                                         <div className="flex justify-end gap-2">
                                             <button onClick={() => { setHealthEncFormVisible(false); setEditingEnclosureId(null); }} className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
@@ -3424,8 +3555,21 @@ useEffect(() => {
                                                             {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
                                                             <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                                            <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'health' }); setEditingEnclosureId(enc._id); setHealthEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-orange-600 rounded" title="Edit"><Edit size={13} /></button>
+                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>                                                            <button onClick={() => {
+                                                                setEnclosureFormData({
+                                                                    name: enc.name,
+                                                                    enclosureType: enc.enclosureType || '',
+                                                                    location: enc.location || '',
+                                                                    dimensions: enc.dimensions || enc.size || '',
+                                                                    capacity: enc.capacity || '',
+                                                                    tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
+                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '',
+                                                                    lightingSchedule: enc.lightingSchedule || '',
+                                                                    notes: enc.notes || '',
+                                                                    tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
+                                                                    cleaningTasks: enc.cleaningTasks || [],
+                                                                    purpose: enc.purpose || 'health'
+                                                                }); setEditingEnclosureId(enc._id); setHealthEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-orange-600 rounded" title="Edit"><Edit size={13} /></button>
                                                             <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={13} /></button>
                                                         </div>
                                                     </div>
@@ -4351,6 +4495,15 @@ useEffect(() => {
                                     ? 'currentColor' : 'none'} />
                             </button>
                         </div>
+                        {isCollectionsView && (
+                            <button
+                                onClick={() => setShowCollectionManager(prev => !prev)}
+                                className={`p-2 text-xs border rounded-lg flex items-center gap-1 transition ${showCollectionManager ? 'bg-gray-200 border-gray-300 text-gray-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                            >
+                                <Wrench size={14} />
+                                <span>{showCollectionManager ? 'Close Collections' : 'Manage Collections'}</span>
+                            </button>
+                        )}
                         <div className="relative flex-shrink-0">
                             <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
@@ -4410,16 +4563,6 @@ useEffect(() => {
                                     <option key={line.id} value={line.id}>{line.name}</option>
                                 ))}
                             </select>
-                        )}
-                        {isCollectionsView && (
-                            <button
-                                onClick={() => setShowCollectionManager(prev => !prev)}
-                                className={`p-2 text-sm border rounded-lg flex items-center gap-1 transition ${showCollectionManager ? 'bg-gray-200 border-gray-300 text-gray-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                                className={`p-2 text-xs border rounded-lg flex items-center gap-1 transition ${showCollectionManager ? 'bg-gray-200 border-gray-300 text-gray-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                            >
-                                <Wrench size={14} />
-                                <span>{showCollectionManager ? 'Close Collections' : 'Manage Collections'}</span>
-                            </button>
                         )}
                     </div>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
