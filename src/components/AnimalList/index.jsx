@@ -222,6 +222,7 @@ const AnimalList = ({
         speciesFilter: (function() { try { return localStorage.getItem('animalList_speciesFilter') || ''; } catch { return ''; } })(),
         statusFilterPregnant: (function() { try { return localStorage.getItem('animalList_statusFilterPregnant') === 'true'; } catch { return false; } })(),
         statusFilterNursing: (function() { try { return localStorage.getItem('animalList_statusFilterNursing') === 'true'; } catch { return false; } })(),
+        statusFilterMating: (function() { try { return localStorage.getItem('animalList_statusFilterMating') === 'true'; } catch { return false; } })(),
         publicFilter: (function() { try { return localStorage.getItem('animalList_publicFilter') || ''; } catch { return ''; } })(),
         blFilter: (function() { try { const s = localStorage.getItem('animalList_blFilter'); return s ? JSON.parse(s) : []; } catch { return []; } })(),
     }));
@@ -1078,49 +1079,13 @@ useEffect(() => {
     const enclosureAnimalMap = {}; // { enclosureId: [animals] }
     const unassignedAnimals = [];
     allAnimals.forEach(a => {
-        if (a.enclosureId) {
-            if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
-            enclosureAnimalMap[a.enclosureId].push(a);
-        } else {
-                unassignedAnimals.push(a);
-        }
+        const key = a.enclosureId || 'unassigned';
+        if (!enclosureAnimalMap[key]) enclosureAnimalMap[key] = [];
+        enclosureAnimalMap[key].push(a);
     });
-
-    // Initialize species filter to "All" on first load only
-    // Also add any new species that appear (e.g., after creating a new animal)
-    // Keep selectedSpecies in sync with allUserSpecies (the unfiltered master list)
-    useEffect(() => {
-        if (allUserSpecies.length === 0) return;
-        if (selectedSpecies.length === 0) {
-            // First load: select everything
-            setSelectedSpecies([...allUserSpecies]);
-            setAppliedFilters(prev => ({ ...prev, selectedSpecies: [...allUserSpecies] }));
-        } else {
-            // Add any newly-seen species so they aren't silently hidden
-            const newSpecies = allUserSpecies.filter(s => !selectedSpecies.includes(s));
-            if (newSpecies.length > 0) {
-                setSelectedSpecies(prev => [...prev, ...newSpecies]);
-                setAppliedFilters(prev => ({ ...prev, selectedSpecies: [...prev.selectedSpecies, ...newSpecies] }));
-            }
-        }
-    }, [allUserSpecies]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
     const handleSearchInputChange = (e) => setSearchInput(e.target.value);
-    const toggleGender = (gender) => {
-        setSelectedGenders(prev => 
-            prev.includes(gender) 
-                ? prev.filter(g => g !== gender) 
-                : [...prev, gender]
-        );
-    };
-    const toggleSpecies = (species) => {
-        setSelectedSpecies(prev => 
-            prev.includes(species)
-                ? prev.filter(s => s !== species)
-                : [...prev, species]
-        );
-    };
     const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); setStatusFilterMating(false); };
     const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); };
     const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); };
@@ -1129,9 +1094,8 @@ useEffect(() => {
     const hasActiveFilters = (
         appliedFilters.statusFilter !== '' ||
         appliedNameFilter !== '' ||
-        searchInput !== '' ||
-        appliedFilters.selectedGenders.length !== 4 ||
-        (appliedFilters.selectedSpecies.length > 0 && !speciesNames.every(species => appliedFilters.selectedSpecies.includes(species))) ||
+        appliedFilters.genderFilter !== '' ||
+        appliedFilters.speciesFilter !== '' ||
         appliedFilters.statusFilterPregnant ||
         appliedFilters.statusFilterNursing ||
         appliedFilters.statusFilterMating ||
@@ -1142,8 +1106,8 @@ useEffect(() => {
     // Detect if panel UI state differs from applied snapshot (show pulse on Apply button)
     const panelDirty = (
         statusFilter !== appliedFilters.statusFilter ||
-        JSON.stringify(selectedGenders) !== JSON.stringify(appliedFilters.selectedGenders) ||
-        JSON.stringify(selectedSpecies) !== JSON.stringify(appliedFilters.selectedSpecies) ||
+        genderFilter !== appliedFilters.genderFilter ||
+        speciesFilter !== appliedFilters.speciesFilter ||
         statusFilterPregnant !== appliedFilters.statusFilterPregnant ||
         statusFilterNursing !== appliedFilters.statusFilterNursing ||
         statusFilterMating !== appliedFilters.statusFilterMating ||
@@ -1155,8 +1119,8 @@ useEffect(() => {
         setStatusFilter('');
         setSearchInput('');
         setAppliedNameFilter('');
-        setSelectedGenders(['Male', 'Female', 'Intersex', 'Unknown']);
-        setSelectedSpecies([...speciesNames]);
+        setGenderFilter('');
+        setSpeciesFilter('');
         setStatusFilterPregnant(false);
         setStatusFilterNursing(false);
         setStatusFilterMating(false);
@@ -1166,10 +1130,11 @@ useEffect(() => {
         // Also reset the applied snapshot to defaults
         setAppliedFilters({
             statusFilter: '',
-            selectedGenders: ['Male', 'Female', 'Intersex', 'Unknown'],
-            selectedSpecies: [...speciesNames],
+            genderFilter: '',
+            speciesFilter: '',
             statusFilterPregnant: false,
             statusFilterNursing: false,
+            statusFilterMating: false,
             publicFilter: '',
             blFilter: [],
         });
