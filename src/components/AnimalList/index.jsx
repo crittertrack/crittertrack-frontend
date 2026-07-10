@@ -184,6 +184,9 @@ const AnimalList = ({
      const [speciesFilter, setSpeciesFilter] = useState(() => {
         try { return localStorage.getItem('animalList_speciesFilter') || ''; } catch { return ''; }
     });
+    const [categoryFilter, setCategoryFilter] = useState(() => {
+        try { return localStorage.getItem('animalList_categoryFilter') || ''; } catch { return ''; }
+    });
     // Master species list ? all species the user has ANY animal for, never filtered
     const [allUserSpecies, setAllUserSpecies] = useState([]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
@@ -298,10 +301,13 @@ const AnimalList = ({
     };
 
     // Duplicates state
-    const [showForSaleScreen, setShowForSaleScreen] = useState(false);
-    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(() => {
-        try { return localStorage.getItem(`ct_my_animals_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
+     const [showForSaleScreen, setShowForSaleScreen] = useState(false); const [defaultMyAnimalsViewMode, setDefaultMyAnimalsViewMode] = useState(() => {
+        try { return localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
     });
+    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(defaultMyAnimalsViewMode);
+    useEffect(() => {
+        try { localStorage.setItem(`ct_default_my_animals_view_mode_${userKey}`, defaultMyAnimalsViewMode); } catch {}
+    }, [defaultMyAnimalsViewMode, userKey]);
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
     const [duplicatesLoading, setDuplicatesLoading] = useState(false);
@@ -370,12 +376,11 @@ const AnimalList = ({
         } catch { setUserCollections([]); setAnimalCollections({}); }
         // View mode & column config
         try {
-            const vm = localStorage.getItem(`ct_my_animals_view_mode_${userKey}`);
-            if (vm) setMyAnimalsViewMode(vm);
-            const cvm = localStorage.getItem(`ct_collections_view_mode_${userKey}`);
-            if (cvm) setCollectionsViewMode(cvm);
-        } catch {}
-        // Alert settings
+            const cvm = localStorage.getItem(`ct_collections_view_mode_${userKey}`); if (cvm) setCollectionsViewMode(cvm); const dvm = localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`); if (dvm) {
+                setMyAnimalsViewMode(dvm);
+                setDefaultMyAnimalsViewMode(dvm);
+            }
+        } catch {} // Alert settings
         try {
             const saved = localStorage.getItem(`ct_alert_settings_${userKey}`);
             if (saved) {
@@ -549,6 +554,11 @@ useEffect(() => {
         try { localStorage.setItem('animalList_speciesFilter', speciesFilter); }
         catch (e) { console.warn('Failed to save speciesFilter', e); }
     }, [speciesFilter]);
+
+    useEffect(() => {
+        try { localStorage.setItem('animalList_categoryFilter', categoryFilter); }
+        catch (e) { console.warn('Failed to save categoryFilter', e); }
+    }, [categoryFilter]);
 
 
     useEffect(() => {
@@ -850,6 +860,10 @@ useEffect(() => {
     const groupedAnimals = useMemo(() => {
         let source = animals;
 
+        if (categoryFilter) {
+            source = source.filter(a => getSpeciesCategory(a.species) === categoryFilter);
+        }
+
         // Status filter
         if (statusFilter) {
             source = source.filter(a => a.status === statusFilter);
@@ -937,7 +951,8 @@ useEffect(() => {
             }
             groups[species].push(animal);
             return groups;
-        }, {});}, [animals, statusFilter, genderFilter, speciesFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig]);
+        }, {});
+    }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig]);
 
     const displayedAnimalCount = useMemo(() => {
         return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
@@ -971,6 +986,18 @@ useEffect(() => {
             return a.localeCompare(b);
         });
     }, [allUserSpecies, userSpeciesOrder]);
+
+    const allSpeciesCategories = useMemo(() => {
+        const categories = new Set(allUserSpecies.map(getSpeciesCategory));
+        return ['All Categories', ...Array.from(categories).sort()];
+    }, [allUserSpecies]);
+
+    const filteredSpeciesNames = useMemo(() => {
+        if (!categoryFilter) {
+            return speciesNames;
+        }
+        return speciesNames.filter(species => getSpeciesCategory(species) === categoryFilter);
+    }, [speciesNames, categoryFilter]);
 
     // -- Dashboard & Management Data Calculations --
     const today = new Date();
@@ -1081,6 +1108,7 @@ useEffect(() => {
         appliedNameFilter !== '' ||
         genderFilter !== '' ||
         speciesFilter !== '' ||
+        categoryFilter !== '' ||
         statusFilterPregnant ||
         statusFilterNursing ||
         statusFilterMating ||
@@ -1094,6 +1122,7 @@ useEffect(() => {
         setAppliedNameFilter('');
         setGenderFilter('');
         setSpeciesFilter('');
+        setCategoryFilter('');
         setStatusFilterPregnant(false);
         setStatusFilterNursing(false);
         setStatusFilterMating(false);
@@ -4043,6 +4072,26 @@ useEffect(() => {
             {isListLikeView && !isCollectionsView && !showArchiveScreen && (
                 <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
                     <div className="flex flex-wrap items-center gap-2 flex-grow">
+                        <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                            <button onClick={() => setMyAnimalsViewMode('cards')}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                title="Card view"
+                            >
+                                <LayoutGrid size={14} />
+                            </button>
+                            <button onClick={() => setMyAnimalsViewMode('list')}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                title="List view"
+                            >
+                                <ClipboardList size={14} />
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); setDefaultMyAnimalsViewMode(myAnimalsViewMode); }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${defaultMyAnimalsViewMode === myAnimalsViewMode ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
+                                title="Pin as default view"
+                            >
+                                <Pin size={14} fill={defaultMyAnimalsViewMode === myAnimalsViewMode ? 'currentColor' : 'none'} />
+                            </button>
+                        </div>
                         <div className="relative flex-shrink-0">
                             <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
@@ -4054,13 +4103,22 @@ useEffect(() => {
                                 className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 rounded-lg"
                             />
                         </div>
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => { setCategoryFilter(e.target.value); setSpeciesFilter(''); }}
+                            className="p-2 text-sm border border-gray-300 rounded-lg"
+                        >
+                            {allSpeciesCategories.map(cat => (
+                                <option key={cat} value={cat === 'All Categories' ? '' : cat}>{cat}</option>
+                            ))}
+                        </select>
                         <select 
                             value={speciesFilter}
                             onChange={(e) => { setSpeciesFilter(e.target.value); }}
                             className="p-2 text-sm border border-gray-300 rounded-lg"
                         >
                             <option value="">All Species</option>
-                            {speciesNames.map(species => (
+                            {filteredSpeciesNames.map(species => (
                                 <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
                             ))}
                         </select>
@@ -4079,6 +4137,21 @@ useEffect(() => {
                                 <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender}</option>
                             ))}
                         </select>
+                        {breedingLineDefs && breedingLineDefs.length > 0 && (
+                            <select
+                                value={blFilter.length > 0 ? blFilter[0] : ''}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setBlFilter(value ? [value] : []);
+                                }}
+                                className="p-2 text-sm border border-gray-300 rounded-lg"
+                            >
+                                <option value="">All Lines</option>
+                                {breedingLineDefs.map(line => (
+                                    <option key={line.id} value={line.id}>{line.name}</option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
                         {hasActiveFilters && (
