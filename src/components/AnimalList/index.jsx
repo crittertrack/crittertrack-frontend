@@ -2429,12 +2429,14 @@ useEffect(() => {
         const needsAttentionCount = 0; // Placeholder for future implementation
 
         return (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <StatCard icon={<Home size={32} className="text-blue-800" />} label="Total Enclosures" value={enclosures.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" />
-                <StatCard icon={<Package size={32} className="text-green-800" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
-                <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
-                <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Needs Attention" value={needsAttentionCount} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" />
-                <StatCard icon={<Wrench size={32} className="text-red-800" />} label="Maintenance Due" value={maintenanceDueCount} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" />
+            <div className="mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <StatCard icon={<Home size={32} className="text-blue-800" />} label="Total Enclosures" value={enclosures.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" />
+                    <StatCard icon={<Package size={32} className="text-green-800" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
+                    <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
+                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Needs Attention" value={needsAttentionCount} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" />
+                    <StatCard icon={<Wrench size={32} className="text-red-800" />} label="Maintenance Due" value={maintenanceDueCount} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" />
+                </div>
             </div>
         );
     };
@@ -2502,10 +2504,7 @@ useEffect(() => {
         };
 
         return (
-            <div className="space-y-4 mt-4">
-                {/* Statistic Cards */}
-                {renderEnclosureDashboard()}
-
+            <div className="space-y-4">
                 {/* Search/Filter Bar */}
                 <div className="p-2 bg-gray-50 dark:bg-dark-surface rounded-lg flex flex-wrap items-center gap-2">
                     <div className="relative flex-grow">
@@ -4240,7 +4239,12 @@ useEffect(() => {
                     </div>
                 </div>
 
-                {!['enclosures', 'reproduction', 'health', 'feeding'].includes(animalView) && renderDashboard()}
+                {/* Conditional Dashboards */}
+                {animalView === 'enclosures' ? (
+                    renderEnclosureDashboard()
+                ) : !['reproduction', 'health', 'feeding'].includes(animalView) ? (
+                    renderDashboard()
+                ) : null}
 
                 {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
