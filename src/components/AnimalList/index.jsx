@@ -329,6 +329,7 @@ const AnimalList = ({
     const [restockSaving, setRestockSaving] = useState(false);
     const [openActionMenu, setOpenActionMenu] = useState(null); // For list view action dropdown
     const actionMenuRef = useRef(null);
+    const alertsDropdownRef = useRef(null);
 
     // ---- Collections state (user-scoped localStorage + backend sync) ----
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
@@ -350,10 +351,13 @@ const AnimalList = ({
             if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
                 setOpenActionMenu(null);
             }
+            if (alertsDropdownRef.current && !alertsDropdownRef.current.contains(event.target)) {
+                setShowAlertsDropdown(false);
+            }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [actionMenuRef]);
+    }, [actionMenuRef, alertsDropdownRef]);
 
     // ---- Re-load user-scoped prefs & collections whenever the logged-in user changes ----
     // This prevents one user's data from leaking into another account after switching.
@@ -404,15 +408,6 @@ const AnimalList = ({
     const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' });
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (alertsDropdownRef.current && !alertsDropdownRef.current.contains(event.target)) {
-                setShowAlertsDropdown(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
     const [enclosureSaving, setEnclosureSaving] = useState(false);
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
