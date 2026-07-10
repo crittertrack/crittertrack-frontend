@@ -2119,12 +2119,8 @@ useEffect(() => {
 
     // -- Collections View ----------------------------------------------------------
     const renderCollectionsView = () => {
-        const searchTerm = searchInput.trim().toLowerCase();
-        const allOwnedAnimals = (allAnimalsRaw.length > 0 ? allAnimalsRaw : animals)
-            .filter(a => !a.isViewOnly && !a.archived)
-            .filter(a => !searchTerm || [
-                a.name, a.prefix, a.suffix, a.id_public, a.breederAssignedId
-            ].some(v => v && v.toString().toLowerCase().includes(searchTerm)));
+        // Use the same filtered list as the main "My Animals" view, but also exclude archived.
+        const allOwnedAnimals = displayedAnimalsForList.filter(a => !a.archived);
         const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
         return (
             <div className="space-y-4">
