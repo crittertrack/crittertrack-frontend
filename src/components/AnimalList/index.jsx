@@ -313,7 +313,9 @@ const AnimalList = ({
 
     // Duplicates state
     const [showForSaleScreen, setShowForSaleScreen] = useState(false);
-    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState('cards');
+    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(() => {
+        try { return localStorage.getItem(`ct_my_animals_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
+    });
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
     const [duplicatesLoading, setDuplicatesLoading] = useState(false);
@@ -330,6 +332,16 @@ const AnimalList = ({
     const [openActionMenu, setOpenActionMenu] = useState(null); // For list view action dropdown
     const actionMenuRef = useRef(null);
     const alertsDropdownRef = useRef(null);
+
+    const [showColumnsDropdown, setShowColumnsDropdown] = useState(false);
+    const [listViewColumns, setListViewColumns] = useState(() => {
+        try {
+            const saved = localStorage.getItem(`ct_list_columns_${userKey}`);
+            return saved ? { ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) } : DEFAULT_LIST_COLUMNS;
+        } catch {
+            return DEFAULT_LIST_COLUMNS;
+        }
+    });
 
     // ---- Collections state (user-scoped localStorage + backend sync) ----
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
@@ -591,6 +603,12 @@ useEffect(() => {
         } catch (e) { console.warn('Failed to save blFilter', e); }
     }, [blFilter]);
 
+    useEffect(() => {
+        try {
+            localStorage.setItem(`ct_list_columns_${userKey}`, JSON.stringify(listViewColumns));
+        } catch (e) { console.warn('Failed to save listViewColumns', e); }
+    }, [listViewColumns, userKey]);
+
     const fetchAnimals = useCallback(async () => {
         // Two-phase fetch: fast owned-only first, then all animals in background
         try {
@@ -648,13 +666,20 @@ useEffect(() => {
 
     // Apply filters: snapshot current UI filter state into appliedFilters
     const applyFilters = useCallback(() => {
+        const term = searchInput.trim();
+        if (term && term.length < 3) {
+            showModalMessageRef.current('Search Info', 'Please enter at least 3 characters to search.');
+            return;
+        }
+        setAppliedNameFilter(term);
+
         setAppliedFilters({
             statusFilter, genderFilter, speciesFilter,
             statusFilterPregnant, statusFilterNursing, statusFilterMating,
             publicFilter, blFilter,
         });
         setPendingFilters(false);
-      }, [statusFilter, genderFilter, speciesFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
+      }, [searchInput, statusFilter, genderFilter, speciesFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
 
     // Species list is now derived from the fetchAnimals result - no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
@@ -1107,7 +1132,8 @@ useEffect(() => {
         statusFilterNursing !== appliedFilters.statusFilterNursing ||
         statusFilterMating !== appliedFilters.statusFilterMating ||
         publicFilter !== appliedFilters.publicFilter ||
-        JSON.stringify(blFilter) !== JSON.stringify(appliedFilters.blFilter)
+        JSON.stringify(blFilter) !== JSON.stringify(appliedFilters.blFilter) ||
+        searchInput.trim() !== appliedNameFilter
     );
 
     const handleClearFilters = () => {
@@ -4076,43 +4102,69 @@ useEffect(() => {
 
             {isListLikeView && !isCollectionsView && !showArchiveScreen && (
                 <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
-                    <div className="relative flex-shrink-0">
-                        <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchInput}
-                            onChange={handleSearchInputChange}
-                            onKeyPress={(e) => { if (e.key === 'Enter') { triggerSearch(); applyFilters(); } }}
-                            className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 rounded-lg"
-                        />
+                    <div className="flex flex-wrap items-center gap-2 flex-grow">
+                        <div className="relative flex-shrink-0">
+                            <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={searchInput}
+                                onChange={handleSearchInputChange}
+                                onKeyPress={(e) => { if (e.key === 'Enter') { applyFilters(); } }}
+                                className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 rounded-lg"
+                            />
+                        </div>
+                        <select 
+                            value={speciesFilter}
+                            onChange={(e) => { setSpeciesFilter(e.target.value); setPendingFilters(true); }}
+                            className="p-2 text-sm border border-gray-300 rounded-lg"
+                        >
+                            <option value="">All Species</option>
+                            {speciesNames.map(species => (
+                                <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
+                            ))}
+                        </select>
+                        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPendingFilters(true); }}
+                            className="p-2 text-sm border border-gray-300 rounded-lg"
+                        >
+                            <option value="">All Statuses</option>
+                            {STATUS_OPTIONS.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
+                        <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); setPendingFilters(true); }}
+                            className="p-2 text-sm border border-gray-300 rounded-lg"
+                        >
+                            {GENDER_OPTIONS.map(gender => (
+                                <option key={gender} value={gender === 'All' ? '' : gender}>{gender}</option>
+                            ))}
+                        </select>
                     </div>
-                    <select 
-                        value={speciesFilter}
-                        onChange={(e) => { setSpeciesFilter(e.target.value); setPendingFilters(true); }}
-                        className="p-2 text-sm border border-gray-300 rounded-lg"
-                    >
-                        <option value="">All Species</option>
-                        {speciesNames.map(species => (
-                            <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
-                        ))}
-                    </select>
-                    <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPendingFilters(true); }}
-                        className="p-2 text-sm border border-gray-300 rounded-lg"
-                    >
-                        <option value="">All Statuses</option>
-                        {STATUS_OPTIONS.map(status => (
-                            <option key={status} value={status}>{status}</option>
-                        ))}
-                    </select>
-                    <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); setPendingFilters(true); }}
-                        className="p-2 text-sm border border-gray-300 rounded-lg"
-                    >
-                        {GENDER_OPTIONS.map(gender => (
-                            <option key={gender} value={gender === 'All' ? '' : gender}>{gender}</option>
-                        ))}
-                    </select>
-                    <div className="flex items-center gap-2 ml-auto">
+                    <div className="flex items-center gap-2 ml-auto flex-wrap">
+                        <button onClick={applyFilters} className={`relative px-3 py-2 text-sm font-semibold rounded-lg transition ${panelDirty ? 'bg-accent text-white animate-pulse' : 'bg-primary text-black'}`}>
+                            Apply Filters
+                        </button>
+                        {hasActiveFilters && (
+                            <button onClick={handleClearFilters} className="px-3 py-2 text-sm font-semibold bg-gray-200 text-gray-700 rounded-lg transition hover:bg-gray-300">
+                                Clear
+                            </button>
+                        )}
+                        <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                            <button
+                                onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'cards'); } catch {} }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                title="Card view"
+                            >
+                                <LayoutGrid size={14} />
+                            </button>
+                            <button
+                                onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'list'); } catch {} }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                title="List view"
+                            >
+                                <ClipboardList size={14} />
+                            </button>
+                        </div>
                         <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
                             A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
@@ -4120,11 +4172,6 @@ useEffect(() => {
                             Age {sortConfig.key === 'birthdate' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
                     </div>
-                    <input
-                        type="text"
-                        onFocus={applyFilters}
-                        className="w-px h-px absolute -top-96"
-                    />
             </div>
             )}
             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
