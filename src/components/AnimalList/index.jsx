@@ -114,27 +114,6 @@ const AnimalList = ({
     // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
     // so that switching accounts never leaks one user's collections/prefs into another's.
     const userKey = useMemo(() => getUserKey(authToken), [authToken]);
-    const [showNotifications, setShowNotifications] = useState(false);
-    const [showMessages, setShowMessages] = useState(false);
-    const [showCategoryBreakdown, setShowCategoryBreakdown] = useState(false);
-    useEffect(() => { showModalMessageRef.current = showModalMessage; });
-
-    const [animals, setAnimalsRaw] = useState(() => _alCache || []);
-    const setAnimals = useCallback((valOrFn) => {
-        setAnimalsRaw(prev => {
-            const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
-            _alCache = next;
-            return next;
-        });
-    }, []);
-    const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
-    const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
-    const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals ? shown in Management > Sold/Transferred section
-    const [showAlertsDropdown, setShowAlertsDropdown] = useState(false);
-    const alertsDropdownRef = useRef(null);
-    const [alertSettings, setAlertSettings] = useState(() => Object.keys(ALERT_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: true }), {}));    
-    const [listViewColumns, setListViewColumns] = useState(DEFAULT_LIST_COLUMNS);
-
     const [sortConfig, setSortConfig] = useState(() => {
         try {
             const saved = localStorage.getItem(`ct_list_sort_config_${userKey}`);
@@ -157,16 +136,23 @@ const AnimalList = ({
         setSortConfig(newSortConfig);
         try { localStorage.setItem(`ct_list_sort_config_${userKey}`, JSON.stringify(newSortConfig)); } catch {}
     };
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [showMessages, setShowMessages] = useState(false);
+    const [showCategoryBreakdown, setShowCategoryBreakdown] = useState(false);
+    useEffect(() => { showModalMessageRef.current = showModalMessage; });
 
-    const toggleAlertCategory = (key) => {
-        setAlertSettings(prev => {
-            const next = { ...prev, [key]: !prev[key] };
-            try {
-                localStorage.setItem(`ct_alert_settings_${userKey}`, JSON.stringify(next));
-            } catch {}
+    const [animals, setAnimalsRaw] = useState(() => _alCache || []);
+    const setAnimals = useCallback((valOrFn) => {
+        setAnimalsRaw(prev => {
+            const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
+            _alCache = next;
             return next;
         });
-    };
+    }, []);
+    const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
+    const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
+    const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals ? shown in Management > Sold/Transferred section
+    const [showAlertsDropdown, setShowAlertsDropdown] = useState(false);
     const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
     const [loading, setLoading] = useState(() => !_alCache);
     const [allAnimalsFetched, setAllAnimalsFetched] = useState(false); // true once Phase 2 (all animals) fetch completes
@@ -900,10 +886,8 @@ useEffect(() => {
         }
 
         // Gender filter (appliedFilters)
-        if (af.selectedGenders.length === 0) {
-            source = [];
-        } else if (af.selectedGenders.length < GENDER_OPTIONS.length) {
-            source = source.filter(a => af.selectedGenders.includes(a.gender));
+        if (af.genderFilter) {
+            source = source.filter(a => a.gender === af.genderFilter);
         }
 
         // Pregnant / Nursing / Mating filters (appliedFilters)
@@ -931,6 +915,32 @@ useEffect(() => {
             source = source.filter(a => {
                 const assigned = animalBreedingLines[a.id_public] || [];
                 return af.blFilter.some(lineId => assigned.includes(lineId));
+            });
+        }
+
+        // Sorting logic
+        if (sortConfig.key) {
+            source.sort((a, b) => {
+                const dir = sortConfig.direction === 'ascending' ? 1 : -1;
+                let valA, valB;
+
+                if (sortConfig.key === 'name') {
+                    valA = (a.name || '').toLowerCase();
+                    valB = (b.name || '').toLowerCase();
+                } else if (sortConfig.key === 'birthdate') {
+                    const dateA = a.birthDate ? new Date(a.birthDate) : null;
+                    const dateB = b.birthDate ? new Date(b.birthDate) : null;
+                    if (dateA === dateB) return 0;
+                    if (dateA === null) return 1; // nulls/invalid dates last
+                    if (dateB === null) return -1;
+                    valA = dateA.getTime();
+                    valB = dateB.getTime();
+                }
+
+                if (valA < valB) return -1 * dir;
+                if (valA > valB) return 1 * dir;
+                
+                return 0;
             });
         }
         return source.reduce((groups, animal) => { // ownedFilterMode is a direct dependency now
@@ -4105,226 +4115,56 @@ useEffect(() => {
             )}
 
             {isListLikeView && !isCollectionsView && !showArchiveScreen && (
-                <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
-                <div className="flex items-center gap-2 p-2 sm:p-3 border-t border-gray-200">
-                    {/* Card / List view toggle */}
-                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
-                        <button
-                            onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'cards'); } catch {} }}
-                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                            title="Card view"
-                        >
-                            <LayoutGrid size={14} />
+                <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
+                    <div className="relative flex-shrink-0">
+                        <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchInput}
+                            onChange={handleSearchInputChange}
+                            onKeyPress={(e) => { if (e.key === 'Enter') { triggerSearch(); applyFilters(); } }}
+                            className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 rounded-lg"
+                        />
+                    </div>
+                    <select 
+                        value={speciesFilter}
+                        onChange={(e) => { setSpeciesFilter(e.target.value); setPendingFilters(true); }}
+                        className="p-2 text-sm border border-gray-300 rounded-lg"
+                    >
+                        <option value="">All Species</option>
+                        {speciesNames.map(species => (
+                            <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
+                        ))}
+                    </select>
+                    <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPendingFilters(true); }}
+                        className="p-2 text-sm border border-gray-300 rounded-lg"
+                    >
+                        <option value="">All Statuses</option>
+                        {STATUS_OPTIONS.map(status => (
+                            <option key={status} value={status}>{status}</option>
+                        ))}
+                    </select>
+                    <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); setPendingFilters(true); }}
+                        className="p-2 text-sm border border-gray-300 rounded-lg"
+                    >
+                        {GENDER_OPTIONS.map(gender => (
+                            <option key={gender} value={gender === 'All' ? '' : gender}>{gender}</option>
+                        ))}
+                    </select>
+                    <div className="flex items-center gap-2 ml-auto">
+                        <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
+                            A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
-                        <button
-                            onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'list'); } catch {} }}
-                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                            title="List view"
-                        >
-                            <ClipboardList size={14} />
+                        <button onClick={() => requestSort('birthdate')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'birthdate' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
+                            Age {sortConfig.key === 'birthdate' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
                     </div>
                     <input
                         type="text"
-                        placeholder="Search by name..."
-                        value={searchInput}
-                        onChange={handleSearchInputChange}
-                        onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
-                        className="flex-grow p-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-0"
-                        disabled={loading}
-                        data-tutorial-target="my-animals-search"
+                        onFocus={applyFilters}
+                        className="w-px h-px absolute -top-96"
                     />
-                    <button
-                        onClick={triggerSearch}
-                        disabled={loading}
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 text-sm shrink-0"
-                        title="Search"
-                    >
-                        <Search size={16} />
-                        <span className="hidden sm:inline">Search</span>
-                    </button>
-                    <button
-                        onClick={() => setFiltersExpanded(prev => !prev)}
-                        className={`relative py-2 px-3 rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 text-sm font-semibold shrink-0 ${
-                            filtersExpanded ? 'bg-gray-700 text-white' : hasActiveFilters ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                        title="Toggle Filters"
-                    >
-                        <SlidersHorizontal size={16} />
-                        <span className="hidden sm:inline">Filters</span>
-                        {hasActiveFilters && !filtersExpanded && (
-                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full" />
-                        )}
-                    </button>
-                </div>
-
-            {/* Collapsible filter panel */}
-            {filtersExpanded && (
-            <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2 sm:space-y-3 border-t border-gray-200 dark:border-dark-border pt-2 sm:pt-3">
-                {/* Row 1: Species + Status dropdowns */}
-                <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="species-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Species:</span>
-                        <select 
-                            value={
-                                speciesNames.every(species => selectedSpecies.includes(species)) ? '' : 
-                                (selectedSpecies.find(s => speciesNames.includes(s)) || '')
-                            }
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                if (value === '') {
-                                    setSelectedSpecies([...speciesNames]);
-                                } else {
-                                    setSelectedSpecies([value]);
-                                }
-                            }}
-                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 dark:border-dark-border rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:bg-dark-surface dark:text-dark-text transition min-w-[110px] sm:min-w-[160px]"
-                        >
-                            <option value="">All</option>
-                            {speciesNames.map(species => (
-                                <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
-                            ))}
-                        </select>
-                    </div>
-                    
-                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="status-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Status:</span>
-                        <select value={statusFilter} onChange={handleStatusFilterChange} 
-                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 dark:border-dark-border rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:bg-dark-surface dark:text-dark-text transition min-w-[110px] sm:min-w-[160px]"
-                        >
-                            <option value="">All</option>
-                            {STATUS_OPTIONS.filter(s => s !== 'Sold').map(status => (
-                                <option key={status} value={status}>{status}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                {/* Row 2: Gender + Visibility */}
-                <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6">
-                    <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="gender-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Gender:</span>
-                            {GENDER_OPTIONS.map(gender => {
-                                const isSelected = selectedGenders.includes(gender);
-                                let Icon, bgColor;
-                                switch(gender) {
-                                    case 'Male': Icon = Mars; bgColor = isSelected ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400'; break;
-                                    case 'Female': Icon = Venus; bgColor = isSelected ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400'; break;
-                                    case 'Intersex': Icon = VenusAndMars; bgColor = isSelected ? 'bg-purple-400' : 'bg-gray-300 hover:bg-gray-400'; break;
-                                    case 'Unknown': Icon = Circle; bgColor = isSelected ? 'bg-teal-400' : 'bg-gray-300 hover:bg-gray-400'; break;
-                                    default: Icon = Circle; bgColor = 'bg-gray-300 hover:bg-gray-400';
-                                }
-                                return (
-                                    <button key={gender} onClick={() => toggleGender(gender)}
-                                        className={`p-1.5 sm:p-2 rounded-lg transition duration-150 shadow-sm ${bgColor}`}
-                                        title={gender}
-                                    >
-                                        <Icon className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-black" />
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                    <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="visibility-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Visibility:</span>
-                            {['All', 'Public', 'Private'].map(option => {
-                                const value = option === 'All' ? '' : option.toLowerCase();
-                                const isSelected = publicFilter === value;
-                                return (
-                                    <button key={option} onClick={() => setPublicFilter(value)}
-                                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
-                                            isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                        }`}
-                                    >
-                                        {option}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                {/* Row 3: Show filters */}
-                <div className="flex flex-wrap justify-center items-center gap-1 sm:gap-2" data-tutorial-target="collection-filters">
-                    <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Show:</span>
-
-                        <button onClick={handleFilterMating}
-                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                                statusFilterMating ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                            title="Mating"
-                        >
-                            <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            <span className="hidden sm:inline">Mating</span>
-                        </button>
-                        <button onClick={handleFilterPregnant}
-                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                                statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                            title="Pregnant"
-                        >
-                            <Bean className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            <span className="hidden sm:inline">Pregnant</span>
-                        </button>
-                        <button onClick={handleFilterNursing}
-                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                                statusFilterNursing ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                            title="Nursing"
-                        >
-                            <Milk className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            <span className="hidden sm:inline">Nursing</span>
-                        </button>
-                    </div>
-
-                {/* Row 4: Breeding Line filters */}
-                {breedingLineDefs.some(l => l.name) && (
-                    <div className="flex flex-wrap justify-center items-center gap-2">
-                        <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap">Breeding Line:</span>
-                            {breedingLineDefs.filter(l => l.name).map(line => {
-                                const isActive = blFilter.includes(line.id);
-                                return (
-                                    <button
-                                        key={line.id}
-                                        onClick={() => setBlFilter(prev => isActive ? prev.filter(id => id !== line.id) : [...prev, line.id])}
-                                        title={line.name}
-                                        className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm border ${
-                                            isActive ? 'text-white border-transparent' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300'
-                                        }`}
-                                        style={isActive ? { backgroundColor: line.color, borderColor: line.color } : {}}
-                                    >
-                                        <span style={{ color: isActive ? 'white' : line.color }} className="text-base leading-none">&#x25C6;</span>
-                                        {line.name}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
-
-                {/* Apply / Clear row */}
-                <div className="flex justify-center items-center gap-2 pt-2 border-t border-gray-200 dark:border-dark-border">
-                        <button
-                            onClick={() => { applyFilters(); setFiltersExpanded(false); }}
-                            className={`font-semibold py-2 px-5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1.5 text-sm ${
-                                panelDirty
-                                    ? 'bg-accent hover:bg-accent/90 text-white animate-pulse'
-                                    : 'bg-primary hover:bg-primary/90 text-black'
-                            }`}
-                        >
-                            <Check size={16} />
-                            Apply Filters
-                        </button>
-                        {hasActiveFilters && (
-                            <button
-                                onClick={() => { handleClearFilters(); setFiltersExpanded(false); }}
-                                className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm font-medium"
-                            >
-                                <X size={14} />
-                                Clear All
-                            </button>
-                        )}
-                    </div>
-                </div>
-                )}
             </div>
             )}
             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
@@ -4332,23 +4172,6 @@ useEffect(() => {
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">                    
                     <table className="min-w-full text-xs divide-y divide-gray-200">
-                        <thead className="bg-gray-100 text-gray-600 text-xs">
-                            <tr>
-                                <th className="px-4 py-2 w-12"></th>                                
-
-                                {listViewColumns.animal && <th className="px-3 py-2 text-left"><button onClick={() => requestSort('name')} className="flex items-center gap-1 group"><span className={sortConfig.key === 'name' ? 'text-gray-800 font-bold' : ''}>Animal</span>{sortConfig.key === 'name' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400" />)}</button></th>}
-                                {listViewColumns.species && <th className="px-3 py-2 text-left">Species</th>}
-                                {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
-                                {listViewColumns.enclosure && <th className="px-3 py-2 text-left">Enclosure</th>}
-                                {listViewColumns.lifeStage && <th className="px-3 py-2 text-left">Life Stage</th>}
-                                {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
-                                {listViewColumns.health && <th className="px-3 py-2 text-left">Health</th>}
-                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left whitespace-nowrap"><button onClick={() => requestSort('birthdate')} className="flex items-center gap-1 group"><span className={sortConfig.key === 'birthdate' ? 'text-gray-800 font-bold' : ''}>Birthdate / age</span>{sortConfig.key === 'birthdate' ? (sortConfig.direction === 'ascending' ? <ArrowUp size={12} className="text-gray-800" /> : <ArrowDown size={12} className="text-gray-800" />) : (<ArrowDown size={12} className="text-gray-400" />)}</button></th>}
-                                {listViewColumns.breedingLines && <th className="px-3 py-2 text-left">Lines</th>}
-                                {listViewColumns.tags && <th className="px-3 py-2 text-left">Tags</th>}
-                                <th className="px-3 py-2 text-right w-12"></th>
-                            </tr>
-                        </thead>
                         <tbody className="divide-y divide-gray-100">
                             {(() => {
                                 let displayedAnimals = speciesNames.flatMap(species => (groupedAnimals[species] || []));
@@ -4375,10 +4198,6 @@ useEffect(() => {
                                         if (valA < valB) return -1 * dir;
                                         if (valA > valB) return 1 * dir;
                                         
-                                        // Secondary sort for stability
-                                        if ((a.name || '').toLowerCase() < (b.name || '').toLowerCase()) return -1;
-                                        if ((a.name || '').toLowerCase() > (b.name || '').toLowerCase()) return 1;
-
                                         return 0;
                                     });
                                 }
