@@ -104,12 +104,28 @@ const AnimalList = ({
     setSoldTransferredAnimals,
     archiveLoading,
     setArchiveLoading,
-    // Breeding lines (display-only for cards)
-    breedingLineDefs = [],
-    animalBreedingLines = {}
+    // Breeding lines (display-only for cards) - raw props
+    breedingLineDefs: rawBreedingLineDefs = [],
+    animalBreedingLines: rawAnimalBreedingLines = {}
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
+
+    // Filter out breeding lines with empty names, as they are considered deleted.
+    const breedingLineDefs = useMemo(() =>
+        (rawBreedingLineDefs || []).filter(l => l.name && l.name.trim()),
+    [rawBreedingLineDefs]);
+
+    const validLineIds = useMemo(() => new Set(breedingLineDefs.map(l => l.id)), [breedingLineDefs]);
+
+    const animalBreedingLines = useMemo(() => {
+        const cleaned = {};
+        Object.entries(rawAnimalBreedingLines).forEach(([animalId, lineIds]) => {
+            const validIds = (lineIds || []).filter(id => validLineIds.has(id));
+            if (validIds.length > 0) cleaned[animalId] = validIds;
+        });
+        return cleaned;
+    }, [rawAnimalBreedingLines, validLineIds]);
 
     // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
     // so that switching accounts never leaks one user's collections/prefs into another's.
@@ -212,6 +228,13 @@ const AnimalList = ({
         } catch { return []; }
     }); // array of line IDs to filter by (empty = no filter)
    
+    // If the currently selected breeding line filter is for a line that no longer exists, clear it.
+    useEffect(() => {
+        if (blFilter.length > 0 && !validLineIds.has(blFilter[0])) {
+            setBlFilter([]);
+        }
+    }, [blFilter, validLineIds]);
+
     const [ownedFilterMode, setOwnedFilterMode] = useState(() => {
         try {
             return localStorage.getItem('animalList_ownedFilterMode') || 'owned';
