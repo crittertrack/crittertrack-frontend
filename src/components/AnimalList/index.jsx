@@ -2219,6 +2219,7 @@ useEffect(() => {
                     <>
                         {userCollections.map(col => {
                             const colAnimals = allFilteredAnimals.filter(a => (animalCollections[a.id_public] || []).includes(col.id));
+                            const colAnimals = allOwnedAnimals.filter(a => (animalCollections[a.id_public] || []).includes(col.id));
                             const isColCollapsed = collapsedCollections[col.id] || false;
                             return (
                                 <div key={col.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
@@ -2307,6 +2308,7 @@ useEffect(() => {
                         {(() => {
                             const validCollectionIds = new Set(userCollections.map(c => c.id));
                             const uncategorized = allFilteredAnimals.filter(a => {
+                            const uncategorized = allOwnedAnimals.filter(a => {
                                 const assigned = (animalCollections[a.id_public] || []).filter(cid => validCollectionIds.has(cid));
                                 return assigned.length === 0;
                             });
