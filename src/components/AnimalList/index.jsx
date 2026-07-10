@@ -4249,34 +4249,12 @@ useEffect(() => {
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
                         <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
                         </div>
-                        <button
-                            onClick={triggerSearch}
-                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 text-sm shrink-0"
-                            title="Search"
-                        >
-                            <Search size={16} />
-                        </button>
                         <span className="hidden sm:inline mx-1 text-gray-300">|</span>
                         <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
                             A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
                         <button onClick={() => requestSort('birthdate')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'birthdate' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
                             Age {sortConfig.key === 'birthdate' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
-                        </button>
-                        <span className="hidden sm:inline mx-1 text-gray-300">|</span>
-                        <button
-                            onClick={() => toggleAllAnimalsPrivacy(true)}
-                            className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 p-2 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
-                            title="Make All Animals Public"
-                        >
-                            <Eye size={14} className="sm:w-4 sm:h-4" />
-                        </button>
-                        <button
-                            onClick={() => toggleAllAnimalsPrivacy(false)}
-                            className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 p-2 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
-                            title="Make All Animals Private"
-                        >
-                            <EyeOff size={14} className="sm:w-4 sm:h-4" />
                         </button>
                     </div>
             </div>
