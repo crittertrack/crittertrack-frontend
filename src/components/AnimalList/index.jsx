@@ -466,6 +466,11 @@ const AnimalList = ({
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
     const [newCleaningTaskFreq, setNewCleaningTaskFreq] = useState('');
     
+    // New states for Enclosures tab overhaul
+    const [enclosureSearch, setEnclosureSearch] = useState('');
+    const [enclosureTypeFilter, setEnclosureTypeFilter] = useState('');
+    const [enclosureStatusFilter, setEnclosureStatusFilter] = useState(''); // 'occupied' | 'empty'
+    
     // Fetch archived + sold/transferred animals from API
     const fetchArchiveData = useCallback(async () => {
         setArchiveLoading(true);
@@ -2394,6 +2399,151 @@ useEffect(() => {
         );
     };
 
+    const renderEnclosuresTab = () => {
+        // --- Data Calculation ---
+        const occupiedEnclosuresList = enclosures.filter(enc => (enclosureAnimalMap[enc._id] || []).length > 0);
+        const animalsHousedCount = Object.values(enclosureAnimalMap).flat().filter(a => a.enclosureId).length;
+
+        const maintenanceDueCount = enclosures.reduce((count, enc) => {
+            const hasDueTask = (enc.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
+            return count + (hasDueTask ? 1 : 0);
+        }, 0);
+
+        // Placeholder for "Needs Attention"
+        const needsAttentionCount = 0; // Placeholder for future implementation (e.g., temp/humidity alerts)
+
+        // --- Filtering ---
+        let filteredEnclosures = [...enclosures];
+        if (enclosureSearch) {
+            filteredEnclosures = filteredEnclosures.filter(e => e.name.toLowerCase().includes(enclosureSearch.toLowerCase()));
+        }
+        if (enclosureTypeFilter) {
+            filteredEnclosures = filteredEnclosures.filter(e => e.enclosureType === enclosureTypeFilter);
+        }
+        if (enclosureStatusFilter) {
+            if (enclosureStatusFilter === 'occupied') {
+                filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length > 0);
+            } else if (enclosureStatusFilter === 'empty') {
+                filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length === 0);
+            }
+        }
+
+        // --- Components ---
+        const EnclosureCard = ({ enclosure }) => {
+            const occupants = enclosureAnimalMap[enclosure._id] || [];
+            const occupancyStatus = occupants.length > 0 ? 'Occupied' : 'Empty';
+            const lastCleaned = (enclosure.cleaningTasks || [])
+                .map(t => t.lastDoneDate)
+                .filter(Boolean)
+                .sort((a, b) => new Date(b) - new Date(a))[0];
+
+            const needsCleaning = (enclosure.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
+
+            return (
+                <div className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer">
+                    {/* Banner Image - Placeholder */}
+                    <div className="h-32 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center">
+                        <Home size={48} className="text-gray-400 dark:text-dark-text-muted" />
+                    </div>
+                    <div className="p-4">
+                        <div className="flex justify-between items-start">
+                            <h3 className="font-bold text-lg text-gray-800 dark:text-dark-text">{enclosure.name}</h3>
+                            <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-dark-surface-hover dark:text-dark-text-secondary'}`}>
+                                {occupancyStatus}
+                            </span>
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-dark-text-secondary">{enclosure.enclosureType || 'N/A'}</p>
+                        
+                        <div className="mt-4 space-y-2 text-xs text-gray-600 dark:text-dark-text-secondary">
+                            <div className="flex justify-between"><span>Animal Count:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{occupants.length}</span></div>
+                            <div className="flex justify-between"><span>Occupancy:</span> <span className="font-medium text-gray-800 dark:text-dark-text">N/A</span></div>
+                            <div className="flex justify-between"><span>Temp Range:</span> <span className="font-medium text-gray-800 dark:text-dark-text">N/A</span></div>
+                            <div className="flex justify-between"><span>Last Cleaned:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{lastCleaned ? formatDateShort(lastCleaned) : 'Never'}</span></div>
+                        </div>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                            {needsCleaning && (
+                                <span className="flex items-center gap-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-1 rounded-full font-medium">
+                                    <Wrench size={12} /> Needs Cleaning
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const StatCard = ({ icon, label, value, colorClass }) => (
+            <div className={`flex items-center p-4 rounded-xl shadow-sm ${colorClass}`}>
+                {icon}
+                <div className="ml-4">
+                    <div className="text-2xl font-bold">{value}</div>
+                    <div className="text-sm font-medium opacity-90">{label}</div>
+                </div>
+            </div>
+        );
+
+        return (
+            <div className="space-y-4 mt-4">
+                {/* Statistic Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <StatCard icon={<Home size={32} className="text-blue-800" />} label="Total Enclosures" value={enclosures.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" />
+                    <StatCard icon={<Package size={32} className="text-green-800" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
+                    <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
+                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Needs Attention" value={needsAttentionCount} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" />
+                    <StatCard icon={<Wrench size={32} className="text-red-800" />} label="Maintenance Due" value={maintenanceDueCount} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" />
+                </div>
+
+                {/* Search/Filter Bar */}
+                <div className="p-2 bg-gray-50 dark:bg-dark-surface rounded-lg flex flex-wrap items-center gap-2">
+                    <div className="relative flex-grow">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input 
+                            type="text"
+                            placeholder="Search enclosures..."
+                            value={enclosureSearch}
+                            onChange={e => setEnclosureSearch(e.target.value)}
+                            className="w-full pl-10 p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
+                        />
+                    </div>
+                    <select
+                        value={enclosureStatusFilter}
+                        onChange={e => setEnclosureStatusFilter(e.target.value)}
+                        className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="occupied">Occupied</option>
+                        <option value="empty">Empty</option>
+                    </select>
+                     <select
+                        value={enclosureTypeFilter}
+                        onChange={e => setEnclosureTypeFilter(e.target.value)}
+                        className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
+                    >
+                        <option value="">All Types</option>
+                        {[...new Set(enclosures.map(e => e.enclosureType).filter(Boolean))].map(type => (
+                            <option key={type} value={type}>{type}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Main Content */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredEnclosures.map(enclosure => (
+                        <EnclosureCard key={enclosure._id} enclosure={enclosure} />
+                    ))}
+                </div>
+                 {filteredEnclosures.length === 0 && (
+                    <div className="text-center py-16 text-gray-500 dark:text-dark-text-secondary">
+                        <Home size={48} className="mx-auto text-gray-300 dark:text-dark-border mb-4" />
+                        <h3 className="font-semibold text-lg">No Enclosures Found</h3>
+                        <p className="text-sm mt-1">Try adjusting your filters or add a new enclosure.</p>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     // -- For Sale Screen ----------------------------------------------------------
     const renderForSaleScreen = () => {
         const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
@@ -4078,6 +4228,20 @@ useEffect(() => {
                         >
                             <PlusCircle size={14} /> <span className="sm:hidden">Add</span>
                         </button>
+                        )}
+                        {/* Add Enclosure button */}
+                        {animalView === 'enclosures' && !showArchiveScreen && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); }
+                                    else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' }); setEnclosureFormVisible(v => !v); }
+                                }}
+                                className="hidden sm:flex bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                            >
+                                <PlusCircle size={14} className="sm:w-4 sm:h-4" />
+                                <span>{enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add Enclosure'}</span>
+                            </button>
                         )}
                     </div>
                 </div>
