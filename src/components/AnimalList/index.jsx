@@ -4147,7 +4147,7 @@ useEffect(() => {
                                 className="p-2 text-sm border border-gray-300 rounded-lg"
                             >
                                 <option value="">All Lines</option>
-                                {breedingLineDefs.map(line => (
+                                {breedingLineDefs.filter(line => line.name).map(line => (
                                     <option key={line.id} value={line.id}>{line.name}</option>
                                 ))}
                             </select>
