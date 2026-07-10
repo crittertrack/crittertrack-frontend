@@ -19,8 +19,8 @@ import { prefetchPedigreeTree } from '../AnimalForm';
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
 
-const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Unknown']; 
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Unknown'];
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
 
@@ -104,28 +104,12 @@ const AnimalList = ({
     setSoldTransferredAnimals,
     archiveLoading,
     setArchiveLoading,
-    // Breeding lines (display-only for cards) - raw props
-    breedingLineDefs: rawBreedingLineDefs = [],
-    animalBreedingLines: rawAnimalBreedingLines = {}
+    // Breeding lines (display-only for cards)
+    breedingLineDefs = [],
+    animalBreedingLines = {}
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
-
-    // Filter out breeding lines with empty names, as they are considered deleted.
-    const breedingLineDefs = useMemo(() =>
-        (rawBreedingLineDefs || []).filter(l => l.name && l.name.trim()),
-    [rawBreedingLineDefs]);
-
-    const validLineIds = useMemo(() => new Set(breedingLineDefs.map(l => String(l.id))), [breedingLineDefs]);
-
-    const animalBreedingLines = useMemo(() => {
-        const cleaned = {};
-        Object.entries(rawAnimalBreedingLines).forEach(([animalId, lineIds]) => {
-            const validIds = (lineIds || []).map(String).filter(id => validLineIds.has(id));
-            if (validIds.length > 0) cleaned[animalId] = validIds;
-        });
-        return cleaned;
-    }, [rawAnimalBreedingLines, validLineIds]);
 
     // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
     // so that switching accounts never leaks one user's collections/prefs into another's.
@@ -194,15 +178,14 @@ const AnimalList = ({
         try {
             return localStorage.getItem('animalList_genderFilter') || '';
         } catch { return ''; }
-});
-        const [categoryFilter, setCategoryFilter] = useState(() => {
-        try { return localStorage.getItem('animalList_categoryFilter') || ''; } catch { return ''; }
-
     });
     // Always start with all species selected (empty array = show all)
     // Don't persist this filter to prevent newly created animals from being hidden
      const [speciesFilter, setSpeciesFilter] = useState(() => {
         try { return localStorage.getItem('animalList_speciesFilter') || ''; } catch { return ''; }
+    });
+    const [categoryFilter, setCategoryFilter] = useState(() => {
+        try { return localStorage.getItem('animalList_categoryFilter') || ''; } catch { return ''; }
     });
     // Master species list ? all species the user has ANY animal for, never filtered
     const [allUserSpecies, setAllUserSpecies] = useState([]);
@@ -227,20 +210,11 @@ const AnimalList = ({
             return saved ? JSON.parse(saved) : [];
         } catch { return []; }
     }); // array of line IDs to filter by (empty = no filter)
-   
-    // If the currently selected breeding line filter is for a line that no longer exists, clear it.
-    useEffect(() => {
-        if (blFilter.length > 0 && !validLineIds.has(blFilter[0])) {
-            setBlFilter([]);
-        }
-    }, [blFilter, validLineIds]);
-
     const [ownedFilterMode, setOwnedFilterMode] = useState(() => {
         try {
             return localStorage.getItem('animalList_ownedFilterMode') || 'owned';
         } catch { return 'owned'; }
     });
-    
     const [publicFilter, setPublicFilter] = useState(() => {
         try {
             return localStorage.getItem('animalList_publicFilter') || '';
@@ -327,13 +301,10 @@ const AnimalList = ({
     };
 
     // Duplicates state
-     const [showForSaleScreen, setShowForSaleScreen] = useState(false); const [defaultMyAnimalsViewMode, setDefaultMyAnimalsViewMode] = useState(() => {
-        try { return localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
+    const [showForSaleScreen, setShowForSaleScreen] = useState(false);
+    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(() => {
+        try { return localStorage.getItem(`ct_my_animals_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
     });
-    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(defaultMyAnimalsViewMode);
-    useEffect(() => {
-        try { localStorage.setItem(`ct_default_my_animals_view_mode_${userKey}`, defaultMyAnimalsViewMode); } catch {}
-    }, [defaultMyAnimalsViewMode, userKey]);
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
     const [duplicatesLoading, setDuplicatesLoading] = useState(false);
@@ -404,11 +375,10 @@ const AnimalList = ({
         try {
             const vm = localStorage.getItem(`ct_my_animals_view_mode_${userKey}`);
             if (vm) setMyAnimalsViewMode(vm);
-            const cvm = localStorage.getItem(`ct_collections_view_mode_${userKey}`); if (cvm) setCollectionsViewMode(cvm); const dvm = localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`); if (dvm) {
-                setMyAnimalsViewMode(dvm);
-                setDefaultMyAnimalsViewMode(dvm);
-            }
-        } catch {} // Alert settings
+            const cvm = localStorage.getItem(`ct_collections_view_mode_${userKey}`);
+            if (cvm) setCollectionsViewMode(cvm);
+        } catch {}
+        // Alert settings
         try {
             const saved = localStorage.getItem(`ct_alert_settings_${userKey}`);
             if (saved) {
@@ -616,16 +586,10 @@ useEffect(() => {
         } catch (e) { console.warn('Failed to save publicFilter', e); }
     }, [publicFilter]);
 
-      useEffect(() => {
-        try { localStorage.setItem('animalList_categoryFilter', categoryFilter); }
-        catch (e) { console.warn('Failed to save categoryFilter', e); }
-    }, [categoryFilter]);
-
      useEffect(() => {
         try { localStorage.setItem('animalList_speciesFilter', speciesFilter); }
         catch (e) { console.warn('Failed to save speciesFilter', e); }
     }, [speciesFilter]);
-
 
     useEffect(() => {
         try {
@@ -893,7 +857,8 @@ useEffect(() => {
 
     const groupedAnimals = useMemo(() => {
         let source = animals;
-       if (categoryFilter) {
+
+        if (categoryFilter) {
             source = source.filter(a => getSpeciesCategory(a.species) === categoryFilter);
         }
 
@@ -933,7 +898,7 @@ useEffect(() => {
         if (statusFilterNursing) source = source.filter(a => a.isNursing === true);
         if (statusFilterMating) source = source.filter(a => a.isInMating === true);
 
-         // Public/private filter
+        // Public/private filter
         if (publicFilter === 'public') {
             source = source.filter(a => a.showOnPublicProfile === true);
         } else if (publicFilter === 'private') {
@@ -1145,9 +1110,7 @@ useEffect(() => {
         statusFilterPregnant ||
         statusFilterNursing ||
         statusFilterMating ||
-        publicFilter !== '' ||
-        blFilter.length > 0
-    
+        publicFilter !== ''
     );
 
     const handleClearFilters = () => {
@@ -4106,64 +4069,28 @@ useEffect(() => {
             {isListLikeView && !isCollectionsView && !showArchiveScreen && (
                 <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
                     <div className="flex flex-wrap items-center gap-2 flex-grow">
-                        <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
-                            <button onClick={() => setMyAnimalsViewMode('cards')}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                                title="Card view"
-                            >
-                                <LayoutGrid size={14} />
-                            </button>
-                            <button onClick={() => setMyAnimalsViewMode('list')}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                                title="List view"
-                            >
-                                <ClipboardList size={14} />
-                            </button>
-                            <button onClick={(e) => { e.stopPropagation(); setDefaultMyAnimalsViewMode(myAnimalsViewMode); }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${defaultMyAnimalsViewMode === myAnimalsViewMode ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
-                                title="Pin as default view"
-                            >
-                                <Pin size={14} fill={defaultMyAnimalsViewMode === myAnimalsViewMode ? 'currentColor' : 'none'} />
-                            </button>
-                        </div>
-                        <div className="relative flex-grow">
+                        <div className="relative flex-shrink-0">
                             <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
                                 type="text"
                                 placeholder="Search..."
                                 value={searchInput}
                                 onChange={handleSearchInputChange}
-                                 onKeyPress={(e) => { if (e.key === 'Enter') { setAppliedNameFilter(searchInput.trim()); } }}
-                                className="w-full pl-8 p-2 text-sm border border-gray-300 rounded-lg"
+                                onKeyPress={(e) => { if (e.key === 'Enter') { applyFilters(); } }}
+                                className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 rounded-lg"
                             />
                         </div>
-                        <select
-                            value={categoryFilter}
-                            onChange={(e) => { setCategoryFilter(e.target.value); setSpeciesFilter(''); }}
-                            className="p-2 text-sm border border-gray-300 rounded-lg"
-                        >
-                            {allSpeciesCategories.map(cat => (
-                                <option key={cat} value={cat === 'All Categories' ? '' : cat}>{cat}</option>
-                            ))}
-                        </select>
                         <select 
                             value={speciesFilter}
-                            onChange={(e) => { setSpeciesFilter(e.target.value); }}
+                            onChange={(e) => { setSpeciesFilter(e.target.value); setPendingFilters(true); }}
                             className="p-2 text-sm border border-gray-300 rounded-lg"
                         >
                             <option value="">All Species</option>
-                            {filteredSpeciesNames.map(species => (
+                            {speciesNames.map(species => (
                                 <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
                             ))}
                         </select>
-                         <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); }}
-                            className="p-2 text-sm border border-gray-300 rounded-lg"
-                        >
-                            {GENDER_OPTIONS.map(gender => (
-                               <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender}</option>
-                            ))}
-                        </select>
-                         <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); }}
+                        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPendingFilters(true); }}
                             className="p-2 text-sm border border-gray-300 rounded-lg"
                         >
                             <option value="">All Statuses</option>
@@ -4171,28 +4098,39 @@ useEffect(() => {
                                 <option key={status} value={status}>{status}</option>
                             ))}
                         </select>
-                        {breedingLineDefs && breedingLineDefs.length > 0 && (
-                            <select
-                                value={blFilter.length > 0 ? blFilter[0] : ''}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    setBlFilter(value ? [value] : []);
-                                }}
-                                className="p-2 text-sm border border-gray-300 rounded-lg"
-                            >
-                                <option value="">All Lines</option>
-                                {breedingLineDefs.map(line => (
-                                    <option key={line.id} value={line.id}>{line.name}</option>
-                                ))}
-                            </select>
-                        )}
+                        <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); setPendingFilters(true); }}
+                            className="p-2 text-sm border border-gray-300 rounded-lg"
+                        >
+                            {GENDER_OPTIONS.map(gender => (
+                                <option key={gender} value={gender === 'All' ? '' : gender}>{gender}</option>
+                            ))}
+                        </select>
                     </div>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
+                        <button onClick={applyFilters} className={`relative px-3 py-2 text-sm font-semibold rounded-lg transition ${panelDirty ? 'bg-accent text-white animate-pulse' : 'bg-primary text-black'}`}>
+                            Apply Filters
+                        </button>
                         {hasActiveFilters && (
                             <button onClick={handleClearFilters} className="px-3 py-2 text-sm font-semibold bg-gray-200 text-gray-700 rounded-lg transition hover:bg-gray-300">
                                 Clear
                             </button>
                         )}
+                        <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                            <button
+                                onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'cards'); } catch {} }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                title="Card view"
+                            >
+                                <LayoutGrid size={14} />
+                            </button>
+                            <button
+                                onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'list'); } catch {} }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                title="List view"
+                            >
+                                <ClipboardList size={14} />
+                            </button>
+                        </div>
                         <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
                             A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
@@ -4207,22 +4145,6 @@ useEffect(() => {
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">                    
                     <table className="min-w-full text-xs divide-y divide-gray-200">
-                        <thead className="bg-gray-50 text-gray-500 uppercase text-[10px]">
-                            <tr>
-                                <th className="px-4 py-2 text-left font-semibold"></th>
-                                {listViewColumns.animal && <th className="px-3 py-2 text-left font-semibold">Animal</th>}
-                                {listViewColumns.species && <th className="px-3 py-2 text-left font-semibold">Species</th>}
-                                {listViewColumns.variety && <th className="px-3 py-2 text-left font-semibold">Variety</th>}
-                                {listViewColumns.enclosure && <th className="px-3 py-2 text-left font-semibold">Enclosure</th>}
-                                {listViewColumns.lifeStage && <th className="px-3 py-2 text-left font-semibold">Life Stage</th>}
-                                {listViewColumns.status && <th className="px-3 py-2 text-left font-semibold">Status</th>}
-                                {listViewColumns.health && <th className="px-3 py-2 text-left font-semibold">Health</th>}
-                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left font-semibold">Birthdate / Age</th>}
-                                {listViewColumns.breedingLines && <th className="px-3 py-2 text-left font-semibold">Lines</th>}
-                                {listViewColumns.tags && <th className="px-3 py-2 text-left font-semibold">Tags</th>}
-                                <th className="px-3 py-2 text-right font-semibold w-12"></th>
-                            </tr>
-                        </thead>
                         <tbody className="divide-y divide-gray-100">
                             {(() => {
                                 let displayedAnimals = speciesNames.flatMap(species => (groupedAnimals[species] || []));
