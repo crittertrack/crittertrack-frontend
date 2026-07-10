@@ -19,8 +19,8 @@ import { prefetchPedigreeTree } from '../AnimalForm';
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
 
-const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Unknown'];
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Unknown']; 
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
 
@@ -304,10 +304,13 @@ const AnimalList = ({
     };
 
     // Duplicates state
-    const [showForSaleScreen, setShowForSaleScreen] = useState(false);
-    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(() => {
-        try { return localStorage.getItem(`ct_my_animals_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
+     const [showForSaleScreen, setShowForSaleScreen] = useState(false); const [defaultMyAnimalsViewMode, setDefaultMyAnimalsViewMode] = useState(() => {
+        try { return localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
     });
+    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(defaultMyAnimalsViewMode);
+    useEffect(() => {
+        try { localStorage.setItem(`ct_default_my_animals_view_mode_${userKey}`, defaultMyAnimalsViewMode); } catch {}
+    }, [defaultMyAnimalsViewMode, userKey]);
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
     const [duplicatesLoading, setDuplicatesLoading] = useState(false);
@@ -378,10 +381,11 @@ const AnimalList = ({
         try {
             const vm = localStorage.getItem(`ct_my_animals_view_mode_${userKey}`);
             if (vm) setMyAnimalsViewMode(vm);
-            const cvm = localStorage.getItem(`ct_collections_view_mode_${userKey}`);
-            if (cvm) setCollectionsViewMode(cvm);
-        } catch {}
-        // Alert settings
+            const cvm = localStorage.getItem(`ct_collections_view_mode_${userKey}`); if (cvm) setCollectionsViewMode(cvm); const dvm = localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`); if (dvm) {
+                setMyAnimalsViewMode(dvm);
+                setDefaultMyAnimalsViewMode(dvm);
+            }
+        } catch {} // Alert settings
         try {
             const saved = localStorage.getItem(`ct_alert_settings_${userKey}`);
             if (saved) {
@@ -4080,22 +4084,26 @@ useEffect(() => {
                 <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
                     <div className="flex flex-wrap items-center gap-2 flex-grow">
                         <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
-                            <button
-                                onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'cards'); } catch {} }}
+                            <button onClick={() => setMyAnimalsViewMode('cards')}
                                 className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                                 title="Card view"
                             >
                                 <LayoutGrid size={14} />
                             </button>
-                            <button
-                                onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'list'); } catch {} }}
+                            <button onClick={() => setMyAnimalsViewMode('list')}
                                 className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                                 title="List view"
                             >
                                 <ClipboardList size={14} />
                             </button>
+                            <button onClick={(e) => { e.stopPropagation(); setDefaultMyAnimalsViewMode(myAnimalsViewMode); }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${defaultMyAnimalsViewMode === myAnimalsViewMode ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
+                                title="Pin as default view"
+                            >
+                                <Pin size={14} fill={defaultMyAnimalsViewMode === myAnimalsViewMode ? 'currentColor' : 'none'} />
+                            </button>
                         </div>
-                        <div className="relative flex-shrink-0">
+                        <div className="relative flex-grow">
                             <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
                                 type="text"
@@ -4103,7 +4111,7 @@ useEffect(() => {
                                 value={searchInput}
                                 onChange={handleSearchInputChange}
                                  onKeyPress={(e) => { if (e.key === 'Enter') { setAppliedNameFilter(searchInput.trim()); } }}
-                                className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 rounded-lg"
+                                className="w-full pl-8 p-2 text-sm border border-gray-300 rounded-lg"
                             />
                         </div>
                         <select
@@ -4125,6 +4133,13 @@ useEffect(() => {
                                 <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
                             ))}
                         </select>
+                         <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); }}
+                            className="p-2 text-sm border border-gray-300 rounded-lg"
+                        >
+                            {GENDER_OPTIONS.map(gender => (
+                               <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender}</option>
+                            ))}
+                        </select>
                          <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); }}
                             className="p-2 text-sm border border-gray-300 rounded-lg"
                         >
@@ -4133,13 +4148,21 @@ useEffect(() => {
                                 <option key={status} value={status}>{status}</option>
                             ))}
                         </select>
-                         <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); }}
-                            className="p-2 text-sm border border-gray-300 rounded-lg"
-                        >
-                            {GENDER_OPTIONS.map(gender => (
-                               <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender}</option>
-                            ))}
-                        </select>
+                        {breedingLineDefs && breedingLineDefs.length > 0 && (
+                            <select
+                                value={blFilter.length > 0 ? blFilter[0] : ''}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setBlFilter(value ? [value] : []);
+                                }}
+                                className="p-2 text-sm border border-gray-300 rounded-lg"
+                            >
+                                <option value="">All Lines</option>
+                                {breedingLineDefs.map(line => (
+                                    <option key={line.id} value={line.id}>{line.name}</option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
                         {hasActiveFilters && (
