@@ -355,6 +355,7 @@ const AnimalList = ({
     const [openActionMenu, setOpenActionMenu] = useState(null); // For list view action dropdown
     const actionMenuRef = useRef(null);
     const alertsDropdownRef = useRef(null);
+    const columnsDropdownRef = useRef(null);
 
     const [showColumnsDropdown, setShowColumnsDropdown] = useState(false);
     const [listViewColumns, setListViewColumns] = useState(() => {
@@ -368,6 +369,7 @@ const AnimalList = ({
 
     // ---- Collections state (user-scoped localStorage + backend sync) ----
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
+    const [listSelectedIds, setListSelectedIds] = useState(new Set());
     const [animalCollections, setAnimalCollections] = useState({}); // populated from user-scoped key below
     const [showCollectionManager, setShowCollectionManager] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
@@ -389,10 +391,13 @@ const AnimalList = ({
             if (alertsDropdownRef.current && !alertsDropdownRef.current.contains(event.target)) {
                 setShowAlertsDropdown(false);
             }
+            if (columnsDropdownRef.current && !columnsDropdownRef.current.contains(event.target)) {
+                setShowColumnsDropdown(false);
+            }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [actionMenuRef, alertsDropdownRef]);
+    }, [actionMenuRef, alertsDropdownRef, columnsDropdownRef]);
 
     // ---- Re-load user-scoped prefs & collections whenever the logged-in user changes ----
     // This prevents one user's data from leaking into another account after switching.
@@ -410,6 +415,11 @@ const AnimalList = ({
             const cvm = localStorage.getItem(`ct_collections_view_mode_${userKey}`); if (cvm) setCollectionsViewMode(cvm); const dvm = localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`); if (dvm) {
                 setMyAnimalsViewMode(dvm);
                 setDefaultMyAnimalsViewMode(dvm);
+            }
+            const lvc = localStorage.getItem(`ct_list_columns_${userKey}`);
+            if (lvc) {
+                try { setListViewColumns({ ...DEFAULT_LIST_COLUMNS, ...JSON.parse(lvc) }); }
+                catch {}
             }
         } catch {} // Alert settings
         try {
@@ -1011,6 +1021,43 @@ useEffect(() => {
         }, {});
     }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig]);
 
+    const displayedAnimalsForList = useMemo(() => {
+        let source = animals;
+
+        if (categoryFilter) {
+            source = source.filter(a => getSpeciesCategory(a.species) === categoryFilter);
+        }
+        if (statusFilter) source = source.filter(a => a.status === statusFilter);
+        if (appliedNameFilter) {
+            const term = appliedNameFilter.toLowerCase();
+            source = source.filter(a => {
+                const name = (a.name || '').toString().toLowerCase();
+                const registry = (a.breederAssignedId || a.registryCode || '').toString().toLowerCase();
+                const idPublic = (a.id_public || '').toString().toLowerCase();
+                const tags = (a.tags || []).map(t => t.toLowerCase());
+                const tagsMatch = tags.some(tag => tag.includes(term));
+                return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch;
+            });
+        }
+        if (speciesFilter) source = source.filter(a => a.species === speciesFilter);
+        if (genderFilter) source = source.filter(a => a.gender === genderFilter);
+        if (statusFilterPregnant) source = source.filter(a => a.isPregnant === true);
+        if (statusFilterNursing) source = source.filter(a => a.isNursing === true);
+        if (statusFilterMating) source = source.filter(a => a.isInMating === true);
+        if (publicFilter === 'public') source = source.filter(a => a.showOnPublicProfile === true);
+        else if (publicFilter === 'private') source = source.filter(a => !a.showOnPublicProfile);
+        if (ownedFilterMode === 'owned') source = source.filter(a => a.isOwned !== false);
+        if (blFilter.length > 0) source = source.filter(a => { const assigned = animalBreedingLines[a.id_public] || []; return blFilter.some(lineId => assigned.map(String).includes(String(lineId))); });
+        return source.reduce((groups, animal) => {
+            const species = animal.species || 'Unspecified Species';
+            if (!groups[species]) {
+                groups[species] = [];
+            }
+            groups[species].push(animal);
+            return groups;
+        }, {});
+    }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig]);
+
     const displayedAnimalCount = useMemo(() => {
         return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
     }, [groupedAnimals]);
@@ -1432,6 +1479,26 @@ useEffect(() => {
         // Show notification if there were failures
         if (failedUpdates > 0) {
             showModalMessage('Partial Success', `Updated locally, but ${failedUpdates} animal(s) failed to sync with the server. They will be updated on next refresh.`);
+        }
+    };
+
+    const handleListToggle = (animalId) => {
+        setListSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(animalId)) {
+                next.delete(animalId);
+            } else {
+                next.add(animalId);
+            }
+            return next;
+        });
+    };
+
+    const handleListSelectAll = (e) => {
+        if (e.target.checked) {
+            setListSelectedIds(new Set(displayedAnimalsForList.map(a => a.id_public)));
+        } else {
+            setListSelectedIds(new Set());
         }
     };
 
@@ -4225,42 +4292,51 @@ useEffect(() => {
             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
-                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">                    
+                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm relative">
+                    {showColumnsDropdown && (
+                        <div ref={columnsDropdownRef} className="absolute top-10 right-2 bg-white border rounded-lg shadow-lg p-3 z-20 w-48">
+                            <h4 className="text-xs font-bold mb-2">Displayed Columns</h4>
+                            {Object.entries({ animal: 'Animal', species: 'Species', variety: 'Variety', enclosure: 'Enclosure', lifeStage: 'Life Stage', status: 'Status', health: 'Health', birthdateAge: 'Birthdate / Age', breedingLines: 'Lines', tags: 'Tags' }).map(([key, label]) => (
+                                <label key={key} className="flex items-center gap-2 text-sm text-gray-700 p-1 hover:bg-gray-100 rounded">
+                                    <input type="checkbox" checked={!!listViewColumns[key]} onChange={() => setListViewColumns(prev => ({...prev, [key]: !prev[key]}))} className="rounded" />
+                                    {label}
+                                </label>
+                            ))}
+                        </div>
+                    )}
                     <table className="min-w-full text-xs divide-y divide-gray-200">
+                        <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] sticky top-0 z-10">
+                            <tr>
+                                <th className="px-4 py-2 text-center">
+                                    <input
+                                        type="checkbox"
+                                        className="w-4 h-4 cursor-pointer rounded"
+                                        onChange={handleListSelectAll}
+                                        checked={displayedAnimalsForList.length > 0 && listSelectedIds.size === displayedAnimalsForList.length}
+                                        ref={el => el && (el.indeterminate = listSelectedIds.size > 0 && listSelectedIds.size < displayedAnimalsForList.length)}
+                                    />
+                                </th>
+                                {listViewColumns.animal && <th className="px-3 py-2 text-left font-semibold">Animal</th>}
+                                {listViewColumns.species && <th className="px-3 py-2 text-left font-semibold">Species</th>}
+                                {listViewColumns.variety && <th className="px-3 py-2 text-left font-semibold">Variety</th>}
+                                {listViewColumns.enclosure && <th className="px-3 py-2 text-left font-semibold">Enclosure</th>}
+                                {listViewColumns.lifeStage && <th className="px-3 py-2 text-left font-semibold">Life Stage</th>}
+                                {listViewColumns.status && <th className="px-3 py-2 text-left font-semibold">Status</th>}
+                                {listViewColumns.health && <th className="px-3 py-2 text-left font-semibold">Health</th>}
+                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left font-semibold">Birthdate / Age</th>}
+                                {listViewColumns.breedingLines && <th className="px-3 py-2 text-left font-semibold">Lines</th>}
+                                {listViewColumns.tags && <th className="px-3 py-2 text-left font-semibold">Tags</th>}
+                                <th className="px-3 py-2 text-right w-12">
+                                    <button onClick={() => setShowColumnsDropdown(v => !v)} className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200">
+                                        <SlidersHorizontal size={14} />
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
                         <tbody className="divide-y divide-gray-100">
                             {(() => {
-                                let displayedAnimals = speciesNames.flatMap(species => (groupedAnimals[species] || []));
-                                
-                                // Sorting logic
-                                if (sortConfig.key) {
-                                    displayedAnimals.sort((a, b) => {
-                                        const dir = sortConfig.direction === 'ascending' ? 1 : -1;
-                                        let valA, valB;
-
-                                        if (sortConfig.key === 'name') {
-                                            valA = (a.name || '').toLowerCase();
-                                            valB = (b.name || '').toLowerCase();
-                                        } else if (sortConfig.key === 'birthdate') {
-                                            const dateA = a.birthDate ? new Date(a.birthDate) : null;
-                                            const dateB = b.birthDate ? new Date(b.birthDate) : null;
-                                            if (dateA === dateB) return 0;
-                                            if (dateA === null) return 1; // nulls/invalid dates last
-                                            if (dateB === null) return -1;
-                                            valA = dateA.getTime();
-                                            valB = dateB.getTime();
-                                        }
-
-                                        if (valA < valB) return -1 * dir;
-                                        if (valA > valB) return 1 * dir;
-                                        
-                                        return 0;
-                                    });
-                                }
-
-                                const isBulkMode = Object.values(bulkDeleteMode).some(v => v) || Object.values(bulkArchiveMode).some(v => v);
-                                const selectedIds = Object.values(selectedAnimals).flat();
                             const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
-                                return displayedAnimals.map(animal => {
+                                return displayedAnimalsForList.map(animal => {
                                     const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
                                     const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
                                     const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
@@ -4272,6 +4348,8 @@ useEffect(() => {
                                         <td className="px-4 py-1.5 text-center">
                                             <input
                                                 type="checkbox"
+                                                checked={listSelectedIds.has(animal.id_public)}
+                                                onChange={() => handleListToggle(animal.id_public)}
                                                 className="w-4 h-4 cursor-pointer rounded"
                                                 onClick={e => e.stopPropagation()}
                                             />
