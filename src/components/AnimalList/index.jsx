@@ -4211,11 +4211,6 @@ useEffect(() => {
                         )}
                     </div>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
-                        {hasActiveFilters && (
-                            <button onClick={handleClearFilters} className="px-3 py-2 text-sm font-semibold bg-gray-200 text-gray-700 rounded-lg transition hover:bg-gray-300">
-                                Clear
-                            </button>
-                        )}
                         <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
                             <button
                                 onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'cards'); } catch {} }}
@@ -4223,13 +4218,6 @@ useEffect(() => {
                                 title="Card view"
                             >
                                 <LayoutGrid size={14} />
-                            </button>
-                            <button
-                                onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'list'); } catch {} }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                                title="List view"
-                            >
-                                <ClipboardList size={14} />
                             </button>
                         </div>
                         <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
