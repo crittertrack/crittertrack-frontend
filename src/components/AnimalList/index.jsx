@@ -712,8 +712,7 @@ useEffect(() => {
             showModalMessageRef.current('Error', 'Failed to fetch animal list.');
             setLoading(false);
         } finally {
-            setPendingFilters(false);
-            // setPendingFilters(false); // This was causing a ReferenceError
+            // setPendingFilters(false); // This state was removed, causing a ReferenceError.
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [authToken]);
@@ -1884,11 +1883,11 @@ useEffect(() => {
                 // Remove from UI
                 setDuplicateGroups(prev => prev.map(group => ({
                     ...group,
-                    duplicates: group.duplicates.filter(d => 
+                    duplicates: (group.duplicates || []).filter(d => 
                         !((group.primary.id_public === id1 && d.animal.id_public === id2) ||
                           (group.primary.id_public === id2 && d.animal.id_public === id1))
                     )
-                })).filter(group => group.duplicates.length > 0));
+                })).filter(group => (group.duplicates || []).length > 0));
             } catch (err) {
                 showModalMessage('Error', err.response?.data?.message || 'Failed to dismiss duplicate');
             }
@@ -1902,8 +1901,8 @@ useEffect(() => {
                 return;
             }
             
-            const keepAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === keepId);
-            const deleteAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === deleteId);
+            const keepAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...(g.duplicates || []).map(d => d.animal)])].find(a => a.id_public === keepId);
+            const deleteAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...(g.duplicates || []).map(d => d.animal)])].find(a => a.id_public === deleteId);
             
             if (!keepAnimal || !deleteAnimal) {
                 showModalMessage('Error', 'Could not find one or both animals. Please refresh and try again.');
@@ -1923,8 +1922,8 @@ useEffect(() => {
                 // Remove merged pair from UI
                 setDuplicateGroups(prev => prev.map(group => ({
                     ...group,
-                    duplicates: group.duplicates.filter(d => d.animal.id_public !== deleteId)
-                })).filter(group => group.duplicates.length > 0));
+                    duplicates: (group.duplicates || []).filter(d => d.animal.id_public !== deleteId)
+                })).filter(group => (group.duplicates || []).length > 0));
                 // Refresh animal list
                 fetchAnimals();
             } catch (err) {
@@ -1933,7 +1932,8 @@ useEffect(() => {
         };
 
         const formatReasons = (reasons) => {
-            return reasons.map(r => {
+            if (!reasons) return 'Unknown reason';
+            return (reasons || []).map(r => {
                 if (r === 'exact_name') return 'Exact name match';
                 if (r.startsWith('similar_name_')) return `Similar name (${r.split('_')[2]} match)`;
                 if (r === 'same_birthdate_species') return 'Same birthdate & species';
@@ -1982,7 +1982,7 @@ useEffect(() => {
                     <div className="space-y-4">
                         {duplicateGroups.map((group, gIdx) => (
                             <div key={gIdx} className="border border-amber-200 rounded-lg bg-amber-50/30 p-4 space-y-3">
-                                {group.duplicates.map((dup, dIdx) => (
+                                {(group.duplicates || []).map((dup, dIdx) => (
                                     <div key={dIdx} className="bg-white rounded-lg border border-gray-200 shadow-sm">
                                         <div className="p-3 bg-amber-50 border-b border-amber-100 flex items-center justify-between">
                                             <div className="text-xs text-amber-700 font-medium">
