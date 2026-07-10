@@ -4212,13 +4212,6 @@ useEffect(() => {
                     </div>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
                         <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
-                            <button
-                                onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'cards'); } catch {} }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                                title="Card view"
-                            >
-                                <LayoutGrid size={14} />
-                            </button>
                         </div>
                         <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
                             A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
