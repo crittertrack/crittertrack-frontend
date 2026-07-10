@@ -338,6 +338,14 @@ const AnimalList = ({
     useEffect(() => {
         try { localStorage.setItem(`ct_default_my_animals_view_mode_${userKey}`, defaultMyAnimalsViewMode); } catch {}
     }, [defaultMyAnimalsViewMode, userKey]);
+    const [defaultCollectionsViewMode, setDefaultCollectionsViewMode] = useState(() => {
+        try { return localStorage.getItem(`ct_default_collections_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
+    });
+    const [collectionsViewMode, setCollectionsViewMode] = useState(defaultCollectionsViewMode);
+    useEffect(() => {
+        try { localStorage.setItem(`ct_default_collections_view_mode_${userKey}`, defaultCollectionsViewMode); } catch {}
+    }, [defaultCollectionsViewMode, userKey]);
+
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
     const [duplicatesLoading, setDuplicatesLoading] = useState(false);
@@ -379,10 +387,6 @@ const AnimalList = ({
     const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
 
     // Close action menu when clicking outside
-    const [collectionsViewMode, setCollectionsViewMode] = useState(() => {
-        try { return localStorage.getItem(`ct_collections_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
-    });
-
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
@@ -412,7 +416,12 @@ const AnimalList = ({
         } catch { setUserCollections([]); setAnimalCollections({}); }
         // View mode & column config
         try {
-            const cvm = localStorage.getItem(`ct_collections_view_mode_${userKey}`); if (cvm) setCollectionsViewMode(cvm); const dvm = localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`); if (dvm) {
+            const dcvm = localStorage.getItem(`ct_default_collections_view_mode_${userKey}`);
+            if (dcvm) {
+                setDefaultCollectionsViewMode(dcvm);
+                setCollectionsViewMode(dcvm);
+            }
+            const dvm = localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`); if (dvm) {
                 setMyAnimalsViewMode(dvm);
                 setDefaultMyAnimalsViewMode(dvm);
             }
@@ -4149,10 +4158,7 @@ useEffect(() => {
                     <div className="flex flex-wrap items-center gap-2 flex-grow">
                         <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
                             <button onClick={() => {
-                                if (isCollectionsView) {
-                                    setCollectionsViewMode('cards');
-                                    try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'cards'); } catch {}
-                                } else {
+                                if (isCollectionsView) { setCollectionsViewMode('cards'); } else {
                                     setMyAnimalsViewMode('cards');
                                 }
                             }}
@@ -4162,10 +4168,7 @@ useEffect(() => {
                                 <LayoutGrid size={14} />
                             </button>
                             <button onClick={() => {
-                                if (isCollectionsView) {
-                                    setCollectionsViewMode('list');
-                                    try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'list'); } catch {}
-                                } else {
+                                if (isCollectionsView) { setCollectionsViewMode('list'); } else {
                                     setMyAnimalsViewMode('list');
                                 }
                             }}
@@ -4174,11 +4177,24 @@ useEffect(() => {
                             >
                                 <ClipboardList size={14} />
                             </button>
-                            <button onClick={(e) => { e.stopPropagation(); if (!isCollectionsView) setDefaultMyAnimalsViewMode(myAnimalsViewMode); }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${!isCollectionsView && defaultMyAnimalsViewMode === myAnimalsViewMode ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
+                            <button onClick={(e) => {
+                                e.stopPropagation();
+                                if (isCollectionsView) {
+                                    setDefaultCollectionsViewMode(collectionsViewMode);
+                                } else {
+                                    setDefaultMyAnimalsViewMode(myAnimalsViewMode);
+                                }
+                            }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${
+                                    (isCollectionsView && defaultCollectionsViewMode === collectionsViewMode) ||
+                                    (!isCollectionsView && defaultMyAnimalsViewMode === myAnimalsViewMode)
+                                    ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
                                 title="Pin as default view"
                             >
-                                <Pin size={14} fill={!isCollectionsView && defaultMyAnimalsViewMode === myAnimalsViewMode ? 'currentColor' : 'none'} />
+                                <Pin size={14} fill={
+                                    (isCollectionsView && defaultCollectionsViewMode === collectionsViewMode) ||
+                                    (!isCollectionsView && defaultMyAnimalsViewMode === myAnimalsViewMode)
+                                    ? 'currentColor' : 'none'} />
                             </button>
                         </div>
                         <div className="relative flex-shrink-0">
