@@ -4161,6 +4161,22 @@ useEffect(() => {
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">                    
                     <table className="min-w-full text-xs divide-y divide-gray-200">
+                        <thead className="bg-gray-50 text-gray-500 uppercase text-[10px]">
+                            <tr>
+                                <th className="px-4 py-2 text-left font-semibold"></th>
+                                {listViewColumns.animal && <th className="px-3 py-2 text-left font-semibold">Animal</th>}
+                                {listViewColumns.species && <th className="px-3 py-2 text-left font-semibold">Species</th>}
+                                {listViewColumns.variety && <th className="px-3 py-2 text-left font-semibold">Variety</th>}
+                                {listViewColumns.enclosure && <th className="px-3 py-2 text-left font-semibold">Enclosure</th>}
+                                {listViewColumns.lifeStage && <th className="px-3 py-2 text-left font-semibold">Life Stage</th>}
+                                {listViewColumns.status && <th className="px-3 py-2 text-left font-semibold">Status</th>}
+                                {listViewColumns.health && <th className="px-3 py-2 text-left font-semibold">Health</th>}
+                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left font-semibold">Birthdate / Age</th>}
+                                {listViewColumns.breedingLines && <th className="px-3 py-2 text-left font-semibold">Lines</th>}
+                                {listViewColumns.tags && <th className="px-3 py-2 text-left font-semibold">Tags</th>}
+                                <th className="px-3 py-2 text-right font-semibold w-12"></th>
+                            </tr>
+                        </thead>
                         <tbody className="divide-y divide-gray-100">
                             {(() => {
                                 let displayedAnimals = speciesNames.flatMap(species => (groupedAnimals[species] || []));
