@@ -1900,8 +1900,8 @@ useEffect(() => {
                 return;
             }
             
-            const keepAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...(g.duplicates || []).map(d => d.animal)])].find(a => a.id_public === keepId);
-            const deleteAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...(g.duplicates || []).map(d => d.animal)])].find(a => a.id_public === deleteId);
+            const keepAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...((g.duplicates || []).map(d => d.animal))])].find(a => a.id_public === keepId);
+            const deleteAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...((g.duplicates || []).map(d => d.animal))])].find(a => a.id_public === deleteId);
             
             if (!keepAnimal || !deleteAnimal) {
                 showModalMessage('Error', 'Could not find one or both animals. Please refresh and try again.');
