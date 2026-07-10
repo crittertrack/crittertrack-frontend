@@ -19,7 +19,7 @@ import { prefetchPedigreeTree } from '../AnimalForm';
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
 
-const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Unknown'];
+const GENDER_OPTIONS = ['All', 'Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
@@ -183,9 +183,6 @@ const AnimalList = ({
     // Don't persist this filter to prevent newly created animals from being hidden
      const [speciesFilter, setSpeciesFilter] = useState(() => {
         try { return localStorage.getItem('animalList_speciesFilter') || ''; } catch { return ''; }
-    });
-    const [categoryFilter, setCategoryFilter] = useState(() => {
-        try { return localStorage.getItem('animalList_categoryFilter') || ''; } catch { return ''; }
     });
     // Master species list ? all species the user has ANY animal for, never filtered
     const [allUserSpecies, setAllUserSpecies] = useState([]);
@@ -553,11 +550,6 @@ useEffect(() => {
         catch (e) { console.warn('Failed to save speciesFilter', e); }
     }, [speciesFilter]);
 
-    useEffect(() => {
-        try { localStorage.setItem('animalList_categoryFilter', categoryFilter); }
-        catch (e) { console.warn('Failed to save categoryFilter', e); }
-    }, [categoryFilter]);
-
 
     useEffect(() => {
         try {
@@ -858,10 +850,6 @@ useEffect(() => {
     const groupedAnimals = useMemo(() => {
         let source = animals;
 
-        if (categoryFilter) {
-            source = source.filter(a => getSpeciesCategory(a.species) === categoryFilter);
-        }
-
         // Status filter
         if (statusFilter) {
             source = source.filter(a => a.status === statusFilter);
@@ -913,7 +901,7 @@ useEffect(() => {
         if (blFilter.length > 0) {
             source = source.filter(a => {
                 const assigned = animalBreedingLines[a.id_public] || [];
-                return blFilter.some(lineId => assigned.includes(lineId));
+                return blFilter.some(lineId => assigned.includes(String(lineId)));
             });
         }
 
@@ -949,8 +937,7 @@ useEffect(() => {
             }
             groups[species].push(animal);
             return groups;
-        }, {});
-    }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig]);
+        }, {});}, [animals, statusFilter, genderFilter, speciesFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig]);
 
     const displayedAnimalCount = useMemo(() => {
         return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
@@ -984,18 +971,6 @@ useEffect(() => {
             return a.localeCompare(b);
         });
     }, [allUserSpecies, userSpeciesOrder]);
-
-    const allSpeciesCategories = useMemo(() => {
-        const categories = new Set(allUserSpecies.map(getSpeciesCategory));
-        return ['All Categories', ...Array.from(categories).sort()];
-    }, [allUserSpecies]);
-
-    const filteredSpeciesNames = useMemo(() => {
-        if (!categoryFilter) {
-            return speciesNames;
-        }
-        return speciesNames.filter(species => getSpeciesCategory(species) === categoryFilter);
-    }, [speciesNames, categoryFilter]);
 
     // -- Dashboard & Management Data Calculations --
     const today = new Date();
@@ -1106,11 +1081,11 @@ useEffect(() => {
         appliedNameFilter !== '' ||
         genderFilter !== '' ||
         speciesFilter !== '' ||
-        categoryFilter !== '' ||
         statusFilterPregnant ||
         statusFilterNursing ||
         statusFilterMating ||
-        publicFilter !== ''
+        publicFilter !== '' ||
+        blFilter.length > 0
     );
 
     const handleClearFilters = () => {
@@ -1119,7 +1094,6 @@ useEffect(() => {
         setAppliedNameFilter('');
         setGenderFilter('');
         setSpeciesFilter('');
-        setCategoryFilter('');
         setStatusFilterPregnant(false);
         setStatusFilterNursing(false);
         setStatusFilterMating(false);
@@ -4076,13 +4050,13 @@ useEffect(() => {
                                 placeholder="Search..."
                                 value={searchInput}
                                 onChange={handleSearchInputChange}
-                                onKeyPress={(e) => { if (e.key === 'Enter') { applyFilters(); } }}
+                                onKeyPress={(e) => { if (e.key === 'Enter') { setAppliedNameFilter(searchInput.trim()); } }}
                                 className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 rounded-lg"
                             />
                         </div>
                         <select 
                             value={speciesFilter}
-                            onChange={(e) => { setSpeciesFilter(e.target.value); setPendingFilters(true); }}
+                            onChange={(e) => { setSpeciesFilter(e.target.value); }}
                             className="p-2 text-sm border border-gray-300 rounded-lg"
                         >
                             <option value="">All Species</option>
@@ -4090,7 +4064,7 @@ useEffect(() => {
                                 <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
                             ))}
                         </select>
-                        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPendingFilters(true); }}
+                        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); }}
                             className="p-2 text-sm border border-gray-300 rounded-lg"
                         >
                             <option value="">All Statuses</option>
@@ -4098,18 +4072,15 @@ useEffect(() => {
                                 <option key={status} value={status}>{status}</option>
                             ))}
                         </select>
-                        <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); setPendingFilters(true); }}
+                        <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); }}
                             className="p-2 text-sm border border-gray-300 rounded-lg"
                         >
                             {GENDER_OPTIONS.map(gender => (
-                                <option key={gender} value={gender === 'All' ? '' : gender}>{gender}</option>
+                                <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender}</option>
                             ))}
                         </select>
                     </div>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
-                        <button onClick={applyFilters} className={`relative px-3 py-2 text-sm font-semibold rounded-lg transition ${panelDirty ? 'bg-accent text-white animate-pulse' : 'bg-primary text-black'}`}>
-                            Apply Filters
-                        </button>
                         {hasActiveFilters && (
                             <button onClick={handleClearFilters} className="px-3 py-2 text-sm font-semibold bg-gray-200 text-gray-700 rounded-lg transition hover:bg-gray-300">
                                 Clear
