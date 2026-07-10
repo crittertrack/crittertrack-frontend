@@ -3843,6 +3843,9 @@ useEffect(() => {
                                 All
                             </button>
                         </div>
+                        <div className="text-center text-[10px] text-gray-400 dark:text-dark-text-muted mt-1">
+                            Applies to all tabs
+                        </div>
                     </div>
 
                     {/* Column 2: Owned */}
