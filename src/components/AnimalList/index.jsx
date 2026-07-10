@@ -1547,8 +1547,7 @@ const AnimalList = ({
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
-                            isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 dark:border-dark-border bg-gray-50 dark:bg-dark-surface-hover' : 'border-gray-300 dark:border-dark-border'
+                        className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-border'
                         }`}
                     >
                     {isSelectable && (
@@ -1561,13 +1560,6 @@ const AnimalList = ({
                             />
                         </div>
                     )}
-                    {/* Transfer icon top-left */}
-                    {(animal.soldStatus || animal.isViewOnly) && !isSelectable && (
-                        <div className="absolute top-1 sm:top-2 left-1 sm:left-2 text-black" title="Transferred Animal">
-                            <ArrowLeftRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
-                        </div>
-                    )}
-
                     {/* Birthdate center-top - only show if not in selection mode */}
                     {birth && !isSelectable && (
                         <div className="absolute top-1 sm:top-2 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-surface/80 px-1 sm:px-2 py-0.5 rounded">
@@ -1680,12 +1672,8 @@ const AnimalList = ({
                         </div>
                     )}
                     {/* Status bar at bottom */}
-                    <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto ${
-                        animal.isViewOnly ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-gray-100 dark:bg-dark-surface-hover'
-                    }`}>
-                        <div className={`text-[10px] sm:text-xs font-medium ${
-                            animal.isViewOnly ? 'text-orange-800 dark:text-orange-400' : 'text-gray-700 dark:text-dark-text-secondary'
-                        }`}>{animal.isViewOnly ? 'Sold' : (animal.status || 'Unknown')}</div>
+                    <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto bg-gray-100 dark:bg-dark-surface-hover`}>
+                        <div className={`text-[10px] sm:text-xs font-medium text-gray-700 dark:text-dark-text-secondary`}>{(animal.status || 'Unknown')}</div>
                     </div>
                 </div>
             </div>
