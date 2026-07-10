@@ -2399,8 +2399,25 @@ useEffect(() => {
         );
     };
 
-    const renderEnclosuresTab = () => {
-        // --- Data Calculation ---
+    const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => (
+        <div
+            className={`relative flex items-center p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
+            onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
+        >
+            {icon}
+            <div className="ml-4">
+                <div className="text-2xl font-bold">{value}</div>
+                <div className="text-sm font-medium opacity-90">{label}</div>
+            </div>
+            {hasDropdown && (
+                <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-2 right-2 p-1 text-inherit opacity-60 hover:opacity-100">
+                    <ChevronDown size={20} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+            )}
+        </div>
+    );
+
+    const renderEnclosureDashboard = () => {
         const occupiedEnclosuresList = enclosures.filter(enc => (enclosureAnimalMap[enc._id] || []).length > 0);
         const animalsHousedCount = Object.values(enclosureAnimalMap).flat().filter(a => a.enclosureId).length;
 
@@ -2409,9 +2426,20 @@ useEffect(() => {
             return count + (hasDueTask ? 1 : 0);
         }, 0);
 
-        // Placeholder for "Needs Attention"
-        const needsAttentionCount = 0; // Placeholder for future implementation (e.g., temp/humidity alerts)
+        const needsAttentionCount = 0; // Placeholder for future implementation
 
+        return (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <StatCard icon={<Home size={32} className="text-blue-800" />} label="Total Enclosures" value={enclosures.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" />
+                <StatCard icon={<Package size={32} className="text-green-800" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
+                <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
+                <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Needs Attention" value={needsAttentionCount} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" />
+                <StatCard icon={<Wrench size={32} className="text-red-800" />} label="Maintenance Due" value={maintenanceDueCount} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" />
+            </div>
+        );
+    };
+
+    const renderEnclosuresTab = () => {
         // --- Filtering ---
         let filteredEnclosures = [...enclosures];
         if (enclosureSearch) {
@@ -2473,26 +2501,10 @@ useEffect(() => {
             );
         };
 
-        const StatCard = ({ icon, label, value, colorClass }) => (
-            <div className={`flex items-center p-4 rounded-xl shadow-sm ${colorClass}`}>
-                {icon}
-                <div className="ml-4">
-                    <div className="text-2xl font-bold">{value}</div>
-                    <div className="text-sm font-medium opacity-90">{label}</div>
-                </div>
-            </div>
-        );
-
         return (
             <div className="space-y-4 mt-4">
                 {/* Statistic Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <StatCard icon={<Home size={32} className="text-blue-800" />} label="Total Enclosures" value={enclosures.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" />
-                    <StatCard icon={<Package size={32} className="text-green-800" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
-                    <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
-                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Needs Attention" value={needsAttentionCount} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" />
-                    <StatCard icon={<Wrench size={32} className="text-red-800" />} label="Maintenance Due" value={maintenanceDueCount} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" />
-                </div>
+                {renderEnclosureDashboard()}
 
                 {/* Search/Filter Bar */}
                 <div className="p-2 bg-gray-50 dark:bg-dark-surface rounded-lg flex flex-wrap items-center gap-2">
@@ -3914,30 +3926,12 @@ useEffect(() => {
             'Other': <Sparkles size={16} className="mr-1.5 text-gray-500" />
         };
 
-        const DashboardCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => (
-            <div
-                className={`relative flex items-center p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
-                onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
-            >
-                {icon}
-                <div className="ml-4">
-                    <div className="text-2xl font-bold">{value}</div>
-                    <div className="text-sm font-medium opacity-90">{label}</div>
-                </div>
-                {hasDropdown && (
-                    <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-2 right-2 p-1 text-inherit opacity-60 hover:opacity-100">
-                        <ChevronDown size={20} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                )}
-            </div>
-        );
-
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {/* Column 1: Total Animals */}
                     <div className="flex flex-col gap-2">
-                        <DashboardCard
+                        <StatCard
                             icon={<Cat size={32} className="text-blue-800" />}
                             label="Total Animals"
                             value={totalDashboardAnimalsCount}
@@ -3989,7 +3983,7 @@ useEffect(() => {
 
                     {/* Column 2: Owned */}
                     <div className="flex flex-col gap-2">
-                        <DashboardCard
+                        <StatCard
                             icon={<Heart size={32} className="text-red-800" />}
                             label="Owned"
                             value={ownedDashboardCount}
@@ -4013,7 +4007,7 @@ useEffect(() => {
 
                     {/* Column 3: Public */}
                     <div className="flex flex-col gap-2">
-                        <DashboardCard
+                        <StatCard
                             icon={<Eye size={32} className="text-green-800" />}
                             label="Public"
                             value={publicDashboardCount}
@@ -4037,7 +4031,7 @@ useEffect(() => {
 
                     {/* Column 4: Sold/Archived */}
                     <div className="flex flex-col gap-2">
-                        <DashboardCard
+                        <StatCard
                             icon={<Archive size={32} className="text-purple-800" />}
                             label="Sold / Archived"
                             value={soldOrArchivedCount}
@@ -4057,7 +4051,7 @@ useEffect(() => {
 
                     {/* Column 5: Needs Attention */}
                     <div className="flex flex-col gap-2">
-                        <DashboardCard
+                        <StatCard
                             icon={<AlertCircle size={32} className="text-orange-800" />}
                             label="Needs Attention"
                             value={feedDueDashboard.length + healthAttentionDashboardCount}
@@ -4246,7 +4240,7 @@ useEffect(() => {
                     </div>
                 </div>
 
-                {renderDashboard()}
+                {!['enclosures', 'reproduction', 'health', 'feeding'].includes(animalView) && renderDashboard()}
 
                 {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
