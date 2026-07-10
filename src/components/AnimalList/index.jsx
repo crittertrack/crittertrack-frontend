@@ -19,7 +19,7 @@ import { prefetchPedigreeTree } from '../AnimalForm';
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
 
-const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
+const GENDER_OPTIONS = ['All', 'Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
@@ -188,16 +188,16 @@ const AnimalList = ({
             return localStorage.getItem('animalList_appliedNameFilter') || '';
         } catch { return ''; }
     });
-    const [selectedGenders, setSelectedGenders] = useState(() => {
+    const [genderFilter, setGenderFilter] = useState(() => {
         try {
-            const saved = localStorage.getItem('animalList_selectedGenders_v2');
-            // Default to all genders if not previously saved
-            return saved ? JSON.parse(saved) : ['Male', 'Female', 'Intersex', 'Unknown'];
-        } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; }
+            return localStorage.getItem('animalList_genderFilter') || '';
+        } catch { return ''; }
     });
     // Always start with all species selected (empty array = show all)
     // Don't persist this filter to prevent newly created animals from being hidden
-    const [selectedSpecies, setSelectedSpecies] = useState([]);
+     const [speciesFilter, setSpeciesFilter] = useState(() => {
+        try { return localStorage.getItem('animalList_speciesFilter') || ''; } catch { return ''; }
+    });
     // Master species list ? all species the user has ANY animal for, never filtered
     const [allUserSpecies, setAllUserSpecies] = useState([]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
@@ -232,8 +232,8 @@ const AnimalList = ({
     // Applied filter snapshot ? groupedAnimals reads from this, only updated on "Apply Filters" click
     const [appliedFilters, setAppliedFilters] = useState(() => ({
         statusFilter: (function() { try { return localStorage.getItem('animalList_statusFilter') || ''; } catch { return ''; } })(),
-        selectedGenders: (function() { try { const s = localStorage.getItem('animalList_selectedGenders_v2'); return s ? JSON.parse(s) : ['Male', 'Female', 'Intersex', 'Unknown']; } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; } })(),
-        selectedSpecies: [], // will be filled on first species load
+        genderFilter: (function() { try { return localStorage.getItem('animalList_genderFilter') || ''; } catch { return ''; } })(),
+        speciesFilter: (function() { try { return localStorage.getItem('animalList_speciesFilter') || ''; } catch { return ''; } })(),
         statusFilterPregnant: (function() { try { return localStorage.getItem('animalList_statusFilterPregnant') === 'true'; } catch { return false; } })(),
         statusFilterNursing: (function() { try { return localStorage.getItem('animalList_statusFilterNursing') === 'true'; } catch { return false; } })(),
         publicFilter: (function() { try { return localStorage.getItem('animalList_publicFilter') || ''; } catch { return ''; } })(),
@@ -558,14 +558,19 @@ const AnimalList = ({
     }, [appliedNameFilter]);
     
     useEffect(() => {
-        try {
-            localStorage.setItem('animalList_selectedGenders_v2', JSON.stringify(selectedGenders));
-        } catch (e) { console.warn('Failed to save selectedGenders', e); }
-    }, [selectedGenders]);
-    
+          try { localStorage.setItem('animalList_genderFilter', genderFilter); }
+        catch (e) { console.warn('Failed to save genderFilter', e); }
+    }, [genderFilter]);
+
     // Removed selectedSpecies persistence - always default to showing all species
     // This prevents confusion when users create new animals and they don't appear due to cached filters
     
+useEffect(() => {
+        try { localStorage.setItem('animalList_speciesFilter', speciesFilter); }
+        catch (e) { console.warn('Failed to save speciesFilter', e); }
+    }, [speciesFilter]);
+
+
     useEffect(() => {
         try {
             localStorage.setItem('animalList_statusFilterPregnant', statusFilterPregnant.toString());
@@ -592,6 +597,11 @@ const AnimalList = ({
             localStorage.setItem('animalList_publicFilter', publicFilter);
         } catch (e) { console.warn('Failed to save publicFilter', e); }
     }, [publicFilter]);
+
+     useEffect(() => {
+        try { localStorage.setItem('animalList_speciesFilter', speciesFilter); }
+        catch (e) { console.warn('Failed to save speciesFilter', e); }
+    }, [speciesFilter]);
 
     useEffect(() => {
         try {
@@ -657,12 +667,12 @@ const AnimalList = ({
     // Apply filters: snapshot current UI filter state into appliedFilters
     const applyFilters = useCallback(() => {
         setAppliedFilters({
-            statusFilter, selectedGenders, selectedSpecies,
+            statusFilter, genderFilter, speciesFilter,
             statusFilterPregnant, statusFilterNursing, statusFilterMating,
             publicFilter, blFilter,
         });
         setPendingFilters(false);
-    }, [statusFilter, selectedGenders, selectedSpecies, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
+      }, [statusFilter, genderFilter, speciesFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
 
     // Species list is now derived from the fetchAnimals result - no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
@@ -885,9 +895,8 @@ const AnimalList = ({
         }
 
         // Species filter (appliedFilters)
-        if (af.selectedSpecies.length > 0) {
-            const selectedSpeciesKeys = new Set(af.selectedSpecies.map(normalizeSpeciesForFilter));
-            source = source.filter(a => selectedSpeciesKeys.has(normalizeSpeciesForFilter(a.species)));
+         if (af.speciesFilter) {
+            source = source.filter(a => a.species === af.speciesFilter);
         }
 
         // Gender filter (appliedFilters)
