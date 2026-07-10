@@ -482,8 +482,12 @@ const AnimalList = ({
             });
             setArchivedAnimals(res.data.archived || []);
             setSoldTransferredAnimals(res.data.soldTransferred || []);
+            const responseData = res.data || {};
+            setArchivedAnimals(responseData.archived || []);
+            setSoldTransferredAnimals(responseData.soldTransferred || []);
 
             const sold = res.data.soldTransferred || [];
+            const sold = responseData.soldTransferred || [];
             if (sold.length > 0) {
                 // Get unique owner IDs from the sold animals
                 const ownerIds = [...new Set(sold.map(a => a.ownerId_public).filter(Boolean))];
