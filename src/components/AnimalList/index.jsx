@@ -2133,18 +2133,7 @@ useEffect(() => {
         const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
         return (
             <div className="space-y-4">
-                {/* Collections Manager Header */}
-                <div className="flex items-center gap-2 mb-1">
-                    <button
-                        onClick={() => setShowCollectionManager(prev => !prev)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition ${
-                            showCollectionManager ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' : 'bg-primary hover:bg-primary/90 text-black'
-                        }`}
-                    >
-                        <FolderOpen size={14} />
-                        {showCollectionManager ? 'Close Manager' : 'Manage Collections'}
-                    </button>
-                </div>
+                {/* Collections Manager Header - button moved to filter bar */}
 
                 {/* Collection Manager Panel */}
                 {showCollectionManager && (
@@ -4259,6 +4248,15 @@ useEffect(() => {
                                     <option key={line.id} value={line.id}>{line.name}</option>
                                 ))}
                             </select>
+                        )}
+                        {isCollectionsView && (
+                            <button
+                                onClick={() => setShowCollectionManager(prev => !prev)}
+                                className={`p-2 text-sm border rounded-lg flex items-center gap-1 transition ${showCollectionManager ? 'bg-gray-200 border-gray-300 text-gray-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                            >
+                                <Wrench size={14} />
+                                <span>{showCollectionManager ? 'Close' : 'Manage'}</span>
+                            </button>
                         )}
                     </div>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
