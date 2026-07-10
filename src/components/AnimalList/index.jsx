@@ -61,6 +61,35 @@ const formatDateDisplay = (dateStr) => {
     try { return formatDateShort(dateStr); } catch(e) { return dateStr; }
 };
 
+const BreedingLineManagerModal = ({ lines, onClose, onClearLine }) => {
+    return (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={onClose}>
+            <div className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-4 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-3 pb-3 border-b dark:border-dark-border">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Manage Breeding Lines</h3>
+                    <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface-hover"><X size={20} /></button>
+                </div>
+                <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
+                    {(lines || []).filter(l => l.name).map(line => (
+                        <div key={line.id} className="flex items-center justify-between p-2 border rounded-md hover:bg-gray-50 dark:border-dark-border dark:hover:bg-dark-surface-hover">
+                            <div className="flex items-center gap-3">
+                                <span style={{ backgroundColor: line.color }} className="w-4 h-4 rounded-full border border-gray-300 dark:border-dark-border"></span>
+                                <span className="font-medium text-gray-800 dark:text-dark-text">{line.name}</span>
+                            </div>
+                            <button onClick={() => onClearLine(line.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Clear line name and unassign from all animals">
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                    ))}
+                    {(lines || []).filter(l => l.name).length === 0 && (
+                        <p className="text-sm text-gray-500 dark:text-dark-text-secondary text-center py-4">No named breeding lines to manage.</p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 ﻿
 // -- Decode JWT payload to get a stable per-user key for localStorage scoping --
 const getUserKey = (token) => {
@@ -106,7 +135,8 @@ const AnimalList = ({
     setArchiveLoading,
     // Breeding lines (display-only for cards)
     breedingLineDefs = [],
-    animalBreedingLines = {}
+    animalBreedingLines = {},
+    onBreedingLinesUpdate
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
@@ -317,6 +347,7 @@ const AnimalList = ({
     const [supplySaving, setSupplySaving] = useState(false);
     const [supplies, setSupplies] = useState([]);
     const [suppliesLoading, setSuppliesLoading] = useState(false);
+    const [showBreedingLineManager, setShowBreedingLineManager] = useState(false);
     const [supplyCategoryFilter, setSupplyCategoryFilter] = useState('All');
     const [restockingSupplyId, setRestockingSupplyId] = useState(null);
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
@@ -700,6 +731,32 @@ useEffect(() => {
             setAvailableAnimalsRaw((res.data || []).filter(a => !a.isViewOnly));
         } catch (err) { console.error('[fetchAvailableAnimals]', err); }
     }, [authToken, API_BASE_URL]);
+
+    const handleClearBreedingLine = async (lineId) => {
+        const lineToClear = breedingLineDefs.find(l => l.id === lineId);
+        if (!lineToClear || !lineToClear.name) return;
+
+        if (!window.confirm(`Are you sure you want to clear the "${lineToClear.name}" breeding line? This will also unassign it from all animals.`)) {
+            return;
+        }
+
+        try {
+            // Assumes a backend endpoint that clears the name and unassigns from all animals.
+            await axios.delete(`${API_BASE_URL}/breeding-lines/${lineId}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+
+            showModalMessageRef.current('Success', `Breeding line "${lineToClear.name}" has been cleared.`);
+
+            // Trigger a refetch in the parent component
+            onBreedingLinesUpdate?.();
+            setShowBreedingLineManager(false);
+
+        } catch (error) {
+            console.error('Error clearing breeding line:', error);
+            showModalMessageRef.current('Error', error.response?.data?.message || 'Failed to clear breeding line.');
+        }
+    };
 
     // Fetch view-only/transferred animals ? these are animals the user sold/transferred but retains view-only access to
     const fetchSoldTransferred = useCallback(async () => {
@@ -4468,6 +4525,13 @@ useEffect(() => {
                     showModalMessage={showModalMessage}
                     onNotificationChange={() => window.dispatchEvent(new CustomEvent('notifications-changed'))}
                     onViewAnimal={handleViewAnimalFromNotification}
+                />
+            )}
+            {showBreedingLineManager && (
+                <BreedingLineManagerModal
+                    lines={breedingLineDefs}
+                    onClose={() => setShowBreedingLineManager(false)}
+                    onClearLine={handleClearBreedingLine}
                 />
             )}
             </div>
