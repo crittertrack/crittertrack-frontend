@@ -2218,7 +2218,7 @@ useEffect(() => {
                 {userCollections.length > 0 && (
                     <>
                         {userCollections.map(col => {
-                            const colAnimals = allOwnedAnimals.filter(a => (animalCollections[a.id_public] || []).includes(col.id));
+                            const colAnimals = allFilteredAnimals.filter(a => (animalCollections[a.id_public] || []).includes(col.id));
                             const isColCollapsed = collapsedCollections[col.id] || false;
                             return (
                                 <div key={col.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
@@ -2306,7 +2306,7 @@ useEffect(() => {
                         {/* Uncategorized section */}
                         {(() => {
                             const validCollectionIds = new Set(userCollections.map(c => c.id));
-                            const uncategorized = allOwnedAnimals.filter(a => {
+                            const uncategorized = allFilteredAnimals.filter(a => {
                                 const assigned = (animalCollections[a.id_public] || []).filter(cid => validCollectionIds.has(cid));
                                 return assigned.length === 0;
                             });
@@ -4148,83 +4148,41 @@ useEffect(() => {
             </div>
             )}
 
-            {isCollectionsView && !showArchiveScreen && (
-            <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
-                <div className="flex items-center gap-2 p-2 sm:p-3">
-                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
-                        <button
-                            onClick={() => { setCollectionsViewMode('cards'); try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'cards'); } catch {} }}
-                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${collectionsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                            title="Card view"
-                        >
-                            <LayoutGrid size={14} />
-                        </button>
-                        <button
-                            onClick={() => { setCollectionsViewMode('list'); try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'list'); } catch {} }}
-                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${collectionsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                            title="List view"
-                        >
-                            <ClipboardList size={14} />
-                        </button>
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Search by name..."
-                        value={searchInput}
-                        onChange={handleSearchInputChange}
-                        onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
-                        className="flex-grow p-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-0"
-                    />
-                    <button
-                        onClick={triggerSearch}
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 text-sm shrink-0"
-                        title="Search"
-                    >
-                        <Search size={16} />
-                        <span className="hidden sm:inline">Search</span>
-                    </button>
-                    <span className="hidden sm:inline mx-1 text-gray-300">|</span>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(true)}
-                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
-                        title="Make All Animals Public"
-                    >
-                        <Eye size={14} className="sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Set All Public</span>
-                    </button>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(false)}
-                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
-                        title="Make All Animals Private"
-                    >
-                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Set All Private</span>
-                    </button>
-                </div>
-            </div>
-            )}
-
-            {isListLikeView && !isCollectionsView && !showArchiveScreen && (
+            {isListLikeView && !showArchiveScreen && (
                 <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
                     <div className="flex flex-wrap items-center gap-2 flex-grow">
                         <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
-                            <button onClick={() => setMyAnimalsViewMode('cards')}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            <button onClick={() => {
+                                if (isCollectionsView) {
+                                    setCollectionsViewMode('cards');
+                                    try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'cards'); } catch {}
+                                } else {
+                                    setMyAnimalsViewMode('cards');
+                                }
+                            }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${(isCollectionsView ? collectionsViewMode : myAnimalsViewMode) === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                                 title="Card view"
                             >
                                 <LayoutGrid size={14} />
                             </button>
-                            <button onClick={() => setMyAnimalsViewMode('list')}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            <button onClick={() => {
+                                if (isCollectionsView) {
+                                    setCollectionsViewMode('list');
+                                    try { localStorage.setItem(`ct_collections_view_mode_${userKey}`, 'list'); } catch {}
+                                } else {
+                                    setMyAnimalsViewMode('list');
+                                }
+                            }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${(isCollectionsView ? collectionsViewMode : myAnimalsViewMode) === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                                 title="List view"
                             >
                                 <ClipboardList size={14} />
                             </button>
-                            <button onClick={(e) => { e.stopPropagation(); setDefaultMyAnimalsViewMode(myAnimalsViewMode); }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${defaultMyAnimalsViewMode === myAnimalsViewMode ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
+                            <button onClick={(e) => { e.stopPropagation(); if (!isCollectionsView) setDefaultMyAnimalsViewMode(myAnimalsViewMode); }}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${!isCollectionsView && defaultMyAnimalsViewMode === myAnimalsViewMode ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
                                 title="Pin as default view"
                             >
-                                <Pin size={14} fill={defaultMyAnimalsViewMode === myAnimalsViewMode ? 'currentColor' : 'none'} />
+                                <Pin size={14} fill={!isCollectionsView && defaultMyAnimalsViewMode === myAnimalsViewMode ? 'currentColor' : 'none'} />
                             </button>
                         </div>
                         <div className="relative flex-shrink-0">
@@ -4234,7 +4192,7 @@ useEffect(() => {
                                 placeholder="Search..."
                                 value={searchInput}
                                 onChange={handleSearchInputChange}
-                                onKeyPress={(e) => { if (e.key === 'Enter') { setAppliedNameFilter(searchInput.trim()); } }}
+                                onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
                                 className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 rounded-lg"
                             />
                         </div>
@@ -4291,16 +4249,39 @@ useEffect(() => {
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
                         <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
                         </div>
+                        <button
+                            onClick={triggerSearch}
+                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 text-sm shrink-0"
+                            title="Search"
+                        >
+                            <Search size={16} />
+                        </button>
+                        <span className="hidden sm:inline mx-1 text-gray-300">|</span>
                         <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
                             A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
                         <button onClick={() => requestSort('birthdate')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'birthdate' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
                             Age {sortConfig.key === 'birthdate' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
+                        <span className="hidden sm:inline mx-1 text-gray-300">|</span>
+                        <button
+                            onClick={() => toggleAllAnimalsPrivacy(true)}
+                            className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 p-2 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
+                            title="Make All Animals Public"
+                        >
+                            <Eye size={14} className="sm:w-4 sm:h-4" />
+                        </button>
+                        <button
+                            onClick={() => toggleAllAnimalsPrivacy(false)}
+                            className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 p-2 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
+                            title="Make All Animals Private"
+                        >
+                            <EyeOff size={14} className="sm:w-4 sm:h-4" />
+                        </button>
                     </div>
             </div>
             )}
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm relative">
