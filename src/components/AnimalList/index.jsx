@@ -972,7 +972,7 @@ useEffect(() => {
         if (blFilter.length > 0) {
             source = source.filter(a => {
                 const assigned = animalBreedingLines[a.id_public] || [];
-                return blFilter.some(lineId => assigned.includes(String(lineId)));
+                return blFilter.some(lineId => assigned.map(String).includes(String(lineId)));
             });
         }
 
