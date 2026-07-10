@@ -697,6 +697,7 @@ useEffect(() => {
             setLoading(false);
         } finally {
             setPendingFilters(false);
+            // setPendingFilters(false); // This was causing a ReferenceError
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [authToken]);
@@ -986,9 +987,12 @@ useEffect(() => {
             });
         }
 
+        // Create a new array to sort to avoid mutating the original source
+        const sortedSource = [...source];
+
         // Sorting logic
         if (sortConfig.key) {
-            source.sort((a, b) => {
+            sortedSource.sort((a, b) => {
                 const dir = sortConfig.direction === 'ascending' ? 1 : -1;
                 let valA, valB;
 
@@ -1011,7 +1015,7 @@ useEffect(() => {
                 return 0;
             });
         }
-        return source.reduce((groups, animal) => { // ownedFilterMode is a direct dependency now
+        return sortedSource.reduce((groups, animal) => { // ownedFilterMode is a direct dependency now
             const species = animal.species || 'Unspecified Species';
             if (!groups[species]) {
                 groups[species] = [];
@@ -1044,18 +1048,36 @@ useEffect(() => {
         if (statusFilterPregnant) source = source.filter(a => a.isPregnant === true);
         if (statusFilterNursing) source = source.filter(a => a.isNursing === true);
         if (statusFilterMating) source = source.filter(a => a.isInMating === true);
-        if (publicFilter === 'public') source = source.filter(a => a.showOnPublicProfile === true);
-        else if (publicFilter === 'private') source = source.filter(a => !a.showOnPublicProfile);
+        if (publicFilter === 'public') {
+            source = source.filter(a => a.showOnPublicProfile === true);
+        } else if (publicFilter === 'private') {
+            source = source.filter(a => !a.showOnPublicProfile);
+        }
         if (ownedFilterMode === 'owned') source = source.filter(a => a.isOwned !== false);
         if (blFilter.length > 0) source = source.filter(a => { const assigned = animalBreedingLines[a.id_public] || []; return blFilter.some(lineId => assigned.map(String).includes(String(lineId))); });
-        return source.reduce((groups, animal) => {
-            const species = animal.species || 'Unspecified Species';
-            if (!groups[species]) {
-                groups[species] = [];
-            }
-            groups[species].push(animal);
-            return groups;
-        }, {});
+        const sortedSource = [...source];
+        if (sortConfig.key) {
+            sortedSource.sort((a, b) => {
+                const dir = sortConfig.direction === 'ascending' ? 1 : -1;
+                let valA, valB;
+                if (sortConfig.key === 'name') {
+                    valA = (a.name || '').toLowerCase();
+                    valB = (b.name || '').toLowerCase();
+                } else if (sortConfig.key === 'birthdate') {
+                    const dateA = a.birthDate ? new Date(a.birthDate) : null;
+                    const dateB = b.birthDate ? new Date(b.birthDate) : null;
+                    if (dateA === dateB) return 0;
+                    if (dateA === null) return 1;
+                    if (dateB === null) return -1;
+                    valA = dateA.getTime();
+                    valB = dateB.getTime();
+                }
+                if (valA < valB) return -1 * dir;
+                if (valA > valB) return 1 * dir;
+                return 0;
+            });
+        }
+        return sortedSource;
     }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig]);
 
     const displayedAnimalCount = useMemo(() => {
@@ -1581,17 +1603,6 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
-                            isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 dark:border-dark-border bg-gray-50 dark:bg-dark-surface-hover' : 'border-gray-300 dark:border-dark-border'
-                        }`}
-                        className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${(() => {
-                            if (isSelected) return 'border-red-500';
-                            // Only apply darker border for isViewOnly if the animal's status is 'Sold'
-                            if (animal.isViewOnly && animal.status === 'Sold') {
-                                return 'border-gray-400 dark:border-dark-border bg-gray-50 dark:bg-dark-surface-hover';
-                            }
-                            return 'border-gray-300 dark:border-dark-border';
-                        })()}`}
                         className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-border'}`}
                     >
                     {isSelectable && (
