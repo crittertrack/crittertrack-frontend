@@ -4255,7 +4255,7 @@ useEffect(() => {
                                 className={`p-2 text-sm border rounded-lg flex items-center gap-1 transition ${showCollectionManager ? 'bg-gray-200 border-gray-300 text-gray-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <Wrench size={14} />
-                                <span>{showCollectionManager ? 'Close' : 'Manage'}</span>
+                                <span>{showCollectionManager ? 'Close Collections' : 'Manage Collections'}</span>
                             </button>
                         )}
                     </div>
