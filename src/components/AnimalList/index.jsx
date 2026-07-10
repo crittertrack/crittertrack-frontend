@@ -116,12 +116,12 @@ const AnimalList = ({
         (rawBreedingLineDefs || []).filter(l => l.name && l.name.trim()),
     [rawBreedingLineDefs]);
 
-    const validLineIds = useMemo(() => new Set(breedingLineDefs.map(l => l.id)), [breedingLineDefs]);
+    const validLineIds = useMemo(() => new Set(breedingLineDefs.map(l => String(l.id))), [breedingLineDefs]);
 
     const animalBreedingLines = useMemo(() => {
         const cleaned = {};
         Object.entries(rawAnimalBreedingLines).forEach(([animalId, lineIds]) => {
-            const validIds = (lineIds || []).filter(id => validLineIds.has(id));
+            const validIds = (lineIds || []).map(String).filter(id => validLineIds.has(id));
             if (validIds.length > 0) cleaned[animalId] = validIds;
         });
         return cleaned;
