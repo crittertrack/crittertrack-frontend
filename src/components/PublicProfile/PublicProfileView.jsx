@@ -13,7 +13,7 @@ import ReportButton from '../ReportButton';
 
 const API_BASE_URL = '/api';
 
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {

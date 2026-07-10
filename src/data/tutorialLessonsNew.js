@@ -1651,7 +1651,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 6,
         title: 'Status Filter',
-        content: 'Filter by status (Pet, Breeder, Growout, Available, Sold, etc.) to quickly find animals in specific situations within your collection.',
+        content: 'Filter by status (Pet, Breeder, Growout, Available etc.) to quickly find animals in specific situations within your collection.',
         tips: [
           'Find breeding stock',
           'See available for sale animals',
