@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { X, Home, Cat } from 'lucide-react';
 import { AnimalImage } from './AnimalList'; // Assuming AnimalImage is exported or can be moved
+import AnimalImage from '../AnimalImage';
 
 const EnclosureModal = ({
     isOpen,
@@ -223,14 +224,5 @@ const EnclosureModal = ({
     );
 };
 
-// Export AnimalImage if it's not already exported from AnimalList
-const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
-    const [imageError, setImageError] = React.useState(false);
-    const [imageSrc, setImageSrc] = React.useState(src);
-    React.useEffect(() => { setImageSrc(src); setImageError(false); }, [src]);
-    if (!imageSrc || imageError) return <Cat size={iconSize} className="text-gray-400" />;
-    return <img src={imageSrc} alt={alt} className={className} onError={() => setImageError(true)} loading="lazy" />;
-};
 
-export { AnimalImage }; // Export it here if it's not globally available
 export default EnclosureModal;
