@@ -3,8 +3,8 @@ import axios from 'axios';
 import NotificationBar from '../Notifications/NotificationBar';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
-import EnclosureModal from '../EnclosureModal'; // Import the new modal component
-import AnimalImage from './shared/AnimalImage'; // Import the new AnimalImage component
+import EnclosureModal from '../EnclosureModal';
+import AnimalImage from '../shared/AnimalImage';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
     Bean, Bell, Bird, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,

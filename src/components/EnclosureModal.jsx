@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { X, Home, Cat } from 'lucide-react';
-import AnimalImage from './shared/AnimalImage';
+import AnimalImage from '../components/shared/AnimalImage';
 
 const EnclosureModal = ({
     isOpen,
