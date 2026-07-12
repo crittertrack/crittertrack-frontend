@@ -178,49 +178,36 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
             <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
                 <p className="text-xs font-semibold text-gray-600">{parentType}</p>
             </div>
-            <div className="p-3 flex flex-col items-center">
+            <div className="p-3 flex items-center gap-3">
                 {/* Image */}
-                <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mb-2">
+                <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
                         <img src={imgSrc} alt={parentData.name} className="w-full h-full object-cover" />
                     ) : (
-                        <Cat size={28} className="text-gray-400" />
+                        <Cat size={24} className="text-gray-400" />
                     )}
                 </div>
 
-                {/* Icon row */}
-                <div className="flex justify-center items-center space-x-2 mb-2">
-                    {parentData.isOwned ? (
-                        <Heart size={12} className="text-black" />
-                    ) : (
-                        <HeartOff size={12} className="text-black" />
-                    )}
-                    {parentData.showOnPublicProfile ? (
-                        <Eye size={12} className="text-black" />
-                    ) : (
-                        <EyeOff size={12} className="text-black" />
-                    )}
-                    {parentData.isInMating && <Hourglass size={12} className="text-black" />}
-                    {parentData.isPregnant && <Bean size={12} className="text-black" />}
-                    {parentData.isNursing && <Milk size={12} className="text-black" />}
-                </div>
-
-                {/* Name */}
-                <div className="text-center mb-1">
+                <div className="flex-1 min-w-0">
+                    {/* Name */}
                     <p className="text-sm font-semibold text-gray-800 truncate">
                         {parentData.prefix ? `${parentData.prefix} ` : ''}{parentData.name}{parentData.suffix ? ` ${parentData.suffix}` : ''}
                     </p>
-                </div>
-
-                {/* ID */}
-                <div className="text-center mb-2">
+                    {/* ID */}
                     <p className="text-xs text-gray-500">{parentData.id_public}</p>
+                    {/* Icon row */}
+                    <div className="flex items-center space-x-2 mt-1">
+                        {parentData.isOwned ? <Heart size={12} className="text-black" title="Owned" /> : <HeartOff size={12} className="text-black" title="Not Owned" />}
+                        {parentData.showOnPublicProfile ? <Eye size={12} className="text-black" title="Public" /> : <EyeOff size={12} className="text-black" title="Private" />}
+                        {parentData.isInMating && <Hourglass size={12} className="text-black" title="Mating" />}
+                        {parentData.isPregnant && <Bean size={12} className="text-black" title="Pregnant" />}
+                        {parentData.isNursing && <Milk size={12} className="text-black" title="Nursing" />}
+                    </div>
                 </div>
-
-                {/* Status bar */}
-                <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300">
-                    <p className="text-xs font-medium text-gray-700">{parentData.status || 'Unknown'}</p>
-                </div>
+            </div>
+            {/* Status bar */}
+            <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300">
+                <p className="text-xs font-medium text-gray-700">{parentData.status || 'Unknown'}</p>
             </div>
         </div>
     );
