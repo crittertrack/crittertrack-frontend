@@ -54,6 +54,7 @@ import CommunityPage from './components/Community/CommunityPage';
 // import ThemeToggle from './components/ThemeToggle';
 
 import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
+import AnimalTestModal from './components/AnimalDetail/AnimalTestModal';
 import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
 import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
 import { OffspringSection } from './components/AnimalDetail/utils';
@@ -2358,25 +2359,25 @@ const App = () => {
                 if (iCurrentlyOwn) {
                     return (
                         <AnimalTestModal
-                        animal={viewingAnimal}
-                        onClose={onClose}
-                        onEdit={onEditAnimal}
-                     onArchive={handleArchive}
-                     onAddSibling={onAddSibling}
-                     onTransfer={onTransfer}
-                     API_BASE_URL={API_BASE_URL}
-                     authToken={authToken}
-                     onViewAnimal={onViewAnimal}
-                     onUpdateAnimal={onUpdateAnimal}
-                     onToggleOwned={onToggleOwned}
-                     userProfile={userProfile}
-                     handleReturnTransferredAnimal={handleReturnTransferredAnimal}
-                     handleWithdrawTransfer={handleWithdrawTransfer}
-                     handleAcceptTransfer={handleAcceptTransfer}
-                     handleRejectTransfer={handleRejectTransfer}
-                    breedingLineDefs={breedingLineDefs}
-                    animalBreedingLines={animalBreedingLines}
-                            />
+                            animal={animalToView}
+                            onClose={handleBackFromAnimal}
+                            onEdit={handleEditAnimal}
+                            onArchive={handleArchiveAnimal}
+                            onAddSibling={handleAddSibling}
+                            onTransfer={handleOpenTransferWithAnimal}
+                            API_BASE_URL={API_BASE_URL}
+                            authToken={authToken}
+                            onViewAnimal={handleViewAnimal}
+                            onUpdateAnimal={handleAnimalFieldUpdate}
+                            onToggleOwned={toggleAnimalOwned}
+                            userProfile={userProfile}
+                            handleReturnTransferredAnimal={transferWorkflow.handleReturnTransferredAnimal}
+                            handleWithdrawTransfer={transferWorkflow.handleWithdrawTransfer}
+                            handleAcceptTransfer={transferWorkflow.handleAcceptTransfer}
+                            handleRejectTransfer={transferWorkflow.handleRejectTransfer}
+                            breedingLineDefs={breedingLinesState.breedingLineDefs}
+                            animalBreedingLines={breedingLinesState.animalBreedingLines}
+                        />
                     );
                 } else {
                     return (
