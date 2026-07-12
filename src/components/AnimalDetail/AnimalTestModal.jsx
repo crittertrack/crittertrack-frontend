@@ -196,7 +196,7 @@ const AnimalTestModal = ({
                     <div className={`${isHeaderCollapsed ? 'w-full' : 'w-3/4'} flex flex-col`}>
                         <div className="flex justify-between items-start">
                             <div>
-                                <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                                     {animal.prefix} {animal.name} {animal.suffix}
                                     {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />}
                                     {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
@@ -206,7 +206,7 @@ const AnimalTestModal = ({
                                 </h2>
                                 {!isHeaderCollapsed && (
                                     <>
-                                        <p className="text-md text-gray-500">
+                                        <p className="text-sm text-gray-500">
                                             {[animal.species, animal.breed, animal.strain, animal.origin].filter(Boolean).join(' • ')}
                                         </p>
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -289,11 +289,11 @@ const AnimalTestModal = ({
 
                         {!isHeaderCollapsed && (
                             <>
-                                <dl className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
+                                <dl className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3 text-xs">
                                     <InfoItem label="Variety">
                                         {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(', ') || <span className="text-gray-400">N/A</span>}
                                     </InfoItem>
-                                    {animal.geneticCode && <InfoItem label="Genetics"><code className="bg-gray-200 px-1.5 py-1 rounded-md text-xs font-mono">{animal.geneticCode}</code></InfoItem>}
+                                    {animal.geneticCode && <InfoItem label="Genetics"><code className="bg-gray-200 px-1.5 py-1 rounded-md text-[11px] font-mono">{animal.geneticCode}</code></InfoItem>}
                                     {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
                                     <InfoItem label="Birthdate">
                                         {animal.birthDate ? (
@@ -322,22 +322,22 @@ const AnimalTestModal = ({
                                     <InfoItem label="Keeper">{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</InfoItem>
                                     <InfoItem label="Weight">{animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'}</InfoItem>
                                     {animal.coOwnership && <InfoItem label="Co-Ownership" value={animal.coOwnership} />}
-                                    <InfoItem label="Breeding Lines">
-                                        <div className="flex flex-wrap items-center gap-1">
-                                            {(animalBreedingLines[animal.id_public] || [])
-                                                .map(lineId => breedingLineDefs.find(l => l.id === lineId))
-                                                .filter(Boolean)
-                                                .map(line => (
-                                                    <span key={line.id} title={line.name} style={{ color: line.color }} className="text-lg leading-none">&#x25C6;</span>
-                                                ))
-                                            }
-                                            {(animalBreedingLines[animal.id_public] || []).length === 0 && <span className="text-gray-400">N/A</span>}
-                                        </div>
-                                    </InfoItem>
                                 </dl>
                                 <div className="mt-4 pt-2 border-t border-gray-200">
-                                    <p className="text-sm text-gray-500 text-center">
-                                        {[animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId].filter(Boolean).join(' • ')}
+                                    <p className="text-xs text-gray-500 text-center flex justify-center items-center gap-x-2">
+                                        {(() => {
+                                            const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean);
+                                            const idString = [animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId].filter(Boolean).join(' • ');
+                                            const linesComponent = lines.length > 0 && (
+                                                <span className="flex items-center gap-1">
+                                                    {lines.map(line => (
+                                                        <span key={line.id} title={line.name} style={{ color: line.color }} className="text-base leading-none">&#x25C6;</span>
+                                                    ))}
+                                                </span>
+                                            );
+                                            const idComponent = idString && <span>{idString}</span>;
+                                            return (<>{linesComponent}{linesComponent && idComponent && <span className="text-gray-300 mx-1">•</span>}{idComponent}</>);
+                                        })()}
                                     </p>
                                 </div>
                             </>
