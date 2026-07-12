@@ -2377,6 +2377,8 @@ const App = () => {
                             handleRejectTransfer={transferWorkflow.handleRejectTransfer}
                             breedingLineDefs={breedingLinesState.breedingLineDefs}
                             animalBreedingLines={breedingLinesState.animalBreedingLines}
+                            setShowImageModal={setShowImageModal}
+                            setEnlargedImageUrl={setEnlargedImageUrl}
                         />
                     );
                 } else {

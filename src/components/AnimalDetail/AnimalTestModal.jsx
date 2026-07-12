@@ -59,7 +59,9 @@ const AnimalTestModal = ({
     handleAcceptTransfer,
     handleRejectTransfer,
     breedingLineDefs = [], 
-    animalBreedingLines = {}
+    animalBreedingLines = {},
+    setShowImageModal,
+    setEnlargedImageUrl
 }) => {
     if (!animal) return null;
 
@@ -157,12 +159,22 @@ const AnimalTestModal = ({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
             <div className="bg-gray-50 rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-start p-6 border-b border-gray-200 gap-6">
+                <div className="flex justify-between items-start p-4 md:p-6 border-b border-gray-200 gap-4 md:gap-6">
                     {/* Left: Gallery */}
-                    <div className="w-1/3 flex flex-col gap-2">
+                    <div className="w-1/4 flex flex-col gap-2">
                         <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
                             {mainImage ? (
-                                <img src={mainImage} alt={animal.name} className="w-full h-full object-cover" />
+                                <img 
+                                    src={mainImage} 
+                                    alt={animal.name} 
+                                    className="w-full h-full object-cover cursor-pointer"
+                                    onClick={() => {
+                                        if (setShowImageModal && setEnlargedImageUrl) {
+                                            setEnlargedImageUrl(mainImage);
+                                            setShowImageModal(true);
+                                        }
+                                    }}
+                                />
                             ) : (
                                 <Cat size={64} className="text-gray-300" />
                             )}
@@ -179,7 +191,7 @@ const AnimalTestModal = ({
                     </div>
 
                     {/* Right: Info & Actions */}
-                    <div className="w-2/3 flex flex-col">
+                    <div className="w-3/4 flex flex-col">
                         <div className="flex justify-between items-start">
                             <div>
                                 <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
@@ -187,11 +199,15 @@ const AnimalTestModal = ({
                                     {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />}
                                     {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
                                 </h2>
-                                <p className="text-md text-gray-500">{animal.species} {animal.id_public && `• ${animal.id_public}`}</p>
-                                <div className="flex items-center gap-2 mt-2">
+                                <p className="text-md text-gray-500">
+                                    {[animal.strain, animal.breed, animal.species, animal.origin, animal.id_public].filter(Boolean).join(' • ')}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2 flex-wrap">
                                     {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.status}</span>}
+                                    {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.lifeStage}</span>}
                                     {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale</span>}
                                     {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Heart size={12} /> Stud</span>}
+                                    {animal.tags && animal.tags.map(tag => <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-full">{tag}</span>)}
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -262,12 +278,17 @@ const AnimalTestModal = ({
                             </div>
                         </div>
 
-                        <dl className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-4">
-                            <InfoItem label="ID" value={animal.id_public} />
-                            <InfoItem label="Species" value={animal.species} />
-                            <InfoItem label="Sex" value={animal.gender} />
+                        <div className="mt-4 text-sm space-y-1">
+                            <div>
+                                <span className="font-semibold text-gray-600">Variety: </span>
+                                <span>{[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(', ')}</span>
+                            </div>
+                            {animal.carrierTraits && <div><span className="font-semibold text-gray-600">Carries: </span><span>{animal.carrierTraits}</span></div>}
+                            {animal.geneticCode && <div><span className="font-semibold text-gray-600">Genetics: </span><code className="bg-gray-100 p-1 rounded text-xs">{animal.geneticCode}</code></div>}
+                        </div>
+
+                        <dl className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
                             <InfoItem label="Born" value={animal.birthDate ? formatDate(animal.birthDate) : 'N/A'} />
-                            <InfoItem label="Variety" value={[animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(', ') || 'N/A'} />
                             <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
                             <InfoItem label="Keeper">{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</InfoItem>
                         </dl>
@@ -296,34 +317,8 @@ const AnimalTestModal = ({
                             <div className="lg:col-span-2 space-y-6">
                                 <InfoCard title="About" icon={<Info size={18} className="text-gray-400" />}>
                                     <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6">
-                                        <InfoItem label="Species" value={animal.species} />
-                                        <InfoItem label="Strain" value={animal.strain} />
-                                        <InfoItem label="Breed" value={animal.breed} />
-                                        <InfoItem label="Life Stage" value={animal.lifeStage} />
-                                        <InfoItem label="Sex" value={animal.gender} />
-                                        <InfoItem label="Birth Date" value={animal.birthDate ? formatDate(animal.birthDate) : 'N/A'} />
                                         <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}g` : 'N/A'} />
-                                        <InfoItem label="Status" value={animal.status} />
-                                        <InfoItem label="Origin" value={animal.origin} />
                                         <InfoItem label="Co-Ownership" value={animal.coOwnership} />
-                                        <InfoItem label="Color" value={animal.color} />
-                                        <InfoItem label="Pattern" value={animal.coatPattern} />
-                                        <InfoItem label="Coat" value={animal.coat} />
-                                        <InfoItem label="Carrier Traits" value={animal.carrierTraits} />
-                                        {animal.tags && animal.tags.length > 0 && (
-                                            <div className="col-span-full">
-                                                <InfoItem label="Tags">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {animal.tags.map(tag => <span key={tag} className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">{tag}</span>)}
-                                                    </div>
-                                                </InfoItem>
-                                            </div>
-                                        )}
-                                        <div className="col-span-full">
-                                            <InfoItem label="Genetic Code">
-                                                <code className="bg-gray-100 p-1 rounded text-xs">{animal.geneticCode || 'N/A'}</code>
-                                            </InfoItem>
-                                        </div>
                                     </dl>
                                 </InfoCard>
                                 <InfoCard 
