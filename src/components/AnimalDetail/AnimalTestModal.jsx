@@ -24,7 +24,7 @@ import { FertilityTabContent } from './FertilityTabContent';
 import { MeasurementsTabContent } from './MeasurementsTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents';
 
-const parseHealthRecords = (data) => {
+const parseJsonArrayField = (data) => {
     if (!data) return [];
     if (typeof data === 'string') {
         try {
@@ -35,6 +35,10 @@ const parseHealthRecords = (data) => {
         }
     }
     return Array.isArray(data) ? data : [];
+};
+
+const parseMilestones = (data) => {
+    return parseJsonArrayField(data).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
 };
 
 const AnimalTestModal = ({
@@ -338,13 +342,16 @@ const AnimalTestModal = ({
                                 <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400" />}>
                                     <InfoItem label="Health Status" value={animal.healthStatus || 'Good'} />
                                     <InfoItem label="Last Vet Check" value={animal.lastVetCheck ? formatDate(animal.lastVetCheck) : 'N/A'} />
-                                    <InfoItem label="Medical Conditions" value={parseHealthRecords(animal.medicalConditions).map(c => c.condition || c.name).join(', ')} />
+                                    <InfoItem label="Medical Conditions" value={parseJsonArrayField(animal.medicalConditions).map(c => c.condition || c.name).join(', ')} />
                                 </InfoCard>
                                 <InfoCard title="Recent Activity" icon={<Clock size={18} className="text-gray-400" />}>
-                                    {(animal.milestones || []).slice(0, 3).map((m, i) => (
-                                        <TimelineItem key={i} icon={<Calendar size={16} />} title={m.label} date={m.startDate} />
-                                    ))}
-                                    {(animal.milestones || []).length === 0 && <p className="text-sm text-gray-400">No recent activity.</p>}
+                                    {(() => {
+                                        const milestones = parseMilestones(animal.milestones);
+                                        if (milestones.length === 0) return <p className="text-sm text-gray-400">No recent activity.</p>;
+                                        return milestones.slice(0, 3).map((m, i) => (
+                                            <TimelineItem key={i} icon={<Calendar size={16} />} title={m.label} date={m.startDate} />
+                                        ));
+                                    })()}
                                 </InfoCard>
                             </div>
                             <div className="lg:col-span-3">
