@@ -2,13 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
     X, Cat, Mars, Venus, Edit, Archive, Users, Heart, Tag, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Sprout,
     Shield, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain,
-    Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy,
+    Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info,
     Scale, HeartOff, Eye, EyeOff, RotateCcw
 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import axios from 'axios';
-import { ViewOnlyParentCard, useDetailFieldTemplate, DetailJsonList } from './utils';
+import { useDetailFieldTemplate, DetailJsonList } from './utils';
 import { FamilyTabContent } from './FamilyTabContent';
 import { CareTabContent } from './CareTabContent';
 import { PedigreeTabContent } from './PedigreeTabContent';
@@ -23,6 +23,64 @@ import { EndOfLifeTabContent } from './EndOfLifeTabContent';
 import { FertilityTabContent } from './FertilityTabContent';
 import { MeasurementsTabContent } from './MeasurementsTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents';
+
+const CompactParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, authToken }) => {
+    const [parentData, setParentData] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!parentId) {
+            setParentData(null);
+            return;
+        }
+        setLoading(true);
+        const fetchParent = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setParentData(response.data);
+            } catch (error) {
+                console.error(`Error fetching parent ${parentId}:`, error);
+                setParentData(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchParent();
+    }, [parentId, API_BASE_URL, authToken]);
+
+    if (!parentId) {
+        return (
+            <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center h-full flex items-center justify-center">
+                <p className="text-gray-500 text-sm">No {parentType} recorded</p>
+            </div>
+        );
+    }
+
+    if (loading) return <div className="border border-gray-200 rounded-lg p-4 flex justify-center items-center h-full"><Loader2 size={24} className="animate-spin text-gray-400" /></div>;
+    if (!parentData) return <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center h-full flex items-center justify-center"><p className="text-gray-500 text-sm">{parentType} not found</p></div>;
+
+    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-lg p-2 flex items-center gap-3 cursor-pointer hover:shadow-md hover:border-primary-dark transition-all" onClick={() => onViewAnimal && onViewAnimal(parentData)}>
+            <div className="w-14 h-14 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                {imgSrc ? <img src={imgSrc} alt={parentData.name} className="w-full h-full object-cover" /> : <Cat size={20} className="text-gray-400" />}
+            </div>
+            <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-baseline">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{parentType}</p>
+                    {parentData.status && <span className="text-[10px] font-semibold bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-full">{parentData.status}</span>}
+                </div>
+                <p className="text-sm font-bold text-gray-800 truncate" title={[parentData.prefix, parentData.name, parentData.suffix].filter(Boolean).join(' ')}>
+                    {[parentData.prefix, parentData.name, parentData.suffix].filter(Boolean).join(' ')}
+                </p>
+                <p className="text-xs text-gray-400 truncate">{[parentData.id_public, parentData.species].filter(Boolean).join(' • ')}</p>
+            </div>
+        </div>
+    );
+};
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -143,6 +201,7 @@ const AnimalTestModal = ({
 
     const TABS = [
         { id: 'overview', label: 'Overview', icon: <Info size={14} /> },
+        { id: 'identification', label: 'Identification', icon: <Hash size={14} /> },
         { id: 'health', label: 'Health', icon: <Heart size={14} /> },
         { id: 'care', label: 'Care', icon: <Droplets size={14} /> },
         { id: 'measurements', label: 'Measurements', icon: <Ruler size={14} /> },
@@ -206,7 +265,7 @@ const AnimalTestModal = ({
                                 {!isHeaderCollapsed && (
                                     <>
                                         <p className="text-md text-gray-500">
-                                            {[animal.id_public, animal.strain, animal.breed, animal.species, animal.origin].filter(Boolean).join(' • ')}
+                                            {[animal.species, animal.breed, animal.strain, animal.origin].filter(Boolean).join(' • ')}
                                         </p>
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                                             {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.status}</span>}
@@ -325,6 +384,10 @@ const AnimalTestModal = ({
                                     <InfoItem label="Keeper">{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</InfoItem>
                                     <InfoItem label="Weight">{animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'}</InfoItem>
                                     {animal.coOwnership && <InfoItem label="Co-Ownership" value={animal.coOwnership} />}
+                                </dl><div className="mt-4 pt-4 border-t border-gray-200">
+                                    <p className="text-sm text-gray-500 text-center">
+                                        {[animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId].filter(Boolean).join(' • ')}
+                                    </p>
                                 </dl>
                             </>
                         )}
@@ -359,8 +422,8 @@ const AnimalTestModal = ({
                                     <div className="absolute top-4 right-4 text-xs">
                                         {loadingCOI ? <span className="text-gray-400">COI: Calculating...</span> : animalCOI != null && <span className="font-semibold">COI: {animalCOI.toFixed(2)}%</span>}
                                     </div>
-                                    <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
-                                    <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                    <CompactParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                    <CompactParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                                 </InfoCard>
                             </div>
                             <div className="space-y-6">
@@ -379,30 +442,6 @@ const AnimalTestModal = ({
                                     })()}
                                 </InfoCard>
                             </div>
-                            <div className="lg:col-span-3">
-                                <InfoCard title="Identification" icon={<Hash size={18} className="text-gray-400" />}>
-                                    <dl className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6">
-                                        <InfoItem label="CritterTrack ID" value={animal.id_public} />
-                                        <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />
-                                        <InfoItem label="Microchip Number" value={animal.microchipNumber} />
-                                        <InfoItem label="Pedigree Reg. ID" value={animal.pedigreeRegistrationId} />
-                                        <InfoItem label="Registry Name"><span className="text-gray-400 italic">e.g., AKC, TICA</span></InfoItem>
-                                        <InfoItem label="DNA Profile ID"><span className="text-gray-400 italic">e.g., V123456</span></InfoItem>
-                                        <InfoItem label="Litter Reg. Number"><span className="text-gray-400 italic">e.g., RN12345678</span></InfoItem>
-                                        <InfoItem label="Colony ID" value={animal.colonyId} />
-                                        <InfoItem label="Tattoo ID" value={animal.tattooId} />
-                                    </dl>
-                                    {breedingLineDefs.length > 0 && (
-                                        <div className="pt-4 mt-4 border-t">
-                                            <InfoItem label="Breeding Lines">
-                                                <div className="flex flex-wrap gap-2">
-                                                    {(animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean).map(line => <span key={line.id} style={{ backgroundColor: line.color, color: '#fff' }} className="text-xs font-semibold px-2 py-0.5 rounded-full">{line.name}</span>)}
-                                                </div>
-                                            </InfoItem>
-                                        </div>
-                                    )}
-                                </InfoCard>
-                            </div>
                         </div>
                     )}
                     {activeTab === 'dev' && (
@@ -410,6 +449,30 @@ const AnimalTestModal = ({
                             <pre className="bg-gray-800 text-white p-4 rounded-md text-xs overflow-x-auto max-h-96">
                                 {JSON.stringify(animal, null, 2)}
                             </pre>
+                        </InfoCard>
+                    )}
+                    {activeTab === 'identification' && (
+                        <InfoCard title="Identification" icon={<Hash size={18} className="text-gray-400" />}>
+                            <dl className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6">
+                                <InfoItem label="CritterTrack ID" value={animal.id_public} />
+                                <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />
+                                <InfoItem label="Microchip Number" value={animal.microchipNumber} />
+                                <InfoItem label="Pedigree Reg. ID" value={animal.pedigreeRegistrationId} />
+                                <InfoItem label="Registry Name"><span className="text-gray-400 italic">e.g., AKC, TICA</span></InfoItem>
+                                <InfoItem label="DNA Profile ID"><span className="text-gray-400 italic">e.g., V123456</span></InfoItem>
+                                <InfoItem label="Litter Reg. Number"><span className="text-gray-400 italic">e.g., RN12345678</span></InfoItem>
+                                <InfoItem label="Colony ID" value={animal.colonyId} />
+                                <InfoItem label="Tattoo ID" value={animal.tattooId} />
+                            </dl>
+                            {breedingLineDefs.length > 0 && (
+                                <div className="pt-4 mt-4 border-t">
+                                    <InfoItem label="Breeding Lines">
+                                        <div className="flex flex-wrap gap-2">
+                                            {(animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean).map(line => <span key={line.id} style={{ backgroundColor: line.color, color: '#fff' }} className="text-xs font-semibold px-2 py-0.5 rounded-full">{line.name}</span>)}
+                                        </div>
+                                    </InfoItem>
+                                </div>
+                            )}
                         </InfoCard>
                     )}
                     {activeTab === 'health' && (
@@ -480,6 +543,7 @@ const AnimalTestModal = ({
                     {/* Placeholder for other tabs */}
                     {activeTab !== 'overview' &&
                      activeTab !== 'dev' &&
+                     activeTab !== 'identification' &&
                      activeTab !== 'breeding' &&
                      activeTab !== 'health' &&
                      activeTab !== 'care' &&
