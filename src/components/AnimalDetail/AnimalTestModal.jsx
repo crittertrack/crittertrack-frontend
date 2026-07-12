@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import axios from 'axios';
-import { useDetailFieldTemplate, DetailJsonList } from './utils';
+import { ViewOnlyParentCard } from './utils';
 import { FamilyTabContent } from './FamilyTabContent';
 import { CareTabContent } from './CareTabContent';
 import { PedigreeTabContent } from './PedigreeTabContent';
@@ -23,64 +23,6 @@ import { EndOfLifeTabContent } from './EndOfLifeTabContent';
 import { FertilityTabContent } from './FertilityTabContent';
 import { MeasurementsTabContent } from './MeasurementsTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents';
-
-const CompactParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, authToken }) => {
-    const [parentData, setParentData] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        if (!parentId) {
-            setParentData(null);
-            return;
-        }
-        setLoading(true);
-        const fetchParent = async () => {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                setParentData(response.data);
-            } catch (error) {
-                console.error(`Error fetching parent ${parentId}:`, error);
-                setParentData(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchParent();
-    }, [parentId, API_BASE_URL, authToken]);
-
-    if (!parentId) {
-        return (
-            <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center h-full flex items-center justify-center">
-                <p className="text-gray-500 text-sm">No {parentType} recorded</p>
-            </div>
-        );
-    }
-
-    if (loading) return <div className="border border-gray-200 rounded-lg p-4 flex justify-center items-center h-full"><Loader2 size={24} className="animate-spin text-gray-400" /></div>;
-    if (!parentData) return <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center h-full flex items-center justify-center"><p className="text-gray-500 text-sm">{parentType} not found</p></div>;
-
-    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
-
-    return (
-        <div className="bg-white border border-gray-200 rounded-lg p-2 flex items-center gap-3 cursor-pointer hover:shadow-md hover:border-primary-dark transition-all" onClick={() => onViewAnimal && onViewAnimal(parentData)}>
-            <div className="w-14 h-14 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
-                {imgSrc ? <img src={imgSrc} alt={parentData.name} className="w-full h-full object-cover" /> : <Cat size={20} className="text-gray-400" />}
-            </div>
-            <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{parentType}</p>
-                    {parentData.status && <span className="text-[10px] font-semibold bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-full">{parentData.status}</span>}
-                </div>
-                <p className="text-sm font-bold text-gray-800 truncate" title={[parentData.prefix, parentData.name, parentData.suffix].filter(Boolean).join(' ')}>
-                    {[parentData.prefix, parentData.name, parentData.suffix].filter(Boolean).join(' ')}
-                </p>
-                <p className="text-xs text-gray-400 truncate">{[parentData.id_public, parentData.species].filter(Boolean).join(' • ')}</p>
-            </div>
-        </div>
-    );
-};
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -347,16 +289,12 @@ const AnimalTestModal = ({
 
                         {!isHeaderCollapsed && (
                             <>
-                                <div className="mt-4 text-sm space-y-1">
-                                    <div>
-                                        <span className="font-semibold text-gray-600">Variety: </span>
-                                        <span>{[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(', ')}</span>
-                                    </div>
-                                    {animal.carrierTraits && <div><span className="font-semibold text-gray-600">Carries: </span><span>{animal.carrierTraits}</span></div>}
-                                    {animal.geneticCode && <div><span className="font-semibold text-gray-600">Genetics: </span><code className="bg-gray-100 p-1 rounded text-xs">{animal.geneticCode}</code></div>}
-                                </div>
-
-                                <dl className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+                                <dl className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
+                                    <InfoItem label="Variety">
+                                        {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(', ') || <span className="text-gray-400">N/A</span>}
+                                    </InfoItem>
+                                    {animal.geneticCode && <InfoItem label="Genetics"><code className="bg-gray-200 px-1.5 py-1 rounded-md text-xs font-mono">{animal.geneticCode}</code></InfoItem>}
+                                    {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
                                     <InfoItem label="Birthdate">
                                         {animal.birthDate ? (
                                             <>
@@ -384,8 +322,20 @@ const AnimalTestModal = ({
                                     <InfoItem label="Keeper">{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</InfoItem>
                                     <InfoItem label="Weight">{animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'}</InfoItem>
                                     {animal.coOwnership && <InfoItem label="Co-Ownership" value={animal.coOwnership} />}
+                                    <InfoItem label="Breeding Lines">
+                                        <div className="flex flex-wrap items-center gap-1">
+                                            {(animalBreedingLines[animal.id_public] || [])
+                                                .map(lineId => breedingLineDefs.find(l => l.id === lineId))
+                                                .filter(Boolean)
+                                                .map(line => (
+                                                    <span key={line.id} title={line.name} style={{ color: line.color }} className="text-lg leading-none">&#x25C6;</span>
+                                                ))
+                                            }
+                                            {(animalBreedingLines[animal.id_public] || []).length === 0 && <span className="text-gray-400">N/A</span>}
+                                        </div>
+                                    </InfoItem>
                                 </dl>
-                                <div className="mt-4 pt-4">
+                                <div className="mt-4 pt-2 border-t border-gray-200">
                                     <p className="text-sm text-gray-500 text-center">
                                         {[animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId].filter(Boolean).join(' • ')}
                                     </p>
@@ -423,8 +373,8 @@ const AnimalTestModal = ({
                                     <div className="absolute top-4 right-4 text-xs">
                                         {loadingCOI ? <span className="text-gray-400">COI: Calculating...</span> : animalCOI != null && <span className="font-semibold">COI: {animalCOI.toFixed(2)}%</span>}
                                     </div>
-                                    <CompactParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
-                                    <CompactParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                    <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                    <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                                 </InfoCard>
                             </div>
                             <div className="space-y-6">
