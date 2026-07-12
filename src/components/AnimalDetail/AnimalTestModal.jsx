@@ -210,17 +210,22 @@ const AnimalTestModal = ({
                                             {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' • ')}
                                         </p>
                                         <p className="text-lg font-semibold text-gray-700 mt-1">
-                                            {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(', ') || <span className="text-gray-400 italic">Variety not specified</span>}
+                                            {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400 italic">Variety not specified</span>}
                                         </p>
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${animal.isOwned ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>{animal.isOwned ? 'Owned' : 'Not Owned'}</span>
-                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${animal.isDisplay ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'}`}>{animal.isDisplay ? 'Public' : 'Private'}</span>
-                                            {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.status}</span>}
-                                            {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.lifeStage}</span>}
-                                            {animal.healthStatus && <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.healthStatus}</span>}
+                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
+                                                {animal.isOwned ? <Heart size={12} /> : <HeartOff size={12} />}
+                                                {animal.isOwned ? 'Owned' : 'Not Owned'}
+                                            </span>
+                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${animal.isDisplay ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
+                                                {animal.isDisplay ? <Eye size={12} /> : <EyeOff size={12} />}
+                                                {animal.isDisplay ? 'Public' : 'Private'}
+                                            </span>
+                                            {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
+                                            {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
+                                            {animal.healthStatus && <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"><Shield size={12} />{animal.healthStatus}</span>}
                                             {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale</span>}
                                             {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Heart size={12} /> Stud</span>}
-                                            {animal.tags && animal.tags.map(tag => <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-full">{tag}</span>)}
                                         </div>
                                     </>
                                 )}
@@ -298,6 +303,7 @@ const AnimalTestModal = ({
                                 <dl className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-4 text-xs">
                                     {/* Animal */}
                                     <InfoItem label="Sex" value={animal.gender || 'N/A'} />
+                                    <InfoItem label="Birthdate" value={animal.birthDate ? formatDate(animal.birthDate) : 'N/A'} />
                                     <InfoItem label="Age">
                                         {(() => {
                                             if (!animal.birthDate) return 'N/A';
@@ -312,7 +318,6 @@ const AnimalTestModal = ({
                                             return animal.deceasedDate ? `Lived ${age}` : `~${age}`;
                                         })()}
                                     </InfoItem>
-                                    <InfoItem label="Birthdate" value={animal.birthDate ? formatDate(animal.birthDate) : 'N/A'} />
                                     <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'} />
                                     
                                     {/* Ownership */}
@@ -350,6 +355,15 @@ const AnimalTestModal = ({
                                             return (<>{linesComponent}{linesComponent && idComponent && <span className="text-gray-300 mx-1">•</span>}{idComponent}</>);
                                         })()}
                                     </p>
+                                    {animal.tags && animal.tags.length > 0 && (
+                                        <div className="text-center mt-2">
+                                            <div className="flex flex-wrap gap-2 justify-center">
+                                                {animal.tags.map(tag => (
+                                                    <span key={tag} className="bg-gray-200 text-gray-700 text-xs font-medium px-2 py-0.5 rounded-full">{tag}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </>
                         )}
