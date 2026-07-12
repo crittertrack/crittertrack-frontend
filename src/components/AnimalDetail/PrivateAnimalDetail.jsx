@@ -74,7 +74,6 @@ const PrivateAnimalDetail = ({
     const [showVertCert, setShowVertCert] = useState(false);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
-    const [returningAnimal, setReturningAnimal] = useState(false);
 
     // Warm pedigree cache shortly after opening details so Pedigree tab opens faster.
     useEffect(() => {
