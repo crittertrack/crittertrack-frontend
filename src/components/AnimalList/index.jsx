@@ -122,16 +122,12 @@ const AnimalList = ({
     onUpdateAnimal,
     onToggleOwned,
     userProfile,
-    handleReturnTransferredAnimal,
-    handleWithdrawTransfer,
     handleAcceptTransfer,
     handleRejectTransfer,
     onTransfer,
     onCloseAll,
     navigate,
     initialAnimalView = 'list',
-    // Transfer handlers passed from parent (e.g., App.js)
-    handleAcceptTransfer, handleRejectTransfer,
     // Archive props
     showArchiveScreen,
     setShowArchiveScreen,
