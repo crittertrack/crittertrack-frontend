@@ -2357,31 +2357,25 @@ const App = () => {
                 const iCurrentlyOwn = animalToView.ownerId_public === userProfile?.id_public;
                 if (iCurrentlyOwn) {
                     return (
-                        <PrivateAnimalDetail
-                                animal={animalToView}
-                                initialTab={privateAnimalInitialTab}
-                                initialBetaView={privateBetaView}
-                                onClose={handleBackFromAnimal}
-                                onCloseAll={handleCloseAllAnimals}
-                                onEdit={handleEditAnimal}
-                                onArchive={handleArchiveAnimal}
-                                API_BASE_URL={API_BASE_URL}
-                                authToken={authToken}
-                                setShowImageModal={setShowImageModal}
-                                setEnlargedImageUrl={setEnlargedImageUrl}
-                                onUpdateAnimal={handleAnimalFieldUpdate}
-                                showModalMessage={showModalMessage}
-                                onTransfer={(animal) => { // Open the new transfer modal directly
-                                    handleOpenTransferWithAnimal(animal); }}
-                                onViewAnimal={handleViewAnimal}
-                                onViewPublicAnimal={handleViewPublicAnimal}
-                                onToggleOwned={handleToggleAnimalOwned}
-                                userProfile={userProfile}
-                                breedingLineDefs={breedingLineDefs}
-                                animalBreedingLines={animalBreedingLines}
-                                toggleAnimalBreedingLine={toggleAnimalBreedingLine}
-                                setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
-                                onAddSibling={handleAddSibling}
+                        <AnimalTestModal
+                        animal={viewingAnimal}
+                        onClose={onClose}
+                        onEdit={onEditAnimal}
+                     onArchive={handleArchive}
+                     onAddSibling={onAddSibling}
+                     onTransfer={onTransfer}
+                     API_BASE_URL={API_BASE_URL}
+                     authToken={authToken}
+                     onViewAnimal={onViewAnimal}
+                     onUpdateAnimal={onUpdateAnimal}
+                     onToggleOwned={onToggleOwned}
+                     userProfile={userProfile}
+                     handleReturnTransferredAnimal={handleReturnTransferredAnimal}
+                     handleWithdrawTransfer={handleWithdrawTransfer}
+                     handleAcceptTransfer={handleAcceptTransfer}
+                     handleRejectTransfer={handleRejectTransfer}
+                    breedingLineDefs={breedingLineDefs}
+                    animalBreedingLines={animalBreedingLines}
                             />
                     );
                 } else {

@@ -335,6 +335,30 @@ const AnimalList = ({
         } catch {}
     };
 
+const handleArchive = useCallback(async (animalToArchive) => {
+        if (!animalToArchive) return;
+        const isArchived = !!animalToArchive.archived;
+        const action = isArchived ? 'unarchive' : 'archive';
+        if (!window.confirm(`Are you sure you want to ${action} this animal?`)) return;
+
+        try {
+            const url = `${API_BASE_URL}/animals/${animalToArchive.id_public}/${action}`;
+            const res = await axios.post(url, {}, { headers: { Authorization: `Bearer ${authToken}` } });
+            
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: res.data }));
+            window.dispatchEvent(new Event('animals-changed'));
+            
+            showModalMessage('Success', `Animal ${action}d successfully.`);
+            
+            if (viewingAnimal && viewingAnimal.id_public === animalToArchive.id_public) {
+                onClose();
+            }
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || `Failed to ${action} animal.`);
+        }
+    }, [API_BASE_URL, authToken, showModalMessage, viewingAnimal, onClose]);
+
+
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
         if (!authToken) return;
