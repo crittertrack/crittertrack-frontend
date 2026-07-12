@@ -17,6 +17,8 @@ import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
+import PrivateAnimalDetail from '../AnimalDetail/PrivateAnimalDetail';
+import AnimalTestModal from '../AnimalDetail/AnimalTestModal';
 
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
@@ -114,8 +116,22 @@ const AnimalList = ({
     showModalMessage, 
     onEditAnimal, 
     onViewAnimal, 
+    viewingAnimal, // Assuming parent passes this down
+    onClose, // Assuming parent passes this down
+    onAddSibling,
+    onUpdateAnimal,
+    onToggleOwned,
+    userProfile,
+    handleReturnTransferredAnimal,
+    handleWithdrawTransfer,
+    handleAcceptTransfer,
+    handleRejectTransfer,
+    onTransfer,
+    onCloseAll,
     navigate,
     initialAnimalView = 'list',
+    // Transfer handlers passed from parent (e.g., App.js)
+    handleAcceptTransfer, handleRejectTransfer,
     // Archive props
     showArchiveScreen,
     setShowArchiveScreen,
@@ -136,6 +152,54 @@ const AnimalList = ({
     // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
     // so that switching accounts never leaks one user's collections/prefs into another's.
     const userKey = useMemo(() => getUserKey(authToken), [authToken]);
+    const [returningAnimal, setReturningAnimal] = useState(false);
+
+    const handleReturnTransferredAnimal = useCallback(async () => {
+        if (!viewingAnimal?.id_public || returningAnimal) return;
+
+        const breederName = viewingAnimal.breederName || 'the breeder';
+        if (!window.confirm(`Return ${viewingAnimal.name} to ${breederName}? This will remove the animal from your account.`)) {
+            return;
+        }
+
+        setReturningAnimal(true);
+        try {
+            await axios.post(`${API_BASE_URL}/animals/${viewingAnimal.id_public}/return`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            window.dispatchEvent(new Event('animals-changed'));
+            showModalMessage('Success', `Animal has been returned to ${breederName}.`);
+            (onCloseAll || onClose)?.();
+        } catch (error) {
+            console.error('Failed to return animal:', error);
+            showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setReturningAnimal(false);
+        }
+    }, [viewingAnimal, returningAnimal, API_BASE_URL, authToken, showModalMessage, onCloseAll, onClose]);
+
+    const handleWithdrawTransfer = useCallback(async (transferId) => {
+        if (!transferId) return;
+
+        if (!window.confirm('Are you sure you want to withdraw this transfer request?')) {
+            return;
+        }
+
+        try {
+            await axios.post(`${API_BASE_URL}/transfers/${transferId}/withdraw`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Transfer request has been withdrawn.');
+            // Optimistically update the viewing animal to remove the pending transfer state
+            if (onUpdateAnimal) {
+                onUpdateAnimal({ ...viewingAnimal, pendingTransfer: null, pendingTransferId: undefined });
+            }
+        } catch (err) {
+            console.error('Failed to withdraw transfer:', err);
+            showModalMessage('Error', `Failed to withdraw transfer: ${err.response?.data?.message || err.message}`);
+        }
+    }, [API_BASE_URL, authToken, showModalMessage, viewingAnimal, onUpdateAnimal]);
+
     const [sortConfig, setSortConfig] = useState(() => {
         try {
             const saved = localStorage.getItem(`ct_list_sort_config_${userKey}`);

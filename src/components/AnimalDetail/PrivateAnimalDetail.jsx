@@ -23,7 +23,21 @@ import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { QRModal } from '../PublicProfile/PublicProfileView';
-import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, onAddSibling, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect, initialTab = 1, initialBetaView = 'vertical' }) => {
+import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
+
+const PrivateAnimalDetail = ({ 
+    animal, onClose, onCloseAll, onEdit, onArchive, onAddSibling, API_BASE_URL, authToken, 
+    setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, 
+    onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], 
+    breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, 
+    setAnimalBreedingLinesDirect, initialTab = 1, initialBetaView = 'vertical',
+    // Handlers now passed from parent
+    returningAnimal,
+    handleReturnTransferredAnimal,
+    handleWithdrawTransfer,
+    handleAcceptTransfer,
+    handleRejectTransfer
+}) => {
     const navigate = useNavigate();
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerInfo, setOwnerInfo] = useState(null);
@@ -147,48 +161,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
 
-    const handleReturnTransferredAnimal = useCallback(async () => {
-        if (!animal?.id_public || returningAnimal) return;
-
-        const breederName = animal.breederName || 'the breeder';
-        if (!window.confirm(`Return ${animal.name} to ${breederName}? This will remove the animal from your account.`)) {
-            return;
-        }
-
-        setReturningAnimal(true);
-        try {
-            await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            window.dispatchEvent(new Event('animals-changed'));
-            showModalMessage('Success', `Animal has been returned to ${breederName}.`);
-            (onCloseAll || onClose)?.();
-        } catch (error) {
-            console.error('Failed to return animal:', error);
-            showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
-        } finally {
-            setReturningAnimal(false);
-        }
-    }, [animal, returningAnimal, API_BASE_URL, authToken, showModalMessage, onCloseAll, onClose]);
-
-    const handleWithdrawTransfer = useCallback(async (transferId) => {
-        if (!transferId) return;
-
-        if (!window.confirm('Are you sure you want to withdraw this transfer request?')) {
-            return;
-        }
-
-        try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/withdraw`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            showModalMessage('Success', 'Transfer request has been withdrawn.');
-            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { ...animal, pendingTransfer: null, pendingTransferId: undefined } })); // Clear pendingTransfer and pendingTransferId
-        } catch (err) {
-            console.error('Failed to withdraw transfer:', err);
-            showModalMessage('Error', `Failed to withdraw transfer: ${err.response?.data?.message || err.message}`);
-        }
-    }, [API_BASE_URL, authToken, showModalMessage, animal]);
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); setShowHorizCert(false); setShowVertCert(false); }, [animal?.id_public, initialTab, initialBetaView]);
 
