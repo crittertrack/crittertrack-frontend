@@ -964,6 +964,40 @@ useEffect(() => {
     }, [authToken]);
     useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
 
+    const handleSaveEnclosure = useCallback(async () => {
+        if (enclosureSaving || !enclosureFormData.name.trim()) return;
+        setEnclosureSaving(true);
+        
+        const dataToSave = { ...enclosureFormData };
+
+        try { // Image upload logic
+            if (enclosureImageFile) {
+                const uploadFormData = new FormData();
+                uploadFormData.append('image', enclosureImageFile);
+                const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
+                });
+                dataToSave.imageUrl = res.data.imageUrl;
+            }
+
+            if (editingEnclosureId) {
+                await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, dataToSave,
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+            } else {
+                await axios.post(`${API_BASE_URL}/enclosures`, dataToSave,
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+            }
+            setEditingEnclosureId(null);
+            setShowEnclosureModal(false); // Close the modal on success
+            setEnclosureFormData({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'general', imageUrl: '' });
+            setEnclosureImageFile(null);
+            setEnclosureImagePreview(null);
+            fetchEnclosures();
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to save enclosure');
+        } finally { setEnclosureSaving(false); }
+    }, [authToken, API_BASE_URL, enclosureSaving, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, showModalMessage]);
+
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
         setSuppliesLoading(true);
@@ -2715,41 +2749,6 @@ useEffect(() => {
                     )}
                 </div>
             );
-        };
-
-        // Enclosure CRUD handlers
-        const handleSaveEnclosure = async () => {
-            if (enclosureSaving || !enclosureFormData.name.trim()) return;
-            setEnclosureSaving(true);
-            
-            const dataToSave = { ...enclosureFormData };
-
-            try { // Image upload logic
-                if (enclosureImageFile) {
-                    const uploadFormData = new FormData();
-                    uploadFormData.append('image', enclosureImageFile);
-                    const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
-                        headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
-                    });
-                    dataToSave.imageUrl = res.data.imageUrl;
-                }
-
-                if (editingEnclosureId) {
-                    await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, dataToSave,
-                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                } else {
-                    await axios.post(`${API_BASE_URL}/enclosures`, dataToSave,
-                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                }
-                setEditingEnclosureId(null);
-                setShowEnclosureModal(false); // Close the modal on success
-                setEnclosureFormData({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'general', imageUrl: '' });
-                setEnclosureImageFile(null);
-                setEnclosureImagePreview(null);
-                fetchEnclosures();
-            } catch (err) {
-                showModalMessage('Error', err.response?.data?.message || 'Failed to save enclosure');
-            } finally { setEnclosureSaving(false); }
         };
 
         const handleDeleteEnclosure = async (encId) => {
