@@ -66,6 +66,7 @@ const AnimalTestModal = ({
     if (!animal) return null;
 
     const [activeTab, setActiveTab] = useState('overview');
+    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [mainImage, setMainImage] = useState(animal.imageUrl || animal.photoUrl);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
@@ -159,9 +160,9 @@ const AnimalTestModal = ({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
             <div className="bg-gray-50 rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-start p-4 md:p-6 border-b border-gray-200 gap-4 md:gap-6">
+                <div className={`flex justify-between items-start p-4 md:p-6 border-b border-gray-200 gap-4 md:gap-6 ${isHeaderCollapsed ? 'pb-2 md:pb-4' : ''}`}>
                     {/* Left: Gallery */}
-                    <div className="w-1/4 flex flex-col gap-2">
+                    <div className={`w-1/4 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
                         <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
                             {mainImage ? (
                                 <img 
@@ -191,24 +192,31 @@ const AnimalTestModal = ({
                     </div>
 
                     {/* Right: Info & Actions */}
-                    <div className="w-3/4 flex flex-col">
+                    <div className={`${isHeaderCollapsed ? 'w-full' : 'w-3/4'} flex flex-col`}>
                         <div className="flex justify-between items-start">
                             <div>
                                 <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                                     {animal.prefix} {animal.name} {animal.suffix}
                                     {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />}
                                     {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
+                                    <button onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)} className="p-1 text-gray-400 hover:text-gray-600" title={isHeaderCollapsed ? 'Expand Header' : 'Collapse Header'}>
+                                        {isHeaderCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+                                    </button>
                                 </h2>
-                                <p className="text-md text-gray-500">
-                                    {[animal.strain, animal.breed, animal.species, animal.origin, animal.id_public].filter(Boolean).join(' • ')}
-                                </p>
-                                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                    {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.status}</span>}
-                                    {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.lifeStage}</span>}
-                                    {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale</span>}
-                                    {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Heart size={12} /> Stud</span>}
-                                    {animal.tags && animal.tags.map(tag => <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-full">{tag}</span>)}
-                                </div>
+                                {!isHeaderCollapsed && (
+                                    <>
+                                        <p className="text-md text-gray-500">
+                                            {[animal.id_public, animal.strain, animal.breed, animal.species, animal.origin].filter(Boolean).join(' • ')}
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                            {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.status}</span>}
+                                            {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full">{animal.lifeStage}</span>}
+                                            {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale</span>}
+                                            {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Heart size={12} /> Stud</span>}
+                                            {animal.tags && animal.tags.map(tag => <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-full">{tag}</span>)}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                             <div className="flex items-center gap-2">
                                 {onToggleOwned && <button onClick={() => onToggleOwned(animal.id_public, !animal.isOwned)} className={`p-2 rounded-lg transition ${animal.isOwned ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-700'}`} title={animal.isOwned ? 'Mark as Not Owned' : 'Mark as Owned'}>{animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}</button>}
@@ -278,20 +286,48 @@ const AnimalTestModal = ({
                             </div>
                         </div>
 
-                        <div className="mt-4 text-sm space-y-1">
-                            <div>
-                                <span className="font-semibold text-gray-600">Variety: </span>
-                                <span>{[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(', ')}</span>
-                            </div>
-                            {animal.carrierTraits && <div><span className="font-semibold text-gray-600">Carries: </span><span>{animal.carrierTraits}</span></div>}
-                            {animal.geneticCode && <div><span className="font-semibold text-gray-600">Genetics: </span><code className="bg-gray-100 p-1 rounded text-xs">{animal.geneticCode}</code></div>}
-                        </div>
+                        {!isHeaderCollapsed && (
+                            <>
+                                <div className="mt-4 text-sm space-y-1">
+                                    <div>
+                                        <span className="font-semibold text-gray-600">Variety: </span>
+                                        <span>{[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(', ')}</span>
+                                    </div>
+                                    {animal.carrierTraits && <div><span className="font-semibold text-gray-600">Carries: </span><span>{animal.carrierTraits}</span></div>}
+                                    {animal.geneticCode && <div><span className="font-semibold text-gray-600">Genetics: </span><code className="bg-gray-100 p-1 rounded text-xs">{animal.geneticCode}</code></div>}
+                                </div>
 
-                        <dl className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
-                            <InfoItem label="Born" value={animal.birthDate ? formatDate(animal.birthDate) : 'N/A'} />
-                            <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
-                            <InfoItem label="Keeper">{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</InfoItem>
-                        </dl>
+                                <dl className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+                                    <InfoItem label="Birthdate">
+                                        {animal.birthDate ? (
+                                            <>
+                                                {formatDate(animal.birthDate)}
+                                                <span className="text-gray-500 ml-1">
+                                                    {(() => {
+                                                        const birth = new Date(animal.birthDate);
+                                                        const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                                        let years = endDate.getFullYear() - birth.getFullYear();
+                                                        let months = endDate.getMonth() - birth.getMonth();
+                                                        let days = endDate.getDate() - birth.getDate();
+                                                        if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                                        if (months < 0) { years--; months += 12; }
+                                                        const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                        if (animal.deceasedDate) {
+                                                            return `(Lived ${ageStr})`;
+                                                        }
+                                                        return `(~${ageStr})`;
+                                                    })()}
+                                                </span>
+                                            </>
+                                        ) : 'N/A'}
+                                    </InfoItem>
+                                    <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
+                                    <InfoItem label="Keeper">{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</InfoItem>
+                                    <InfoItem label="Weight">{animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'}</InfoItem>
+                                    {animal.coOwnership && <InfoItem label="Co-Ownership" value={animal.coOwnership} />}
+                                </dl>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -314,13 +350,7 @@ const AnimalTestModal = ({
                 <div className="p-6 overflow-y-auto bg-white rounded-b-xl flex-1">
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 space-y-6">
-                                <InfoCard title="About" icon={<Info size={18} className="text-gray-400" />}>
-                                    <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6">
-                                        <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}g` : 'N/A'} />
-                                        <InfoItem label="Co-Ownership" value={animal.coOwnership} />
-                                    </dl>
-                                </InfoCard>
+                            <div className="lg:col-span-2 space-y-6">                                
                                 <InfoCard 
                                     title="Parents" 
                                     icon={<Users size={18} className="text-gray-400" />} 
