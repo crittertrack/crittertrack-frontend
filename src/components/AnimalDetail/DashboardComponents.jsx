@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatDate } from '../../../utils/dateFormatter';
+import { formatDate } from '../../utils/dateFormatter';
 
 export const InfoCard = ({ title, icon, children, className = '', contentClassName = '' }) => (
     <div className={`bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col h-full ${className}`}>
