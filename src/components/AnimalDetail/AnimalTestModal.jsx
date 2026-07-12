@@ -24,6 +24,19 @@ import { FertilityTabContent } from './FertilityTabContent';
 import { MeasurementsTabContent } from './MeasurementsTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents';
 
+const parseHealthRecords = (data) => {
+    if (!data) return [];
+    if (typeof data === 'string') {
+        try {
+            const parsed = JSON.parse(data);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return Array.isArray(data) ? data : [];
+};
+
 const AnimalTestModal = ({
     animal,
     onClose,
@@ -325,7 +338,7 @@ const AnimalTestModal = ({
                                 <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400" />}>
                                     <InfoItem label="Health Status" value={animal.healthStatus || 'Good'} />
                                     <InfoItem label="Last Vet Check" value={animal.lastVetCheck ? formatDate(animal.lastVetCheck) : 'N/A'} />
-                                    <InfoItem label="Medical Conditions" value={(animal.medicalConditions || []).map(c => c.condition).join(', ')} />
+                                    <InfoItem label="Medical Conditions" value={parseHealthRecords(animal.medicalConditions).map(c => c.condition || c.name).join(', ')} />
                                 </InfoCard>
                                 <InfoCard title="Recent Activity" icon={<Clock size={18} className="text-gray-400" />}>
                                     {(animal.milestones || []).slice(0, 3).map((m, i) => (
