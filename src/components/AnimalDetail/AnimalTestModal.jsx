@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
     X, Cat, Mars, Venus, Edit, Archive, Users, Heart, Tag, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Sprout,
     Shield, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain,
-    Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2,
+    Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info,
     Scale, HeartOff, Eye, EyeOff, RotateCcw
 } from 'lucide-react';
