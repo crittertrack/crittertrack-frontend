@@ -1011,6 +1011,26 @@ useEffect(() => {
     }, [authToken, API_BASE_URL]);
     useEffect(() => { fetchSupplies(); }, [fetchSupplies]);
 
+    const handleEnclosureTagAdd = useCallback(() => {
+        if (!newEnclosureTag.trim()) return;
+        setEnclosureFormData(p => ({ ...p, tags: [...new Set([...(p.tags || []), newEnclosureTag.trim()])] }));
+        setNewEnclosureTag('');
+    }, [newEnclosureTag]);
+
+    const handleEnclosureTagRemove = useCallback((tagToRemove) => {
+        setEnclosureFormData(p => ({ ...p, tags: (p.tags || []).filter(t => t !== tagToRemove) }));
+    }, []);
+
+    const handleEnclosureSpeciesLabelAdd = useCallback(() => {
+        if (!newEnclosureSpeciesLabel.trim()) return;
+        setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), newEnclosureSpeciesLabel.trim()])] }));
+        setNewEnclosureSpeciesLabel('');
+    }, [newEnclosureSpeciesLabel]);
+
+    const handleEnclosureSpeciesLabelRemove = useCallback((labelToRemove) => {
+        setEnclosureFormData(p => ({ ...p, speciesLabels: (p.speciesLabels || []).filter(l => l !== labelToRemove) }));
+    }, []);
+
     // Fetch user's custom species order on mount
     useEffect(() => {
         const fetchSpeciesOrder = async () => {
