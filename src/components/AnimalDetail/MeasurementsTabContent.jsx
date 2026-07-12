@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Ruler, Plus, Trash2 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import axios from 'axios';
-import { InfoCard } from './shared/DashboardComponents';
+import { InfoCard } from './DashboardComponents';
 
 const GrowthChart = ({ records, animal }) => {
     if (!records || records.length < 1) return null;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { UtensilsCrossed, Home, Droplets, Thermometer, Scissors, Check } from 'lucide-react';
 import { useDetailFieldTemplate, DetailJsonList } from './utils';
-import { InfoCard, InfoItem } from './shared/DashboardComponents';
+import { InfoCard, InfoItem } from './DashboardComponents';
 
 const parseCareRecords = (data) => {
     if (!data) return [];

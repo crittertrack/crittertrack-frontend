@@ -2,7 +2,7 @@ import React from 'react';
 import { Shield, Microscope, Pill, Stethoscope, Hospital } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import { useDetailFieldTemplate, DetailJsonList } from './utils';
-import { InfoCard, InfoItem, StructuredClearanceItem } from './shared/DashboardComponents';
+import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
 
 // Helper to parse fields that might be JSON strings or arrays
 const parseHealthRecords = (data) => {

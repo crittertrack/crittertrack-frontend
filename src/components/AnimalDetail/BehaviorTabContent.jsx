@@ -1,7 +1,7 @@
 import React from 'react';
 import { MessageSquare, Activity, AlertTriangle } from 'lucide-react';
 import { useDetailFieldTemplate } from './utils';
-import { InfoCard, InfoItem } from './shared/DashboardComponents';
+import { InfoCard, InfoItem } from './DashboardComponents';
 
 export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);

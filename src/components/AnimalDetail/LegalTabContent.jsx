@@ -3,7 +3,7 @@ import { FileCheck, Key, Ban, Tag, Home } from 'lucide-react';
 import { useDetailFieldTemplate } from './utils';
 import { formatDate } from '../../utils/dateFormatter';
 import { Link as RouterLink } from 'react-router-dom';
-import { InfoCard, InfoItem } from './shared/DashboardComponents';
+import { InfoCard, InfoItem } from './DashboardComponents';
 
 export const LegalTabContent = ({ animal, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);

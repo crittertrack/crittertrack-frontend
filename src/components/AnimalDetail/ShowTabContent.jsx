@@ -1,7 +1,7 @@
 import React from 'react';
 import { Trophy, Medal, Target } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
-import { InfoCard, InfoItem, StructuredTitleItem } from './shared/DashboardComponents';
+import { InfoCard, InfoItem, StructuredTitleItem } from './DashboardComponents';
 
 export const ShowTabContent = ({ animal }) => {
     const hasShowData = animal.showTitles || animal.showRatings || animal.judgeComments;

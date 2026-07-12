@@ -2,7 +2,7 @@ import React from 'react';
 import { Leaf, RefreshCw, Mars, Venus } from 'lucide-react';
 import { useDetailFieldTemplate } from './utils';
 import { formatDate } from '../../utils/dateFormatter';
-import { InfoCard, InfoItem } from './shared/DashboardComponents';
+import { InfoCard, InfoItem } from './DashboardComponents';
 
 export const FertilityTabContent = ({ animal, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);

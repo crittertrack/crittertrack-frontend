@@ -2,7 +2,7 @@ import React from 'react';
 import { Feather, Scale } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import { useDetailFieldTemplate } from './utils';
-import { InfoCard, InfoItem } from './shared/DashboardComponents';
+import { InfoCard, InfoItem } from './DashboardComponents';
 
 export const EndOfLifeTabContent = ({ animal, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);

@@ -22,7 +22,7 @@ import { ShowTabContent } from './ShowTabContent';
 import { EndOfLifeTabContent } from './EndOfLifeTabContent';
 import { FertilityTabContent } from './FertilityTabContent';
 import { MeasurementsTabContent } from './MeasurementsTabContent';
-import { InfoCard, InfoItem, TimelineItem } from './shared/DashboardComponents';
+import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents';
 
 const AnimalTestModal = ({
     animal,
