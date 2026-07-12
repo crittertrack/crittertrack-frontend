@@ -384,11 +384,12 @@ const AnimalTestModal = ({
                                     <InfoItem label="Keeper">{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</InfoItem>
                                     <InfoItem label="Weight">{animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'}</InfoItem>
                                     {animal.coOwnership && <InfoItem label="Co-Ownership" value={animal.coOwnership} />}
-                                </dl><div className="mt-4 pt-4 border-t border-gray-200">
+                                </dl>
+                                <div className="mt-4 pt-4 border-t border-gray-200">
                                     <p className="text-sm text-gray-500 text-center">
                                         {[animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId].filter(Boolean).join(' • ')}
                                     </p>
-                                </dl>
+                                </div>
                             </>
                         )}
                     </div>
