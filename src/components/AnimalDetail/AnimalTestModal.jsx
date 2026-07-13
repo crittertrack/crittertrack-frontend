@@ -209,9 +209,6 @@ const AnimalTestModal = ({
                                         <p className="text-xs text-gray-500">
                                             {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' • ')}
                                         </p>
-                                        <p className="text-base font-medium text-gray-700 mt-1">
-                                            {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400 italic">Variety not specified</span>}
-                                        </p>
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
                                                 {animal.isOwned ? <Heart size={12} /> : <HeartOff size={12} />}
@@ -300,10 +297,20 @@ const AnimalTestModal = ({
 
                         {!isHeaderCollapsed && (
                             <>
-                                <div className="mt-3 flex gap-4">
+                                <div className="mt-3 flex gap-4 flex-grow">
                                     <div className="w-2/3 space-y-4">
-                                        <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-xs">
-                                            {/* Animal */}
+                                        <dl className="grid grid-cols-3 gap-x-6 gap-y-4 text-xs">
+                                            {/* Row 1 */}
+                                            <InfoItem label="Variety">
+                                                {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400">N/A</span>}
+                                            </InfoItem>
+                                            <InfoItem label="Carries" value={animal.carrierTraits} />
+                                            <InfoItem label="Genetics">
+                                                {animal.geneticCode && <code className="font-mono">{animal.geneticCode}</code>}
+                                            </InfoItem>
+
+                                            {/* Row 2 */}
+                                            <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
                                             <InfoItem label="Birthdate">
                                                 {animal.birthDate ? (
                                                     <>
@@ -322,20 +329,17 @@ const AnimalTestModal = ({
                                                             })()}
                                                         </span>
                                                     </>
-                                                ) : 'N/A'}
+                                                ) : null}
                                             </InfoItem>
-                                            {/* Ownership */}
-                                            <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
+                                            <InfoItem label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
+
+                                            {/* Row 3 */}
+                                            <InfoItem label="Enclosure" value={enclosureInfo?.name} />
                                             <InfoItem label="Keeper">
                                                 <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</span>
                                                 {animal.coOwnership && <span className="text-gray-500 ml-1">({animal.coOwnership})</span>}
                                             </InfoItem>
-
-                                            {/* Genetics */}
-                                            <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'} />
-                                            {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
-                                            {animal.geneticCode && <InfoItem label="Genetics"><code className="font-mono">{animal.geneticCode}</code></InfoItem>}
-                                            {loadingCOI ? <InfoItem label="COI" value="Calculating..." /> : animalCOI != null && <InfoItem label="COI" value={`${animalCOI.toFixed(2)}%`} />}
+                                            <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
                                         </dl>
                                         <div className="pt-2 border-t border-gray-200">
                                             <p className="text-xs text-gray-500 text-center flex justify-center items-center gap-x-2">
@@ -376,7 +380,7 @@ const AnimalTestModal = ({
                                             )}
                                         </div>
                                     </div>
-                                    <div className="w-1/3 flex">
+                                    <div className="w-1/3 flex flex-col">
                                         <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} className="flex-1" contentClassName="overflow-y-auto">
                                             <p className="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
                                         </InfoCard>
