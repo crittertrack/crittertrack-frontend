@@ -194,200 +194,202 @@ const AnimalTestModal = ({
 
                     {/* Right: Info & Actions */}
                     <div className={`${isHeaderCollapsed ? 'w-full' : 'flex-1'} flex flex-col`}>
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                    {animal.prefix} {animal.name} {animal.suffix}
-                                    {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />}
-                                    {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
-                                    <button onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)} className="p-1 text-gray-400 hover:text-gray-600" title={isHeaderCollapsed ? 'Expand Header' : 'Collapse Header'}>
-                                        {isHeaderCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
-                                    </button>
-                                </h2>
-                                {!isHeaderCollapsed && (
-                                    <>
-                                        <p className="text-xs text-gray-700">
-                                            {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' • ')}
-                                        </p>
-                                        <div className="flex items-center gap-2 mt-3 flex-wrap">
-                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
-                                                {animal.isOwned ? <Heart size={12} /> : <HeartOff size={12} />}
-                                                {animal.isOwned ? 'Owned' : 'Not Owned'}
-                                            </span>
-                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isDisplay ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
-                                                {animal.isDisplay ? <Eye size={12} /> : <EyeOff size={12} />}
-                                                {animal.isDisplay ? 'Public' : 'Private'}
-                                            </span>
-                                            {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
-                                            {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
-                                            {animal.healthStatus && <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><HeartPulse size={12} />{animal.healthStatus}</span>}
-                                            {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale</span>}
-                                            {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud</span>}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {onToggleOwned && <button onClick={() => onToggleOwned(animal.id_public, !animal.isOwned)} className={`p-2 rounded-lg transition ${animal.isOwned ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-700'}`} title={animal.isOwned ? 'Mark as Not Owned' : 'Mark as Owned'}>{animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}</button>}
-                                {onUpdateAnimal && <button onClick={() => {
-                                    const newIsDisplay = !animal.isDisplay;
-                                    onUpdateAnimal({ ...animal, isDisplay: newIsDisplay, showOnPublicProfile: newIsDisplay });
-                                    axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay, showOnPublicProfile: newIsDisplay }, { headers: { Authorization: `Bearer ${authToken}` } }).catch(() => onUpdateAnimal({ ...animal, isDisplay: !newIsDisplay, showOnPublicProfile: !newIsDisplay }));
-                                }} className={`p-2 rounded-lg transition ${animal.isDisplay ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}`} title={animal.isDisplay ? 'Make Private' : 'Make Public'}>{animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}</button>}
-                                {onEdit && <button onClick={() => onEdit(animal)} className="p-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition"><Edit size={16} /></button>}
-                                {onTransfer && (() => {
-                                    const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
-                                    if (iWasTransferredThisAnimal && handleReturnTransferredAnimal) {
-                                        return (
-                                            <button
-                                                onClick={() => handleReturnTransferredAnimal()}
-                                                className="p-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition"
-                                                title="Return to breeder"
-                                            >
-                                                <RotateCcw size={16} />
-                                            </button>
-                                        );
-                                    }
-
-                                    if (animal.pendingTransfer) {
-                                        if (animal.pendingTransfer.fromUserId === userProfile?._id && handleWithdrawTransfer) {
+                        <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-300 shadow-sm p-4 h-full flex flex-col">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                        {animal.prefix} {animal.name} {animal.suffix}
+                                        {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />}
+                                        {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
+                                        <button onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)} className="p-1 text-gray-400 hover:text-gray-600" title={isHeaderCollapsed ? 'Expand Header' : 'Collapse Header'}>
+                                            {isHeaderCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+                                        </button>
+                                    </h2>
+                                    {!isHeaderCollapsed && (
+                                        <>
+                                            <p className="text-xs text-gray-700">
+                                                {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' • ')}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
+                                                    {animal.isOwned ? <Heart size={12} /> : <HeartOff size={12} />}
+                                                    {animal.isOwned ? 'Owned' : 'Not Owned'}
+                                                </span>
+                                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isDisplay ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
+                                                    {animal.isDisplay ? <Eye size={12} /> : <EyeOff size={12} />}
+                                                    {animal.isDisplay ? 'Public' : 'Private'}
+                                                </span>
+                                                {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
+                                                {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
+                                                {animal.healthStatus && <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><HeartPulse size={12} />{animal.healthStatus}</span>}
+                                                {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale</span>}
+                                                {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud</span>}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {onToggleOwned && <button onClick={() => onToggleOwned(animal.id_public, !animal.isOwned)} className={`p-2 rounded-lg transition ${animal.isOwned ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-700'}`} title={animal.isOwned ? 'Mark as Not Owned' : 'Mark as Owned'}>{animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}</button>}
+                                    {onUpdateAnimal && <button onClick={() => {
+                                        const newIsDisplay = !animal.isDisplay;
+                                        onUpdateAnimal({ ...animal, isDisplay: newIsDisplay, showOnPublicProfile: newIsDisplay });
+                                        axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay, showOnPublicProfile: newIsDisplay }, { headers: { Authorization: `Bearer ${authToken}` } }).catch(() => onUpdateAnimal({ ...animal, isDisplay: !newIsDisplay, showOnPublicProfile: !newIsDisplay }));
+                                    }} className={`p-2 rounded-lg transition ${animal.isDisplay ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}`} title={animal.isDisplay ? 'Make Private' : 'Make Public'}>{animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}</button>}
+                                    {onEdit && <button onClick={() => onEdit(animal)} className="p-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition"><Edit size={16} /></button>}
+                                    {onTransfer && (() => {
+                                        const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
+                                        if (iWasTransferredThisAnimal && handleReturnTransferredAnimal) {
                                             return (
                                                 <button
-                                                    onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
-                                                    className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
-                                                    title="Withdraw transfer request"
+                                                    onClick={() => handleReturnTransferredAnimal()}
+                                                    className="p-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition"
+                                                    title="Return to breeder"
                                                 >
-                                                    <X size={16} />
+                                                    <RotateCcw size={16} />
                                                 </button>
                                             );
                                         }
-                                        if (animal.pendingTransfer.toUserId === userProfile?._id && handleAcceptTransfer && handleRejectTransfer) {
-                                            return (
-                                                <>
+
+                                        if (animal.pendingTransfer) {
+                                            if (animal.pendingTransfer.fromUserId === userProfile?._id && handleWithdrawTransfer) {
+                                                return (
                                                     <button
-                                                        onClick={() => handleAcceptTransfer(animal.pendingTransfer._id)}
-                                                        className="p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition"
-                                                        title="Accept transfer"
-                                                    >
-                                                        <Check size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleRejectTransfer(animal.pendingTransfer._id)}
+                                                        onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
                                                         className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
-                                                        title="Reject transfer"
+                                                        title="Withdraw transfer request"
                                                     >
                                                         <X size={16} />
                                                     </button>
-                                                </>
-                                            );
-                                        }
-                                    }
-
-                                    return (
-                                        <button onClick={() => onTransfer(animal)} className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" title="Transfer Animal">
-                                            <ArrowLeftRight size={16} />
-                                        </button>
-                                    );
-                                })()}
-                                {onAddSibling && <button onClick={() => onAddSibling(animal)} className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"><Users size={16} /></button>}
-                                {onArchive && <button onClick={() => onArchive(animal)} className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"><Archive size={16} /></button>}
-                                <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-800"><X size={20} /></button>
-                            </div>
-                        </div>
-
-                        {!isHeaderCollapsed && (
-                            <>
-                                <div className="mt-3 flex gap-4 flex-grow">
-                                    <div className="w-2/3 space-y-4">
-                                        <dl className="grid grid-cols-3 gap-x-6 gap-y-4 text-xs">
-                                            {/* Row 1 */}
-                                            <InfoItem label="Variety">
-                                                {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400">N/A</span>}
-                                            </InfoItem>
-                                            <InfoItem label="Carries" value={animal.carrierTraits} />
-                                            <InfoItem label="Genetics">
-                                                {animal.geneticCode && <code className="font-mono">{animal.geneticCode}</code>}
-                                            </InfoItem>
-
-                                            {/* Row 2 */}
-                                            <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
-                                            <InfoItem label="Birthdate">
-                                                {animal.birthDate ? (
+                                                );
+                                            }
+                                            if (animal.pendingTransfer.toUserId === userProfile?._id && handleAcceptTransfer && handleRejectTransfer) {
+                                                return (
                                                     <>
-                                                        {formatDate(animal.birthDate)}
-                                                        <span className="text-gray-500 ml-1">
-                                                            {(() => {
-                                                                const birth = new Date(animal.birthDate);
-                                                                const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
-                                                                let years = endDate.getFullYear() - birth.getFullYear();
-                                                                let months = endDate.getMonth() - birth.getMonth();
-                                                                let days = endDate.getDate() - birth.getDate();
-                                                                if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
-                                                                if (months < 0) { years--; months += 12; }
-                                                                const age = years > 0 ? `${years}y ${months}m` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
-                                                                return `(${animal.deceasedDate ? `Lived ${age}` : `~${age}`})`;
-                                                            })()}
-                                                        </span>
+                                                        <button
+                                                            onClick={() => handleAcceptTransfer(animal.pendingTransfer._id)}
+                                                            className="p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition"
+                                                            title="Accept transfer"
+                                                        >
+                                                            <Check size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRejectTransfer(animal.pendingTransfer._id)}
+                                                            className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+                                                            title="Reject transfer"
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
                                                     </>
-                                                ) : null}
-                                            </InfoItem>
-                                            <InfoItem label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
+                                                );
+                                            }
+                                        }
 
-                                            {/* Row 3 */}
-                                            <InfoItem label="Enclosure" value={enclosureInfo?.name} />
-                                            <InfoItem label="Keeper">
-                                                <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</span>
-                                                {animal.coOwnership && <span className="text-gray-500 ml-1">({animal.coOwnership})</span>}
-                                            </InfoItem>
-                                            <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
-                                        </dl>
-                                        <div className="pt-2 border-t border-gray-200">
-                                            <p className="text-xs text-gray-700 text-center flex justify-center items-center gap-x-2">
-                                                {(() => {
-                                                    const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean);
-                                                    const idString = [animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId].filter(Boolean).join(' • ');
-                                                    const linesComponent = lines.length > 0 && (
-                                                        <span className="flex items-center gap-1">
-                                                            {lines.map(line => (
+                                        return (
+                                            <button onClick={() => onTransfer(animal)} className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" title="Transfer Animal">
+                                                <ArrowLeftRight size={16} />
+                                            </button>
+                                        );
+                                    })()}
+                                    {onAddSibling && <button onClick={() => onAddSibling(animal)} className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"><Users size={16} /></button>}
+                                    {onArchive && <button onClick={() => onArchive(animal)} className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"><Archive size={16} /></button>}
+                                    <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-800"><X size={20} /></button>
+                                </div>
+                            </div>
+
+                            {!isHeaderCollapsed && (
+                                <>
+                                    <div className="mt-3 flex gap-4 flex-grow">
+                                        <div className="w-2/3 space-y-4">
+                                            <dl className="grid grid-cols-3 gap-x-6 gap-y-4 text-xs">
+                                                {/* Row 1 */}
+                                                <InfoItem label="Variety">
+                                                    {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400">N/A</span>}
+                                                </InfoItem>
+                                                <InfoItem label="Carries" value={animal.carrierTraits} />
+                                                <InfoItem label="Genetics">
+                                                    {animal.geneticCode && <code className="font-mono">{animal.geneticCode}</code>}
+                                                </InfoItem>
+
+                                                {/* Row 2 */}
+                                                <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
+                                                <InfoItem label="Birthdate">
+                                                    {animal.birthDate ? (
+                                                        <>
+                                                            {formatDate(animal.birthDate)}
+                                                            <span className="text-gray-500 ml-1">
+                                                                {(() => {
+                                                                    const birth = new Date(animal.birthDate);
+                                                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                                                    let years = endDate.getFullYear() - birth.getFullYear();
+                                                                    let months = endDate.getMonth() - birth.getMonth();
+                                                                    let days = endDate.getDate() - birth.getDate();
+                                                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                                                    if (months < 0) { years--; months += 12; }
+                                                                    const age = years > 0 ? `${years}y ${months}m` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                                    return `(${animal.deceasedDate ? `Lived ${age}` : `~${age}`})`;
+                                                                })()}
+                                                            </span>
+                                                        </>
+                                                    ) : null}
+                                                </InfoItem>
+                                                <InfoItem label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
+
+                                                {/* Row 3 */}
+                                                <InfoItem label="Enclosure" value={enclosureInfo?.name} />
+                                                <InfoItem label="Keeper">
+                                                    <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</span>
+                                                    {animal.coOwnership && <span className="text-gray-500 ml-1">({animal.coOwnership})</span>}
+                                                </InfoItem>
+                                                <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
+                                            </dl>
+                                            <div className="pt-2 border-t border-gray-200">
+                                                <p className="text-xs text-gray-700 text-center flex justify-center items-center gap-x-2">
+                                                    {(() => {
+                                                        const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean);
+                                                        const idString = [animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId].filter(Boolean).join(' • ');
+                                                        const linesComponent = lines.length > 0 && (
+                                                            <span className="flex items-center gap-1">
+                                                                {lines.map(line => (
+                                                                    <span key={line.id} title={line.name} style={{ color: line.color }} className="text-sm leading-none">&#x25C6;</span>
+                                                                ))}
+                                                            </span>
+                                                        );
+                                                        const idComponent = idString && <span>{idString}</span>;
+                                                        return (<>{linesComponent}{linesComponent && idComponent && <span className="text-gray-300 mx-1">•</span>}{idComponent}</>);
+                                                    })()}
+                                                </p>
+                                                {animal.tags && animal.tags.length > 0 && (
+                                                    <div className="text-center mt-2">
+                                                        <div className="flex flex-wrap gap-2 justify-center">
+                                                            {animal.tags.map(tag => (
+                                                                <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {(animalBreedingLines[animal.id_public] || []).length > 0 && (
+                                                    <div className="text-center mt-2">
+                                                        <div className="flex flex-wrap items-center gap-1 justify-center">
+                                                            {(animalBreedingLines[animal.id_public] || [])
+                                                                .map(lineId => breedingLineDefs.find(l => l.id === lineId))
+                                                                .filter(Boolean)
+                                                            .map(line => (
                                                                 <span key={line.id} title={line.name} style={{ color: line.color }} className="text-sm leading-none">&#x25C6;</span>
                                                             ))}
-                                                        </span>
-                                                    );
-                                                    const idComponent = idString && <span>{idString}</span>;
-                                                    return (<>{linesComponent}{linesComponent && idComponent && <span className="text-gray-300 mx-1">•</span>}{idComponent}</>);
-                                                })()}
-                                            </p>
-                                            {animal.tags && animal.tags.length > 0 && (
-                                                <div className="text-center mt-2">
-                                                    <div className="flex flex-wrap gap-2 justify-center">
-                                                        {animal.tags.map(tag => (
-                                                            <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
-                                                        ))}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
-                                            {(animalBreedingLines[animal.id_public] || []).length > 0 && (
-                                                <div className="text-center mt-2">
-                                                    <div className="flex flex-wrap items-center gap-1 justify-center">
-                                                        {(animalBreedingLines[animal.id_public] || [])
-                                                            .map(lineId => breedingLineDefs.find(l => l.id === lineId))
-                                                            .filter(Boolean)
-                                                        .map(line => (
-                                                            <span key={line.id} title={line.name} style={{ color: line.color }} className="text-sm leading-none">&#x25C6;</span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="w-1/3 flex flex-col">
+                                            <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} className="flex-1" contentClassName="overflow-y-auto">
+                                                <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
+                                            </InfoCard>
                                         </div>
                                     </div>
-                                    <div className="w-1/3 flex flex-col">
-                                        <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} className="flex-1" contentClassName="overflow-y-auto">
-                                            <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
-                                        </InfoCard>
-                                    </div>
-                                </div>
-                            </>
-                        )}
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
 
