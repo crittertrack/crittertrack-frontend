@@ -161,7 +161,7 @@ const AnimalTestModal = ({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
             <div className="bg-[#e1f2f5] rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col">
                 {/* Header */}
-                <div className={`flex items-stretch p-4 md:p-6 border-b border-gray-200 gap-4 md:gap-6 ${isHeaderCollapsed ? 'pb-2 md:pb-4' : ''}`}>
+                <div className={`flex items-stretch p-4 md:p-6 pb-3 md:pb-4 border-b border-gray-200 gap-4 md:gap-6`}>
                     {/* Left: Gallery */}
                     <div className={`w-1/4 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
                         <div className="flex-grow bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-300">
@@ -394,7 +394,7 @@ const AnimalTestModal = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="px-6 border-b border-gray-200">
+                <div className="bg-white px-6 border-b border-gray-200">
                     <nav className="flex space-x-4 -mb-px overflow-x-auto">
                         {TABS.map(tab => (
                             <button
