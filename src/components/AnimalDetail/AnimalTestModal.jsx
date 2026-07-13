@@ -324,8 +324,6 @@ const AnimalTestModal = ({
                                                     </>
                                                 ) : 'N/A'}
                                             </InfoItem>
-                                            <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'} />
-                                            
                                             {/* Ownership */}
                                             <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
                                             <InfoItem label="Keeper">
@@ -333,9 +331,10 @@ const AnimalTestModal = ({
                                                 {animal.coOwnership && <span className="text-gray-500 ml-1">({animal.coOwnership})</span>}
                                             </InfoItem>
 
+                                            <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'} />
                                             {/* Genetics */}
-                                            {animal.geneticCode && <InfoItem label="Genetics"><code className="bg-gray-200 px-1.5 py-1 rounded-md text-[11px] font-mono">{animal.geneticCode}</code></InfoItem>}
                                             {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
+                                            {animal.geneticCode && <InfoItem label="Genetics"><code className="text-[11px] font-mono">{animal.geneticCode}</code></InfoItem>}
                                             {loadingCOI ? <InfoItem label="COI" value="Calculating..." /> : animalCOI != null && <InfoItem label="COI" value={`${animalCOI.toFixed(2)}%`} />}
                                         </dl>
                                         <div className="pt-4 border-t border-gray-200">
@@ -378,7 +377,7 @@ const AnimalTestModal = ({
                                         </div>
                                     </div>
                                     <div className="w-1/3">
-                                        <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />}>
+                                        <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} contentClassName="overflow-y-auto">
                                             <p className="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
                                         </InfoCard>
                                     </div>
@@ -407,18 +406,14 @@ const AnimalTestModal = ({
                 <div className="p-6 overflow-y-auto bg-white rounded-b-xl flex-1">
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 space-y-6">                                
-                                <InfoCard 
-                                    title="Parents" 
-                                    icon={<Users size={18} className="text-gray-400" />} 
-                                    contentClassName="grid grid-cols-1 md:grid-cols-2 gap-4"
-                                >
-                                    <div className="absolute top-4 right-4 text-xs">
+                            <div className="lg:col-span-2">
+                                <div className="relative grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <div className="absolute right-4 top-4 z-10 text-xs">
                                         {loadingCOI ? <span className="text-gray-400">COI: Calculating...</span> : animalCOI != null && <span className="font-semibold">COI: {animalCOI.toFixed(2)}%</span>}
                                     </div>
                                     <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                                     <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
-                                </InfoCard>
+                                </div>
                             </div>
                             <div className="space-y-6">
                                 <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400" />}>
