@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
+﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -252,10 +252,10 @@ const ViewOnlyPrivateAnimalDetail = ({
     // Fetch owner info when animal is owned (ownerId_public differs from breederId_public)
     React.useEffect(() => {
         const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.ownerId_public) {
+            if (animal?.isOwned && animal?.creatorId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setOwnerInfo(response.data[0]);
@@ -270,7 +270,7 @@ const ViewOnlyPrivateAnimalDetail = ({
             }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.ownerId_public, API_BASE_URL]);
+    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
     
     if (!animal) return null;
 
@@ -306,8 +306,8 @@ const ViewOnlyPrivateAnimalDetail = ({
                         <div className="flex items-center gap-2">
                             {(() => {
                                 // This component is for view-only animals.
-                                // Check if the current user is the *original* owner of this transferred animal.
-                                const iAmTheOriginalOwner = animal.originalOwnerId === userProfile?._id;
+                                // Check if the current user is the *original* creator of this transferred animal.
+                                const iAmTheOriginalOwner = animal.originalCreatorId === userProfile?._id;
 
                                 if (iAmTheOriginalOwner) {
                                     return (
@@ -508,10 +508,10 @@ const ViewOnlyPrivateAnimalDetail = ({
                                                     return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
-                                            {/* Keeper */}
-                                            {animal.ownerId_public && (
+                                            {/* Owner */}
+                                            {animal.creatorId_public && (
                                                 <div>
-                                                    <span className="text-gray-500">Keeper:</span>{' '}
+                                                    <span className="text-gray-500">Owner:</span>{' '}
                                                     {ownerInfo ? (
                                                         <RouterLink
                                                             to={`/user/${ownerInfo.id_public}`}
@@ -532,7 +532,7 @@ const ViewOnlyPrivateAnimalDetail = ({
                                                             })()}
                                                         </RouterLink>
                                                     ) : (
-                                                        <span className="font-mono text-accent">{animal.keeperName || '\u2014'}</span>
+                                                        <span className="font-mono text-accent">{animal.ownerName || '\u2014'}</span>
                                                     )}
                                                 </div>
                                             )}
@@ -595,15 +595,15 @@ const ViewOnlyPrivateAnimalDetail = ({
 
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><User size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        const keeperDisplay = animal.keeperName || null;
-                                        if (!keeperDisplay) return null;
+                                        const ownerDisplay = animal.ownerName || null;
+                                        if (!ownerDisplay) return null;
                                         return (
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-600">Keeper Name:</span>
-                                                <strong>{keeperDisplay}</strong>
+                                                <span className="text-gray-600">Owner Name:</span>
+                                                <strong>{ownerDisplay}</strong>
                                             </div>
                                         );
                                     })()}
@@ -618,7 +618,7 @@ const ViewOnlyPrivateAnimalDetail = ({
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -821,8 +821,8 @@ const ViewOnlyPrivateAnimalDetail = ({
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
                             {/* 2nd Section: Keeper History */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4"> 
+                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -1321,12 +1321,6 @@ const ViewOnlyPrivateAnimalDetail = ({
                                             <div><span className="text-gray-600">{getLabel('isPregnant', 'Pregnant')}:</span> <strong>{animal.isPregnant ? 'Yes' : 'No'}</strong></div>
                                             <div><span className="text-gray-600">{getLabel('isNursing', 'Nursing')}:</span> <strong>{animal.isNursing ? 'Yes' : 'No'}</strong></div>
                                         </>
-                                    )}
-                                    {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? 'Yes' : 'No'}</strong></div>
-                                    )}
-                                    {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? 'Yes' : 'No'}</strong></div>
                                     )}
                                 </div>
                             </div>

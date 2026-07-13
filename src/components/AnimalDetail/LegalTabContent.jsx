@@ -74,7 +74,7 @@ export const LegalTabContent = ({ animal, API_BASE_URL }) => {
                     </InfoCard>
                 )}
                 {hasKeeperHistory && (
-                    <InfoCard title="Keeper History" icon={<Home size={18} className="text-gray-400" />}>
+                    <InfoCard title="Owner History" icon={<Users size={18} className="text-gray-400" />}>
                         <div className="space-y-2">
                             {(animal.keeperHistory || []).map((entry, idx) => (
                                 <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200">

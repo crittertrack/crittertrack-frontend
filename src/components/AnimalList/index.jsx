@@ -565,12 +565,12 @@ const handleArchive = useCallback(async (animalToArchive) => {
             setArchivedAnimals(responseData.archived || []);
             const sold = responseData.soldTransferred || [];
             if (sold.length > 0) {
-                // Get unique owner IDs from the sold animals
-                const ownerIds = [...new Set(sold.map(a => a.ownerId_public).filter(Boolean))];
+                // Get unique creator IDs from the sold animals
+                const creatorIds = [...new Set(sold.map(a => a.creatorId_public).filter(Boolean))];
 
-                if (ownerIds.length > 0) {
+                if (creatorIds.length > 0) {
                     // Fetch all owner profiles in parallel for efficiency
-                    const profilePromises = ownerIds.map(id =>
+                    const profilePromises = creatorIds.map(id =>
                         axios.get(`${API_BASE_URL}/public/profiles/search?query=${id}&limit=1`)
                             .then(res => res.data?.[0])
                             .catch(() => null) // Ignore errors for individual profile fetches
@@ -580,13 +580,13 @@ const handleArchive = useCallback(async (animalToArchive) => {
 
                     // Enrich the animal objects with owner details for display
                     const enrichedSold = sold.map(animal => {
-                        const ownerProfile = profilesMap.get(animal.ownerId_public);
+                        const ownerProfile = profilesMap.get(animal.creatorId_public);
                         if (ownerProfile) {
                             return {
                                 ...animal,
                                 ownerName: ownerProfile.breederName || ownerProfile.personalName,
                                 ownerAvatar: ownerProfile.profileImage,
-                                ownerIdPublic: ownerProfile.id_public
+                                creatorIdPublic: ownerProfile.id_public
                             };
                         }
                         return animal;
@@ -1765,7 +1765,7 @@ useEffect(() => {
                         </div>
                     )}
                     {/* Transfer icon top-left */}
-                    {animal.originalOwnerId && !isSelectable && (
+                    {animal.originalCreatorId && !isSelectable && (
                         <div className="absolute top-1 sm:top-2 left-1 sm:left-2 text-black" title="Received Animal">
                             <ArrowLeftRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
                         </div>

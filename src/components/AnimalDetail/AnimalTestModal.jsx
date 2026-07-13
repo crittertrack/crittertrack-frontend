@@ -335,9 +335,9 @@ const AnimalTestModal = ({
                                                 <InfoItem label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
 
                                                 {/* Row 3 */}
-                                                <InfoItem label="Enclosure" value={enclosureInfo?.name} />
-                                                <InfoItem label="Keeper">
-                                                    <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.keeperName || 'N/A'}</span>
+                                                <InfoItem label="Enclosure" value={enclosureInfo?.name} /> 
+                                                <InfoItem label="Owner">
+                                                    <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.ownerName || 'N/A'}</span>
                                                     {animal.coOwnership && <span className="text-gray-500 ml-1">({animal.coOwnership})</span>}
                                                 </InfoItem>
                                                 <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>

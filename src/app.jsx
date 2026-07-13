@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -2342,7 +2342,7 @@ const App = () => {
 
             {/* Animal detail overlay - renders on top of whatever route is active */}
             {animalToView && (() => {
-                const iCurrentlyOwn = animalToView.ownerId_public === userProfile?.id_public;
+                const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public;
                 if (iCurrentlyOwn) {
                     return (
                         <AnimalTestModal

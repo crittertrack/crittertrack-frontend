@@ -269,9 +269,9 @@ const PublicProfilePage = () => {
                                   flagData.context?.type === 'animal' ? 'animal' : 'message';
                 
                 // Get the correct user ID based on context type
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
+                const userId = flagData.context?.type === 'profile'
+                    ? flagData.context?.userId
+                    : flagData.context?.creatorId;
                 
                 const reportData = {
                     reason: flagData.reason,
@@ -310,9 +310,9 @@ const PublicProfilePage = () => {
             }
             else if (flagData.action === 'warn') {
                 // Warn user - get correct user ID based on context type
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
+                const userId = flagData.context?.type === 'profile'
+                    ? flagData.context?.userId
+                    : flagData.context?.creatorId;
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/warn`,
@@ -327,9 +327,9 @@ const PublicProfilePage = () => {
             }
             else if (flagData.action === 'suspend') {
                 // Suspend user - get correct user ID based on context type
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
+                const userId = flagData.context?.type === 'profile'
+                    ? flagData.context?.userId
+                    : flagData.context?.creatorId;
                 
                 await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/status`,
@@ -345,9 +345,9 @@ const PublicProfilePage = () => {
             }
             else if (flagData.action === 'ban') {
                 // Ban user - get correct user ID based on context type
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
+                const userId = flagData.context?.type === 'profile'
+                    ? flagData.context?.userId
+                    : flagData.context?.creatorId;
                 
                 await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/status`,
@@ -363,9 +363,9 @@ const PublicProfilePage = () => {
             }
             else if (flagData.action === 'lift-warning') {
                 // Lift warning from user
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
+                const userId = flagData.context?.type === 'profile'
+                    ? flagData.context?.userId
+                    : flagData.context?.creatorId;
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/lift-warning`,
@@ -380,9 +380,9 @@ const PublicProfilePage = () => {
             }
             else if (flagData.action === 'lift-suspension') {
                 // Lift suspension from user
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
+                const userId = flagData.context?.type === 'profile'
+                    ? flagData.context?.userId
+                    : flagData.context?.creatorId;
                 
                 await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/status`,
@@ -397,9 +397,9 @@ const PublicProfilePage = () => {
             }
             else if (flagData.action === 'lift-ban') {
                 // Lift ban from user
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
+                const userId = flagData.context?.type === 'profile'
+                    ? flagData.context?.userId
+                    : flagData.context?.creatorId;
                 
                 await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/status`,
