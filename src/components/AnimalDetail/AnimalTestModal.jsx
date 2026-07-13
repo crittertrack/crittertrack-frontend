@@ -159,7 +159,7 @@ const AnimalTestModal = ({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
-            <div className="bg-gray-50 rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col">
+            <div className="bg-[#e1f2f5] rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col">
                 {/* Header */}
                 <div className={`flex items-start p-4 md:p-6 border-b border-gray-200 gap-4 md:gap-6 ${isHeaderCollapsed ? 'pb-2 md:pb-4' : ''}`}>
                     {/* Left: Gallery */}
@@ -196,7 +196,7 @@ const AnimalTestModal = ({
                     <div className={`${isHeaderCollapsed ? 'w-full' : 'flex-1'} flex flex-col`}>
                         <div className="flex justify-between items-start">
                             <div>
-                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                                     {animal.prefix} {animal.name} {animal.suffix}
                                     {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />}
                                     {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
@@ -206,10 +206,10 @@ const AnimalTestModal = ({
                                 </h2>
                                 {!isHeaderCollapsed && (
                                     <>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-gray-700">
                                             {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' • ')}
                                         </p>
-                                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                        <div className="flex items-center gap-2 mt-3 flex-wrap">
                                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
                                                 {animal.isOwned ? <Heart size={12} /> : <HeartOff size={12} />}
                                                 {animal.isOwned ? 'Owned' : 'Not Owned'}
@@ -342,7 +342,7 @@ const AnimalTestModal = ({
                                             <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
                                         </dl>
                                         <div className="pt-2 border-t border-gray-200">
-                                            <p className="text-xs text-gray-500 text-center flex justify-center items-center gap-x-2">
+                                            <p className="text-xs text-gray-700 text-center flex justify-center items-center gap-x-2">
                                                 {(() => {
                                                     const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean);
                                                     const idString = [animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId].filter(Boolean).join(' • ');
@@ -361,7 +361,7 @@ const AnimalTestModal = ({
                                                 <div className="text-center mt-2">
                                                     <div className="flex flex-wrap gap-2 justify-center">
                                                         {animal.tags.map(tag => (
-                                                            <span key={tag} className="bg-gray-200 text-gray-700 text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
+                                                            <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -382,7 +382,7 @@ const AnimalTestModal = ({
                                     </div>
                                     <div className="w-1/3 flex flex-col">
                                         <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} className="flex-1" contentClassName="overflow-y-auto">
-                                            <p className="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
+                                            <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
                                         </InfoCard>
                                     </div>
                                 </div>
@@ -398,7 +398,7 @@ const AnimalTestModal = ({
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                                className={`flex items-center gap-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-700 hover:text-gray-800 hover:border-gray-400'}`}
                             >
                                 {tab.icon} {tab.label}
                             </button>
@@ -407,7 +407,7 @@ const AnimalTestModal = ({
                 </div>
 
                 {/* Content */}
-                <div className="p-6 overflow-y-auto bg-white rounded-b-xl flex-1">
+                <div className="p-6 overflow-y-auto rounded-b-xl flex-1">
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className="lg:col-span-2">

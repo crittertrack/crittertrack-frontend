@@ -6,7 +6,7 @@ export const InfoCard = ({ title, icon, children, className = '', contentClassNa
         {title && (
             <div className="flex items-center gap-3 p-3 border-b border-gray-200">
                 {icon}
-                <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
+                <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
             </div>
         )}
         <div className={`p-3 space-y-3 flex-1 ${contentClassName}`}>
@@ -17,8 +17,8 @@ export const InfoCard = ({ title, icon, children, className = '', contentClassNa
 
 export const InfoItem = ({ label, value, children }) => (
     <div>
-        <dt className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">{label}</dt>
-        <dd className="text-xs font-medium text-gray-800">{children || value || <span className="text-gray-400">N/A</span>}</dd>
+        <dt className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">{label}</dt>
+        <dd className="text-xs font-medium text-gray-900">{children || value || <span className="text-gray-500">N/A</span>}</dd>
     </div>
 );
 
@@ -28,9 +28,9 @@ export const TimelineItem = ({ icon, title, description, date }) => (
             {icon}
         </div>
         <div className="flex-1">
-            <p className="font-medium text-gray-800">{title}</p>
-            <p className="text-sm text-gray-500">{description}</p>
-            <p className="text-xs text-gray-400 mt-1">{formatDate(date)}</p>
+            <p className="font-medium text-gray-900">{title}</p>
+            <p className="text-sm text-gray-700">{description}</p>
+            <p className="text-xs text-gray-600 mt-1">{formatDate(date)}</p>
         </div>
     </div>
 );
