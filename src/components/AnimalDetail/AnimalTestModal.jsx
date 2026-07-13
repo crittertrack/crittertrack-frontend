@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     X, Cat, Mars, Venus, Edit, Archive, Users, Heart, Tag, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Sprout,
-    Shield, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain,
-    Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList,
+    Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse,
+    Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info,
     Scale, HeartOff, Eye, EyeOff, RotateCcw
 } from 'lucide-react';
@@ -144,7 +144,7 @@ const AnimalTestModal = ({
     const TABS = [
         { id: 'overview', label: 'Overview', icon: <Info size={14} /> },
         { id: 'identification', label: 'Identification', icon: <Hash size={14} /> },
-        { id: 'health', label: 'Health', icon: <Heart size={14} /> },
+        { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> },
         { id: 'care', label: 'Care', icon: <Droplets size={14} /> },
         { id: 'measurements', label: 'Measurements', icon: <Ruler size={14} /> },
         { id: 'behavior', label: 'Behavior', icon: <Brain size={14} /> },

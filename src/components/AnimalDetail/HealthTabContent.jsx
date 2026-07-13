@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Microscope, Pill, Stethoscope, Hospital } from 'lucide-react';
+import { Shield, Microscope, HeartPulse, Stethoscope } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import { useDetailFieldTemplate, DetailJsonList } from './utils';
 import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
@@ -66,7 +66,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
             </div>
 
             <div className="space-y-6">
-                <InfoCard title="Active Medical Records" icon={<Pill size={18} className="text-gray-400" />}>
+                <InfoCard title="Active Medical Records" icon={<HeartPulse size={18} className="text-gray-400" />}>
                     {hasActiveRecords ? (
                          <>
                             {medicalConditions.length > 0 && <DetailJsonList label="Medical Conditions" data={medicalConditions} renderItem={item => `${item.condition || item.name}`} />}
@@ -91,7 +91,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
             </div>
 
             <div className="space-y-6">
-                 <InfoCard title="Health Clearances & Screening" icon={<Hospital size={18} className="text-gray-400" />}>
+                 <InfoCard title="Health Clearances & Screening" icon={<HeartPulse size={18} className="text-gray-400" />}>
                     {!hasClearances ? (
                         <p className="text-sm text-gray-400">No health clearances recorded.</p>
                     ) : (

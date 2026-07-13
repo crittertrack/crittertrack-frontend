@@ -9,9 +9,9 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // Lucide React Icons
 import {
     Mars, Venus, VenusAndMars, Circle, Cat, QrCode, Edit, Archive, Heart, HeartOff, Eye, EyeOff,
-    ChevronDown, ChevronRight, ChevronUp, ArrowLeft, X, ClipboardList, Lock, Tag, Palette, Dna,
-    TreeDeciduous, Egg, Hospital, Home, Brain, FileText, Trophy, FileCheck, Scale, Images, ScrollText,
-    Shield, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare,
+    ChevronDown, ChevronRight, ChevronUp, ArrowLeft, X, ClipboardList, Lock, Tag, Palette, Dna, HeartPulse,
+    TreeDeciduous, Egg, Home, Brain, FileText, Trophy, FileCheck, Scale, Images, ScrollText,
+    Shield, Microscope, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, ArrowRight, Hourglass,
     Users, FolderOpen, Globe, Sparkles, Sprout, Ruler, Feather, Download, Loader2, Camera, Network,
     TableOfContents, BookOpen, RotateCcw, ArrowLeftRight, Hash, User, Bell
@@ -750,7 +750,7 @@ const PrivateAnimalDetail = ({
                             { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
                             { id: 6, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' },
                             { id: 7, label: 'Fertility', icon: Egg, color: 'text-yellow-500' },
-                            { id: 8, label: 'Health', icon: Hospital, color: 'text-red-500' },
+                            { id: 8, label: 'Health', icon: HeartPulse, color: 'text-red-500' },
                             { id: 9, label: 'Care', icon: Home, color: 'text-teal-500' },
                             { id: 10, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
                             { id: 11, label: 'Notes & Milestones', icon: FileText, color: 'text-indigo-500' },
@@ -2256,7 +2256,7 @@ const PrivateAnimalDetail = ({
                             {/* 3rd Section: Active Medical Records */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><HeartPulse size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
@@ -2329,7 +2329,7 @@ const PrivateAnimalDetail = ({
                                 return (clearanceFields.length > 0 || spayDate) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
-                                            <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
+                                            <h3 className="text-lg font-semibold text-gray-700"><HeartPulse size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
                                             <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
                                         </button>
                                         {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
