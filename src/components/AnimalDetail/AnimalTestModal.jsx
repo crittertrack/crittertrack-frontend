@@ -196,7 +196,7 @@ const AnimalTestModal = ({
                     <div className={`${isHeaderCollapsed ? 'w-full' : 'flex-1'} flex flex-col`}>
                         <div className="flex justify-between items-start">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                     {animal.prefix} {animal.name} {animal.suffix}
                                     {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />}
                                     {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
@@ -206,26 +206,26 @@ const AnimalTestModal = ({
                                 </h2>
                                 {!isHeaderCollapsed && (
                                     <>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-xs text-gray-500">
                                             {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' • ')}
                                         </p>
-                                        <p className="text-lg font-semibold text-gray-700 mt-1">
+                                        <p className="text-base font-medium text-gray-700 mt-1">
                                             {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400 italic">Variety not specified</span>}
                                         </p>
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
                                                 {animal.isOwned ? <Heart size={12} /> : <HeartOff size={12} />}
                                                 {animal.isOwned ? 'Owned' : 'Not Owned'}
                                             </span>
-                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${animal.isDisplay ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isDisplay ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
                                                 {animal.isDisplay ? <Eye size={12} /> : <EyeOff size={12} />}
                                                 {animal.isDisplay ? 'Public' : 'Private'}
                                             </span>
-                                            {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
-                                            {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
-                                            {animal.healthStatus && <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"><HeartPulse size={12} />{animal.healthStatus}</span>}
-                                            {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale</span>}
-                                            {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1"><Heart size={12} /> Stud</span>}
+                                            {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
+                                            {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
+                                            {animal.healthStatus && <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><HeartPulse size={12} />{animal.healthStatus}</span>}
+                                            {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale</span>}
+                                            {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud</span>}
                                         </div>
                                     </>
                                 )}
@@ -300,9 +300,9 @@ const AnimalTestModal = ({
 
                         {!isHeaderCollapsed && (
                             <>
-                                <div className="mt-4 flex gap-6">
+                                <div className="mt-3 flex gap-4">
                                     <div className="w-2/3 space-y-4">
-                                        <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4 text-xs">
+                                        <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-xs">
                                             {/* Animal */}
                                             <InfoItem label="Birthdate">
                                                 {animal.birthDate ? (
@@ -331,13 +331,13 @@ const AnimalTestModal = ({
                                                 {animal.coOwnership && <span className="text-gray-500 ml-1">({animal.coOwnership})</span>}
                                             </InfoItem>
 
-                                            <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'} />
                                             {/* Genetics */}
+                                            <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : 'N/A'} />
                                             {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
-                                            {animal.geneticCode && <InfoItem label="Genetics"><code className="text-[11px] font-mono">{animal.geneticCode}</code></InfoItem>}
+                                            {animal.geneticCode && <InfoItem label="Genetics"><code className="font-mono">{animal.geneticCode}</code></InfoItem>}
                                             {loadingCOI ? <InfoItem label="COI" value="Calculating..." /> : animalCOI != null && <InfoItem label="COI" value={`${animalCOI.toFixed(2)}%`} />}
                                         </dl>
-                                        <div className="pt-4 border-t border-gray-200">
+                                        <div className="pt-2 border-t border-gray-200">
                                             <p className="text-xs text-gray-500 text-center flex justify-center items-center gap-x-2">
                                                 {(() => {
                                                     const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean);
@@ -345,7 +345,7 @@ const AnimalTestModal = ({
                                                     const linesComponent = lines.length > 0 && (
                                                         <span className="flex items-center gap-1">
                                                             {lines.map(line => (
-                                                                <span key={line.id} title={line.name} style={{ color: line.color }} className="text-base leading-none">&#x25C6;</span>
+                                                                <span key={line.id} title={line.name} style={{ color: line.color }} className="text-sm leading-none">&#x25C6;</span>
                                                             ))}
                                                         </span>
                                                     );
@@ -357,7 +357,7 @@ const AnimalTestModal = ({
                                                 <div className="text-center mt-2">
                                                     <div className="flex flex-wrap gap-2 justify-center">
                                                         {animal.tags.map(tag => (
-                                                            <span key={tag} className="bg-gray-200 text-gray-700 text-xs font-medium px-2 py-0.5 rounded-full">{tag}</span>
+                                                            <span key={tag} className="bg-gray-200 text-gray-700 text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -368,16 +368,16 @@ const AnimalTestModal = ({
                                                         {(animalBreedingLines[animal.id_public] || [])
                                                             .map(lineId => breedingLineDefs.find(l => l.id === lineId))
                                                             .filter(Boolean)
-                                                            .map(line => (
-                                                                <span key={line.id} title={line.name} style={{ color: line.color }} className="text-base leading-none">&#x25C6;</span>
-                                                            ))}
+                                                        .map(line => (
+                                                            <span key={line.id} title={line.name} style={{ color: line.color }} className="text-sm leading-none">&#x25C6;</span>
+                                                        ))}
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="w-1/3">
-                                        <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} contentClassName="overflow-y-auto">
+                                    <div className="w-1/3 flex">
+                                        <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} className="flex-1" contentClassName="overflow-y-auto">
                                             <p className="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
                                         </InfoCard>
                                     </div>

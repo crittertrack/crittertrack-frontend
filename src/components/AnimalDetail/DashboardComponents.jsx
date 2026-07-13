@@ -4,12 +4,12 @@ import { formatDate } from '../../utils/dateFormatter';
 export const InfoCard = ({ title, icon, children, className = '', contentClassName = '' }) => (
     <div className={`bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col h-full ${className}`}>
         {title && (
-            <div className="flex items-center gap-3 p-4 border-b border-gray-200">
+            <div className="flex items-center gap-3 p-3 border-b border-gray-200">
                 {icon}
-                <h3 className="text-md font-semibold text-gray-700">{title}</h3>
+                <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
             </div>
         )}
-        <div className={`p-4 space-y-4 flex-1 ${contentClassName}`}>
+        <div className={`p-3 space-y-3 flex-1 ${contentClassName}`}>
             {children}
         </div>
     </div>
@@ -17,7 +17,7 @@ export const InfoCard = ({ title, icon, children, className = '', contentClassNa
 
 export const InfoItem = ({ label, value, children }) => (
     <div>
-        <dt className="text-xs text-gray-500">{label}</dt>
+        <dt className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">{label}</dt>
         <dd className="text-xs font-medium text-gray-800">{children || value || <span className="text-gray-400">N/A</span>}</dd>
     </div>
 );
