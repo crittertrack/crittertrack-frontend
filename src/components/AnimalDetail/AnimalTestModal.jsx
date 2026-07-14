@@ -401,11 +401,11 @@ const AnimalTestModal = ({
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
-                            <div className="relative bg-white">
+                            <div className="relative">
                                 <div className="absolute right-4 top-4 z-10 text-xs">
                                     {loadingCOI ? <span className="text-gray-400">COI: Calculating...</span> : animalCOI != null && <span className="font-semibold">COI: {animalCOI.toFixed(2)}%</span>}
                                 </div>
-                                <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                                <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} className="bg-white" />
                             </div>
                             {/* Dam Card */}
                             <div>
