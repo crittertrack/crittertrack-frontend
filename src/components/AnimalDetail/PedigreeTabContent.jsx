@@ -164,46 +164,9 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
                 <button onClick={() => setShowVertCert(true)} className="px-4 py-2 text-sm rounded-lg bg-accent hover:bg-accent/90 text-white border border-accent/40 transition flex items-center gap-1.5 font-semibold shadow-sm">
                     <ScrollText size={16} /> Open Vertical Certificate
                 </button>
-                {/* Orientation Toggle */}
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Orientation:</span>
-                    <button
-                        type="button"
-                        onClick={() => setIsVerticalView(false)}
-                        className={`px-3 py-1 rounded-lg text-sm font-medium transition ${!isVerticalView ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                    >
-                        Horizontal
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setIsVerticalView(true)}
-                        className={`px-3 py-1 rounded-lg text-sm font-medium transition ${isVerticalView ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                    >
-                        Vertical
-                    </button>
                 </div>
-
-                {/* Generations Slider */}
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Generations:</span>
-                    <input
-                        type="range"
-                        min={1}
-                        max={isVerticalView ? 3 : 4} // Max 3 for vertical, 4 for horizontal
-                        step={1}
-                        value={generations}
-                        onChange={e => setGenerations(Number(e.target.value))}
-                        className="w-24 accent-primary cursor-pointer"
-                    />
-                    <span className="text-sm font-bold w-4">{generations}</span>
-                </div>
-            </div>
             {showHorizCert && <PedigreeChart animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowHorizCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
             {showVertCert && <PedigreeChart vertical animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowVertCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
-            <div className="text-center text-gray-400 text-sm pt-4">
-                <p>Use the buttons above to view the interactive pedigree chart.</p>
-                <p className="text-xs mt-1">The full pedigree is best viewed on a larger screen.</p>
-            </div>
             <div className="mt-6 space-y-4">
                 <div>
                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Parents (Gen 1)</p>
