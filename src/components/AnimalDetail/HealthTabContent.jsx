@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Microscope, HeartPulse, Stethoscope } from 'lucide-react';
+import { Shield, Microscope, HeartPulse, Stethoscope, AlertTriangle, Activity } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import { useDetailFieldTemplate, DetailJsonList } from './utils';
 import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
@@ -16,6 +16,20 @@ const parseHealthRecords = (data) => {
         }
     }
     return Array.isArray(data) ? data : [];
+};
+
+// New component for status
+const StatusIndicator = ({ status }) => {
+    const statusStyles = {
+        'Good': 'bg-green-100 text-green-800',
+        'Under Observation': 'bg-yellow-100 text-yellow-800',
+        'Under Treatment': 'bg-blue-100 text-blue-800',
+        'Quarantined': 'bg-orange-100 text-orange-800',
+        'Critical': 'bg-red-100 text-red-800',
+        'Unknown': 'bg-gray-100 text-gray-800',
+    };
+    const style = statusStyles[status] || statusStyles['Unknown'];
+    return <span className={`px-2 py-1 text-xs font-bold rounded-full ${style}`}>{status}</span>;
 };
 
 export const HealthTabContent = ({ animal, API_BASE_URL }) => {
@@ -35,12 +49,39 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
     const hasProcedures = medicalProcedures.length > 0 || labResults.length > 0;
     const hasActiveRecords = medicalConditions.length > 0 || allergies.length > 0 || medications.length > 0;
     const hasVetCare = animal.primaryVet || vetVisits.length > 0;
-    const hasClearances = animal.spayNeuterDate || animal.heartwormStatus || animal.hipElbowScores || animal.eyeClearance || animal.cardiacClearance || animal.dentalRecords || animal.geneticTestResults || animal.chronicConditions;
+    const hasClearances = animal.healthStatus || animal.spayNeuterDate || animal.heartwormStatus || animal.hipElbowScores || animal.eyeClearance || animal.cardiacClearance || animal.dentalRecords || animal.geneticTestResults || animal.chronicConditions;
+
+    // Check for active medical situations based on the proposed data model
+    const isQuarantined = animal.quarantineStatus?.active === true;
+    const hasActiveMedication = medications.some(m => m.status === 'active');
+    const hasActiveCriticalCondition = medicalConditions.some(c => c.status === 'active' && c.severity === 'critical');
+    const isUnderTreatment = hasActiveMedication || hasActiveCriticalCondition;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6">
-                <InfoCard title="Preventive Care" icon={<Shield size={18} className="text-gray-400" />}>
+                <InfoCard title="Health Status & Preventive Care" icon={<Shield size={18} className="text-gray-400" />}>
+                    <div className="pb-3 border-b border-gray-200 space-y-3">
+                        <InfoItem label="Overall Health Status">
+                            <StatusIndicator status={animal.healthStatus || 'Unknown'} />
+                        </InfoItem>
+                        {isQuarantined && (
+                            <div className="flex items-center gap-2 p-2 bg-orange-50 border-l-4 border-orange-400">
+                                <AlertTriangle size={16} className="text-orange-500" />
+                                <div className="text-xs">
+                                    <p className="font-semibold text-orange-700">Quarantined</p>
+                                    <p className="text-gray-600">{animal.quarantineStatus.reason || 'No reason specified'}</p>
+                                    {animal.quarantineStatus.endDate && <p className="text-gray-500">Until: {formatDate(animal.quarantineStatus.endDate)}</p>}
+                                </div>
+                            </div>
+                        )}
+                        {isUnderTreatment && !isQuarantined && (
+                             <div className="flex items-center gap-2 p-2 bg-blue-50 border-l-4 border-blue-400">
+                                <Activity size={16} className="text-blue-500" />
+                                <p className="text-xs font-semibold text-blue-700">Under Active Treatment</p>
+                            </div>
+                        )}
+                    </div>
                     {hasPreventiveCare ? (
                         <>
                             {vaccinations.length > 0 && <DetailJsonList label={getLabel('vaccinations', 'Vaccinations')} data={vaccinations} renderItem={v => `${v.name} ${v.date ? `(${formatDate(v.date)})` : ''}`} />}

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -10,6 +10,7 @@ import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatte
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
+import { HealthTabContent } from './HealthTabContent';
 import { QRModal } from '../PublicProfile/PublicProfileView';
 import ReportButton from '../ReportButton';
 const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, initialTab = 1 }) => {
@@ -1501,175 +1502,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
 
                     {/* Tab 8: Health */}
                     {detailViewTab === 8 && (
-                        <div className="space-y-6">
-                            {/* 1st Section: Preventive Care */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
-                                </button>
-                                {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
-                                    {animal.vaccinations && (
-                                        <DetailJsonList
-                                            label={getLabel('vaccinations', 'Vaccinations')}
-                                            data={animal.vaccinations}
-                                            renderItem={v => <>{v.name} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
-                                        />
-                                    )}
-                                    {animal.dewormingRecords && (
-                                        <DetailJsonList
-                                            label="Deworming Records"
-                                            data={animal.dewormingRecords}
-                                            renderItem={r => <>{r.medication} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
-                                        />
-                                    )}
-                                    {animal.parasiteControl && (
-                                        <DetailJsonList
-                                            label="Parasite Control"
-                                            data={animal.parasiteControl}
-                                            renderItem={r => <>{r.treatment} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
-                                        />
-                                    )}
-                                    {fieldTemplate?.fields?.parasitePreventionSchedule?.enabled !== false && animal.parasitePreventionSchedule && (
-                                        <div className="text-sm">
-                                            <span className="text-gray-600">{getLabel('parasitePreventionSchedule', 'Parasite Prevention Schedule')}:</span>
-                                            <strong className="whitespace-pre-wrap">{animal.parasitePreventionSchedule}</strong>
-                                        </div>
-                                    )}
-                                </div>)}
-                            </div>
-
-                            {/* 2nd Section: Procedures & Diagnostics */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
-                                </button>
-                                {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
-                                    {animal.medicalProcedures && (
-                                        <DetailJsonList
-                                            label="Medical Procedures"
-                                            data={animal.medicalProcedures}
-                                            renderItem={p => <>{p.name} {p.date && `(${formatDate(p.date)})`}{p.notes && <span className="text-gray-600"> - {p.notes}</span>}</>}
-                                        />
-                                    )}
-                                    {(animal.labResults || animal.laboratoryResults) && (
-                                        <DetailJsonList
-                                            label="Laboratory Results"
-                                            data={animal.labResults || animal.laboratoryResults}
-                                            renderItem={r => <>{r.testName} - {r.result} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
-                                        />
-                                    )}
-                                </div>)}
-                            </div>
-
-                            {/* 3rd Section: Active Medical Records */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
-                                </button>
-                                {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
-                                    {animal.medicalConditions && (() => {
-                                        const d = animal.medicalConditions;
-                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
-                                        return parsed && parsed.length > 0 ? (
-                                            <div>
-                                                <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
-                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((item, i) => (
-                                                        <li key={i} className="text-gray-700">
-                                                            {item.condition || item.name}
-                                                            {item.notes && <span className="text-gray-500"> ? {item.notes}</span>}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
-                                    })()}
-                                    {animal.allergies && (() => {
-                                        const d = animal.allergies;
-                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
-                                        return parsed && parsed.length > 0 ? (
-                                            <div>
-                                                <span className="text-gray-600 text-sm font-semibold">Allergies:</span>
-                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((item, i) => (
-                                                        <li key={i} className="text-gray-700">
-                                                            {item.allergen || item.name}
-                                                            {item.notes && <span className="text-gray-500"> ? {item.notes}</span>}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Allergies:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
-                                    })()}
-                                    {animal.medications && (() => {
-                                        const d = animal.medications;
-                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
-                                        return parsed && parsed.length > 0 ? (
-                                            <div>
-                                                <span className="text-gray-600 text-sm font-semibold">Current Medications:</span>
-                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((item, i) => (
-                                                        <li key={i} className="text-gray-700">
-                                                            {item.medication || item.name}
-                                                            {item.notes && <span className="text-gray-500"> ? {item.notes}</span>}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Current Medications:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
-                                    })()}
-                                </div>)}
-                            </div>
-
-                            {/* 4th Section: Health Clearances & Screening */}
-                            {(() => {
-                                const clearanceFields = [
-                                    { key: 'heartwormStatus', label: 'Heartworm Status' },
-                                    { key: 'hipElbowScores', label: 'Hip/Elbow Scores' },
-                                    { key: 'eyeClearance', label: 'Eye Clearance' },
-                                    { key: 'cardiacClearance', label: 'Cardiac Clearance' },
-                                    { key: 'dentalRecords', label: 'Dental Records' },
-                                    { key: 'geneticTestResults', label: 'Genetic Test Results' },
-                                    { key: 'chronicConditions', label: 'Chronic Conditions' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
-                                const spayDate = fieldTemplate?.fields?.spayNeuterDate?.enabled !== false && animal.spayNeuterDate;
-                                return (clearanceFields.length > 0 || spayDate) && (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                        <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
-                                            <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
-                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
-                                        </button>
-                                        {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
-                                            {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
-                                            {clearanceFields.map(f => (
-                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
-                                            ))}
-                                        </div>)}
-                                    </div>
-                                );
-                            })()}
-
-                            {/* 5th Section: Veterinary Care */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
-                                </button>
-                                {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
-                                    {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
-                                    {animal.vetVisits && (
-                                        <DetailJsonList
-                                            label="Veterinary Visits"
-                                            data={animal.vetVisits}
-                                            renderItem={v => <>{v.reason} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
-                                        />
-                                    )}
-                                </div>)}
-                            </div>
-                        </div>
+                        <HealthTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
                     )}
 
                     {/* Tab 9: Care */}
