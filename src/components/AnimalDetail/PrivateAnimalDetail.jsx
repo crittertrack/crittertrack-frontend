@@ -513,9 +513,9 @@ const PrivateAnimalDetail = ({
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                    animal.creatorId_public === userProfile?.id_public && // Current user is the current owner
-                                    animal.originalCreatorId && // An original creator exists
-                                    animal.originalCreatorId.$oid !== animal.creatorId.$oid; // Original creator is different from current creator
+                                    const iWasTransferredThisAnimal = animal.creatorId_public === userProfile?.id_public && // Current user is the current owner
+                                        animal.originalCreatorId && // An original creator exists
+                                        animal.originalCreatorId.$oid !== animal.creatorId.$oid; // Original creator is different from current creator
 
                                 // Recipient owns it
                                 if (iWasTransferredThisAnimal) {
@@ -634,8 +634,7 @@ const PrivateAnimalDetail = ({
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                
-                                const iWasTransferredThisAnimal = animal.originalCreatorId && animal.creatorId_public === userProfile?.id_public;
+                                    const iWasTransferredThisAnimal = animal.originalCreatorId && animal.creatorId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
