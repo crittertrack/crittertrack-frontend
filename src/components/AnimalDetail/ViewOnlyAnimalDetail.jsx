@@ -669,10 +669,10 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                     <hr className="border-gray-200" />
                                                 )}
                                                 {/* Keeper */}
-                                                {animal.keeperName && (
+                                                {animal.ownerName && (
                                                     <div>
                                                         <span className="text-gray-500">Keeper:</span>{' '}
-                                                        <span className="font-mono text-accent">{animal.keeperName}</span>
+                                                        <span className="font-mono text-accent">{animal.ownerName}</span>
                                                     </div>
                                                 )}
                                                 {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (

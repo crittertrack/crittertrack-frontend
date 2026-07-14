@@ -3263,7 +3263,7 @@ const AnimalForm = ({
             motherId_public: animalToEdit.motherId_public || animalToEdit.damId_public || null,
             breederId_public: animalToEdit.breederId_public || null,
             manualBreederName: animalToEdit.manualBreederName || '',
-            keeperName: animalToEdit.keeperName || animalToEdit.ownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '',
+            ownerName: animalToEdit.ownerName || animalToEdit.ownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '',
             groupRole: animalToEdit.groupRole || '',
                 isPregnant: animalToEdit.isPregnant || false,
             isNursing: animalToEdit.isNursing || false,
@@ -3446,7 +3446,7 @@ const AnimalForm = ({
             breederId_public: null,
             // Apply any sibling/template pre-fills (spread last so they override defaults)
             ...(initialValues || {}),
-            keeperName: '',
+            ownerName: '',
             groupRole: '',
             isPregnant: false,
             isNursing: false,
@@ -4109,7 +4109,7 @@ const AnimalForm = ({
         } else if (contactSelectorTarget === 'keeper') {
             setFormData(prev => ({
                 ...prev,
-                keeperName: displayName
+                ownerName: displayName
             }));
         }
 
@@ -5580,7 +5580,7 @@ const AnimalForm = ({
             console.log('[DEBUG] Breeder field in payload:', {
                 breederId_public: payloadToSave.breederId_public,
                 manualBreederName: payloadToSave.manualBreederName,
-                keeperName: payloadToSave.keeperName
+                ownerName: payloadToSave.ownerName
             });
 
             // If an image URL was set by the upload step, also populate common alternate keys
@@ -6458,15 +6458,15 @@ const AnimalForm = ({
                         {/* Current Owner */}
                         <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
-                            {!isFieldHidden('keeperName') && (
+                            {!isFieldHidden('ownerName') && (
                             <div>
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('keeperName', 'Keeper Name (Manual or Contact)')}</label>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('ownerName', 'Keeper Name (Manual or Contact)')}</label>
                                     <div className="flex gap-2">
                                         <input 
                                             type="text" 
-                                            name="keeperName" 
-                                            value={formData.keeperName || ''} 
+                                            name="ownerName" 
+                                            value={formData.ownerName || ''} 
                                             onChange={handleChange}
                                             placeholder="Enter keeper name or select contact"
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
