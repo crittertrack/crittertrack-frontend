@@ -162,7 +162,7 @@ const AnimalTestModal = ({
                 {/* Header */}
                 <div className={`flex items-stretch p-4 md:p-6 pb-3 md:pb-4 border-b border-gray-200 gap-4 md:gap-6`}>
                     {/* Left: Gallery */}
-                    <div className={`w-1/4 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
+                    <div className={`w-1/4 flex flex-col gap-2 ${isHeaderCollapsed ? 'invisible' : 'flex'}`}>
                         <div className="flex-grow bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-300">
                             {mainImage ? (
                                 <img 
@@ -192,7 +192,7 @@ const AnimalTestModal = ({
                     </div>
 
                     {/* Right: Info & Actions */}
-                    <div className={`${isHeaderCollapsed ? 'w-full' : 'flex-1'} flex flex-col`}>
+                    <div className="flex-1 flex flex-col">
                         <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-300 shadow-sm p-4 h-full flex flex-col">
                             <div className="flex justify-between items-start">
                                 <div>
@@ -585,17 +585,17 @@ const AnimalTestModal = ({
                     )}
                     {/* Placeholder for other tabs */}
                     {activeTab !== 'overview' &&
-                     activeTab !== 'identification' &&
-                     activeTab !== 'breeding' &&
-                     activeTab !== 'health' &&
-                     activeTab !== 'care' &&
-                     activeTab !== 'pedigree' &&
-                     activeTab !== 'gallery' && 
-                     activeTab !== 'timeline' && 
-                     activeTab !== 'notes' &&
-                     activeTab !== 'records' &&
-                     activeTab !== 'measurements' &&
-                     activeTab !== 'behavior' && (
+                        activeTab !== 'identification' &&
+                        activeTab !== 'health' &&
+                        activeTab !== 'care' &&
+                        activeTab !== 'appearance' &&
+                        activeTab !== 'behavior' &&
+                        activeTab !== 'breeding' &&
+                        activeTab !== 'pedigree' &&
+                        activeTab !== 'gallery' &&
+                        activeTab !== 'timeline' &&
+                        activeTab !== 'notes' &&
+                        activeTab !== 'records' && (
                         <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
                             <p className="text-gray-500">Content for the {activeTab} tab goes here.</p>
                         </div>

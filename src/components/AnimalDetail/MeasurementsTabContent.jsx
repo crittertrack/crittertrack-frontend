@@ -104,7 +104,7 @@ export const MeasurementsTabContent = ({ animal, onUpdateAnimal, authToken, API_
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1">
                 <InfoCard title="Add Measurement" icon={<Plus size={18} className="text-gray-400" />}>
                     <div className="space-y-4">
                         <input type="date" value={newRecord.date} onChange={e => setNewRecord({...newRecord, date: e.target.value})} className="w-full p-2 border rounded-md" />
@@ -114,6 +114,11 @@ export const MeasurementsTabContent = ({ animal, onUpdateAnimal, authToken, API_
                         <button onClick={handleSaveGrowthRecord} className="w-full bg-primary text-black font-semibold py-2 rounded-lg">Add Record</button>
                     </div>
                 </InfoCard>
+            </div>
+            <div className="lg:col-span-2">
+                <GrowthChart records={growthRecords} animal={animal} />
+            </div>
+            <div className="lg:col-span-3">
                 <InfoCard title="Measurement History" icon={<Ruler size={18} className="text-gray-400" />}>
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                         {growthRecords.length > 0 ? growthRecords.map((rec, i) => (
@@ -130,9 +135,6 @@ export const MeasurementsTabContent = ({ animal, onUpdateAnimal, authToken, API_
                         )) : <p className="text-sm text-gray-400">No measurements recorded.</p>}
                     </div>
                 </InfoCard>
-            </div>
-            <div className="lg:col-span-2">
-                <GrowthChart records={growthRecords} animal={animal} />
             </div>
         </div>
     );
