@@ -24,6 +24,7 @@ import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/l
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { QRModal } from '../PublicProfile/PublicProfileView';
 import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
+import { CareTabContent } from './CareTabContent';
 import { HealthTabContent } from './HealthTabContent';
 
 const PrivateAnimalDetail = ({ 

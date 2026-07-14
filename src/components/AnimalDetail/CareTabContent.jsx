@@ -1,111 +1,127 @@
 import React from 'react';
-import { UtensilsCrossed, Home, Droplets, Thermometer, Scissors, Check } from 'lucide-react';
-import { useDetailFieldTemplate, DetailJsonList } from './utils';
+import { UtensilsCrossed, Home, Droplets, Thermometer, Scissors, CheckSquare, Sun, Wind, Bug, Activity } from 'lucide-react';
+import { formatDate } from '../../utils/dateFormatter';
+import { useDetailFieldTemplate, DetailJsonList, parseJsonField } from './utils';
 import { InfoCard, InfoItem } from './DashboardComponents';
 
-const parseCareRecords = (data) => {
-    if (!data) return [];
-    if (typeof data === 'string') {
-        try {
-            const parsed = JSON.parse(data);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            return [];
-        }
-    }
-    return Array.isArray(data) ? data : [];
+// Helper to render tasks
+const TaskList = ({ tasks, label }) => {
+    if (!tasks || tasks.length === 0) return null;
+    return (
+        <div>
+            <h4 className="text-sm font-semibold text-gray-600 mt-3 mb-1">{label}</h4>
+            <div className="space-y-1">
+                {tasks.map((task, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs bg-gray-100 px-2 py-1.5 rounded border border-gray-200">
+                        <span className="font-medium text-gray-700">{task.taskName}</span>
+                        <div className="flex items-center gap-2 text-gray-500">
+                            {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
+                            {task.lastDoneDate && <span>Last: {formatDate(task.lastDoneDate)}</span>}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 };
 
-export const CareTabContent = ({ animal, API_BASE_URL, enclosureInfo }) => {
+export const CareTabContent = ({ animal, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
-    const animalCareTasks = parseCareRecords(animal.animalCareTasks);
-    const enclosureCareTasks = parseCareRecords(animal.careTasks);
+    const careTasks = parseJsonField(animal.careTasks);
+    const animalCareTasks = parseJsonField(animal.animalCareTasks);
+    
+    // New structured records
+    const sheddingRecords = parseJsonField(animal.sheddingRecords);
+    const moltingRecords = parseJsonField(animal.moltingRecords);
+    const waterParameterChecks = parseJsonField(animal.waterParameterChecks);
 
     const hasNutrition = animal.dietType || animal.feedingSchedule || animal.supplements;
-    const hasHousing = enclosureInfo || animal.housingType || animal.bedding || animal.enrichment || enclosureCareTasks.length > 0;
-    const hasAnimalCare = animalCareTasks.length > 0 || animal.handlingNotes || animal.socializationNotes || animal.specialCareRequirements;
-    const hasEnvironment = animal.temperatureRange || animal.humidity || animal.lighting || animal.noise;
-    const hasGrooming = animal.groomingNeeds || animal.sheddingLevel || animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained;
-
-    const trainingFlags = [
-        { key: 'crateTrained', label: 'Crate Trained' },
-        { key: 'litterTrained', label: 'Litter Trained' },
-        { key: 'leashTrained', label: 'Leash Trained' },
-        { key: 'freeFlightTrained', label: 'Free Flight Trained' },
-    ].filter(f => animal[f.key]);
+    const hasHousing = animal.housingType || animal.bedding || animal.enrichment;
+    const hasEnvironment = animal.temperatureRange || animal.humidity || animal.lighting || animal.noise || animal.lastBulbChange;
+    const hasGrooming = animal.groomingNeeds || animal.sheddingLevel;
+    const hasTraining = animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Column 1 */}
             <div className="space-y-6">
                 <InfoCard title="Nutrition" icon={<UtensilsCrossed size={18} className="text-gray-400" />}>
                     {hasNutrition ? (
-                        <dl className="space-y-4">
-                            {animal.dietType && <InfoItem label={getLabel('dietType', 'Diet Type')} value={animal.dietType} />}
-                            {animal.feedingSchedule && <InfoItem label={getLabel('feedingSchedule', 'Feeding Schedule')} value={animal.feedingSchedule} />}
-                            {animal.supplements && <InfoItem label={getLabel('supplements', 'Supplements')} value={animal.supplements} />}
-                        </dl>
-                    ) : <p className="text-sm text-gray-400">No nutrition information recorded.</p>}
+                        <>
+                            {animal.dietType && <InfoItem label="Diet Type" value={animal.dietType} />}
+                            {animal.feedingSchedule && <InfoItem label="Feeding Schedule" value={animal.feedingSchedule} />}
+                            {animal.supplements && <InfoItem label="Supplements" value={animal.supplements} />}
+                        </>
+                    ) : <p className="text-sm text-gray-400">No nutrition information.</p>}
                 </InfoCard>
 
-                <InfoCard title="Environment" icon={<Thermometer size={18} className="text-gray-400" />}>
-                    {hasEnvironment ? (
-                        <dl className="space-y-4">
-                            {animal.temperatureRange && <InfoItem label={getLabel('temperatureRange', 'Temperature Range')} value={animal.temperatureRange} />}
-                            {animal.humidity && <InfoItem label={getLabel('humidity', 'Humidity')} value={animal.humidity} />}
-                            {animal.lighting && <InfoItem label={getLabel('lighting', 'Lighting')} value={animal.lighting} />}
-                            {animal.noise && <InfoItem label={getLabel('noise', 'Noise Level')} value={animal.noise} />}
-                        </dl>
-                    ) : <p className="text-sm text-gray-400">No environment details recorded.</p>}
-                </InfoCard>
-            </div>
-
-            <div className="space-y-6">
-                <InfoCard title="Housing & Enclosure" icon={<Home size={18} className="text-gray-400" />}>
-                    {hasHousing ? (
-                        <dl className="space-y-4">
-                            {enclosureInfo && <InfoItem label="Enclosure" value={enclosureInfo.name} />}
+                <InfoCard title="Housing & Environment" icon={<Home size={18} className="text-gray-400" />}>
+                    {hasHousing || hasEnvironment ? (
+                        <>
                             {animal.housingType && <InfoItem label={getLabel('housingType', 'Housing Type')} value={animal.housingType} />}
                             {animal.bedding && <InfoItem label={getLabel('bedding', 'Bedding')} value={animal.bedding} />}
-                            {animal.enrichment && <InfoItem label={getLabel('enrichment', 'Enrichment')} value={animal.enrichment} />}
-                            {enclosureCareTasks.length > 0 && <DetailJsonList label="Enclosure Care Tasks" data={enclosureCareTasks} renderItem={t => `${t.taskName} (Every ${t.frequencyDays}d)`} />}
-                        </dl>
-                    ) : <p className="text-sm text-gray-400">No housing information recorded.</p>}
-                </InfoCard>
-
-                <InfoCard title="Grooming & Training" icon={<Scissors size={18} className="text-gray-400" />}>
-                    {hasGrooming ? (
-                        <dl className="space-y-4">
-                            {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} />}
-                            {animal.sheddingLevel && <InfoItem label={getLabel('sheddingLevel', 'Shedding Level')} value={animal.sheddingLevel} />}
-                            {trainingFlags.length > 0 && (
-                                <div>
-                                    <dt className="text-xs text-gray-500">Training</dt>
-                                    <dd className="flex flex-wrap gap-2 mt-1">
-                                        {trainingFlags.map(f => (
-                                            <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-semibold">
-                                                <Check size={12} className="mr-1" /> {f.label}
-                                            </span>
-                                        ))}
-                                    </dd>
-                                </div>
-                            )}
-                        </dl>
-                    ) : <p className="text-sm text-gray-400">No grooming or training details recorded.</p>}
+                            {animal.enrichment && <InfoItem label="Enrichment" value={animal.enrichment} />}
+                            
+                            {hasEnvironment && <div className="pt-3 mt-3 border-t border-gray-200 space-y-2">
+                                {animal.temperatureRange && <InfoItem label="Temperature Range" value={animal.temperatureRange} icon={<Thermometer size={14} />} />}
+                                {animal.humidity && <InfoItem label={getLabel('humidity', 'Humidity')} value={animal.humidity} icon={<Wind size={14} />} />}
+                                {animal.lighting && <InfoItem label="Lighting" value={animal.lighting} icon={<Sun size={14} />} />}
+                                {animal.lastBulbChange && <InfoItem label="Last Bulb Change" value={formatDate(animal.lastBulbChange)} icon={<Sun size={14} />} />}
+                                {animal.noise && <InfoItem label={getLabel('noise', 'Noise Level')} value={animal.noise} />}
+                            </div>}
+                        </>
+                    ) : <p className="text-sm text-gray-400">No housing or environment details.</p>}
                 </InfoCard>
             </div>
 
+            {/* Column 2 */}
             <div className="space-y-6">
-                <InfoCard title="Animal Care" icon={<Droplets size={18} className="text-gray-400" />}>
-                    {hasAnimalCare ? (
-                        <dl className="space-y-4">
-                            {animal.handlingNotes && <InfoItem label={getLabel('handlingNotes', 'Handling Notes')}><p className="whitespace-pre-wrap">{animal.handlingNotes}</p></InfoItem>}
-                            {animal.socializationNotes && <InfoItem label={getLabel('socializationNotes', 'Socialization Notes')}><p className="whitespace-pre-wrap">{animal.socializationNotes}</p></InfoItem>}
-                            {animal.specialCareRequirements && <InfoItem label={getLabel('specialCareRequirements', 'Special Care Requirements')}><p className="whitespace-pre-wrap">{animal.specialCareRequirements}</p></InfoItem>}
-                            {animalCareTasks.length > 0 && <DetailJsonList label="Animal Care Tasks" data={animalCareTasks} renderItem={t => `${t.taskName} (Every ${t.frequencyDays}d)`} />}
-                        </dl>
-                    ) : <p className="text-sm text-gray-400">No specific animal care information recorded.</p>}
+                <InfoCard title="Animal Care & Grooming" icon={<Droplets size={18} className="text-gray-400" />}>
+                    {animal.handlingNotes && <InfoItem label="Handling Notes" value={animal.handlingNotes} />}
+                    {animal.socializationNotes && <InfoItem label="Socialization Notes" value={animal.socializationNotes} />}
+                    {animal.specialCareRequirements && <InfoItem label="Special Care Requirements" value={animal.specialCareRequirements} />}
+                    
+                    {hasGrooming && <div className="pt-3 mt-3 border-t border-gray-200 space-y-2">
+                        {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} icon={<Scissors size={14} />} />}
+                        {animal.sheddingLevel && <InfoItem label={getLabel('sheddingLevel', 'Shedding Level')} value={animal.sheddingLevel} />}
+                    </div>}
+
+                    {hasTraining && <div className="pt-3 mt-3 border-t border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-600 mb-2">Training</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {animal.crateTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('crateTrained', 'Crate Trained')}</span>}
+                            {animal.litterTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('litterTrained', 'Litter Trained')}</span>}
+                            {animal.leashTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('leashTrained', 'Leash Trained')}</span>}
+                            {animal.freeFlightTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
+                        </div>
+                    </div>}
                 </InfoCard>
+
+                <InfoCard title="Scheduled Tasks" icon={<Activity size={18} className="text-gray-400" />}>
+                    <TaskList tasks={animalCareTasks} label="Animal-Specific Tasks" />
+                    <TaskList tasks={careTasks} label="Enclosure-Related Tasks" />
+                    {animalCareTasks.length === 0 && careTasks.length === 0 && <p className="text-sm text-gray-400">No scheduled care tasks.</p>}
+                </InfoCard>
+            </div>
+
+            {/* Column 3 */}
+            <div className="space-y-6">
+                {sheddingRecords.length > 0 && (
+                    <InfoCard title="Shedding History" icon={<Bug size={18} className="text-gray-400" />}>
+                        <DetailJsonList label="" data={sheddingRecords} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
+                    </InfoCard>
+                )}
+                {moltingRecords.length > 0 && (
+                    <InfoCard title="Molting History" icon={<Bug size={18} className="text-gray-400" />}>
+                        <DetailJsonList label="" data={moltingRecords} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
+                    </InfoCard>
+                )}
+                {waterParameterChecks.length > 0 && (
+                    <InfoCard title="Water Quality Checks" icon={<Droplets size={18} className="text-gray-400" />}>
+                        <DetailJsonList label="" data={waterParameterChecks} renderItem={r => `${formatDate(r.date)} - pH: ${r.ph}, Ammonia: ${r.ammonia}`} />
+                    </InfoCard>
+                )}
             </div>
         </div>
     );

@@ -10,6 +10,7 @@ import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatte
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
+import { CareTabContent } from './CareTabContent';
 import { HealthTabContent } from './HealthTabContent';
 const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
     const [breederInfo, setBreederInfo] = useState(null);
@@ -1359,74 +1360,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                     {/* Tab 9: Care */}
                     {detailViewTab === 9 && (
-                        <div className="space-y-6">
-                            {/* 1st Section: Nutrition */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
-                                <div className="space-y-3 text-sm">
-                                    {animal.dietType && <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType}</strong></div>}
-                                    {animal.feedingSchedule && <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule}</strong></div>}
-                                    {animal.supplements && <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements}</strong></div>}
-                                </div>
-                            </div>
-
-                            {/* 2nd Section: Husbandry */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
-                                <div className="space-y-3 text-sm">
-                                    {enclosureInfo && (<div><span className="text-gray-600">Enclosure:</span> <strong>{enclosureInfo.name}</strong></div>)}
-                                    {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
-                                    {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
-                                    {animal.enrichment && <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment}</strong></div>}
-                                </div>
-                            </div>
-
-                            {/* 3rd Section: Environment */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    {animal.temperatureRange && <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange}</strong></div>}
-                                    {fieldTemplate?.fields?.humidity?.enabled !== false && animal.humidity && <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity}</strong></div>}
-                                    {animal.lighting && <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting}</strong></div>}
-                                    {fieldTemplate?.fields?.noise?.enabled !== false && animal.noise && <div><span className="text-gray-600">{getLabel('noise', 'Noise Level')}:</span> <strong>{animal.noise}</strong></div>}
-                                </div>
-                            </div>
-
-                            {/* 4th Section: Exercise & Grooming */}
-                            {(() => {
-                                const egFields = [
-                                    { key: 'exerciseRequirements', label: 'Exercise Requirements' },
-                                    { key: 'dailyExerciseMinutes', label: 'Daily Exercise (min)' },
-                                    { key: 'groomingNeeds', label: 'Grooming Needs' },
-                                    { key: 'sheddingLevel', label: 'Shedding Level' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
-                                const trainFlags = [
-                                    { key: 'crateTrained', label: 'Crate Trained' },
-                                    { key: 'litterTrained', label: 'Litter Trained' },
-                                    { key: 'leashTrained', label: 'Leash Trained' },
-                                    { key: 'freeFlightTrained', label: 'Free Flight Trained' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
-                                return (egFields.length > 0 || trainFlags.length > 0) && (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
-                                        {egFields.length > 0 && (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                {egFields.map(f => (
-                                                    <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {trainFlags.length > 0 && (
-                                            <div className="flex flex-wrap gap-3 text-sm">
-                                                {trainFlags.map(f => (
-                                                    <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">&#x2713; {getLabel(f.key, f.label)}</span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })()}
-                        </div>
+                        <CareTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
                     )}
 
                     {/* Tab 10: Behavior */}
