@@ -9,9 +9,9 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // Lucide React Icons
 import {
     Mars, Venus, VenusAndMars, Circle, Cat, QrCode, Edit, Archive, Heart, HeartOff, Eye, EyeOff,
-    ChevronDown, ChevronRight, ChevronUp, ArrowLeft, X, ClipboardList, Lock, Tag, Palette, Dna,
-    TreeDeciduous, Egg, Hospital, Home, Brain, FileText, Trophy, FileCheck, Scale, Images, ScrollText,
-    Shield, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare,
+    ChevronDown, ChevronRight, ChevronUp, ArrowLeft, X, ClipboardList, Lock, Tag, Palette, Dna, HeartPulse,
+    TreeDeciduous, Egg, Home, Brain, FileText, Trophy, FileCheck, Scale, Images, ScrollText,
+    Shield, Microscope, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, ArrowRight, Hourglass,
     Users, FolderOpen, Globe, Sparkles, Sprout, Ruler, Feather, Download, Loader2, Camera, Network,
     TableOfContents, BookOpen, RotateCcw, ArrowLeftRight, Hash, User, Bell
@@ -23,7 +23,21 @@ import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { QRModal } from '../PublicProfile/PublicProfileView';
-import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, onAddSibling, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect, initialTab = 1, initialBetaView = 'vertical' }) => {
+import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
+
+const PrivateAnimalDetail = ({ 
+    animal, onClose, onCloseAll, onEdit, onArchive, onAddSibling, API_BASE_URL, authToken, 
+    setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, 
+    onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], 
+    breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, 
+    setAnimalBreedingLinesDirect, initialTab = 1, initialBetaView = 'vertical',
+    // Handlers now passed from parent
+    returningAnimal,
+    handleReturnTransferredAnimal,
+    handleWithdrawTransfer,
+    handleAcceptTransfer,
+    handleRejectTransfer
+}) => {
     const navigate = useNavigate();
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerInfo, setOwnerInfo] = useState(null);
@@ -32,8 +46,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
-    const [animalLogs, setAnimalLogs] = useState(null); // null = not yet fetched
-    const [animalLogsLoading, setAnimalLogsLoading] = useState(false);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
@@ -48,9 +60,9 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [showContactSelector, setShowContactSelector] = useState(false);
-    const [contacts, setContacts] = useState([]);
-    const [contactsLoading, setContactsLoading] = useState(false);
-    const [keeperContactInfo, setKeeperContactInfo] = useState(null);
+    const [contacts, setContacts] = useState([]); 
+    const [contactsLoading, setContactsLoading] = useState(false); 
+    const [ownerContactInfo, setOwnerContactInfo] = useState(null);
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
     const [offspringRefreshKey, setOffspringRefreshKey] = useState(0); // increment to force offspring fetches to refetch
     // Manual Pedigree (Beta) • Tab 16
@@ -62,7 +74,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
     const [showVertCert, setShowVertCert] = useState(false);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
-    const [returningAnimal, setReturningAnimal] = useState(false);
 
     // Warm pedigree cache shortly after opening details so Pedigree tab opens faster.
     useEffect(() => {
@@ -149,48 +160,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
 
-    const handleReturnTransferredAnimal = useCallback(async () => {
-        if (!animal?.id_public || returningAnimal) return;
-
-        const breederName = animal.breederName || 'the breeder';
-        if (!window.confirm(`Return ${animal.name} to ${breederName}? This will remove the animal from your account.`)) {
-            return;
-        }
-
-        setReturningAnimal(true);
-        try {
-            await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            window.dispatchEvent(new Event('animals-changed'));
-            showModalMessage('Success', `Animal has been returned to ${breederName}.`);
-            (onCloseAll || onClose)?.();
-        } catch (error) {
-            console.error('Failed to return animal:', error);
-            showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
-        } finally {
-            setReturningAnimal(false);
-        }
-    }, [animal, returningAnimal, API_BASE_URL, authToken, showModalMessage, onCloseAll, onClose]);
-
-    const handleWithdrawTransfer = useCallback(async (transferId) => {
-        if (!transferId) return;
-
-        if (!window.confirm('Are you sure you want to withdraw this transfer request?')) {
-            return;
-        }
-
-        try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/withdraw`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            showModalMessage('Success', 'Transfer request has been withdrawn.');
-            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { ...animal, pendingTransfer: null, pendingTransferId: undefined } })); // Clear pendingTransfer and pendingTransferId
-        } catch (err) {
-            console.error('Failed to withdraw transfer:', err);
-            showModalMessage('Error', `Failed to withdraw transfer: ${err.response?.data?.message || err.message}`);
-        }
-    }, [API_BASE_URL, authToken, showModalMessage, animal]);
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); setShowHorizCert(false); setShowVertCert(false); }, [animal?.id_public, initialTab, initialBetaView]);
 
@@ -408,15 +377,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
             .catch(() => setEnclosureInfo(null));
     }, [animal?.enclosureId, authToken, API_BASE_URL]);
 
-    // Fetch logs when Logs tab is opened (lazy, once per animal)
-    React.useEffect(() => {
-        if (detailViewTab !== 16 || animalLogs !== null || !animal?.id_public || !authToken) return;
-        setAnimalLogsLoading(true);
-        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
-            .then(res => setAnimalLogs(res.data || []))
-            .catch(() => setAnimalLogs([]))
-            .finally(() => setAnimalLogsLoading(false));
-    }, [detailViewTab, animal?.id_public, authToken, API_BASE_URL, animalLogs]);
     
     // Fetch COI when component mounts or animal changes (if animal has both parents)
     React.useEffect(() => {
@@ -500,27 +460,27 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
         fetchOwner();
     }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
     
-    // Fetch keeper contact info when keeperContactId exists
+    // Fetch owner contact info when ownerContactId exists
     React.useEffect(() => {
-        const fetchKeeperContact = async () => {
-            if (animal?.keeperContactId && authToken) {
+        const fetchOwnerContact = async () => {
+            if (animal?.ownerContactId && authToken) {
                 try {
                     const response = await axios.get(
                         `${API_BASE_URL}/contacts`,
                         { headers: { Authorization: `Bearer ${authToken}` } }
                     );
-                    const keeper = response.data?.find(c => c._id === animal.keeperContactId);
-                    setKeeperContactInfo(keeper || null);
+                    const owner = response.data?.find(c => c._id === animal.ownerContactId);
+                    setOwnerContactInfo(owner || null);
                 } catch (error) {
-                    console.error('Failed to fetch keeper contact:', error);
-                    setKeeperContactInfo(null);
+                    console.error('Failed to fetch owner contact:', error);
+                    setOwnerContactInfo(null);
                 }
             } else {
-                setKeeperContactInfo(null);
+                setOwnerContactInfo(null);
             }
         };
-        fetchKeeperContact();
-    }, [animal?.keeperContactId, authToken, API_BASE_URL]);
+        fetchOwnerContact();
+    }, [animal?.ownerContactId, authToken, API_BASE_URL]);
 
     if (!animal) return null;
 
@@ -553,70 +513,78 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                const iWasTransferredThisAnimal =
                                     animal.creatorId_public === userProfile?.id_public && // Current user is the current owner
                                     animal.originalCreatorId && // An original creator exists
-                                    animal.creatorId && // Current creator exists
                                     animal.originalCreatorId.$oid !== animal.creatorId.$oid; // Original creator is different from current creator
 
-                            // Recipient owns it
-                            if (iWasTransferredThisAnimal) {
-                            return (
-                           <button
-                            onClick={() => handleReturnTransferredAnimal()}
-                            disabled={returningAnimal}
-                            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                             title="Return to breeder"
-                            >
-                            <RotateCcw size={14} />
-                            {returningAnimal ? "Returning..." : "Return"}
-                            </button>
-                         );
-                     }
+                                // Recipient owns it
+                                if (iWasTransferredThisAnimal) {
+                                    return (
+                                        <button
+                                            onClick={() => handleReturnTransferredAnimal()}
+                                            disabled={returningAnimal}
+                                            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                            title="Return to breeder"
+                                        >
+                                            <RotateCcw size={14} />
+                                            {returningAnimal ? "Returning..." : "Return"}
+                                        </button>
+                                    );
+                                }
 
-                     // Transfer request exists
-                     if (animal.pendingTransfer) {
+                                // Transfer request exists
+                                if (animal.pendingTransfer) {
+                                    // If current user is the SENDER → show Withdraw
+                                    if (animal.pendingTransfer.fromUserId === userProfile?._id) {
+                                        return (
+                                            <button
+                                                onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
+                                                className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                                title="Withdraw transfer request"
+                                            >
+                                                <X size={14} />
+                                                Withdraw
+                                            </button>
+                                        );
+                                    }
 
-                       // 🆕 If current user is the SENDER → show Withdraw
-                     if (animal.pendingTransfer.fromUserId === userProfile?._id) {
-                       return (
-                      <button
-                onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
-                className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                title="Withdraw transfer request"
-                  >
-                <X size={14} />
-                Withdraw
-              </button>
-             );
-            }
+                                    // If current user is the RECIPIENT -> show Accept/Reject
+                                    if (animal.pendingTransfer.toUserId === userProfile?._id) {
+                                        return (
+                                            <div className="flex gap-1.5">
+                                                <button
+                                                    onClick={() => handleAcceptTransfer(animal.pendingTransfer._id)}
+                                                    className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                                    title="Accept transfer"
+                                                >
+                                                    <Check size={14} />
+                                                    Accept
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRejectTransfer(animal.pendingTransfer._id)}
+                                                    className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                                    title="Reject transfer"
+                                                >
+                                                    <X size={14} />
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        );
+                                    }
+                                }
 
-    
-
-              // Recipient view → still pending approval
-              return (
-             <button
-            disabled
-            className="px-2 py-1 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-1 text-xs cursor-not-allowed"
-            title="Transfer request pending"
-             >
-            <ArrowLeftRight size={14} />
-            Pending
-           </button>
-            );
-              }
-
-               // Original owner (no transfer)
-              return (
-            <button
-             onClick={() => onTransfer(animal)}
-             className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-             title="Transfer this animal"
-               >
-             <ArrowLeftRight size={14} />
-              Transfer
-               </button>
-                       );})()}
+                                // Original owner (no transfer)
+                                return (
+                                    <button
+                                        onClick={() => onTransfer(animal)}
+                                        className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                        title="Transfer this animal"
+                                    >
+                                        <ArrowLeftRight size={14} />
+                                        Transfer
+                                    </button>
+                                );
+                            })()}
                             {onArchive && (
                                 <button
                                     onClick={() => onArchive(animal)}
@@ -625,16 +593,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 >
                                     <Archive size={14} />
                                     {animal.archived ? 'Unarchive' : 'Archive'}
-                                </button>
-                            )}
-                            {onEdit && (
-                                <button
-                                    onClick={() => setDetailViewTab(16)}
-                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                    title="View activity logs"
-                                >
-                                    <ScrollText size={14} />
-                                    Logs
                                 </button>
                             )}
                             {onEdit && (
@@ -676,11 +634,8 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                const iWasTransferredThisAnimal =
-                                    animal.creatorId_public === userProfile?.id_public && // Current user is the current owner
-                                    animal.originalCreatorId && // An original creator exists
-                                    animal.creatorId && // Current creator exists
-                                    animal.originalCreatorId.$oid !== animal.creatorId.$oid; // Original creator is different from current creator
+                                
+                                const iWasTransferredThisAnimal = animal.originalCreatorId && animal.creatorId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
@@ -711,17 +666,29 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                         );
                                     }
 
-                                    // Recipient view → still pending approval
-                                    return (
-                                        <button
-                                            disabled
-                                            className="px-3 py-1.5 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-2 cursor-not-allowed"
-                                            title="Transfer request pending"
-                                        >
-                                            <ArrowLeftRight size={16} />
-                                            Pending
-                                        </button>
-                                    );
+                                    // If current user is the RECIPIENT -> show Accept/Reject
+                                    if (animal.pendingTransfer.toUserId === userProfile?._id) {
+                                        return (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleAcceptTransfer(animal.pendingTransfer._id)}
+                                                    className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                                    title="Accept transfer"
+                                                >
+                                                    <Check size={16} />
+                                                    Accept
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRejectTransfer(animal.pendingTransfer._id)}
+                                                    className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                                    title="Reject transfer"
+                                                >
+                                                    <X size={16} />
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        );
+                                    }
                                 }
 
                                 // Original owner (no transfer)
@@ -746,14 +713,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                     {animal.archived ? 'Unarchive' : 'Archive'}
                                 </button>
                             )}
-                            <button
-                                onClick={() => setDetailViewTab(16)}
-                                className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                title="View activity logs"
-                            >
-                                <ScrollText size={16} />
-                                Logs
-                            </button>
                             {onEdit && (
                                 <button
                                     onClick={() => onEdit(animal)}
@@ -792,7 +751,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                             { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
                             { id: 6, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' },
                             { id: 7, label: 'Fertility', icon: Egg, color: 'text-yellow-500' },
-                            { id: 8, label: 'Health', icon: Hospital, color: 'text-red-500' },
+                            { id: 8, label: 'Health', icon: HeartPulse, color: 'text-red-500' },
                             { id: 9, label: 'Care', icon: Home, color: 'text-teal-500' },
                             { id: 10, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
                             { id: 11, label: 'Notes & Milestones', icon: FileText, color: 'text-indigo-500' },
@@ -973,39 +932,39 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                                     if (breederInfo.suffix) parts.push(breederInfo.suffix);
                                                     
                                                     const displayName = parts.join(' • ') || 'Unknown Breeder';
-                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}</div>{/* Keeper */}
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}</div>{/* Owner */}
                                                            {animal.creatorId_public && (
                                                            <div>
-                                            <span className="text-gray-500">Keeper:</span>{' '}
-                                                       {keeperContactInfo ? (() => {
+                                            <span className="text-gray-500">Owner:</span>{' '}
+                                                       {ownerContactInfo ? (() => {
                                                       const parts = [];
-                                                 if (keeperContactInfo.prefix) parts.push(keeperContactInfo.prefix);
+                                                 if (ownerContactInfo.prefix) parts.push(ownerContactInfo.prefix);
             
                                                    // Handle breeder name and personal name
-                                                   if (keeperContactInfo.breederName && keeperContactInfo.personalName) {
-                                              parts.push(`${keeperContactInfo.breederName} (${keeperContactInfo.personalName})`);
-                                        } else if (keeperContactInfo.breederName) {
-                                parts.push(keeperContactInfo.breederName);
-                                      } else if (keeperContactInfo.personalName) {
-                                            parts.push(keeperContactInfo.personalName);
+                                                   if (ownerContactInfo.breederName && ownerContactInfo.personalName) {
+                                              parts.push(`${ownerContactInfo.breederName} (${ownerContactInfo.personalName})`);
+                                        } else if (ownerContactInfo.breederName) {
+                                parts.push(ownerContactInfo.breederName);
+                                      } else if (ownerContactInfo.personalName) {
+                                            parts.push(ownerContactInfo.personalName);
                                     }
              
-                                if (keeperContactInfo.suffix) parts.push(keeperContactInfo.suffix);
+                                if (ownerContactInfo.suffix) parts.push(ownerContactInfo.suffix);
             
-                           const displayName = parts.join(' • ') || animal.keeperName || 'Unknown Keeper';
+                           const displayName = parts.join(' • ') || animal.ownerName || 'Unknown Owner';
             
                          return (
-                <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
+                <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
                     {displayName}
                 </RouterLink>
                         );
-                         })() : animal.keeperContactId ? (
-                         <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
-                                                {animal.keeperName || '—'}
+                         })() : animal.ownerContactId ? (
+                         <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
+                                                {animal.ownerName || '—'}
                            </RouterLink>
                           ) : (
                                  <span className="font-mono text-accent">
-                                                {animal.keeperName || '—'}
+                                                {animal.ownerName || '—'}
                                    </span>
                                            )}
                                                 </div>
@@ -1071,42 +1030,42 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
 
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><User size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        if (!animal.keeperName && !keeperContactInfo) return null;
+                                        if (!animal.ownerName && !ownerContactInfo) return null;
                                         
                                         return (
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-600">Keeper Name:</span>
-                                                {keeperContactInfo ? (() => {
+                                                <span className="text-gray-600">Owner Name:</span>
+                                                {ownerContactInfo ? (() => {
                                                     const parts = [];
-                                                    if (keeperContactInfo.prefix) parts.push(keeperContactInfo.prefix);
+                                                    if (ownerContactInfo.prefix) parts.push(ownerContactInfo.prefix);
                                                     
                                                     // Handle breeder name and personal name
-                                                    if (keeperContactInfo.breederName && keeperContactInfo.personalName) {
-                                                        parts.push(`${keeperContactInfo.breederName} (${keeperContactInfo.personalName})`);
-                                                    } else if (keeperContactInfo.breederName) {
-                                                        parts.push(keeperContactInfo.breederName);
-                                                    } else if (keeperContactInfo.personalName) {
-                                                        parts.push(keeperContactInfo.personalName);
+                                                    if (ownerContactInfo.breederName && ownerContactInfo.personalName) {
+                                                        parts.push(`${ownerContactInfo.breederName} (${ownerContactInfo.personalName})`);
+                                                    } else if (ownerContactInfo.breederName) {
+                                                        parts.push(ownerContactInfo.breederName);
+                                                    } else if (ownerContactInfo.personalName) {
+                                                        parts.push(ownerContactInfo.personalName);
                                                     }
                                                     
-                                                    if (keeperContactInfo.suffix) parts.push(keeperContactInfo.suffix);
+                                                    if (ownerContactInfo.suffix) parts.push(ownerContactInfo.suffix);
                                                     
-                                                    const displayName = parts.join(' • ') || animal.keeperName || 'Unknown Keeper';
+                                                    const displayName = parts.join(' • ') || animal.ownerName || 'Unknown Owner';
                                                     
                                                     return (
-                                                        <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
+                                                        <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
                                                             {displayName}
                                                         </RouterLink>
                                                     );
-                                                })() : animal.keeperContactId ? (
-                                                    <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
-                                                        {animal.keeperName}
+                                                })() : animal.ownerContactId ? (
+                                                    <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
+                                                        {animal.ownerName}
                                                     </RouterLink>
                                                 ) : (
-                                                    <strong>{animal.keeperName}</strong>
+                                                    <strong>{animal.ownerName}</strong>
                                                 )}
                                             </div>
                                         );
@@ -1122,7 +1081,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -2154,12 +2113,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                             <div><span className="text-gray-600">{getLabel('isNursing', 'Nursing')}:</span> <strong>{animal.isNursing ? 'Yes' : 'No'}</strong></div>
                                         </>
                                     )}
-                                    {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? 'Yes' : 'No'}</strong></div>
-                                    )}
-                                    {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? 'Yes' : 'No'}</strong></div>
-                                    )}
                                 </div>
                             </div>
 
@@ -2298,7 +2251,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                             {/* 3rd Section: Active Medical Records */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><HeartPulse size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
@@ -2371,7 +2324,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 return (clearanceFields.length > 0 || spayDate) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
-                                            <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
+                                            <h3 className="text-lg font-semibold text-gray-700"><HeartPulse size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
                                             <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
                                         </button>
                                         {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
@@ -2766,115 +2719,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                     </div>
                 )}
 
-                {/* -- TAB 16 : Logs -------------------------------------------------- */}
-                {detailViewTab === 16 && (
-                    <div className="space-y-6 p-1">
-                        {animalLogsLoading ? (
-                            <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
-                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
-                                Loading logs...
-                            </div>
-                        ) : !animalLogs || animalLogs.length === 0 ? (
-                            <div className="text-center py-12 text-gray-400 text-sm">No changes recorded yet. Logs are created when you edit or feed this animal.</div>
-                        ) : (() => {
-                            const feedingLogs = animalLogs.filter(l => l.category === 'feeding');
-                            const careLogs    = animalLogs.filter(l => l.category === 'care');
-                            const fieldLogs   = animalLogs.filter(l => l.category === 'field');
-                            const fmtVal = v => v === null || v === undefined ? '?' : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v).slice(0, 80);
-                            return (
-                                <>
-                                    {/* Feeding History */}
-                                    {feedingLogs.length > 0 && (
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2 pb-1 border-b border-green-200">
-                                                <Edit size={16} className="inline-block align-middle" />
-                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Feeding History</h3>
-                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{feedingLogs.length}</span>
-                                            </div>
-                                            {feedingLogs.map(log => {
-                                                const ev = log.changes?.[0]?.newValue || {};
-                                                const foodLabel = ev.supplyName
-                                                    ? `${ev.supplyName}${ev.feederType ? ` (${ev.feederType}${ev.feederSize ? ` · ${ev.feederSize}` : ''})` : ''}`
-                                                    : null;
-                                                const qtyLabel = ev.quantity != null ? `${ev.quantity}${ev.unit ? ` ${ev.unit}` : ''}` : null;
-                                                return (
-                                                    <div key={log._id} className="bg-green-50 border border-green-100 rounded-lg p-3">
-                                                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                                                            <div className="flex items-center gap-2 flex-wrap">
-                                                                <span className="text-green-600 font-medium text-sm flex items-center gap-0.5"><Check size={12} className="flex-shrink-0" /> Fed</span>
-                                                                {foodLabel && <span className="text-gray-700 text-sm font-medium">{foodLabel}</span>}
-                                                                {qtyLabel && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">• {qtyLabel}</span>}
-                                                            </div>
-                                                            <span className="text-xs text-gray-400">{new Date(log.createdAt).toLocaleString()}</span>
-                                                        </div>
-                                                        {!foodLabel && <p className="text-xs text-gray-400 mt-1">No food recorded</p>}
-                                                        {ev.notes && <p className="text-xs text-gray-500 mt-1 italic">"{ev.notes}"</p>}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-
-                                    {/* Care Schedule Updates */}
-                                    {careLogs.length > 0 && (
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2 pb-1 border-b border-blue-200">
-                                                <Edit size={16} className="inline-block align-middle" />
-                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Care Schedule Updates</h3>
-                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{careLogs.length}</span>
-                                            </div>
-                                            {careLogs.map(log => (
-                                                <div key={log._id} className="bg-blue-50 border border-blue-100 rounded-lg p-3 space-y-1.5">
-                                                    <span className="text-xs font-medium text-blue-500">{new Date(log.createdAt).toLocaleString()}</span>
-                                                    {log.changes.map((c, i) => (
-                                                        <div key={i} className="text-sm">
-                                                            <span className="font-medium text-gray-700">{c.label}:</span>{' '}
-                                                            {c.field === 'careTasks' ? (
-                                                                <span className="text-gray-500">Task list updated</span>
-                                                            ) : c.field === 'careTaskDone' ? (
-                                                                <span className="text-green-600 flex items-center gap-0.5"><Check size={12} className="flex-shrink-0" /> Completed: {c.newValue}</span>
-                                                            ) : (
-                                                                <span className="text-gray-500">
-                                                                    {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">none</span>}
-                                                                    <ArrowRight size={14} className="inline-block align-middle mr-0.5" /> <span className="text-green-600">{fmtVal(c.newValue)}</span>
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* Field Edits */}
-                                    {fieldLogs.length > 0 && (
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2 pb-1 border-b border-gray-200">
-                                                <Edit size={16} className="inline-block align-middle" />
-                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Field Edits</h3>
-                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{fieldLogs.length}</span>
-                                            </div>
-                                            {fieldLogs.map(log => (
-                                                <div key={log._id} className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-1.5">
-                                                    <span className="text-xs font-medium text-gray-500">{new Date(log.createdAt).toLocaleString()}</span>
-                                                    {log.changes.map((c, i) => (
-                                                        <div key={i} className="text-sm flex items-start gap-1.5 flex-wrap">
-                                                            <span className="font-medium text-gray-700 shrink-0">{c.label}:</span>
-                                                            <span className="text-gray-500">
-                                                                {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">•</span>}
-                                                                <ArrowRight size={14} className="inline-block align-middle mr-0.5" /> <span className="text-green-600">{fmtVal(c.newValue)}</span>
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </>
-                            );
-                        })()}
-                    </div>
-                )}
 
                 {/* -- TAB 5: Pedigree -- */}
                 {detailViewTab === 5 && (() => {
