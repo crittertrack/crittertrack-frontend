@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Loader2, ScrollText, Mars, Venus } from 'lucide-react';
 import { PedigreeChart } from '../AnimalForm';
+import { formatDate } from '../../utils/dateFormatter';
 
 export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal }) => {
     const [generations, setGenerations] = useState(4); // Default to 4 generations for inline view
