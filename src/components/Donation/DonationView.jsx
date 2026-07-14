@@ -90,7 +90,7 @@ const DonationView = ({ onBack, authToken, userProfile, API_BASE_URL }) => {
             </div>
 
             {/* Donation Options */}
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Choose Your Support Method</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">How to Support</h2>
             <div className="space-y-4">
                 {/* Ko-fi Donation */}
                 <div className="border-2 border-blue-500/30 rounded-lg p-6 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 hover:shadow-md transition">
