@@ -401,15 +401,15 @@ const AnimalTestModal = ({
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
-                            <div className="relative">
+                            <div className="relative bg-white rounded-lg border border-gray-200 shadow-sm">
                                 <div className="absolute right-4 top-4 z-10 text-xs">
                                     {loadingCOI ? <span className="text-gray-400">COI: Calculating...</span> : animalCOI != null && <span className="font-semibold">COI: {animalCOI.toFixed(2)}%</span>}
                                 </div>
-                                <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} className="bg-white" />
+                                <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
                             {/* Dam Card */}
-                            <div>
-                                <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} className="bg-white" />
+                            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                                <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
                             {/* Health Summary Card */}
                             <div>
