@@ -764,11 +764,11 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                             {/* 2nd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
-                                {(animal.keeperHistory || []).length === 0 ? (
+                                {parseJsonField(animal.keeperHistory).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
                                     <div className="space-y-2">
-                                        {(animal.keeperHistory || []).map((entry, idx) => (
+                                        {parseJsonField(animal.keeperHistory).map((entry, idx) => (
                                             <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
                                                 <div className="flex-1 min-w-0">
                                                     {entry.userId_public
@@ -1429,57 +1429,27 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
-                                    {animal.medicalConditions && (() => {
-                                        const d = animal.medicalConditions;
-                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
-                                        return parsed && parsed.length > 0 ? (
-                                            <div>
-                                                <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
-                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((item, i) => (
-                                                        <li key={i} className="text-gray-700">
-                                                            {item.condition || item.name}
-                                                            {item.notes && <span className="text-gray-500"> ? {item.notes}</span>}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
-                                    })()}
-                                    {animal.allergies && (() => {
-                                        const d = animal.allergies;
-                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
-                                        return parsed && parsed.length > 0 ? (
-                                            <div>
-                                                <span className="text-gray-600 text-sm font-semibold">Allergies:</span>
-                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((item, i) => (
-                                                        <li key={i} className="text-gray-700">
-                                                            {item.allergen || item.name}
-                                                            {item.notes && <span className="text-gray-500"> ? {item.notes}</span>}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Allergies:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
-                                    })()}
-                                    {animal.medications && (() => {
-                                        const d = animal.medications;
-                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
-                                        return parsed && parsed.length > 0 ? (
-                                            <div>
-                                                <span className="text-gray-600 text-sm font-semibold">Current Medications:</span>
-                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((item, i) => (
-                                                        <li key={i} className="text-gray-700">
-                                                            {item.medication || item.name}
-                                                            {item.notes && <span className="text-gray-500"> ? {item.notes}</span>}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Current Medications:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
-                                    })()}
+                                    {animal.medicalConditions && (
+                                        <DetailJsonList
+                                            label="Medical Conditions"
+                                            data={animal.medicalConditions}
+                                            renderItem={item => <>{item.condition || item.name}{item.notes && <span className="text-gray-500"> - {item.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.allergies && (
+                                        <DetailJsonList
+                                            label="Allergies"
+                                            data={animal.allergies}
+                                            renderItem={item => <>{item.allergen || item.name}{item.notes && <span className="text-gray-500"> - {item.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.medications && (
+                                        <DetailJsonList
+                                            label="Current Medications"
+                                            data={animal.medications}
+                                            renderItem={item => <>{item.medication || item.name}{item.notes && <span className="text-gray-500"> - {item.notes}</span>}</>}
+                                        />
+                                    )}
                                 </div>)}
                             </div>
 
@@ -1663,11 +1633,11 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                             {/* Milestones */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
                                 <h3 className="text-lg font-semibold text-gray-700"><Bell size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Milestones</h3>
-                                {(!animal.milestones || animal.milestones.length === 0) ? (
+                                {parseJsonField(animal.milestones).length === 0 ? (
                                     <p className="text-sm text-gray-400">No milestones recorded.</p>
                                 ) : (
                                     <div className="space-y-2">
-                                        {animal.milestones.map((m, idx) => {
+                                        {parseJsonField(animal.milestones).map((m, idx) => {
                                             const d = m.startDate ? new Date(String(m.startDate).substring(0,10) + 'T00:00:00') : null;
                                             const dateStr = d && !isNaN(d) ? d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : (m.startDate || '');
                                             return (
