@@ -154,7 +154,6 @@ const AnimalTestModal = ({
         { id: 'timeline', label: 'Timeline', icon: <Clock size={14} /> },
         { id: 'notes', label: 'Notes', icon: <FileText size={14} /> },
         { id: 'records', label: 'Records', icon: <BookOpen size={14} /> },
-        { id: 'dev', label: 'Dev', icon: <FileJson size={14} /> },
     ];
 
     return (
@@ -433,13 +432,6 @@ const AnimalTestModal = ({
                             </div>
                         </div>
                     )}
-                    {activeTab === 'dev' && (
-                        <InfoCard title="Raw Data (for testing)" icon={<FileJson size={18} className="text-gray-400" />}>
-                            <pre className="bg-gray-800 text-white p-4 rounded-md text-xs overflow-x-auto max-h-96">
-                                {JSON.stringify(animal, null, 2)}
-                            </pre>
-                        </InfoCard>
-                    )}
                     {activeTab === 'identification' && (
                         <InfoCard title="Identification" icon={<Hash size={18} className="text-gray-400" />}>
                             <dl className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6">
@@ -531,7 +523,6 @@ const AnimalTestModal = ({
                     )}
                     {/* Placeholder for other tabs */}
                     {activeTab !== 'overview' &&
-                     activeTab !== 'dev' &&
                      activeTab !== 'identification' &&
                      activeTab !== 'breeding' &&
                      activeTab !== 'health' &&
