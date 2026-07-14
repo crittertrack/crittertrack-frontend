@@ -1039,7 +1039,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         <div className="animal-detail-section">
                                             <h4>Breeder</h4>
                                             <div className="detail-grid">
-                                                <div><strong>Original Breeder:</strong> {selectedAnimal.originalcreatorId?.personalName || selectedAnimal.originalcreatorId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
+                                                <div><strong>Original Breeder:</strong> {selectedAnimal.originalCreatorId?.personalName || selectedAnimal.originalCreatorId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
                                             </div>
                                         </div>
 
@@ -1086,7 +1086,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             <h4>Ownership</h4>
                                             <div className="detail-grid">
                                                 <div><strong>Currently Owned:</strong> {selectedAnimal.isOwned ? 'Yes' : 'No'}</div>
-                                                <div><strong>Breeder:</strong> {selectedAnimal.originalcreatorId?.personalName || selectedAnimal.originalcreatorId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
+                                                <div><strong>Breeder:</strong> {selectedAnimal.originalCreatorId?.personalName || selectedAnimal.originalCreatorId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
                                             </div>
                                         </div>
 

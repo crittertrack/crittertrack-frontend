@@ -9756,7 +9756,7 @@ const AnimalForm = ({
                                     // - If it was transferred TO me ? I own it but can only return it (not delete)
                                     
                                     // Check if this animal was transferred TO the current user
-                                    const iWasTransferredThisAnimal = animalToEdit.originalcreatorId && animalToEdit.creatorId_public === userProfile?.id_public;
+                                    const iWasTransferredThisAnimal = animalToEdit.originalCreatorId && animalToEdit.creatorId_public === userProfile?.id_public;
                                     
                                     const confirmMessage = iWasTransferredThisAnimal 
                                         ? `Return ${animalToEdit.name} to ${animalToEdit.breederName || 'the original breeder'}? This will remove the animal from your account.`
@@ -9768,11 +9768,11 @@ const AnimalForm = ({
                                 className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
                             > 
                                 {(() => {
-                                    const iWasTransferredThisAnimal = animalToEdit.originalcreatorId && animalToEdit.creatorId_public === userProfile?.id_public;
+                                    const iWasTransferredThisAnimal = animalToEdit.originalCreatorId && animalToEdit.creatorId_public === userProfile?.id_public;
                                     return iWasTransferredThisAnimal ? <RotateCcw size={18} /> : <Trash2 size={18} />;
                                 })()}
                                 <span>{(() => {
-                                    const iWasTransferredThisAnimal = animalToEdit.originalcreatorId && animalToEdit.creatorId_public === userProfile?.id_public;
+                                    const iWasTransferredThisAnimal = animalToEdit.originalCreatorId && animalToEdit.creatorId_public === userProfile?.id_public;
                                     return iWasTransferredThisAnimal ? 'Return Animal' : 'Delete';
                                 })()}</span> 
                             </button>

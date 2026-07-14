@@ -553,9 +553,11 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
-                             const iWasTransferredThisAnimal =
-                            animal.originalcreatorId &&
-                            animal.creatorId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal =
+                                    animal.creatorId_public === userProfile?.id_public && // Current user is the current owner
+                                    animal.originalCreatorId && // An original creator exists
+                                    animal.creatorId && // Current creator exists
+                                    animal.originalCreatorId.$oid !== animal.creatorId.$oid; // Original creator is different from current creator
 
                             // Recipient owns it
                             if (iWasTransferredThisAnimal) {
@@ -674,7 +676,11 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                const iWasTransferredThisAnimal = animal.originalcreatorId && animal.creatorId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal =
+                                    animal.creatorId_public === userProfile?.id_public && // Current user is the current owner
+                                    animal.originalCreatorId && // An original creator exists
+                                    animal.creatorId && // Current creator exists
+                                    animal.originalCreatorId.$oid !== animal.creatorId.$oid; // Original creator is different from current creator
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
