@@ -28,9 +28,9 @@ export const TimelineItem = ({ icon, title, description, date }) => (
             {icon}
         </div>
         <div className="flex-1">
-            <p className="font-medium text-gray-900">{title}</p>
-            <p className="text-sm text-gray-700">{description}</p>
-            <p className="text-xs text-gray-600 mt-1">{formatDate(date)}</p>
+            <p className="text-sm font-medium text-gray-900">{title}</p>
+            <p className="text-xs text-gray-700">{description}</p>
+            <p className="text-xs text-gray-600 mt-0.5">{formatDate(date)}</p>
         </div>
     </div>
 );
