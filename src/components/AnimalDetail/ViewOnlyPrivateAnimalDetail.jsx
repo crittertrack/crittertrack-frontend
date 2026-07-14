@@ -473,7 +473,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                                             })()}
                                                         </RouterLink>
                                                     ) : (
-                                                        <span className="font-mono text-accent">{animal.keeperName || '\u2014'}</span>
+                                                        <span className="font-mono text-accent">{animal.ownerName || '\u2014'}</span>
                                                     )}
                                                 </div>
                                             )}
@@ -539,7 +539,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        const keeperDisplay = animal.keeperName || null;
+                                        const keeperDisplay = animal.ownerName || null;
                                         if (!keeperDisplay) return null;
                                         return (
                                             <div className="flex items-center gap-2">

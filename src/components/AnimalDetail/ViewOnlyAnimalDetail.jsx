@@ -670,10 +670,10 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                     <hr className="border-gray-200" />
                                                 )}
                                                 {/* Keeper */}
-                                                {animal.keeperName && (
+                                                {animal.ownerName && (
                                                     <div>
                                                         <span className="text-gray-500">Keeper:</span>{' '}
-                                                        <span className="font-mono text-accent">{animal.keeperName}</span>
+                                                        <span className="font-mono text-accent">{animal.ownerName}</span>
                                                     </div>
                                                 )}
                                                 {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
@@ -762,7 +762,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        const keeperDisplay = animal.keeperName || null;
+                                        const keeperDisplay = animal.ownerName || null;
                                         if (!keeperDisplay) return null;
                                         return (
                                             <div className="flex items-center gap-2">
