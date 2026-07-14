@@ -932,7 +932,7 @@ const PrivateAnimalDetail = ({
                                                     
                                                     const displayName = parts.join(' • ') || 'Unknown Breeder';
                                                     return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}</div>{/* Owner */}
-                                                           {animal.ownerId_public && (
+                                                           {animal.creatorId_public && (
                                                            <div>
                                             <span className="text-gray-500">Owner:</span>{' '}
                                                        {ownerContactInfo ? (() => {

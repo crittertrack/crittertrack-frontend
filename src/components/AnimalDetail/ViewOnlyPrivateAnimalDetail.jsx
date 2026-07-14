@@ -251,11 +251,11 @@ const ViewOnlyPrivateAnimalDetail = ({
 
     // Fetch owner info when animal is owned (ownerId_public differs from breederId_public)
     React.useEffect(() => {
-        const fetchOwner = async () => {
+        const fetchOwner = async () => { // Changed from ownerId_public to creatorId_public
             if (animal?.isOwned && animal?.creatorId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1` // Changed from ownerId_public to creatorId_public
                     );
                     if (response.data && response.data.length > 0) {
                         setOwnerInfo(response.data[0]);
@@ -270,7 +270,7 @@ const ViewOnlyPrivateAnimalDetail = ({
             }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
+    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]); // Changed from ownerId_public to creatorId_public
     
     if (!animal) return null;
 

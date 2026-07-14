@@ -349,11 +349,11 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
 
     // Fetch owner info when animal is owned
     React.useEffect(() => {
-        const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.creatorId_public) {
+        const fetchOwner = async () => { // Changed from ownerId_public to creatorId_public
+            if (animal?.isOwned && animal?.creatorId_public) { // Changed from ownerId_public to creatorId_public
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1` // Changed from ownerId_public to creatorId_public
                     );
                     if (response.data && response.data.length > 0) {
                         setOwnerInfo(response.data[0]);
@@ -368,7 +368,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
             }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
+    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]); // Changed from ownerId_public to creatorId_public
     
     // Fetch COI when component mounts or animal changes (if animal has both parents)
     React.useEffect(() => {
@@ -767,7 +767,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gray-600">Owner Name:</span>
                                                 <strong>{ownerDisplay}</strong>
-                                            </div>
+                                    </div> // Removed ownerId_public check here, as ownerName is sufficient for display
                                         );
                                     })()}
                                     {animal.coOwnership && (

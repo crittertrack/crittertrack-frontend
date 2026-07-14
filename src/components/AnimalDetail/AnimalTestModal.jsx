@@ -92,16 +92,16 @@ const AnimalTestModal = ({
 
     useEffect(() => {
         const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.ownerId_public) {
+            if (animal?.isOwned && animal?.creatorId_public) { // Changed from ownerId_public to creatorId_public
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`);
+                    const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`); // Changed from ownerId_public to creatorId_public
                     if (response.data && response.data.length > 0) setOwnerInfo(response.data[0]);
                     else setOwnerInfo(null);
                 } catch { setOwnerInfo(null); }
             } else { setOwnerInfo(null); }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.ownerId_public, API_BASE_URL]);
+    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]); // Changed from ownerId_public to creatorId_public
 
     useEffect(() => {
         const fetchEnclosure = async () => {
@@ -237,8 +237,8 @@ const AnimalTestModal = ({
                                     }} className={`p-2 rounded-lg transition ${animal.isDisplay ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}`} title={animal.isDisplay ? 'Make Private' : 'Make Public'}>{animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}</button>}
                                     {onEdit && <button onClick={() => onEdit(animal)} className="p-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition"><Edit size={16} /></button>}
                                     {onTransfer && (() => {
-                                        const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
-                                        if (iWasTransferredThisAnimal && handleReturnTransferredAnimal) {
+                                        const iWasTransferredThisAnimal = animal.originalOwnerId && animal.creatorId_public === userProfile?.id_public;
+                                        if (iWasTransferredThisAnimal && handleReturnTransferredAnimal) { // Changed from ownerId_public to creatorId_public
                                             return (
                                                 <button
                                                     onClick={() => handleReturnTransferredAnimal()}
@@ -363,18 +363,6 @@ const AnimalTestModal = ({
                                                         <div className="flex flex-wrap gap-2 justify-center">
                                                             {animal.tags.map(tag => (
                                                                 <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-medium px-1.5 py-0.5 rounded-full">{tag}</span>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {(animalBreedingLines[animal.id_public] || []).length > 0 && (
-                                                    <div className="text-center mt-2">
-                                                        <div className="flex flex-wrap items-center gap-1 justify-center">
-                                                            {(animalBreedingLines[animal.id_public] || [])
-                                                                .map(lineId => breedingLineDefs.find(l => l.id === lineId))
-                                                                .filter(Boolean)
-                                                            .map(line => (
-                                                                <span key={line.id} title={line.name} style={{ color: line.color }} className="text-sm leading-none">&#x25C6;</span>
                                                             ))}
                                                         </div>
                                                     </div>

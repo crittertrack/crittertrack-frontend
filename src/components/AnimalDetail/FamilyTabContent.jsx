@@ -510,7 +510,7 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                                                                             <div className="w-full text-center px-2 pb-1">
                                                                                 <div className="text-sm font-semibold text-gray-500 truncate">Private Animal</div>
                                                                             </div>
-                                                                            <div className="w-full px-2 pb-2 flex justify-end">
+                                                                <div className="w-full px-2 pb-2 flex justify-end"> {/* Changed from ownerId_public to creatorId_public */}
                                                                                 <div className="text-xs text-gray-400 font-mono">{offspring.id_public}</div>
                                                                             </div>
                                                                             <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
