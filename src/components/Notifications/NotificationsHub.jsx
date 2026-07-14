@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import { BroadcastPoll } from './Banners';
+import { parseJsonField } from '../AnimalDetail/utils';
 
 const API_BASE_URL = '/api';
 
@@ -178,8 +179,8 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         }
         let careDueCount = 0;
         animals.forEach(a => {
-            careDueCount += (a.careTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
-            careDueCount += (a.animalCareTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+            careDueCount += parseJsonField(a.careTasks).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+            careDueCount += parseJsonField(a.animalCareTasks).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
         });
         if (careDueCount > 0) {
             const key = 'mgmt-care';
@@ -187,7 +188,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         }
         let maintDueCount = 0;
         enclosures.forEach(enc => {
-            maintDueCount += (enc.cleaningTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+            maintDueCount += parseJsonField(enc.cleaningTasks).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
         });
         if (maintDueCount > 0) {
             const key = 'mgmt-maintenance';
