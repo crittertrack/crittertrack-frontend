@@ -433,31 +433,63 @@ const AnimalTestModal = ({
                         </div>
                     )}
                     {activeTab === 'identification' && (
-                        <InfoCard title="Identification" icon={<Hash size={18} className="text-gray-400" />}>
-                            <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6">
-                                <InfoItem label="CritterTrack ID" value={animal.id_public} />
-                                <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />
-                                <InfoItem label="Microchip Number" value={animal.microchipNumber} />
-                                <InfoItem label="Tattoo" value={animal.tattooId} />
-                                <InfoItem label="Ring" value={animal.ringId} />
-                                <InfoItem label="Eartag Number" value={animal.eartagNumber} />
-                                <InfoItem label="Pedigree Registration" value={animal.pedigreeRegistrationId} />
-                                <InfoItem label="Colony ID" value={animal.colonyId} />
-                                <InfoItem label="DNA Profile" value={animal.dnaProfile} />
-                                {parseJsonArrayField(animal.identifiers).map((identifier, index) => (
-                                    <InfoItem key={index} label={identifier.title} value={identifier.value} />
-                                ))}
-                            </dl>
-                            {breedingLineDefs.length > 0 && (
-                                <div className="pt-4 mt-4 border-t">
-                                    <InfoItem label="Breeding Lines">
+                        <div className="space-y-6">
+                            {/* Identification Numbers */}
+                            <InfoCard title="Identification Numbers" icon={<Hash size={18} className="text-gray-400" />}>
+                                <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6">
+                                    <InfoItem label="CritterTrack ID" value={animal.id_public} />
+                                    {animal.breederAssignedId && <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />}
+                                    {animal.microchipNumber && <InfoItem label="Microchip Number" value={animal.microchipNumber} />}
+                                    {animal.tattooId && <InfoItem label="Tattoo" value={animal.tattooId} />}
+                                    {animal.ringId && <InfoItem label="Ring" value={animal.ringId} />}
+                                    {animal.eartagNumber && <InfoItem label="Eartag Number" value={animal.eartagNumber} />}
+                                    {animal.pedigreeRegistrationId && <InfoItem label="Pedigree Registration" value={animal.pedigreeRegistrationId} />}
+                                    {animal.colonyId && <InfoItem label="Colony ID" value={animal.colonyId} />}
+                                    {animal.dnaProfile && <InfoItem label="DNA Profile" value={animal.dnaProfile} />}
+                                    {parseJsonArrayField(animal.identifiers).map((identifier, index) => (
+                                        <InfoItem key={index} label={identifier.title} value={identifier.value} />
+                                    ))}
+                                </dl>
+                            </InfoCard>
+
+                            {/* Classification */}
+                            <InfoCard title="Classification" icon={<FolderOpen size={18} className="text-gray-400" />}>
+                                <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6">
+                                    <InfoItem label="Species" value={animal.species} />
+                                    {animal.breed && <InfoItem label="Breed" value={animal.breed} />}
+                                    {animal.strain && <InfoItem label="Strain" value={animal.strain} />}
+                                </dl>
+                            </InfoCard>
+
+                            {/* Origin */}
+                            {animal.origin && (
+                                <InfoCard title="Origin" icon={<Globe size={18} className="text-gray-400" />}>
+                                    <dl>
+                                        <InfoItem label="Origin" value={animal.origin} />
+                                    </dl>
+                                </InfoCard>
+                            )}
+
+                            {/* Tags */}
+                            {animal.tags && animal.tags.length > 0 && (
+                                <InfoCard title="Tags" icon={<Tag size={18} className="text-gray-400" />}>
+                                    <div className="flex flex-wrap gap-2">
+                                        {animal.tags.map(tag => (
+                                            <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-medium px-2.5 py-1 rounded-full">{tag}</span>
+                                        ))}
+                                    </div>
+                                </InfoCard>
+                            )}
+
+                            {/* Breeding Lines */}
+                            {breedingLineDefs.length > 0 && (animalBreedingLines[animal.id_public] || []).length > 0 && (
+                                <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400" />}>
                                         <div className="flex flex-wrap gap-2">
                                             {(animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean).map(line => <span key={line.id} style={{ backgroundColor: line.color, color: '#fff' }} className="text-xs font-semibold px-2 py-0.5 rounded-full">{line.name}</span>)}
                                         </div>
-                                    </InfoItem>
-                                </div>
+                                </InfoCard>
                             )}
-                        </InfoCard>
+                        </div>
                     )}
                     {activeTab === 'health' && (
                         <HealthTabContent
