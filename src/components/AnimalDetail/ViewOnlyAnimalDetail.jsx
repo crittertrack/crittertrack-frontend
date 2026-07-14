@@ -1,10 +1,10 @@
-﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { QRCodeSVG } from 'qrcode.react';
 import { Link as RouterLink } from 'react-router-dom';
-import { ArrowLeft, X, QrCode, ChevronDown, ChevronUp, ChevronRight, Mars, Venus, VenusAndMars, Circle, Cat, Users, User, Home, Tag, Loader2, Lock, TreeDeciduous, Egg, Shield, Microscope, HeartPulse, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Activity, AlertTriangle, FileText, Feather, Medal, Target, Key, ClipboardList, Ban, Images, Camera, Heart, Eye, EyeOff, Sparkles, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Hourglass, Bean, Milk, Sprout, RefreshCw, Leaf, Brain, Trophy, FileCheck, Scale, ScrollText, Check, Users as UsersIcon, TableOfContents, Dumbbell, Download, Network, Bell } from 'lucide-react';
+import { ArrowLeft, X, QrCode, ChevronDown, ChevronUp, ChevronRight, Mars, Venus, VenusAndMars, Circle, Cat, Users, User, Home, Tag, Loader2, Lock, TreeDeciduous, Egg, Pill, Shield, Microscope, Hospital, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Activity, AlertTriangle, FileText, Feather, Medal, Target, Key, ClipboardList, Ban, Images, Camera, Heart, Eye, EyeOff, Sparkles, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Hourglass, Bean, Milk, Sprout, RefreshCw, Leaf, Brain, Trophy, FileCheck, Scale, ScrollText, Check, Users as UsersIcon, TableOfContents, Dumbbell, Download, Network, Bell } from 'lucide-react';
 import { useDetailFieldTemplate, parseJsonField, DetailJsonList, ViewOnlyParentCard, ParentMiniCard } from './utils';
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
@@ -349,11 +349,11 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
 
     // Fetch owner info when animal is owned
     React.useEffect(() => {
-        const fetchOwner = async () => { // Changed from creatorId_public to creatorId_public
-            if (animal?.isOwned && animal?.creatorId_public) { // Changed from creatorId_public to creatorId_public
+        const fetchOwner = async () => {
+            if (animal?.isOwned && animal?.creatorId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1` // Changed from creatorId_public to creatorId_public
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setOwnerInfo(response.data[0]);
@@ -368,7 +368,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
             }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]); // Changed from creatorId_public to creatorId_public
+    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
     
     // Fetch COI when component mounts or animal changes (if animal has both parents)
     React.useEffect(() => {
@@ -505,13 +505,14 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                     <div className="flex flex-wrap gap-1 sm:gap-2 px-0.5 sm:px-4 py-2 justify-center">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 2, label: 'Status', icon: Lock, color: 'text-slate-500' },
                             { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
                             { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
                             { id: 6, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' },
                             { id: 7, label: 'Fertility', icon: Egg, color: 'text-yellow-500' },
-                            { id: 8, label: 'Health', icon: HeartPulse, color: 'text-red-500' },
+                            { id: 8, label: 'Health', icon: Hospital, color: 'text-red-500' },
                             { id: 9, label: 'Care', icon: Home, color: 'text-teal-500' },
                             { id: 10, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
                             { id: 11, label: 'Notes & Milestones', icon: FileText, color: 'text-indigo-500' },
@@ -758,16 +759,16 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
 
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><User size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        const ownerDisplay = animal.ownerName || null;
-                                        if (!ownerDisplay) return null;
+                                        const keeperDisplay = animal.ownerName || null;
+                                        if (!keeperDisplay) return null;
                                         return (
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-600">Owner Name:</span>
-                                                <strong>{ownerDisplay}</strong>
-                                    </div> // Removed creatorId_public check here, as ownerName is sufficient for display
+                                                <span className="text-gray-600">Keeper Name:</span>
+                                                <strong>{keeperDisplay}</strong>
+                                            </div>
                                         );
                                     })()}
                                     {animal.coOwnership && (
@@ -781,7 +782,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -897,31 +898,23 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                     {detailViewTab === 3 && (
                         <div className="space-y-6">
                             {/* Identification Numbers */}
-                            {(() => {
-                                const idFields = [
-                                    { key: 'breederAssignedId', label: 'Identification' },
-                                    { key: 'microchipNumber', label: 'Microchip Number' },
-                                    { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
-                                    { key: 'colonyId', label: 'Colony ID' },
-                                    { key: 'rabiesTagNumber', label: 'Rabies Tag Number' },
-                                    { key: 'tattooId', label: 'Tattoo ID' },
-                                    { key: 'akcRegistrationNumber', label: 'AKC Registration #' },
-                                    { key: 'fciRegistrationNumber', label: 'FCI Registration #' },
-                                    { key: 'cfaRegistrationNumber', label: 'CFA Registration #' },
-                                    { key: 'workingRegistryIds', label: 'Working Registry IDs' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
-                                return (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                            <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
-                                            {idFields.map(f => (
-                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })()}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
+                                    {animal.breederAssignedId && <div><span className="text-gray-600">{getLabel('breederAssignedId', 'Breeder Assigned ID')}:</span> <strong>{animal.breederAssignedId}</strong></div>}
+                                    {animal.microchipNumber && <div><span className="text-gray-600">{getLabel('microchipNumber', 'Microchip')}:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                    {animal.tattooId && <div><span className="text-gray-600">{getLabel('tattooId', 'Tattoo')}:</span> <strong>{animal.tattooId}</strong></div>}
+                                    {animal.ringId && <div><span className="text-gray-600">{getLabel('ringId', 'Ring')}:</span> <strong>{animal.ringId}</strong></div>}
+                                    {animal.eartagNumber && <div><span className="text-gray-600">{getLabel('eartagNumber', 'Ear Tag')}:</span> <strong>{animal.eartagNumber}</strong></div>}
+                                    {animal.pedigreeRegistrationId && <div><span className="text-gray-600">{getLabel('pedigreeRegistrationId', 'Pedigree Registration')}:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                    {animal.colonyId && <div><span className="text-gray-600">{getLabel('colonyId', 'Colony ID')}:</span> <strong>{animal.colonyId}</strong></div>}
+                                    {animal.dnaProfile && <div><span className="text-gray-600">{getLabel('dnaProfile', 'DNA Profile')}:</span> <strong>{animal.dnaProfile}</strong></div>}
+                                    {parseJsonField(animal.identifiers).map((identifier, index) => (
+                                        <div key={index}><span className="text-gray-600">{identifier.title}:</span> <strong>{identifier.value}</strong></div>
+                                    ))}
+                                </div>
+                            </div>
 
                             {/* Classification */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -1429,6 +1422,12 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                             <div><span className="text-gray-600">{getLabel('isNursing', 'Nursing')}:</span> <strong>{animal.isNursing ? 'Yes' : 'No'}</strong></div>
                                         </>
                                     )}
+                                    {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? 'Yes' : 'No'}</strong></div>
+                                    )}
+                                    {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? 'Yes' : 'No'}</strong></div>
+                                    )}
                                 </div>
                             </div>
 
@@ -1567,7 +1566,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                             {/* 3rd Section: Active Medical Records */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700"><HeartPulse size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
@@ -1640,7 +1639,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                 return (clearanceFields.length > 0 || spayDate) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
-                                            <h3 className="text-lg font-semibold text-gray-700"><HeartPulse size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
+                                            <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
                                             <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
                                         </button>
                                         {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">

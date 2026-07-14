@@ -1431,31 +1431,23 @@ const PrivateAnimalDetail = ({
                     {detailViewTab === 3 && (
                         <div className="space-y-6">
                             {/* Identification Numbers */}
-                            {(() => {
-                                const idFields = [
-                                    { key: 'breederAssignedId', label: 'Identification' },
-                                    { key: 'microchipNumber', label: 'Microchip Number' },
-                                    { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
-                                    { key: 'colonyId', label: 'Colony ID' },
-                                    { key: 'rabiesTagNumber', label: 'Rabies Tag Number' },
-                                    { key: 'tattooId', label: 'Tattoo ID' },
-                                    { key: 'akcRegistrationNumber', label: 'AKC Registration #' },
-                                    { key: 'fciRegistrationNumber', label: 'FCI Registration #' },
-                                    { key: 'cfaRegistrationNumber', label: 'CFA Registration #' },
-                                    { key: 'workingRegistryIds', label: 'Working Registry IDs' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
-                                return (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                            <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
-                                            {idFields.map(f => (
-                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })()}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
+                                    {animal.breederAssignedId && <div><span className="text-gray-600">{getLabel('breederAssignedId', 'Breeder Assigned ID')}:</span> <strong>{animal.breederAssignedId}</strong></div>}
+                                    {animal.microchipNumber && <div><span className="text-gray-600">{getLabel('microchipNumber', 'Microchip')}:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                    {animal.tattooId && <div><span className="text-gray-600">{getLabel('tattooId', 'Tattoo')}:</span> <strong>{animal.tattooId}</strong></div>}
+                                    {animal.ringId && <div><span className="text-gray-600">{getLabel('ringId', 'Ring')}:</span> <strong>{animal.ringId}</strong></div>}
+                                    {animal.eartagNumber && <div><span className="text-gray-600">{getLabel('eartagNumber', 'Ear Tag')}:</span> <strong>{animal.eartagNumber}</strong></div>}
+                                    {animal.pedigreeRegistrationId && <div><span className="text-gray-600">{getLabel('pedigreeRegistrationId', 'Pedigree Registration')}:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                    {animal.colonyId && <div><span className="text-gray-600">{getLabel('colonyId', 'Colony ID')}:</span> <strong>{animal.colonyId}</strong></div>}
+                                    {animal.dnaProfile && <div><span className="text-gray-600">{getLabel('dnaProfile', 'DNA Profile')}:</span> <strong>{animal.dnaProfile}</strong></div>}
+                                    {parseJsonField(animal.identifiers).map((identifier, index) => (
+                                        <div key={index}><span className="text-gray-600">{identifier.title}:</span> <strong>{identifier.value}</strong></div>
+                                    ))}
+                                </div>
+                            </div>
 
                             {/* Classification */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">

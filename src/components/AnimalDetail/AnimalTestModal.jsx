@@ -434,16 +434,19 @@ const AnimalTestModal = ({
                     )}
                     {activeTab === 'identification' && (
                         <InfoCard title="Identification" icon={<Hash size={18} className="text-gray-400" />}>
-                            <dl className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6">
+                            <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6">
                                 <InfoItem label="CritterTrack ID" value={animal.id_public} />
                                 <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />
                                 <InfoItem label="Microchip Number" value={animal.microchipNumber} />
-                                <InfoItem label="Pedigree Reg. ID" value={animal.pedigreeRegistrationId} />
-                                <InfoItem label="Registry Name"><span className="text-gray-400 italic">e.g., AKC, TICA</span></InfoItem>
-                                <InfoItem label="DNA Profile ID"><span className="text-gray-400 italic">e.g., V123456</span></InfoItem>
-                                <InfoItem label="Litter Reg. Number"><span className="text-gray-400 italic">e.g., RN12345678</span></InfoItem>
+                                <InfoItem label="Tattoo" value={animal.tattooId} />
+                                <InfoItem label="Ring" value={animal.ringId} />
+                                <InfoItem label="Eartag Number" value={animal.eartagNumber} />
+                                <InfoItem label="Pedigree Registration" value={animal.pedigreeRegistrationId} />
                                 <InfoItem label="Colony ID" value={animal.colonyId} />
-                                <InfoItem label="Tattoo ID" value={animal.tattooId} />
+                                <InfoItem label="DNA Profile" value={animal.dnaProfile} />
+                                {parseJsonArrayField(animal.identifiers).map((identifier, index) => (
+                                    <InfoItem key={index} label={identifier.title} value={identifier.value} />
+                                ))}
                             </dl>
                             {breedingLineDefs.length > 0 && (
                                 <div className="pt-4 mt-4 border-t">
