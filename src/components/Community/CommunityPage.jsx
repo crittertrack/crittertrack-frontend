@@ -69,7 +69,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         `${API_BASE_URL}/public/marketplace?limit=100&type=all`
                     ).catch(() => ({ data: { animals: [] } }));
                     const allAvailable = availRes.data?.animals || availRes.data || [];
-                    const fromFavUsers = allAvailable.filter(a => favUserIds.has(a.ownerId_public));
+                    const fromFavUsers = allAvailable.filter(a => favUserIds.has(a.creatorId_public));
                     setNewAvailableAnimals(fromFavUsers);
                 } else {
                     setNewAvailableAnimals([]);

@@ -155,8 +155,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                 throw new Error('Authentication token is missing. Please log in again.');
             }
 
-            // Add ownerId_public if not present (for new animals)
-            if (!data.ownerId_public) {
+            // Add creatorId_public if not present (for new animals)
+            if (!data.creatorId_public) {
                 // Note: userProfile should be passed as parameter or accessed from context
                 // For now, relying on backend to set it from auth token
             }

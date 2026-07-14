@@ -215,13 +215,13 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
 
-    // Fetch owner info when animal is owned (ownerId_public differs from breederId_public)
+    // Fetch owner info when animal is owned (creatorId_public differs from breederId_public)
     React.useEffect(() => {
         const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.ownerId_public) {
+            if (animal?.isOwned && animal?.creatorId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setOwnerInfo(response.data[0]);
@@ -236,7 +236,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
             }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.ownerId_public, API_BASE_URL]);
+    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
     
     if (!animal) return null;
 
@@ -350,7 +350,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                             )}
                                         </div>
                                         <div className="text-sm font-medium text-gray-700">
-                                            {animal.breederId_public && animal.ownerId_public && animal.breederId_public !== animal.ownerId_public ? (
+                                            {animal.breederId_public && animal.creatorId_public && animal.breederId_public !== animal.creatorId_public ? (
                                                 <div className="space-y-0.5 text-center">
                                                     <div>Sold</div>
                                                     {animal.status && <div>{animal.status}</div>}
@@ -450,7 +450,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
                                             {/* Keeper */}
-                                            {animal.ownerId_public && (
+                                            {animal.creatorId_public && (
                                                 <div>
                                                     <span className="text-gray-500">Keeper:</span>{' '}
                                                     {ownerInfo ? (

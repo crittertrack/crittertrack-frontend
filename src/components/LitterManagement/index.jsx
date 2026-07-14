@@ -2695,17 +2695,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 
                 // Create males
                 for (let i = 1; i <= parseInt(createOffspringCounts.males || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: sire.species, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, ownerId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: sire.species, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
                 
                 // Create females
                 for (let i = 1; i <= parseInt(createOffspringCounts.females || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: sire.species, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, ownerId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: sire.species, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
 
                 // Create unknown/intersex
                 for (let i = 1; i <= parseInt(createOffspringCounts.unknown || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: sire.species, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, ownerId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: sire.species, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
             }
             
@@ -3181,13 +3181,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 }
                 
                 for (let i = 1; i <= parseInt(createOffspringCounts.males || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: offspringSpecies, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, ownerId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: offspringSpecies, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
                 for (let i = 1; i <= parseInt(createOffspringCounts.females || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: offspringSpecies, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, ownerId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: offspringSpecies, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
                 for (let i = 1; i <= parseInt(createOffspringCounts.unknown || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: offspringSpecies, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, ownerId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: offspringSpecies, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
             }
             
@@ -3335,7 +3335,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 remarks: newOffspringData.remarks || null,
                 isOwned: true,
                 breederId_public: userProfile.id_public,
-                ownerId_public: userProfile.id_public
+                creatorId_public: userProfile.id_public
             };
 
             const response = await axios.post(`${API_BASE_URL}/animals`, animalData, {
@@ -5379,7 +5379,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                         damId_public: animal.damId_public || litter.damId_public || null,
                                                                     };
                                                                     // If animal is owned by current user, open edit view; otherwise open read-only view
-                                                                    const isOwnedByUser = animal.ownerId_public === userProfile?.id_public;
+                                                                    const isOwnedByUser = animal.creatorId_public === userProfile?.id_public;
                                                                     if (isOwnedByUser) {
                                                                         handleViewAnimal && handleViewAnimal(animalWithParents);
                                                                     } else {

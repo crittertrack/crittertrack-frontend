@@ -203,7 +203,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             remarks: animal.remarks || '',
             sireId_public: animal.sireId_public || '',
             damId_public: animal.damId_public || '',
-            ownerId_public: animal.ownerId_public || '',
+            creatorId_public: animal.creatorId_public || '',
             breederId_public: animal.breederId_public || '',
             manualBreederName: animal.manualBreederName || '',
             // Basic identification
@@ -395,7 +395,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     };
     
     const selectOwner = (user) => {
-        setEditForm(prev => ({ ...prev, ownerId_public: user.id_public }));
+        setEditForm(prev => ({ ...prev, creatorId_public: user.id_public }));
         setShowOwnerSearch(false);
         setOwnerSearchQuery('');
         setOwnerSearchResults([]);
@@ -413,9 +413,9 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     };
     
     const getOwnerDisplay = () => {
-        if (!editForm.ownerId_public) return 'Click to Select Owner';
-        const owner = users.find(u => u.id_public === editForm.ownerId_public);
-        if (!owner) return editForm.ownerId_public;
+        if (!editForm.creatorId_public) return 'Click to Select Owner';
+        const owner = users.find(u => u.id_public === editForm.creatorId_public);
+        if (!owner) return editForm.creatorId_public;
         return `${owner.personalName || owner.username || owner.email} (${owner.id_public})`;
     };
     
@@ -485,13 +485,13 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             return;
         }
 
-        // If owner is being changed, resolve ownerId (backend ObjectId)
-        // The Animal model requires both ownerId (ObjectId) and ownerId_public (string)
-        if (changedFields.ownerId_public) {
-            const selectedUser = users.find(u => u.id_public === changedFields.ownerId_public);
+        // If owner is being changed, resolve creatorId (backend ObjectId)
+        // The Animal model requires both creatorId (ObjectId) and creatorId_public (string)
+        if (changedFields.creatorId_public) {
+            const selectedUser = users.find(u => u.id_public === changedFields.creatorId_public);
             if (selectedUser) {
-                changedFields.ownerId = selectedUser._id;
-                // ownerId_public is already in changedFields from the form
+                changedFields.creatorId = selectedUser._id;
+                // creatorId_public is already in changedFields from the form
                 // Set animal as owned and public when owner changes
                 changedFields.isOwned = true;
                 changedFields.showOnPublicProfile = true;
@@ -653,10 +653,10 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     };
 
     const getAnimalOwnerDisplay = (animal) => {
-        if (animal.ownerId?.personalName) {
-            return `${animal.ownerId.personalName} (${animal.ownerId.id_public || animal.ownerId.email})`;
+        if (animal.creatorId?.personalName) {
+            return `${animal.creatorId.personalName} (${animal.creatorId.id_public || animal.creatorId.email})`;
         }
-        return animal.ownerId?.email || animal.ownerId_public || 'Unknown';
+        return animal.creatorId?.email || animal.creatorId_public || 'Unknown';
     };
 
     const formatDate = (date) => {
@@ -856,7 +856,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     <td>{animal.species}</td>
                                     <td className="animal-owner">
                                         <span title={getAnimalOwnerDisplay(animal)}>
-                                            {animal.ownerId?.personalName || animal.ownerId?.email?.split('@')[0] || 'Unknown'}
+                                            {animal.creatorId?.personalName || animal.creatorId?.email?.split('@')[0] || 'Unknown'}
                                         </span>
                                     </td>
                                     <td>{animal.status || '-'}</td>
@@ -1039,7 +1039,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         <div className="animal-detail-section">
                                             <h4>Breeder</h4>
                                             <div className="detail-grid">
-                                                <div><strong>Original Breeder:</strong> {selectedAnimal.originalOwnerId?.personalName || selectedAnimal.originalOwnerId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
+                                                <div><strong>Original Breeder:</strong> {selectedAnimal.originalcreatorId?.personalName || selectedAnimal.originalcreatorId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
                                             </div>
                                         </div>
 
@@ -1086,15 +1086,15 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             <h4>Ownership</h4>
                                             <div className="detail-grid">
                                                 <div><strong>Currently Owned:</strong> {selectedAnimal.isOwned ? 'Yes' : 'No'}</div>
-                                                <div><strong>Breeder:</strong> {selectedAnimal.originalOwnerId?.personalName || selectedAnimal.originalOwnerId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
+                                                <div><strong>Breeder:</strong> {selectedAnimal.originalcreatorId?.personalName || selectedAnimal.originalcreatorId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
                                             </div>
                                         </div>
 
                                         <div className="animal-detail-section">
                                             <h4>Current Owner</h4>
                                             <div className="detail-grid">
-                                                <div><strong>Owner:</strong> {selectedAnimal.ownerId?.personalName || selectedAnimal.ownerId?.email || '-'}</div>
-                                                <div><strong>Owner ID:</strong> {selectedAnimal.ownerId?.id_public || '-'}</div>
+                                                <div><strong>Owner:</strong> {selectedAnimal.creatorId?.personalName || selectedAnimal.creatorId?.email || '-'}</div>
+                                                <div><strong>Owner ID:</strong> {selectedAnimal.creatorId?.id_public || '-'}</div>
                                                 {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && selectedAnimal.coOwnership && (
                                                     <div><strong>Co-Ownership:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.coOwnership}</span></div>
                                                 )}

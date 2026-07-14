@@ -255,7 +255,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                 type: 'animal',
                 id: animal.id_public,
                 name: animal.name,
-                ownerId: animal.ownerId
+                creatorId: animal.creatorId
             });
         }
         return () => {
@@ -350,10 +350,10 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
     // Fetch owner info when animal is owned
     React.useEffect(() => {
         const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.ownerId_public) {
+            if (animal?.isOwned && animal?.creatorId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setOwnerInfo(response.data[0]);
@@ -368,7 +368,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
             }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.ownerId_public, API_BASE_URL]);
+    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
     
     // Fetch COI when component mounts or animal changes (if animal has both parents)
     React.useEffect(() => {
@@ -452,7 +452,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                             <ReportButton
                                 contentType="animal"
                                 contentId={animal.id_public}
-                                contentOwnerId={animal.ownerId}
+                                contentcreatorId={animal.creatorId}
                                 authToken={authToken}
                                 tooltipText="Report this animal"
                             />
@@ -489,7 +489,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                             <ReportButton
                                 contentType="animal"
                                 contentId={animal.id_public}
-                                contentOwnerId={animal.ownerId}
+                                contentcreatorId={animal.creatorId}
                                 authToken={authToken}
                                 tooltipText="Report this animal"
                             />

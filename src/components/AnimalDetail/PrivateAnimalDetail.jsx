@@ -477,13 +477,13 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
     
-    // Fetch owner info when animal is owned (ownerId_public differs from breederId_public)
+    // Fetch owner info when animal is owned (creatorId_public differs from breederId_public)
     React.useEffect(() => {
         const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.ownerId_public) {
+            if (animal?.isOwned && animal?.creatorId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setOwnerInfo(response.data[0]);
@@ -498,7 +498,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
             }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.ownerId_public, API_BASE_URL]);
+    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
     
     // Fetch keeper contact info when keeperContactId exists
     React.useEffect(() => {
@@ -554,8 +554,8 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                             </button>
                             {onTransfer && (() => {
                              const iWasTransferredThisAnimal =
-                            animal.originalOwnerId &&
-                            animal.ownerId_public === userProfile?.id_public;
+                            animal.originalcreatorId &&
+                            animal.creatorId_public === userProfile?.id_public;
 
                             // Recipient owns it
                             if (iWasTransferredThisAnimal) {
@@ -674,7 +674,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal = animal.originalcreatorId && animal.creatorId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
@@ -968,7 +968,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                                     
                                                     const displayName = parts.join(' • ') || 'Unknown Breeder';
                                                     return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}</div>{/* Keeper */}
-                                                           {animal.ownerId_public && (
+                                                           {animal.creatorId_public && (
                                                            <div>
                                             <span className="text-gray-500">Keeper:</span>{' '}
                                                        {keeperContactInfo ? (() => {
