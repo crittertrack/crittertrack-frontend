@@ -4,20 +4,6 @@ import { formatDate } from '../../utils/dateFormatter';
 import { useDetailFieldTemplate, DetailJsonList, parseJsonField } from './utils';
 import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
 
-// Helper to parse fields that might be JSON strings or arrays
-const parseHealthRecords = (data) => {
-    if (!data) return [];
-    if (typeof data === 'string') {
-        try {
-            const parsed = JSON.parse(data);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            return [];
-        }
-    }
-    return Array.isArray(data) ? data : [];
-};
-
 // New component for status
 const StatusIndicator = ({ status }) => {
     const statusStyles = {

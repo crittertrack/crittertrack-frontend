@@ -28,13 +28,13 @@ const TaskList = ({ tasks, label }) => {
 export const CareTabContent = ({ animal, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
-    const careTasks = Array.isArray(animal.careTasks) ? animal.careTasks : [];
-    const animalCareTasks = Array.isArray(animal.animalCareTasks) ? animal.animalCareTasks : [];
+    const careTasks = parseJsonField(animal.careTasks);
+    const animalCareTasks = parseJsonField(animal.animalCareTasks);
     
     // New structured records
-    const sheddingRecords = Array.isArray(animal.sheddingRecords) ? animal.sheddingRecords : [];
-    const moltingRecords = Array.isArray(animal.moltingRecords) ? animal.moltingRecords : [];
-    const waterParameterChecks = Array.isArray(animal.waterParameterChecks) ? animal.waterParameterChecks : [];
+    const sheddingRecords = parseJsonField(animal.sheddingRecords);
+    const moltingRecords = parseJsonField(animal.moltingRecords);
+    const waterParameterChecks = parseJsonField(animal.waterParameterChecks);
 
     const hasNutrition = animal.dietType || animal.feedingSchedule || animal.supplements;
     const hasHousing = animal.housingType || animal.bedding || animal.enrichment;
