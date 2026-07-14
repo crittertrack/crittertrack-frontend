@@ -7,6 +7,7 @@ import {
     Scale, HeartOff, Eye, EyeOff, RotateCcw
 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
+import { getCurrencySymbol } from '../../utils/locationUtils';
 import axios from 'axios';
 import { ViewOnlyParentCard } from './utils';
 import { FamilyTabContent } from './FamilyTabContent';
@@ -158,11 +159,11 @@ const AnimalTestModal = ({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
-            <div className="bg-[#e1f2f5] rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col">
+            <div className="bg-[#e1f2f5] rounded-xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col">
                 {/* Header */}
                 <div className={`flex items-stretch p-4 md:p-6 pb-3 md:pb-4 border-b border-gray-200 gap-4 md:gap-6`}>
                     {/* Left: Gallery */}
-                    <div className={`w-1/4 flex flex-col gap-2 ${isHeaderCollapsed ? 'invisible' : 'flex'}`}>
+                    <div className={`w-1/4 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
                         <div className="flex-grow bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-300">
                             {mainImage ? (
                                 <img 
@@ -221,8 +222,8 @@ const AnimalTestModal = ({
                                                 {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
                                                 {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
                                                 {animal.healthStatus && <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><HeartPulse size={12} />{animal.healthStatus}</span>}
-                                                {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale</span>}
-                                                {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud</span>}
+                                                {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}</span>}
+                                                {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}</span>}
                                             </div>
                                         </>
                                     )}

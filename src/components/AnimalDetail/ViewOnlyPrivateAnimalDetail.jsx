@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -620,7 +620,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     { key: 'nailColor', label: 'Nail/Claw Color' },
                                     { key: 'size', label: 'Size' },
                                     { key: 'carrierTraits', label: 'Carrier Traits' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                ].filter(f => animal[f.key]);
                                 return fields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                         <h3 className="text-lg font-semibold text-gray-700"><Sparkles size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Appearance</h3>
@@ -634,7 +634,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             })()}
 
                             {/* Genetic Code */}
-                            {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
+                            {animal.geneticCode && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('geneticCode', 'Genetic Code')}</h3>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
@@ -642,13 +642,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             )}
 
                             {/* Life Stage */}
-                            {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
+                            {animal.lifeStage && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700"><Sprout size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('lifeStage', 'Life Stage')}</h3>
                                     <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
                                 </div>
                             )}
-
                             {/* Measurements */}
                             {(() => {
                                 const mFields = [
@@ -659,7 +658,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     { key: 'adultWeight', label: 'Adult Weight' },
                                     { key: 'bodyConditionScore', label: 'Body Condition Score' },
                                     { key: 'length', label: 'Length' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                ].filter(f => animal[f.key]);
                                 return mFields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                         <h3 className="text-lg font-semibold text-gray-700"><Ruler size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Measurements</h3>
@@ -701,10 +700,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 <h3 className="text-lg font-semibold text-gray-700"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
-                                    {fieldTemplate?.fields?.breed?.enabled !== false && animal.breed && (
+                                    {animal.breed && (
                                         <div><span className="text-gray-600">{getLabel('breed', 'Breed')}:</span> <strong>{animal.breed}</strong></div>
                                     )}
-                                    {fieldTemplate?.fields?.strain?.enabled !== false && animal.strain && (
+                                    {animal.strain && (
                                         <div><span className="text-gray-600">{getLabel('strain', 'Strain')}:</span> <strong>{animal.strain}</strong></div>
                                     )}
                                 </div>
@@ -1371,7 +1370,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 <h3 className="text-lg font-semibold text-gray-700"><MessageSquare size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Behavior</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.temperament && <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament}</strong></div>}
-                                    {fieldTemplate?.fields?.handlingTolerance?.enabled !== false && animal.handlingTolerance && <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance}</strong></div>}
+                                    {animal.handlingTolerance && <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance}</strong></div>}
                                     {animal.socialStructure && <div><span className="text-gray-600">Social Structure:</span> <strong>{animal.socialStructure}</strong></div>}
                                 </div>
                             </div>
@@ -1396,7 +1395,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     { key: 'behavioralIssues', label: 'Behavioral Issues' },
                                     { key: 'biteHistory', label: 'Bite History' },
                                     { key: 'reactivityNotes', label: 'Reactivity Notes' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                ].filter(f => animal[f.key]);
                                 return trainFields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                         <h3 className="text-lg font-semibold text-gray-700"><Dumbbell size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Training & Working</h3>
@@ -1493,10 +1492,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><Key size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Licensing & Permits</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    {fieldTemplate?.fields?.licenseNumber?.enabled !== false && animal.licenseNumber && (
+                                    {animal.licenseNumber && (
                                         <div><span className="text-gray-600">{getLabel('licenseNumber', 'License Number')}:</span> <strong>{animal.licenseNumber}</strong></div>
                                     )}
-                                    {fieldTemplate?.fields?.licenseJurisdiction?.enabled !== false && animal.licenseJurisdiction && (
+                                    {animal.licenseJurisdiction && (
                                         <div><span className="text-gray-600">{getLabel('licenseJurisdiction', 'License Jurisdiction')}:</span> <strong>{animal.licenseJurisdiction}</strong></div>
                                     )}
                                 </div>
@@ -1506,10 +1505,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><ClipboardList size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Legal / Administrative</h3>
                                 <div className="space-y-3 text-sm">
-                                    {fieldTemplate?.fields?.insurance?.enabled !== false && animal.insurance && (
+                                    {animal.insurance && (
                                         <div><span className="text-gray-600">{getLabel('insurance', 'Insurance')}:</span> <strong className="whitespace-pre-wrap">{animal.insurance}</strong></div>
                                     )}
-                                    {fieldTemplate?.fields?.legalStatus?.enabled !== false && animal.legalStatus && (
+                                    {animal.legalStatus && (
                                         <div><span className="text-gray-600">{getLabel('legalStatus', 'Legal Status')}:</span> <strong className="whitespace-pre-wrap">{animal.legalStatus}</strong></div>
                                     )}
                                 </div>
