@@ -5,11 +5,23 @@ import html2canvas from 'html2canvas';
 import { QRCodeSVG } from 'qrcode.react';
 import { Link as RouterLink } from 'react-router-dom';
 import { ArrowLeft, X, QrCode, ChevronDown, ChevronUp, ChevronRight, Mars, Venus, VenusAndMars, Circle, Cat, Users, User, Home, Tag, Loader2, Lock, TreeDeciduous, Egg, Pill, Shield, Microscope, Hospital, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Activity, AlertTriangle, FileText, Feather, Medal, Target, Key, ClipboardList, Ban, Images, Camera, Heart, Eye, EyeOff, Sparkles, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Hourglass, Bean, Milk, Sprout, RefreshCw, Leaf, Brain, Trophy, FileCheck, Scale, ScrollText, Check, Users as UsersIcon, TableOfContents, Dumbbell, Download, Bell } from 'lucide-react';
-import { useDetailFieldTemplate, parseJsonField, DetailJsonList, ViewOnlyParentCard, ParentMiniCard } from './utils';
+import { useDetailFieldTemplate, DetailJsonList, ViewOnlyParentCard, ParentMiniCard } from './utils';
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
+    const parseJsonField = (data) => {
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try {
+                const parsed = JSON.parse(data);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
+        }
+        return Array.isArray(data) ? data : [];
+    };
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);

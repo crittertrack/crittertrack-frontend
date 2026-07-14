@@ -1,7 +1,19 @@
 import React from 'react';
 import { Calendar } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
-import { parseJsonField } from './utils';
+
+const parseJsonField = (data) => {
+    if (!data) return [];
+    if (typeof data === 'string') {
+        try {
+            const parsed = JSON.parse(data);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return Array.isArray(data) ? data : [];
+};
 
 const TimelineEvent = ({ icon, title, date, children }) => (
     <div className="relative pl-10 pb-8 group">

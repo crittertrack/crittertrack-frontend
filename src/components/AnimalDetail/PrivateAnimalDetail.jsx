@@ -18,12 +18,25 @@ import {
 } from 'lucide-react';
 
 // Utilities
-import { useDetailFieldTemplate, parseJsonField, DetailJsonList, computeRelationships, ViewOnlyParentCard, ParentMiniCard } from './utils';
+import { useDetailFieldTemplate, DetailJsonList, computeRelationships, ViewOnlyParentCard, ParentMiniCard } from './utils';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { QRModal } from '../PublicProfile/PublicProfileView';
 import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
+
+const parseJsonField = (data) => {
+    if (!data) return [];
+    if (typeof data === 'string') {
+        try {
+            const parsed = JSON.parse(data);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return Array.isArray(data) ? data : [];
+};
 
 const PrivateAnimalDetail = ({ 
     animal, onClose, onCloseAll, onEdit, onArchive, onAddSibling, API_BASE_URL, authToken, 
