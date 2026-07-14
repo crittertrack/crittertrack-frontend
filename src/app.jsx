@@ -1587,15 +1587,13 @@ const App = () => {
                             no matter the size, makes a difference!
                         </p>
                         
-                        <a
-                            href="https://ko-fi.com/crittertrack"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <RouterLink 
+                            to="/donation"
                             className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
                         >
                             <Heart size={18} className="fill-current" />
                             Learn More & Donate
-                        </a>
+                        </RouterLink>
                         
                         <a
                             href="https://ko-fi.com/mousemagic/shop"
@@ -1691,17 +1689,13 @@ const App = () => {
             {/* Fixed Donation Button - Top Left */}
             <div className="fixed top-4 left-4 z-[60]">
                 <button
-                    // Changed to an <a> tag for direct linking
-                    // The onClick is retained to handle the hasSeenDonationHighlight state
-                    onClick={() => { 
+                    onClick={() => {
+                        navigate('/donation');
                         if (!hasSeenDonationHighlight) {
                             setHasSeenDonationHighlight(true);
                             localStorage.setItem('hasSeenDonationHighlight', 'true');
                         }
                     }}
-                    href="https://ko-fi.com/crittertrack"
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className={`bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white p-2.5 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center ${
                         !hasSeenDonationHighlight ? 'animate-pulse ring-4 ring-pink-300 ring-opacity-50' : ''
                     }`}
