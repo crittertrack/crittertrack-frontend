@@ -146,7 +146,7 @@ const AnimalTestModal = ({
         { id: 'identification', label: 'Identification', icon: <Hash size={14} /> },
         { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> },
         { id: 'care', label: 'Care', icon: <Droplets size={14} /> },
-        { id: 'measurements', label: 'Measurements', icon: <Ruler size={14} /> },
+        { id: 'appearance', label: 'Appearance', icon: <Palette size={14} /> },
         { id: 'behavior', label: 'Behavior', icon: <Brain size={14} /> },
         { id: 'breeding', label: 'Breeding', icon: <Users size={14} /> },
         { id: 'pedigree', label: 'Pedigree', icon: <Dna size={14} /> },
@@ -497,13 +497,40 @@ const AnimalTestModal = ({
                             API_BASE_URL={API_BASE_URL}
                         />
                     )}
-                    {activeTab === 'measurements' && (
-                        <MeasurementsTabContent
-                            animal={animal}
-                            onUpdateAnimal={onUpdateAnimal}
-                            authToken={authToken}
-                            API_BASE_URL={API_BASE_URL}
-                        />
+                    {activeTab === 'appearance' && (
+                        <div className="space-y-6">
+                            <InfoCard title="Appearance" icon={<Palette size={18} />}>
+                                <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6">
+                                    {animal.color && <InfoItem label="Color" value={animal.color} />}
+                                    {animal.coatPattern && <InfoItem label="Pattern" value={animal.coatPattern} />}
+                                    {animal.coat && <InfoItem label="Coat" value={animal.coat} />}
+                                    {animal.markings && <InfoItem label="Markings" value={animal.markings} />}
+                                    {animal.eyeColor && <InfoItem label="Eye Color" value={animal.eyeColor} />}
+                                    {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
+                                </dl>
+                            </InfoCard>
+                            {animal.geneticCode && (
+                                <InfoCard title="Genetic Code" icon={<Dna size={18} />}>
+                                    <div className="flex items-center justify-between">
+                                        <p className="font-mono text-sm">{animal.geneticCode}</p>
+                                        {animal.species === 'Fancy Mouse' && (
+                                            <button className="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Builder</button>
+                                        )}
+                                    </div>
+                                </InfoCard>
+                            )}
+                            {animal.lifeStage && (
+                                <InfoCard title="Life Stage" icon={<Sprout size={18} />}>
+                                    <p>{animal.lifeStage}</p>
+                                </InfoCard>
+                            )}
+                            <MeasurementsTabContent
+                                animal={animal}
+                                onUpdateAnimal={onUpdateAnimal}
+                                authToken={authToken}
+                                API_BASE_URL={API_BASE_URL}
+                            />
+                        </div>
                     )}
                     {activeTab === 'care' && (
                         <CareTabContent
