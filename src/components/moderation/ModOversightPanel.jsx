@@ -132,7 +132,7 @@ const getSubjectOwner = (report = {}) => {
     }
 
     if (report.reportedAnimalId) {
-        const owner = report.reportedAnimalId.ownerId;
+        const owner = report.reportedAnimalId.creatorId;
         if (owner && typeof owner === 'object') {
             const name = owner.personalName || owner.breederName;
             const ctu = owner.id_public;
@@ -166,8 +166,8 @@ const getSubjectOwner = (report = {}) => {
 };
 
 const getContentOwnerDetails = (report = {}) => {
-    if (report.reportedAnimalId?.ownerId && typeof report.reportedAnimalId.ownerId === 'object') {
-        const owner = report.reportedAnimalId.ownerId;
+    if (report.reportedAnimalId?.creatorId && typeof report.reportedAnimalId.creatorId === 'object') {
+        const owner = report.reportedAnimalId.creatorId;
         return {
             personalName: owner.personalName || null,
             breederName: owner.breederName || null,
@@ -432,8 +432,8 @@ export default function ModOversightPanel({
 
     // Returns { userId, userName } for the content owner of a report
     const getContentOwnerUserInfo = (report) => {
-        if (report.reportedAnimalId?.ownerId && typeof report.reportedAnimalId.ownerId === 'object') {
-            const o = report.reportedAnimalId.ownerId;
+        if (report.reportedAnimalId?.creatorId && typeof report.reportedAnimalId.creatorId === 'object') {
+            const o = report.reportedAnimalId.creatorId;
             return { userId: o._id, userName: o.breederName || o.personalName || o.id_public || 'Unknown' };
         }
         if (report.reportedUserId && typeof report.reportedUserId === 'object') {

@@ -139,7 +139,7 @@ export function useModerationMode(
                     const userId =
                         flagData.context?.type === 'profile'
                             ? flagData.context?.userId
-                            : flagData.context?.ownerId;
+                            : flagData.context?.creatorId;
 
                     const reportData = {
                         reason: flagData.reason,
@@ -211,7 +211,7 @@ export function useModerationMode(
                     const userId =
                         flagData.context?.type === 'profile'
                             ? flagData.context?.userId
-                            : flagData.context?.ownerId;
+                            : flagData.context?.creatorId;
 
                     const warnData = {
                         reason: flagData.reason,
@@ -239,7 +239,7 @@ export function useModerationMode(
                     const userId =
                         flagData.context?.type === 'profile'
                             ? flagData.context?.userId
-                            : flagData.context?.ownerId;
+                            : flagData.context?.creatorId;
 
                     const suspendData = {
                         reason: flagData.reason,
@@ -266,7 +266,7 @@ export function useModerationMode(
                     const userId =
                         flagData.context?.type === 'profile'
                             ? flagData.context?.userId
-                            : flagData.context?.ownerId;
+                            : flagData.context?.creatorId;
 
                     const banData = {
                         reason: flagData.reason,
@@ -292,7 +292,7 @@ export function useModerationMode(
                     const userId =
                         flagData.context?.type === 'profile'
                             ? flagData.context?.userId
-                            : flagData.context?.ownerId;
+                            : flagData.context?.creatorId;
 
                     console.log('[MOD ACTION] Lifting warning from user:', userId);
 
@@ -313,7 +313,7 @@ export function useModerationMode(
                     const userId =
                         flagData.context?.type === 'profile'
                             ? flagData.context?.userId
-                            : flagData.context?.ownerId;
+                            : flagData.context?.creatorId;
 
                     console.log('[MOD ACTION] Lifting suspension from user:', userId);
 
@@ -334,7 +334,7 @@ export function useModerationMode(
                     const userId =
                         flagData.context?.type === 'profile'
                             ? flagData.context?.userId
-                            : flagData.context?.ownerId;
+                            : flagData.context?.creatorId;
 
                     console.log('[MOD ACTION] Lifting ban from user:', userId);
 

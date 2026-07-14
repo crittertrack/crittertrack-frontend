@@ -39,7 +39,7 @@ export default function ReportModal({
     isOpen,
     contentType,
     contentId,
-    contentOwnerId,
+    contentcreatorId,
     authToken,
     API_BASE_URL,
     onClose,
@@ -106,8 +106,8 @@ export default function ReportModal({
             const payload = { reason: composedReason };
 
             if (contentType === 'profile') {
-                if (contentOwnerId) {
-                    payload.reportedUserId = contentOwnerId;
+                if (contentcreatorId) {
+                    payload.reportedUserId = contentcreatorId;
                 }
                 if (contentId && !payload.reportedUserId) {
                     payload.reportedUserPublicId = contentId;

@@ -144,7 +144,7 @@ const PublicAnimalPage = () => {
                 <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
                     <XCircle size={64} className="text-red-500 mx-auto mb-4" />
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">Animal Not Found</h1>
-                    <p className="text-gray-600 mb-6"> {/* Changed from ownerId_public to creatorId_public */}
+                    <p className="text-gray-600 mb-6"> {/* Changed from creatorId_public to creatorId_public */}
                         This animal either doesn't exist or is not publicly visible.
                     </p>
                     <button

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
+﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -437,7 +437,7 @@ const PrivateAnimalDetail = ({
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
     
-    // Fetch owner info when animal is owned (ownerId_public differs from breederId_public)
+    // Fetch owner info when animal is owned (creatorId_public differs from breederId_public)
     React.useEffect(() => {
         const fetchOwner = async () => {
             if (animal?.isOwned && animal?.creatorId_public) {
@@ -514,7 +514,7 @@ const PrivateAnimalDetail = ({
                             </button>
                             {onTransfer && (() => {
                                 
-                                const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal = animal.originalCreatorId && animal.creatorId_public === userProfile?.id_public;
 
                                 // Recipient owns it
                                 if (iWasTransferredThisAnimal) {
@@ -634,7 +634,7 @@ const PrivateAnimalDetail = ({
                             </button>
                             {onTransfer && (() => {
                                 
-                                const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal = animal.originalCreatorId && animal.creatorId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button

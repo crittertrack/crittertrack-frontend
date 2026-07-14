@@ -83,10 +83,10 @@ const ArchiveScreen = ({
                             const soldOwners = [...new Map(
                                 soldTransferredAnimals
                                     .filter(a => a.ownerName)
-                                    .map(a => [a.ownerId_public || a.ownerName, { key: a.ownerId_public || a.ownerName, label: a.ownerName }])
+                                    .map(a => [a.creatorId_public || a.ownerName, { key: a.creatorId_public || a.ownerName, label: a.ownerName }])
                             ).values()].sort((a, b) => a.label.localeCompare(b.label));
                             const filteredSoldList = soldOwnerFilter
-                                ? soldTransferredAnimals.filter(a => (a.ownerId_public || a.ownerName) === soldOwnerFilter)
+                                ? soldTransferredAnimals.filter(a => (a.creatorId_public || a.ownerName) === soldOwnerFilter)
                                 : soldTransferredAnimals;
                             return (
                                 <div className="p-3 space-y-2">
@@ -104,7 +104,7 @@ const ArchiveScreen = ({
                                                         <option value="">All recipients ({soldTransferredAnimals.length})</option>
                                                         {soldOwners.map(o => (
                                                             <option key={o.key} value={o.key}>
-                                                                {o.label} ({soldTransferredAnimals.filter(a => (a.ownerId_public || a.ownerName) === o.key).length})
+                                                                {o.label} ({soldTransferredAnimals.filter(a => (a.creatorId_public || a.ownerName) === o.key).length})
                                                             </option>
                                                         ))}
                                                     </select>
@@ -120,7 +120,7 @@ const ArchiveScreen = ({
                                                                 <button
                                                                     className="flex items-center gap-1.5 shrink-0 min-w-0 hover:opacity-80 transition-opacity"
                                                                     title={`View profile: ${a.ownerName}`}
-                                                                    onClick={e => { e.stopPropagation(); if (a.ownerIdPublic) navigate(`/user/${a.ownerIdPublic}`); }}
+                                                                    onClick={e => { e.stopPropagation(); if (a.creatorIdPublic) navigate(`/user/${a.creatorIdPublic}`); }}
                                                                 >
                                                                     {a.ownerAvatar
                                                                         ? <img src={a.ownerAvatar} alt={a.ownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />

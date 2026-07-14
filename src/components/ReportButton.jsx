@@ -5,7 +5,7 @@ import './ReportButton.css';
 export default function ReportButton({
     contentType,
     contentId,
-    contentOwnerId,
+    contentcreatorId,
     authToken,
     API_BASE_URL,
     tooltipText = 'Report this content'
@@ -23,7 +23,7 @@ export default function ReportButton({
                 const userId = payload.user?.id || payload.id;
                 setCurrentUserId(userId);
                 // Hide report button if user owns the content
-                const ownerCheck = String(userId) === String(contentOwnerId);
+                const ownerCheck = String(userId) === String(contentcreatorId);
                 setIsOwner(ownerCheck);
             } catch (err) {
                 console.error('Failed to parse token:', err);
@@ -34,7 +34,7 @@ export default function ReportButton({
             setCurrentUserId(null);
             setIsOwner(false);
         }
-    }, [contentOwnerId, authToken]);
+    }, [contentcreatorId, authToken]);
 
     const handleOpenReport = (e) => {
         e.preventDefault();
@@ -64,7 +64,7 @@ export default function ReportButton({
                 isOpen={isModalOpen}
                 contentType={contentType}
                 contentId={contentId}
-                contentOwnerId={contentOwnerId}
+                contentcreatorId={contentcreatorId}
                 authToken={authToken}
                 API_BASE_URL={API_BASE_URL}
                 onClose={() => setIsModalOpen(false)}

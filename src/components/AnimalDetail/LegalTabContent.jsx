@@ -78,7 +78,7 @@ export const LegalTabContent = ({ animal, API_BASE_URL }) => {
                         <div className="space-y-2">
                             {(animal.keeperHistory || []).map((entry, idx) => (
                                 <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
-                                    <div className="flex-1 min-w-0"> {/* Changed from ownerId_public to creatorId_public */}
+                                    <div className="flex-1 min-w-0"> {/* Changed from creatorId_public to creatorId_public */}
                                         {entry.userId_public
                                             ? <RouterLink to={`/user/${entry.userId_public}`} className="text-sm font-semibold text-purple-600 hover:underline">{entry.name || 'Unknown'}</RouterLink>
                                             : <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>}

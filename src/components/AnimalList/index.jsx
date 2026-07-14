@@ -872,7 +872,7 @@ useEffect(() => {
             const res = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            // Only keep view-only entries (ownerId !== current user)
+            // Only keep view-only entries (creatorId !== current user)
             setSoldTransferredRaw((res.data || []).filter(a => a.isViewOnly));
         } catch (err) { console.error('[fetchSoldTransferred]', err); }
     }, [authToken, API_BASE_URL]);

@@ -12,7 +12,7 @@ import './InlineModerationActions.css';
  * - contentType: 'animal' | 'profile' | 'litter' | 'post'
  * - contentId: ID of the content (MongoDB _id or id_public)
  * - contentName: Display name of the content
- * - ownerId: ID of the content owner
+ * - creatorId: ID of the content owner
  * - currentlyHidden: Boolean - is content currently hidden?
  * - authToken: JWT token
  * - API_BASE_URL: Base API URL
@@ -23,7 +23,7 @@ export default function InlineModerationActions({
     contentType,
     contentId,
     contentName,
-    ownerId,
+    creatorId,
     currentlyHidden = false,
     authToken,
     API_BASE_URL,
@@ -53,7 +53,7 @@ export default function InlineModerationActions({
             if (contentType === 'animal') {
                 endpoint = `/api/admin/animals/${contentId}/hide`;
             } else if (contentType === 'profile') {
-                endpoint = `/api/admin/profiles/${ownerId}/hide`;
+                endpoint = `/api/admin/profiles/${creatorId}/hide`;
             }
 
             const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -161,7 +161,7 @@ export default function InlineModerationActions({
 
                     <div className="mod-content-info">
                         <p><strong>Content:</strong> {contentType} - {contentName}</p>
-                        <p><strong>Owner ID:</strong> {ownerId}</p>
+                        <p><strong>Owner ID:</strong> {creatorId}</p>
                         <p><strong>Status:</strong> {currentlyHidden ? 'Hidden' : 'Visible'}</p>
                     </div>
 
