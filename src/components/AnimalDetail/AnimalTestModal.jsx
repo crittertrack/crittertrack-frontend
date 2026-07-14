@@ -382,8 +382,8 @@ const AnimalTestModal = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-white px-6 border-b border-gray-200">
-                    <nav className="flex space-x-4 -mb-px overflow-x-auto">
+                <div className="bg-white border-b border-gray-200">
+                    <nav className="flex space-x-4 -mb-px overflow-x-auto px-4">
                         {TABS.map(tab => (
                             <button
                                 key={tab.id}
@@ -399,22 +399,28 @@ const AnimalTestModal = ({
                 {/* Content */}
                 <div className="p-6 overflow-y-auto rounded-b-xl flex-1">
                     {activeTab === 'overview' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2">
-                                <div className="relative grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    <div className="absolute right-4 top-4 z-10 text-xs">
-                                        {loadingCOI ? <span className="text-gray-400">COI: Calculating...</span> : animalCOI != null && <span className="font-semibold">COI: {animalCOI.toFixed(2)}%</span>}
-                                    </div>
-                                    <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
-                                    <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {/* Sire Card */}
+                            <div className="relative">
+                                <div className="absolute right-4 top-4 z-10 text-xs">
+                                    {loadingCOI ? <span className="text-gray-400">COI: Calculating...</span> : animalCOI != null && <span className="font-semibold">COI: {animalCOI.toFixed(2)}%</span>}
                                 </div>
+                                <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
-                            <div className="space-y-6">
+                            {/* Dam Card */}
+                            <div>
+                                <ViewOnlyParentCard parentId={animal.motherId_public || animal.damId_public} parentType="Dam" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
+                            </div>
+                            {/* Health Summary Card */}
+                            <div>
                                 <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400" />}>
                                     <InfoItem label="Health Status" value={animal.healthStatus || 'Good'} />
                                     <InfoItem label="Last Vet Check" value={animal.lastVetCheck ? formatDate(animal.lastVetCheck) : 'N/A'} />
                                     <InfoItem label="Medical Conditions" value={parseJsonArrayField(animal.medicalConditions).map(c => c.condition || c.name).join(', ')} />
                                 </InfoCard>
+                            </div>
+                            {/* Recent Activity Card */}
+                            <div>
                                 <InfoCard title="Recent Activity" icon={<Clock size={18} className="text-gray-400" />}>
                                     {(() => {
                                         const milestones = parseMilestones(animal.milestones);
