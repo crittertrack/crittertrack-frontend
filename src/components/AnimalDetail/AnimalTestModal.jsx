@@ -198,12 +198,7 @@ const AnimalTestModal = ({
                             <div className="flex justify-between items-start">
                                 <div>
                                     <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                        {animal.prefix} {animal.name} {animal.suffix}
-                                        {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />}
-                                        {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
-                                        <button onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)} className="p-1 text-gray-400 hover:text-gray-600" title={isHeaderCollapsed ? 'Expand Header' : 'Collapse Header'}>
-                                            {isHeaderCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
-                                        </button>
+                                        {animal.prefix} {animal.name} {animal.suffix} {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
                                     </h2>
                                     {!isHeaderCollapsed && (
                                         <>
@@ -379,6 +374,13 @@ const AnimalTestModal = ({
                             )}
                         </div>
                     </div>
+                </div>
+
+                {/* Collapse/Expand Chevron */}
+                <div className="flex justify-center -mt-3 z-10">
+                    <button onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)} className="bg-white border border-gray-300 rounded-full p-1 shadow-sm hover:bg-gray-100 transition" title={isHeaderCollapsed ? 'Expand Header' : 'Collapse Header'}>
+                        {isHeaderCollapsed ? <ChevronDown size={20} className="text-gray-600" /> : <ChevronUp size={20} className="text-gray-600" />}
+                    </button>
                 </div>
 
                 {/* Tabs */}
