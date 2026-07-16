@@ -93,16 +93,16 @@ const AnimalTestModal = ({
 
     useEffect(() => {
         const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.creatorId_public) { // Changed from creatorId_public to creatorId_public
+            if (animal?.ownerId_public) {
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`); // Changed from creatorId_public to creatorId_public
+                    const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`);
                     if (response.data && response.data.length > 0) setOwnerInfo(response.data[0]);
                     else setOwnerInfo(null);
                 } catch { setOwnerInfo(null); }
             } else { setOwnerInfo(null); }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]); // Changed from creatorId_public to creatorId_public
+    }, [animal?.ownerId_public, API_BASE_URL]);
 
     useEffect(() => {
         const fetchEnclosure = async () => {
@@ -337,7 +337,7 @@ const AnimalTestModal = ({
                                                 {/* Row 3 */}
                                                 <InfoItem label="Enclosure" value={enclosureInfo?.name} /> 
                                                 <InfoItem label="Owner">
-                                                    <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.ownerName || 'N/A'}</span>
+                                                    <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.manualOwnerName || 'N/A'}</span>
                                                     {animal.coOwnership && <span className="text-gray-500 ml-1">({animal.coOwnership})</span>}
                                                 </InfoItem>
                                                 <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>

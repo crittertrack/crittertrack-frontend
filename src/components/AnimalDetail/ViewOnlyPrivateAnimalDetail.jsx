@@ -221,7 +221,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     // Fetch owner info when animal is owned (creatorId_public differs from breederId_public)
     React.useEffect(() => {
         const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.creatorId_public) {
+             if (animal?.ownerId_public) {
                 try {
                     const response = await axios.get(
                         `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`

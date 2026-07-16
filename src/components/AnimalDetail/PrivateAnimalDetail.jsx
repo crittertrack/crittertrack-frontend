@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -63,8 +63,7 @@ const PrivateAnimalDetail = ({
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [showContactSelector, setShowContactSelector] = useState(false);
     const [contacts, setContacts] = useState([]); 
-    const [contactsLoading, setContactsLoading] = useState(false); 
-    const [ownerContactInfo, setOwnerContactInfo] = useState(null);
+    const [contactsLoading, setContactsLoading] = useState(false);
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
     const [offspringRefreshKey, setOffspringRefreshKey] = useState(0); // increment to force offspring fetches to refetch
     // Manual Pedigree (Beta) • Tab 16
@@ -439,51 +438,27 @@ const PrivateAnimalDetail = ({
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
     
-    // Fetch owner info when animal is owned (creatorId_public differs from breederId_public)
+     // Fetch designated owner's profile if an ownerId_public is present
     React.useEffect(() => {
         const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.creatorId_public) {
+            if (animal?.ownerId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
+                          `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setOwnerInfo(response.data[0]);
                     } else {
                         setOwnerInfo(null);
                     }
-                } catch {
-                    setOwnerInfo(null);
-                }
+                 } catch { setOwnerInfo(null); }
             } else {
                 setOwnerInfo(null);
             }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
+    }, [animal?.ownerId_public, API_BASE_URL]);
     
-    // Fetch owner contact info when ownerContactId exists
-    React.useEffect(() => {
-        const fetchOwnerContact = async () => {
-            if (animal?.ownerContactId && authToken) {
-                try {
-                    const response = await axios.get(
-                        `${API_BASE_URL}/contacts`,
-                        { headers: { Authorization: `Bearer ${authToken}` } }
-                    );
-                    const owner = response.data?.find(c => c._id === animal.ownerContactId);
-                    setOwnerContactInfo(owner || null);
-                } catch (error) {
-                    console.error('Failed to fetch owner contact:', error);
-                    setOwnerContactInfo(null);
-                }
-            } else {
-                setOwnerContactInfo(null);
-            }
-        };
-        fetchOwnerContact();
-    }, [animal?.ownerContactId, authToken, API_BASE_URL]);
-
     if (!animal) return null;
 
     
@@ -920,7 +895,7 @@ const PrivateAnimalDetail = ({
                                                 {breederInfo ? (() => {
                                                     const parts = [];
                                                     if (breederInfo.prefix) parts.push(breederInfo.prefix);
-                                                    
+
                                                     // Handle breeder name and personal name
                                                     if (breederInfo.breederName && breederInfo.personalName) {
                                                         parts.push(`${breederInfo.breederName} (${breederInfo.personalName})`);
@@ -931,45 +906,13 @@ const PrivateAnimalDetail = ({
                                                     }
                                                     
                                                     if (breederInfo.suffix) parts.push(breederInfo.suffix);
-                                                    
+
                                                     const displayName = parts.join(' • ') || 'Unknown Breeder';
-                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}</div>{/* Owner */}
-                                                           {animal.creatorId_public && (
-                                                           <div>
-                                            <span className="text-gray-500">Owner:</span>{' '}
-                                                       {ownerContactInfo ? (() => {
-                                                      const parts = [];
-                                                 if (ownerContactInfo.prefix) parts.push(ownerContactInfo.prefix);
-            
-                                                   // Handle breeder name and personal name
-                                                   if (ownerContactInfo.breederName && ownerContactInfo.personalName) {
-                                              parts.push(`${ownerContactInfo.breederName} (${ownerContactInfo.personalName})`);
-                                        } else if (ownerContactInfo.breederName) {
-                                parts.push(ownerContactInfo.breederName);
-                                      } else if (ownerContactInfo.personalName) {
-                                            parts.push(ownerContactInfo.personalName);
-                                    }
-             
-                                if (ownerContactInfo.suffix) parts.push(ownerContactInfo.suffix);
-            
-                           const displayName = parts.join(' • ') || animal.ownerName || 'Unknown Owner';
-            
-                         return (
-                <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
-                    {displayName}
-                </RouterLink>
-                        );
-                         })() : animal.ownerContactId ? (
-                         <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
-                                                {animal.ownerName || '—'}
-                           </RouterLink>
-                          ) : (
-                                 <span className="font-mono text-accent">
-                                                {animal.ownerName || '—'}
-                                   </span>
-                                           )}
-                                                </div>
-                                            )}
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
+                                            </div>
+                                            <div><span className="text-gray-500">Owner:</span>{' '}
+                                                {ownerInfo ? <RouterLink to={`/user/${ownerInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{ownerInfo.breederName || ownerInfo.personalName}</RouterLink> : <span className="font-mono text-accent">{animal.manualOwnerName || '\u2014'}</span>}
+                                            </div>
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId || animal.ringId || animal.eartagNumber) && (
                                                 <hr className="border-gray-200" />
                                             )}
@@ -1015,8 +958,8 @@ const PrivateAnimalDetail = ({
                     {detailViewTab === 2 && (
                         <div className="space-y-6">
                             {/* 1st Section: Ownership */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Ownership</h3>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="ownership-section">
+                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Breeder</h3>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Currently Owned:</span>
@@ -1034,45 +977,17 @@ const PrivateAnimalDetail = ({
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><User size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner</h3>
-                                <div className="text-sm space-y-2">
-                                    {(() => {
-                                        if (!animal.ownerName && !ownerContactInfo) return null;
-                                        
-                                        return (
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-600">Owner Name:</span>
-                                                {ownerContactInfo ? (() => {
-                                                    const parts = [];
-                                                    if (ownerContactInfo.prefix) parts.push(ownerContactInfo.prefix);
-                                                    
-                                                    // Handle breeder name and personal name
-                                                    if (ownerContactInfo.breederName && ownerContactInfo.personalName) {
-                                                        parts.push(`${ownerContactInfo.breederName} (${ownerContactInfo.personalName})`);
-                                                    } else if (ownerContactInfo.breederName) {
-                                                        parts.push(ownerContactInfo.breederName);
-                                                    } else if (ownerContactInfo.personalName) {
-                                                        parts.push(ownerContactInfo.personalName);
-                                                    }
-                                                    
-                                                    if (ownerContactInfo.suffix) parts.push(ownerContactInfo.suffix);
-                                                    
-                                                    const displayName = parts.join(' • ') || animal.ownerName || 'Unknown Owner';
-                                                    
-                                                    return (
-                                                        <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
-                                                            {displayName}
-                                                        </RouterLink>
-                                                    );
-                                                })() : animal.ownerContactId ? (
-                                                    <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
-                                                        {animal.ownerName}
-                                                    </RouterLink>
-                                                ) : (
-                                                    <strong>{animal.ownerName}</strong>
-                                                )}
-                                            </div>
-                                        );
-                                    })()}
+                                <div className="text-sm space-y-2" data-tutorial-target="owner-details">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Owner Name:</span>
+                                        {ownerInfo ? (
+                                            <RouterLink to={`/user/${ownerInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">
+                                                {ownerInfo.breederName || ownerInfo.personalName}
+                                            </RouterLink>
+                                        ) : (
+                                            <strong>{animal.manualOwnerName || 'N/A'}</strong>
+                                        )}
+                                    </div>
                                     {animal.coOwnership && (
                                         <div className="flex items-center gap-2">
                                             <span className="text-gray-600">Co-Ownership:</span>
@@ -1085,7 +1000,7 @@ const PrivateAnimalDetail = ({
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner History</h3>
-                                {(animal.keeperHistory || []).length === 0 ? (
+                                {(animal.ownerHistory || animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
                                     <div className="space-y-2">

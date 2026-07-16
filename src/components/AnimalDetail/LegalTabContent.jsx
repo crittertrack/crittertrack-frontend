@@ -13,15 +13,15 @@ export const LegalTabContent = ({ animal, API_BASE_URL }) => {
     const hasRestrictions = animal.breedingRestrictions || animal.exportRestrictions;
     const hasPurchase = animal.purchaseDate || animal.purchasePrice || animal.purchaseLocation;
     const hasSale = animal.saleDate || animal.salePriceAmount || animal.saleLocation;
-    const hasKeeperHistory = animal.keeperHistory && animal.keeperHistory.length > 0;
+    const hasOwnerHistory = (animal.ownerHistory && animal.ownerHistory.length > 0) || (animal.keeperHistory && animal.keeperHistory.length > 0);
 
-    const hasAnyData = hasLicensing || hasLegal || hasRestrictions || hasPurchase || hasSale || hasKeeperHistory;
+    const hasAnyData = hasLicensing || hasLegal || hasRestrictions || hasPurchase || hasSale || hasOwnerHistory;
 
     if (!hasAnyData) {
         return (
             <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg text-gray-400">
                 <FileCheck size={48} className="mb-2" />
-                <p className="text-sm">No legal or documentation records.</p>
+                <p className="text-sm">No legal, ownership, or documentation records.</p>
             </div>
         );
     }
@@ -73,10 +73,10 @@ export const LegalTabContent = ({ animal, API_BASE_URL }) => {
                         </dl>
                     </InfoCard>
                 )}
-                {hasKeeperHistory && (
+                {hasOwnerHistory && (
                     <InfoCard title="Owner History" icon={<Users size={18} className="text-gray-400" />}>
                         <div className="space-y-2">
-                            {(animal.keeperHistory || []).map((entry, idx) => (
+                            {(animal.ownerHistory || animal.keeperHistory || []).map((entry, idx) => (
                                 <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
                                     <div className="flex-1 min-w-0"> {/* Changed from creatorId_public to creatorId_public */}
                                         {entry.userId_public

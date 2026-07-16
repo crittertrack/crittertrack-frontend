@@ -149,6 +149,17 @@ const AnimalFormTestModal = ({
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [assignModalTarget, setAssignModalTarget] = useState(null); // 'breeder' or 'keeper'
     const [breederInfo, setBreederInfo] = useState(null);
+    const [ownerInfo, setOwnerInfo] = useState(null);
+    const [sectionsCollapsed, setSectionsCollapsed] = useState({
+        identity: false,
+        breederOwner: true,
+        availability: true,
+    });
+
+    const toggleSection = (section) => {
+        setSectionsCollapsed(prev => ({ ...prev, [section]: !prev[section] }));
+    };
+
     const [tagInput, setTagInput] = useState('');
 
 
@@ -174,6 +185,8 @@ const AnimalFormTestModal = ({
             breederId_public: animalToEdit.breederId_public || null,
             manualBreederName: animalToEdit.manualBreederName || '',
             isDisplay: animalToEdit.isDisplay ?? false,
+            ownerId_public: animalToEdit.ownerId_public || animalToEdit.ownerId || null,
+            manualOwnerName: animalToEdit.manualOwnerName || animalToEdit.ownerName || '',
             coOwnership: animalToEdit.coOwnership || '',
             isForSale: animalToEdit.isForSale || false,
             salePriceCurrency: animalToEdit.salePriceCurrency || 'USD',
@@ -212,7 +225,8 @@ const AnimalFormTestModal = ({
             motherId_public: null,
             breederId_public: null,
             manualBreederName: '',
-            ownerName: '',
+            ownerId_public: null,
+            manualOwnerName: '',
             isOwned: true, // Default for new animals, not editable in this form
             isDisplay: true,
             coOwnership: '',
@@ -267,6 +281,20 @@ const AnimalFormTestModal = ({
         }
     }, [formData.breederId_public, API_BASE_URL]);
 
+    useEffect(() => {
+        if (formData.ownerId_public) {
+            axios.get(`${API_BASE_URL}/public/profiles/search?query=${formData.ownerId_public}&limit=1`)
+                .then(res => {
+                    if (res.data && res.data.length > 0) {
+                        setOwnerInfo(res.data[0]);
+                    }
+                })
+                .catch(err => console.error('Failed to fetch owner info', err));
+        } else {
+            setOwnerInfo(null);
+        }
+    }, [formData.ownerId_public, API_BASE_URL]);
+
 
 
     const handleFileChange = (e) => {
@@ -306,10 +334,11 @@ const AnimalFormTestModal = ({
                 breederId_public: selection.userId || null,
                 manualBreederName: selection.userId ? '' : selection.name,
             }));
-        } else if (assignModalTarget === 'keeper') {
+        } else if (assignModalTarget === 'owner') {
             setFormData(prev => ({
                 ...prev,
-                ownerName: selection.name,
+                ownerId_public: selection.userId || null,
+                manualOwnerName: selection.userId ? '' : selection.name,
             }));
         }
         setAssignModalOpen(false);
@@ -536,7 +565,7 @@ const AnimalFormTestModal = ({
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700">Date of Birth</label>
                                                 <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()}
-                                                    className="mt-1" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-xs font-medium text-gray-700">Status*</label>
@@ -549,61 +578,75 @@ const AnimalFormTestModal = ({
                                     </div>
 
                                     {/* Breeder & Keeper */}
-                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
-                                        <h3 className="text-base font-semibold text-gray-700 border-b pb-2 flex items-center gap-1.5"><User size={16} />Breeder & Keeper</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <ContactDisplayField
-                                                label="Breeder"
-                                                value={breederInfo ? (breederInfo.breederName || breederInfo.personalName) : formData.manualBreederName}
-                                                onEdit={() => { setAssignModalTarget('breeder'); setAssignModalOpen(true); }}
-                                            />
-                                            <ContactDisplayField
-                                                label="Keeper"
-                                                value={formData.ownerName}
-                                                onEdit={() => { setAssignModalTarget('keeper'); setAssignModalOpen(true); }}
-                                            />
-                                            <div className="md:col-span-2">
-                                                <label className="block text-xs font-medium text-gray-700">Co-Ownership Details</label>
-                                                <textarea name="coOwnership" value={formData.coOwnership} onChange={handleChange} rows="2"
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                    placeholder="Co-owner name, terms, breeding rights, etc." />
+                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                        <button type="button" onClick={() => toggleSection('breederOwner')} className="w-full flex justify-between items-center text-left">
+                                            <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><User size={16} />Breeder & Owner</h3>
+                                            {sectionsCollapsed.breederOwner ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                        </button>
+                                        {!sectionsCollapsed.breederOwner && (
+                                            <div className="mt-3 pt-3 border-t space-y-3">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                    <ContactDisplayField
+                                                        label="Breeder"
+                                                        value={breederInfo ? (breederInfo.breederName || breederInfo.personalName) : formData.manualBreederName}
+                                                        onEdit={() => { setAssignModalTarget('breeder'); setAssignModalOpen(true); }}
+                                                    />
+                                                    <ContactDisplayField
+                                                        label="Owner"
+                                                        value={ownerInfo ? (ownerInfo.breederName || ownerInfo.personalName) : formData.manualOwnerName}
+                                                        onEdit={() => { setAssignModalTarget('owner'); setAssignModalOpen(true); }}
+                                                    />
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-xs font-medium text-gray-700">Co-Ownership Details</label>
+                                                        <textarea name="coOwnership" value={formData.coOwnership} onChange={handleChange} rows="2"
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                            placeholder="Co-owner name, terms, breeding rights, etc." />
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
 
                                     {/* Availability */}
-                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
-                                        <h3 className="text-base font-semibold text-gray-700 border-b pb-2">Availability</h3>
-                                        {/* For Sale */}
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
-                                            <label className="flex items-center space-x-2">
-                                                <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} className="form-checkbox h-4 w-4 text-primary rounded" />
-                                                <span className="text-xs font-medium text-gray-700">Available for Sale</span>
-                                            </label>
-                                            {formData.isForSale && (
-                                                <div className="flex gap-2 pl-6">
-                                                    <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 rounded-md text-xs">
-                                                        <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="Negotiable">Negotiable</option>
-                                                    </select>
-                                                    <input type="number" name="salePriceAmount" value={formData.salePriceAmount} onChange={handleChange} disabled={formData.salePriceCurrency === 'Negotiable'} placeholder="Price" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
+                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                        <button type="button" onClick={() => toggleSection('availability')} className="w-full flex justify-between items-center text-left">
+                                            <h3 className="text-base font-semibold text-gray-700">Availability</h3>
+                                            {sectionsCollapsed.availability ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                        </button>
+                                        {!sectionsCollapsed.availability && (
+                                            <div className="mt-3 pt-3 border-t space-y-3">
+                                                {/* For Sale */}
+                                                <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                                    <label className="flex items-center space-x-2">
+                                                        <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} className="form-checkbox h-4 w-4 text-primary rounded" />
+                                                        <span className="text-xs font-medium text-gray-700">Available for Sale</span>
+                                                    </label>
+                                                    {formData.isForSale && (
+                                                        <div className="flex gap-2 pl-6">
+                                                            <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 rounded-md text-xs">
+                                                                <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="Negotiable">Negotiable</option>
+                                                            </select>
+                                                            <input type="number" name="salePriceAmount" value={formData.salePriceAmount} onChange={handleChange} disabled={formData.salePriceCurrency === 'Negotiable'} placeholder="Price" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                        {/* For Stud */}
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
-                                            <label className="flex items-center space-x-2">
-                                                <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} className="form-checkbox h-4 w-4 text-primary rounded" />
-                                                <span className="text-xs font-medium text-gray-700">Available for Stud/Breeding</span>
-                                            </label>
-                                            {formData.availableForBreeding && (
-                                                <div className="flex gap-2 pl-6">
-                                                    <select name="studFeeCurrency" value={formData.studFeeCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 rounded-md text-xs">
-                                                        <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="Negotiable">Negotiable</option>
-                                                    </select>
-                                                    <input type="number" name="studFeeAmount" value={formData.studFeeAmount} onChange={handleChange} disabled={formData.studFeeCurrency === 'Negotiable'} placeholder="Fee" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
+                                                {/* For Stud */}
+                                                <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                                    <label className="flex items-center space-x-2">
+                                                        <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} className="form-checkbox h-4 w-4 text-primary rounded" />
+                                                        <span className="text-xs font-medium text-gray-700">Available for Stud/Breeding</span>
+                                                    </label>
+                                                    {formData.availableForBreeding && (
+                                                        <div className="flex gap-2 pl-6">
+                                                            <select name="studFeeCurrency" value={formData.studFeeCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 rounded-md text-xs">
+                                                                <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="Negotiable">Negotiable</option>
+                                                            </select>
+                                                            <input type="number" name="studFeeAmount" value={formData.studFeeAmount} onChange={handleChange} disabled={formData.studFeeCurrency === 'Negotiable'} placeholder="Fee" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
