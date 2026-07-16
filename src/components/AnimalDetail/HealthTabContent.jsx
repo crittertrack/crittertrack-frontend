@@ -97,8 +97,8 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                 <InfoCard title="Procedures & Diagnostics" icon={<Microscope size={18} className="text-gray-400" />}>
                     {hasProcedures ? (
                         <>
-                            {medicalProcedures.length > 0 && <DetailJsonList label="Medical Procedures" data={medicalProcedures} renderItem={p => `${p.name} ${p.date ? `(${formatDate(p.date)})` : ''}`} />}
-                            {labResults.length > 0 && <DetailJsonList label="Laboratory Results" data={labResults} renderItem={r => `${r.testName} - ${r.result} ${r.date ? `(${formatDate(r.date)})` : ''}`} />}
+                            {medicalProcedures.length > 0 && <DetailJsonList label="Medical Procedures" data={medicalProcedures.filter(Boolean)} renderItem={p => `${p.name} ${p.date ? `(${formatDate(p.date)})` : ''}`} />}
+                            {labResults.length > 0 && <DetailJsonList label="Laboratory Results" data={labResults.filter(Boolean)} renderItem={r => `${r.testName} - ${r.result} ${r.date ? `(${formatDate(r.date)})` : ''}`} />}
                         </>
                     ) : (
                         <p className="text-sm text-gray-400">No procedures or diagnostics recorded.</p>
@@ -110,9 +110,9 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                 <InfoCard title="Active Medical Records" icon={<HeartPulse size={18} className="text-gray-400" />}>
                     {hasActiveRecords ? (
                          <>
-                            {medicalConditions.length > 0 && <DetailJsonList label="Medical Conditions" data={medicalConditions} renderItem={item => `${item.condition || item.name}`} />}
-                            {allergies.length > 0 && <DetailJsonList label="Allergies" data={allergies} renderItem={item => `${item.allergen || item.name}`} />}
-                            {medications.length > 0 && <DetailJsonList label="Current Medications" data={medications} renderItem={item => `${item.medication || item.name}`} />}
+                            {medicalConditions.length > 0 && <DetailJsonList label="Medical Conditions" data={medicalConditions.filter(Boolean)} renderItem={item => `${item.condition || item.name}`} />}
+                            {allergies.length > 0 && <DetailJsonList label="Allergies" data={allergies.filter(Boolean)} renderItem={item => `${item.allergen || item.name}`} />}
+                            {medications.length > 0 && <DetailJsonList label="Current Medications" data={medications.filter(Boolean)} renderItem={item => `${item.medication || item.name}`} />}
                         </>
                     ) : (
                          <p className="text-sm text-gray-400">No active medical records.</p>
@@ -123,7 +123,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                     {hasVetCare ? (
                         <>
                             {animal.primaryVet && <InfoItem label="Primary Veterinarian" value={animal.primaryVet} />}
-                            {vetVisits.length > 0 && <DetailJsonList label="Veterinary Visits" data={vetVisits} renderItem={v => `${v.reason} ${v.date ? `(${formatDate(v.date)})` : ''}`} />}
+                            {vetVisits.length > 0 && <DetailJsonList label="Veterinary Visits" data={vetVisits.filter(Boolean)} renderItem={v => `${v.reason} ${v.date ? `(${formatDate(v.date)})` : ''}`} />}
                         </>
                     ) : (
                         <p className="text-sm text-gray-400">No veterinary information.</p>

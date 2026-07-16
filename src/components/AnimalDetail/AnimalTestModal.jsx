@@ -414,9 +414,9 @@ const AnimalTestModal = ({
                             {/* Health Summary Card */}
                             <div>
                                 <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400" />}>
-                                    <InfoItem label="Health Status" value={animal.healthStatus || 'Good'} />
+                                    <InfoItem label="Health Status" value={animal.healthStatus || 'N/A'} />
                                     <InfoItem label="Last Vet Check" value={animal.lastVetCheck ? formatDate(animal.lastVetCheck) : 'N/A'} />
-                                    <InfoItem label="Medical Conditions" value={parseJsonArrayField(animal.medicalConditions).map(c => c.condition || c.name).join(', ')} />
+                                    <InfoItem label="Medical Conditions" value={parseJsonArrayField(animal.medicalConditions).filter(Boolean).map(c => c.condition || c.name).join(', ')} />
                                 </InfoCard>
                             </div>
                             {/* Recent Activity Card */}

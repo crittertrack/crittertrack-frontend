@@ -109,17 +109,17 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
             <div className="space-y-6">
                 {sheddingRecords.length > 0 && (
                     <InfoCard title="Shedding History" icon={<Bug size={18} className="text-gray-400" />}>
-                        <DetailJsonList label="" data={sheddingRecords} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
+                        <DetailJsonList label="" data={sheddingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
                     </InfoCard>
                 )}
                 {moltingRecords.length > 0 && (
                     <InfoCard title="Molting History" icon={<Bug size={18} className="text-gray-400" />}>
-                        <DetailJsonList label="" data={moltingRecords} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
+                        <DetailJsonList label="" data={moltingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
                     </InfoCard>
                 )}
                 {waterParameterChecks.length > 0 && (
                     <InfoCard title="Water Quality Checks" icon={<Droplets size={18} className="text-gray-400" />}>
-                        <DetailJsonList label="" data={waterParameterChecks} renderItem={r => `${formatDate(r.date)} - pH: ${r.ph}, Ammonia: ${r.ammonia}`} />
+                        <DetailJsonList label="" data={waterParameterChecks.filter(Boolean)} renderItem={r => `${formatDate(r.date)} - pH: ${r.ph}, Ammonia: ${r.ammonia}`} />
                     </InfoCard>
                 )}
             </div>
