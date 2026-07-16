@@ -346,7 +346,7 @@ const AnimalTestModal = ({
                                                 <p className="text-xs text-gray-700 text-center flex justify-center items-center gap-x-2">
                                                     {(() => {
                                                         const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean);
-                                                        const idString = [animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId].filter(Boolean).join(' • ');
+                                                        const idString = [animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId, animal.ringId, animal.eartagNumber].filter(Boolean).join(' • ');
                                                         const linesComponent = lines.length > 0 && (
                                                             <span className="flex items-center gap-1">
                                                                 {lines.map(line => (
@@ -442,8 +442,8 @@ const AnimalTestModal = ({
                                     {animal.breederAssignedId && <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />}
                                     {animal.microchipNumber && <InfoItem label="Microchip Number" value={animal.microchipNumber} />}
                                     {animal.tattooId && <InfoItem label="Tattoo" value={animal.tattooId} />}
-                                    {animal.ringId && <InfoItem label="Ring" value={animal.ringId} />}
-                                    {animal.eartagNumber && <InfoItem label="Eartag Number" value={animal.eartagNumber} />}
+                                    {animal.ringId && <InfoItem label="Ring ID" value={animal.ringId} />}
+                                    {animal.eartagNumber && <InfoItem label="Ear Tag" value={animal.eartagNumber} />}
                                     {animal.pedigreeRegistrationId && <InfoItem label="Pedigree Registration" value={animal.pedigreeRegistrationId} />}
                                     {animal.colonyId && <InfoItem label="Colony ID" value={animal.colonyId} />}
                                     {animal.dnaProfile && <InfoItem label="DNA Profile" value={animal.dnaProfile} />}

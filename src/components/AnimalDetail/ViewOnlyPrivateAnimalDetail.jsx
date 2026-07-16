@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -480,12 +480,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     )}
                                                 </div>
                                             )}
-                                            {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
+                                            {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId || animal.ringId || animal.eartagNumber) && (
                                                 <hr className="border-gray-200" />
                                             )}
                                             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                                                 {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
                                                 {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                                {animal.ringId && <div><span className="text-gray-500">Ring ID:</span> <strong>{animal.ringId}</strong></div>}
+                                                {animal.eartagNumber && <div><span className="text-gray-500">Ear Tag:</span> <strong>{animal.eartagNumber}</strong></div>}
                                                 {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
                                             </div>
                                         </div>
