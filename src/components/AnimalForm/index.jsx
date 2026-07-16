@@ -5370,10 +5370,10 @@ const AnimalForm = ({
         // Tab switching does not submit the form so HTML5 `required` attributes are
         // bypassed ? we must enforce these explicitly before any network call.
         const missingFields = [];
-        if (!formData.name?.trim())    missingFields.push('Name (Overview tab)');
-        if (!formData.species?.trim()) missingFields.push('Species (Overview tab)');
-        if (!formData.gender?.trim())  missingFields.push('Gender (Overview tab)');
-        if (!formData.status?.trim())  missingFields.push('Status (Overview tab)');
+        if (!formData.name?.trim())    missingFields.push('Name (Dashboard tab)');
+        if (!formData.species?.trim()) missingFields.push('Species (Dashboard tab)');
+        if (!formData.gender?.trim())  missingFields.push('Gender (Dashboard tab)');
+        if (!formData.status?.trim())  missingFields.push('Status (Dashboard tab)');
 
         if (missingFields.length > 0) {
             showModalMessage(
@@ -6170,7 +6170,7 @@ const AnimalForm = ({
                 <div className="bg-[#E1F2F5] border-b border-gray-300 -mx-6 px-2 py-2">
                     <div className="flex flex-wrap gap-2">
                         {[
-                            { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 1, label: 'Dashboard', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
@@ -6205,7 +6205,7 @@ const AnimalForm = ({
                     </div>
                 </div>
                 
-                {/* Tab 1: Overview - Core Identity */}
+                {/* Tab 1: Dashboard - Core Identity */}
                 {activeTab === 1 && (
                     <div className="space-y-6">
                         {/* Image Upload */}

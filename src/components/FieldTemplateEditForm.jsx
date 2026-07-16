@@ -27,9 +27,9 @@ const FIELD_GROUPS = {
 };
 
 const TAB_NAMES = [
-    'Overview',
+    'Dashboard',
     'Status & Privacy',
-    'Physical',
+    'Appearance',
     'Identification',
     'Lineage',
     'Breeding',

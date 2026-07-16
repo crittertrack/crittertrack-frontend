@@ -733,7 +733,7 @@ const PrivateAnimalDetail = ({
                 <div className="bg-[#E1F2F5] border-b border-gray-300 px-0.5 sm:px-4 py-2">
                     <div className="flex flex-wrap gap-1 sm:gap-2 justify-center">
                         {[
-                            { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 1, label: 'Dashboard', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
@@ -771,7 +771,7 @@ const PrivateAnimalDetail = ({
 
                 {/* Tab Content */}
                 <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg pt-1 px-3 py-3 sm:pt-2 sm:px-6 sm:py-6 overflow-y-auto flex-1 pb-8">
-                    {/* Tab 1: Overview */}
+                    {/* Tab 1: Dashboard */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
                             {/* Main info card */}
@@ -935,6 +935,9 @@ const PrivateAnimalDetail = ({
                                                 {animal.ringId && <div><span className="text-gray-500">Ring ID:</span> <strong>{animal.ringId}</strong></div>}
                                                 {animal.eartagNumber && <div><span className="text-gray-500">Ear Tag:</span> <strong>{animal.eartagNumber}</strong></div>}
                                                 {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                                {parseJsonArrayField(animal.identifiers).map((identifier, index) => (
+                                                    <div key={index}><span className="text-gray-500">{identifier.title}:</span> <strong>{identifier.value}</strong></div>
+                                                ))}
                                             </div>
                                         </div>
                                     </div>

@@ -506,7 +506,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                 <div className="bg-[#E1F2F5] border border-b-0 border-gray-300 rounded-t-lg">
                     <div className="flex flex-wrap gap-1 sm:gap-2 px-0.5 sm:px-4 py-2 justify-center">
                         {[
-                            { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 1, label: 'Dashboard', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Status', icon: Lock, color: 'text-slate-500' },
                             { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
@@ -543,7 +543,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
 
                 {/* Tab Content */}
                 <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg pt-1 px-3 py-3 sm:pt-2 sm:px-6 sm:py-6 overflow-y-auto flex-1 pb-8">
-                    {/* Tab 1: Overview */}
+                    {/* Tab 1: Dashboard */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
                             {/* Main info card */}
@@ -684,6 +684,9 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                     {animal.ringId && <div><span className="text-gray-500">Ring ID:</span> <strong>{animal.ringId}</strong></div>}
                                                     {animal.eartagNumber && <div><span className="text-gray-500">Ear Tag:</span> <strong>{animal.eartagNumber}</strong></div>}
                                                     {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                                    {parseJsonField(animal.identifiers).map((identifier, index) => (
+                                                        <div key={index}><span className="text-gray-600">{identifier.title}:</span> <strong>{identifier.value}</strong></div>
+                                                    ))}
                                                 </div>
                                             </div>
                                         )}

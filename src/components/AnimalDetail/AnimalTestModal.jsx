@@ -143,7 +143,7 @@ const AnimalTestModal = ({
     const allImages = useMemo(() => [animal.imageUrl || animal.photoUrl, ...(animal.extraImages || [])].filter(Boolean), [animal]);
 
     const TABS = [
-        { id: 'overview', label: 'Overview', icon: <Info size={14} /> },
+        { id: 'dashboard', label: 'Dashboard', icon: <Info size={14} /> },
         { id: 'identification', label: 'Identification', icon: <Hash size={14} /> },
         { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> },
         { id: 'care', label: 'Care', icon: <Droplets size={14} /> },
@@ -341,7 +341,18 @@ const AnimalTestModal = ({
                                                 <p className="text-xs text-gray-700 text-center flex justify-center items-center gap-x-2">
                                                     {(() => {
                                                         const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean);
-                                                        const idString = [animal.id_public, animal.breederAssignedId, animal.microchipNumber, animal.pedigreeRegistrationId, animal.colonyId, animal.tattooId, animal.ringId, animal.eartagNumber].filter(Boolean).join(' • ');
+                                                        const idParts = [
+                                                            animal.id_public,
+                                                            animal.breederAssignedId,
+                                                            animal.microchipNumber,
+                                                            animal.pedigreeRegistrationId,
+                                                            animal.colonyId,
+                                                            animal.tattooId,
+                                                            animal.ringId,
+                                                            animal.eartagNumber,
+                                                            ...parseJsonArrayField(animal.identifiers).map(id => id.value)
+                                                        ];
+                                                        const idString = idParts.filter(Boolean).join(' • ');
                                                         const linesComponent = lines.length > 0 && (
                                                             <span className="flex items-center gap-1">
                                                                 {lines.map(line => (
@@ -401,7 +412,7 @@ const AnimalTestModal = ({
 
                 {/* Content */}
                 <div className="p-6 overflow-y-auto rounded-b-xl flex-1">
-                    {activeTab === 'overview' && (
+                    {activeTab === 'dashboard' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
                             <div className="relative bg-white rounded-lg border border-gray-200 shadow-sm h-full">
@@ -587,7 +598,7 @@ const AnimalTestModal = ({
                         </div>
                     )}
                     {/* Placeholder for other tabs */}
-                    {activeTab !== 'overview' &&
+                    {activeTab !== 'dashboard' &&
                         activeTab !== 'identification' &&
                         activeTab !== 'health' &&
                         activeTab !== 'care' &&

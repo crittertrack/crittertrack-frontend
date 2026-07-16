@@ -424,10 +424,10 @@ const AnimalFormTestModal = ({
         setLoading(true);
 
         const missingFields = [];
-        if (!formData.name?.trim()) missingFields.push('Name (Overview tab)');
-        if (!formData.species?.trim()) missingFields.push('Species (Overview tab)');
-        if (!formData.gender?.trim()) missingFields.push('Gender (Overview tab)');
-        if (!formData.status?.trim()) missingFields.push('Status (Overview tab)');
+        if (!formData.name?.trim()) missingFields.push('Name (Dashboard tab)');
+        if (!formData.species?.trim()) missingFields.push('Species (Dashboard tab)');
+        if (!formData.gender?.trim()) missingFields.push('Gender (Dashboard tab)');
+        if (!formData.status?.trim()) missingFields.push('Status (Dashboard tab)');
 
         if (missingFields.length > 0) {
             showModalMessage('Required Fields Missing', `Please fill in the following required fields:\n\n· ${missingFields.join('\n· ')}`);
