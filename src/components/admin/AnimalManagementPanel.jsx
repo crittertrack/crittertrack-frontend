@@ -1840,12 +1840,13 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             <div className="form-row">
                                                 <label>Life Stage</label>
                                                 <select value={editForm.lifeStage || ''} onChange={(e) => setEditForm({...editForm, lifeStage: e.target.value})}>
-                                                    <option value="">Select...</option>
-                                                    <option value="Newborn">Newborn</option>
-                                                    <option value="Juvenile">Juvenile</option>
-                                                    <option value="Adult">Adult</option>
-                                                    <option value="Senior">Senior</option>
                                                     <option value="Unknown">Unknown</option>
+                                        <option value="Newborn">Newborn</option>
+                                        <option value="Juvenile">Juvenile</option>
+                                        <option value="Sub-Adult">Sub-Adult</option>
+                                        <option value="Adult">Adult</option>
+                                        <option value="Senior">Senior</option>
+                                        <option value="Mixed">Mixed</option>
                                                 </select>
                                             </div>
                                             <div className="form-row">
@@ -2095,12 +2096,13 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             <div className="form-row">
                                                 <label>Life Stage</label>
                                                 <select value={editForm.lifeStage || ''} onChange={(e) => setEditForm({...editForm, lifeStage: e.target.value})}>
-                                                    <option value="">Select...</option>
-                                                    <option value="Newborn">Newborn</option>
-                                                    <option value="Juvenile">Juvenile</option>
-                                                    <option value="Adult">Adult</option>
-                                                    <option value="Senior">Senior</option>
                                                     <option value="Unknown">Unknown</option>
+                                        <option value="Newborn">Newborn</option>
+                                        <option value="Juvenile">Juvenile</option>
+                                        <option value="Sub-Adult">Sub-Adult</option>
+                                        <option value="Adult">Adult</option>
+                                        <option value="Senior">Senior</option>
+                                        <option value="Mixed">Mixed</option>
                                                 </select>
                                             </div>
                                         </div>
