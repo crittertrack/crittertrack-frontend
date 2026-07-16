@@ -376,16 +376,17 @@ const AnimalTestModal = ({
                     </div>
                 </div>
 
-                {/* Collapse/Expand Chevron */}
-                <div className="flex justify-center -mt-3 z-10">
-                    <button onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)} className="bg-white border border-gray-300 rounded-full p-1 shadow-sm hover:bg-gray-100 transition" title={isHeaderCollapsed ? 'Expand Header' : 'Collapse Header'}>
-                        {isHeaderCollapsed ? <ChevronDown size={20} className="text-gray-600" /> : <ChevronUp size={20} className="text-gray-600" />}
-                    </button>
-                </div>
-
                 {/* Tabs */}
                 <div className="bg-white border-b border-gray-200">
-                    <nav className="flex space-x-4 -mb-px overflow-x-auto px-4">
+                    <nav className="flex items-center space-x-4 -mb-px overflow-x-auto px-4">
+                        <button
+                            onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
+                            className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors border border-gray-300"
+                            title={isHeaderCollapsed ? 'Expand Header' : 'Collapse Header'}
+                        >
+                            {isHeaderCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+                        </button>
+                        <div className="h-6 w-px bg-gray-200"></div>
                         {TABS.map(tab => (
                             <button
                                 key={tab.id}
