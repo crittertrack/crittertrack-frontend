@@ -332,13 +332,13 @@ const AnimalFormTestModal = ({
             setFormData(prev => ({
                 ...prev,
                 breederId_public: selection.userId || null,
-                manualBreederName: selection.userId ? '' : selection.name,
+                manualBreederName: selection.name || '',
             }));
         } else if (assignModalTarget === 'owner') {
             setFormData(prev => ({
                 ...prev,
                 ownerId_public: selection.userId || null, // The new linked user ID
-                ownerName: selection.userId ? '' : selection.name, // The manual name, falls back for display
+                ownerName: selection.name || '', // The manual name, falls back for display
             }));
         }
         setAssignModalOpen(false);
