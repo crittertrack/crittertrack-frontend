@@ -345,6 +345,24 @@ const AnimalFormTestModal = ({
         setAssignModalTarget(null);
     };
 
+    const clearContactSelection = (target) => {
+        if (target === 'breeder') {
+            setFormData(prev => ({
+                ...prev,
+                breederId_public: null,
+                manualBreederName: '',
+            }));
+            setBreederInfo(null);
+        } else if (target === 'owner') {
+            setFormData(prev => ({
+                ...prev,
+                ownerId_public: null,
+                manualownerName: '',
+            }));
+            setOwnerInfo(null);
+        }
+    };
+
 
     const deleteImage = (id) => {
         setGalleryImages(prevImages => prevImages.filter(img => img.id !== id));
@@ -591,11 +609,21 @@ const AnimalFormTestModal = ({
                                                         value={breederInfo ? (breederInfo.breederName || breederInfo.personalName) : formData.manualBreederName}
                                                         onEdit={() => { setAssignModalTarget('breeder'); setAssignModalOpen(true); }}
                                                     />
+                                                    {(breederInfo || formData.manualBreederName) && (
+                                                        <button type="button" onClick={() => clearContactSelection('breeder')} className="text-gray-500 hover:text-red-500 transition p-1" title="Clear Breeder">
+                                                            <X size={16} />
+                                                        </button>
+                                                    )}
                                                     <ContactDisplayField
                                                         label="Owner"
                                                         value={ownerInfo ? (ownerInfo.breederName || ownerInfo.personalName) : formData.manualownerName}
                                                         onEdit={() => { setAssignModalTarget('owner'); setAssignModalOpen(true); }}
                                                     />
+                                                    {(ownerInfo || formData.manualownerName) && (
+                                                        <button type="button" onClick={() => clearContactSelection('owner')} className="text-gray-500 hover:text-red-500 transition p-1" title="Clear Owner">
+                                                            <X size={16} />
+                                                        </button>
+                                                    )}
                                                     <div className="md:col-span-2">
                                                         <label className="block text-xs font-medium text-gray-700">Co-Ownership Details</label>
                                                         <textarea name="coOwnership" value={formData.coOwnership} onChange={handleChange} rows="2"
