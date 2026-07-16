@@ -6955,13 +6955,13 @@ const AnimalForm = ({
                                     <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} 
                                         data-tutorial-target="life-stage-select"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value="">Select Life Stage</option>
+                                        <option value="Unknown">Unknown</option>
                                         <option value="Newborn">Newborn</option>
                                         <option value="Juvenile">Juvenile</option>
+                                        <option value="Sub-Adult">Sub-Adult</option>
                                         <option value="Adult">Adult</option>
                                         <option value="Senior">Senior</option>
                                         <option value="Mixed">Mixed</option>
-                                        <option value="Unknown">Unknown</option>
                                     </select>
                                 </div>
                             </div>
