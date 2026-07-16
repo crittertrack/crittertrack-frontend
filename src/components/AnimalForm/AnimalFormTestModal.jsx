@@ -184,9 +184,9 @@ const AnimalFormTestModal = ({
             motherId_public: animalToEdit.motherId_public || animalToEdit.damId_public || null,
             breederId_public: animalToEdit.breederId_public || null,
             manualBreederName: animalToEdit.manualBreederName || '',
-            isDisplay: animalToEdit.isDisplay ?? false,
             ownerId_public: animalToEdit.ownerId_public || animalToEdit.ownerId || null,
-            manualOwnerName: animalToEdit.manualOwnerName || animalToEdit.ownerName || '',
+            ownerName: animalToEdit.manualOwnerName || animalToEdit.ownerName || '', // Renamed from manualOwnerName
+            isDisplay: animalToEdit.isDisplay ?? false,
             coOwnership: animalToEdit.coOwnership || '',
             isForSale: animalToEdit.isForSale || false,
             salePriceCurrency: animalToEdit.salePriceCurrency || 'USD',
@@ -225,8 +225,8 @@ const AnimalFormTestModal = ({
             motherId_public: null,
             breederId_public: null,
             manualBreederName: '',
-            ownerId_public: null,
-            manualOwnerName: '',
+            ownerId_public: null, // This is the new field for linked user owner
+            ownerName: '', // This is for manual entry, matching the old form
             isOwned: true, // Default for new animals, not editable in this form
             isDisplay: true,
             coOwnership: '',
@@ -337,8 +337,8 @@ const AnimalFormTestModal = ({
         } else if (assignModalTarget === 'owner') {
             setFormData(prev => ({
                 ...prev,
-                ownerId_public: selection.userId || null,
-                manualOwnerName: selection.userId ? '' : selection.name,
+                ownerId_public: selection.userId || null, // The new linked user ID
+                ownerName: selection.userId ? '' : selection.name, // The manual name, falls back for display
             }));
         }
         setAssignModalOpen(false);
@@ -593,7 +593,7 @@ const AnimalFormTestModal = ({
                                                     />
                                                     <ContactDisplayField
                                                         label="Owner"
-                                                        value={ownerInfo ? (ownerInfo.breederName || ownerInfo.personalName) : formData.manualOwnerName}
+                                                        value={ownerInfo ? (ownerInfo.breederName || ownerInfo.personalName) : formData.ownerName}
                                                         onEdit={() => { setAssignModalTarget('owner'); setAssignModalOpen(true); }}
                                                     />
                                                     <div className="md:col-span-2">
