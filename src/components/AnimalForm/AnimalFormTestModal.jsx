@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
     ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images,
     Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff,
@@ -7,7 +8,7 @@ import {
     Loader2, ChevronDown, ChevronRight
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
-import AnimalImageUpload from './AnimalImageUpload'; // Assuming this is the correct path
+import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
 import { FamilyTabContent } from '../AnimalDetail/FamilyTabContent';
 
