@@ -6960,6 +6960,7 @@ const AnimalForm = ({
                                         <option value="Juvenile">Juvenile</option>
                                         <option value="Adult">Adult</option>
                                         <option value="Senior">Senior</option>
+                                        <option value="Mixed">Mixed</option>
                                         <option value="Unknown">Unknown</option>
                                     </select>
                                 </div>

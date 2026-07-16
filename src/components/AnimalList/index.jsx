@@ -17,7 +17,7 @@ import { prefetchPedigreeTree } from '../AnimalForm';
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
 
-const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
+const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown', 'Mixed'];
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const normalizeAnimalView = (value) => (
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'supplies', 'familyTree'].includes(value) ? value : 'list'
