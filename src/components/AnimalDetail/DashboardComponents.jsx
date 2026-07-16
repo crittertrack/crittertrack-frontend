@@ -17,7 +17,7 @@ export const InfoCard = ({ title, icon, children, className = '', contentClassNa
 
 export const InfoItem = ({ label, value, children }) => (
     <div>
-        <dt className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">{label}</dt>
+        <dt className="text-xs font-semibold uppercase tracking-wider text-gray-600">{label}</dt>
         <dd className="text-xs font-medium text-gray-900">{children || value || <span className="text-gray-500">N/A</span>}</dd>
     </div>
 );

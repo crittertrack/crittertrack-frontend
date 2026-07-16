@@ -32,12 +32,12 @@ const getContactDisplayName = (contact) => {
 
 const ContactDisplayField = ({ label, value, onEdit }) => (
     <div>
-        <label className="block text-sm font-medium text-gray-700">{label}</label>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600">{label}</label>
         <div
             onClick={onEdit}
-            className="mt-1 flex justify-between items-center p-3 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer hover:border-primary"
+            className="mt-1 flex justify-between items-center p-2.5 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer hover:border-primary"
         >
-            <span className={value ? "text-gray-900" : "text-gray-400"}>{value || `Click to assign ${label}`}</span>
+            <span className={`text-sm ${value ? "text-gray-900" : "text-gray-400"}`}>{value || `Click to assign ${label}`}</span>
             <Edit size={16} className="text-gray-400" />
         </div>
     </div>
@@ -458,8 +458,8 @@ const AnimalFormTestModal = ({
                 <div className="flex-1 overflow-y-auto">
                     {/* Tab Content */}
                     <div className="p-6">
-                        {activeTab === 1 && (
-                            <div className="flex gap-6">
+                        {activeTab === 1 && ( // DASHBOARD
+                            <div className="flex gap-4">
                                 {/* Left Column: Image Upload */}
                                 <div className="w-1/3 flex-shrink-0 flex flex-col gap-2">
                                     {(() => {
@@ -505,43 +505,43 @@ const AnimalFormTestModal = ({
                                 </div>
 
                                 {/* Right Column: Identity Fields */}
-                                <div className="w-2/3 flex-1 flex flex-col gap-6">
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identity</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="w-2/3 flex-1 flex flex-col gap-4">
+                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <h3 className="text-base font-semibold text-gray-700 border-b pb-2">Identity</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Prefix</label>
+                                                <label className="block text-xs font-medium text-gray-700">Prefix</label>
                                                 <input type="text" name="prefix" value={formData.prefix} onChange={handleChange}
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Name*</label>
+                                                <label className="block text-xs font-medium text-gray-700">Name*</label>
                                                 <input type="text" name="name" value={formData.name} onChange={handleChange} required
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Suffix</label>
+                                                <label className="block text-xs font-medium text-gray-700">Suffix</label>
                                                 <input type="text" name="suffix" value={formData.suffix} onChange={handleChange}
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Gender*</label>
+                                                <label className="block text-xs font-medium text-gray-700">Gender*</label>
                                                 <select name="gender" value={formData.gender} onChange={handleChange} required
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                                <label className="block text-xs font-medium text-gray-700">Date of Birth</label>
                                                 <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()}
-                                                    className="mt-1 p-2" />
+                                                    className="mt-1" />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700">Status*</label>
+                                                <label className="block text-xs font-medium text-gray-700">Status*</label>
                                                 <select name="status" value={formData.status} onChange={handleChange} required
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                                                 </select>
                                             </div>
@@ -549,9 +549,9 @@ const AnimalFormTestModal = ({
                                     </div>
 
                                     {/* Breeder & Keeper */}
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center gap-1.5"><User size={16} />Breeder & Keeper</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <h3 className="text-base font-semibold text-gray-700 border-b pb-2 flex items-center gap-1.5"><User size={16} />Breeder & Keeper</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <ContactDisplayField
                                                 label="Breeder"
                                                 value={breederInfo ? (breederInfo.breederName || breederInfo.personalName) : formData.manualBreederName}
@@ -563,44 +563,44 @@ const AnimalFormTestModal = ({
                                                 onEdit={() => { setAssignModalTarget('keeper'); setAssignModalOpen(true); }}
                                             />
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700">Co-Ownership Details</label>
+                                                <label className="block text-xs font-medium text-gray-700">Co-Ownership Details</label>
                                                 <textarea name="coOwnership" value={formData.coOwnership} onChange={handleChange} rows="2"
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                     placeholder="Co-owner name, terms, breeding rights, etc." />
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Availability */}
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Availability</h3>
+                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <h3 className="text-base font-semibold text-gray-700 border-b pb-2">Availability</h3>
                                         {/* For Sale */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
                                             <label className="flex items-center space-x-2">
-                                                <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} className="form-checkbox h-5 w-5 text-primary rounded" />
-                                                <span className="text-sm font-medium text-gray-700">Available for Sale</span>
+                                                <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} className="form-checkbox h-4 w-4 text-primary rounded" />
+                                                <span className="text-xs font-medium text-gray-700">Available for Sale</span>
                                             </label>
                                             {formData.isForSale && (
-                                                <div className="flex gap-2 pl-7">
-                                                    <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="p-2 border border-gray-300 rounded-md text-sm">
+                                                <div className="flex gap-2 pl-6">
+                                                    <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 rounded-md text-xs">
                                                         <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="Negotiable">Negotiable</option>
                                                     </select>
-                                                    <input type="number" name="salePriceAmount" value={formData.salePriceAmount} onChange={handleChange} disabled={formData.salePriceCurrency === 'Negotiable'} placeholder="Price" className="flex-1 p-2 border border-gray-300 rounded-md text-sm" />
+                                                    <input type="number" name="salePriceAmount" value={formData.salePriceAmount} onChange={handleChange} disabled={formData.salePriceCurrency === 'Negotiable'} placeholder="Price" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
                                                 </div>
                                             )}
                                         </div>
                                         {/* For Stud */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
                                             <label className="flex items-center space-x-2">
-                                                <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} className="form-checkbox h-5 w-5 text-primary rounded" />
-                                                <span className="text-sm font-medium text-gray-700">Available for Stud/Breeding</span>
+                                                <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} className="form-checkbox h-4 w-4 text-primary rounded" />
+                                                <span className="text-xs font-medium text-gray-700">Available for Stud/Breeding</span>
                                             </label>
                                             {formData.availableForBreeding && (
-                                                <div className="flex gap-2 pl-7">
-                                                    <select name="studFeeCurrency" value={formData.studFeeCurrency} onChange={handleChange} className="p-2 border border-gray-300 rounded-md text-sm">
+                                                <div className="flex gap-2 pl-6">
+                                                    <select name="studFeeCurrency" value={formData.studFeeCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 rounded-md text-xs">
                                                         <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="Negotiable">Negotiable</option>
                                                     </select>
-                                                    <input type="number" name="studFeeAmount" value={formData.studFeeAmount} onChange={handleChange} disabled={formData.studFeeCurrency === 'Negotiable'} placeholder="Fee" className="flex-1 p-2 border border-gray-300 rounded-md text-sm" />
+                                                    <input type="number" name="studFeeAmount" value={formData.studFeeAmount} onChange={handleChange} disabled={formData.studFeeCurrency === 'Negotiable'} placeholder="Fee" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
                                                 </div>
                                             )}
                                         </div>
@@ -609,79 +609,79 @@ const AnimalFormTestModal = ({
                             </div>
                         )}
                         {activeTab === 2 && (
-                            <div className="space-y-6">
+                            <div className="space-y-4">
                                 {/* Identification Numbers */}
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <h3 className="text-base font-semibold text-gray-700 border-b pb-2"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Breeder Assigned ID</label>
+                                            <label className="block text-xs font-medium text-gray-700">Breeder Assigned ID</label>
                                             <input type="text" name="breederAssignedId" value={formData.breederAssignedId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Microchip Number</label>
+                                            <label className="block text-xs font-medium text-gray-700">Microchip Number</label>
                                             <input type="text" name="microchipNumber" value={formData.microchipNumber || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Pedigree Registration ID</label>
+                                            <label className="block text-xs font-medium text-gray-700">Pedigree Registration ID</label>
                                             <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Colony ID</label>
+                                            <label className="block text-xs font-medium text-gray-700">Colony ID</label>
                                             <input type="text" name="colonyId" value={formData.colonyId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Tattoo ID</label>
+                                            <label className="block text-xs font-medium text-gray-700">Tattoo ID</label>
                                             <input type="text" name="tattooId" value={formData.tattooId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Ring ID</label>
+                                            <label className="block text-xs font-medium text-gray-700">Ring ID</label>
                                             <input type="text" name="ringId" value={formData.ringId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Ear Tag</label>
+                                            <label className="block text-xs font-medium text-gray-700">Ear Tag</label>
                                             <input type="text" name="eartagNumber" value={formData.eartagNumber || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Classification */}
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <h3 className="text-base font-semibold text-gray-700 border-b pb-2"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Species</label>
+                                            <label className="block text-xs font-medium text-gray-700">Species</label>
                                             <input type="text" value={formData.species} disabled
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600" />
                                             <p className="text-xs text-gray-500 mt-1">Cannot be changed after creation</p>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Breed</label>
+                                            <label className="block text-xs font-medium text-gray-700">Breed</label>
                                             <input type="text" name="breed" value={formData.breed || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700">Strain</label>
+                                            <label className="block text-xs font-medium text-gray-700">Strain</label>
                                             <input type="text" name="strain" value={formData.strain || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="e.g., C57BL/6, Wistar, Syrian" />
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Origin */}
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Globe size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Origin</h3>
-                                    <label className="block text-sm font-medium text-gray-700">Origin</label>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <h3 className="text-base font-semibold text-gray-700 border-b pb-2 mb-2"><Globe size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Origin</h3>
+                                    <label className="block text-xs font-medium text-gray-700">Origin</label>
                                     <select name="origin" value={formData.origin || ''} onChange={handleChange}
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        className="block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                         <option value="">Select Origin</option>
                                         <option value="Captive-bred">Captive-bred</option>
                                         <option value="Wild-caught">Wild-caught</option>
@@ -690,9 +690,9 @@ const AnimalFormTestModal = ({
                                 </div>
 
                                 {/* Tags */}
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Tags</h3>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Tags (Lines, Enclosures, etc)</label>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    <h3 className="text-base font-semibold text-gray-700 border-b pb-2 mb-2"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Tags</h3>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Tags (Lines, Enclosures, etc)</label>
                                     <input type="text" placeholder="Type and press Enter or comma to add tags" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } } else if (e.key === 'Backspace' && !tagInput && formData.tags.length > 0) { setFormData({ ...formData, tags: formData.tags.slice(0, -1) }); } }} onBlur={() => { const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } }} className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                     {formData.tags.length > 0 && (
                                         <div className="mt-2 flex flex-wrap gap-2">
