@@ -476,7 +476,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             })()}
                                                         </RouterLink>
                                                     ) : (
-                                                        <span className="font-mono text-accent">{animal.ownerName || '\u2014'}</span>
+                                                        <span className="font-mono text-accent">{animal.manualownerName || '\u2014'}</span>
                                                     )}
                                                 </div>
                                             )}
@@ -544,7 +544,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        const keeperDisplay = animal.ownerName || null;
+                                        const keeperDisplay = animal.manualownerName || null;
                                         if (!keeperDisplay) return null;
                                         return (
                                             <div className="flex items-center gap-2">

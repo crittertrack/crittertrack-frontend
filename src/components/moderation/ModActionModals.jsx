@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { X, AlertTriangle, Eye, MessageSquare, UserX, Ban, Flag, TrendingDown, Check } from 'lucide-react';
+import { X, AlertTriangle, Eye, MessageSquare, UserX, Ban, Flag, TrendingDown, Check, Loader2 } from 'lucide-react';
 import './ModActionModals.css';
 
 // Flag Content Modal
@@ -286,7 +286,7 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
 };
 
 // Warn User Modal
-export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarnings = 0, API_BASE_URL, authToken }) => {
+export const WarnUserModal = ({ isOpen, onClose, onSubmit, userContext, currentWarnings = 0, API_BASE_URL, authToken }) => {
     const [reason, setReason] = useState('');
     const [category, setCategory] = useState('policy_violation');
     const [liveWarningCount, setLiveWarningCount] = useState(currentWarnings);
@@ -294,9 +294,9 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
 
     // Fetch fresh warning count when modal opens
     const fetchWarningCount = async () => {
-        if (context?.userId && authToken && API_BASE_URL) {
+        if (userContext?.userId && authToken && API_BASE_URL) {
             try {
-                const response = await axios.get(`${API_BASE_URL}/moderation/users/${context.userId}/info`, {
+                const response = await axios.get(`${API_BASE_URL}/moderation/users/${userContext.userId}/info`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
                 console.log('[WarnUserModal] Fetched user info:', response.data);
@@ -311,7 +311,7 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
     };
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && userContext?.userId) {
             fetchWarningCount();
         }
     }, [isOpen, context?.userId, authToken, API_BASE_URL, currentWarnings]);
@@ -327,7 +327,7 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
                 action: 'warn',
                 reason,
                 category,
-                context
+                context: userContext?.originalContext // Pass original context for audit logging
             });
             
             // Refresh warning count after submission completes
@@ -364,9 +364,9 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
                         )}
                     </div>
                     
-                    {context && (
+                    {userContext?.userName && (
                         <div className="mod-context-info">
-                            <strong>Warning User:</strong> {context.ownerName || context.name}
+                            <strong>Warning User:</strong> {userContext.userName}
                         </div>
                     )}
 
@@ -409,7 +409,7 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
 };
 
 // Suspend User Modal
-export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
+export const SuspendUserModal = ({ isOpen, onClose, onSubmit, userContext }) => {
     const [reason, setReason] = useState('');
     const [duration, setDuration] = useState('1 Day');
     const [customDuration, setCustomDuration] = useState('');
@@ -466,7 +466,7 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
             action: 'suspend',
             reason,
             durationDays: finalDuration,
-            context
+            context: userContext?.originalContext // Pass original context for audit logging
         };
         console.log('[SUSPEND MODAL] Submitting data:', submitData);
         
@@ -491,10 +491,10 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
                     <p className="text-gray-600 mb-4">
                         Suspended users cannot log in until the suspension expires. Login will be disabled during the suspension period.
                     </p>
-                    
-                    {context && (
+
+                    {userContext?.userName && (
                         <div className="mod-context-info">
-                            <strong>Suspending:</strong> {context.ownerName || context.name}
+                            <strong>Suspending:</strong> {userContext.userName}
                         </div>
                     )}
 
@@ -550,7 +550,7 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
 };
 
 // Ban User Modal
-export const BanUserModal = ({ isOpen, onClose, onSubmit, context }) => {
+export const BanUserModal = ({ isOpen, onClose, onSubmit, userContext }) => {
     const [reason, setReason] = useState('');
     const [ipBan, setIpBan] = useState(true);
 
@@ -561,7 +561,7 @@ export const BanUserModal = ({ isOpen, onClose, onSubmit, context }) => {
             action: 'ban',
             reason,
             ipBan,
-            context
+            context: userContext?.originalContext // Pass original context for audit logging
         });
         setReason('');
         setIpBan(true);
@@ -587,9 +587,9 @@ export const BanUserModal = ({ isOpen, onClose, onSubmit, context }) => {
                         </div>
                     </div>
                     
-                    {context && (
+                    {userContext?.userName && (
                         <div className="mod-context-info">
-                            <strong>Banning:</strong> {context.ownerName || context.name}
+                            <strong>Banning:</strong> {userContext.userName}
                         </div>
                     )}
 
@@ -631,7 +631,7 @@ export const BanUserModal = ({ isOpen, onClose, onSubmit, context }) => {
 };
 
 // Lift Warning Modal
-export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWarnings = 0, warnings = [], API_BASE_URL, authToken }) => {
+export const LiftWarningModal = ({ isOpen, onClose, onSubmit, userContext, currentWarnings = 0, warnings = [], API_BASE_URL, authToken }) => {
     const [reason, setReason] = useState('');
     const [selectedWarningIndex, setSelectedWarningIndex] = useState(null);
     const [liveWarnings, setLiveWarnings] = useState(warnings);
@@ -639,9 +639,9 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
 
     // Fetch fresh warnings when modal opens
     const fetchUserWarnings = async () => {
-        if (context?.userId && authToken && API_BASE_URL) {
+        if (userContext?.userId && authToken && API_BASE_URL) {
             try {
-                const response = await axios.get(`${API_BASE_URL}/moderation/users/${context.userId}/info`, {
+                const response = await axios.get(`${API_BASE_URL}/moderation/users/${userContext.userId}/info`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
                 console.log('[LiftWarningModal] Fetched user info:', response.data);
@@ -659,7 +659,7 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
     };
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && userContext?.userId) {
             fetchUserWarnings();
             setSelectedWarningIndex(null);
             setReason('');
@@ -675,7 +675,7 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
             action: 'lift-warning',
             reason,
             warningIndex: selectedWarningIndex,
-            context
+            context: userContext?.originalContext // Pass original context for audit logging
         });
         setReason('');
         setSelectedWarningIndex(null);
@@ -698,9 +698,9 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
                         <span>User currently has <strong>{liveWarningCount}</strong> active warning(s)</span>
                     </div>
                     
-                    {context && (
+                     {userContext?.userName && (
                         <div className="mod-context-info">
-                            <strong>Lifting Warning For:</strong> {context.ownerName || context.name}
+                            <strong>Lifting Warning For:</strong> {userContext.userName}
                         </div>
                     )}
 
@@ -777,7 +777,7 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
 };
 
 // Lift Suspension Modal
-export const LiftSuspensionModal = ({ isOpen, onClose, onSubmit, context }) => {
+export const LiftSuspensionModal = ({ isOpen, onClose, onSubmit, userContext }) => {
     const [reason, setReason] = useState('');
 
     if (!isOpen) return null;
@@ -786,7 +786,7 @@ export const LiftSuspensionModal = ({ isOpen, onClose, onSubmit, context }) => {
         onSubmit({
             action: 'lift-suspension',
             reason,
-            context
+            context: userContext?.originalContext // Pass original context for audit logging
         });
         setReason('');
         onClose();
@@ -803,9 +803,9 @@ export const LiftSuspensionModal = ({ isOpen, onClose, onSubmit, context }) => {
                     </button>
                 </div>
                 <div className="mod-modal-body">
-                    {context && (
+                    {userContext?.userName && (
                         <div className="mod-context-info">
-                            <strong>Lifting Suspension For:</strong> {context.ownerName || context.name}
+                            <strong>Lifting Suspension For:</strong> {userContext.userName}
                         </div>
                     )}
 
@@ -837,7 +837,7 @@ export const LiftSuspensionModal = ({ isOpen, onClose, onSubmit, context }) => {
 };
 
 // Lift Ban Modal
-export const LiftBanModal = ({ isOpen, onClose, onSubmit, context }) => {
+export const LiftBanModal = ({ isOpen, onClose, onSubmit, userContext }) => {
     const [reason, setReason] = useState('');
 
     if (!isOpen) return null;
@@ -846,7 +846,7 @@ export const LiftBanModal = ({ isOpen, onClose, onSubmit, context }) => {
         onSubmit({
             action: 'lift-ban',
             reason,
-            context
+            context: userContext?.originalContext // Pass original context for audit logging
         });
         setReason('');
         onClose();
@@ -863,9 +863,9 @@ export const LiftBanModal = ({ isOpen, onClose, onSubmit, context }) => {
                     </button>
                 </div>
                 <div className="mod-modal-body">
-                    {context && (
+                    {userContext?.userName && (
                         <div className="mod-context-info">
-                            <strong>Lifting Ban For:</strong> {context.ownerName || context.name}
+                            <strong>Lifting Ban For:</strong> {userContext.userName}
                         </div>
                     )}
 

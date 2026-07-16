@@ -911,7 +911,7 @@ const PrivateAnimalDetail = ({
                                                     return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
                                             <div><span className="text-gray-500">Owner:</span>{' '}
-                                                {ownerInfo ? <RouterLink to={`/user/${ownerInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{ownerInfo.breederName || ownerInfo.personalName}</RouterLink> : <span className="font-mono text-accent">{animal.manualOwnerName || '\u2014'}</span>}
+                                                {ownerInfo ? <RouterLink to={`/user/${ownerInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{ownerInfo.breederName || ownerInfo.personalName}</RouterLink> : <span className="font-mono text-accent">{animal.manualownerName || '\u2014'}</span>}
                                             </div>
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId || animal.ringId || animal.eartagNumber) && (
                                                 <hr className="border-gray-200" />
@@ -985,7 +985,7 @@ const PrivateAnimalDetail = ({
                                                 {ownerInfo.breederName || ownerInfo.personalName}
                                             </RouterLink>
                                         ) : (
-                                            <strong>{animal.manualOwnerName || 'N/A'}</strong>
+                                            <strong>{animal.manualownerName || 'N/A'}</strong>
                                         )}
                                     </div>
                                     {animal.coOwnership && (

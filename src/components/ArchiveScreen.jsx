@@ -82,11 +82,11 @@ const ArchiveScreen = ({
                         {!collapsedMgmtSections['soldTransferred'] && (() => {
                             const soldOwners = [...new Map(
                                 soldTransferredAnimals
-                                    .filter(a => a.ownerName)
-                                    .map(a => [a.creatorId_public || a.ownerName, { key: a.creatorId_public || a.ownerName, label: a.ownerName }])
+                                    .filter(a => a.manualownerName)
+                                    .map(a => [a.creatorId_public || a.manualownerName, { key: a.creatorId_public || a.manualownerName, label: a.manualownerName }])
                             ).values()].sort((a, b) => a.label.localeCompare(b.label));
                             const filteredSoldList = soldOwnerFilter
-                                ? soldTransferredAnimals.filter(a => (a.creatorId_public || a.ownerName) === soldOwnerFilter)
+                                ? soldTransferredAnimals.filter(a => (a.creatorId_public || a.manualownerName) === soldOwnerFilter)
                                 : soldTransferredAnimals;
                             return (
                                 <div className="p-3 space-y-2">
@@ -104,7 +104,7 @@ const ArchiveScreen = ({
                                                         <option value="">All recipients ({soldTransferredAnimals.length})</option>
                                                         {soldOwners.map(o => (
                                                             <option key={o.key} value={o.key}>
-                                                                {o.label} ({soldTransferredAnimals.filter(a => (a.creatorId_public || a.ownerName) === o.key).length})
+                                                                {o.label} ({soldTransferredAnimals.filter(a => (a.creatorId_public || a.manualownerName) === o.key).length})
                                                             </option>
                                                         ))}
                                                     </select>
@@ -116,17 +116,17 @@ const ArchiveScreen = ({
                                                         key={a._id || a.id_public}
                                                         animal={a}
                                                         extras={
-                                                            a.ownerName ? (
+                                                            a.manualownerName ? (
                                                                 <button
                                                                     className="flex items-center gap-1.5 shrink-0 min-w-0 hover:opacity-80 transition-opacity"
-                                                                    title={`View profile: ${a.ownerName}`}
+                                                                    title={`View profile: ${a.manualownerName}`}
                                                                     onClick={e => { e.stopPropagation(); if (a.creatorIdPublic) navigate(`/user/${a.creatorIdPublic}`); }}
                                                                 >
                                                                     {a.ownerAvatar
-                                                                        ? <img src={a.ownerAvatar} alt={a.ownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />
-                                                                        : <span className="w-5 h-5 rounded-full bg-orange-200 text-orange-700 text-[10px] font-bold flex items-center justify-center shrink-0">{a.ownerName.charAt(0).toUpperCase()}</span>
+                                                                        ? <img src={a.ownerAvatar} alt={a.manualownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />
+                                                                        : <span className="w-5 h-5 rounded-full bg-orange-200 text-orange-700 text-[10px] font-bold flex items-center justify-center shrink-0">{a.manualownerName.charAt(0).toUpperCase()}</span>
                                                                     }
-                                                                    <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.ownerName}</span>
+                                                                    <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.manualownerName}</span>
                                                                 </button>
                                                             ) : null
                                                         }

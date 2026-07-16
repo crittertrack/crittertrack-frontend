@@ -213,7 +213,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             isOwned: animal.isOwned ?? true,
             isDisplay: animal.isDisplay ?? false,
             currentOwner: animal.currentOwner || '',
-            ownerName: animal.ownerName || '',
+            manualownerName: animal.manualownerName || '',
             // Dates
             birthDate: animal.birthDate ? new Date(animal.birthDate).toISOString().substring(0, 10) : '',
             deceasedDate: animal.deceasedDate ? new Date(animal.deceasedDate).toISOString().substring(0, 10) : '',

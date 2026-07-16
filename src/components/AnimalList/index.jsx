@@ -584,7 +584,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
                         if (ownerProfile) {
                             return {
                                 ...animal,
-                                ownerName: ownerProfile.breederName || ownerProfile.personalName,
+                                manualownerName: ownerProfile.breederName || ownerProfile.personalName,
                                 ownerAvatar: ownerProfile.profileImage,
                                 creatorIdPublic: ownerProfile.id_public
                             };

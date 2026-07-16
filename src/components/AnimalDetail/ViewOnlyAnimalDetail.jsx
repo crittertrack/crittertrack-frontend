@@ -669,10 +669,10 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                     )}
                                                 </div>
                                                 {/* Keeper */}
-                                                {animal.ownerName && (
+                                                {animal.manualownerName && (
                                                     <div>
                                                         <span className="text-gray-500">Keeper:</span>{' '}
-                                                        <span className="font-mono text-accent">{animal.ownerName}</span>
+                                                        <span className="font-mono text-accent">{animal.manualownerName}</span>
                                                     </div>
                                                 )}
                                                 {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId || animal.ringId || animal.eartagNumber) && (
@@ -769,7 +769,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                 {ownerInfo.breederName || ownerInfo.personalName}
                                             </button>
                                         ) : (
-                                            <strong>{animal.manualOwnerName || 'N/A'}</strong>
+                                            <strong>{animal.manualownerName || 'N/A'}</strong>
                                         )}
                                     </div>
                                     {animal.coOwnership && (
