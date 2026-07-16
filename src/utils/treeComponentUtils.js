@@ -18,9 +18,8 @@ export const getGenderBorderColor = (gender) => {
         case 'f':
             return 'border-pink-500';
         case 'intersex':
-            return 'border-purple-500';
         case 'mixed':
-            return 'border-green-500';
+            return 'border-purple-500';
         default:
             return 'border-gray-400';
     }

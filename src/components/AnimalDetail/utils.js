@@ -298,8 +298,12 @@ export const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
                 {parent.gender && (
                     <div>
                         {parent.gender === 'Male' 
-                            ? <Mars size={12} strokeWidth={2.5} className="text-primary" /> 
-                            : <Venus size={12} strokeWidth={2.5} className="text-accent" />
+                            ? <Mars size={12} strokeWidth={2.5} className="text-primary" />
+                            : parent.gender === 'Female'
+                                ? <Venus size={12} strokeWidth={2.5} className="text-accent" />
+                                : (parent.gender === 'Intersex' || parent.gender === 'Mixed')
+                                    ? <VenusAndMars size={12} strokeWidth={2.5} className="text-purple-500" />
+                                    : <Circle size={12} strokeWidth={2.5} className="text-gray-500" />
                         }
                     </div>
                 )}
@@ -466,8 +470,12 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                                         {animal.gender && (
                                             <div className="absolute top-1.5 right-1.5">
                                                 {animal.gender === 'Male' 
-                                                    ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> 
-                                                    : <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                    ? <Mars size={14} strokeWidth={2.5} className="text-primary" />
+                                                    : animal.gender === 'Female'
+                                                        ? <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                        : (animal.gender === 'Intersex' || animal.gender === 'Mixed')
+                                                            ? <VenusAndMars size={14} strokeWidth={2.5} className="text-purple-500" />
+                                                            : <Circle size={14} strokeWidth={2.5} className="text-gray-500" />
                                                 }
                                             </div>
                                         )}
