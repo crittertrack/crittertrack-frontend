@@ -12,6 +12,20 @@ import {
     Calculator, Calendar, CheckCircle, Dumbbell, Brain, Trophy, Scale, FileCheck,
     Palette, Wrench, Utensils, Package, ScrollText, Link, Unlink, Baby, Bell
 } from 'lucide-react';
+
+const parseJsonArrayField = (data) => {
+    if (!data) return [];
+    if (typeof data === 'string') {
+        try {
+            const parsed = JSON.parse(data);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return Array.isArray(data) ? data : [];
+};
+
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
@@ -3151,6 +3165,7 @@ const AnimalForm = ({
     const [quickEnclosureSize, setQuickEnclosureSize] = useState('');
     const [newCareTaskName, setNewCareTaskName] = useState('');
     const [newCareTaskFreq, setNewCareTaskFreq] = useState('');
+    const [newIdentifier, setNewIdentifier] = useState({ title: '', value: '' });
     const [newAnimalCareTaskName, setNewAnimalCareTaskName] = useState('');
     const [newAnimalCareTaskFreq, setNewAnimalCareTaskFreq] = useState('');
     // Milestone add-entry states
@@ -3284,6 +3299,7 @@ const AnimalForm = ({
             isOwned: animalToEdit.isOwned ?? true,
             isDisplay: animalToEdit.isDisplay ?? false,
             // New fields for comprehensive mammal profile
+            identifiers: parseJsonArrayField(animalToEdit.identifiers),
             microchipNumber: animalToEdit.microchipNumber || '',
             pedigreeRegistrationId: animalToEdit.pedigreeRegistrationId || '',
             colonyId: animalToEdit.colonyId || '',
@@ -3462,6 +3478,7 @@ const AnimalForm = ({
             isOwned: true,
             isDisplay: true,
             // New fields defaults
+            identifiers: [],
             microchipNumber: '',
             pedigreeRegistrationId: '',
             colonyId: '',
@@ -5326,6 +5343,25 @@ const AnimalForm = ({
         setNewLabResult({ date: new Date().toISOString().substring(0, 10), testName: '', result: '', notes: '' });
     };
 
+    const addIdentifier = () => {
+        if (!newIdentifier.title.trim() || !newIdentifier.value.trim()) {
+            showModalMessage('Missing Data', 'Please enter both a title and a value for the identifier.');
+            return;
+        }
+        setFormData(prev => ({
+            ...prev,
+            identifiers: [...(prev.identifiers || []), { ...newIdentifier }]
+        }));
+        setNewIdentifier({ title: '', value: '' });
+    };
+
+    const removeIdentifier = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            identifiers: (prev.identifiers || []).filter((_, i) => i !== index)
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(false);
@@ -5450,6 +5486,11 @@ const AnimalForm = ({
             payloadToSave.growthRecords = growthRecords;
             payloadToSave.measurementUnits = measurementUnits;
             
+            // Stringify identifiers
+            if (Array.isArray(payloadToSave.identifiers)) {
+                payloadToSave.identifiers = JSON.stringify(payloadToSave.identifiers);
+            }
+
             // Include health records - map to correct field names and serialize if needed
             payloadToSave.vaccinations = vaccinationRecords.length > 0 ? JSON.stringify(vaccinationRecords) : null;
             payloadToSave.vaccinationRecords = vaccinationRecords; // Keep for backward compat
@@ -7344,6 +7385,43 @@ const AnimalForm = ({
                                     </div>
                                 </>
                             )}
+
+                            {/* Additional Identifiers */}
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                                <h4 className="text-sm font-semibold text-gray-600 mb-2">Additional Identifiers</h4>
+                                {(formData.identifiers || []).map((identifier, index) => (
+                                    <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-white border rounded-md">
+                                        <div className="flex-1 grid grid-cols-2 gap-2">
+                                            <input type="text" value={identifier.title} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
+                                            <input type="text" value={identifier.value} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
+                                        </div>
+                                        <button type="button" onClick={() => removeIdentifier(index)} className="p-1 text-red-500 hover:text-red-700">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                ))}
+                                <div className="flex items-center gap-2 p-2 bg-white border border-dashed rounded-md">
+                                    <div className="flex-1 grid grid-cols-2 gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Identifier Title (e.g., DNA ID)"
+                                            value={newIdentifier.title}
+                                            onChange={(e) => setNewIdentifier({ ...newIdentifier, title: e.target.value })}
+                                            className="text-sm p-1 border-gray-300 rounded"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Identifier Value"
+                                            value={newIdentifier.value}
+                                            onChange={(e) => setNewIdentifier({ ...newIdentifier, value: e.target.value })}
+                                            className="text-sm p-1 border-gray-300 rounded"
+                                        />
+                                    </div>
+                                    <button type="button" onClick={addIdentifier} className="p-1 text-green-600 hover:text-green-700">
+                                        <PlusCircle size={20} />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         
                         {/* Classification */}

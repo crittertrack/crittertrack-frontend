@@ -12,6 +12,19 @@ import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
 import { FamilyTabContent } from '../AnimalDetail/FamilyTabContent';
 
+const parseJsonArrayField = (data) => {
+    if (!data) return [];
+    if (typeof data === 'string') {
+        try {
+            const parsed = JSON.parse(data);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return Array.isArray(data) ? data : [];
+};
+
 const getContactDisplayName = (contact) => {
     const personalName = contact?.personalName?.trim();
     const breederName = contact?.breederName?.trim();
@@ -155,6 +168,7 @@ const AnimalFormTestModal = ({
         breederOwner: true,
         availability: true,
     });
+    const [newIdentifier, setNewIdentifier] = useState({ title: '', value: '' });
 
     const toggleSection = (section) => {
         setSectionsCollapsed(prev => ({ ...prev, [section]: !prev[section] }));
@@ -196,6 +210,7 @@ const AnimalFormTestModal = ({
             studFeeAmount: animalToEdit.studFeeAmount || '',
             // Add all other fields from the original form
             ...animalToEdit,
+            identifiers: parseJsonArrayField(animalToEdit.identifiers),
             microchipNumber: animalToEdit.microchipNumber || '',
             pedigreeRegistrationId: animalToEdit.pedigreeRegistrationId || '',
             colonyId: animalToEdit.colonyId || '',
@@ -238,6 +253,7 @@ const AnimalFormTestModal = ({
             studFeeAmount: '',
             // Add all other fields with default values
             ...(initialValues || {}),
+            identifiers: [],
             microchipNumber: '',
             pedigreeRegistrationId: '',
             colonyId: '',
@@ -363,6 +379,25 @@ const AnimalFormTestModal = ({
         }
     };
 
+    const addIdentifier = () => {
+        if (!newIdentifier.title.trim() || !newIdentifier.value.trim()) {
+            showModalMessage('Missing Data', 'Please enter both a title and a value for the identifier.');
+            return;
+        }
+        setFormData(prev => ({
+            ...prev,
+            identifiers: [...(prev.identifiers || []), { ...newIdentifier }]
+        }));
+        setNewIdentifier({ title: '', value: '' });
+    };
+
+    const removeIdentifier = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            identifiers: (prev.identifiers || []).filter((_, i) => i !== index)
+        }));
+    };
+
 
     const deleteImage = (id) => {
         setGalleryImages(prevImages => prevImages.filter(img => img.id !== id));
@@ -433,6 +468,10 @@ const AnimalFormTestModal = ({
             payloadToSave.imageUrl = primaryImageUrl;
             payloadToSave.photoUrl = primaryImageUrl;
             payloadToSave.extraImages = extraImages;
+
+            if (Array.isArray(payloadToSave.identifiers)) {
+                payloadToSave.identifiers = JSON.stringify(payloadToSave.identifiers);
+            }
 
             if (galleryImages.length === 0) {
                 payloadToSave.imageUrl = null;
@@ -727,6 +766,42 @@ const AnimalFormTestModal = ({
                                             <label className="block text-xs font-medium text-gray-700">Ear Tag</label>
                                             <input type="text" name="eartagNumber" value={formData.eartagNumber || ''} onChange={handleChange}
                                                 className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                    </div>
+                                    {/* Additional Identifiers */}
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                        <h4 className="text-sm font-semibold text-gray-600 mb-2">Additional Identifiers</h4>
+                                        {(formData.identifiers || []).map((identifier, index) => (
+                                            <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-white border rounded-md">
+                                                <div className="flex-1 grid grid-cols-2 gap-2">
+                                                    <input type="text" value={identifier.title} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
+                                                    <input type="text" value={identifier.value} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
+                                                </div>
+                                                <button type="button" onClick={() => removeIdentifier(index)} className="p-1 text-red-500 hover:text-red-700">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <div className="flex items-center gap-2 p-2 bg-white border border-dashed rounded-md">
+                                            <div className="flex-1 grid grid-cols-2 gap-2">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Identifier Title (e.g., DNA ID)"
+                                                    value={newIdentifier.title}
+                                                    onChange={(e) => setNewIdentifier({ ...newIdentifier, title: e.target.value })}
+                                                    className="text-sm p-1 border-gray-300 rounded"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Identifier Value"
+                                                    value={newIdentifier.value}
+                                                    onChange={(e) => setNewIdentifier({ ...newIdentifier, value: e.target.value })}
+                                                    className="text-sm p-1 border-gray-300 rounded"
+                                                />
+                                            </div>
+                                            <button type="button" onClick={addIdentifier} className="p-1 text-green-600 hover:text-green-700">
+                                                <PlusCircle size={20} />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

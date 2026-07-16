@@ -449,7 +449,6 @@ const AnimalTestModal = ({
                                     {animal.eartagNumber && <InfoItem label="Ear Tag" value={animal.eartagNumber} />}
                                     {animal.pedigreeRegistrationId && <InfoItem label="Pedigree Registration" value={animal.pedigreeRegistrationId} />}
                                     {animal.colonyId && <InfoItem label="Colony ID" value={animal.colonyId} />}
-                                    {animal.dnaProfile && <InfoItem label="DNA Profile" value={animal.dnaProfile} />}
                                     {parseJsonArrayField(animal.identifiers).map((identifier, index) => (
                                         <InfoItem key={index} label={identifier.title} value={identifier.value} />
                                     ))}

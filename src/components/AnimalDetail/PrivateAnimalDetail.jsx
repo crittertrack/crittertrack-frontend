@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -26,6 +26,19 @@ import { QRModal } from '../PublicProfile/PublicProfileView';
 import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
 import { CareTabContent } from './CareTabContent';
 import { HealthTabContent } from './HealthTabContent';
+
+const parseJsonArrayField = (data) => {
+    if (!data) return [];
+    if (typeof data === 'string') {
+        try {
+            const parsed = JSON.parse(data);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return Array.isArray(data) ? data : [];
+};
 
 const PrivateAnimalDetail = ({ 
     animal, onClose, onCloseAll, onEdit, onArchive, onAddSibling, API_BASE_URL, authToken, 

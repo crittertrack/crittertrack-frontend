@@ -909,7 +909,6 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                     {animal.eartagNumber && <div><span className="text-gray-600">{getLabel('eartagNumber', 'Ear Tag')}:</span> <strong>{animal.eartagNumber}</strong></div>}
                                     {animal.pedigreeRegistrationId && <div><span className="text-gray-600">{getLabel('pedigreeRegistrationId', 'Pedigree Registration')}:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
                                     {animal.colonyId && <div><span className="text-gray-600">{getLabel('colonyId', 'Colony ID')}:</span> <strong>{animal.colonyId}</strong></div>}
-                                    {animal.dnaProfile && <div><span className="text-gray-600">{getLabel('dnaProfile', 'DNA Profile')}:</span> <strong>{animal.dnaProfile}</strong></div>}
                                     {parseJsonField(animal.identifiers).map((identifier, index) => (
                                         <div key={index}><span className="text-gray-600">{identifier.title}:</span> <strong>{identifier.value}</strong></div>
                                     ))}
