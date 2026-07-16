@@ -3374,12 +3374,9 @@ const AnimalForm = ({
             // Dog/Cat specific - Identification
             licenseNumber: animalToEdit.licenseNumber || '',
             licenseJurisdiction: animalToEdit.licenseJurisdiction || '',
-            rabiesTagNumber: animalToEdit.rabiesTagNumber || '',
             tattooId: animalToEdit.tattooId || '',
-            akcRegistrationNumber: animalToEdit.akcRegistrationNumber || '',
-            fciRegistrationNumber: animalToEdit.fciRegistrationNumber || '',
-            cfaRegistrationNumber: animalToEdit.cfaRegistrationNumber || '',
-            workingRegistryIds: animalToEdit.workingRegistryIds || '',
+            RingId: animalToEdit.RingId || '',
+            eartagNumber: animalToEdit.eartagNumber || '',
             // Dog/Cat specific - Reproduction
             estrusCycleLength: animalToEdit.estrusCycleLength || '',
             gestationLength: animalToEdit.gestationLength || '',
@@ -3561,6 +3558,8 @@ const AnimalForm = ({
             fciRegistrationNumber: '',
             cfaRegistrationNumber: '',
             workingRegistryIds: '',
+            RingId: '',
+            eartagNumber: '',
             // Dog/Cat specific - Reproduction
             estrusCycleLength: '',
             gestationLength: '',
