@@ -461,7 +461,7 @@ const AnimalFormTestModal = ({
                         {activeTab === 1 && ( // DASHBOARD
                             <div className="flex gap-4">
                                 {/* Left Column: Image Upload */}
-                                <div className="w-1/3 flex-shrink-0 flex flex-col gap-2">
+                                <div className="w-1/4 flex-shrink-0 flex flex-col gap-2">
                                     {(() => {
                                         const mainImage = galleryImages[0];
                                         const thumbnailImages = galleryImages.slice(1, 4);
@@ -505,7 +505,7 @@ const AnimalFormTestModal = ({
                                 </div>
 
                                 {/* Right Column: Identity Fields */}
-                                <div className="w-2/3 flex-1 flex flex-col gap-4">
+                                <div className="w-3/4 flex-1 flex flex-col gap-4">
                                     <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
                                         <h3 className="text-base font-semibold text-gray-700 border-b pb-2">Identity</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
