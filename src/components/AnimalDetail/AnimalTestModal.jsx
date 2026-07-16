@@ -353,15 +353,22 @@ const AnimalTestModal = ({
                                                             ...parseJsonArrayField(animal.identifiers).map(id => id.value)
                                                         ];
                                                         const idString = idParts.filter(Boolean).join(' • ');
-                                                        const linesComponent = lines.length > 0 && (
+                                                        const linesComponent = lines.length > 0 ? (
                                                             <span className="flex items-center gap-1">
                                                                 {lines.map(line => (
                                                                     <span key={line.id} title={line.name} style={{ color: line.color }} className="text-sm leading-none">&#x25C6;</span>
                                                                 ))}
                                                             </span>
+                                                        ) : null;
+                                                        const idComponent = idString ? <span>{idString}</span> : null;
+                                                        
+                                                        return (
+                                                            <>
+                                                                {linesComponent}
+                                                                {linesComponent && idComponent && <span className="text-gray-300 mx-1">•</span>}
+                                                                {idComponent}
+                                                            </>
                                                         );
-                                                        const idComponent = idString && <span>{idString}</span>;
-                                                        return (<>{linesComponent}{linesComponent && idComponent && <span className="text-gray-300 mx-1">•</span>}{idComponent}</>);
                                                     })()}
                                                 </p>
                                                 {animal.tags && animal.tags.length > 0 && (
