@@ -98,9 +98,9 @@ export const computeRelationships = (animal, collection = []) => {
         }
         
         // Offspring relationships
-        else if (animal.sireId_public && a.sireId_public === animal.id_public) {
+        else if (a.sireId_public === animal.id_public) {
             rel = `${a.gender === 'Female' ? 'Daughter' : 'Son'}`;
-        } else if (animal.damId_public && a.damId_public === animal.id_public) {
+        } else if (a.damId_public === animal.id_public) {
             rel = `${a.gender === 'Female' ? 'Daughter' : 'Son'}`;
         }
         
