@@ -3552,12 +3552,7 @@ const AnimalForm = ({
             // Dog/Cat specific - Identification
             licenseNumber: '',
             licenseJurisdiction: '',
-            rabiesTagNumber: '',
             tattooId: '',
-            akcRegistrationNumber: '',
-            fciRegistrationNumber: '',
-            cfaRegistrationNumber: '',
-            workingRegistryIds: '',
             RingId: '',
             eartagNumber: '',
             // Dog/Cat specific - Reproduction
@@ -7332,15 +7327,6 @@ const AnimalForm = ({
                                         placeholder="Colony or group identifier" />
                                 </div>
                                 )}
-
-                                {/* Licensing fields moved to Tab 13: Legal & Documentation */}
-                                {!isFieldHidden('rabiesTagNumber') && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Rabies Tag Number</label>
-                                        <input type="text" name="rabiesTagNumber" value={formData.rabiesTagNumber || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                    </div>
-                                )}
                                 {!isFieldHidden('tattooId') && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">Tattoo ID</label>
@@ -7354,39 +7340,6 @@ const AnimalForm = ({
                             {(formData.species === 'Dog' || formData.species === 'Cat') && (
                                 <>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {formData.species === 'Dog' && (
-                                            <>
-                                                {!isFieldHidden('akcRegistrationNumber') && (
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700">AKC Registration #</label>
-                                                    <input type="text" name="akcRegistrationNumber" value={formData.akcRegistrationNumber || ''} onChange={handleChange} 
-                                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                                </div>
-                                                )}
-                                                {!isFieldHidden('fciRegistrationNumber') && (
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700">FCI Registration #</label>
-                                                    <input type="text" name="fciRegistrationNumber" value={formData.fciRegistrationNumber || ''} onChange={handleChange} 
-                                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                                </div>
-                                                )}
-                                            </>
-                                        )}
-                                        {formData.species === 'Cat' && !isFieldHidden('cfaRegistrationNumber') && (
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">CFA Registration #</label>
-                                                <input type="text" name="cfaRegistrationNumber" value={formData.cfaRegistrationNumber || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        )}
-                                        {!isFieldHidden('workingRegistryIds') && (
-                                        <div className={formData.species === 'Cat' ? '' : 'md:col-span-2'}>
-                                            <label className="block text-sm font-medium text-gray-700">Working Registry IDs</label>
-                                            <input type="text" name="workingRegistryIds" value={formData.workingRegistryIds || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="Herding, Hunting, Service registrations" />
-                                        </div>
-                                        )}
                                     </div>
                                 </>
                             )}

@@ -239,12 +239,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             // Dog/Cat specific identification
             licenseNumber: animal.licenseNumber || '',
             licenseJurisdiction: animal.licenseJurisdiction || '',
-            rabiesTagNumber: animal.rabiesTagNumber || '',
             tattooId: animal.tattooId || '',
-            akcRegistrationNumber: animal.akcRegistrationNumber || '',
-            fciRegistrationNumber: animal.fciRegistrationNumber || '',
-            cfaRegistrationNumber: animal.cfaRegistrationNumber || '',
-            workingRegistryIds: animal.workingRegistryIds || '',
             // Health Status
             isNeutered: animal.isNeutered || false,
             isInfertile: animal.isInfertile || false,
@@ -2176,34 +2171,8 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                                     <input type="text" value={editForm.licenseJurisdiction || ''} onChange={(e) => setEditForm({...editForm, licenseJurisdiction: e.target.value})} placeholder="e.g., Los Angeles County" />
                                                 </div>
                                                 <div className="form-row">
-                                                    <label>Rabies Tag Number</label>
-                                                    <input type="text" value={editForm.rabiesTagNumber || ''} onChange={(e) => setEditForm({...editForm, rabiesTagNumber: e.target.value})} />
-                                                </div>
-                                                <div className="form-row">
                                                     <label>Tattoo ID</label>
                                                     <input type="text" value={editForm.tattooId || ''} onChange={(e) => setEditForm({...editForm, tattooId: e.target.value})} />
-                                                </div>
-                                                {(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) === 'dog' && (
-                                                    <>
-                                                        <div className="form-row">
-                                                            <label>AKC Registration #</label>
-                                                            <input type="text" value={editForm.akcRegistrationNumber || ''} onChange={(e) => setEditForm({...editForm, akcRegistrationNumber: e.target.value})} />
-                                                        </div>
-                                                        <div className="form-row">
-                                                            <label>FCI Registration #</label>
-                                                            <input type="text" value={editForm.fciRegistrationNumber || ''} onChange={(e) => setEditForm({...editForm, fciRegistrationNumber: e.target.value})} />
-                                                        </div>
-                                                    </>
-                                                )}
-                                                {(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) === 'cat' && (
-                                                    <div className="form-row">
-                                                        <label>CFA Registration #</label>
-                                                        <input type="text" value={editForm.cfaRegistrationNumber || ''} onChange={(e) => setEditForm({...editForm, cfaRegistrationNumber: e.target.value})} />
-                                                    </div>
-                                                )}
-                                                <div className="form-row">
-                                                    <label>Working Registry IDs</label>
-                                                    <input type="text" value={editForm.workingRegistryIds || ''} onChange={(e) => setEditForm({...editForm, workingRegistryIds: e.target.value})} placeholder="Herding, Hunting, Service registrations" />
                                                 </div>
                                             </div>
                                         )}
