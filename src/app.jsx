@@ -55,6 +55,7 @@ import CommunityPage from './components/Community/CommunityPage';
 
 import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
 import AnimalTestModal from './components/AnimalDetail/AnimalTestModal';
+import AnimalFormTestModal from './components/AnimalForm/AnimalFormTestModal';
 import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
 import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
 import { OffspringSection } from './components/AnimalDetail/utils';
@@ -2392,33 +2393,49 @@ const App = () => {
 
             {/* Animal edit overlay */}
             {animalToEdit && (
-                <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
-                    <AnimalForm
-                        formTitle={`Edit ${animalToEdit.name}`}
-                        animalToEdit={animalToEdit}
-                        species={animalToEdit.species}
-                        onSave={handleSaveAnimalWithRefresh}
-                        onCancel={handleCancelEditAnimal}
-                        onDelete={handleDeleteAnimal}
-                        authToken={authToken}
-                        showModalMessage={showModalMessage}
-                        API_BASE_URL={API_BASE_URL}
-                        userProfile={userProfile}
-                        speciesConfigs={speciesConfigs}
-                        X={X}
-                        Search={Search}
-                        Loader2={Loader2}
-                        LoadingSpinner={LoadingSpinner}
-                        PlusCircle={PlusCircle}
-                        ArrowLeft={ArrowLeft}
-                        Save={Save}
-                        Trash2={Trash2}
-                        RotateCcw={RotateCcw}
-                        GENDER_OPTIONS={GENDER_OPTIONS}
-                        STATUS_OPTIONS={STATUS_OPTIONS}
-                        AnimalImageUpload={AnimalImageUpload}
-                    />
-                </div>
+                (() => {
+                    const iCurrentlyOwn = animalToEdit.creatorId_public === userProfile?.id_public;
+                    return (
+                        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
+                            {iCurrentlyOwn ? (
+                                <AnimalFormTestModal
+                                    formTitle={`Edit ${animalToEdit.name}`}
+                                    animalToEdit={animalToEdit}
+                                    species={animalToEdit.species}
+                                    onSave={handleSaveAnimalWithRefresh}
+                                    onCancel={handleCancelEditAnimal}
+                                    onDelete={handleDeleteAnimal}
+                                    authToken={authToken}
+                                    showModalMessage={showModalMessage}
+                                    API_BASE_URL={API_BASE_URL}
+                                    userProfile={userProfile}
+                                    speciesConfigs={speciesConfigs}
+                                    GENDER_OPTIONS={GENDER_OPTIONS}
+                                    STATUS_OPTIONS={STATUS_OPTIONS}
+                                />
+                            ) : (
+                                <AnimalForm
+                                    formTitle={`Edit ${animalToEdit.name}`}
+                                    animalToEdit={animalToEdit}
+                                    species={animalToEdit.species}
+                                    onSave={handleSaveAnimalWithRefresh}
+                                    onCancel={handleCancelEditAnimal}
+                                    onDelete={handleDeleteAnimal}
+                                    authToken={authToken}
+                                    showModalMessage={showModalMessage}
+                                    API_BASE_URL={API_BASE_URL}
+                                    userProfile={userProfile}
+                                    speciesConfigs={speciesConfigs}
+                                    X={X} Search={Search} Loader2={Loader2} LoadingSpinner={LoadingSpinner}
+                                    PlusCircle={PlusCircle} ArrowLeft={ArrowLeft} Save={Save} Trash2={Trash2} RotateCcw={RotateCcw}
+                                    GENDER_OPTIONS={GENDER_OPTIONS}
+                                    STATUS_OPTIONS={STATUS_OPTIONS}
+                                    AnimalImageUpload={AnimalImageUpload}
+                                />
+                            )}
+                        </div>
+                    );
+                })()
             )}
 
             {/* Add Sibling overlay */}
