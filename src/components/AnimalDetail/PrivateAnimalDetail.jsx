@@ -906,7 +906,7 @@ const PrivateAnimalDetail = ({
                                                 {breederInfo ? (() => {
                                                     const parts = [];
                                                     if (breederInfo.prefix) parts.push(breederInfo.prefix);
-                                                    
+
                                                     // Handle breeder name and personal name
                                                     if (breederInfo.breederName && breederInfo.personalName) {
                                                         parts.push(`${breederInfo.breederName} (${breederInfo.personalName})`);
@@ -915,38 +915,39 @@ const PrivateAnimalDetail = ({
                                                     } else if (breederInfo.personalName) {
                                                         parts.push(breederInfo.personalName);
                                                     }
-                                                    
+
                                                     if (breederInfo.suffix) parts.push(breederInfo.suffix);
-                                                    
+
                                                     const displayName = parts.join(' • ') || 'Unknown Breeder';
-                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}</div>{/* Owner */}
-                                                           {animal.creatorId_public && (
-                                                           <div>
-                                            <span className="text-gray-500">Owner:</span>{' '}
-                                                       {ownerContactInfo ? (() => {
-                                                      const parts = [];
-                                                 if (ownerContactInfo.prefix) parts.push(ownerContactInfo.prefix);
-            
-                                                   // Handle breeder name and personal name
-                                                   if (ownerContactInfo.breederName && ownerContactInfo.personalName) {
-                                              parts.push(`${ownerContactInfo.breederName} (${ownerContactInfo.personalName})`);
-                                        } else if (ownerContactInfo.breederName) {
-                                parts.push(ownerContactInfo.breederName);
-                                      } else if (ownerContactInfo.personalName) {
-                                            parts.push(ownerContactInfo.personalName);
-                                    }
-             
-                                if (ownerContactInfo.suffix) parts.push(ownerContactInfo.suffix);
-            
-                           const displayName = parts.join(' • ') || animal.ownerName || 'Unknown Owner';
-            
-                         return (
-                <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
-                    {displayName}
-                </RouterLink>
-                        );
-                         })() : animal.ownerContactId ? (
-                         <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}</div>
+                                            {/* Owner */}
+                                            {animal.ownerId_public && (
+                                                <div>
+                                                    <span className="text-gray-500">Owner:</span>{' '}
+                                                    {ownerInfo ? (() => {
+                                                        const parts = [];
+                                                        if (ownerInfo.prefix) parts.push(ownerInfo.prefix);
+
+                                                        // Handle breeder name and personal name
+                                                        if (ownerInfo.breederName && ownerInfo.personalName) {
+                                                            parts.push(`${ownerInfo.breederName} (${ownerInfo.personalName})`);
+                                                        } else if (ownerInfo.breederName) {
+                                                            parts.push(ownerInfo.breederName);
+                                                        } else if (ownerInfo.personalName) {
+                                                            parts.push(ownerInfo.personalName);
+                                                        }
+
+                                                        if (ownerInfo.suffix) parts.push(ownerInfo.suffix);
+
+                                                        const displayName = parts.join(' • ') || animal.ownerName || 'Unknown Owner';
+
+                                                        return (
+                                                            <RouterLink to={`/user/${ownerInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">
+                                                                {displayName}
+                                                            </RouterLink>
+                                                        );
+                                                    })() : animal.ownerId_public ? (
+                                                        <RouterLink to={`/user/${animal.ownerId_public}`} className="text-purple-600 hover:underline font-semibold">
                                                 {animal.ownerName || '—'}
                            </RouterLink>
                           ) : (
@@ -956,6 +957,7 @@ const PrivateAnimalDetail = ({
                                            )}
                                                 </div>
                                             )}
+
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
                                                 <hr className="border-gray-200" />
                                             )}
@@ -1020,35 +1022,35 @@ const PrivateAnimalDetail = ({
                                 <h3 className="text-lg font-semibold text-gray-700"><User size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        if (!animal.ownerName && !ownerContactInfo) return null;
-                                        
+                                        if (!animal.ownerName && !ownerInfo) return null;
+
                                         return (
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gray-600">Owner Name:</span>
-                                                {ownerContactInfo ? (() => {
+                                                {ownerInfo ? (() => {
                                                     const parts = [];
-                                                    if (ownerContactInfo.prefix) parts.push(ownerContactInfo.prefix);
-                                                    
+                                                    if (ownerInfo.prefix) parts.push(ownerInfo.prefix);
+
                                                     // Handle breeder name and personal name
-                                                    if (ownerContactInfo.breederName && ownerContactInfo.personalName) {
-                                                        parts.push(`${ownerContactInfo.breederName} (${ownerContactInfo.personalName})`);
-                                                    } else if (ownerContactInfo.breederName) {
-                                                        parts.push(ownerContactInfo.breederName);
-                                                    } else if (ownerContactInfo.personalName) {
-                                                        parts.push(ownerContactInfo.personalName);
+                                                    if (ownerInfo.breederName && ownerInfo.personalName) {
+                                                        parts.push(`${ownerInfo.breederName} (${ownerInfo.personalName})`);
+                                                    } else if (ownerInfo.breederName) {
+                                                        parts.push(ownerInfo.breederName);
+                                                    } else if (ownerInfo.personalName) {
+                                                        parts.push(ownerInfo.personalName);
                                                     }
-                                                    
-                                                    if (ownerContactInfo.suffix) parts.push(ownerContactInfo.suffix);
-                                                    
+
+                                                    if (ownerInfo.suffix) parts.push(ownerInfo.suffix);
+
                                                     const displayName = parts.join(' • ') || animal.ownerName || 'Unknown Owner';
-                                                    
+
                                                     return (
-                                                        <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
+                                                        <RouterLink to={`/user/${ownerInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">
                                                             {displayName}
                                                         </RouterLink>
                                                     );
-                                                })() : animal.ownerContactId ? (
-                                                    <RouterLink to={`/user/${animal.ownerContactId}`} className="text-purple-600 hover:underline font-semibold">
+                                                })() : animal.ownerId_public ? (
+                                                    <RouterLink to={`/user/${animal.ownerId_public}`} className="text-purple-600 hover:underline font-semibold">
                                                         {animal.ownerName}
                                                     </RouterLink>
                                                 ) : (
