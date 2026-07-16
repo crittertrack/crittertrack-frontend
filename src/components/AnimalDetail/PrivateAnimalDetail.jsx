@@ -74,8 +74,7 @@ const PrivateAnimalDetail = ({
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [showContactSelector, setShowContactSelector] = useState(false);
     const [contacts, setContacts] = useState([]); 
-    const [contactsLoading, setContactsLoading] = useState(false); 
-    const [ownerContactInfo, setOwnerContactInfo] = useState(null);
+    const [contactsLoading, setContactsLoading] = useState(false);
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
     const [offspringRefreshKey, setOffspringRefreshKey] = useState(0); // increment to force offspring fetches to refetch
     // Manual Pedigree (Beta) • Tab 16
@@ -450,50 +449,26 @@ const PrivateAnimalDetail = ({
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
     
-    // Fetch owner info when animal is owned (creatorId_public differs from breederId_public)
+    // Fetch designated owner's profile if an ownerId_public is present
     React.useEffect(() => {
         const fetchOwner = async () => {
-            if (animal?.isOwned && animal?.creatorId_public) {
+            if (animal?.ownerId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setOwnerInfo(response.data[0]);
                     } else {
                         setOwnerInfo(null);
                     }
-                } catch {
-                    setOwnerInfo(null);
-                }
+                } catch { setOwnerInfo(null); }
             } else {
                 setOwnerInfo(null);
             }
         };
         fetchOwner();
-    }, [animal?.isOwned, animal?.creatorId_public, API_BASE_URL]);
-    
-    // Fetch owner contact info when ownerContactId exists
-    React.useEffect(() => {
-        const fetchOwnerContact = async () => {
-            if (animal?.ownerContactId && authToken) {
-                try {
-                    const response = await axios.get(
-                        `${API_BASE_URL}/contacts`,
-                        { headers: { Authorization: `Bearer ${authToken}` } }
-                    );
-                    const owner = response.data?.find(c => c._id === animal.ownerContactId);
-                    setOwnerContactInfo(owner || null);
-                } catch (error) {
-                    console.error('Failed to fetch owner contact:', error);
-                    setOwnerContactInfo(null);
-                }
-            } else {
-                setOwnerContactInfo(null);
-            }
-        };
-        fetchOwnerContact();
-    }, [animal?.ownerContactId, authToken, API_BASE_URL]);
+    }, [animal?.ownerId_public, API_BASE_URL]);
 
     if (!animal) return null;
 
