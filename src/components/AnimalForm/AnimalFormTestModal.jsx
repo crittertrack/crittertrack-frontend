@@ -28,7 +28,7 @@ const AnimalFormTestModal = ({
     GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'],
     STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']
 }) => {
-    const [activeTab, setActiveTab] = useState(1);
+    const [activeTab, setActiveTab] = useState(2);
     const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState(
@@ -172,7 +172,6 @@ const AnimalFormTestModal = ({
     };
 
     const TABS = [
-        { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
         { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
         { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
         { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
@@ -191,7 +190,7 @@ const AnimalFormTestModal = ({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
-            <form onSubmit={handleSubmit} className="bg-[#e1f2f5] rounded-xl shadow-2xl w-full max-w-6xl h-[95vh] flex flex-col">
+            <form onSubmit={handleSubmit} className="bg-[#e1f2f5] rounded-xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col">
                 {/* Header */}
                 <div className="p-6 border-b border-gray-300 flex-shrink-0">
                     <h2 className="text-3xl font-bold text-gray-800 flex items-center justify-between">
@@ -204,6 +203,71 @@ const AnimalFormTestModal = ({
                         </button>
                     </h2>
                 </div>
+
+                {/* NEW: Two-column section for Image and Identity */}
+                <div className="flex gap-6 px-6 pt-4 pb-6 border-b border-gray-300 bg-white/30">
+                    {/* Left Column: Image Upload */}
+                    <div className="w-1/3 flex-shrink-0">
+                        <AnimalImageUpload
+                            imageUrl={animalImagePreview}
+                            onFileChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    setAnimalImageFile(e.target.files[0]);
+                                    setAnimalImagePreview(URL.createObjectURL(e.target.files[0]));
+                                }
+                            }}
+                            onDeleteImage={() => { setAnimalImageFile(null); setAnimalImagePreview(null); setDeleteImage(true); }}
+                            disabled={loading}
+                            Trash2={Trash2}
+                        />
+                    </div>
+
+                    {/* Right Column: Identity Fields */}
+                    <div className="w-2/3 flex-1">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4 h-full">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identity</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Prefix</label>
+                                    <input type="text" name="prefix" value={formData.prefix} onChange={handleChange}
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Name*</label>
+                                    <input type="text" name="name" value={formData.name} onChange={handleChange} required
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Suffix</label>
+                                    <input type="text" name="suffix" value={formData.suffix} onChange={handleChange}
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Gender*</label>
+                                    <select name="gender" value={formData.gender} onChange={handleChange} required
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                    <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()}
+                                        className="mt-1 p-2" />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">Status*</label>
+                                    <select name="status" value={formData.status} onChange={handleChange} required
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Scrollable Content Area */}
                 <div className="flex-1 overflow-y-auto">
                     {/* Tabs */}
