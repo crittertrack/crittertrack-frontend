@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Microscope, HeartPulse, Stethoscope, AlertTriangle, Activity } from 'lucide-react';
+import { Shield, Microscope, HeartPulse, Stethoscope, AlertTriangle, Activity, Scale } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import { useDetailFieldTemplate, DetailJsonList } from './utils';
 import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
@@ -155,6 +155,19 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                         </div>
                     )}
                 </InfoCard>
+                {/* End of Life Card */}
+                {(animal.deceasedDate || animal.causeOfDeath || animal.necropsyResults || animal.endOfLifeCareNotes) && (
+                    <InfoCard title="End of Life Information" icon={<Scale size={18} className="text-gray-400" />}>
+                        <div className="space-y-3">
+                            {animal.deceasedDate && <InfoItem label="Deceased Date" value={formatDate(animal.deceasedDate)} />}
+                            {animal.causeOfDeath && <InfoItem label="Cause of Death" value={animal.causeOfDeath} />}
+                            {animal.necropsyResults && <InfoItem label="Necropsy Results" value={animal.necropsyResults} />}
+                            {animal.endOfLifeCareNotes && <InfoItem label={getLabel('endOfLifeCareNotes', 'End of Life Care Notes')}>
+                                <p className="whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p>
+                            </InfoItem>}
+                        </div>
+                    </InfoCard>
+                )}
             </div>
         </div>
     );

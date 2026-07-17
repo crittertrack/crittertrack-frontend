@@ -16,11 +16,10 @@ import { PedigreeTabContent } from './PedigreeTabContent';
 import { HealthTabContent } from './HealthTabContent'; // This component is used in AnimalTestModal.jsx
 import { GalleryTabContent } from './GalleryTabContent';
 import { NotesTabContent } from './NotesTabContent';
-import { LegalTabContent } from './LegalTabContent';
 import { BehaviorTabContent } from './BehaviorTabContent';
 import { ShowTabContent } from './ShowTabContent';
-import { EndOfLifeTabContent } from './EndOfLifeTabContent';
 import { FertilityTabContent } from './FertilityTabContent';
+import { LegalTabContent } from './LegalTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents'; // This component is used in AnimalTestModal.jsx
 
 const parseJsonArrayField = (data) => {
@@ -830,13 +829,7 @@ const AnimalTestModal = ({
                         </div>
                     )}
                     {activeTab === 'health' && (
-                        <div className="space-y-6">
-                            <HealthTabContent
-                                animal={animal}
-                                API_BASE_URL={API_BASE_URL}
-                            />
-                            <EndOfLifeTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
-                        </div>
+                        <HealthTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
                     )}
                     {activeTab === 'care' && (
                         <CareTabContent
