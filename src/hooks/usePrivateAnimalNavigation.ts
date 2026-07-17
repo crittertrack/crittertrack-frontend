@@ -264,13 +264,16 @@ if (method.toLowerCase() === 'put') {
      * Makes API call then closes all views
      */
     const handleDeleteAnimal = useCallback(async (id_public: string, animalData: any = null) => {
-        if (!id_public || !authToken) return;
+        // The API endpoint for deletion uses the public-facing ID (e.g., "CTC7026").
+        // It appears the internal MongoDB ID is sometimes passed as the first argument.
+        // To ensure the correct ID is used, we will prioritize the `id_public` from the `animalData` object if it's available.
+        const idForUrl = animalData?.id_public || id_public;
+        if (!idForUrl || !authToken) return;
 
         try {
-            const response = await axios.delete(
-                `${API_BASE_URL}/animals/${id_public}`,
-                { headers: { Authorization: `Bearer ${authToken}` } }
-            );
+            const response = await axios.delete(`${API_BASE_URL}/animals/${idForUrl}`, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
 
             // Close all animal views
             handleCloseAllAnimals();
@@ -283,17 +286,8 @@ if (method.toLowerCase() === 'put') {
 
             return response.data;
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === 404) {
-                console.warn(`[handleDeleteAnimal] Animal with id ${id_public} not found, likely already deleted.`);
-                // If the animal is not found, it's already deleted.
-                // We can treat this as a success from the UI perspective.
-                handleCloseAllAnimals();
-                window.dispatchEvent(new Event('animals-changed'));
-                // Return a success-like object to prevent calling components from thinking it's an error.
-                return { success: true, message: 'Animal already deleted.' };
-            }
-
-            console.error('[handleDeleteAnimal] Error:', error);
+            // Now that we are confident we are using the correct ID, a 404 is a real error.
+            console.error(`[handleDeleteAnimal] Error deleting animal ${idForUrl}:`, error);
             throw error;
         }
     }, [authToken, API_BASE_URL, handleCloseAllAnimals]);
