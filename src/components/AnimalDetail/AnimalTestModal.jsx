@@ -174,7 +174,11 @@ const AnimalTestModal = ({
     const TABS = [
         { id: 'dashboard', label: 'Dashboard', icon: <Info size={14} /> },
         { id: 'identification', label: 'Identification', icon: <Hash size={14} /> },
-        { id: 'appearance', label: 'Appearance', icon: <Palette size={14} /> }, { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> }, { id: 'care', label: 'Routine Care', icon: <Droplets size={14} /> }, { id: 'behavior', label: 'Behavior', icon: <Brain size={14} /> }, { id: 'breeding', label: 'Breeding', icon: <Users size={14} /> },
+        { id: 'appearance', label: 'Appearance', icon: <Palette size={14} /> }, 
+        { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> }, 
+        { id: 'care', label: 'Routine Care', icon: <Droplets size={14} /> }, 
+        { id: 'behavior', label: 'Behavior', icon: <Brain size={14} /> }, 
+        { id: 'breeding', label: 'Breeding', icon: <Users size={14} /> },
         { id: 'pedigree', label: 'Pedigree', icon: <Dna size={14} /> },
         { id: 'gallery', label: 'Gallery', icon: <ImageIcon size={14} /> },
         { id: 'timeline', label: 'Timeline', icon: <Clock size={14} /> },
@@ -629,13 +633,8 @@ const AnimalTestModal = ({
                                 </dl>
                             </InfoCard>
                             {animal.geneticCode && (
-                                <InfoCard title="Genetic Code" icon={<Dna size={18} />}>
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-mono text-sm">{animal.geneticCode}</p>
-                                        {animal.species === 'Fancy Mouse' && (
-                                            <button className="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Builder</button>
-                                        )}
-                                    </div>
+                                <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400" />}>
+                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
                                 </InfoCard>
                             )}
                             {animal.lifeStage && (
@@ -643,15 +642,174 @@ const AnimalTestModal = ({
                                     <p>{animal.lifeStage}</p>
                                 </InfoCard>
                             )}
+  {/* Current Measurements & Growth Tracking - Always show */}
+                            <InfoCard title="Measurements & Growth Tracking" icon={<Ruler size={18} className="text-gray-400" />}>
+                                {(() => {
+                                    const growthRecords = parseJsonArrayField(animal.growthRecords);
+                                    
+                                    if (growthRecords.length > 0) {
+                                        const sorted = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                        const latest = sorted[0];
+                                        return (
+                                            <div className="text-sm space-y-1">
+                                                <p><span className="text-gray-600">Latest Weight:</span> <strong>{latest.weight} {animal.measurementUnits?.weight || 'g'}</strong></p>
+                                                {latest.length && <p><span className="text-gray-600">Latest Length:</span> <strong>{latest.length} {animal.measurementUnits?.length || 'cm'}</strong></p>}
+                                                {latest.height && <p><span className="text-gray-600">Latest Height:</span> <strong>{latest.height} {animal.measurementUnits?.length || 'cm'}</strong></p>}
+                                                <p className="text-gray-600 text-xs mt-2">Total measurements: {growthRecords.length} entries</p>
+                                            </div>
+                                        );
+                                    }
+                                    
+                                    const mFields = [
+                                        { key: 'bodyWeight', label: 'Weight' },
+                                        { key: 'bodyLength', label: 'Body Length' },
+                                        { key: 'heightAtWithers', label: 'Height at Withers' },
+                                        { key: 'chestGirth', label: 'Chest Girth' },
+                                        { key: 'adultWeight', label: 'Adult Weight' },
+                                        { key: 'bodyConditionScore', label: 'Body Condition Score' },
+                                        { key: 'length', label: 'Length' },
+                                    ].filter(f => animal[f.key]);
+                                    
+                                    return mFields.length > 0 ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {mFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{f.label}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-sm text-gray-500">No measurements recorded yet.</div>
+                                    );
+                                })()}
+                            </InfoCard>
+
+                            {/* Growth Curve Charts */}
+                            {(() => {
+                                const growthRecords = parseJsonArrayField(animal.growthRecords);
+                                
+                                if (growthRecords.length < 1) return null;
+                                
+                                const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+                                const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
+                                const lengths = sorted
+                                    .filter(record => record.length && !isNaN(parseFloat(record.length)))
+                                    .map(record => parseFloat(record.length));
+                                const heights = sorted
+                                    .filter(record => record.height && !isNaN(parseFloat(record.height)))
+                                    .map(record => parseFloat(record.height));
+                                
+                                if (weights.length < 1) return null;
+                                
+                                const width = 500;
+                                const height = 250;
+                                const margin = { top: 20, right: 30, bottom: 50, left: 70 };
+                                const graphWidth = width - margin.left - margin.right;
+                                const graphHeight = height - margin.top - margin.bottom;
+                                
+                                // Weight chart setup
+                                const minWeight = Math.min(...weights);
+                                const maxWeight = Math.max(...weights);
+                                const weightPadding = (maxWeight - minWeight) * 0.1 || 5;
+                                const weightChartMin = Math.max(0, minWeight - weightPadding);
+                                const weightChartMax = maxWeight + weightPadding;
+                                const weightRange = weightChartMax - weightChartMin;
+                                
+                                // Length chart setup
+                                const hasLengthData = lengths.length >= 1;
+                                let minLength, maxLength, lengthRange, lengthChartMin, lengthChartMax;
+                                if (hasLengthData) {
+                                    minLength = Math.min(...lengths);
+                                    maxLength = Math.max(...lengths);
+                                    const lengthPadding = (maxLength - minLength) * 0.1 || 1;
+                                    lengthChartMin = Math.max(0, minLength - lengthPadding);
+                                    lengthChartMax = maxLength + lengthPadding;
+                                    lengthRange = lengthChartMax - lengthChartMin;
+                                }
+                                
+                                // Height chart setup
+                                const hasHeightData = heights.length >= 1;
+                                let minHeight, maxHeight, heightRange, heightChartMin, heightChartMax;
+                                if (hasHeightData) {
+                                    minHeight = Math.min(...heights);
+                                    maxHeight = Math.max(...heights);
+                                    const heightPadding = (maxHeight - minHeight) * 0.1 || 1;
+                                    heightChartMin = Math.max(0, minHeight - heightPadding);
+                                    heightChartMax = maxHeight + heightPadding;
+                                    heightRange = heightChartMax - heightChartMin;
+                                }
+                                
+                                const weightPoints = sorted.map((record, idx) => ({
+                                    x: margin.left + (idx / Math.max(1, sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.weight) - weightChartMin) / weightRange) * graphHeight,
+                                    ...record
+                                }));
+                                
+                                const lengthPoints = hasLengthData ? sorted.filter(r => r.length).map((record, idx) => ({
+                                    x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.length) - lengthChartMin) / lengthRange) * graphHeight,
+                                    ...record
+                                })) : [];
+                                
+                                const heightPoints = hasHeightData ? sorted.filter(r => r.height).map((record, idx) => ({
+                                    x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.height) - heightChartMin) / heightRange) * graphHeight,
+                                    ...record
+                                })) : [];
+                                
+                                const weightPathData = weightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const lengthPathData = lengthPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const heightPathData = heightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                
+                                const renderChart = (points, label, color, pathData, chartMin, chartMax) => {
+                                    const range = chartMax - chartMin;
+                                    return (
+                                        <svg key={`chart-${label}`} width="100%" height="300" viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: '100%' }} preserveAspectRatio="xMidYMid meet">
+                                            {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+                                                const y = margin.top + graphHeight * (1 - ratio);
+                                                const axisLabel = (chartMin + range * ratio).toFixed(1);
+                                                return (
+                                                    <g key={`grid-${i}`}>
+                                                        <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
+                                                        <text x={margin.left - 12} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#666">{axisLabel}</text>
+                                                    </g>
+                                                );
+                                            })}
+                                            <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                            <text x={margin.left + graphWidth / 2} y={height - 8} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600">Date</text>
+                                            {points.map((p, i) => (
+                                                i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
+                                                    <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 25} textAnchor="middle" fontSize="10" fill="#666">{formatDate(p.date)}</text>
+                                                )
+                                            ))}
+                                            <path d={pathData} fill="none" stroke={color} strokeWidth="2" />
+                                            {points.map((p, i) => (
+                                                <circle key={`point-${i}`} cx={p.x} cy={p.y} r="5" fill={color} stroke="#fff" strokeWidth="2">
+                                                    <title>{`Date: ${formatDate(p.date)}\n${label}: ${p[label.toLowerCase()]} ${label === 'Weight' ? (animal.measurementUnits?.weight || 'g') : (animal.measurementUnits?.length || 'cm')}`}</title>
+                                                </circle>
+                                            ))}
+                                        </svg>
+                                    );
+                                };
+                                
+                                return (
+                                    <div className="space-y-4">
+                                        <InfoCard title="Weight Growth Curve" icon={<Ruler size={18} className="text-gray-400" />}>
+                                            {renderChart(weightPoints, 'Weight', '#3b82f6', weightPathData, weightChartMin, weightChartMax)}
+                                            <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements.</p>
+                                        </InfoCard>
+                                        {hasLengthData && (
+                                            <InfoCard title="Body Length Growth Curve" icon={<Ruler size={18} className="text-gray-400" />}>
+                                                {renderChart(lengthPoints, 'Length', '#ff8c42', lengthPathData, lengthChartMin, lengthChartMax)}
+                                            </InfoCard>
+                                        )}
+                                        {hasHeightData && (
+                                            <InfoCard title="Height Growth Curve" icon={<Ruler size={18} className="text-gray-400" />}>
+                                                {renderChart(heightPoints, 'Height', '#9333ea', heightPathData, heightChartMin, heightChartMax)}
+                                            </InfoCard>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
-                    )}
-                    {activeTab === 'measurements' && (
-                        <MeasurementsTabContent
-                            animal={animal}
-                            onUpdateAnimal={onUpdateAnimal}
-                            authToken={authToken}
-                            API_BASE_URL={API_BASE_URL}
-                        />
                     )}
                     {activeTab === 'health' && (
                         <div className="space-y-6">
