@@ -1,18 +1,26 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { QRCodeSVG } from 'qrcode.react';
-import { Link as RouterLink } from 'react-router-dom';
-import { ArrowLeft, X, QrCode, ChevronDown, ChevronUp, ChevronRight, Mars, Venus, VenusAndMars, Circle, Cat, Users, User, Home, Tag, Loader2, Lock, TreeDeciduous, Egg, Pill, Shield, Microscope, Hospital, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Activity, AlertTriangle, FileText, Feather, Medal, Target, Key, ClipboardList, Ban, Images, Camera, Heart, Eye, EyeOff, Sparkles, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Hourglass, Bean, Milk, Sprout, RefreshCw, Leaf, Brain, Trophy, FileCheck, Scale, ScrollText, Check, Users as UsersIcon, TableOfContents, Dumbbell, Download, Bell } from 'lucide-react';
-import { useDetailFieldTemplate, parseJsonField, DetailJsonList, ViewOnlyParentCard } from './utils';
+import { Link as RouterLink } from 'react-router-dom';import { ArrowLeft, X, QrCode, ChevronDown, ChevronUp, ChevronRight, Mars, Venus, VenusAndMars, Circle, Cat, Users, User, Home, Tag, Loader2, Lock, TreeDeciduous, Egg, Pill, Shield, Microscope, Hospital, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Activity, AlertTriangle, FileText, Feather, Medal, Target, Key, ClipboardList, Ban, Images, Camera, Heart, Eye, EyeOff, Sparkles, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Hourglass, Bean, Milk, Sprout, RefreshCw, Leaf, Brain, Trophy, FileCheck, Scale, ScrollText, Check, Users as UsersIcon, TableOfContents, Dumbbell, Download, Network, Bell, Info } from 'lucide-react';
+import { useDetailFieldTemplate, DetailJsonList, ViewOnlyParentCard, ParentMiniCard } from './utils';
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
-import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
-import { CareTabContent } from './CareTabContent';
-import { HealthTabContent } from './HealthTabContent';
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
+import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
+    const parseJsonField = (data) => {
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try {
+                const parsed = JSON.parse(data);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
+        }
+        return Array.isArray(data) ? data : [];
+    };
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
@@ -115,7 +123,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     }, [detailViewTab, animal?.id_public]);
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); setShowHorizCert(false); setShowVertCert(false); }, [animal?.id_public, initialTab, initialBetaView]);
-
+    
     // Listen for animal updates and force refresh when this animal or relatives are updated
     useEffect(() => {
         const handleAnimalUpdated = (event) => {
@@ -186,6 +194,23 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
         return () => { cancelled = true; };
     }, [animal?.id_public, authToken, API_BASE_URL]);
 
+    // Fetch public relationships when Dashboard tab opens
+    React.useEffect(() => {
+        if (detailViewTab !== 1 || !animal?.id_public || !authToken) return;
+        setPublicRelLoading(true);
+        (async () => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, { headers: { Authorization: `Bearer ${authToken}` } });
+                setPublicRelationships(res.data || {});
+            } catch (err) {
+                console.error('Error fetching public relationships:', err);
+                setPublicRelationships({});
+            } finally {
+                setPublicRelLoading(false);
+            }
+        })();
+    }, [detailViewTab, animal?.id_public, authToken, API_BASE_URL]);
+
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
     // Fetch assigned enclosure info
@@ -221,7 +246,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     // Fetch owner info when animal is owned (creatorId_public differs from breederId_public)
     React.useEffect(() => {
         const fetchOwner = async () => {
-             if (animal?.ownerId_public) {
+            if (animal?.isOwned && animal?.creatorId_public) {
                 try {
                     const response = await axios.get(
                         `${API_BASE_URL}/public/profiles/search?query=${animal.creatorId_public}&limit=1`
@@ -284,10 +309,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 <div className="bg-[#E1F2F5] border-b border-gray-300 px-0.5 sm:px-4 py-2">
                     <div className="flex flex-wrap gap-1 sm:gap-2 justify-center">
                         {[
-                            { id: 1, label: 'Dashboard', icon: ClipboardList, color: 'text-blue-500' },
-                            { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
-                            { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
-                            { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
+                            { id: 1, label: 'Overview', icon: <Info size={14} /> }, // 1st
+                            { id: 2, label: 'Identification', icon: <Hash size={14} /> },     // 2nd
+                            { id: 3, label: 'Appearance', icon: <Palette size={14} /> },       // 3rd         // 4th
                             { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
                             { id: 6, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' },
                             { id: 7, label: 'Fertility', icon: Egg, color: 'text-yellow-500' },
@@ -322,7 +346,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                 {/* Tab Content - COPY OF PRIVATE DETAIL (no edit/delete/privacy toggle in Tab 1) */}
                 <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg pt-1 px-3 py-3 sm:pt-2 sm:px-6 sm:py-6 overflow-y-auto flex-1 pb-8">
-                    {/* Tab 1: Dashboard - NO PRIVACY TOGGLE */}
+                    {/* Tab 1: Overview - NO PRIVACY TOGGLE */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
                             {/* Main info card */}
@@ -476,22 +500,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             })()}
                                                         </RouterLink>
                                                     ) : (
-                                                        <span className="font-mono text-accent">{animal.manualownerName || '\u2014'}</span>
+                                                        <span className="font-mono text-accent">{animal.ownerName || '\u2014'}</span>
                                                     )}
                                                 </div>
                                             )}
-                                            {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId || animal.ringId || animal.eartagNumber) && (
+                                            {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
                                                 <hr className="border-gray-200" />
                                             )}
                                             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                                                 {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
                                                 {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
-                                                {animal.ringId && <div><span className="text-gray-500">Ring ID:</span> <strong>{animal.ringId}</strong></div>}
-                                                {animal.eartagNumber && <div><span className="text-gray-500">Ear Tag:</span> <strong>{animal.eartagNumber}</strong></div>}
                                                 {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
-                                                {parseJsonField(animal.identifiers).map((identifier, index) => (
-                                                    <div key={index}><span className="text-gray-600">{identifier.title}:</span> <strong>{identifier.value}</strong></div>
-                                                ))}
                                             </div>
                                         </div>
                                     </div>
@@ -547,7 +566,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        const keeperDisplay = animal.manualownerName || null;
+                                        const keeperDisplay = animal.ownerName || null;
                                         if (!keeperDisplay) return null;
                                         return (
                                             <div className="flex items-center gap-2">
@@ -625,7 +644,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     { key: 'nailColor', label: 'Nail/Claw Color' },
                                     { key: 'size', label: 'Size' },
                                     { key: 'carrierTraits', label: 'Carrier Traits' },
-                                ].filter(f => animal[f.key]);
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return fields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                         <h3 className="text-lg font-semibold text-gray-700"><Sparkles size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Appearance</h3>
@@ -639,7 +658,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             })()}
 
                             {/* Genetic Code */}
-                            {animal.geneticCode && (
+                            {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('geneticCode', 'Genetic Code')}</h3>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
@@ -647,12 +666,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             )}
 
                             {/* Life Stage */}
-                            {animal.lifeStage && (
+                            {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700"><Sprout size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('lifeStage', 'Life Stage')}</h3>
                                     <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
                                 </div>
                             )}
+
                             {/* Measurements */}
                             {(() => {
                                 const mFields = [
@@ -663,7 +683,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     { key: 'adultWeight', label: 'Adult Weight' },
                                     { key: 'bodyConditionScore', label: 'Body Condition Score' },
                                     { key: 'length', label: 'Length' },
-                                ].filter(f => animal[f.key]);
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return mFields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                         <h3 className="text-lg font-semibold text-gray-700"><Ruler size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Measurements</h3>
@@ -682,32 +702,41 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                     {detailViewTab === 3 && (
                         <div className="space-y-6">
                             {/* Identification Numbers */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
-                                    {animal.breederAssignedId && <div><span className="text-gray-600">{getLabel('breederAssignedId', 'Breeder Assigned ID')}:</span> <strong>{animal.breederAssignedId}</strong></div>}
-                                    {animal.microchipNumber && <div><span className="text-gray-600">{getLabel('microchipNumber', 'Microchip')}:</span> <strong>{animal.microchipNumber}</strong></div>}
-                                    {animal.tattooId && <div><span className="text-gray-600">{getLabel('tattooId', 'Tattoo')}:</span> <strong>{animal.tattooId}</strong></div>}
-                                    {animal.ringId && <div><span className="text-gray-600">{getLabel('ringId', 'Ring')}:</span> <strong>{animal.ringId}</strong></div>}
-                                    {animal.eartagNumber && <div><span className="text-gray-600">{getLabel('eartagNumber', 'Ear Tag')}:</span> <strong>{animal.eartagNumber}</strong></div>}
-                                    {animal.pedigreeRegistrationId && <div><span className="text-gray-600">{getLabel('pedigreeRegistrationId', 'Pedigree Registration')}:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
-                                    {animal.colonyId && <div><span className="text-gray-600">{getLabel('colonyId', 'Colony ID')}:</span> <strong>{animal.colonyId}</strong></div>}
-                                    {parseJsonField(animal.identifiers).map((identifier, index) => (
-                                        <div key={index}><span className="text-gray-600">{identifier.title}:</span> <strong>{identifier.value}</strong></div>
-                                    ))}
-                                </div>
-                            </div>
+                            {(() => {
+                                const idFields = [
+                                    { key: 'breederAssignedId', label: 'Identification' },
+                                    { key: 'microchipNumber', label: 'Microchip Number' },
+                                    { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
+                                    { key: 'colonyId', label: 'Colony ID' },
+                                    { key: 'rabiesTagNumber', label: 'Rabies Tag Number' },
+                                    { key: 'tattooId', label: 'Tattoo ID' },
+                                    { key: 'akcRegistrationNumber', label: 'AKC Registration #' },
+                                    { key: 'fciRegistrationNumber', label: 'FCI Registration #' },
+                                    { key: 'cfaRegistrationNumber', label: 'CFA Registration #' },
+                                    { key: 'workingRegistryIds', label: 'Working Registry IDs' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
+                                            {idFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
 
                             {/* Classification */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
-                                    {animal.breed && (
+                                    {fieldTemplate?.fields?.breed?.enabled !== false && animal.breed && (
                                         <div><span className="text-gray-600">{getLabel('breed', 'Breed')}:</span> <strong>{animal.breed}</strong></div>
                                     )}
-                                    {animal.strain && (
+                                    {fieldTemplate?.fields?.strain?.enabled !== false && animal.strain && (
                                         <div><span className="text-gray-600">{getLabel('strain', 'Strain')}:</span> <strong>{animal.strain}</strong></div>
                                     )}
                                 </div>
@@ -755,36 +784,106 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             </div>
                         </div>
                     )}
+                    {/* Relationship Insights */}
+                    {detailViewTab === 1 && (
+                        <>
+                            {publicRelLoading ? (
+                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <div className="text-sm text-gray-500 animate-pulse">Loading relationships...</div>
+                                </div>
+                            ) : publicRelationships && Object.values(publicRelationships).some(arr => Array.isArray(arr) && arr.length > 0) ? (
+                                <div className="bg-blue-50 rounded-lg border border-blue-200">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRelInsightsOpen(o => !o)}
+                                        className="w-full flex items-center justify-between p-4 text-left"
+                                    >
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center">
+                                            <Network size={20} className="text-blue-600 mr-2" />
+                                            Relationship Insights
+                                            <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
+                                                {Object.values(publicRelationships).reduce((s, arr) => s + (Array.isArray(arr) ? arr.length : 0), 0)} relatives
+                                            </span>
+                                        </h3>
+                                        {relInsightsOpen
+                                            ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
+                                            : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
+                                    </button>
+                                    {relInsightsOpen && (
+                                    <div className="px-4 pb-4 space-y-3">
+                                            {(() => {
+                                                const _seenRel = new Set();
+                                                return [
+                                                { key: 'parents', label: 'Parents' },
+                                                { key: 'siblings', label: 'Siblings' },
+                                                { key: 'nephewsNieces', label: 'Nieces & Nephews' },
+                                                { key: 'auntsUncles', label: 'Aunts & Uncles' },
+                                                { key: 'grandparents', label: 'Grandparents' },
+                                                { key: 'greatGrandparents', label: 'Great-Grandparents' },
+                                                { key: 'cousins', label: 'Cousins' },
+                                            ].map(({ key, label }) => {
+                                                const group = (publicRelationships[key] || []).filter(a => a.id_public !== animal?.id_public && !_seenRel.has(a.id_public));
+                                                group.forEach(a => _seenRel.add(a.id_public));
+                                                if (!group.length) return null;
+                                                return (
+                                                    <div key={key}>
+                                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{label}</h4>
+                                                        <div className="space-y-2">
+                                                            {group.map(rel => {
+                                                                const isMale = rel.gender === 'Male';
+                                                                const isFemale = rel.gender === 'Female';
+                                                                const side = rel._side === 'paternal' ? 'Paternal ' : rel._side === 'maternal' ? 'Maternal ' : '';
+                                                                let relLabel;
+                                                                switch (label) {
+                                                                    case 'Parents': relLabel = rel.id_public === animal?.sireId_public ? 'Sire (Father)' : rel.id_public === animal?.damId_public ? 'Dam (Mother)' : isMale ? 'Sire (Father)' : isFemale ? 'Dam (Mother)' : 'Parent'; break;
+                                                                    case 'Siblings': relLabel = isMale ? 'Brother' : isFemale ? 'Sister' : 'Sibling'; break;
+                                                                    case 'Nieces & Nephews': relLabel = isMale ? 'Nephew' : isFemale ? 'Niece' : 'Niece / Nephew'; break;
+                                                                    case 'Aunts & Uncles': relLabel = isMale ? `${side}Uncle` : isFemale ? `${side}Aunt` : `${side}Aunt / Uncle`; break;
+                                                                    case 'Grandparents': relLabel = isMale ? `${side}Grandfather` : isFemale ? `${side}Grandmother` : `${side}Grandparent`; break;
+                                                                    case 'Great-Grandparents': relLabel = isMale ? `${side}Great-Grandfather` : isFemale ? `${side}Great-Grandmother` : `${side}Great-Grandparent`; break;
+                                                                    case 'Cousins': relLabel = 'Cousin'; break;
+                                                                    default: relLabel = label;
+                                                                }
+                                                                return (
+                                                                    <div
+                                                                        key={rel.id_public}
+                                                                        className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+                                                                        onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                    >
+                                                                        <div className="flex items-center gap-2 min-w-0">
+                                                                            {(rel.imageUrl || rel.photoUrl) ? (
+                                                                                <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                            ) : (
+                                                                                <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 font-semibold">
+                                                                                    {rel.species?.charAt(0).toUpperCase()}
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="min-w-0">
+                                                                                <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
+                                                                                <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                            <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
+                                                                            <ChevronRight size={14} className="text-gray-400" />
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                    </div>
+                                    )}
+                                </div>
+                            ) : null}
+                        </>
+                    )}
 
                     {/* Tab 6: Family */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
-                            {/* 2nd Section: Keeper History */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
-                                {(animal.keeperHistory || []).length === 0 ? (
-                                    <p className="text-sm text-gray-400 italic">No entries yet</p>
-                                ) : (
-                                    <div className="space-y-2">
-                                        {(animal.keeperHistory || []).map((entry, idx) => (
-                                            <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                                                <div className="flex-1 min-w-0">
-                                                    {entry.userId_public
-                                                        ? <RouterLink to={`/user/${entry.userId_public}`} className="text-sm font-semibold text-purple-600 hover:underline">{entry.name || 'Unknown'}</RouterLink>
-                                                        : <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>}
-                                                </div>
-                                                {entry.country && (
-                                                    <div className="flex items-center gap-1 flex-shrink-0">
-                                                        <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6`}></span>
-                                                        <span className="text-xs text-gray-500">{getCountryName(entry.country)}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
                             {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
@@ -1358,12 +1457,217 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                     {/* Tab 8: Health */}
                     {detailViewTab === 8 && (
-                        <HealthTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
+                        <div className="space-y-6">
+                            {/* 1st Section: Preventive Care */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
+                                    {animal.vaccinations && (
+                                        <DetailJsonList
+                                            label={getLabel('vaccinations', 'Vaccinations')}
+                                            data={animal.vaccinations}
+                                            renderItem={v => <>{v.name} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.dewormingRecords && (
+                                        <DetailJsonList
+                                            label="Deworming Records"
+                                            data={animal.dewormingRecords}
+                                            renderItem={r => <>{r.medication} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.parasiteControl && (
+                                        <DetailJsonList
+                                            label="Parasite Control"
+                                            data={animal.parasiteControl}
+                                            renderItem={r => <>{r.treatment} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {fieldTemplate?.fields?.parasitePreventionSchedule?.enabled !== false && animal.parasitePreventionSchedule && (
+                                        <div className="text-sm">
+                                            <span className="text-gray-600">{getLabel('parasitePreventionSchedule', 'Parasite Prevention Schedule')}:</span>
+                                            <strong className="whitespace-pre-wrap">{animal.parasitePreventionSchedule}</strong>
+                                        </div>
+                                    )}
+                                </div>)}
+                            </div>
+
+                            {/* 2nd Section: Procedures & Diagnostics */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
+                                    {animal.medicalProcedures && (
+                                        <DetailJsonList
+                                            label="Medical Procedures"
+                                            data={animal.medicalProcedures}
+                                            renderItem={p => <>{p.name} {p.date && `(${formatDate(p.date)})`}{p.notes && <span className="text-gray-600"> - {p.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {(animal.labResults || animal.laboratoryResults) && (
+                                        <DetailJsonList
+                                            label="Laboratory Results"
+                                            data={animal.labResults || animal.laboratoryResults}
+                                            renderItem={r => <>{r.testName} - {r.result} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                </div>)}
+                            </div>
+
+                            {/* 3rd Section: Active Medical Records */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
+                                    {animal.medicalConditions && (
+                                        <DetailJsonList
+                                            label="Medical Conditions"
+                                            data={animal.medicalConditions}
+                                            renderItem={item => <>{item.condition || item.name}{item.notes && <span className="text-gray-500"> - {item.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.allergies && (
+                                        <DetailJsonList
+                                            label="Allergies"
+                                            data={animal.allergies}
+                                            renderItem={item => <>{item.allergen || item.name}{item.notes && <span className="text-gray-500"> - {item.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.medications && (
+                                        <DetailJsonList
+                                            label="Current Medications"
+                                            data={animal.medications}
+                                            renderItem={item => <>{item.medication || item.name}{item.notes && <span className="text-gray-500"> - {item.notes}</span>}</>}
+                                        />
+                                    )}
+                                </div>)}
+                            </div>
+
+                            {/* 4th Section: Health Clearances & Screening */}
+                            {(() => {
+                                const clearanceFields = [
+                                    { key: 'heartwormStatus', label: 'Heartworm Status' },
+                                    { key: 'hipElbowScores', label: 'Hip/Elbow Scores' },
+                                    { key: 'eyeClearance', label: 'Eye Clearance' },
+                                    { key: 'cardiacClearance', label: 'Cardiac Clearance' },
+                                    { key: 'dentalRecords', label: 'Dental Records' },
+                                    { key: 'geneticTestResults', label: 'Genetic Test Results' },
+                                    { key: 'chronicConditions', label: 'Chronic Conditions' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const spayDate = fieldTemplate?.fields?.spayNeuterDate?.enabled !== false && animal.spayNeuterDate;
+                                return (clearanceFields.length > 0 || spayDate) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
+                                            <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                        </button>
+                                        {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
+                                            {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
+                                            {clearanceFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>)}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* 5th Section: Veterinary Care */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
+                                    {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
+                                    {animal.vetVisits && (
+                                        <DetailJsonList
+                                            label="Veterinary Visits"
+                                            data={animal.vetVisits}
+                                            renderItem={v => <>{v.reason} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
+                                    )}
+                                </div>)}
+                            </div>
+                        </div>
                     )}
 
                     {/* Tab 9: Care */}
                     {detailViewTab === 9 && (
-                        <CareTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
+                        <div className="space-y-6">
+                            {/* 1st Section: Nutrition */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.dietType && <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType}</strong></div>}
+                                    {animal.feedingSchedule && <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule}</strong></div>}
+                                    {animal.supplements && <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements}</strong></div>}
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Husbandry */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
+                                <div className="space-y-3 text-sm">
+                                    {enclosureInfo && (<div><span className="text-gray-600">Enclosure:</span> <strong>{enclosureInfo.name}</strong></div>)}
+                                    {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
+                                    {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
+                                    {animal.enrichment && <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment}</strong></div>}
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Environment */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {animal.temperatureRange && <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange}</strong></div>}
+                                    {fieldTemplate?.fields?.humidity?.enabled !== false && animal.humidity && <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity}</strong></div>}
+                                    {animal.lighting && <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting}</strong></div>}
+                                    {fieldTemplate?.fields?.noise?.enabled !== false && animal.noise && <div><span className="text-gray-600">{getLabel('noise', 'Noise Level')}:</span> <strong>{animal.noise}</strong></div>}
+                                </div>
+                            </div>
+
+                            {/* 4th Section: Exercise & Grooming */}
+                            {(() => {
+                                const egFields = [
+                                    { key: 'exerciseRequirements', label: 'Exercise Requirements' },
+                                    { key: 'dailyExerciseMinutes', label: 'Daily Exercise (min)' },
+                                    { key: 'groomingNeeds', label: 'Grooming Needs' },
+                                    { key: 'sheddingLevel', label: 'Shedding Level' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const trainFlags = [
+                                    { key: 'crateTrained', label: 'Crate Trained' },
+                                    { key: 'litterTrained', label: 'Litter Trained' },
+                                    { key: 'leashTrained', label: 'Leash Trained' },
+                                    { key: 'freeFlightTrained', label: 'Free Flight Trained' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (egFields.length > 0 || trainFlags.length > 0) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
+                                        {egFields.length > 0 && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                {egFields.map(f => (
+                                                    <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {trainFlags.length > 0 && (
+                                            <div className="flex flex-wrap gap-3 text-sm">
+                                                {trainFlags.map(f => (
+                                                    <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">&#x2713; {getLabel(f.key, f.label)}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+                        </div>
                     )}
 
                     {/* Tab 10: Behavior */}
@@ -1374,7 +1678,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 <h3 className="text-lg font-semibold text-gray-700"><MessageSquare size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Behavior</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.temperament && <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament}</strong></div>}
-                                    {animal.handlingTolerance && <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance}</strong></div>}
+                                    {fieldTemplate?.fields?.handlingTolerance?.enabled !== false && animal.handlingTolerance && <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance}</strong></div>}
                                     {animal.socialStructure && <div><span className="text-gray-600">Social Structure:</span> <strong>{animal.socialStructure}</strong></div>}
                                 </div>
                             </div>
@@ -1399,7 +1703,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     { key: 'behavioralIssues', label: 'Behavioral Issues' },
                                     { key: 'biteHistory', label: 'Bite History' },
                                     { key: 'reactivityNotes', label: 'Reactivity Notes' },
-                                ].filter(f => animal[f.key]);
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return trainFields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                         <h3 className="text-lg font-semibold text-gray-700"><Dumbbell size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Training & Working</h3>
@@ -1417,7 +1721,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                     {/* Tab 11: Notes & Milestones */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Notes */}
+                            {/* 1st Section: Notes - Remarks are now on the Dashboard tab */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Notes</h3>
                                 <strong className="block text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || ''}</strong>
@@ -1426,11 +1730,11 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Milestones */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
                                 <h3 className="text-lg font-semibold text-gray-700"><Bell size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Milestones</h3>
-                                {(!animal.milestones || animal.milestones.length === 0) ? (
+                                {parseJsonField(animal.milestones).length === 0 ? (
                                     <p className="text-sm text-gray-400">No milestones recorded.</p>
                                 ) : (
                                     <div className="space-y-2">
-                                        {animal.milestones.map((m, idx) => {
+                                        {parseJsonField(animal.milestones).map((m, idx) => {
                                             const d = m.startDate ? new Date(String(m.startDate).substring(0,10) + 'T00:00:00') : null;
                                             const dateStr = d && !isNaN(d) ? d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : (m.startDate || '');
                                             return (
@@ -1496,10 +1800,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><Key size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Licensing & Permits</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    {animal.licenseNumber && (
+                                    {fieldTemplate?.fields?.licenseNumber?.enabled !== false && animal.licenseNumber && (
                                         <div><span className="text-gray-600">{getLabel('licenseNumber', 'License Number')}:</span> <strong>{animal.licenseNumber}</strong></div>
                                     )}
-                                    {animal.licenseJurisdiction && (
+                                    {fieldTemplate?.fields?.licenseJurisdiction?.enabled !== false && animal.licenseJurisdiction && (
                                         <div><span className="text-gray-600">{getLabel('licenseJurisdiction', 'License Jurisdiction')}:</span> <strong>{animal.licenseJurisdiction}</strong></div>
                                     )}
                                 </div>
@@ -1509,10 +1813,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><ClipboardList size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Legal / Administrative</h3>
                                 <div className="space-y-3 text-sm">
-                                    {animal.insurance && (
+                                    {fieldTemplate?.fields?.insurance?.enabled !== false && animal.insurance && (
                                         <div><span className="text-gray-600">{getLabel('insurance', 'Insurance')}:</span> <strong className="whitespace-pre-wrap">{animal.insurance}</strong></div>
                                     )}
-                                    {animal.legalStatus && (
+                                    {fieldTemplate?.fields?.legalStatus?.enabled !== false && animal.legalStatus && (
                                         <div><span className="text-gray-600">{getLabel('legalStatus', 'Legal Status')}:</span> <strong className="whitespace-pre-wrap">{animal.legalStatus}</strong></div>
                                     )}
                                 </div>
