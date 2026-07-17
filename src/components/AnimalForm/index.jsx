@@ -7551,8 +7551,7 @@ const AnimalForm = ({
                                         name="isNeutered"
                                         checked={formData.isNeutered}
                                         onChange={handleChange}
-                                        className="form-checkbox h-5 w-5 text-primary rounded fol/;
-                                        gbcus:ring-primary"
+                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                     />
                                     <span className="text-sm font-medium text-gray-700">
                                         {formData.gender === 'Female' ? 'Spayed' : (formData.gender === 'Intersex' || formData.gender === 'Unknown') ? 'Neutered / Spayed' : 'Neutered'}

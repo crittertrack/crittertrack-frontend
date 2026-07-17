@@ -473,7 +473,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                                     
                                                     const displayName = parts.join(' • ') || 'Unknown Breeder';
                                                     
-                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
                                             {/* Keeper */}
@@ -783,102 +783,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                 <p className="text-sm text-gray-700">{animal.origin || ''}</p>
                             </div>
                         </div>
-                    )}
-                    {/* Relationship Insights */}
-                    {detailViewTab === 1 && (
-                        <>
-                            {publicRelLoading ? (
-                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                    <div className="text-sm text-gray-500 animate-pulse">Loading relationships...</div>
-                                </div>
-                            ) : publicRelationships && Object.values(publicRelationships).some(arr => Array.isArray(arr) && arr.length > 0) ? (
-                                <div className="bg-blue-50 rounded-lg border border-blue-200">
-                                    <button
-                                        type="button"
-                                        onClick={() => setRelInsightsOpen(o => !o)}
-                                        className="w-full flex items-center justify-between p-4 text-left"
-                                    >
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center">
-                                            <Network size={20} className="text-blue-600 mr-2" />
-                                            Relationship Insights
-                                            <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
-                                                {Object.values(publicRelationships).reduce((s, arr) => s + (Array.isArray(arr) ? arr.length : 0), 0)} relatives
-                                            </span>
-                                        </h3>
-                                        {relInsightsOpen
-                                            ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
-                                            : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
-                                    </button>
-                                    {relInsightsOpen && (
-                                    <div className="px-4 pb-4 space-y-3">
-                                            {(() => {
-                                                const _seenRel = new Set();
-                                                return [
-                                                { key: 'parents', label: 'Parents' },
-                                                { key: 'siblings', label: 'Siblings' },
-                                                { key: 'nephewsNieces', label: 'Nieces & Nephews' },
-                                                { key: 'auntsUncles', label: 'Aunts & Uncles' },
-                                                { key: 'grandparents', label: 'Grandparents' },
-                                                { key: 'greatGrandparents', label: 'Great-Grandparents' },
-                                                { key: 'cousins', label: 'Cousins' },
-                                            ].map(({ key, label }) => {
-                                                const group = (publicRelationships[key] || []).filter(a => a.id_public !== animal?.id_public && !_seenRel.has(a.id_public));
-                                                group.forEach(a => _seenRel.add(a.id_public));
-                                                if (!group.length) return null;
-                                                return (
-                                                    <div key={key}>
-                                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{label}</h4>
-                                                        <div className="space-y-2">
-                                                            {group.map(rel => {
-                                                                const isMale = rel.gender === 'Male';
-                                                                const isFemale = rel.gender === 'Female';
-                                                                const side = rel._side === 'paternal' ? 'Paternal ' : rel._side === 'maternal' ? 'Maternal ' : '';
-                                                                let relLabel;
-                                                                switch (label) {
-                                                                    case 'Parents': relLabel = rel.id_public === animal?.sireId_public ? 'Sire (Father)' : rel.id_public === animal?.damId_public ? 'Dam (Mother)' : isMale ? 'Sire (Father)' : isFemale ? 'Dam (Mother)' : 'Parent'; break;
-                                                                    case 'Siblings': relLabel = isMale ? 'Brother' : isFemale ? 'Sister' : 'Sibling'; break;
-                                                                    case 'Nieces & Nephews': relLabel = isMale ? 'Nephew' : isFemale ? 'Niece' : 'Niece / Nephew'; break;
-                                                                    case 'Aunts & Uncles': relLabel = isMale ? `${side}Uncle` : isFemale ? `${side}Aunt` : `${side}Aunt / Uncle`; break;
-                                                                    case 'Grandparents': relLabel = isMale ? `${side}Grandfather` : isFemale ? `${side}Grandmother` : `${side}Grandparent`; break;
-                                                                    case 'Great-Grandparents': relLabel = isMale ? `${side}Great-Grandfather` : isFemale ? `${side}Great-Grandmother` : `${side}Great-Grandparent`; break;
-                                                                    case 'Cousins': relLabel = 'Cousin'; break;
-                                                                    default: relLabel = label;
-                                                                }
-                                                                return (
-                                                                    <div
-                                                                        key={rel.id_public}
-                                                                        className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
-                                                                        onClick={() => onViewAnimal && onViewAnimal(rel)}
-                                                                    >
-                                                                        <div className="flex items-center gap-2 min-w-0">
-                                                                            {(rel.imageUrl || rel.photoUrl) ? (
-                                                                                <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
-                                                                            ) : (
-                                                                                <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 font-semibold">
-                                                                                    {rel.species?.charAt(0).toUpperCase()}
-                                                                                </div>
-                                                                            )}
-                                                                            <div className="min-w-0">
-                                                                                <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
-                                                                                <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                                            <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
-                                                                            <ChevronRight size={14} className="text-gray-400" />
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })()}
-                                    </div>
-                                    )}
-                                </div>
-                            ) : null}
-                        </>
                     )}
 
                     {/* Tab 6: Family */}
