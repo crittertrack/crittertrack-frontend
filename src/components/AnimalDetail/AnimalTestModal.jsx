@@ -532,10 +532,8 @@ const AnimalTestModal = ({
                                     })()}
                                 </InfoCard>
                             </div>
+                            
                             </div>
-                            <InfoCard title="General Notes" icon={<FileText size={18} className="text-gray-400" />}>
-                                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
-                            </InfoCard>
                             <div className="bg-blue-50 rounded-lg border border-blue-200">
                                 <button
                                     type="button"

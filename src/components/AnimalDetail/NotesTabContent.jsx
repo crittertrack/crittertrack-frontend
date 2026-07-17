@@ -1,5 +1,6 @@
 import React from 'react';
 import { FileText } from 'lucide-react';
+import { InfoCard } from './DashboardComponents';
 
 export const NotesTabContent = ({ animal }) => {
     const notes = [
@@ -18,15 +19,11 @@ export const NotesTabContent = ({ animal }) => {
     }
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {notes.map((note, index) => (
-                <div key={index} className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                    <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                        <FileText size={16} className="text-gray-400" />
-                        {note.title}
-                    </h3>
+                <InfoCard key={index} title={note.title} icon={<FileText size={18} className="text-gray-400" />}>
                     <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{note.content}</p>
-                </div>
+                </InfoCard>
             ))}
         </div>
     );

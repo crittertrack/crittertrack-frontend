@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { computeRelationships } from './utils';
+import { InfoCard } from './DashboardComponents';
 
 export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal = null }) => {
     const [animalLitters, setAnimalLitters] = useState(null);
@@ -176,10 +177,10 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
 
     return (
         <div className="space-y-6">
-            {/* Offspring & Litters */}
+            <InfoCard title="Offspring & Litters" icon={<Users size={18} className="text-gray-400" />}>
             {(animalLitters === null || pedigreeOffspring === null) ? (
-                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters</div>
+                <div className="text-sm text-gray-500 animate-pulse">
+                    Loading offspring & litters...
                 </div>
             ) : (() => {
                 const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
@@ -199,18 +200,13 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                 });
                 if (allRecords.length === 0) {
                     return (
-                        <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center text-sm text-gray-500">
+                        <p className="text-center text-sm text-gray-400">
                             No known offspring/litters recorded.
-                        </div>
+                        </p>
                     );
                 }
                 return (
-                    <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                        <button type="button" onClick={() => setOffspringOpen(o => !o)} className="w-full flex items-center justify-between text-left">
-                            <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Offspring & Litters</h3>
-                            {offspringOpen ? <ChevronUp size={18} className="text-purple-400 flex-shrink-0" /> : <ChevronDown size={18} className="text-purple-400 flex-shrink-0" />}
-                        </button>
-                        {offspringOpen && <div className="space-y-2">
+                        <div className="space-y-2">
                             {allRecords.map((litter) => {
                                 if (litter._recordType === 'litter') {
                                     const lid = litter.litter_id_public;
@@ -633,10 +629,10 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                                     );
                                 }
                             })}
-                        </div>}
-                    </div>
+                        </div>
                 );
             })()}
+            </InfoCard>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
+﻿﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -973,55 +973,38 @@ const PrivateAnimalDetail = ({
                     {/* Tab 2: Ownership */}
                     {detailViewTab === 2 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Ownership */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="ownership-section">
-                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Breeder</h3>
-                                <div className="space-y-3 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-600">Currently Owned:</span>
-                                        <strong>{animal.isOwned ? 'Yes' : 'No'}</strong>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-600">Breeder:</span>
-                                        {breederInfo
-                                            ? <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{breederInfo.breederName || breederInfo.personalName || 'Unknown'}</RouterLink>
-                                            : <strong>{animal.manualBreederName || animal.breederId_public || ''}</strong>}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* 2nd Section: Current Owner */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><User size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner</h3>
-                                <div className="text-sm space-y-2" data-tutorial-target="owner-details">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-600">Owner Name:</span>
+                            <InfoCard title="Breeder & Owner" icon={<Users size={18} className="text-gray-400" />}>
+                                <dl className="space-y-4">
+                                    <InfoItem label="Currently Owned" value={animal.isOwned ? 'Yes' : 'No'} />
+                                    <InfoItem label="Breeder">
+                                        {breederInfo ? (
+                                            <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">
+                                                {breederInfo.breederName || breederInfo.personalName || 'Unknown'}
+                                            </RouterLink>
+                                        ) : (
+                                            <span>{animal.manualBreederName || animal.breederId_public || 'N/A'}</span>
+                                        )}
+                                    </InfoItem>
+                                    <InfoItem label="Owner">
                                         {ownerInfo ? (
                                             <RouterLink to={`/user/${ownerInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">
                                                 {ownerInfo.breederName || ownerInfo.personalName}
                                             </RouterLink>
                                         ) : (
-                                            <strong>{animal.manualownerName || 'N/A'}</strong>
+                                            <span>{animal.manualownerName || 'N/A'}</span>
                                         )}
-                                    </div>
-                                    {animal.coOwnership && (
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-600">Co-Ownership:</span>
-                                            <strong>{animal.coOwnership}</strong>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                                    </InfoItem>
+                                    {animal.coOwnership && <InfoItem label="Co-Ownership" value={animal.coOwnership} />}
+                                </dl>
+                            </InfoCard>
 
-                            {/* 3rd Section: Keeper History */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Owner History</h3>
+                            <InfoCard title="Owner History" icon={<Users size={18} className="text-gray-400" />}>
                                 {(animal.ownerHistory || animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
                                     <div className="space-y-2">
                                         {(animal.keeperHistory || []).map((entry, idx) => (
-                                            <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                                            <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
                                                 <div className="flex-1 min-w-0">
                                                     {entry.userId_public
                                                         ? <RouterLink to={`/user/${entry.userId_public}`} className="text-sm font-semibold text-purple-600 hover:underline">{entry.name || 'Unknown'}</RouterLink>
@@ -1037,22 +1020,14 @@ const PrivateAnimalDetail = ({
                                         ))}
                                     </div>
                                 )}
-                            </div>
+                            </InfoCard>
 
-                            {/* 4th Section: Availability for Sale or Stud */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Availability for Sale or Stud</h3>
-                                <div className="space-y-3 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-600">For Sale:</span>
-                                        <strong>{animal.isForSale ? `Yes - ${getCurrencySymbol(animal.salePriceCurrency)} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}</strong>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-600">For Stud:</span>
-                                        <strong>{animal.availableForBreeding ? `Yes - ${getCurrencySymbol(animal.studFeeCurrency)} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}</strong>
-                                    </div>
-                                </div>
-                            </div>
+                            <InfoCard title="Availability for Sale or Stud" icon={<Tag size={18} className="text-gray-400" />}>
+                                <dl className="space-y-4">
+                                    <InfoItem label="For Sale" value={animal.isForSale ? `Yes - ${getCurrencySymbol(animal.salePriceCurrency)} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'} />
+                                    <InfoItem label="For Stud" value={animal.availableForBreeding ? `Yes - ${getCurrencySymbol(animal.studFeeCurrency)} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'} />
+                                </dl>
+                            </InfoCard>
                         </div>
                     )}
 
@@ -1075,39 +1050,35 @@ const PrivateAnimalDetail = ({
                                     { key: 'carrierTraits', label: 'Carrier Traits' },
                                 ].filter(f => animal[f.key]);
                                 return (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700"><Sparkles size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Appearance</h3>
+                                    <InfoCard title="Appearance" icon={<Sparkles size={18} className="text-gray-400" />}>
                                         {fields.length > 0 ? (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {fields.map(f => (
-                                                    <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                    <InfoItem key={f.key} label={getLabel(f.key, f.label)} value={animal[f.key]} />
                                                 ))}
-                                            </div>
+                                            </dl>
                                         ) : (
-                                            <div className="text-sm text-gray-500">No appearance data recorded yet.</div>
+                                            <p className="text-sm text-gray-400">No appearance data recorded yet.</p>
                                         )}
-                                    </div>
+                                    </InfoCard>
                                 );
                             })()}
 
                             {/* Genetic Code - Always show */}
                             {animal.geneticCode && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('geneticCode', 'Genetic Code')}</h3>
+                                <InfoCard title={getLabel('geneticCode', 'Genetic Code')} icon={<Dna size={18} className="text-gray-400" />}>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
-                                </div>
+                                </InfoCard>
                             )}
 
                             {/* Life Stage - Always show */}
                             {animal.lifeStage && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700"><Sprout size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('lifeStage', 'Life Stage')}</h3>
+                                <InfoCard title={getLabel('lifeStage', 'Life Stage')} icon={<Sprout size={18} className="text-gray-400" />}>
                                     <p className="text-gray-700 text-sm">{animal.lifeStage || 'Not specified'}</p>
-                                </div>
+                                </InfoCard>
                             )}
                             {/* Current Measurements & Growth Tracking - Always show */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Ruler size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Measurements & Growth Tracking</h3>
+                            <InfoCard title="Measurements & Growth Tracking" icon={<Ruler size={18} className="text-gray-400" />}>
                                 {(() => {
                                     let growthRecords = animal.growthRecords;
                                     if (typeof growthRecords === 'string') {
@@ -1119,12 +1090,12 @@ const PrivateAnimalDetail = ({
                                         const sorted = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
                                         const latest = sorted[0];
                                         return (
-                                            <div className="text-sm space-y-1">
-                                                <p><span className="text-gray-600">Latest Weight:</span> <strong>{latest.weight} {animal.measurementUnits?.weight || 'g'}</strong></p>
-                                                {latest.length && <p><span className="text-gray-600">Latest Length:</span> <strong>{latest.length} {animal.measurementUnits?.length || 'cm'}</strong></p>}
-                                                {latest.height && <p><span className="text-gray-600">Latest Height:</span> <strong>{latest.height} {animal.measurementUnits?.length || 'cm'}</strong></p>}
-                                                <p className="text-gray-600 text-xs mt-2">Total measurements: {growthRecords.length} entries</p>
-                                            </div>
+                                            <dl className="space-y-3">
+                                                <InfoItem label="Latest Weight" value={`${latest.weight} ${animal.measurementUnits?.weight || 'g'}`} />
+                                                {latest.length && <InfoItem label="Latest Length" value={`${latest.length} ${animal.measurementUnits?.length || 'cm'}`} />}
+                                                {latest.height && <InfoItem label="Latest Height" value={`${latest.height} ${animal.measurementUnits?.length || 'cm'}`} />}
+                                                <p className="text-xs text-gray-400 pt-2 border-t">Total measurements: {growthRecords.length} entries</p>
+                                            </dl>
                                         );
                                     }
                                     
@@ -1139,16 +1110,16 @@ const PrivateAnimalDetail = ({
                                     ].filter(f => animal[f.key]);
                                     
                                     return mFields.length > 0 ? (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {mFields.map(f => (
-                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                <InfoItem key={f.key} label={getLabel(f.key, f.label)} value={animal[f.key]} />
                                             ))}
-                                        </div>
+                                        </dl>
                                     ) : (
-                                        <div className="text-sm text-gray-500">No measurements recorded yet.</div>
+                                        <p className="text-sm text-gray-400">No measurements recorded yet.</p>
                                     );
                                 })()}
-                            </div>
+                            </InfoCard>
 
                             {/* Growth Curve Charts */}
                             {(() => {
@@ -1364,55 +1335,49 @@ const PrivateAnimalDetail = ({
                     {/* Tab 3: Identification */}
                     {detailViewTab === 3 && (
                         <div className="space-y-6">
-                            {/* Identification Numbers */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
-                                    {animal.breederAssignedId && <div><span className="text-gray-600">{getLabel('breederAssignedId', 'Breeder Assigned ID')}:</span> <strong>{animal.breederAssignedId}</strong></div>}
-                                    {animal.microchipNumber && <div><span className="text-gray-600">{getLabel('microchipNumber', 'Microchip')}:</span> <strong>{animal.microchipNumber}</strong></div>}
-                                    {animal.tattooId && <div><span className="text-gray-600">{getLabel('tattooId', 'Tattoo')}:</span> <strong>{animal.tattooId}</strong></div>}
-                                    {animal.ringId && <div><span className="text-gray-600">{getLabel('ringId', 'Ring')}:</span> <strong>{animal.ringId}</strong></div>}
-                                    {animal.eartagNumber && <div><span className="text-gray-600">{getLabel('eartagNumber', 'Ear Tag')}:</span> <strong>{animal.eartagNumber}</strong></div>}
-                                    {animal.pedigreeRegistrationId && <div><span className="text-gray-600">{getLabel('pedigreeRegistrationId', 'Pedigree Registration')}:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
-                                    {animal.colonyId && <div><span className="text-gray-600">{getLabel('colonyId', 'Colony ID')}:</span> <strong>{animal.colonyId}</strong></div>}
+                            <InfoCard title="Identification Numbers" icon={<Hash size={18} className="text-gray-400" />}>
+                                <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <InfoItem label="CritterTrack ID" value={animal.id_public} />
+                                    {animal.breederAssignedId && <InfoItem label={getLabel('breederAssignedId', 'Breeder Assigned ID')} value={animal.breederAssignedId} />}
+                                    {animal.microchipNumber && <InfoItem label={getLabel('microchipNumber', 'Microchip')} value={animal.microchipNumber} />}
+                                    {animal.tattooId && <InfoItem label={getLabel('tattooId', 'Tattoo')} value={animal.tattooId} />}
+                                    {animal.ringId && <InfoItem label={getLabel('ringId', 'Ring')} value={animal.ringId} />}
+                                    {animal.eartagNumber && <InfoItem label={getLabel('eartagNumber', 'Ear Tag')} value={animal.eartagNumber} />}
+                                    {animal.pedigreeRegistrationId && <InfoItem label={getLabel('pedigreeRegistrationId', 'Pedigree Registration')} value={animal.pedigreeRegistrationId} />}
+                                    {animal.colonyId && <InfoItem label={getLabel('colonyId', 'Colony ID')} value={animal.colonyId} />}
                                     {parseJsonField(animal.identifiers).map((identifier, index) => (
-                                        <div key={index}><span className="text-gray-600">{identifier.title}:</span> <strong>{identifier.value}</strong></div>
+                                        <InfoItem key={index} label={identifier.title} value={identifier.value} />
                                     ))}
-                                </div>
-                            </div>
+                                </dl>
+                            </InfoCard>
 
-                            {/* Classification */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
+                            <InfoCard title="Classification" icon={<FolderOpen size={18} className="text-gray-400" />}>
+                                <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <InfoItem label="Species" value={animal.species} />
                                     {animal.breed && (
-                                        <div><span className="text-gray-600">{getLabel('breed', 'Breed')}:</span> <strong>{animal.breed}</strong></div>
+                                        <InfoItem label={getLabel('breed', 'Breed')} value={animal.breed} />
                                     )}
                                     {animal.strain && (
-                                        <div><span className="text-gray-600">{getLabel('strain', 'Strain')}:</span> <strong>{animal.strain}</strong></div>
+                                        <InfoItem label={getLabel('strain', 'Strain')} value={animal.strain} />
                                     )}
-                                </div>
-                            </div>
+                                </dl>
+                            </InfoCard>
 
                             {/* Origin */}
                             {animal.origin && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Globe size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Origin</h3>
-                                <p className="text-sm text-gray-700">{animal.origin}</p>
-                            </div>
+                                <InfoCard title="Origin" icon={<Globe size={18} className="text-gray-400" />}>
+                                    <InfoItem label="Origin" value={animal.origin} />
+                                </InfoCard>
                             )}
                             {/* Tags */}
                             {animal.tags && animal.tags.length > 0 && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Tags</h3>
+                                <InfoCard title="Tags" icon={<Tag size={18} className="text-gray-400" />}>
                                     <div className="flex flex-wrap gap-2">
                                         {animal.tags.map((tag, idx) => (
                                             <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{tag}</span>
                                         ))}
                                     </div>
-                                </div>
+                                </InfoCard>
                             )}
                             {/* Breeding Lines */}
                             {(() => {
@@ -1434,9 +1399,8 @@ const PrivateAnimalDetail = ({
                                     .filter(Boolean);
 
                                 return (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                                        <div className="flex items-center justify-between flex-wrap gap-2">
-                                            <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
+                                    <InfoCard title="Breeding Lines" icon={<TableOfContents size={18} className="text-gray-400" />}>
+                                        <div className="flex items-center justify-end flex-wrap gap-2 -mt-2 -mr-1">
                                             {uninheritedParentLines.length > 0 && setAnimalBreedingLinesDirect && (
                                                 <button
                                                     type="button"
@@ -1466,7 +1430,7 @@ const PrivateAnimalDetail = ({
                                                 );
                                             })}
                                         </div>
-                                    </div>
+                                    </InfoCard>
                                 );
                             })()}
                         </div>

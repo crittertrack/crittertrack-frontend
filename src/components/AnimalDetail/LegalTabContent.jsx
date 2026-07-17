@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileCheck, Key, Ban, Tag, Home } from 'lucide-react';
+import { FileCheck, Key, Ban, Tag, Home, Users } from 'lucide-react';
 import { useDetailFieldTemplate } from './utils';
 import { formatDate } from '../../utils/dateFormatter';
 import { Link as RouterLink } from 'react-router-dom';
@@ -30,43 +30,43 @@ export const LegalTabContent = ({ animal, API_BASE_URL }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">
                 <InfoCard title="Licensing & Permits" icon={<Key size={18} className="text-gray-400" />}>
-                    {hasLicensing ? (
-                        <dl className="space-y-4">
-                            {animal.licenseNumber && <InfoItem label={getLabel('licenseNumber', 'License Number')} value={animal.licenseNumber} />}
-                            {animal.licenseJurisdiction && <InfoItem label={getLabel('licenseJurisdiction', 'License Jurisdiction')} value={animal.licenseJurisdiction} />}
-                        </dl>
-                    ) : <p className="text-sm text-gray-400">No licensing or permit information recorded.</p>}
+                    {hasLicensing
+                        ? <dl className="grid grid-cols-1 gap-4">
+                              {animal.licenseNumber && <InfoItem label={getLabel('licenseNumber', 'License Number')} value={animal.licenseNumber} />}
+                              {animal.licenseJurisdiction && <InfoItem label={getLabel('licenseJurisdiction', 'License Jurisdiction')} value={animal.licenseJurisdiction} />}
+                          </dl>
+                        : <p className="text-sm text-gray-400">No licensing or permit information recorded.</p>}
                 </InfoCard>
                 <InfoCard title="Legal / Administrative" icon={<FileCheck size={18} className="text-gray-400" />}>
-                    {hasLegal ? (
-                        <dl className="space-y-4">
-                            {animal.insurance && <InfoItem label={getLabel('insurance', 'Insurance')} value={animal.insurance} />}
-                            {animal.legalStatus && <InfoItem label={getLabel('legalStatus', 'Legal Status')} value={animal.legalStatus} />}
-                        </dl>
-                    ) : <p className="text-sm text-gray-400">No legal or administrative information recorded.</p>}
+                    {hasLegal
+                        ? <dl className="grid grid-cols-1 gap-4">
+                              {animal.insurance && <InfoItem label={getLabel('insurance', 'Insurance')} value={animal.insurance} />}
+                              {animal.legalStatus && <InfoItem label={getLabel('legalStatus', 'Legal Status')} value={animal.legalStatus} />}
+                          </dl>
+                        : <p className="text-sm text-gray-400">No legal or administrative information recorded.</p>}
                 </InfoCard>
                 <InfoCard title="Restrictions" icon={<Ban size={18} className="text-gray-400" />}>
-                    {hasRestrictions ? (
-                        <dl className="space-y-4">
-                            {animal.breedingRestrictions && <InfoItem label={getLabel('breedingRestrictions', 'Breeding Restrictions')} value={animal.breedingRestrictions} />}
-                            {animal.exportRestrictions && <InfoItem label={getLabel('exportRestrictions', 'Export Restrictions')} value={animal.exportRestrictions} />}
-                        </dl>
-                    ) : <p className="text-sm text-gray-400">No restrictions recorded.</p>}
+                    {hasRestrictions
+                        ? <dl className="grid grid-cols-1 gap-4">
+                              {animal.breedingRestrictions && <InfoItem label={getLabel('breedingRestrictions', 'Breeding Restrictions')} value={animal.breedingRestrictions} />}
+                              {animal.exportRestrictions && <InfoItem label={getLabel('exportRestrictions', 'Export Restrictions')} value={animal.exportRestrictions} />}
+                          </dl>
+                        : <p className="text-sm text-gray-400">No restrictions recorded.</p>}
                 </InfoCard>
             </div>
              <div className="space-y-6">
                 <InfoCard title="Purchase Information" icon={<Tag size={18} className="text-gray-400" />}>
-                    {hasPurchase ? (
-                        <dl className="space-y-4">
-                            {animal.purchaseDate && <InfoItem label="Purchase Date" value={formatDate(animal.purchaseDate)} />}
-                            {animal.purchasePrice && <InfoItem label="Purchase Price" value={`${animal.purchasePriceCurrency || ''} ${animal.purchasePrice}`} />}
-                            {animal.purchaseLocation && <InfoItem label="Purchase Location" value={animal.purchaseLocation} />}
-                        </dl>
-                    ) : <p className="text-sm text-gray-400">No purchase information recorded.</p>}
+                    {hasPurchase
+                        ? <dl className="grid grid-cols-1 gap-4">
+                              {animal.purchaseDate && <InfoItem label="Purchase Date" value={formatDate(animal.purchaseDate)} />}
+                              {animal.purchasePrice && <InfoItem label="Purchase Price" value={`${animal.purchasePriceCurrency || ''} ${animal.purchasePrice}`} />}
+                              {animal.purchaseLocation && <InfoItem label="Purchase Location" value={animal.purchaseLocation} />}
+                          </dl>
+                        : <p className="text-sm text-gray-400">No purchase information recorded.</p>}
                 </InfoCard>
                 <InfoCard title="Sale Information" icon={<Tag size={18} className="text-gray-400" />}>
                     {hasSale ? (
-                        <dl className="space-y-4">
+                        <dl className="grid grid-cols-1 gap-4">
                             {animal.saleDate && <InfoItem label="Sale Date" value={formatDate(animal.saleDate)} />}
                             {animal.salePriceAmount && <InfoItem label="Sale Price" value={`${animal.salePriceCurrency || ''} ${animal.salePriceAmount}`} />}
                             {animal.saleLocation && <InfoItem label="Sale Location" value={animal.saleLocation} />}
