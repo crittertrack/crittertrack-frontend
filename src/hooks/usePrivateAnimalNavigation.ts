@@ -283,6 +283,16 @@ if (method.toLowerCase() === 'put') {
 
             return response.data;
         } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                console.warn(`[handleDeleteAnimal] Animal with id ${id_public} not found, likely already deleted.`);
+                // If the animal is not found, it's already deleted.
+                // We can treat this as a success from the UI perspective.
+                handleCloseAllAnimals();
+                window.dispatchEvent(new Event('animals-changed'));
+                // Return a success-like object to prevent calling components from thinking it's an error.
+                return { success: true, message: 'Animal already deleted.' };
+            }
+
             console.error('[handleDeleteAnimal] Error:', error);
             throw error;
         }
