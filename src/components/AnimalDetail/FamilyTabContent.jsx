@@ -17,7 +17,6 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
     const [ownedAnimalsLoaded, setOwnedAnimalsLoaded] = useState(false);
     const [ownedAnimalsLoading, setOwnedAnimalsLoading] = useState(true);
     const [globalRels, setGlobalRels] = useState(null);
-    const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [relInsightsOpen, setRelInsightsOpen] = useState(true);
     const [offspringOpen, setOffspringOpen] = useState(true);
     const ownedAnimalsLoadedRef = React.useRef(false);
@@ -45,13 +44,11 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
             }
 
             // Step 2: once own collection is shown, fetch cross-breeder relationships
-            setGlobalRelsLoading(true);
             try {
                 const relsRes = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, { headers: { Authorization: `Bearer ${authToken}` } });
                 setGlobalRels(relsRes.data || null);
-            } catch { /* no-op */ } finally {
-                setGlobalRelsLoading(false);
-            }
+            } catch { /* no-op */ }
+            // globalRelsLoading is not used here anymore, as Relationship Insights is moved out
         };
 
         run();
@@ -179,84 +176,6 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
 
     return (
         <div className="space-y-6">
-            {/* Relationship Insights */}
-            <div className="bg-blue-50 rounded-lg border border-blue-200">
-                <button
-                    type="button"
-                    onClick={() => setRelInsightsOpen(o => !o)}
-                    className="w-full flex items-center justify-between p-4 text-left"
-                >
-                    <h3 className="text-lg font-semibold text-gray-700 flex items-center">
-                        <Network size={20} className="text-blue-600 mr-2" />
-                        Relationship Insights
-                        {!ownedAnimalsLoading && allRelGroups.length > 0 && (
-                            <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
-                                {allRelGroups.reduce((s, g) => s + g.items.length, 0)} relatives
-                            </span>
-                        )}
-                        {globalRelsLoading && (
-                            <Loader2 size={13} className="animate-spin text-blue-400 ml-2" />
-                        )}
-                    </h3>
-                    {relInsightsOpen
-                        ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
-                        : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
-                </button>
-                {relInsightsOpen && (
-                    <div className="px-4 pb-4 space-y-3">
-                        {ownedAnimalsLoading ? (
-                            <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
-                                <Loader2 size={13} className="animate-spin" />
-                                Loading relationships...
-                            </div>
-                        ) : allRelGroups.length === 0 && !globalRelsLoading ? (
-                            <div className="text-xs text-gray-400 py-1">No known relatives found</div>
-                        ) : (
-                            <>
-                                {allRelGroups.map(({ label: groupLabel, items }) => (
-                                    <div key={groupLabel}>
-                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
-                                        <div className="space-y-2">
-                                            {items.map(({ rel, relLabel }) => (
-                                                <div
-                                                    key={rel.id_public}
-                                                    className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
-                                                    onClick={() => onViewAnimal && onViewAnimal(rel)}
-                                                >
-                                                    <div className="flex items-center gap-2 min-w-0">
-                                                        {(rel.imageUrl || rel.photoUrl) ? (
-                                                            <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
-                                                        ) : (
-                                                            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 font-semibold">
-                                                                {rel.species?.charAt(0).toUpperCase()}
-                                                            </div>
-                                                        )}
-                                                        <div className="min-w-0">
-                                                            <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
-                                                            <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                        <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
-                                                        <ChevronRight size={14} className="text-gray-400" />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                                {globalRelsLoading && (
-                                    <div className="flex items-center gap-2 text-xs text-gray-400 py-1">
-                                        <Loader2 size={13} className="animate-spin" />
-                                        Loading more...
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                )}
-            </div>
-
             {/* Offspring & Litters */}
             {(animalLitters === null || pedigreeOffspring === null) ? (
                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">

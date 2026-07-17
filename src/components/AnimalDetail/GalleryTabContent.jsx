@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Camera } from 'lucide-react';
-
+// This component is used in AnimalTestModal.jsx
 export const GalleryTabContent = ({ animal }) => {
     const allImages = useMemo(() => [animal.imageUrl || animal.photoUrl, ...(animal.extraImages || [])].filter(Boolean), [animal]);
     const [selectedImage, setSelectedImage] = useState(allImages[0] || null);

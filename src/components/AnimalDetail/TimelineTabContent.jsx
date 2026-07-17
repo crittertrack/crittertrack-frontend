@@ -34,7 +34,6 @@ export const TimelineTabContent = ({ animal }) => {
             </div>
         );
     }
-
     return (
         <div className="max-w-3xl mx-auto">
             {milestones.map((event, index) => (

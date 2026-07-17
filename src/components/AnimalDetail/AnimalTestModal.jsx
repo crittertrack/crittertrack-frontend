@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     X, Cat, Mars, Venus, Edit, Archive, Users, Heart, Tag, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Sprout,
-    Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse,
+    Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Hospital, Pill, Microscope, Feather,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList,
-    Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info,
-    Scale, HeartOff, Eye, EyeOff, RotateCcw
+    Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info, PlusCircle, Trash2, 
+    Scale, HeartOff, Eye, EyeOff, RotateCcw, Network, Save
 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
@@ -24,6 +24,7 @@ import { EndOfLifeTabContent } from './EndOfLifeTabContent';
 import { FertilityTabContent } from './FertilityTabContent';
 import { MeasurementsTabContent } from './MeasurementsTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents';
+import DatePicker from '../DatePicker';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -65,6 +66,7 @@ const AnimalTestModal = ({
     setEnlargedImageUrl
 }) => {
     if (!animal) return null;
+    const [formData, setFormData] = useState(animal);
 
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
@@ -72,8 +74,86 @@ const AnimalTestModal = ({
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [breederInfo, setBreederInfo] = useState(null);
+    const [ownedAnimals, setOwnedAnimals] = useState([]); // Placeholder for owned animals
+    const [ownedAnimalsLoaded, setOwnedAnimalsLoaded] = useState(false);
+    const ownedAnimalsLoadedRef = useRef(false);
+    const [globalRels, setGlobalRels] = useState(null);
+    const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
+    const [relInsightsOpen, setRelInsightsOpen] = useState(true);
+    const [offspringOpen, setOffspringOpen] = useState(true);
+    const [healthSaving, setHealthSaving] = useState(false);
+
+    // Health Tab State
+    const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    const [vaccinationRecords, setVaccinationRecords] = useState(() => parseJsonArrayField(animal?.vaccinations || animal?.vaccinationRecords));
+    const [newVaccination, setNewVaccination] = useState({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
+    const [dewormingRecordsArray, setDewormingRecordsArray] = useState(() => parseJsonArrayField(animal?.dewormingRecords));
+    const [newDeworming, setNewDeworming] = useState({ date: new Date().toISOString().substring(0, 10), medication: '', notes: '' });
+    const [parasiteControlRecords, setParasiteControlRecords] = useState(() => parseJsonArrayField(animal?.parasiteControl));
+    const [newParasiteControl, setNewParasiteControl] = useState({ date: new Date().toISOString().substring(0, 10), treatment: '', notes: '' });
+    const [medicalConditionsArray, setMedicalConditionsArray] = useState(() => parseJsonArrayField(animal?.medicalConditions));
+    const [newMedicalCondition, setNewMedicalCondition] = useState({ name: '', notes: '' });
+    const [allergiesArray, setAllergiesArray] = useState(() => parseJsonArrayField(animal?.allergies));
+    const [newAllergy, setNewAllergy] = useState({ name: '', notes: '' });
+    const [medicationsArray, setMedicationsArray] = useState(() => parseJsonArrayField(animal?.medications));
+    const [newMedication, setNewMedication] = useState({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
+    const [vetVisitsArray, setVetVisitsArray] = useState(() => parseJsonArrayField(animal?.vetVisits));
+    const [newVetVisit, setNewVetVisit] = useState({ date: new Date().toISOString().substring(0, 10), reason: '', notes: '' });
+    const [medicalProcedureRecords, setMedicalProcedureRecords] = useState(() => parseJsonArrayField(animal?.medicalProcedures));
+    const [newProcedure, setNewProcedure] = useState({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
+    const [labResultRecords, setLabResultRecords] = useState(() => parseJsonArrayField(animal?.labResults));
+    const [newLabResult, setNewLabResult] = useState({ date: new Date().toISOString().substring(0, 10), testName: '', result: '', notes: '' });
+
+    const addVaccination = () => { if (newVaccination.date && newVaccination.name) { setVaccinationRecords(p => [...p, { ...newVaccination, id: Date.now().toString() }]); setNewVaccination({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' }); }};
+    const addDeworming = () => { if (newDeworming.date && newDeworming.medication) { setDewormingRecordsArray(p => [...p, { ...newDeworming, id: Date.now().toString() }]); setNewDeworming({ date: new Date().toISOString().substring(0, 10), medication: '', notes: '' }); }};
+    const addParasiteControl = () => { if (newParasiteControl.date && newParasiteControl.treatment) { setParasiteControlRecords(p => [...p, { ...newParasiteControl, id: Date.now().toString() }]); setNewParasiteControl({ date: new Date().toISOString().substring(0, 10), treatment: '', notes: '' }); }};
+    const addMedicalCondition = () => { if (newMedicalCondition.name) { setMedicalConditionsArray(p => [...p, { ...newMedicalCondition, id: Date.now().toString() }]); setNewMedicalCondition({ name: '', notes: '' }); }};
+    const addAllergy = () => { if (newAllergy.name) { setAllergiesArray(p => [...p, { ...newAllergy, id: Date.now().toString() }]); setNewAllergy({ name: '', notes: '' }); }};
+    const addMedication = () => { if (newMedication.name) { setMedicationsArray(p => [...p, { ...newMedication, id: Date.now().toString() }]); setNewMedication({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' }); }};
+    const addVetVisit = () => { if (newVetVisit.date && newVetVisit.reason) { setVetVisitsArray(p => [...p, { ...newVetVisit, id: Date.now().toString() }]); setNewVetVisit({ date: new Date().toISOString().substring(0, 10), reason: '', notes: '' }); }};
+    const addMedicalProcedure = () => { if (newProcedure.date && newProcedure.name) { setMedicalProcedureRecords(p => [...p, { ...newProcedure, id: Date.now().toString() }]); setNewProcedure({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' }); }};
+    const addLabResult = () => { if (newLabResult.date && newLabResult.testName) { setLabResultRecords(p => [...p, { ...newLabResult, id: Date.now().toString() }]); setNewLabResult({ date: new Date().toISOString().substring(0, 10), testName: '', result: '', notes: '' }); }};
+
+    const handleSaveHealthData = async () => {
+        setHealthSaving(true);
+        try {
+            const healthPayload = {
+                ...formData,
+                vaccinations: JSON.stringify(vaccinationRecords),
+                dewormingRecords: JSON.stringify(dewormingRecordsArray),
+                parasiteControl: JSON.stringify(parasiteControlRecords),
+                medicalConditions: JSON.stringify(medicalConditionsArray),
+                allergies: JSON.stringify(allergiesArray),
+                medications: JSON.stringify(medicationsArray),
+                vetVisits: JSON.stringify(vetVisitsArray),
+                medicalProcedures: JSON.stringify(medicalProcedureRecords),
+                labResults: JSON.stringify(labResultRecords),
+            };
+            const response = await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, healthPayload, { headers: { Authorization: `Bearer ${authToken}` } });
+            onUpdateAnimal(response.data);
+            showModalMessage('Success', 'Health records have been updated.');
+        } catch (error) { showModalMessage('Error', 'Failed to save health records.'); }
+        finally { setHealthSaving(false); }
+    };
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => {
+            const updated = {
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            };
+            
+            // If deceased date is being set, automatically set status to Deceased
+            if (name === 'deceasedDate' && value) {
+                updated.status = 'Deceased';
+            }
+            
+            return updated;
+        });
+    };
 
     useEffect(() => {
         setMainImage(animal.imageUrl || animal.photoUrl);
@@ -140,22 +220,76 @@ const AnimalTestModal = ({
         fetchCOI();
     }, [animal?.id_public, animal?.fatherId_public, animal?.sireId_public, animal?.motherId_public, animal?.damId_public, API_BASE_URL, authToken]);
 
+    // Fetch own collection first, then global relationships sequentially
+    useEffect(() => {
+        if (!authToken || !animal?.id_public) {
+            return;
+        }
+        if (ownedAnimalsLoadedRef.current) return;
+        ownedAnimalsLoadedRef.current = true;
+
+        const run = async () => {
+            setGlobalRelsLoading(true);
+            try {
+                const animalsRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
+                setOwnedAnimals(animalsRes.data || []);
+                setOwnedAnimalsLoaded(true);
+
+                const relsRes = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, { headers: { Authorization: `Bearer ${authToken}` } });
+                setGlobalRels(relsRes.data || null);
+            } catch { /* no-op */ }
+            finally { setGlobalRelsLoading(false); }
+        };
+        run();
+    }, [authToken, API_BASE_URL, animal?.id_public]);
+
     const allImages = useMemo(() => [animal.imageUrl || animal.photoUrl, ...(animal.extraImages || [])].filter(Boolean), [animal]);
 
     const TABS = [
         { id: 'dashboard', label: 'Dashboard', icon: <Info size={14} /> },
         { id: 'identification', label: 'Identification', icon: <Hash size={14} /> },
-        { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> },
-        { id: 'care', label: 'Care', icon: <Droplets size={14} /> },
         { id: 'appearance', label: 'Appearance', icon: <Palette size={14} /> },
+        { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> },
+        { id: 'care', label: 'Routine Care', icon: <Droplets size={14} /> },
         { id: 'behavior', label: 'Behavior', icon: <Brain size={14} /> },
         { id: 'breeding', label: 'Breeding', icon: <Users size={14} /> },
         { id: 'pedigree', label: 'Pedigree', icon: <Dna size={14} /> },
         { id: 'gallery', label: 'Gallery', icon: <ImageIcon size={14} /> },
         { id: 'timeline', label: 'Timeline', icon: <Clock size={14} /> },
-        { id: 'notes', label: 'Notes', icon: <FileText size={14} /> },
-        { id: 'records', label: 'Records', icon: <BookOpen size={14} /> },
+        { id: 'administrative', label: 'Administrative', icon: <FileText size={14} /> },
     ];
+
+    const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
+
+    const getRelLabel = (groupLabel, rel) => {
+        const isMale = rel.gender === 'Male';
+        const isFemale = rel.gender === 'Female';
+        const side = rel._side === 'paternal' ? 'Paternal ' : rel._side === 'maternal' ? 'Maternal ' : '';
+        switch (groupLabel) {
+            case 'Parents':
+                if (rel.id_public === animal?.sireId_public) return 'Sire (Father)';
+                if (rel.id_public === animal?.damId_public) return 'Dam (Mother)';
+                return isMale ? 'Sire (Father)' : isFemale ? 'Dam (Mother)' : 'Parent';
+            case 'Siblings':
+                return isMale ? 'Brother' : isFemale ? 'Sister' : 'Sibling';
+            case 'Nieces & Nephews':
+                return isMale ? 'Nephew' : isFemale ? 'Niece' : 'Niece / Nephew';
+            case 'Aunts & Uncles':
+                return isMale ? `${side}Uncle` : isFemale ? `${side}Aunt` : `${side}Aunt / Uncle`;
+            case 'Grandparents':
+                return isMale ? `${side}Grandfather` : isFemale ? `${side}Grandmother` : `${side}Grandparent`;
+            case 'Great-Grandparents':
+                return isMale ? `${side}Great-Grandfather` : isFemale ? `${side}Great-Grandmother` : `${side}Great-Grandparent`;
+            case 'Cousins': return 'Cousin';
+            default: return groupLabel;
+        }
+    };
+
+    const allRelGroups = useMemo(() => {
+        // This is a simplified version. For full functionality, it should be expanded
+        // based on the logic in PrivateAnimalDetail.jsx if needed.
+        return [];
+    }, [relationships, globalRels, animal?.id_public]);
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
@@ -385,7 +519,7 @@ const AnimalTestModal = ({
                                         <div className="w-1/3 flex flex-col">
                                             <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} className="flex-1" contentClassName="overflow-y-auto">
                                                 <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
-                                            </InfoCard>
+                                            </InfoCard> {/* Remarks are now on the Dashboard tab */}
                                         </div>
                                     </div>
                                 </>
@@ -420,7 +554,8 @@ const AnimalTestModal = ({
                 {/* Content */}
                 <div className="p-6 overflow-y-auto rounded-b-xl flex-1">
                     {activeTab === 'dashboard' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
                             <div className="relative bg-white rounded-lg border border-gray-200 shadow-sm h-full">
                                 <div className="absolute right-4 top-4 z-10 text-xs">
@@ -452,6 +587,53 @@ const AnimalTestModal = ({
                                     })()}
                                 </InfoCard>
                             </div>
+                            </div>
+                            <InfoCard title="General Notes" icon={<FileText size={18} className="text-gray-400" />}>
+                                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
+                            </InfoCard>
+                            <div className="bg-blue-50 rounded-lg border border-blue-200">
+                                <button
+                                    type="button"
+                                    onClick={() => setRelInsightsOpen(o => !o)}
+                                    className="w-full flex items-center justify-between p-4 text-left"
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center">
+                                        <Network size={20} className="text-blue-600 mr-2" />
+                                        Relationship Insights
+                                        {ownedAnimalsLoaded && allRelGroups.length > 0 && (
+                                            <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
+                                                {allRelGroups.reduce((s, g) => s + g.items.length, 0)} relatives
+                                            </span>
+                                        )}
+                                        {globalRelsLoading && (
+                                            <Loader2 size={13} className="animate-spin text-blue-400 ml-2" />
+                                        )}
+                                    </h3>
+                                    {relInsightsOpen
+                                        ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
+                                        : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
+                                </button>
+                                {relInsightsOpen && (
+                                    <div className="px-4 pb-4 space-y-3">
+                                        {!ownedAnimalsLoaded ? (
+                                            <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
+                                                <Loader2 size={13} className="animate-spin" />
+                                                Loading relationships...
+                                            </div>
+                                        ) : allRelGroups.length === 0 && !globalRelsLoading ? (
+                                            <div className="text-xs text-gray-400 py-1">No known relatives found</div>
+                                        ) : (
+                                            <p className="text-xs text-gray-500">Relationship display goes here.</p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                            <FamilyTabContent
+                                animal={animal}
+                                API_BASE_URL={API_BASE_URL}
+                                authToken={authToken}
+                                onViewAnimal={onViewAnimal}
+                            />
                         </div>
                     )}
                     {activeTab === 'identification' && (
@@ -512,12 +694,6 @@ const AnimalTestModal = ({
                             )}
                         </div>
                     )}
-                    {activeTab === 'health' && (
-                        <HealthTabContent
-                            animal={animal}
-                            API_BASE_URL={API_BASE_URL}
-                        />
-                    )}
                     {activeTab === 'appearance' && (
                         <div className="space-y-6">
                             <InfoCard title="Appearance" icon={<Palette size={18} />}>
@@ -553,6 +729,159 @@ const AnimalTestModal = ({
                             />
                         </div>
                     )}
+                    {activeTab === 'health' && (
+                        <div className="space-y-6">
+                            {/* Preventive Care */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? <ChevronRight size={16} /> : <ChevronDown size={16} />}</span>
+                                </button>
+                                {!collapsedHealthSections.preventiveCare && (<div className="space-y-6 mt-4">
+                                    {/* Vaccinations */}
+                                    <div className="space-y-3">
+                                        <h4 className="text-sm font-semibold text-gray-700">Vaccinations</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                <div><label className="block text-xs font-medium text-gray-700">Date</label><DatePicker value={newVaccination.date} onChange={(e) => setNewVaccination({...newVaccination, date: e.target.value})} className="mt-1 p-2 text-sm" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Vaccination Name</label><input type="text" value={newVaccination.name} onChange={(e) => setNewVaccination({...newVaccination, name: e.target.value})} placeholder="e.g., Rabies" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Notes</label><input type="text" value={newVaccination.notes} onChange={(e) => setNewVaccination({...newVaccination, notes: e.target.value})} placeholder="e.g., Booster" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                            </div>
+                                            <button type="button" onClick={addVaccination} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">+ Add Vaccination</button>
+                                        </div>
+                                        {vaccinationRecords.length > 0 && (<div className="space-y-2 bg-white p-3 rounded-lg border max-h-48 overflow-y-auto">{vaccinationRecords.map((r, i) => (<div key={r.id || i} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm"><div className="flex-1"><strong>{r.date}:</strong> {r.name}{r.notes && <span className="text-xs text-gray-500 ml-2">({r.notes})</span>}</div><button type="button" onClick={() => setVaccinationRecords(p => p.filter(item => item.id !== r.id))} className="text-red-500 p-1"><Trash2 size={14} /></button></div>))}</div>)}
+                                    </div>
+                                    {/* Deworming */}
+                                    <div className="space-y-3 border-t pt-4">
+                                        <h4 className="text-sm font-semibold text-gray-700">Deworming Records</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                <div><label className="block text-xs font-medium text-gray-700">Date</label><DatePicker value={newDeworming.date} onChange={(e) => setNewDeworming({...newDeworming, date: e.target.value})} className="mt-1 p-2 text-sm" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Medication</label><input type="text" value={newDeworming.medication} onChange={(e) => setNewDeworming({...newDeworming, medication: e.target.value})} placeholder="e.g., Fenbendazole" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Notes</label><input type="text" value={newDeworming.notes} onChange={(e) => setNewDeworming({...newDeworming, notes: e.target.value})} placeholder="e.g., Dosage" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                            </div>
+                                            <button type="button" onClick={addDeworming} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">+ Add Deworming</button>
+                                        </div>
+                                        {dewormingRecordsArray.length > 0 && (<div className="space-y-2 bg-white p-3 rounded-lg border max-h-48 overflow-y-auto">{dewormingRecordsArray.map((r, i) => (<div key={r.id || i} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm"><div className="flex-1"><strong>{r.date}:</strong> {r.medication}{r.notes && <span className="text-xs text-gray-500 ml-2">({r.notes})</span>}</div><button type="button" onClick={() => setDewormingRecordsArray(p => p.filter(item => item.id !== r.id))} className="text-red-500 p-1"><Trash2 size={14} /></button></div>))}</div>)}
+                                    </div>
+                                </div>)}
+                            </div>
+
+                            {/* Procedures & Diagnostics */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? <ChevronRight size={16} /> : <ChevronDown size={16} />}</span>
+                                </button>
+                                {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-6 mt-4">
+                                    {/* Medical Procedures */}
+                                    <div className="space-y-3">
+                                        <h4 className="text-sm font-semibold text-gray-700">Medical Procedures</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                <div><label className="block text-xs font-medium text-gray-700">Date</label><DatePicker value={newProcedure.date} onChange={(e) => setNewProcedure({...newProcedure, date: e.target.value})} className="mt-1 p-2 text-sm" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Procedure Name</label><input type="text" value={newProcedure.name} onChange={(e) => setNewProcedure({...newProcedure, name: e.target.value})} placeholder="e.g., Neutering" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Notes</label><input type="text" value={newProcedure.notes} onChange={(e) => setNewProcedure({...newProcedure, notes: e.target.value})} placeholder="e.g., Vet clinic" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                            </div>
+                                            <button type="button" onClick={addMedicalProcedure} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">+ Add Procedure</button>
+                                        </div>
+                                        {medicalProcedureRecords.length > 0 && (<div className="space-y-2 bg-white p-3 rounded-lg border max-h-48 overflow-y-auto">{medicalProcedureRecords.map((r, i) => (<div key={r.id || i} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm"><div className="flex-1"><strong>{r.date}:</strong> {r.name}{r.notes && <span className="text-xs text-gray-500 ml-2">({r.notes})</span>}</div><button type="button" onClick={() => setMedicalProcedureRecords(p => p.filter(item => item.id !== r.id))} className="text-red-500 p-1"><Trash2 size={14} /></button></div>))}</div>)}
+                                    </div>
+                                    {/* Lab Results */}
+                                    <div className="space-y-3 border-t pt-4">
+                                        <h4 className="text-sm font-semibold text-gray-700">Laboratory Results</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div><label className="block text-xs font-medium text-gray-700">Date</label><DatePicker value={newLabResult.date} onChange={(e) => setNewLabResult({...newLabResult, date: e.target.value})} className="mt-1 p-2 text-sm" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Test Name</label><input type="text" value={newLabResult.testName} onChange={(e) => setNewLabResult({...newLabResult, testName: e.target.value})} placeholder="e.g., Blood work" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                                <div className="md:col-span-2"><label className="block text-xs font-medium text-gray-700">Result/Findings</label><input type="text" value={newLabResult.result} onChange={(e) => setNewLabResult({...newLabResult, result: e.target.value})} placeholder="e.g., Negative" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                                <div className="md:col-span-2"><label className="block text-xs font-medium text-gray-700">Notes</label><input type="text" value={newLabResult.notes} onChange={(e) => setNewLabResult({...newLabResult, notes: e.target.value})} placeholder="e.g., Lab name" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                            </div>
+                                            <button type="button" onClick={addLabResult} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">+ Add Lab Result</button>
+                                        </div>
+                                        {labResultRecords.length > 0 && (<div className="space-y-2 bg-white p-3 rounded-lg border max-h-48 overflow-y-auto">{labResultRecords.map((r, i) => (<div key={r.id || i} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm"><div className="flex-1"><strong>{r.date}:</strong> {r.testName} - {r.result}{r.notes && <span className="text-xs text-gray-500 ml-2">({r.notes})</span>}</div><button type="button" onClick={() => setLabResultRecords(p => p.filter(item => item.id !== r.id))} className="text-red-500 p-1"><Trash2 size={14} /></button></div>))}</div>)}
+                                    </div>
+                                </div>)}
+                            </div>
+
+                            {/* Active Medical Records */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? <ChevronRight size={16} /> : <ChevronDown size={16} />}</span>
+                                </button>
+                                {!collapsedHealthSections.activeMedical && (<div className="space-y-4 mt-4">
+                                    <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg bg-white"><input type="checkbox" name="isQuarantine" checked={formData.isQuarantine || false} onChange={handleChange} className="form-checkbox h-5 w-5 text-orange-500" /><span className="text-sm font-medium text-gray-700">In Quarantine / Isolation</span></label>
+                                    <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg bg-white"><input type="checkbox" name="isInTreatment" checked={formData.isInTreatment || false} onChange={handleChange} className="form-checkbox h-5 w-5 text-blue-500" /><span className="text-sm font-medium text-gray-700">In Active Treatment</span></label>
+                                    {/* Medical Conditions */}
+                                    <div className="space-y-3">
+                                        <h4 className="text-sm font-semibold text-gray-700">Medical Conditions</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div><label className="block text-xs font-medium text-gray-700">Condition Name</label><input type="text" value={newMedicalCondition.name} onChange={(e) => setNewMedicalCondition({...newMedicalCondition, name: e.target.value})} placeholder="e.g., Diabetes" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Notes</label><input type="text" value={newMedicalCondition.notes} onChange={(e) => setNewMedicalCondition({...newMedicalCondition, notes: e.target.value})} placeholder="e.g., Ongoing" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                            </div>
+                                            <button type="button" onClick={addMedicalCondition} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">+ Add Condition</button>
+                                        </div>
+                                        {medicalConditionsArray.length > 0 && (<div className="space-y-2 bg-white p-3 rounded-lg border max-h-48 overflow-y-auto">{medicalConditionsArray.map((r, i) => (<div key={r.id || i} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm"><div className="flex-1"><strong>{r.name}</strong>{r.notes && <span className="text-xs text-gray-500 ml-2">({r.notes})</span>}</div><button type="button" onClick={() => setMedicalConditionsArray(p => p.filter(item => item.id !== r.id))} className="text-red-500 p-1"><Trash2 size={14} /></button></div>))}</div>)}
+                                    </div>
+                                    {/* Allergies */}
+                                    <div className="space-y-3 border-t pt-4">
+                                        <h4 className="text-sm font-semibold text-gray-700">Allergies</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div><label className="block text-xs font-medium text-gray-700">Allergy Name</label><input type="text" value={newAllergy.name} onChange={(e) => setNewAllergy({...newAllergy, name: e.target.value})} placeholder="e.g., Peanuts" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Notes</label><input type="text" value={newAllergy.notes} onChange={(e) => setNewAllergy({...newAllergy, notes: e.target.value})} placeholder="e.g., Severe" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                            </div>
+                                            <button type="button" onClick={addAllergy} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">+ Add Allergy</button>
+                                        </div>
+                                        {allergiesArray.length > 0 && (<div className="space-y-2 bg-white p-3 rounded-lg border max-h-48 overflow-y-auto">{allergiesArray.map((r, i) => (<div key={r.id || i} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm"><div className="flex-1"><strong>{r.name}</strong>{r.notes && <span className="text-xs text-gray-500 ml-2">({r.notes})</span>}</div><button type="button" onClick={() => setAllergiesArray(p => p.filter(item => item.id !== r.id))} className="text-red-500 p-1"><Trash2 size={14} /></button></div>))}</div>)}
+                                    </div>
+                                </div>)}
+                            </div>
+
+                            <div className="mt-6 flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={handleSaveHealthData}
+                                    disabled={healthSaving}
+                                    className="flex items-center gap-2 px-4 py-2 bg-accent text-white font-semibold rounded-lg transition hover:bg-accent/90 disabled:opacity-50"
+                                >
+                                    {healthSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                    Save Health Records
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {activeTab === 'administrative' && (
+                        <div className="space-y-6">
+                            <NotesTabContent animal={animal} />
+                            <LegalTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
+                            <ShowTabContent animal={animal} />
+                            {/* EndOfLifeTabContent is now part of the Health tab */}
+                        </div>
+                    )}
+                    {activeTab === 'health' && (
+                        <div className="space-y-6">
+                            {/* ... existing health sections ... */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, endOfLife: !p.endOfLife}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Feather size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> End of Life</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.endOfLife ? <ChevronRight size={16} /> : <ChevronDown size={16} />}</span>
+                                </button>
+                                {!collapsedHealthSections.endOfLife && (
+                                    <div className="space-y-4 mt-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Date of Death</label><DatePicker name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} className="p-2" /></div>
+                                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Cause of Death</label><input type="text" name="causeOfDeath" value={formData.causeOfDeath || ''} onChange={handleChange} className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                        </div>
+                                        <div><label className="block text-sm font-medium text-gray-700 mb-1">Necropsy Results</label><textarea name="necropsyResults" value={formData.necropsyResults || ''} onChange={handleChange} rows="3" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                        <div><label className="block text-sm font-medium text-gray-700 mb-1">End of Life Care Notes</label><textarea name="endOfLifeCareNotes" value={formData.endOfLifeCareNotes || ''} onChange={handleChange} rows="3" className="mt-1 block w-full p-2 text-sm border rounded-md" /></div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                     {activeTab === 'care' && (
                         <CareTabContent
                             animal={animal}
@@ -569,15 +898,10 @@ const AnimalTestModal = ({
                     {activeTab === 'breeding' && (
                         <div className="space-y-6">
                             <FertilityTabContent
-                                animal={animal}
+                                animal={animal} // This tab no longer contains Relationship Insights
                                 API_BASE_URL={API_BASE_URL}
                             />
-                            <FamilyTabContent
-                                animal={animal}
-                                API_BASE_URL={API_BASE_URL}
-                                authToken={authToken}
-                                onViewAnimal={onViewAnimal}
-                            />
+                            {/* FamilyTabContent moved to Dashboard */}
                         </div>
                     )}
                     {activeTab === 'pedigree' && (
@@ -594,29 +918,18 @@ const AnimalTestModal = ({
                     {activeTab === 'timeline' && (
                         <TimelineTabContent animal={animal} />
                     )}
-                    {activeTab === 'notes' && (
-                        <NotesTabContent animal={animal} />
-                    )}
-                    {activeTab === 'records' && (
-                        <div className="space-y-6">
-                            <LegalTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
-                            <ShowTabContent animal={animal} />
-                            <EndOfLifeTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
-                        </div>
-                    )}
                     {/* Placeholder for other tabs */}
                     {activeTab !== 'dashboard' &&
                         activeTab !== 'identification' &&
+                        activeTab !== 'appearance' &&
                         activeTab !== 'health' &&
                         activeTab !== 'care' &&
-                        activeTab !== 'appearance' &&
                         activeTab !== 'behavior' &&
                         activeTab !== 'breeding' &&
                         activeTab !== 'pedigree' &&
                         activeTab !== 'gallery' &&
                         activeTab !== 'timeline' &&
-                        activeTab !== 'notes' &&
-                        activeTab !== 'records' && (
+                        activeTab !== 'administrative' && (
                         <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
                             <p className="text-gray-500">Content for the {activeTab} tab goes here.</p>
                         </div>

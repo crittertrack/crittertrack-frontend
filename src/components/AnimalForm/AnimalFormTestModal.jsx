@@ -495,7 +495,10 @@ const AnimalFormTestModal = ({
     };
 
     const TABS = [
-        { id: 1, label: 'Dashboard', icon: ClipboardList, color: 'text-blue-500' }, { id: 2, label: 'Identification', icon: Tag, color: 'text-amber-500' }, { id: 3, label: 'Appearance', icon: Palette, color: 'text-pink-500' }, { id: 4, label: 'Pedigree', icon: Dna, color: 'text-orange-500' }, { id: 5, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' }, { id: 6, label: 'Fertility', icon: Egg, color: 'text-yellow-500' }, { id: 7, label: 'Health', icon: Hospital, color: 'text-red-500' }, { id: 8, label: 'Care', icon: Home, color: 'text-teal-500' }, { id: 9, label: 'Behavior', icon: Brain, color: 'text-purple-500' }, { id: 10, label: 'Notes & Milestones', icon: FileText, color: 'text-indigo-500' }, { id: 11, label: 'Show', icon: Trophy, color: 'text-yellow-600' }, { id: 12, label: 'Legal', icon: FileCheck, color: 'text-blue-600' }, { id: 13, label: 'End of Life', icon: Scale, color: 'text-gray-500' }, { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' }
+        { id: 1, label: 'Dashboard', icon: <Info size={14} /> },
+        { id: 2, label: 'Identification', icon: <Hash size={14} /> },
+        { id: 3, label: 'Appearance', icon: <Palette size={14} /> },
+        { id: 4, label: 'Pedigree', icon: Dna, color: 'text-orange-500' }, { id: 5, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' }, { id: 6, label: 'Fertility', icon: Egg, color: 'text-yellow-500' }, { id: 7, label: 'Health', icon: Hospital, color: 'text-red-500' }, { id: 8, label: 'Care', icon: Home, color: 'text-teal-500' }, { id: 9, label: 'Behavior', icon: Brain, color: 'text-purple-500' }, { id: 10, label: 'Notes & Milestones', icon: FileText, color: 'text-indigo-500' }, { id: 11, label: 'Show', icon: Trophy, color: 'text-yellow-600' }, { id: 12, label: 'Legal', icon: FileCheck, color: 'text-blue-600' }, { id: 13, label: 'End of Life', icon: Scale, color: 'text-gray-500' }, { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' }
     ];
 
     return (
@@ -631,6 +634,12 @@ const AnimalFormTestModal = ({
                                                     {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                                                 </select>
                                             </div>
+                                        </div>
+                                        <div className="md:col-span-3">
+                                            <label className="block text-xs font-medium text-gray-700">Remarks</label>
+                                            <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="3"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="General notes, observations, and records..." />
                                         </div>
                                     </div>
 

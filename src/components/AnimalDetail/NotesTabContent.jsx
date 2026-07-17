@@ -3,7 +3,6 @@ import { FileText } from 'lucide-react';
 
 export const NotesTabContent = ({ animal }) => {
     const notes = [
-        { title: 'General Remarks', content: animal.remarks },
         { title: 'Handling Notes', content: animal.handlingNotes },
         { title: 'Socialization Notes', content: animal.socializationNotes },
         { title: 'Special Care Requirements', content: animal.specialCareRequirements },

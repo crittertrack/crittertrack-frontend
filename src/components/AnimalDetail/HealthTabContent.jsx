@@ -7,15 +7,18 @@ import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponen
 // Helper to parse fields that might be JSON strings or arrays
 const parseHealthRecords = (data) => {
     if (!data) return [];
+    let records = [];
     if (typeof data === 'string') {
         try {
-            const parsed = JSON.parse(data);
-            return Array.isArray(parsed) ? parsed : [];
+            records = JSON.parse(data);
         } catch (e) {
             return [];
         }
+    } else {
+        records = data;
     }
-    return Array.isArray(data) ? data : [];
+    if (Array.isArray(records)) return records.filter(Boolean); // Filter out null/undefined entries
+    return [];
 };
 
 // New component for status
