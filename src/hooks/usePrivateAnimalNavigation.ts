@@ -293,16 +293,22 @@ if (method.toLowerCase() === 'put') {
             window.dispatchEvent(new Event('animals-changed'));
 
             if (response.data?.reverted) {
-                showModalMessage('Animal Returned', 'This animal was returned to its original owner.');
+                if (typeof showModalMessage === 'function') {
+                    showModalMessage('Animal Returned', 'This animal was returned to its original owner.');
+                }
             } else {
-                showModalMessage('Success', `${animalName} has been deleted.`);
+                if (typeof showModalMessage === 'function') {
+                    showModalMessage('Success', `${animalName} has been deleted.`);
+                }
             }
 
             return response.data;
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || error.message || 'An unknown error occurred.';
             console.error(`[handleDeleteAnimal] Error deleting animal ${idForUrl}:`, error);
-            showModalMessage('Deletion Failed', `Could not delete the animal. The server responded: ${errorMessage}`);
+            if (typeof showModalMessage === 'function') {
+                showModalMessage('Deletion Failed', `Could not delete the animal. The server responded: ${errorMessage}`);
+            }
         }
     }, [authToken, API_BASE_URL, handleCloseAllAnimals, showModalMessage]);
 
