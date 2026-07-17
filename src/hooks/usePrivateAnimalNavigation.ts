@@ -220,29 +220,29 @@ if (method.toLowerCase() === 'put') {
     const handleArchiveAnimal = useCallback(async (animal: any) => {
         if (!animal || !authToken) return;
 
-        const action = animal.archived ? 'unarchive' : 'archive';
-        const confirmMsg = animal.archived 
+        const shouldArchive = !animal.archived;
+        const confirmMsg = shouldArchive
             ? `Restore ${animal.name} from archive?`
             : `Archive ${animal.name}? It will be hidden from main lists but remain in pedigrees.`;
 
         if (!window.confirm(confirmMsg)) return;
 
         try {
-            await axios.post(
-                `${API_BASE_URL}/animals/${animal.id_public}/${action}`,
-                {},
+            await axios.put(
+                `${API_BASE_URL}/animals/${animal.id_public}`,
+                { archived: shouldArchive },
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
 
             // Update viewed animal if currently viewing it
-            if (animalToView && animalToView.id_public === animal.id_public) {
-                setAnimalToView({ ...animalToView, archived: !animal.archived });
+            if (animalToView && animalToView.id_public === animal.id_public) { // Update the state of the currently viewed animal
+                setAnimalToView({ ...animalToView, archived: shouldArchive });
             }
 
             // Dispatch event for other components
             try {
                 window.dispatchEvent(new CustomEvent('animal-archived', {
-                    detail: { id_public: animal.id_public, archived: !animal.archived }
+                    detail: { id_public: animal.id_public, archived: shouldArchive }
                 }));
                 window.dispatchEvent(new Event('animals-changed'));
             } catch (e) {
@@ -250,7 +250,7 @@ if (method.toLowerCase() === 'put') {
             }
 
             // Close view if archiving (not unarchiving)
-            if (!animal.archived) {
+            if (shouldArchive) {
                 handleBackFromAnimal();
             }
         } catch (error) {
