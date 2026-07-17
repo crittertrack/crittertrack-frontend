@@ -576,6 +576,7 @@ const PrivateAnimalDetail = ({
                             {onArchive && (
                                 <button
                                     onClick={() => onArchive(animal)}
+                                    onClick={() => onArchive(animal.id_public, !animal.archived)}
                                     className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs whitespace-nowrap"
                                     title={animal.archived ? "Unarchive animal" : "Archive animal"}
                                 >
@@ -627,6 +628,7 @@ const PrivateAnimalDetail = ({
                                     return (
                                         <button
                                             onClick={() => { console.log("Return button clicked!"); handleReturnTransferredAnimal(); }}
+                                            onClick={() => handleReturnTransferredAnimal()}
                                             disabled={returningAnimal}
                                             className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-2"
                                             title="Return to breeder"
@@ -693,6 +695,7 @@ const PrivateAnimalDetail = ({
                             {onArchive && (
                                 <button
                                     onClick={() => onArchive(animal)}
+                                    onClick={() => onArchive(animal.id_public, !animal.archived)}
                                     className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2 whitespace-nowrap"
                                     title={animal.archived ? "Restore from archive" : "Archive animal"}
                                 >
