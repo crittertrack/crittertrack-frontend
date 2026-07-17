@@ -577,7 +577,7 @@ const PrivateAnimalDetail = ({
                                 <button
                                     onClick={() => {
                                         if (animal && animal.id_public) {
-                                            onArchive(animal.id_public, !animal.archived);
+                                            onArchive(animal);
                                         } else {
                                             console.error("Archive failed: animal ID is missing.", animal);
                                             showModalMessage('Error', 'Cannot archive animal because its ID is missing. Please refresh and try again.');
@@ -701,7 +701,7 @@ const PrivateAnimalDetail = ({
                                 <button
                                     onClick={() => {
                                         if (animal && animal.id_public) {
-                                            onArchive(animal.id_public, !animal.archived);
+                                            onArchive(animal);
                                         } else {
                                             console.error("Archive failed: animal ID is missing.", animal);
                                             showModalMessage('Error', 'Cannot archive animal because its ID is missing. Please refresh and try again.');
