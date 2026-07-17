@@ -309,9 +309,9 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                 <div className="bg-[#E1F2F5] border-b border-gray-300 px-0.5 sm:px-4 py-2">
                     <div className="flex flex-wrap gap-1 sm:gap-2 justify-center">
                         {[
-                            { id: 1, label: 'Overview', icon: <Info size={14} /> }, // 1st
-                            { id: 2, label: 'Identification', icon: <Hash size={14} /> },     // 2nd
-                            { id: 3, label: 'Appearance', icon: <Palette size={14} /> },       // 3rd         // 4th
+                            { id: 1, label: 'Overview', icon: Info  }, // 1st
+                            { id: 2, label: 'Identification', icon: Hash  },     // 2nd
+                            { id: 3, label: 'Appearance', icon: Palette  },       // 3rd         // 4th
                             { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
                             { id: 6, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' },
                             { id: 7, label: 'Fertility', icon: Egg, color: 'text-yellow-500' },

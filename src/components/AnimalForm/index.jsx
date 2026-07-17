@@ -6170,9 +6170,9 @@ const AnimalForm = ({
                 <div className="bg-[#E1F2F5] border-b border-gray-300 -mx-6 px-2 py-2">
                     <div className="flex flex-wrap gap-2">
                         {[
-                            { id: 1, label: 'Dashboard', icon: <Info size={14} /> }, // 1st
-                            { id: 2, label: 'Identification', icon: <Hash size={14} /> },     // 2nd
-                            { id: 3, label: 'Appearance', icon: <Palette size={14} /> },       // 3rd
+                            { id: 1, label: 'Dashboard', icon: Info }, // 1st
+                            { id: 2, label: 'Identification', icon: Hash  },     // 2nd
+                            { id: 3, label: 'Appearance', icon: Palette  },       // 3rd
                             { id: 4, label: 'Ownership', icon: Lock, color: 'text-slate-500' },          // 4th
                             { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
                             { id: 6, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' },
