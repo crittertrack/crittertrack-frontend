@@ -66,7 +66,7 @@ const AnimalTestModal = ({
 }) => {
     if (!animal) return null;
 
-    const [activeTab, setActiveTab] = useState('overview');
+    const [activeTab, setActiveTab] = useState('dashboard');
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [mainImage, setMainImage] = useState(animal.imageUrl || animal.photoUrl);
     const [animalCOI, setAnimalCOI] = useState(null);
