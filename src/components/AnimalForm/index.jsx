@@ -9762,9 +9762,9 @@ const AnimalForm = ({
                                     const confirmMessage = iWasTransferredThisAnimal 
                                         ? `Return ${animalToEdit.name} to ${animalToEdit.breederName || 'the original breeder'}? This will remove the animal from your account.`
                                         : `Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`;
-                                    if(window.confirm(confirmMessage)) { 
-                                        onDelete(animalToEdit.id_public, animalToEdit); 
-                                    } 
+                                      if (window.confirm(confirmMessage)) {
+                                        onDelete(animalToEdit._id, animalToEdit);
+                                    }
                                 }} 
                                 className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
                             > 
