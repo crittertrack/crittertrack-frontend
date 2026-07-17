@@ -9,7 +9,7 @@ import {
 import { formatDate } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import axios from 'axios';
-import { ViewOnlyParentCard } from './utils';
+import { ViewOnlyParentCard, computeRelationships } from './utils';
 import { FamilyTabContent } from './FamilyTabContent';
 import { CareTabContent } from './CareTabContent';
 import { PedigreeTabContent } from './PedigreeTabContent';
