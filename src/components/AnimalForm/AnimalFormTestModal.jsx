@@ -5,7 +5,7 @@ import {
     Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit,
     Hash, Sparkles, Ruler, Sprout, Key, FolderOpen, Globe, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets,
     Thermometer, Feather, Medal, Target, Ban, Package, ScrollText, Link, Unlink, Baby, Bell, Plus, RotateCcw, Camera, Upload, Search, Star, ArrowRight,
-    Loader2, ChevronDown, ChevronRight, Info, Hash, Palette,
+    Loader2, ChevronDown, ChevronRight, Info,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
 import AnimalImageUpload from '../AnimalImageUpload';
