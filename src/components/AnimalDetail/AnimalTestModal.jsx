@@ -22,7 +22,6 @@ import { BehaviorTabContent } from './BehaviorTabContent';
 import { ShowTabContent } from './ShowTabContent';
 import { EndOfLifeTabContent } from './EndOfLifeTabContent';
 import { FertilityTabContent } from './FertilityTabContent';
-import { MeasurementsTabContent } from './MeasurementsTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents'; // This component is used in AnimalTestModal.jsx
 
 const parseJsonArrayField = (data) => {
@@ -175,15 +174,11 @@ const AnimalTestModal = ({
     const TABS = [
         { id: 'dashboard', label: 'Dashboard', icon: <Info size={14} /> },
         { id: 'identification', label: 'Identification', icon: <Hash size={14} /> },
-        { id: 'appearance', label: 'Appearance', icon: <Palette size={14} /> },
-        { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> },
-        { id: 'care', label: 'Routine Care', icon: <Droplets size={14} /> },
-        { id: 'behavior', label: 'Behavior', icon: <Brain size={14} /> },
-        { id: 'breeding', label: 'Breeding', icon: <Users size={14} /> },
+        { id: 'appearance', label: 'Appearance', icon: <Palette size={14} /> }, { id: 'health', label: 'Health', icon: <HeartPulse size={14} /> }, { id: 'care', label: 'Routine Care', icon: <Droplets size={14} /> }, { id: 'behavior', label: 'Behavior', icon: <Brain size={14} /> }, { id: 'breeding', label: 'Breeding', icon: <Users size={14} /> },
         { id: 'pedigree', label: 'Pedigree', icon: <Dna size={14} /> },
         { id: 'gallery', label: 'Gallery', icon: <ImageIcon size={14} /> },
         { id: 'timeline', label: 'Timeline', icon: <Clock size={14} /> },
-        { id: 'administrative', label: 'Administrative', icon: <FileText size={14} /> },
+        { id: 'records', label: 'Records', icon: <FileText size={14} /> },
     ];
 
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
@@ -648,13 +643,15 @@ const AnimalTestModal = ({
                                     <p>{animal.lifeStage}</p>
                                 </InfoCard>
                             )}
-                            <MeasurementsTabContent
-                                animal={animal}
-                                onUpdateAnimal={onUpdateAnimal}
-                                authToken={authToken}
-                                API_BASE_URL={API_BASE_URL}
-                            />
                         </div>
+                    )}
+                    {activeTab === 'measurements' && (
+                        <MeasurementsTabContent
+                            animal={animal}
+                            onUpdateAnimal={onUpdateAnimal}
+                            authToken={authToken}
+                            API_BASE_URL={API_BASE_URL}
+                        />
                     )}
                     {activeTab === 'health' && (
                         <div className="space-y-6">
@@ -700,7 +697,7 @@ const AnimalTestModal = ({
                     {activeTab === 'timeline' && (
                         <TimelineTabContent animal={animal} />
                     )}
-                    {activeTab === 'administrative' && (
+                    {activeTab === 'records' && (
                         <div className="space-y-6">
                             <NotesTabContent animal={animal} />
                             <LegalTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
@@ -718,7 +715,7 @@ const AnimalTestModal = ({
                         activeTab !== 'pedigree' &&
                         activeTab !== 'gallery' &&
                         activeTab !== 'timeline' &&
-                        activeTab !== 'administrative' && (
+                        activeTab !== 'records' && (
                         <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
                             <p className="text-gray-500">Content for the {activeTab} tab goes here.</p>
                         </div>
