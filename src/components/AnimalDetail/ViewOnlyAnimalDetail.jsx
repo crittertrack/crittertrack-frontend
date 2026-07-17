@@ -194,7 +194,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
     }, [detailViewTab]);
 
     // Fetch public relationships when Family tab opens
-    React.useEffect(() => { // This useEffect is now for the Dashboard tab
+    React.useEffect(() => {
         if (detailViewTab !== 6 || !animal?.id_public || !authToken) return;
         setPublicRelLoading(true);
         (async () => {
@@ -207,7 +207,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
             } finally {
                 setPublicRelLoading(false);
             }
-        })(); // This useEffect should be triggered by detailViewTab === 1 (Dashboard)
+        })();
     }, [detailViewTab, animal?.id_public, authToken, API_BASE_URL]);
 
     // Fetch all litters where this animal is sire or dam

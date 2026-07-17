@@ -26,6 +26,8 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
+    const [publicRelationships, setPublicRelationships] = useState(null);
+    const [publicRelLoading, setPublicRelLoading] = useState(false);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
