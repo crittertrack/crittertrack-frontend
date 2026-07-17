@@ -165,57 +165,38 @@ export function usePrivateAnimalNavigation(
                 // For now, relying on backend to set it from auth token
             }
 
-            // Optimistic update: if editing (PUT) with plain-object data, reflect changes immediately
-            if (method.toLowerCase() === 'put' && animalToEdit && !(data instanceof FormData)) {
-                const optimistic = { ...animalToEdit, ...data };
-                setAnimalToView(optimistic);
-                try {
-                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: optimistic }));
-                } catch (e) { /* ignore */ }
-            }
-
             // Make the API request
             const response = await axios({
                 method,
                 url,
                 data,
                 headers: {
-                    Authorization: `Bearer ${authToken}`
-                    // Don't set Content-Type - let axios handle it automatically for JSON
+                    Authorization: `Bearer ${authToken}`,
                 }
             });
 
             console.log('[handleSaveAnimal] Save successful:', response.data);
 
-            // TEMPORARY DEBUG VERSION
-// Skip refetch and skip custom events entirely
+            const updatedAnimal = response?.data?.animal || response?.data?.data || response?.data;
 
-if (method.toLowerCase() === 'put') {
-    console.log('[handleSaveAnimal] DEBUG: skipping refetch');
-
-    // Use whatever the save endpoint returned
-    const updatedAnimal =
-        response?.data?.animal ||
-        response?.data?.data ||
-        response?.data;
-
-    if (updatedAnimal) {
-        setAnimalToView(updatedAnimal);
-    }
-
-    setAnimalToEdit(null);
-
-    console.log(
-        '[handleSaveAnimal] DEBUG: save complete, no refetch, no events'
-    );
-}
+            if (updatedAnimal) {
+                // For existing animals, update the view and notify listeners
+                setAnimalToView(updatedAnimal);
+                try {
+                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: updatedAnimal }));
+                } catch (e) { /* ignore */ }
+            }
+            
+            // For all changes (new or updated), trigger a general refresh event and close edit mode
+            window.dispatchEvent(new Event('animals-changed'));
+            setAnimalToEdit(null);
 
             return response;
         } catch (error) {
             console.error('[handleSaveAnimal] Error saving animal:', error);
             throw error; // Re-throw so AnimalForm can handle the error
         }
-    }, [authToken, API_BASE_URL, animalToEdit]);
+    }, [authToken, API_BASE_URL]);
 
     /**
      * Archive an animal
