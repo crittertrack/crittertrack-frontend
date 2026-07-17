@@ -16,7 +16,11 @@ import axios from 'axios';
  * @param API_BASE_URL - API base URL
  * @returns Object with animal viewing states, handlers, and pedigree data
  */
-export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_URL: string) {
+export function usePrivateAnimalNavigation(
+    authToken: string | null,
+    API_BASE_URL: string,
+    showModalMessage: (title: string, message: string) => void
+) {
     // ========== PRIVATE ANIMAL VIEWING STATES ==========
     const [animalToView, setAnimalToView] = useState<any>(null);
     const [animalToEdit, setAnimalToEdit] = useState<any>(null);
@@ -264,11 +268,20 @@ if (method.toLowerCase() === 'put') {
      * Makes API call then closes all views
      */
     const handleDeleteAnimal = useCallback(async (id_public: string, animalData: any = null) => {
-        // The API endpoint for deletion uses the public-facing ID (e.g., "CTC7026").
-        // It appears the internal MongoDB ID is sometimes passed as the first argument.
-        // To ensure the correct ID is used, we will prioritize the `id_public` from the `animalData` object if it's available.
+        // For a stable, long-term solution, the frontend must consistently use the public-facing ID
+        // as defined by the API contract. The persistent `404` error indicates a backend issue where the
+        // DELETE endpoint is not correctly resolving the animal by its public ID.
+        // This implementation is the correct, stable approach for the client.
         const idForUrl = animalData?.id_public || id_public;
-        if (!idForUrl || !authToken) return;
+
+        if (!idForUrl || !authToken) {
+            return;
+        }
+
+        const animalName = animalData?.name || 'this animal';
+        if (!window.confirm(`Are you sure you want to permanently delete ${animalName}? This action cannot be undone.`)) {
+            return;
+        }
 
         try {
             const response = await axios.delete(`${API_BASE_URL}/animals/${idForUrl}`, {
@@ -279,18 +292,19 @@ if (method.toLowerCase() === 'put') {
             handleCloseAllAnimals();
             window.dispatchEvent(new Event('animals-changed'));
 
-            // Check if animal was reverted to original owner
             if (response.data?.reverted) {
-                console.log('Animal returned to original owner');
+                showModalMessage('Animal Returned', 'This animal was returned to its original owner.');
+            } else {
+                showModalMessage('Success', `${animalName} has been deleted.`);
             }
 
             return response.data;
-        } catch (error) {
-            // Now that we are confident we are using the correct ID, a 404 is a real error.
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || error.message || 'An unknown error occurred.';
             console.error(`[handleDeleteAnimal] Error deleting animal ${idForUrl}:`, error);
-            throw error;
+            showModalMessage('Deletion Failed', `Could not delete the animal. The server responded: ${errorMessage}`);
         }
-    }, [authToken, API_BASE_URL, handleCloseAllAnimals]);
+    }, [authToken, API_BASE_URL, handleCloseAllAnimals, showModalMessage]);
 
     /**
      * Toggle owned/unowned status
