@@ -575,7 +575,14 @@ const PrivateAnimalDetail = ({
                             })()}
                             {onArchive && (
                                 <button
-                                    onClick={() => onArchive(animal.id_public, !animal.archived)}
+                                    onClick={() => {
+                                        if (animal && animal.id_public) {
+                                            onArchive(animal.id_public, !animal.archived);
+                                        } else {
+                                            console.error("Archive failed: animal ID is missing.", animal);
+                                            showModalMessage('Error', 'Cannot archive animal because its ID is missing. Please refresh and try again.');
+                                        }
+                                    }}
                                     className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs whitespace-nowrap"
                                     title={animal.archived ? "Unarchive animal" : "Archive animal"}
                                 >
@@ -692,7 +699,14 @@ const PrivateAnimalDetail = ({
                             })()}
                             {onArchive && (
                                 <button
-                                    onClick={() => onArchive(animal.id_public, !animal.archived)}
+                                    onClick={() => {
+                                        if (animal && animal.id_public) {
+                                            onArchive(animal.id_public, !animal.archived);
+                                        } else {
+                                            console.error("Archive failed: animal ID is missing.", animal);
+                                            showModalMessage('Error', 'Cannot archive animal because its ID is missing. Please refresh and try again.');
+                                        }
+                                    }}
                                     className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2 whitespace-nowrap"
                                     title={animal.archived ? "Restore from archive" : "Archive animal"}
                                 >
