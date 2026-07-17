@@ -165,7 +165,6 @@ export function usePrivateAnimalNavigation(
                 // For now, relying on backend to set it from auth token
             }
 
-            // Make the API request
             const response = await axios({
                 method,
                 url,
@@ -177,26 +176,46 @@ export function usePrivateAnimalNavigation(
 
             console.log('[handleSaveAnimal] Save successful:', response.data);
 
-            const updatedAnimal = response?.data?.animal || response?.data?.data || response?.data;
+            const serverResponse = response?.data?.animal || response?.data?.data || response?.data;
+            let finalAnimal = serverResponse;
 
-            if (updatedAnimal) {
-                // For existing animals, update the view and notify listeners
-                setAnimalToView(updatedAnimal);
+            if (serverResponse) {
+                // Merge the comprehensive data we started with (`animalToEdit`)
+                // with the confirmed updates from the server. This prevents the server
+                // from accidentally stripping fields it doesn't return (like enclosure info).
+                finalAnimal = { ...animalToEdit, ...serverResponse };
+
+                // Update the main detail view with the complete, merged data.
+                setAnimalToView(finalAnimal);
                 try {
-                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: updatedAnimal }));
+                    // Dispatch the complete, merged data to other components.
+                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: finalAnimal }));
                 } catch (e) { /* ignore */ }
             }
             
-            // For all changes (new or updated), trigger a general refresh event and close edit mode
+            // This event tells all lists to refetch their data from the server,
+            // ensuring complete consistency after any change.
             window.dispatchEvent(new Event('animals-changed'));
             setAnimalToEdit(null);
+
+            // If the status was changed to an archival one, close the detail view
+            // and return the user to the list they came from.
+            const originalStatus = animalToEdit?.status;
+            const newStatus = finalAnimal?.status;
+            const archivalStatuses = ['Deceased', 'Sold', 'Rehomed', 'Archived'];
+            const isNowArchival = newStatus && archivalStatuses.includes(newStatus) && !archivalStatuses.includes(originalStatus);
+
+            if (isNowArchival) {
+                showModalMessage('Status Updated', `${finalAnimal.name || 'The animal'}'s record has been moved to your archives.`);
+                handleBackFromAnimal();
+            }
 
             return response;
         } catch (error) {
             console.error('[handleSaveAnimal] Error saving animal:', error);
             throw error; // Re-throw so AnimalForm can handle the error
         }
-    }, [authToken, API_BASE_URL]);
+    }, [authToken, API_BASE_URL, animalToEdit, handleBackFromAnimal, showModalMessage]);
 
     /**
      * Archive an animal
