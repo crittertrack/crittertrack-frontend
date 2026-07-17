@@ -220,29 +220,29 @@ if (method.toLowerCase() === 'put') {
     const handleArchiveAnimal = useCallback(async (animal: any) => {
         if (!animal || !authToken) return;
 
-        const shouldArchive = !animal.archived;
-        const confirmMsg = shouldArchive
-            ? `Restore ${animal.name} from archive?`
-            : `Archive ${animal.name}? It will be hidden from main lists but remain in pedigrees.`;
+        const isArchiving = !animal.archived;
+        const confirmMsg = isArchiving
+            ? `Archive ${animal.name}? It will be hidden from main lists but remain in pedigrees.`
+            : `Restore ${animal.name} from archive?`;
 
         if (!window.confirm(confirmMsg)) return;
 
         try {
             await axios.put(
                 `${API_BASE_URL}/animals/${animal.id_public}`,
-                { archived: shouldArchive },
+                { archived: isArchiving },
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
 
             // Update viewed animal if currently viewing it
-            if (animalToView && animalToView.id_public === animal.id_public) { // Update the state of the currently viewed animal
-                setAnimalToView({ ...animalToView, archived: shouldArchive });
+            if (animalToView && animalToView.id_public === animal.id_public) {
+                setAnimalToView({ ...animalToView, archived: isArchiving });
             }
 
             // Dispatch event for other components
             try {
                 window.dispatchEvent(new CustomEvent('animal-archived', {
-                    detail: { id_public: animal.id_public, archived: shouldArchive }
+                    detail: { id_public: animal.id_public, archived: isArchiving }
                 }));
                 window.dispatchEvent(new Event('animals-changed'));
             } catch (e) {
@@ -250,7 +250,7 @@ if (method.toLowerCase() === 'put') {
             }
 
             // Close view if archiving (not unarchiving)
-            if (shouldArchive) {
+            if (isArchiving) {
                 handleBackFromAnimal();
             }
         } catch (error) {
