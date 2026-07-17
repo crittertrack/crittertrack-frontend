@@ -22,17 +22,17 @@ export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {hasBehavior && (
-                <InfoCard title="Temperament & Social" icon={<MessageSquare size={18} className="text-gray-400" />}>
+            <InfoCard title="Temperament & Social" icon={<MessageSquare size={18} className="text-gray-400" />}>
+                {hasBehavior ? (
                     <dl className="space-y-4">
                         {animal.temperament && <InfoItem label="Temperament" value={animal.temperament} />}
                         {animal.handlingTolerance && <InfoItem label={getLabel('handlingTolerance', 'Handling Tolerance')} value={animal.handlingTolerance} />}
                         {animal.socialStructure && <InfoItem label="Social Structure" value={animal.socialStructure} />}
                     </dl>
-                </InfoCard>
-            )}
-            {hasActivity && (
-                <InfoCard title="Activity & Training" icon={<Activity size={18} className="text-gray-400" />}>
+                ) : <p className="text-sm text-gray-400">No temperament or social information recorded.</p>}
+            </InfoCard>
+            <InfoCard title="Activity & Training" icon={<Activity size={18} className="text-gray-400" />}>
+                {hasActivity ? (
                      <dl className="space-y-4">
                         {animal.activityCycle && <InfoItem label="Activity Cycle" value={animal.activityCycle} />}
                         {animal.exerciseRequirements && <InfoItem label={getLabel('exerciseRequirements', 'Exercise Requirements')} value={animal.exerciseRequirements} />}
@@ -42,17 +42,17 @@ export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
                         {animal.workingRole && <InfoItem label={getLabel('workingRole', 'Working Role')} value={animal.workingRole} />}
                         {animal.certifications && <InfoItem label={getLabel('certifications', 'Certifications')} value={animal.certifications} />}
                     </dl>
-                </InfoCard>
-            )}
-            {hasKnownIssues && (
-                 <InfoCard title="Known Issues" icon={<AlertTriangle size={18} className="text-gray-400" />}>
+                ) : <p className="text-sm text-gray-400">No activity or training information recorded.</p>}
+            </InfoCard>
+            <InfoCard title="Known Issues" icon={<AlertTriangle size={18} className="text-gray-400" />}>
+                {hasKnownIssues ? (
                     <dl className="space-y-4">
                         {animal.behavioralIssues && <InfoItem label={getLabel('behavioralIssues', 'Behavioral Issues')}><p className="whitespace-pre-wrap">{animal.behavioralIssues}</p></InfoItem>}
                         {animal.biteHistory && <InfoItem label={getLabel('biteHistory', 'Bite History')}><p className="whitespace-pre-wrap">{animal.biteHistory}</p></InfoItem>}
                         {animal.reactivityNotes && <InfoItem label={getLabel('reactivityNotes', 'Reactivity Notes')}><p className="whitespace-pre-wrap">{animal.reactivityNotes}</p></InfoItem>}
                     </dl>
-                </InfoCard>
-            )}
+                ) : <p className="text-sm text-gray-400">No known issues recorded.</p>}
+            </InfoCard>
         </div>
     );
 };

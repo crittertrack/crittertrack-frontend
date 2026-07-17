@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿﻿﻿﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -1086,7 +1086,13 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                     if (!bDate) return -1;
                                     return new Date(bDate) - new Date(aDate);
                                 });
-                                if (allRecords.length === 0) return null;
+                                if (allRecords.length === 0) {
+                                    return (
+                                        <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center text-sm text-gray-500">
+                                            No known offspring/litters recorded.
+                                        </div>
+                                    );
+                                }
                                 return (
                                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
                                         <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Offspring & Litters</h3>

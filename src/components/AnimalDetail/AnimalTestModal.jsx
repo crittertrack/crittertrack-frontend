@@ -611,33 +611,35 @@ const AnimalTestModal = ({
                             </InfoCard>
 
                             {/* Origin */}
-                            {animal.origin && (
-                                <InfoCard title="Origin" icon={<Globe size={18} className="text-gray-400" />}>
-                                    <dl>
-                                        <InfoItem label="Origin" value={animal.origin} />
-                                    </dl>
-                                </InfoCard>
-                            )}
+                            <InfoCard title="Origin" icon={<Globe size={18} className="text-gray-400" />}>
+                                <dl>
+                                    <InfoItem label="Origin" value={animal.origin} />
+                                </dl>
+                            </InfoCard>
 
                             {/* Tags */}
-                            {animal.tags && animal.tags.length > 0 && (
-                                <InfoCard title="Tags" icon={<Tag size={18} className="text-gray-400" />}>
+                            <InfoCard title="Tags" icon={<Tag size={18} className="text-gray-400" />}>
+                                {animal.tags && animal.tags.length > 0 ? (
                                     <div className="flex flex-wrap gap-2">
                                         {animal.tags.map(tag => (
                                             <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-medium px-2.5 py-1 rounded-full">{tag}</span>
                                         ))}
                                     </div>
-                                </InfoCard>
-                            )}
+                                ) : (
+                                    <p className="text-sm text-gray-400">No tags recorded.</p>
+                                )}
+                            </InfoCard>
 
                             {/* Breeding Lines */}
-                            {breedingLineDefs.length > 0 && (animalBreedingLines[animal.id_public] || []).length > 0 && (
-                                <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400" />}>
+                            <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400" />}>
+                                {breedingLineDefs.length > 0 && (animalBreedingLines[animal.id_public] || []).length > 0 ? (
                                         <div className="flex flex-wrap gap-2">
                                             {(animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean).map(line => <span key={line.id} style={{ backgroundColor: line.color, color: '#fff' }} className="text-xs font-semibold px-2 py-0.5 rounded-full">{line.name}</span>)}
                                         </div>
-                                </InfoCard>
-                            )}
+                                ) : (
+                                    <p className="text-sm text-gray-400">No breeding lines assigned.</p>
+                                )}
+                            </InfoCard>
                         </div>
                     )}
                     {activeTab === 'appearance' && (
@@ -652,16 +654,12 @@ const AnimalTestModal = ({
                                     {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
                                 </dl>
                             </InfoCard>
-                            {animal.geneticCode && (
-                                <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400" />}>
-                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
-                                </InfoCard>
-                            )}
-                            {animal.lifeStage && (
-                                <InfoCard title="Life Stage" icon={<Sprout size={18} />}>
-                                    <p>{animal.lifeStage}</p>
-                                </InfoCard>
-                            )}
+                            <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400" />}>
+                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
+                            </InfoCard>
+                            <InfoCard title="Life Stage" icon={<Sprout size={18} />}>
+                                <p>{animal.lifeStage || 'Not specified'}</p>
+                            </InfoCard>
   {/* Current Measurements & Growth Tracking - Always show */}
                             <InfoCard title="Measurements & Growth Tracking" icon={<Ruler size={18} className="text-gray-400" />}>
                                 {(() => {

@@ -197,7 +197,13 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                     if (!bDate) return -1;
                     return new Date(bDate) - new Date(aDate);
                 });
-                if (allRecords.length === 0) return null;
+                if (allRecords.length === 0) {
+                    return (
+                        <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center text-sm text-gray-500">
+                            No known offspring/litters recorded.
+                        </div>
+                    );
+                }
                 return (
                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
                         <button type="button" onClick={() => setOffspringOpen(o => !o)} className="w-full flex items-center justify-between text-left">

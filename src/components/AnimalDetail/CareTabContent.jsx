@@ -107,21 +107,21 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
 
             {/* Column 3 */}
             <div className="space-y-6">
-                {sheddingRecords.length > 0 && (
-                    <InfoCard title="Shedding History" icon={<Bug size={18} className="text-gray-400" />}>
+                <InfoCard title="Shedding History" icon={<Bug size={18} className="text-gray-400" />}>
+                    {sheddingRecords.length > 0 ? (
                         <DetailJsonList label="" data={sheddingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
-                    </InfoCard>
-                )}
-                {moltingRecords.length > 0 && (
-                    <InfoCard title="Molting History" icon={<Bug size={18} className="text-gray-400" />}>
+                    ) : <p className="text-sm text-gray-400">No shedding records.</p>}
+                </InfoCard>
+                <InfoCard title="Molting History" icon={<Bug size={18} className="text-gray-400" />}>
+                    {moltingRecords.length > 0 ? (
                         <DetailJsonList label="" data={moltingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
-                    </InfoCard>
-                )}
-                {waterParameterChecks.length > 0 && (
-                    <InfoCard title="Water Quality Checks" icon={<Droplets size={18} className="text-gray-400" />}>
+                    ) : <p className="text-sm text-gray-400">No molting records.</p>}
+                </InfoCard>
+                <InfoCard title="Water Quality Checks" icon={<Droplets size={18} className="text-gray-400" />}>
+                    {waterParameterChecks.length > 0 ? (
                         <DetailJsonList label="" data={waterParameterChecks.filter(Boolean)} renderItem={r => `${formatDate(r.date)} - pH: ${r.ph}, Ammonia: ${r.ammonia}`} />
-                    </InfoCard>
-                )}
+                    ) : <p className="text-sm text-gray-400">No water quality records.</p>}
+                </InfoCard>
             </div>
         </div>
     );

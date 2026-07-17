@@ -29,52 +29,52 @@ export const LegalTabContent = ({ animal, API_BASE_URL }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">
-                {hasLicensing && (
-                    <InfoCard title="Licensing & Permits" icon={<Key size={18} className="text-gray-400" />}>
+                <InfoCard title="Licensing & Permits" icon={<Key size={18} className="text-gray-400" />}>
+                    {hasLicensing ? (
                         <dl className="space-y-4">
                             {animal.licenseNumber && <InfoItem label={getLabel('licenseNumber', 'License Number')} value={animal.licenseNumber} />}
                             {animal.licenseJurisdiction && <InfoItem label={getLabel('licenseJurisdiction', 'License Jurisdiction')} value={animal.licenseJurisdiction} />}
                         </dl>
-                    </InfoCard>
-                )}
-                {hasLegal && (
-                     <InfoCard title="Legal / Administrative" icon={<FileCheck size={18} className="text-gray-400" />}>
+                    ) : <p className="text-sm text-gray-400">No licensing or permit information recorded.</p>}
+                </InfoCard>
+                <InfoCard title="Legal / Administrative" icon={<FileCheck size={18} className="text-gray-400" />}>
+                    {hasLegal ? (
                         <dl className="space-y-4">
                             {animal.insurance && <InfoItem label={getLabel('insurance', 'Insurance')} value={animal.insurance} />}
                             {animal.legalStatus && <InfoItem label={getLabel('legalStatus', 'Legal Status')} value={animal.legalStatus} />}
                         </dl>
-                    </InfoCard>
-                )}
-                {hasRestrictions && (
-                    <InfoCard title="Restrictions" icon={<Ban size={18} className="text-gray-400" />}>
+                    ) : <p className="text-sm text-gray-400">No legal or administrative information recorded.</p>}
+                </InfoCard>
+                <InfoCard title="Restrictions" icon={<Ban size={18} className="text-gray-400" />}>
+                    {hasRestrictions ? (
                         <dl className="space-y-4">
                             {animal.breedingRestrictions && <InfoItem label={getLabel('breedingRestrictions', 'Breeding Restrictions')} value={animal.breedingRestrictions} />}
                             {animal.exportRestrictions && <InfoItem label={getLabel('exportRestrictions', 'Export Restrictions')} value={animal.exportRestrictions} />}
                         </dl>
-                    </InfoCard>
-                )}
+                    ) : <p className="text-sm text-gray-400">No restrictions recorded.</p>}
+                </InfoCard>
             </div>
              <div className="space-y-6">
-                {hasPurchase && (
-                    <InfoCard title="Purchase Information" icon={<Tag size={18} className="text-gray-400" />}>
+                <InfoCard title="Purchase Information" icon={<Tag size={18} className="text-gray-400" />}>
+                    {hasPurchase ? (
                         <dl className="space-y-4">
                             {animal.purchaseDate && <InfoItem label="Purchase Date" value={formatDate(animal.purchaseDate)} />}
                             {animal.purchasePrice && <InfoItem label="Purchase Price" value={`${animal.purchasePriceCurrency || ''} ${animal.purchasePrice}`} />}
                             {animal.purchaseLocation && <InfoItem label="Purchase Location" value={animal.purchaseLocation} />}
                         </dl>
-                    </InfoCard>
-                )}
-                 {hasSale && (
-                    <InfoCard title="Sale Information" icon={<Tag size={18} className="text-gray-400" />}>
+                    ) : <p className="text-sm text-gray-400">No purchase information recorded.</p>}
+                </InfoCard>
+                <InfoCard title="Sale Information" icon={<Tag size={18} className="text-gray-400" />}>
+                    {hasSale ? (
                         <dl className="space-y-4">
                             {animal.saleDate && <InfoItem label="Sale Date" value={formatDate(animal.saleDate)} />}
                             {animal.salePriceAmount && <InfoItem label="Sale Price" value={`${animal.salePriceCurrency || ''} ${animal.salePriceAmount}`} />}
                             {animal.saleLocation && <InfoItem label="Sale Location" value={animal.saleLocation} />}
                         </dl>
-                    </InfoCard>
-                )}
-                {hasOwnerHistory && (
-                    <InfoCard title="Owner History" icon={<Users size={18} className="text-gray-400" />}>
+                    ) : <p className="text-sm text-gray-400">No sale information recorded.</p>}
+                </InfoCard>
+                <InfoCard title="Owner History" icon={<Users size={18} className="text-gray-400" />}>
+                    {hasOwnerHistory ? (
                         <div className="space-y-2">
                             {(animal.ownerHistory || animal.keeperHistory || []).map((entry, idx) => (
                                 <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
@@ -86,8 +86,8 @@ export const LegalTabContent = ({ animal, API_BASE_URL }) => {
                                 </div>
                             ))}
                         </div>
-                    </InfoCard>
-                )}
+                    ) : <p className="text-sm text-gray-400">No owner history recorded.</p>}
+                </InfoCard>
             </div>
         </div>
     );

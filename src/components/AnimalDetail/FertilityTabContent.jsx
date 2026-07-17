@@ -29,8 +29,8 @@ export const FertilityTabContent = ({ animal, API_BASE_URL }) => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
-                {hasReproStatus && (
-                    <InfoCard title="Reproductive Status" icon={<Leaf size={18} className="text-gray-400" />}>
+                <InfoCard title="Reproductive Status" icon={<Leaf size={18} className="text-gray-400" />}>
+                    {hasReproStatus ? (
                         <dl className="grid grid-cols-2 gap-4">
                             <InfoItem label="Neutered/Spayed" value={animal.isNeutered ? 'Yes' : 'No'} />
                             <InfoItem label="Infertile" value={animal.isInfertile ? 'Yes' : 'No'} />
@@ -40,38 +40,32 @@ export const FertilityTabContent = ({ animal, API_BASE_URL }) => {
                             {isMale && !animal.isNeutered && !animal.isInfertile && <InfoItem label="Stud Animal" value={animal.isStudAnimal ? 'Yes' : 'No'} />}
                             {isFemale && !animal.isNeutered && !animal.isInfertile && <InfoItem label="Breeding Dam" value={animal.isDamAnimal ? 'Yes' : 'No'} />}
                         </dl>
-                        {/* Conceptual addition */}
-                        <div className="pt-3 border-t mt-3">
-                            <InfoItem label="Breeding Status Reason">
-                                <span className="text-gray-400 italic">e.g., "Retired due to age"</span>
-                            </InfoItem>
-                        </div>
-                    </InfoCard>
-                )}
-                {hasCycleInfo && (
-                    <InfoCard title="Estrus/Cycle" icon={<RefreshCw size={18} className="text-gray-400" />}>
+                    ) : <p className="text-sm text-gray-400">No reproductive status information recorded.</p>}
+                </InfoCard>
+                <InfoCard title="Estrus/Cycle" icon={<RefreshCw size={18} className="text-gray-400" />}>
+                    {hasCycleInfo ? (
                         <dl className="grid grid-cols-2 gap-4">
                             <InfoItem label="Heat Status" value={animal.heatStatus} />
                             <InfoItem label="Last Heat Date" value={animal.lastHeatDate ? formatDate(animal.lastHeatDate) : null} />
                             <InfoItem label={getLabel('ovulationDate', 'Ovulation Date')} value={animal.ovulationDate ? formatDate(animal.ovulationDate) : null} />
                             {animal.estrusCycleLength && <InfoItem label="Estrus Cycle Length" value={`${animal.estrusCycleLength} days`} />}
                         </dl>
-                    </InfoCard>
-                )}
+                    ) : <p className="text-sm text-gray-400">No estrus or cycle information recorded.</p>}
+                </InfoCard>
             </div>
             <div className="space-y-6">
-                {hasSireInfo && (
-                    <InfoCard title="Sire Information" icon={<Mars size={18} className="text-gray-400" />}>
+                <InfoCard title="Sire Information" icon={<Mars size={18} className="text-gray-400" />}>
+                    {hasSireInfo ? (
                         <dl className="space-y-4">
                             <InfoItem label="Fertility Status" value={animal.fertilityStatus} />
                             {animal.fertilityNotes && <InfoItem label="Notes"><p className="whitespace-pre-wrap">{animal.fertilityNotes}</p></InfoItem>}
                             {animal.reproductiveClearances && <InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap">{animal.reproductiveClearances}</p></InfoItem>}
                             {animal.reproductiveComplications && <InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap">{animal.reproductiveComplications}</p></InfoItem>}
                         </dl>
-                    </InfoCard>
-                )}
-                {hasDamInfo && (
-                    <InfoCard title="Dam Information" icon={<Venus size={18} className="text-gray-400" />}>
+                    ) : <p className="text-sm text-gray-400">No sire-specific fertility information recorded.</p>}
+                </InfoCard>
+                <InfoCard title="Dam Information" icon={<Venus size={18} className="text-gray-400" />}>
+                    {hasDamInfo ? (
                         <dl className="space-y-4">
                             <InfoItem label={getLabel('damFertilityStatus', 'Dam Fertility Status')} value={animal.damFertilityStatus || animal.fertilityStatus} />
                             {animal.gestationLength && <InfoItem label={getLabel('gestationLength', 'Gestation Length')} value={`${animal.gestationLength} days`} />}
@@ -82,8 +76,8 @@ export const FertilityTabContent = ({ animal, API_BASE_URL }) => {
                             {animal.reproductiveClearances && <InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap">{animal.reproductiveClearances}</p></InfoItem>}
                             {animal.reproductiveComplications && <InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap">{animal.reproductiveComplications}</p></InfoItem>}
                         </dl>
-                    </InfoCard>
-                )}
+                    ) : <p className="text-sm text-gray-400">No dam-specific fertility information recorded.</p>}
+                </InfoCard>
             </div>
         </div>
     );
