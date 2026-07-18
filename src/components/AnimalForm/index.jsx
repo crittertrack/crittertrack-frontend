@@ -1,16 +1,17 @@
 ﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import axios from 'axios';
 import {
-    Activity, AlertCircle, AlertTriangle, ArrowLeft, Ban, Camera, Cat,
-    ChevronDown, ChevronRight, ClipboardList, Dna, Download, Droplets, Egg, EyeOff, Feather,
-    FileText, Flame, FolderOpen, Gem, Globe, Hash, Home, Hospital, Images, Key, Leaf,
-    Loader2, Lock, Mars, Medal, MessageSquare, Microscope, Pill, Plus, PlusCircle,
-    RefreshCw, RotateCcw, Ruler, Save, Scissors, Search, Shield, Sparkles,
-    Sprout, Star, Stethoscope, Tag, Target, Thermometer, Trash2, TreeDeciduous,
-    Upload, User, UtensilsCrossed, Venus, X, Check, Edit, Heart, ChevronUp,
-    ChevronLeft, Circle, Hourglass, Network, Bean, Milk, VenusAndMars, BookOpen,
-    Calculator, Calendar, CheckCircle, Dumbbell, Brain, Trophy, Scale, FileCheck,
-    Palette, Wrench, Utensils, Package, ScrollText, Link, Unlink, Baby, Bell
+    ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock,
+    Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit, Users, HeartPulse,
+    Hash, Sparkles, Ruler, Sprout, Key, FolderOpen, Globe, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets,
+    Thermometer, Feather, Medal, Target, Ban, Package, ScrollText, Link, Unlink, Baby, Bell, Plus, RotateCcw, Camera, Upload, Search, Star, ArrowRight,
+    Loader2, ChevronDown, ChevronUp, ChevronRight, Info, Cat,
+    Activity, AlertCircle, AlertTriangle, Download, Flame, Gem,
+    Mars, MessageSquare, Pill,
+    RefreshCw, Scissors, Shield,
+    Venus, Check,
+    Circle, Hourglass, Network, Bean, Milk, VenusAndMars, BookOpen,
+    Calculator, Calendar, CheckCircle, Dumbbell, Wrench, Utensils
 } from 'lucide-react';
 
 const parseJsonArrayField = (data) => {
@@ -30,8 +31,8 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';
+import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
-import ContactSelector from '../Contacts/ContactSelector';
 
 const getCountryFlag = (countryCode) => {
     if (!countryCode || countryCode.length !== 2) return '';
@@ -360,219 +361,116 @@ const compressImageWithWorker = (file, maxBytes = 200 * 1024, opts = {}) => {
     });
 };
 
+const getContactDisplayName = (contact) => {
+    const personalName = contact?.personalName?.trim();
+    const breederName = contact?.breederName?.trim();
+    const prefix = contact?.prefix?.trim();
+    const suffix = contact?.suffix?.trim();
 
-﻿const ConflictResolutionModal = ({ conflicts, litter, onResolve, onCancel }) => {
-    const [resolutions, setResolutions] = useState({});
-
-    useEffect(() => {
-        // Initialize resolutions with default 'breeding' choice for all conflicts
-        const initialResolutions = {};
-        conflicts.forEach(conflict => {
-            initialResolutions[conflict.field] = 'breeding';
-        });
-        setResolutions(initialResolutions);
-    }, [conflicts]);
-
-    const handleResolutionChange = (field, choice) => {
-        setResolutions(prev => ({
-            ...prev,
-            [field]: choice
-        }));
-    };
-
-    const handleResolve = () => {
-        const resolutionArray = Object.entries(resolutions).map(([field, choice]) => ({
-            field,
-            choice
-        }));
-        onResolve(resolutionArray);
-    };
-
-    return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl max-h-96 overflow-y-auto">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">Resolve Data Conflicts</h3>
-                    <button onClick={onCancel} className="text-gray-500 hover:text-gray-700">
-                        <X size={24} />
-                    </button>
-                </div>
-                
-                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-yellow-800 text-sm">
-                        <strong>Linking to Litter:</strong> {litter.litter_id_public}
-                    </p>
-                    <p className="text-yellow-800 text-sm">
-                        Some data conflicts were found between your breeding record and the litter. Please choose which values to keep.
-                    </p>
-                </div>
-
-                <div className="space-y-4">
-                    {conflicts.map((conflict) => (
-                        <div key={conflict.field} className="border border-gray-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-gray-700 mb-3">{conflict.label}</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                                <label className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name={conflict.field}
-                                        value="breeding"
-                                        checked={resolutions[conflict.field] === 'breeding'}
-                                        onChange={() => handleResolutionChange(conflict.field, 'breeding')}
-                                        className="text-blue-600"
-                                    />
-                                    <div className="flex-1">
-                                        <div className="text-sm font-medium text-blue-600">Keep Breeding Record Value</div>
-                                        <div className="text-sm text-gray-600">{conflict.breedingValue}</div>
-                                    </div>
-                                </label>
-                                <label className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name={conflict.field}
-                                        value="litter"
-                                        checked={resolutions[conflict.field] === 'litter'}
-                                        onChange={() => handleResolutionChange(conflict.field, 'litter')}
-                                        className="text-green-600"
-                                    />
-                                    <div className="flex-1">
-                                        <div className="text-sm font-medium text-green-600">Use Litter Value</div>
-                                        <div className="text-sm text-gray-600">{conflict.litterValue}</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                
-                <div className="flex gap-4 mt-6">
-                    <button 
-                        type="button" 
-                        onClick={onCancel}
-                        className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
-                    >
-                        Cancel
-                    </button>
-                    <button 
-                        type="button" 
-                        onClick={handleResolve}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-                    >
-                        Resolve Conflicts & Link
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+    if (personalName && breederName) {
+        return `${personalName} (${breederName})`;
+    }
+    if (personalName) {
+        return [prefix, personalName, suffix].filter(Boolean).join(' ');
+    }
+    if (breederName) {
+        return [prefix, breederName, suffix].filter(Boolean).join(' ');
+    }
+    return [prefix, personalName, suffix].filter(Boolean).join(' ') || 'Unnamed Contact';
 };
 
-// --- Litter Sync Conflict Modal -----------------------------------------------
-// Shown after an animal save when a breeding record's values differ from its
-// linked litter document. Lets the user pick the "truth" for each field; the
-// winning value is written to BOTH sides.
+const ContactDisplayField = ({ label, value, onEdit }) => (
+    <div>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600">{label}</label>
+        <div
+            onClick={onEdit}
+            className="mt-1 flex justify-between items-center p-2.5 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer hover:border-primary"
+        >
+            <span className={`text-sm ${value ? "text-gray-900" : "text-gray-400"}`}>{value || `Click to assign ${label}`}</span>
+            <Edit size={16} className="text-gray-400" />
+        </div>
+    </div>
+);
 
-const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
-    const [choices, setChoices] = useState({});
+const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, authToken }) => {
+    if (!isOpen) return null;
+
+    const [mode, setMode] = useState('user'); // 'user', 'contact', 'manual'
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [manualName, setManualName] = useState('');
+    const [contacts, setContacts] = useState([]);
+    const [loadingContacts, setLoadingContacts] = useState(false);
 
     useEffect(() => {
-        const init = {};
-        items.forEach(item => {
-            item.conflicts.forEach(c => {
-                init[`${item.litter._id}__${c.field}`] = 'record';
-            });
-        });
-        setChoices(init);
-    }, [items]);
+        if (mode === 'contact' && contacts.length === 0) {
+            setLoadingContacts(true);
+            axios.get(`${API_BASE_URL}/contacts`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => setContacts(res.data || []))
+                .catch(err => console.error(err))
+                .finally(() => setLoadingContacts(false));
+        }
+    }, [mode, authToken, API_BASE_URL, contacts.length]);
 
-    const set = (litterId, field, val) =>
-        setChoices(prev => ({ ...prev, [`${litterId}__${field}`]: val }));
+    const handleUserSearch = async () => {
+        if (!searchTerm.trim()) return;
+        setLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchTerm.trim())}&limit=20`);
+            setSearchResults(res.data || []);
+        } catch (err) {
+            console.error(err);
+        } finally { setLoading(false); }
+    };
 
     return (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center p-4 z-[60]">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
-                {/* Header */}
-                <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200">
-                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                        <span className="text-amber-600 text-xl">††</span>
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-bold text-gray-900">Litter Sync Conflicts</h3>
-                        <p className="text-sm text-gray-500">Your breeding record and litter card have different values. Pick which is correct — it will be saved to both.</p>
-                    </div>
+        <div className="fixed inset-0 bg-black/50 z-[90] flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="p-4 border-b">
+                    <h3 className="text-lg font-semibold">Assign {target}</h3>
                 </div>
-
-                {/* Conflict list */}
-                <div className="overflow-y-auto flex-1 px-6 py-4 space-y-6">
-                    {items.map(item => (
-                        <div key={item.litter._id} className="space-y-3">
-                            {items.length > 1 && (
-                                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                    Litter {item.litter.litter_id_public}
-                                </div>
-                            )}
-                            {item.conflicts.map(c => {
-                                const key = `${item.litter._id}__${c.field}`;
-                                const chosen = choices[key] ?? 'record';
-                                return (
-                                    <div key={c.field} className="rounded-xl border border-gray-200 overflow-hidden">
-                                        <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
-                                            <span className="text-sm font-semibold text-gray-700">{c.label}</span>
-                                        </div>
-                                        <div className="grid grid-cols-2 divide-x divide-gray-200">
-                                            {/* Breeding record option */}
-                                            <label className={`flex items-start gap-3 p-4 cursor-pointer transition ${chosen === 'record' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
-                                                <input
-                                                    type="radio"
-                                                    name={key}
-                                                    value="record"
-                                                    checked={chosen === 'record'}
-                                                    onChange={() => set(item.litter._id, c.field, 'record')}
-                                                    className="mt-0.5 accent-blue-600"
-                                                />
-                                                <div>
-                                                    <div className={`text-xs font-semibold mb-1 ${chosen === 'record' ? 'text-blue-600' : 'text-gray-500'}`}>Breeding Record</div>
-                                                    <div className={`text-sm font-bold ${chosen === 'record' ? 'text-blue-800' : 'text-gray-700'}`}>{c.recordValue ?? '?'}</div>
-                                                </div>
-                                            </label>
-                                            {/* Litter card option */}
-                                            <label className={`flex items-start gap-3 p-4 cursor-pointer transition ${chosen === 'litter' ? 'bg-green-50' : 'hover:bg-gray-50'}`}>
-                                                <input
-                                                    type="radio"
-                                                    name={key}
-                                                    value="litter"
-                                                    checked={chosen === 'litter'}
-                                                    onChange={() => set(item.litter._id, c.field, 'litter')}
-                                                    className="mt-0.5 accent-green-600"
-                                                />
-                                                <div>
-                                                    <div className={`text-xs font-semibold mb-1 ${chosen === 'litter' ? 'text-green-600' : 'text-gray-500'}`}>Litter Card</div>
-                                                    <div className={`text-sm font-bold ${chosen === 'litter' ? 'text-green-800' : 'text-gray-700'}`}>{c.litterValue ?? '?'}</div>
-                                                </div>
-                                            </label>
-                                        </div>
+                <div className="p-4 border-b flex gap-2">
+                    <button onClick={() => setMode('user')} className={`px-3 py-1 text-sm rounded-full ${mode === 'user' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Search User</button>
+                    <button onClick={() => setMode('contact')} className={`px-3 py-1 text-sm rounded-full ${mode === 'contact' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Select Contact</button>
+                    <button onClick={() => setMode('manual')} className={`px-3 py-1 text-sm rounded-full ${mode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Manual Entry</button>
+                </div>
+                <div className="p-4 overflow-y-auto flex-1">
+                    {mode === 'user' && (
+                        <div className="space-y-2">
+                            <div className="flex gap-2">
+                                <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or CTU ID" className="w-full p-2 border rounded-md" onKeyPress={e => e.key === 'Enter' && handleUserSearch()} />
+                                <button onClick={handleUserSearch} disabled={loading} className="p-2 bg-primary rounded-md disabled:opacity-50">{loading ? <Loader2 className="animate-spin" /> : <Search />}</button>
+                            </div>
+                            <div className="space-y-1">
+                                {searchResults.map(user => (
+                                    <div key={user.id_public} onClick={() => onSelect({ name: user.breederName || user.personalName, userId: user.id_public })} className="p-2 border rounded-md hover:bg-gray-100 cursor-pointer">
+                                        <p className="font-semibold">{user.breederName || user.personalName}</p>
+                                        <p className="text-xs text-gray-500">{user.id_public}</p>
                                     </div>
-                                );
-                            })}
+                                ))}
+                            </div>
                         </div>
-                    ))}
+                    )}
+                    {mode === 'contact' && (
+                        <div className="space-y-1">
+                            {loadingContacts ? <Loader2 className="animate-spin" /> : contacts.map(contact => (
+                                <div key={contact._id} onClick={() => onSelect({ name: getContactDisplayName(contact), userId: contact.linkedCTUID })} className="p-2 border rounded-md hover:bg-gray-100 cursor-pointer">
+                                    <p className="font-semibold">{getContactDisplayName(contact)}</p>
+                                    {contact.linkedCTUID && <p className="text-xs text-gray-500">{contact.linkedCTUID}</p>}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {mode === 'manual' && (
+                        <div className="space-y-2">
+                            <input type="text" value={manualName} onChange={e => setManualName(e.target.value)} placeholder={`Enter ${target} name`} className="w-full p-2 border rounded-md" />
+                            <button onClick={() => onSelect({ name: manualName })} className="w-full p-2 bg-primary rounded-md">Assign Name</button>
+                        </div>
+                    )}
                 </div>
-
-                {/* Footer */}
-                <div className="flex gap-3 px-6 py-4 border-t border-gray-200">
-                    <button
-                        type="button"
-                        onClick={onSkip}
-                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition text-sm"
-                    >
-                        Skip Litter Sync
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => onResolve(choices)}
-                        className="flex-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition text-sm"
-                    >
-                        Save to Both Sides
-                    </button>
+                <div className="p-4 border-t">
+                    <button onClick={onClose} className="w-full p-2 bg-gray-200 rounded-md">Cancel</button>
                 </div>
             </div>
         </div>
