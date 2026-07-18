@@ -389,7 +389,6 @@ const AnimalFormTestModal = ({
         availability: true,
     });
     const [newIdentifier, setNewIdentifier] = useState({ title: '', value: '' });
-
     const removeArrayItem = (field, index) => {
         setFormData(prev => ({
             ...prev,
@@ -583,7 +582,6 @@ const AnimalFormTestModal = ({
         }
         setParentSearchModalOpen(false);
     };
-
     const toggleSection = (section) => {
         setSectionsCollapsed(prev => ({ ...prev, [section]: !prev[section] }));
     };
@@ -1491,7 +1489,7 @@ const AnimalFormTestModal = ({
                                     {/* Additional Identifiers */}
                                     <div className="mt-4 pt-4 border-t border-gray-200">
                                         <h4 className="text-sm font-semibold text-gray-600 mb-2">Additional Identifiers</h4>
-                                        {(formData.identifiers || []).map((identifier, index) => (
+                                    {(formData.identifiers || []).filter(Boolean).map((identifier, index) => (
                                             <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-white border rounded-md">
                                                 <div className="flex-1 grid grid-cols-2 gap-2">
                                                     <input type="text" value={identifier.title} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
@@ -1685,7 +1683,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addVaccination} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vaccination</button>
                                         </div>
-                                        {(formData.vaccinations || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.vaccinations || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Deworming */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -1698,7 +1696,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addDeworming} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Deworming</button>
                                         </div>
-                                        {(formData.dewormingRecords || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.dewormingRecords || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -1714,7 +1712,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addMedicalProcedure} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Procedure</button>
                                         </div>
-                                        {(formData.medicalProcedures || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.medicalProcedures || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Lab Results */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -1727,7 +1725,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addLabResult} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Lab Result</button>
                                         </div>
-                                        {(formData.labResults || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.labResults || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -1742,7 +1740,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Condition</button>
                                         </div>
-                                        {(formData.medicalConditions || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.medicalConditions || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Allergies */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -1754,7 +1752,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addAllergy} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Allergy</button>
                                         </div>
-                                        {(formData.allergies || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('allergies', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.allergies || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('allergies', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -1774,7 +1772,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addVetVisit} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vet Visit</button>
                                         </div>
-                                        {(formData.vetVisits || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.vetVisits || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -1907,7 +1905,7 @@ const AnimalFormTestModal = ({
                                         <p className="text-sm text-gray-500">No breeding records yet.</p>
                                     ) : (
                                         <div className="space-y-2">
-                                            {(formData.breedingRecords || []).map((rec, i) => (
+                                        {(formData.breedingRecords || []).filter(Boolean).map((rec, i) => (
                                                 <div key={i} className="p-3 bg-white rounded-lg border border-gray-200 text-sm">
                                                     <div className="flex justify-between items-start">
                                                         <div>
@@ -1946,7 +1944,7 @@ const AnimalFormTestModal = ({
                                         </div>
                                         <button type="button" onClick={addMilestone} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Milestone</button>
                                     </div>
-                                    {(formData.milestones || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.startDate}: {rec.label}</span><button type="button" onClick={() => removeArrayItem('milestones', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.milestones || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.startDate}: {rec.label}</span><button type="button" onClick={() => removeArrayItem('milestones', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                 </FormSection>
                                 <FormSection title="Show & Performance" icon={<Trophy size={16} />}>
                                     <div><label className="block text-xs font-medium text-gray-700">Show Titles</label><textarea name="showTitles" value={formData.showTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
