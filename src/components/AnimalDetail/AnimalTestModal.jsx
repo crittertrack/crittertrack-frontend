@@ -1162,7 +1162,6 @@ const AnimalTestModal = ({
                                 animal={animal} // This tab no longer contains Relationship Insights
                                 API_BASE_URL={API_BASE_URL}
                             />
-                            {/* FamilyTabContent moved to Dashboard */}
                         </div>
                     )}
                     {activeTab === 'pedigree' && (

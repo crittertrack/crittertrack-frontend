@@ -29,7 +29,6 @@ const parseJsonArrayField = (data) => {
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
-import { FamilyTabContent } from '../AnimalDetail/FamilyTabContent';
 import DatePicker from '../DatePicker';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
 import ContactSelector from '../Contacts/ContactSelector';
@@ -7524,16 +7523,6 @@ const AnimalForm = ({
                             )}
                         </div>
                     </div>
-                )}
-                
-                {/* Tab 6: Family */}
-                {activeTab === 6 && (
-                    <FamilyTabContent
-                        animal={animalToEdit}
-                        API_BASE_URL={API_BASE_URL}
-                        authToken={authToken}
-                        onViewAnimal={null}
-                    />
                 )}
 
                 {/* Tab 7: Fertility */}

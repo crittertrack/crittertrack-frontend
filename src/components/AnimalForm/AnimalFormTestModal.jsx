@@ -10,7 +10,6 @@ import {
 import DatePicker from '../DatePicker';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
-import { FamilyTabContent } from '../AnimalDetail/FamilyTabContent';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
