@@ -770,9 +770,21 @@ const AnimalFormTestModal = ({
             breedingRecords: parseJsonArrayField(animalToEdit.breedingRecords),
             vetVisits: parseJsonArrayField(animalToEdit.vetVisits),
             primaryVet: animalToEdit.primaryVet || '',
+            // Backward compatible legacy fields
             dietType: animalToEdit.dietType || '',
             feedingSchedule: animalToEdit.feedingSchedule || '',
             supplements: animalToEdit.supplements || '',
+            // New structured nutrition fields (used by new UI)
+            dietSupplies: Array.isArray(animalToEdit.dietSupplies)
+                ? animalToEdit.dietSupplies
+                : (typeof animalToEdit.dietSupplies === 'string' ? (JSON.parse(animalToEdit.dietSupplies) || []) : []),
+            supplementSupplies: Array.isArray(animalToEdit.supplementSupplies)
+                ? animalToEdit.supplementSupplies
+                : (typeof animalToEdit.supplementSupplies === 'string' ? (JSON.parse(animalToEdit.supplementSupplies) || []) : []),
+            nutritionSchedule: animalToEdit.nutritionSchedule && typeof animalToEdit.nutritionSchedule === 'string'
+                ? (JSON.parse(animalToEdit.nutritionSchedule) || {})
+                : (animalToEdit.nutritionSchedule || {}),
+
             housingType: animalToEdit.housingType || '',
             bedding: animalToEdit.bedding || '',
             temperatureRange: animalToEdit.temperatureRange || '',
@@ -935,9 +947,22 @@ const AnimalFormTestModal = ({
             breedingRecords: [],
             vetVisits: '',
             primaryVet: '',
+            // Backward compatible legacy fields
             dietType: '',
             feedingSchedule: '',
             supplements: '',
+            // New structured nutrition fields
+            dietSupplies: [],
+            supplementSupplies: [],
+            nutritionSchedule: {
+                enabled: true,
+                startDate: '',
+                frequency: '',
+                unit: 'days',
+                timesPerDay: '',
+                notes: '',
+            },
+
             housingType: '',
             bedding: '',
             temperatureRange: '',
@@ -1225,7 +1250,8 @@ const AnimalFormTestModal = ({
             payloadToSave.extraImages = extraImages;
 
             // Serialize array fields
-            const arrayFields = ['identifiers', 'vaccinations', 'dewormingRecords', 'parasiteControl', 'medicalProcedures', 'labResults', 'medicalConditions', 'allergies', 'medications', 'vetVisits', 'growthRecords', 'milestones', 'keeperHistory', 'legalDocuments', 'careTasks', 'animalCareTasks'];
+            const arrayFields = ['identifiers', 'vaccinations', 'dewormingRecords', 'parasiteControl', 'medicalProcedures', 'labResults', 'medicalConditions', 'allergies', 'medications', 'vetVisits', 'growthRecords', 'milestones', 'keeperHistory', 'legalDocuments', 'careTasks', 'animalCareTasks', 'dietSupplies', 'supplementSupplies'];
+
             arrayFields.forEach(field => {
                 if (Array.isArray(payloadToSave[field]) && payloadToSave[field].length > 0) {
                     payloadToSave[field] = JSON.stringify(payloadToSave[field]);
@@ -1237,6 +1263,12 @@ const AnimalFormTestModal = ({
             if (Array.isArray(payloadToSave.identifiers)) {
                 payloadToSave.identifiers = JSON.stringify(payloadToSave.identifiers);
             }
+
+            // Serialize structured nutrition schedule (object) as JSON
+            if (payloadToSave.nutritionSchedule && typeof payloadToSave.nutritionSchedule === 'object') {
+                payloadToSave.nutritionSchedule = JSON.stringify(payloadToSave.nutritionSchedule);
+            }
+
 
             if (galleryImages.length === 0) {
                 payloadToSave.imageUrl = null;
@@ -2120,9 +2152,179 @@ const AnimalFormTestModal = ({
                         {activeTab === 'care' && (
                             <div className="space-y-4">
                                 <FormSection title="Nutrition" icon={<UtensilsCrossed size={16} />} initiallyOpen>
-                                    <div><label className="block text-xs font-medium text-gray-700">Diet Type</label><input type="text" name="dietType" value={formData.dietType} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Feeding Schedule</label><textarea name="feedingSchedule" value={formData.feedingSchedule} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Supplements</label><textarea name="supplements" value={formData.supplements} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div className="space-y-3">
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Diet</h4>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Diet Type</label>
+                                                <input
+                                                    type="text"
+                                                    name="dietType"
+                                                    value={formData.dietType}
+                                                    onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                    placeholder="e.g., Pellets, fresh greens, mixed"
+                                                />
+                                            </div>
+
+                                            <div className="pt-2 border-t">
+                                                <label className="block text-xs font-medium text-gray-700">Diet Supplies (future: select from Supplies page)</label>
+                                                <textarea
+                                                    name="dietSupplies"
+                                                    value={Array.isArray(formData.dietSupplies) ? JSON.stringify(formData.dietSupplies, null, 0) : ''}
+                                                    onChange={(e) => {
+                                                        const raw = e.target.value;
+                                                        try {
+                                                            const parsed = raw.trim() ? JSON.parse(raw) : [];
+                                                            setFormData(prev => ({ ...prev, dietSupplies: Array.isArray(parsed) ? parsed : [] }));
+                                                        } catch {
+                                                            // ignore invalid JSON while typing
+                                                        }
+                                                    }}
+                                                    rows={2}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md font-mono"
+                                                    placeholder='[{"supplyId":"","name":""}]'
+                                                />
+                                                <p className="text-[11px] text-gray-500 mt-1">Stored as JSON for now; later this will be replaced with a Supplies selector modal.</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Supplements</h4>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Supplements (legacy text)</label>
+                                                <textarea
+                                                    name="supplements"
+                                                    value={formData.supplements}
+                                                    onChange={handleChange}
+                                                    rows="2"
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                    placeholder="Optional notes or list of supplements"
+                                                />
+                                            </div>
+
+                                            <div className="pt-2 border-t">
+                                                <label className="block text-xs font-medium text-gray-700">Supplement Supplies (future: select from Supplies page)</label>
+                                                <textarea
+                                                    name="supplementSupplies"
+                                                    value={Array.isArray(formData.supplementSupplies) ? JSON.stringify(formData.supplementSupplies, null, 0) : ''}
+                                                    onChange={(e) => {
+                                                        const raw = e.target.value;
+                                                        try {
+                                                            const parsed = raw.trim() ? JSON.parse(raw) : [];
+                                                            setFormData(prev => ({ ...prev, supplementSupplies: Array.isArray(parsed) ? parsed : [] }));
+                                                        } catch {
+                                                            // ignore invalid JSON while typing
+                                                        }
+                                                    }}
+                                                    rows={2}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md font-mono"
+                                                    placeholder='[{"supplyId":"","name":"","dosage":""}]'
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <h4 className="text-sm font-semibold text-gray-700">Schedule (feeds Feeding & Care tab later)</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Enabled</label>
+                                                    <select
+                                                        name="nutritionScheduleEnabled"
+                                                        value={formData.nutritionSchedule?.enabled ? 'yes' : 'no'}
+                                                        onChange={(e) => {
+                                                            const enabled = e.target.value === 'yes';
+                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), enabled } }));
+                                                        }}
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                    >
+                                                        <option value="yes">Yes</option>
+                                                        <option value="no">No</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Start Date</label>
+                                                    <DatePicker
+                                                        value={formData.nutritionSchedule?.startDate || ''}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), startDate: val } }));
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Frequency</label>
+                                                    <input
+                                                        type="number"
+                                                        value={formData.nutritionSchedule?.frequency || ''}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value;
+                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), frequency: v } }));
+                                                        }}
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                        placeholder="e.g., 7"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Unit</label>
+                                                    <select
+                                                        value={formData.nutritionSchedule?.unit || 'days'}
+                                                        onChange={(e) => {
+                                                            const unit = e.target.value;
+                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), unit } }));
+                                                        }}
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                    >
+                                                        <option value="hours">Hours</option>
+                                                        <option value="days">Days</option>
+                                                        <option value="weeks">Weeks</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Times/Day</label>
+                                                    <input
+                                                        type="number"
+                                                        value={formData.nutritionSchedule?.timesPerDay || ''}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value;
+                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), timesPerDay: v } }));
+                                                        }}
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                        placeholder="e.g., 2"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Notes</label>
+                                                <textarea
+                                                    value={formData.nutritionSchedule?.notes || ''}
+                                                    onChange={(e) => {
+                                                        const notes = e.target.value;
+                                                        setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), notes } }));
+                                                    }}
+                                                    rows="2"
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                    placeholder="e.g., reduce for juveniles"
+                                                />
+                                            </div>
+
+                                            <div className="pt-2 border-t">
+                                                <label className="block text-xs font-medium text-gray-700">Feeding Schedule (legacy text)</label>
+                                                <textarea
+                                                    name="feedingSchedule"
+                                                    value={formData.feedingSchedule}
+                                                    onChange={handleChange}
+                                                    rows="2"
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </FormSection>
                                 <FormSection title="Housing & Environment" icon={<Home size={16} />}>
                                     <div><label className="block text-xs font-medium text-gray-700">Housing Type</label><input type="text" name="housingType" value={formData.housingType} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
