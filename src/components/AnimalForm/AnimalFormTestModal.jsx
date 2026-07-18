@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-    ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images,
-    Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit,
-    Hash, Sparkles, Ruler, Sprout, Key, FolderOpen, Globe, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets,
-    Thermometer, Feather, Medal, Target, Ban, Package, ScrollText, Link, Unlink, Baby, Bell, Plus, RotateCcw, Camera, Upload, Search, Star, ArrowRight,
+    ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock,
+    Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit, Users, HeartPulse,
+    Hash, Sparkles, Ruler, Sprout, Key, FolderOpen, Globe, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets, 
+    Thermometer, Feather, Medal, Target, Ban, Package, ScrollText, Link, Unlink, Baby, Bell, Plus, RotateCcw, Camera, Upload, Search, Star, ArrowRight, 
     Loader2, ChevronDown, ChevronRight, Info,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
@@ -156,7 +156,7 @@ const AnimalFormTestModal = ({
     GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'],
     STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']
 }) => {
-    const [activeTab, setActiveTab] = useState(1);
+    const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(false);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [assignModalTarget, setAssignModalTarget] = useState(null); // 'breeder' or 'keeper'
@@ -175,6 +175,18 @@ const AnimalFormTestModal = ({
 
     const [tagInput, setTagInput] = useState('');
 
+    const FormSection = ({ title, icon, children, initiallyOpen = false }) => {
+        const [isOpen, setIsOpen] = useState(initiallyOpen);
+        return (
+            <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center text-left">
+                    <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5">{icon}{title}</h3>
+                    {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </button>
+                {isOpen && <div className="mt-3 pt-3 border-t space-y-3">{children}</div>}
+            </div>
+        );
+    };
 
     const [formData, setFormData] = useState(
         animalToEdit ? {
@@ -215,7 +227,29 @@ const AnimalFormTestModal = ({
             colonyId: animalToEdit.colonyId || '',
             tattooId: animalToEdit.tattooId || '',
             ringId: animalToEdit.ringId || '',
-            eartagNumber: animalToEdit.eartagNumber || '',
+            eartagNumber: animalToEdit.eartagNumber || '', // Identification
+            // Appearance
+            coatPattern: animalToEdit.coatPattern || '',
+            phenotype: animalToEdit.phenotype || '',
+            morph: animalToEdit.morph || '',
+            markings: animalToEdit.markings || '',
+            eyeColor: animalToEdit.eyeColor || '',
+            nailColor: animalToEdit.nailColor || '',
+            size: animalToEdit.size || '',
+            carrierTraits: animalToEdit.carrierTraits || '',
+            lifeStage: animalToEdit.lifeStage || '',
+            growthRecords: parseJsonArrayField(animalToEdit.growthRecords),
+            measurementUnits: animalToEdit.measurementUnits || { weight: 'g', length: 'cm' },
+            // Health
+            healthStatus: animalToEdit.healthStatus || 'Unknown',
+            quarantineStatus: animalToEdit.quarantineStatus || { active: false },
+            vaccinations: parseJsonArrayField(animalToEdit.vaccinations),
+            dewormingRecords: parseJsonArrayField(animalToEdit.dewormingRecords),
+            parasiteControl: parseJsonArrayField(animalToEdit.parasiteControl),
+            medicalProcedures: parseJsonArrayField(animalToEdit.medicalProcedures),
+            labResults: parseJsonArrayField(animalToEdit.labResults || animalToEdit.laboratoryResults),
+            medicalConditions: parseJsonArrayField(animalToEdit.medicalConditions),
+            allergies: parseJsonArrayField(animalToEdit.allergies),
             breed: animalToEdit.breed || '',
             strain: animalToEdit.strain || '',
             origin: animalToEdit.origin || 'Captive-bred'
@@ -259,6 +293,28 @@ const AnimalFormTestModal = ({
             tattooId: '',
             ringId: '',
             eartagNumber: '',
+            // Appearance
+            coatPattern: '',
+            phenotype: '',
+            morph: '',
+            markings: '',
+            eyeColor: '',
+            nailColor: '',
+            size: '',
+            carrierTraits: '',
+            lifeStage: '',
+            growthRecords: [],
+            measurementUnits: { weight: 'g', length: 'cm' },
+            // Health
+            healthStatus: 'Unknown',
+            quarantineStatus: { active: false },
+            vaccinations: [],
+            dewormingRecords: [],
+            parasiteControl: [],
+            medicalProcedures: [],
+            labResults: [],
+            medicalConditions: [],
+            allergies: [],
             breed: '',
             strain: '',
             origin: 'Captive-bred',
@@ -494,10 +550,17 @@ const AnimalFormTestModal = ({
     };
 
     const TABS = [
-        { id: 1, label: 'Dashboard', icon: Info },
-        { id: 2, label: 'Identification', icon: Hash },
-        { id: 3, label: 'Appearance', icon: Palette },
-        { id: 4, label: 'Pedigree', icon: Dna, color: 'text-orange-500' }, { id: 5, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' }, { id: 6, label: 'Fertility', icon: Egg, color: 'text-yellow-500' }, { id: 7, label: 'Health', icon: Hospital, color: 'text-red-500' }, { id: 8, label: 'Care', icon: Home, color: 'text-teal-500' }, { id: 9, label: 'Behavior', icon: Brain, color: 'text-purple-500' }, { id: 10, label: 'Notes & Milestones', icon: FileText, color: 'text-indigo-500' }, { id: 11, label: 'Show', icon: Trophy, color: 'text-yellow-600' }, { id: 12, label: 'Legal', icon: FileCheck, color: 'text-blue-600' }, { id: 13, label: 'End of Life', icon: Scale, color: 'text-gray-500' }, { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' }
+        { id: 'dashboard', label: 'Dashboard', icon: Info },
+        { id: 'identification', label: 'Identification', icon: Hash },
+        { id: 'appearance', label: 'Appearance', icon: Palette },
+        { id: 'health', label: 'Health', icon: HeartPulse },
+        { id: 'care', label: 'Routine Care', icon: Droplets },
+        { id: 'behavior', label: 'Behavior', icon: Brain },
+        { id: 'breeding', label: 'Breeding', icon: Users },
+        { id: 'pedigree', label: 'Pedigree', icon: Dna },
+        { id: 'gallery', label: 'Gallery', icon: Images },
+        { id: 'timeline', label: 'Timeline', icon: Clock },
+        { id: 'records', label: 'Records', icon: FileText },
     ];
 
     return (
@@ -546,7 +609,7 @@ const AnimalFormTestModal = ({
                 <div className="flex-1 overflow-y-auto">
                     {/* Tab Content */}
                     <div className="p-6">
-                        {activeTab === 1 && ( // DASHBOARD
+                        {activeTab === 'dashboard' && ( // DASHBOARD
                             <div className="flex gap-4">
                                 {/* Left Column: Image Upload */}
                                 <div className="w-1/4 flex-shrink-0 flex flex-col gap-2">
@@ -734,7 +797,7 @@ const AnimalFormTestModal = ({
                                 </div>
                             </div>
                         )}
-                        {activeTab === 2 && (
+                        {activeTab === 'identification' && (
                             <div className="space-y-4">
                                 {/* Identification Numbers */}
                                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
@@ -869,8 +932,35 @@ const AnimalFormTestModal = ({
                                 </div>
                             </div>
                         )}
-                        
-                        {activeTab === 14 && (
+
+                        {activeTab === 'appearance' && (
+                            <div className="space-y-6">
+                                <FormSection title="Appearance" icon={<Palette size={16} />} initiallyOpen>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div><label className="block text-xs font-medium text-gray-700">Color</label><input type="text" name="color" value={formData.color} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Coat Pattern</label><input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Coat</label><input type="text" name="coat" value={formData.coat} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Markings</label><input type="text" name="markings" value={formData.markings} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Eye Color</label><input type="text" name="eyeColor" value={formData.eyeColor} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Carrier Traits</label><input type="text" name="carrierTraits" value={formData.carrierTraits} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
+                                    </div>
+                                </FormSection>
+                                <FormSection title="Genetic Code" icon={<Dna size={16} />}>
+                                    <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} />
+                                </FormSection>
+                                <FormSection title="Life Stage & Measurements" icon={<Ruler size={16} />}>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700">Life Stage</label>
+                                        <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                            <option value="">Unknown</option><option value="Newborn">Newborn</option><option value="Juvenile">Juvenile</option><option value="Sub-Adult">Sub-Adult</option><option value="Adult">Adult</option><option value="Senior">Senior</option>
+                                        </select>
+                                    </div>
+                                    {/* Growth records would go here */}
+                                </FormSection>
+                            </div>
+                        )}
+
+                        {activeTab === 'gallery' && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Gallery Management</h3>
                                 <p className="text-sm text-gray-500">
@@ -930,6 +1020,11 @@ const AnimalFormTestModal = ({
                                 )}
                             </div>
                         )}
+
+                        {/* Placeholder for other new tabs */}
+                        {activeTab === 'health' && <div className="text-center p-8 bg-gray-50 rounded-lg">Health Fields Go Here</div>}
+                        {activeTab === 'care' && <div className="text-center p-8 bg-gray-50 rounded-lg">Routine Care Fields Go Here</div>}
+                        {activeTab === 'behavior' && <div className="text-center p-8 bg-gray-50 rounded-lg">Behavior Fields Go Here</div>}
                     </div>
                 </div>
 
