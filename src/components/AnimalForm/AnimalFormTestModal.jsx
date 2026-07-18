@@ -1720,7 +1720,7 @@ const AnimalFormTestModal = ({
                                 <FormSection title="Genetic Code" icon={<Dna size={16} />}>
                                     <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} />
                                 </FormSection>
-                                <FormSection title="Life Stage & Measurements" icon={<Ruler size={16} />}>
+                                <FormSection title="Life Stage" icon={<Sprout size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Life Stage</label>
@@ -1736,7 +1736,9 @@ const AnimalFormTestModal = ({
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="space-y-3 mt-6">
+                                </FormSection>
+                                <FormSection title="Measurements & Growth" icon={<Ruler size={16} />}>
+                                    <div className="space-y-3">
                                         <h4 className="text-sm font-semibold text-gray-600">Growth History</h4>
                                         <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                             <p className="text-xs font-medium text-gray-700 mb-2">Measurement Units</p>
@@ -1854,10 +1856,16 @@ const AnimalFormTestModal = ({
                             </div>
                         )}
 
-                        {/* Placeholder for other new tabs */}
                         {activeTab === 'health' && (
                             <div className="space-y-4">
-                                <FormSection title="Active Medical Records" icon={<Pill size={16} />}>
+                                <FormSection title={
+                                    <div className="flex items-center gap-3">
+                                        <span>Active Medical Records</span>
+                                        <span className="text-xs font-semibold bg-green-100 text-green-800 px-2.5 py-1 rounded-full border border-green-200">
+                                            Health Status: Excellent
+                                        </span>
+                                    </div>
+                                } icon={<Pill size={16} />}>
                                     {/* Quarantine Status */}
                                     <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-gray-700">Quarantine Status</h4>
@@ -1885,6 +1893,33 @@ const AnimalFormTestModal = ({
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* Medications */}
+                                    <div className="space-y-2 pt-3 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Active Medications</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({ ...newMedication, name: e.target.value })} placeholder="Medication Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="Dose (e.g., 0.1ml)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <DatePicker value={newMedication.startDate} onChange={(e) => setNewMedication({ ...newMedication, startDate: e.target.value })} placeholder="Start Date" className="py-1.5 px-2 text-sm" />
+                                                <DatePicker value={newMedication.stopDate} onChange={(e) => setNewMedication({ ...newMedication, stopDate: e.target.value })} placeholder="Stop Date" className="py-1.5 px-2 text-sm" />
+                                                <div className="col-span-2 flex gap-2 items-center">
+                                                    <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="Interval" className="w-20 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                    <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                        <option value="hours">Hours</option><option value="days">Days</option><option value="weeks">Weeks</option>
+                                                    </select>
+                                                    <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Notes" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                </div>
+                                            </div>
+                                            <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Medication</button>
+                                        </div>
+                                        {(formData.medications || []).filter(Boolean).map((rec, i) => (
+                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border">
+                                                <span>{rec.name} {rec.dose} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})</span>
+                                                <button type="button" onClick={() => removeArrayItem('medications', i)}><Trash2 size={14} className="text-red-500" /></button>
+                                            </div>
+                                        ))}
                                     </div>
 
                                     {/* Medical Conditions */}
@@ -1920,34 +1955,6 @@ const AnimalFormTestModal = ({
                                                 <span>{rec.name} {rec.notes && `(${rec.notes})`}</span>
                                                 <button type="button" onClick={() => removeArrayItem('allergies', i)}><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Medications */}
-                                    <div className="space-y-2 pt-3 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Active Medications</h4>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({ ...newMedication, name: e.target.value })} placeholder="Medication Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="Dose (e.g., 0.1ml)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <DatePicker value={newMedication.startDate} onChange={(e) => setNewMedication({ ...newMedication, startDate: e.target.value })} placeholder="Start Date" className="py-1.5 px-2 text-sm" />
-                                                <DatePicker value={newMedication.stopDate} onChange={(e) => setNewMedication({ ...newMedication, stopDate: e.target.value })} placeholder="Stop Date" className="py-1.5 px-2 text-sm" />
-                                                <div className="col-span-2 flex gap-2 items-center">
-                                                    <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="Interval" className="w-20 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                    <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
-                                                        <option value="hours">Hours</option><option value="days">Days</option><option value="weeks">Weeks</option>
-                                                    </select>
-                                                    <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Notes" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                </div>
-                                            </div>
-                                            <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Medication</button>
-                                        </div>
-                                        {(formData.medications || []).filter(Boolean).map((rec, i) => (
-                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border">
-                                                <span>{rec.name} {rec.dose} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})</span>
-                                                <button type="button" onClick={() => removeArrayItem('medications', i)}><Trash2 size={14} className="text-red-500" /></button>
-                                            </div>
-                                            
                                         ))}
                                     </div>
                                 </FormSection>
