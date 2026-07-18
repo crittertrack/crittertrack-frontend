@@ -390,200 +390,6 @@ const AnimalFormTestModal = ({
     });
     const [newIdentifier, setNewIdentifier] = useState({ title: '', value: '' });
 
-    const removeArrayItem = (field, index) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: (parseJsonArrayField(prev[field]) || []).filter((_, i) => i !== index)
-        }));
-    };
-
-    const addVaccination = () => {
-        if (!newVaccination.date || !newVaccination.name) {
-            showModalMessage('Missing Data', 'Please enter at least a date and vaccination name.');
-            return;
-        }
-        const record = {
-            id: Date.now().toString(),
-            date: newVaccination.date,
-            name: newVaccination.name,
-            notes: newVaccination.notes || ''
-        };
-        setFormData(prev => ({
-            ...prev,
-            vaccinations: [...(parseJsonArrayField(prev.vaccinations) || []), record]
-        }));
-        setNewVaccination({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
-    };
-
-    const addDeworming = () => {
-        if (!newDeworming.date || !newDeworming.medication) {
-            showModalMessage('Missing Data', 'Please enter at least a date and medication.');
-            return;
-        }
-        const record = {
-            id: Date.now().toString(),
-            date: newDeworming.date,
-            medication: newDeworming.medication,
-            notes: newDeworming.notes || ''
-        };
-        setFormData(prev => ({
-            ...prev,
-            dewormingRecords: [...(parseJsonArrayField(prev.dewormingRecords) || []), record]
-        }));
-        setNewDeworming({ date: new Date().toISOString().substring(0, 10), medication: '', notes: '' });
-    };
-
-    const addMedicalProcedure = () => {
-        if (!newProcedure.date || !newProcedure.name) {
-            showModalMessage('Missing Data', 'Please enter at least a date and procedure name.');
-            return;
-        }
-        const record = {
-            id: Date.now().toString(),
-            date: newProcedure.date,
-            name: newProcedure.name,
-            notes: newProcedure.notes || ''
-        };
-        setFormData(prev => ({
-            ...prev,
-            medicalProcedures: [...(parseJsonArrayField(prev.medicalProcedures) || []), record]
-        }));
-        setNewProcedure({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
-    };
-
-    const addLabResult = () => {
-        if (!newLabResult.date || !newLabResult.testName) {
-            showModalMessage('Missing Data', 'Please enter at least a date and test name.');
-            return;
-        }
-        const record = {
-            id: Date.now().toString(),
-            date: newLabResult.date,
-            testName: newLabResult.testName,
-            result: newLabResult.result || '',
-            notes: newLabResult.notes || ''
-        };
-        setFormData(prev => ({
-            ...prev,
-            labResults: [...(parseJsonArrayField(prev.labResults) || []), record]
-        }));
-        setNewLabResult({ date: new Date().toISOString().substring(0, 10), testName: '', result: '', notes: '' });
-    };
-
-    const addMedicalCondition = () => {
-        if (!newMedicalCondition.name) {
-            showModalMessage('Missing Data', 'Please enter a condition name.');
-            return;
-        }
-        const record = {
-            id: Date.now().toString(),
-            name: newMedicalCondition.name,
-            notes: newMedicalCondition.notes || ''
-        };
-        setFormData(prev => ({
-            ...prev,
-            medicalConditions: [...(parseJsonArrayField(prev.medicalConditions) || []), record]
-        }));
-        setNewMedicalCondition({ name: '', notes: '' });
-    };
-
-    const addAllergy = () => {
-        if (!newAllergy.name) {
-            showModalMessage('Missing Data', 'Please enter an allergy name.');
-            return;
-        }
-        const record = {
-            id: Date.now().toString(),
-            name: newAllergy.name,
-            notes: newAllergy.notes || ''
-        };
-        setFormData(prev => ({
-            ...prev,
-            allergies: [...(parseJsonArrayField(prev.allergies) || []), record]
-        }));
-        setNewAllergy({ name: '', notes: '' });
-    };
-
-    const addVetVisit = () => {
-        if (!newVetVisit.date || !newVetVisit.reason) {
-            showModalMessage('Missing Data', 'Please enter at least a date and visit reason.');
-            return;
-        }
-        const record = {
-            id: Date.now().toString(),
-            date: newVetVisit.date,
-            reason: newVetVisit.reason,
-            notes: newVetVisit.notes || ''
-        };
-        setFormData(prev => ({
-            ...prev,
-            vetVisits: [...(parseJsonArrayField(prev.vetVisits) || []), record]
-        }));
-        setNewVetVisit({ date: new Date().toISOString().substring(0, 10), reason: '', notes: '' });
-    };
-
-    const addMilestone = () => {
-        if (!newMilestoneLabel.trim() || !newMilestoneDate) return;
-        const entry = {
-            label: newMilestoneLabel.trim(),
-            startDate: newMilestoneDate,
-            interval: newMilestoneInterval ? Number(newMilestoneInterval) : null,
-            intervalUnit: newMilestoneInterval ? newMilestoneUnit : null,
-        };
-        setFormData(prev => ({ ...prev, milestones: [...(prev.milestones || []), entry] }));
-        setNewMilestoneLabel('');
-        setNewMilestoneDate(new Date().toISOString().split('T')[0]);
-        setNewMilestoneInterval('');
-        setNewMilestoneUnit('week');
-    };
-
-    const addBreedingRecord = () => {
-        const record = {
-            id: Date.now().toString(),
-            ...newBreedingRecord,
-            mate: newBreedingRecord.mate || (mateInfo ? `${mateInfo.prefix || ''} ${mateInfo.name}`.trim() : null),
-        };
-        setFormData(prev => ({
-            ...prev,
-            breedingRecords: [...(parseJsonArrayField(prev.breedingRecords) || []), record]
-        }));
-        setNewBreedingRecord({
-            breedingMethod: 'Unknown',
-            matingDate: '',
-            mate: '',
-            mateAnimalId: null,
-            outcome: 'Unknown',
-            birthEventDate: '',
-            litterSizeBorn: '',
-            notes: ''
-        });
-        setMateInfo(null);
-    };
-
-    const clearMateSelection = () => {
-        setNewBreedingRecord(prev => ({ ...prev, mateAnimalId: null, mate: '' }));
-        setMateInfo(null);
-    };
-
-    const handleSelectMate = (animal) => {
-        if (animal) {
-            setMateInfo({
-                id_public: animal.id_public,
-                prefix: animal.prefix || '',
-                suffix: animal.suffix || '',
-                name: animal.name || '',
-            });
-            setNewBreedingRecord(prev => ({
-                ...prev,
-                mateAnimalId: animal.id_public,
-                mate: '',
-            }));
-        } else {
-            clearMateSelection();
-        }
-        setParentSearchModalOpen(false);
-    };
-
     const toggleSection = (section) => {
         setSectionsCollapsed(prev => ({ ...prev, [section]: !prev[section] }));
     };
@@ -1491,7 +1297,7 @@ const AnimalFormTestModal = ({
                                     {/* Additional Identifiers */}
                                     <div className="mt-4 pt-4 border-t border-gray-200">
                                         <h4 className="text-sm font-semibold text-gray-600 mb-2">Additional Identifiers</h4>
-                                        {(formData.identifiers || []).map((identifier, index) => (
+                                    {(formData.identifiers || []).filter(Boolean).map((identifier, index) => (
                                             <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-white border rounded-md">
                                                 <div className="flex-1 grid grid-cols-2 gap-2">
                                                     <input type="text" value={identifier.title} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
@@ -1685,7 +1491,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addVaccination} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vaccination</button>
                                         </div>
-                                        {(formData.vaccinations || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.vaccinations || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Deworming */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -1698,7 +1504,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addDeworming} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Deworming</button>
                                         </div>
-                                        {(formData.dewormingRecords || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.dewormingRecords || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -1714,7 +1520,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addMedicalProcedure} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Procedure</button>
                                         </div>
-                                        {(formData.medicalProcedures || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.medicalProcedures || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Lab Results */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -1727,7 +1533,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addLabResult} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Lab Result</button>
                                         </div>
-                                        {(formData.labResults || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.labResults || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -1742,7 +1548,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Condition</button>
                                         </div>
-                                        {(formData.medicalConditions || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.medicalConditions || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Allergies */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -1754,7 +1560,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addAllergy} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Allergy</button>
                                         </div>
-                                        {(formData.allergies || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('allergies', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.allergies || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('allergies', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -1774,7 +1580,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addVetVisit} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vet Visit</button>
                                         </div>
-                                        {(formData.vetVisits || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.vetVisits || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -1907,7 +1713,7 @@ const AnimalFormTestModal = ({
                                         <p className="text-sm text-gray-500">No breeding records yet.</p>
                                     ) : (
                                         <div className="space-y-2">
-                                            {(formData.breedingRecords || []).map((rec, i) => (
+                                        {(formData.breedingRecords || []).filter(Boolean).map((rec, i) => (
                                                 <div key={i} className="p-3 bg-white rounded-lg border border-gray-200 text-sm">
                                                     <div className="flex justify-between items-start">
                                                         <div>
@@ -1946,7 +1752,7 @@ const AnimalFormTestModal = ({
                                         </div>
                                         <button type="button" onClick={addMilestone} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Milestone</button>
                                     </div>
-                                    {(formData.milestones || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.startDate}: {rec.label}</span><button type="button" onClick={() => removeArrayItem('milestones', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.milestones || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.startDate}: {rec.label}</span><button type="button" onClick={() => removeArrayItem('milestones', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                 </FormSection>
                                 <FormSection title="Show & Performance" icon={<Trophy size={16} />}>
                                     <div><label className="block text-xs font-medium text-gray-700">Show Titles</label><textarea name="showTitles" value={formData.showTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
