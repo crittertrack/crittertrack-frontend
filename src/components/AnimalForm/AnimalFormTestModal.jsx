@@ -8,6 +8,7 @@ import {
     Loader2, ChevronDown, ChevronUp, ChevronRight, Info,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
+import { formatDate } from '../../utils/dateFormatter';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
 
@@ -381,6 +382,26 @@ const AnimalFormTestModal = ({
     const [newMilestoneUnit, setNewMilestoneUnit] = useState('week');
     const [newMeasurement, setNewMeasurement] = useState({ date: new Date().toISOString().substring(0, 10), weight: '', length: '', bcs: '', notes: '' });
 
+    const addMeasurement = () => {
+        if (!newMeasurement.date || !newMeasurement.weight) {
+            showModalMessage('Missing Data', 'Please enter at least a date and weight.');
+            return;
+        }
+        const newRecord = {
+            id: Date.now().toString(),
+            date: newMeasurement.date,
+            weight: newMeasurement.weight,
+            length: newMeasurement.length || null,
+            bcs: newMeasurement.bcs || null,
+            notes: newMeasurement.notes || ''
+        };
+        setFormData(prev => ({
+            ...prev,
+            growthRecords: [...(parseJsonArrayField(prev.growthRecords) || []), newRecord]
+        }));
+        setNewMeasurement({ date: new Date().toISOString().substring(0, 10), weight: '', length: '', bcs: '', notes: '' });
+    };
+
 
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [sectionsCollapsed, setSectionsCollapsed] = useState({
@@ -394,6 +415,67 @@ const AnimalFormTestModal = ({
             ...prev,
             [field]: (parseJsonArrayField(prev[field]) || []).filter((_, i) => i !== index)
         }));
+    };
+
+    const addMedicalCondition = () => {
+        if (!newMedicalCondition.name) {
+            showModalMessage('Missing Data', 'Please enter a condition name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            name: newMedicalCondition.name,
+            notes: newMedicalCondition.notes || ''
+        };
+        setFormData(prev => ({
+            ...prev,
+            medicalConditions: [...(parseJsonArrayField(prev.medicalConditions) || []), record]
+        }));
+        setNewMedicalCondition({ name: '', notes: '' });
+    };
+
+    const addAllergy = () => {
+        if (!newAllergy.name) {
+            showModalMessage('Missing Data', 'Please enter an allergy name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            name: newAllergy.name,
+            notes: newAllergy.notes || ''
+        };
+        setFormData(prev => ({
+            ...prev,
+            allergies: [...(parseJsonArrayField(prev.allergies) || []), record]
+        }));
+        setNewAllergy({ name: '', notes: '' });
+    };
+
+    const addMedication = () => {
+        if (!newMedication.name) {
+            showModalMessage('Missing Data', 'Please enter a medication name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            name: newMedication.name,
+            dose: newMedication.dose || '',
+            notes: newMedication.notes || '',
+            startDate: newMedication.startDate || null,
+            stopDate: newMedication.stopDate || null,
+            intervalValue: newMedication.intervalValue ? Number(newMedication.intervalValue) : null,
+            intervalUnit: newMedication.intervalUnit || 'hours'
+        };
+        setFormData(prev => ({
+            ...prev,
+            medications: [...(parseJsonArrayField(prev.medications) || []), record]
+        }));
+        setNewMedication({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
+    };
+
+    const handleQuarantineChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, quarantineDetails: { ...(prev.quarantineDetails || { status: 'None', reason: '', startDate: '', endDate: '' }), [name]: value } }));
     };
 
     const addVaccination = () => {
@@ -450,7 +532,7 @@ const AnimalFormTestModal = ({
         setNewParasiteControl({ date: new Date().toISOString().substring(0, 10), treatment: '', notes: '' });
     };
 
-    const addMedicalProcedure = () => {
+     const addMedicalProcedure = () => {
         if (!newProcedure.date || !newProcedure.name) {
             showModalMessage('Missing Data', 'Please enter at least a date and procedure name.');
             return;
@@ -468,7 +550,7 @@ const AnimalFormTestModal = ({
         setNewProcedure({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
     };
 
-    const addLabResult = () => {
+     const addLabResult = () => {
         if (!newLabResult.date || !newLabResult.testName) {
             showModalMessage('Missing Data', 'Please enter at least a date and test name.');
             return;
@@ -485,40 +567,6 @@ const AnimalFormTestModal = ({
             labResults: [...(parseJsonArrayField(prev.labResults) || []), record]
         }));
         setNewLabResult({ date: new Date().toISOString().substring(0, 10), testName: '', result: '', notes: '' });
-    };
-
-    const addMedicalCondition = () => {
-        if (!newMedicalCondition.name) {
-            showModalMessage('Missing Data', 'Please enter a condition name.');
-            return;
-        }
-        const record = {
-            id: Date.now().toString(),
-            name: newMedicalCondition.name,
-            notes: newMedicalCondition.notes || ''
-        };
-        setFormData(prev => ({
-            ...prev,
-            medicalConditions: [...(parseJsonArrayField(prev.medicalConditions) || []), record]
-        }));
-        setNewMedicalCondition({ name: '', notes: '' });
-    };
-
-    const addAllergy = () => {
-        if (!newAllergy.name) {
-            showModalMessage('Missing Data', 'Please enter an allergy name.');
-            return;
-        }
-        const record = {
-            id: Date.now().toString(),
-            name: newAllergy.name,
-            notes: newAllergy.notes || ''
-        };
-        setFormData(prev => ({
-            ...prev,
-            allergies: [...(parseJsonArrayField(prev.allergies) || []), record]
-        }));
-        setNewAllergy({ name: '', notes: '' });
     };
 
     const addVetVisit = () => {
@@ -645,18 +693,13 @@ const AnimalFormTestModal = ({
             manualownerName: animalToEdit.manualownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '',
             isDisplay: animalToEdit.isDisplay ?? false,
             coOwnership: animalToEdit.coOwnership || '',
-            isForSale: animalToEdit.isForSale || false,
+            isForSale: animalToEdit.isForSale || false, // This will be superseded by status='Available'
             salePriceCurrency: animalToEdit.salePriceCurrency || 'USD',
             salePriceAmount: animalToEdit.salePriceAmount || '',
             availableForBreeding: animalToEdit.availableForBreeding || false,
             studFeeCurrency: animalToEdit.studFeeCurrency || 'USD',
             studFeeAmount: animalToEdit.studFeeAmount || '',
             groupRole: animalToEdit.groupRole || '',
-            isPregnant: animalToEdit.isPregnant || false,
-            isNursing: animalToEdit.isNursing || false,
-            isInMating: animalToEdit.isInMating || false,
-            isQuarantine: animalToEdit.isQuarantine || false,
-            isInTreatment: animalToEdit.isInTreatment || false,
             enclosureId: animalToEdit.enclosureId || '',
             lastFedDate: animalToEdit.lastFedDate ? new Date(animalToEdit.lastFedDate).toISOString().split('T')[0] : '',
             feedingFrequencyDays: animalToEdit.feedingFrequencyDays || '',
@@ -669,6 +712,14 @@ const AnimalFormTestModal = ({
                 startDate: m.startDate ? new Date(m.startDate).toISOString().split('T')[0] : '',
             })),
             isOwned: animalToEdit.isOwned ?? true,
+            quarantineDetails: animalToEdit.quarantineDetails
+                ? (typeof animalToEdit.quarantineDetails === 'string' ? JSON.parse(animalToEdit.quarantineDetails) : animalToEdit.quarantineDetails)
+                : {
+                    status: animalToEdit.isQuarantine ? 'Quarantine' : 'None',
+                    reason: '',
+                    startDate: animalToEdit.isQuarantine ? new Date().toISOString().substring(0, 10) : '',
+                    endDate: ''
+                  },
             identifiers: parseJsonArrayField(animalToEdit.identifiers),
             microchipNumber: animalToEdit.microchipNumber || '',
             pedigreeRegistrationId: animalToEdit.pedigreeRegistrationId || '',
@@ -713,11 +764,10 @@ const AnimalFormTestModal = ({
             damFertilityStatus: animalToEdit.damFertilityStatus || 'Unknown',
             lastPregnancyDate: animalToEdit.lastPregnancyDate ? new Date(animalToEdit.lastPregnancyDate).toISOString().substring(0, 10) : '',
             offspringCount: animalToEdit.offspringCount || '',
-            breedingRecords: parseJsonArrayField(animalToEdit.breedingRecords),
-            damFertilityNotes: animalToEdit.damFertilityNotes || '',
             medicalConditions: parseJsonArrayField(animalToEdit.medicalConditions),
             allergies: parseJsonArrayField(animalToEdit.allergies),
             medications: parseJsonArrayField(animalToEdit.medications),
+            breedingRecords: parseJsonArrayField(animalToEdit.breedingRecords),
             vetVisits: parseJsonArrayField(animalToEdit.vetVisits),
             primaryVet: animalToEdit.primaryVet || '',
             dietType: animalToEdit.dietType || '',
@@ -820,11 +870,6 @@ const AnimalFormTestModal = ({
             breederId_public: null,
             manualownerName: '',
             groupRole: '',
-            isPregnant: false,
-            isNursing: false,
-            isInMating: false,
-            isQuarantine: false,
-            isInTreatment: false,
             enclosureId: '',
             lastFedDate: '',
             feedingFrequencyDays: '',
@@ -836,6 +881,7 @@ const AnimalFormTestModal = ({
             breedingRole: 'both',
             isOwned: true,
             isDisplay: true,
+             quarantineDetails: { status: 'None', reason: '', startDate: '', endDate: '' },
             identifiers: [],
             microchipNumber: '',
             pedigreeRegistrationId: '',
@@ -883,11 +929,10 @@ const AnimalFormTestModal = ({
             damFertilityStatus: '',
             lastPregnancyDate: '',
             offspringCount: '',
+            medicalConditions: [],
+            allergies: [],
+            medications: [],
             breedingRecords: [],
-            damFertilityNotes: '',
-            medicalConditions: '',
-            allergies: '',
-            medications: '',
             vetVisits: '',
             primaryVet: '',
             dietType: '',
@@ -1101,7 +1146,7 @@ const AnimalFormTestModal = ({
         setNewIdentifier({ title: '', value: '' });
     };
 
-    const removeIdentifier = (index) => {
+     const removeIdentifier = (index) => {
         setFormData(prev => ({
             ...prev,
             identifiers: (prev.identifiers || []).filter((_, i) => i !== index)
@@ -1601,26 +1646,149 @@ const AnimalFormTestModal = ({
                         {activeTab === 'appearance' && (
                             <div className="space-y-6">
                                 <FormSection title="Appearance" icon={<Palette size={16} />} initiallyOpen>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <div><label className="block text-xs font-medium text-gray-700">Color</label><input type="text" name="color" value={formData.color} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Coat Pattern</label><input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Coat</label><input type="text" name="coat" value={formData.coat} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Markings</label><input type="text" name="markings" value={formData.markings} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Eye Color</label><input type="text" name="eyeColor" value={formData.eyeColor} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Carrier Traits</label><input type="text" name="carrierTraits" value={formData.carrierTraits} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"/></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Color</label>
+                                            <input type="text" name="color" value={formData.color} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Pattern</label>
+                                            <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="e.g., Solid, Hooded, Brindle" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Coat Type</label>
+                                            <input type="text" name="coat" value={formData.coat} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="e.g., Short, Long, Rex" />
+                                        </div>
+                                        {(formData.species === 'Rat' || formData.species === 'Fancy Rat') && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Earset</label>
+                                                <input type="text" name="earset" value={formData.earset} onChange={handleChange}
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                    placeholder="e.g., Standard, Dumbo" />
+                                            </div>
+                                        )}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Phenotype</label>
+                                            <input type="text" name="phenotype" value={formData.phenotype || ''} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="Observable traits" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Morph</label>
+                                            <input type="text" name="morph" value={formData.morph || ''} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="Mutation/Morph" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Markings</label>
+                                            <input type="text" name="markings" value={formData.markings || ''} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="Body markings/patterns" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Eye Color</label>
+                                            <input type="text" name="eyeColor" value={formData.eyeColor || ''} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="Eye color" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Nail Color</label>
+                                            <input type="text" name="nailColor" value={formData.nailColor || ''} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="Nail/claw color" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Size</label>
+                                            <input type="text" name="size" value={formData.size || ''} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="e.g., Standard, Dwarf" />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Carrier Traits</label>
+                                            <input type="text" name="carrierTraits" value={formData.carrierTraits || ''} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                placeholder="Genetic traits carried" />
+                                        </div>
                                     </div>
                                 </FormSection>
                                 <FormSection title="Genetic Code" icon={<Dna size={16} />}>
                                     <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} />
                                 </FormSection>
                                 <FormSection title="Life Stage & Measurements" icon={<Ruler size={16} />}>
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700">Life Stage</label>
-                                        <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
-                                            <option value="">Unknown</option><option value="Newborn">Newborn</option><option value="Juvenile">Juvenile</option><option value="Sub-Adult">Sub-Adult</option><option value="Adult">Adult</option><option value="Senior">Senior</option>
-                                        </select>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Life Stage</label>
+                                            <select name="lifeStage" value={formData.lifeStage} onChange={handleChange}
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                <option value="">Unknown</option>
+                                                <option value="Newborn">Newborn</option>
+                                                <option value="Juvenile">Juvenile</option>
+                                                <option value="Sub-Adult">Sub-Adult</option>
+                                                <option value="Adult">Adult</option>
+                                                <option value="Senior">Senior</option>
+                                                <option value="Mixed">Mixed</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    {/* Growth records would go here */}
+                                    <div className="space-y-3 mt-6">
+                                        <h4 className="text-sm font-semibold text-gray-600">Growth History</h4>
+                                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                            <p className="text-xs font-medium text-gray-700 mb-2">Measurement Units</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-600">Weight Unit</label>
+                                                    <select
+                                                        value={formData.measurementUnits.weight}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, measurementUnits: { ...prev.measurementUnits, weight: e.target.value } }))}
+                                                        className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white"
+                                                    >
+                                                        <option value="g">Grams (g)</option><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lb)</option><option value="oz">Ounces (oz)</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-600">Length Unit</label>
+                                                    <select
+                                                        value={formData.measurementUnits.length}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, measurementUnits: { ...prev.measurementUnits, length: e.target.value } }))}
+                                                        className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white"
+                                                    >
+                                                        <option value="cm">Centimeters (cm)</option><option value="m">Meters (m)</option><option value="in">Inches (in)</option><option value="ft">Feet (ft)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
+                                            <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
+                                            <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
+                                                <div><label className="block text-xs font-medium text-gray-700">Date</label><DatePicker value={newMeasurement.date} onChange={(e) => setNewMeasurement({ ...newMeasurement, date: e.target.value })} className="mt-1 p-2 text-sm" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Weight ({formData.measurementUnits.weight})</label><input type="number" step="0.1" value={newMeasurement.weight} onChange={(e) => setNewMeasurement({ ...newMeasurement, weight: e.target.value })} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md" /></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Body Length ({formData.measurementUnits.length})</label><input type="number" step="0.1" value={newMeasurement.length} onChange={(e) => setNewMeasurement({ ...newMeasurement, length: e.target.value })} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md" /></div>
+                                            </div>
+                                            <button type="button" onClick={addMeasurement} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">Add Measurement</button>
+                                        </div>
+                                        {(parseJsonArrayField(formData.growthRecords) || []).length > 0 && (
+                                            <div className="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
+                                                {(parseJsonArrayField(formData.growthRecords) || []).map((record) => (
+                                                    <div key={record.id} className="flex items-center justify-between p-2 bg-white rounded border border-gray-100 text-sm">
+                                                        <div className="flex gap-4 text-gray-700 flex-1 flex-wrap">
+                                                            <span className="font-medium">{record.date}</span>
+                                                            <span>{record.weight} {formData.measurementUnits.weight}</span>
+                                                            {record.length && (<span>L: {record.length} {formData.measurementUnits.length}</span>)}
+                                                        </div>
+                                                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, growthRecords: (parseJsonArrayField(prev.growthRecords) || []).filter(r => r.id !== record.id) }))} className="text-red-500 hover:text-red-700 p-1" title="Delete measurement">
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </FormSection>
                             </div>
                         )}
@@ -1689,6 +1857,101 @@ const AnimalFormTestModal = ({
                         {/* Placeholder for other new tabs */}
                         {activeTab === 'health' && (
                             <div className="space-y-4">
+                                <FormSection title="Active Medical Records" icon={<Pill size={16} />}>
+                                    {/* Quarantine Status */}
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700">Quarantine Status</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Status</label>
+                                                    <select name="status" value={formData.quarantineDetails?.status || 'None'} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                        <option value="None">None</option>
+                                                        <option value="Quarantine">Quarantine</option>
+                                                        <option value="Isolation">Isolation</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Reason</label>
+                                                    <input type="text" name="reason" value={formData.quarantineDetails?.reason || ''} onChange={handleQuarantineChange} placeholder="e.g., New arrival, URI" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Start Date</label>
+                                                    <DatePicker name="startDate" value={formData.quarantineDetails?.startDate || ''} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">End Date (Optional)</label>
+                                                    <DatePicker name="endDate" value={formData.quarantineDetails?.endDate || ''} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Medical Conditions */}
+                                    <div className="space-y-2 pt-3 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Medical Conditions</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <input type="text" value={newMedicalCondition.name} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, name: e.target.value })} placeholder="Condition Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newMedicalCondition.notes} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Medical Condition</button>
+                                        </div>
+                                        {(formData.medicalConditions || []).filter(Boolean).map((rec, i) => (
+                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border">
+                                                <span>{rec.name} {rec.notes && `(${rec.notes})`}</span>
+                                                <button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Allergies */}
+                                    <div className="space-y-2 pt-3 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Allergies</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <input type="text" value={newAllergy.name} onChange={(e) => setNewAllergy({ ...newAllergy, name: e.target.value })} placeholder="Allergy Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newAllergy.notes} onChange={(e) => setNewAllergy({ ...newAllergy, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addAllergy} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Allergy</button>
+                                        </div>
+                                        {(formData.allergies || []).filter(Boolean).map((rec, i) => (
+                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border">
+                                                <span>{rec.name} {rec.notes && `(${rec.notes})`}</span>
+                                                <button type="button" onClick={() => removeArrayItem('allergies', i)}><Trash2 size={14} className="text-red-500" /></button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Medications */}
+                                    <div className="space-y-2 pt-3 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Active Medications</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({ ...newMedication, name: e.target.value })} placeholder="Medication Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="Dose (e.g., 0.1ml)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <DatePicker value={newMedication.startDate} onChange={(e) => setNewMedication({ ...newMedication, startDate: e.target.value })} placeholder="Start Date" className="py-1.5 px-2 text-sm" />
+                                                <DatePicker value={newMedication.stopDate} onChange={(e) => setNewMedication({ ...newMedication, stopDate: e.target.value })} placeholder="Stop Date" className="py-1.5 px-2 text-sm" />
+                                                <div className="col-span-2 flex gap-2 items-center">
+                                                    <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="Interval" className="w-20 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                    <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                        <option value="hours">Hours</option><option value="days">Days</option><option value="weeks">Weeks</option>
+                                                    </select>
+                                                    <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Notes" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                </div>
+                                            </div>
+                                            <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Medication</button>
+                                        </div>
+                                        {(formData.medications || []).filter(Boolean).map((rec, i) => (
+                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border">
+                                                <span>{rec.name} {rec.dose} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})</span>
+                                                <button type="button" onClick={() => removeArrayItem('medications', i)}><Trash2 size={14} className="text-red-500" /></button>
+                                            </div>
+                                            
+                                        ))}
+                                    </div>
+                                </FormSection>
+
                                 <FormSection title="Preventive Care" icon={<Shield size={16} />} initiallyOpen>
                                     {/* Vaccinations */}
                                     <div className="space-y-2">
@@ -1731,6 +1994,49 @@ const AnimalFormTestModal = ({
                                     </div>
                                 </FormSection>
 
+                                <FormSection title="Health Clearances & Screening" icon={<Hospital size={16} />}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Spay/Neuter Date</label>
+                                            <DatePicker name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Heartworm Status</label>
+                                            <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <option value="">Select...</option>
+                                                <option value="Negative">Negative</option>
+                                                <option value="Positive">Positive</option>
+                                                <option value="On Prevention">On Prevention</option>
+                                                <option value="Unknown">Unknown</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Hip/Elbow Scores</label>
+                                            <input type="text" name="hipElbowScores" value={formData.hipElbowScores || ''} onChange={handleChange} placeholder="e.g., OFA Good" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Eye Clearance</label>
+                                            <input type="text" name="eyeClearance" value={formData.eyeClearance || ''} onChange={handleChange} placeholder="e.g., CAER Clear 2024" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Cardiac Clearance</label>
+                                            <input type="text" name="cardiacClearance" value={formData.cardiacClearance || ''} onChange={handleChange} placeholder="e.g., OFA Normal" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Dental Records</label>
+                                            <input type="text" name="dentalRecords" value={formData.dentalRecords || ''} onChange={handleChange} placeholder="e.g., Last cleaning 01/2024" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Genetic Test Results</label>
+                                            <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Embark: Clear for DM, vWD" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Chronic Conditions</label>
+                                            <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Allergies, arthritis" />
+                                        </div>
+                                    </div>
+                                </FormSection>
+
                                 <FormSection title="Procedures & Diagnostics" icon={<Microscope size={16} />}>
                                     {/* Medical Procedures */}
                                     <div className="space-y-2">
@@ -1757,33 +2063,6 @@ const AnimalFormTestModal = ({
                                             <button type="button" onClick={addLabResult} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Lab Result</button>
                                         </div>
                                     {(formData.labResults || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
-                                    </div>
-                                </FormSection>
-
-                                <FormSection title="Active Medical Records" icon={<Pill size={16} />}>
-                                    {/* Medical Conditions */}
-                                    <div className="space-y-2">
-                                        <h4 className="text-sm font-semibold text-gray-700">Medical Conditions</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                <input type="text" value={newMedicalCondition.name} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, name: e.target.value })} placeholder="Condition Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newMedicalCondition.notes} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                            </div>
-                                            <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Condition</button>
-                                        </div>
-                                        {(formData.medicalConditions || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
-                                    </div>
-                                    {/* Allergies */}
-                                    <div className="space-y-2 pt-2 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Allergies</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                <input type="text" value={newAllergy.name} onChange={(e) => setNewAllergy({ ...newAllergy, name: e.target.value })} placeholder="Allergy Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newAllergy.notes} onChange={(e) => setNewAllergy({ ...newAllergy, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                            </div>
-                                            <button type="button" onClick={addAllergy} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Allergy</button>
-                                        </div>
-                                    {(formData.allergies || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('allergies', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 

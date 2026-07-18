@@ -3195,6 +3195,14 @@ const AnimalForm = ({
             })),
             isOwned: animalToEdit.isOwned ?? true,
             isDisplay: animalToEdit.isDisplay ?? false,
+            quarantineDetails: animalToEdit.quarantineDetails
+                ? (typeof animalToEdit.quarantineDetails === 'string' ? JSON.parse(animalToEdit.quarantineDetails) : animalToEdit.quarantineDetails)
+                : {
+                    status: animalToEdit.isQuarantine ? 'Quarantine' : 'None',
+                    reason: '',
+                    startDate: animalToEdit.isQuarantine ? new Date().toISOString().substring(0, 10) : '',
+                    endDate: ''
+                  },
             // New fields for comprehensive mammal profile
             identifiers: parseJsonArrayField(animalToEdit.identifiers),
             microchipNumber: animalToEdit.microchipNumber || '',
@@ -3363,6 +3371,7 @@ const AnimalForm = ({
             isInMating: false,
             isQuarantine: false,
             isInTreatment: false,
+            quarantineDetails: { status: 'None', reason: '', startDate: '', endDate: '' },
             enclosureId: '',
             lastFedDate: '',
             feedingFrequencyDays: '',
@@ -5240,6 +5249,17 @@ const AnimalForm = ({
         setNewLabResult({ date: new Date().toISOString().substring(0, 10), testName: '', result: '', notes: '' });
     };
 
+    const handleQuarantineChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            quarantineDetails: {
+                ...(prev.quarantineDetails || { status: 'None', reason: '', startDate: '', endDate: '' }),
+                [name]: value
+            }
+        }));
+    };
+
     const addIdentifier = () => {
         if (!newIdentifier.title.trim() || !newIdentifier.value.trim()) {
             showModalMessage('Missing Data', 'Please enter both a title and a value for the identifier.');
@@ -6060,8 +6080,6 @@ const AnimalForm = ({
                     <ArrowLeft size={24} />
                 </button>
             </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* Tab Navigation */}
                 <div className="bg-[#E1F2F5] border-b border-gray-300 -mx-6 px-2 py-2">
@@ -7700,138 +7718,6 @@ const AnimalForm = ({
                 {/* Tab 8: Health */}
                 {activeTab === 8 && (
                     <div className="space-y-6">
-                        {/* Preventive Care */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="preventive-care-section">
-                            <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
-                                <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
-                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
-                            </button>
-                            {!collapsedHealthSections.preventiveCare && (<div className="space-y-6 mt-4">
-                            {/* Vaccinations */}
-                            <div className="space-y-3">
-                                <h4 className="text-sm font-semibold text-gray-700">Vaccinations</h4>
-                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Date</label>
-                                            <DatePicker value={newVaccination.date} onChange={(e) => setNewVaccination({...newVaccination, date: e.target.value})}
-                                                className="mt-1 p-2 text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Vaccination Name</label>
-                                            <input type="text" value={newVaccination.name} onChange={(e) => setNewVaccination({...newVaccination, name: e.target.value})}
-                                                placeholder="e.g., Rabies, Distemper" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Notes</label>
-                                            <input type="text" value={newVaccination.notes} onChange={(e) => setNewVaccination({...newVaccination, notes: e.target.value})}
-                                                placeholder="e.g., Booster, Clinic name" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                    </div>
-                                    <button type="button" onClick={addVaccination} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
-                                        Add Vaccination Record
-                                    </button>
-                                </div>
-                                {vaccinationRecords.length > 0 && (
-                                    <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
-                                        {vaccinationRecords.map((record) => (
-                                            <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
-                                                <div className="flex-1">
-                                                    <strong>{record.date}:</strong> {record.name}
-                                                    {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
-                                                </div>
-                                                <button type="button" onClick={() => setVaccinationRecords(vaccinationRecords.filter(r => r.id !== record.id))}
-                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                            
-                            {/* Deworming */}
-                            <div className="space-y-3 border-t border-gray-200 pt-4">
-                                <h4 className="text-sm font-semibold text-gray-700">Deworming Records</h4>
-                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Date</label>
-                                            <DatePicker value={newDeworming.date} onChange={(e) => setNewDeworming({...newDeworming, date: e.target.value})}
-                                                className="mt-1 p-2 text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Medication</label>
-                                            <input type="text" value={newDeworming.medication} onChange={(e) => setNewDeworming({...newDeworming, medication: e.target.value})}
-                                                placeholder="e.g., Fenbendazole, Panacur" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Notes</label>
-                                            <input type="text" value={newDeworming.notes} onChange={(e) => setNewDeworming({...newDeworming, notes: e.target.value})}
-                                                placeholder="e.g., Dosage, vet notes" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                    </div>
-                                    <button type="button" onClick={addDeworming} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
-                                        Add Deworming Record
-                                    </button>
-                                </div>
-                                {dewormingRecordsArray.length > 0 && (
-                                    <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
-                                        {dewormingRecordsArray.map((record) => (
-                                            <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
-                                                <div className="flex-1">
-                                                    <strong>{record.date}:</strong> {record.medication}
-                                                    {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
-                                                </div>
-                                                <button type="button" onClick={() => setDewormingRecordsArray(dewormingRecordsArray.filter(r => r.id !== record.id))}
-                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                            
-                            {/* Parasite Control */}
-                            <div className="space-y-3 border-t border-gray-200 pt-4">
-                                <h4 className="text-sm font-semibold text-gray-700">Parasite Control</h4>
-                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Date</label>
-                                            <DatePicker value={newParasiteControl.date} onChange={(e) => setNewParasiteControl({...newParasiteControl, date: e.target.value})}
-                                                className="mt-1 p-2 text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Treatment</label>
-                                            <input type="text" value={newParasiteControl.treatment} onChange={(e) => setNewParasiteControl({...newParasiteControl, treatment: e.target.value})}
-                                                placeholder="e.g., Flea/tick, mite treatment" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Notes</label>
-                                            <input type="text" value={newParasiteControl.notes} onChange={(e) => setNewParasiteControl({...newParasiteControl, notes: e.target.value})}
-                                                placeholder="e.g., Product name, vet notes" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                    </div>
-                                    <button type="button" onClick={addParasiteControl} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
-                                        Add Parasite Control Record
-                                    </button>
-                                </div>
-                                {parasiteControlRecords.length > 0 && (
-                                    <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
-                                        {parasiteControlRecords.map((record) => (
-                                            <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
-                                                <div className="flex-1">
-                                                    <strong>{record.date}:</strong> {record.treatment}
-                                                    {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
-                                                </div>
-                                                <button type="button" onClick={() => setParasiteControlRecords(parasiteControlRecords.filter(r => r.id !== record.id))}
-                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                            </div>)}
-                        </div>
-
                         {/* Procedures & Diagnostics */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="procedures-section">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
@@ -7927,188 +7813,7 @@ const AnimalForm = ({
                             </div>
                             </div>)}
                         </div>
-
-                        {/* Active Medical Records */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="medical-history-section">
-                            <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
-                                <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
-                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
-                            </button>
-                            {!collapsedHealthSections.activeMedical && (<div className="space-y-4 mt-4">
-                            {/* Quarantine toggle */}
-                            <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg bg-white hover:bg-orange-50 transition">
-                                <input
-                                    type="checkbox"
-                                    name="isQuarantine"
-                                    checked={formData.isQuarantine || false}
-                                    onChange={handleChange}
-                                    className="form-checkbox h-5 w-5 text-orange-500 rounded focus:ring-orange-400"
-                                />
-                                <span className="text-sm font-medium text-gray-700">In Quarantine / Isolation</span>
-                            </label>
-                            {/* In Treatment toggle */}
-                            <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg bg-white hover:bg-blue-50 transition">
-                                <input
-                                    type="checkbox"
-                                    name="isInTreatment"
-                                    checked={formData.isInTreatment || false}
-                                    onChange={handleChange}
-                                    className="form-checkbox h-5 w-5 text-blue-500 rounded focus:ring-blue-400"
-                                />
-                                <span className="text-sm font-medium text-gray-700">In Active Treatment</span>
-                            </label>
-                            <div className="space-y-4">
-                                {/* Medical Conditions */}
-                                <div className="space-y-3">
-                                    <h4 className="text-sm font-semibold text-gray-700">Medical Conditions</h4>
-                                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Condition Name</label>
-                                                <input type="text" value={newMedicalCondition.name} onChange={(e) => setNewMedicalCondition({...newMedicalCondition, name: e.target.value})}
-                                                    placeholder="e.g., Diabetes, Respiratory infection" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
-                                                <input type="text" value={newMedicalCondition.notes} onChange={(e) => setNewMedicalCondition({...newMedicalCondition, notes: e.target.value})}
-                                                    placeholder="e.g., Ongoing treatment" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        </div>
-                                        <button type="button" onClick={addMedicalCondition} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
-                                            Add Medical Condition
-                                        </button>
-                                    </div>
-                                    {medicalConditionsArray.length > 0 && (
-                                        <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
-                                            {medicalConditionsArray.map((record) => (
-                                                <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
-                                                    <div className="flex-1">
-                                                        <strong>{record.name}</strong>
-                                                        {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
-                                                    </div>
-                                                    <button type="button" onClick={() => setMedicalConditionsArray(medicalConditionsArray.filter(r => r.id !== record.id))}
-                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                                
-                                {/* Allergies */}
-                                <div className="space-y-3 border-t border-gray-200 pt-4">
-                                    <h4 className="text-sm font-semibold text-gray-700">Allergies</h4>
-                                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Allergy Name</label>
-                                                <input type="text" value={newAllergy.name} onChange={(e) => setNewAllergy({...newAllergy, name: e.target.value})}
-                                                    placeholder="e.g., Peanuts, Penicillin" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
-                                                <input type="text" value={newAllergy.notes} onChange={(e) => setNewAllergy({...newAllergy, notes: e.target.value})}
-                                                    placeholder="e.g., Severe reaction" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        </div>
-                                        <button type="button" onClick={addAllergy} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
-                                            Add Allergy
-                                        </button>
-                                    </div>
-                                    {allergiesArray.length > 0 && (
-                                        <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
-                                            {allergiesArray.map((record) => (
-                                                <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
-                                                    <div className="flex-1">
-                                                        <strong>{record.name}</strong>
-                                                        {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
-                                                    </div>
-                                                    <button type="button" onClick={() => setAllergiesArray(allergiesArray.filter(r => r.id !== record.id))}
-                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                                
-                                {/* Medications */}
-                                <div className="space-y-3 border-t border-gray-200 pt-4">
-                                    <h4 className="text-sm font-semibold text-gray-700">Current Medications</h4>
-                                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Medication Name</label>
-                                                <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({...newMedication, name: e.target.value})}
-                                                    placeholder="e.g., Baytril, Metacam" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Dose</label>
-                                                <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({...newMedication, dose: e.target.value})}
-                                                    placeholder="e.g., 0.1ml, 5mg/kg" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Start Date (optional)</label>
-                                                <input type="date" value={newMedication.startDate} onChange={(e) => setNewMedication({...newMedication, startDate: e.target.value})}
-                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Stop Date (optional)</label>
-                                                <input type="date" value={newMedication.stopDate} onChange={(e) => setNewMedication({...newMedication, stopDate: e.target.value})}
-                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Give every</label>
-                                                <input type="number" min="1" value={newMedication.intervalValue} onChange={(e) => setNewMedication({...newMedication, intervalValue: e.target.value})}
-                                                    placeholder="e.g., 12" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">&nbsp;</label>
-                                                <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({...newMedication, intervalUnit: e.target.value})}
-                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                    <option value="hours">Hours</option>
-                                                    <option value="days">Days</option>
-                                                    <option value="weeks">Weeks</option>
-                                                    <option value="months">Months</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
-                                            <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({...newMedication, notes: e.target.value})}
-                                                placeholder="e.g., Give with food, special instructions" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <button type="button" onClick={addMedication} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
-                                            Add Medication
-                                        </button>
-                                    </div>
-                                    {medicationsArray.length > 0 && (
-                                        <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
-                                            {medicationsArray.map((record) => (
-                                                <div key={record.id} className="flex items-start justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm gap-2">
-                                                    <div className="flex-1 min-w-0">
-                                                        <strong>{record.name}</strong>
-                                                        {record.dose && <span className="text-xs text-gray-600 ml-2">{record.dose}</span>}
-                                                        {record.intervalValue && <span className="text-xs text-gray-500 ml-2">· every {record.intervalValue} {record.intervalUnit}</span>}
-                                                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-gray-400">
-                                                            {record.startDate && <span>Start: {record.startDate}</span>}
-                                                            {record.stopDate && <span>Stop: {record.stopDate}</span>}
-                                                            {record.notes && <span>{record.notes}</span>}
-                                                        </div>
-                                                    </div>
-                                                    <button type="button" onClick={() => setMedicationsArray(medicationsArray.filter(r => r.id !== record.id))}
-                                                        className="text-red-500 hover:text-red-700 p-1 flex-shrink-0" title="Delete record"><Trash2 size={14} /></button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                                
-                            </div>
-                            </div>)}
-                        </div>
+                         
 
                         {/* Health Clearances & Screening */}
                         {(!isFieldHidden('spayNeuterDate') || !isFieldHidden('heartwormStatus') || !isFieldHidden('hipElbowScores') || !isFieldHidden('eyeClearance') || !isFieldHidden('cardiacClearance') || !isFieldHidden('dentalRecords') || !isFieldHidden('geneticTestResults') || !isFieldHidden('chronicConditions')) && (
@@ -9566,7 +9271,6 @@ const AnimalForm = ({
                         <span>{loading ? 'Saving...' : 'Save Animal'}</span>
                     </button>
                 </div>
-            </form>
 
             {/* Community Genetics Submission Modal */}
             {showCommunityGeneticsModal && (
