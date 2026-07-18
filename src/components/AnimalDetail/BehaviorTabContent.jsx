@@ -6,7 +6,7 @@ import { InfoCard, InfoItem } from './DashboardComponents';
 export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
-    const hasBehavior = animal.temperament || animal.handlingTolerance || animal.socialStructure;
+    const hasBehavior = animal.temperament || animal.handlingTolerance || animal.socialStructure || animal.handlingNotes || animal.socializationNotes;
     const hasActivity = animal.activityCycle || animal.exerciseRequirements || animal.dailyExerciseMinutes || animal.trainingLevel || animal.trainingDisciplines || animal.workingRole || animal.certifications;
     const hasKnownIssues = animal.behavioralIssues || animal.biteHistory || animal.reactivityNotes;
     const hasAnyData = hasBehavior || hasActivity || hasKnownIssues;
@@ -28,6 +28,8 @@ export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
                         {animal.temperament && <InfoItem label="Temperament" value={animal.temperament} />}
                         {animal.handlingTolerance && <InfoItem label={getLabel('handlingTolerance', 'Handling Tolerance')} value={animal.handlingTolerance} />}
                         {animal.socialStructure && <InfoItem label="Social Structure" value={animal.socialStructure} />}
+                        {animal.handlingNotes && <InfoItem label="Handling Notes"><p className="whitespace-pre-wrap">{animal.handlingNotes}</p></InfoItem>}
+                        {animal.socializationNotes && <InfoItem label="Socialization Notes"><p className="whitespace-pre-wrap">{animal.socializationNotes}</p></InfoItem>}
                     </dl>
                 ) : <p className="text-sm text-gray-400">No temperament or social information recorded.</p>}
             </InfoCard>

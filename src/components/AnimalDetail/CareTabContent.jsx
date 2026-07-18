@@ -78,9 +78,9 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
             {/* Column 2 */}
             <div className="space-y-6">
                 <InfoCard title="Animal Care & Grooming" icon={<Droplets size={18} className="text-gray-400" />}>
-                    {animal.handlingNotes && <InfoItem label="Handling Notes" value={animal.handlingNotes} />}
-                    {animal.socializationNotes && <InfoItem label="Socialization Notes" value={animal.socializationNotes} />}
-                    {animal.specialCareRequirements && <InfoItem label="Special Care Requirements" value={animal.specialCareRequirements} />}
+                    {animal.specialCareRequirements && <InfoItem label="Special Care Requirements">
+                        <p className="whitespace-pre-wrap">{animal.specialCareRequirements}</p>
+                    </InfoItem>}
                     
                     {hasGrooming && <div className="pt-3 mt-3 border-t border-gray-200 space-y-2">
                         {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} icon={<Scissors size={14} />} />}

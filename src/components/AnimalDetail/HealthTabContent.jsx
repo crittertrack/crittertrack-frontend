@@ -156,8 +156,8 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                     )}
                 </InfoCard>
                 {/* End of Life Card */}
-                {(animal.deceasedDate || animal.causeOfDeath || animal.necropsyResults || animal.endOfLifeCareNotes) && (
-                    <InfoCard title="End of Life Information" icon={<Scale size={18} className="text-gray-400" />}>
+                <InfoCard title="End of Life Information" icon={<Scale size={18} className="text-gray-400" />}>
+                    {(animal.deceasedDate || animal.causeOfDeath || animal.necropsyResults || animal.endOfLifeCareNotes) ? (
                         <div className="space-y-3">
                             {animal.deceasedDate && <InfoItem label="Deceased Date" value={formatDate(animal.deceasedDate)} />}
                             {animal.causeOfDeath && <InfoItem label="Cause of Death" value={animal.causeOfDeath} />}
@@ -166,8 +166,10 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                                 <p className="whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p>
                             </InfoItem>}
                         </div>
-                    </InfoCard>
-                )}
+                    ) : (
+                        <p className="text-sm text-gray-400">No end of life information recorded.</p>
+                    )}
+                </InfoCard>
             </div>
         </div>
     );

@@ -4,9 +4,6 @@ import { InfoCard } from './DashboardComponents';
 
 export const NotesTabContent = ({ animal }) => {
     const notes = [
-        { title: 'Handling Notes', content: animal.handlingNotes },
-        { title: 'Socialization Notes', content: animal.socializationNotes },
-        { title: 'Special Care Requirements', content: animal.specialCareRequirements },
     ].filter(note => note.content);
 
     if (notes.length === 0) {
