@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
     ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock, Shield, Pill, Microscope, Stethoscope, Scissors, MessageSquare, AlertTriangle, Activity, Cat,
     Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit, Users, HeartPulse,
-    Hash, Sparkles, Ruler, Sprout, Key, FolderOpen, Globe, Leaf, UtensilsCrossed, Droplets,
+    Hash, Sparkles, Ruler, Sprout, Key, FolderOpen, Globe, Leaf, UtensilsCrossed, Droplets, CheckSquare,
     Thermometer, Feather, Medal, Target, Ban, Package, ScrollText, Link, Unlink, Baby, Bell, Plus, RotateCcw, Camera, Upload, Search, Star, ArrowRight,
-    Loader2, ChevronDown, ChevronUp, ChevronRight, Info,
+    Loader2, ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, DollarSign,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
 import { formatDate } from '../../utils/dateFormatter';
@@ -18,6 +18,26 @@ const LoadingSpinner = ({ message = 'Loading...' }) => (
         <span className="text-gray-600">{message}</span>
     </div>
 );
+
+// Utility functions
+const getCountryFlag = (countryCode) => {
+    if (!countryCode || countryCode.length !== 2) return '';
+    return 'fi fi-' + countryCode.toLowerCase();
+};
+
+const getCountryName = (countryCode) => {
+    const countryNames = {
+        'US': 'United States', 'CA': 'Canada', 'GB': 'United Kingdom', 'AU': 'Australia',
+        'NZ': 'New Zealand', 'DE': 'Germany', 'FR': 'France', 'IT': 'Italy',
+        'ES': 'Spain', 'NL': 'Netherlands', 'SE': 'Sweden', 'NO': 'Norway',
+        'DK': 'Denmark', 'CH': 'Switzerland', 'BE': 'Belgium', 'AT': 'Austria',
+        'PL': 'Poland', 'CZ': 'Czech Republic', 'IE': 'Ireland', 'PT': 'Portugal',
+        'GR': 'Greece', 'RU': 'Russia', 'JP': 'Japan', 'KR': 'South Korea',
+        'CN': 'China', 'IN': 'India', 'BR': 'Brazil', 'MX': 'Mexico',
+        'ZA': 'South Africa', 'SG': 'Singapore', 'HK': 'Hong Kong', 'MY': 'Malaysia', 'TH': 'Thailand'
+    };
+    return countryNames[countryCode] || countryCode;
+};
 
 const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-cover", iconSize = 24 }) => {
     const [imageError, setImageError] = useState(false);
@@ -329,6 +349,620 @@ const ParentSearchModal = ({
     );
 };
 
+// Image Editor Modal with Rotate, Crop, Compress, Validate
+const ImageEditorModal = ({ files, onComplete, onCancel }) => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [processedImages, setProcessedImages] = useState([]);
+    const [rotation, setRotation] = useState(0);
+    const [cropMode, setCropMode] = useState(false);
+    const [cropBox, setCropBox] = useState({ x: 0, y: 0, width: 100, height: 100 });
+    const [processing, setProcessing] = useState(false);
+    const [fileSizeWarning, setFileSizeWarning] = useState('');
+    const canvasRef = useRef(null);
+    const imgRef = useRef(null);
+
+    const MAX_FILE_SIZE = 200 * 1024; // 200KB
+
+    useEffect(() => {
+        if (files.length > currentIndex && imgRef.current) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imgRef.current.src = e.target.result;
+            };
+            reader.readAsDataURL(files[currentIndex]);
+            setRotation(0);
+            setCropMode(false);
+            setFileSizeWarning('');
+        }
+    }, [currentIndex, files]);
+
+    const rotateImage = () => {
+        setRotation((rot) => (rot + 90) % 360);
+    };
+
+    const getRotationStyle = () => ({
+        transform: `rotate(${rotation}deg)`,
+        transformOrigin: 'center',
+        transition: 'transform 0.3s ease'
+    });
+
+    const processCurrentImage = async () => {
+        const file = files[currentIndex];
+        try {
+            setProcessing(true);
+
+            // Step 1: Rotate if needed
+            let processedFile = file;
+            if (rotation !== 0) {
+                const rotatedBlob = await rotateImageFile(file, rotation);
+                processedFile = new File([rotatedBlob], file.name, { type: file.type });
+            }
+
+            // Step 2: Crop if enabled
+            if (cropMode && canvasRef.current) {
+                const croppedBlob = await cropImageFile(processedFile, cropBox);
+                processedFile = new File([croppedBlob], file.name, { type: 'image/jpeg' });
+            }
+
+            // Step 3: Compress
+            const compressed = await compressImageFile(processedFile);
+            const finalSize = compressed.size;
+
+            // Step 4: Validate
+            let warning = '';
+            if (finalSize > MAX_FILE_SIZE) {
+                warning = `⚠️ Image is ${(finalSize / 1024).toFixed(1)}KB - recommended max is 200KB`;
+            }
+
+            setProcessedImages((prev) => [
+                ...prev,
+                {
+                    id: `processed-${Date.now()}-${Math.random()}`,
+                    file: compressed,
+                    url: URL.createObjectURL(compressed),
+                    originalSize: file.size,
+                    finalSize: finalSize,
+                    warning: warning,
+                }
+            ]);
+
+            // Move to next image or complete
+            if (currentIndex < files.length - 1) {
+                setCurrentIndex((i) => i + 1);
+            } else {
+                onComplete(processedImages.slice(1)); // Skip this iteration's added image to avoid duplication
+            }
+        } catch (error) {
+            console.error('Image processing error:', error);
+            setFileSizeWarning('Failed to process image');
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const rotateImageFile = (file, degrees) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const radians = (degrees * Math.PI) / 180;
+                    const sin = Math.abs(Math.sin(radians));
+                    const cos = Math.abs(Math.cos(radians));
+                    canvas.width = img.height * sin + img.width * cos;
+                    canvas.height = img.height * cos + img.width * sin;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate(radians);
+                    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+                    canvas.toBlob(resolve, 'image/jpeg', 0.85);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const cropImageFile = (file, cropBox) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scaleX = img.width / 100;
+                    const scaleY = img.height / 100;
+                    canvas.width = cropBox.width * scaleX;
+                    canvas.height = cropBox.height * scaleY;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(
+                        img,
+                        cropBox.x * scaleX,
+                        cropBox.y * scaleY,
+                        cropBox.width * scaleX,
+                        cropBox.height * scaleY,
+                        0,
+                        0,
+                        cropBox.width * scaleX,
+                        cropBox.height * scaleY
+                    );
+
+                    canvas.toBlob(resolve, 'image/jpeg', 0.85);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const compressImageFile = (file) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxWidth = 1200;
+                    const maxHeight = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = Math.round((width * maxHeight) / height);
+                            height = maxHeight;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(
+                        (blob) => {
+                            const resultFile = new File([blob], file.name, { type: 'image/jpeg' });
+                            resolve(resultFile);
+                        },
+                        'image/jpeg',
+                        0.8
+                    );
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const current = files[currentIndex];
+    const progress = `${currentIndex + 1} / ${files.length}`;
+
+    return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                {/* Header */}
+                <div className="sticky top-0 bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">Edit Image ({progress})</h2>
+                    <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-4">
+                    {/* Preview */}
+                    <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center h-96 overflow-hidden">
+                        <img
+                            ref={imgRef}
+                            style={getRotationStyle()}
+                            className="max-w-full max-h-full object-contain"
+                            alt="Preview"
+                        />
+                    </div>
+
+                    {/* Controls */}
+                    <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                        {/* Rotate */}
+                        <div>
+                            <label className="text-xs font-medium text-gray-700 block mb-2">
+                                Rotation: {rotation}°
+                            </label>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={rotateImage}
+                                    disabled={processing}
+                                    className="flex-1 px-3 py-2 bg-primary text-black rounded-md text-sm font-medium hover:bg-primary-dark disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    <RotateCcw size={16} />
+                                    Rotate 90°
+                                </button>
+                                <select
+                                    value={rotation}
+                                    onChange={(e) => setRotation(parseInt(e.target.value))}
+                                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                >
+                                    <option value={0}>0°</option>
+                                    <option value={90}>90°</option>
+                                    <option value={180}>180°</option>
+                                    <option value={270}>270°</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Crop Toggle */}
+                        <div>
+                            <label className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={cropMode}
+                                    onChange={(e) => setCropMode(e.target.checked)}
+                                    disabled={processing}
+                                    className="form-checkbox h-4 w-4 text-primary rounded"
+                                />
+                                <span className="text-xs font-medium text-gray-700">Enable Crop</span>
+                            </label>
+                        </div>
+
+                        {/* Crop Controls */}
+                        {cropMode && (
+                            <div className="bg-white p-3 rounded border border-gray-200 space-y-2">
+                                <p className="text-xs text-gray-500">Drag the corners or adjust dimensions:</p>
+                                <div className="grid grid-cols-4 gap-2">
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600">X</label>
+                                        <input
+                                            type="number"
+                                            value={cropBox.x}
+                                            onChange={(e) => setCropBox({ ...cropBox, x: Math.max(0, parseInt(e.target.value)) })}
+                                            min="0"
+                                            max="100"
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600">Y</label>
+                                        <input
+                                            type="number"
+                                            value={cropBox.y}
+                                            onChange={(e) => setCropBox({ ...cropBox, y: Math.max(0, parseInt(e.target.value)) })}
+                                            min="0"
+                                            max="100"
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600">Width</label>
+                                        <input
+                                            type="number"
+                                            value={cropBox.width}
+                                            onChange={(e) => setCropBox({ ...cropBox, width: Math.min(100, parseInt(e.target.value)) })}
+                                            min="10"
+                                            max="100"
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600">Height</label>
+                                        <input
+                                            type="number"
+                                            value={cropBox.height}
+                                            onChange={(e) => setCropBox({ ...cropBox, height: Math.min(100, parseInt(e.target.value)) })}
+                                            min="10"
+                                            max="100"
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* File Size Info */}
+                    {current && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <p className="text-xs text-blue-800">
+                                <strong>Original:</strong> {(current.size / 1024).toFixed(1)}KB →{' '}
+                                <strong>After compression:</strong> ~100-150KB (estimated)
+                            </p>
+                            {fileSizeWarning && (
+                                <p className="text-xs text-amber-700 mt-2 flex items-center gap-1">
+                                    <AlertTriangle size={14} />
+                                    {fileSizeWarning}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex gap-2 justify-end">
+                    <button
+                        onClick={onCancel}
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={processCurrentImage}
+                        disabled={processing}
+                        className="px-4 py-2 bg-primary text-black rounded-md text-sm font-medium hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
+                    >
+                        {processing ? (
+                            <>
+                                <Loader2 size={16} className="animate-spin" />
+                                Processing...
+                            </>
+                        ) : (
+                            <>
+                                {currentIndex === files.length - 1 ? 'Finish & Add to Gallery' : 'Next Image'}
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, loadingEnclosures, API_BASE_URL, authToken, showModalMessage }) => {
+    if (!isOpen) return null;
+
+    const [mode, setMode] = useState('search'); // 'search' | 'create' | 'manual'
+    const [searchTerm, setSearchTerm] = useState('');
+    const [newEnclosureForm, setNewEnclosureForm] = useState({
+        name: '',
+        roomType: '',
+        location: '',
+        capacity: '',
+        dimensions: { length: '', width: '', height: '', unit: 'cm' },
+        temperatureRange: { min: '', max: '', unit: 'C' },
+        humidityRange: { min: '', max: '' },
+        description: ''
+    });
+    const [manualName, setManualName] = useState('');
+    const [creatingEnclosure, setCreatingEnclosure] = useState(false);
+
+    const handleCreateEnclosure = async () => {
+        if (!newEnclosureForm.name.trim()) {
+            showModalMessage('Validation Error', 'Enclosure name is required.');
+            return;
+        }
+
+        setCreatingEnclosure(true);
+        try {
+            const response = await axios.post(`${API_BASE_URL}/enclosures`, newEnclosureForm, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            if (response.data) {
+                onSelect(response.data);
+                onClose();
+            }
+        } catch (err) {
+            console.error('Failed to create enclosure:', err);
+            showModalMessage('Error', 'Failed to create enclosure. Please try again.');
+        } finally {
+            setCreatingEnclosure(false);
+        }
+    };
+
+    const filteredEnclosures = availableEnclosures.filter(e => 
+        e.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.location?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div className="fixed inset-0 bg-black/50 z-[95] flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="p-4 border-b flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Assign Enclosure</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
+                </div>
+
+                <div className="flex gap-2 p-4 border-b">
+                    <button
+                        onClick={() => { setMode('search'); setSearchTerm(''); }}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'search' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    >
+                        Search Existing
+                    </button>
+                    <button
+                        onClick={() => { setMode('create'); setNewEnclosureForm({ name: '', roomType: '', location: '', capacity: '', dimensions: { length: '', width: '', height: '', unit: 'cm' }, temperatureRange: { min: '', max: '', unit: 'C' }, humidityRange: { min: '', max: '' }, description: '' }); }}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    >
+                        Create New
+                    </button>
+                    <button
+                        onClick={() => { setMode('manual'); setManualName(''); }}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    >
+                        Manual Entry
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                    {mode === 'search' && (
+                        <>
+                            <input
+                                type="text"
+                                placeholder="Search by name or location..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full py-2 px-3 text-sm border border-gray-300 rounded-md"
+                            />
+                            {loadingEnclosures && <p className="text-center text-gray-500 py-4">Loading enclosures...</p>}
+                            {!loadingEnclosures && filteredEnclosures.length === 0 && <p className="text-center text-gray-500 py-4">No enclosures found</p>}
+                            <div className="space-y-2">
+                                {filteredEnclosures.map(enclosure => (
+                                    <div
+                                        key={enclosure.id}
+                                        className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                                        onClick={() => {
+                                            onSelect(enclosure);
+                                            onClose();
+                                        }}
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <p className="font-semibold text-gray-800">{enclosure.name}</p>
+                                                <p className="text-xs text-gray-500">{enclosure.location} • {enclosure.roomType || 'N/A'}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs font-semibold text-gray-700">{enclosure.currentAnimals || 0}/{enclosure.capacity || '?'}</p>
+                                                <p className="text-[11px] text-gray-500">Animals</p>
+                                            </div>
+                                        </div>
+                                        {enclosure.description && <p className="text-xs text-gray-600 mt-1">{enclosure.description}</p>}
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {mode === 'create' && (
+                        <div className="space-y-3">
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">Enclosure Name *</label>
+                                <input
+                                    type="text"
+                                    value={newEnclosureForm.name}
+                                    onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, name: e.target.value })}
+                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                    placeholder="e.g., Aquatic Habitat A"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Room/Type</label>
+                                    <input
+                                        type="text"
+                                        value={newEnclosureForm.roomType}
+                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, roomType: e.target.value })}
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                        placeholder="e.g., Tank, Cage, Vivarium"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Location</label>
+                                    <input
+                                        type="text"
+                                        value={newEnclosureForm.location}
+                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, location: e.target.value })}
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                        placeholder="e.g., Room 2, Shelf 1"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">Capacity</label>
+                                <input
+                                    type="number"
+                                    value={newEnclosureForm.capacity}
+                                    onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, capacity: e.target.value })}
+                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                    placeholder="Max animals"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">Dimensions (L x W x H)</label>
+                                <div className="grid grid-cols-3 gap-2 items-end">
+                                    <input
+                                        type="number"
+                                        value={newEnclosureForm.dimensions.length}
+                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, dimensions: { ...newEnclosureForm.dimensions, length: e.target.value } })}
+                                        placeholder="Length"
+                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                    />
+                                    <input
+                                        type="number"
+                                        value={newEnclosureForm.dimensions.width}
+                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, dimensions: { ...newEnclosureForm.dimensions, width: e.target.value } })}
+                                        placeholder="Width"
+                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                    />
+                                    <select
+                                        value={newEnclosureForm.dimensions.unit}
+                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, dimensions: { ...newEnclosureForm.dimensions, unit: e.target.value } })}
+                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                    >
+                                        <option value="cm">cm</option>
+                                        <option value="in">in</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">Description</label>
+                                <textarea
+                                    value={newEnclosureForm.description}
+                                    onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, description: e.target.value })}
+                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none"
+                                    rows="2"
+                                    placeholder="Any notes about this enclosure..."
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {mode === 'manual' && (
+                        <div className="space-y-3">
+                            <p className="text-sm text-gray-600">Enter a custom enclosure name (will be stored locally):</p>
+                            <input
+                                type="text"
+                                value={manualName}
+                                onChange={(e) => setManualName(e.target.value)}
+                                className="w-full py-2 px-3 text-sm border border-gray-300 rounded-md"
+                                placeholder="e.g., Outdoor Pen, Temporary Setup"
+                            />
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-4 border-t flex gap-2">
+                    <button
+                        onClick={onClose}
+                        className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (mode === 'create') {
+                                handleCreateEnclosure();
+                            } else if (mode === 'manual') {
+                                if (!manualName.trim()) {
+                                    showModalMessage('Validation Error', 'Please enter an enclosure name.');
+                                    return;
+                                }
+                                onSelect({ name: manualName, isManual: true });
+                                onClose();
+                            }
+                        }}
+                        disabled={creatingEnclosure || (mode === 'manual' && !manualName.trim())}
+                        className="flex-1 px-3 py-2 text-sm font-medium bg-primary text-black rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {creatingEnclosure ? (
+                            <>
+                                <Loader2 size={16} className="inline animate-spin mr-1" />
+                                Creating...
+                            </>
+                        ) : (
+                            'Confirm'
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const AnimalFormTestModal = ({
     formTitle = "Create New Animal",
     animalToEdit,
@@ -363,6 +997,56 @@ const AnimalFormTestModal = ({
         notes: ''
     });
     const [mateInfo, setMateInfo] = useState(null);
+
+    // Breeding fertility tracking states (21 fields)
+    const [reproductiveStateOverride, setReproductiveStateOverride] = useState(null);
+    
+    // Section 2: Fertility Status
+    const [currentReproductiveState, setCurrentReproductiveState] = useState({
+        fertilityStatus: animalToEdit?.fertilityStatus || 'Unknown'
+    });
+
+    // Section 3: Reproductive Cycle (conditional - hidden if spayed/neutered)
+    const [reproductiveCycle, setReproductiveCycle] = useState({
+        lastReproductiveEventDate: animalToEdit?.lastReproductiveEventDate || '',
+        reproductiveEventCycleLength: animalToEdit?.reproductiveEventCycleLength || '',
+        currentReproductiveEventPhase: animalToEdit?.currentReproductiveEventPhase || 'Unknown'
+    });
+
+    // Section 4: Conception & Mating History (conditional)
+    const [conceptionHistory, setConceptionHistory] = useState({
+        lastConceptionDate: animalToEdit?.lastConceptionDate || '',
+        successfulConceptionCount: animalToEdit?.successfulConceptionCount || '',
+        unsuccessfulConceptionAttempts: animalToEdit?.unsuccessfulConceptionAttempts || ''
+    });
+
+    // Section 5: Pregnancy/Development Details (conditional)
+    const [developmentDetails, setDevelopmentDetails] = useState({
+        developmentPeriodStart: animalToEdit?.developmentPeriodStart || '',
+        developmentPeriodLength: animalToEdit?.developmentPeriodLength || '',
+        expectedDeliveryDate: animalToEdit?.expectedDeliveryDate || '',
+        developmentMethod: animalToEdit?.developmentMethod || 'Natural'
+    });
+
+    // Section 6: Reproductive Outcomes & Nursing
+    const [reproductiveOutcomes, setReproductiveOutcomes] = useState({
+        totalOffspringProduced: animalToEdit?.totalOffspringProduced || '',
+        viableOffspringCount: animalToEdit?.viableOffspringCount || '',
+        reproductiveEventCount: animalToEdit?.reproductiveEventCount || '',
+        reproductiveEventOutcome: animalToEdit?.reproductiveEventOutcome || 'Unknown',
+        dependentCareEndDate: animalToEdit?.dependentCareEndDate || ''
+    });
+
+    // Section 7: Reproductive Health & Procedures
+    const [reproductiveHealth, setReproductiveHealth] = useState({
+        artificialReproductionMethod: animalToEdit?.artificialReproductionMethod || 'None',
+        lastReproductiveInterventionDate: animalToEdit?.lastReproductiveInterventionDate || '',
+        dependentCareRequired: animalToEdit?.dependentCareRequired || false,
+        reproductiveHealthNotes: animalToEdit?.reproductiveHealthNotes || ''
+    });
+
+    // Override tracking
+    const [reproductiveStateOverrideReason, setReproductiveStateOverrideReason] = useState('');
     const [newVaccination, setNewVaccination] = useState({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
     const [newDeworming, setNewDeworming] = useState({ date: new Date().toISOString().substring(0, 10), medication: '', notes: '' });
     const [newParasiteControl, setNewParasiteControl] = useState({ date: new Date().toISOString().substring(0, 10), treatment: '', notes: '' });
@@ -380,9 +1064,83 @@ const AnimalFormTestModal = ({
     const [newMilestoneDate, setNewMilestoneDate] = useState(() => new Date().toISOString().split('T')[0]);
     const [newMilestoneInterval, setNewMilestoneInterval] = useState('');
     const [newMilestoneUnit, setNewMilestoneUnit] = useState('week');
-    const [newMeasurement, setNewMeasurement] = useState({ date: new Date().toISOString().substring(0, 10), weight: '', length: '', bcs: '', notes: '' });
+    const [newMeasurement, setNewMeasurement] = useState({ date: new Date().toISOString().substring(0, 10), weight: '', length: '', height: '', chestGirth: '', bcs: '', notes: '' });
+    const [measurementUnits, setMeasurementUnits] = useState({
+        weight: animalToEdit?.measurementUnits?.weight || 'g',
+        length: animalToEdit?.measurementUnits?.length || 'cm'
+    });
 
-    const addMeasurement = () => {
+    // Ownership History add-entry states
+    const [ohMode, setOhMode] = useState('manual'); // 'manual' | 'user'
+    const [ohOwnerName, setOhOwnerName] = useState('');
+    const [ohOwnershipType, setOhOwnershipType] = useState('');
+    const [ohStartDate, setOhStartDate] = useState('');
+    const [ohCountry, setOhCountry] = useState('');
+    const [ohSelectedUser, setOhSelectedUser] = useState(null);
+    const [ohUserSearch, setOhUserSearch] = useState('');
+    const [ohUserResults, setOhUserResults] = useState([]);
+    const [ohSearching, setOhSearching] = useState(false);
+    const [lastOwnerId, setLastOwnerId] = useState('');
+
+    // Sale/Purchase information states
+    const [purchaseDate, setPurchaseDate] = useState('');
+    const [purchasePrice, setPurchasePrice] = useState('');
+    const [sellerName, setSellerName] = useState('');
+    const [sellerContact, setSellerContact] = useState('');
+    const [saleDate, setSaleDate] = useState('');
+    const [salePrice, setSalePrice] = useState('');
+    const [buyerName, setBuyerName] = useState('');
+    const [buyerContact, setBuyerContact] = useState('');
+    const [breedingRightsPurchased, setBreedingRightsPurchased] = useState('');
+    const [showRightsPurchased, setShowRightsPurchased] = useState('');
+    const [exportRightsPurchased, setExportRightsPurchased] = useState('');
+    const [studServicesAllowed, setStudServicesAllowed] = useState('');
+    const [resaleRestrictions, setResaleRestrictions] = useState('');
+    const [breederBuybackClause, setBreederBuybackClause] = useState('');
+
+    // Medication supply selection states
+    const [medicationMode, setMedicationMode] = useState('manual'); // 'manual' | 'supply'
+    const [selectedMedicationSupply, setSelectedMedicationSupply] = useState(null);
+    const [availableMedicationSupplies, setAvailableMedicationSupplies] = useState([]);
+    const [medicationSupplySearch, setMedicationSupplySearch] = useState('');
+    const [loadingMedicationSupplies, setLoadingMedicationSupplies] = useState(false);
+
+    // Diet/Nutrition supply selection states
+    const [dietMode, setDietMode] = useState('manual'); // 'manual' | 'supply'
+    const [selectedDietSupply, setSelectedDietSupply] = useState(null);
+    const [availableDietSupplies, setAvailableDietSupplies] = useState([]);
+    const [dietSupplySearch, setDietSupplySearch] = useState('');
+    const [loadingDietSupplies, setLoadingDietSupplies] = useState(false);
+
+    // Supplement supply selection states
+    const [supplementMode, setSupplementMode] = useState('manual'); // 'manual' | 'supply'
+    const [selectedSupplementSupply, setSelectedSupplementSupply] = useState(null);
+    const [availableSupplementSupplies, setAvailableSupplementSupplies] = useState([]);
+    const [supplementSupplySearch, setSupplementSupplySearch] = useState('');
+    const [loadingSupplementSupplies, setLoadingSupplementSupplies] = useState(false);
+
+    // Health status override states
+    const [healthStatusOverride, setHealthStatusOverride] = useState(formData.healthStatusOverride || null);
+    const [healthStatusOverrideNotes, setHealthStatusOverrideNotes] = useState(formData.healthStatusOverrideNotes || '');
+
+    // Enclosure assignment states
+    const [selectedEnclosure, setSelectedEnclosure] = useState(formData.enclosureId || null);
+    const [manualEnclosureName, setManualEnclosureName] = useState('');
+    const [showEnclosureModal, setShowEnclosureModal] = useState(false);
+    const [availableEnclosures, setAvailableEnclosures] = useState([]);
+    const [enclosureSearch, setEnclosureSearch] = useState('');
+    const [loadingEnclosures, setLoadingEnclosures] = useState(false);
+    const [enclosureModalMode, setEnclosureModalMode] = useState('search'); // 'search' | 'create' | 'manual'
+    const [newEnclosureForm, setNewEnclosureForm] = useState({
+        name: '',
+        roomType: '',
+        location: '',
+        capacity: '',
+        dimensions: { length: '', width: '', height: '', unit: 'cm' },
+        temperatureRange: { min: '', max: '', unit: 'C' },
+        humidityRange: { min: '', max: '' },
+        description: ''
+    });
         if (!newMeasurement.date || !newMeasurement.weight) {
             showModalMessage('Missing Data', 'Please enter at least a date and weight.');
             return;
@@ -392,14 +1150,17 @@ const AnimalFormTestModal = ({
             date: newMeasurement.date,
             weight: newMeasurement.weight,
             length: newMeasurement.length || null,
+            height: newMeasurement.height || null,
+            chestGirth: newMeasurement.chestGirth || null,
             bcs: newMeasurement.bcs || null,
             notes: newMeasurement.notes || ''
         };
         setFormData(prev => ({
             ...prev,
-            growthRecords: [...(parseJsonArrayField(prev.growthRecords) || []), newRecord]
+            growthRecords: [...(parseJsonArrayField(prev.growthRecords) || []), newRecord],
+            measurementUnits: measurementUnits
         }));
-        setNewMeasurement({ date: new Date().toISOString().substring(0, 10), weight: '', length: '', bcs: '', notes: '' });
+        setNewMeasurement({ date: new Date().toISOString().substring(0, 10), weight: '', length: '', height: '', chestGirth: '', bcs: '', notes: '' });
     };
 
 
@@ -410,6 +1171,20 @@ const AnimalFormTestModal = ({
         availability: true,
     });
     const [newIdentifier, setNewIdentifier] = useState({ title: '', value: '' });
+
+    // Timeline tab states
+    const [timelineNotes, setTimelineNotes] = useState(parseJsonArrayField(animalToEdit?.timelineNotes) || []);
+    const [eventVisibility, setEventVisibility] = useState({
+        health: true,
+        breeding: true,
+        keeper: true,
+        shows: true,
+        milestones: true
+    });
+    const [pinnedEvents, setPinnedEvents] = useState(parseJsonArrayField(animalToEdit?.pinnedEvents) || []);
+    const [newTimelineNote, setNewTimelineNote] = useState({ eventId: '', noteText: '' });
+    const [showNoteForm, setShowNoteForm] = useState(false);
+
     const removeArrayItem = (field, index) => {
         setFormData(prev => ({
             ...prev,
@@ -452,30 +1227,135 @@ const AnimalFormTestModal = ({
     };
 
     const addMedication = () => {
-        if (!newMedication.name) {
-            showModalMessage('Missing Data', 'Please enter a medication name.');
-            return;
+        if (medicationMode === 'supply') {
+            if (!selectedMedicationSupply) {
+                showModalMessage('Missing Data', 'Please select a medication supply.');
+                return;
+            }
+            const record = {
+                id: Date.now().toString(),
+                name: selectedMedicationSupply.name,
+                dose: newMedication.dose || '',
+                supplyId: selectedMedicationSupply.id || selectedMedicationSupply._id,
+                supplyName: selectedMedicationSupply.name,
+                notes: newMedication.notes || '',
+                startDate: newMedication.startDate || null,
+                stopDate: newMedication.stopDate || null,
+                intervalValue: newMedication.intervalValue ? Number(newMedication.intervalValue) : null,
+                intervalUnit: newMedication.intervalUnit || 'hours',
+                source: 'supply'
+            };
+            setFormData(prev => ({
+                ...prev,
+                medications: [...(parseJsonArrayField(prev.medications) || []), record]
+            }));
+            setSelectedMedicationSupply(null);
+            setNewMedication({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
+            setMedicationMode('manual');
+        } else {
+            if (!newMedication.name) {
+                showModalMessage('Missing Data', 'Please enter a medication name.');
+                return;
+            }
+            const record = {
+                id: Date.now().toString(),
+                name: newMedication.name,
+                dose: newMedication.dose || '',
+                notes: newMedication.notes || '',
+                startDate: newMedication.startDate || null,
+                stopDate: newMedication.stopDate || null,
+                intervalValue: newMedication.intervalValue ? Number(newMedication.intervalValue) : null,
+                intervalUnit: newMedication.intervalUnit || 'hours',
+                source: 'manual'
+            };
+            setFormData(prev => ({
+                ...prev,
+                medications: [...(parseJsonArrayField(prev.medications) || []), record]
+            }));
+            setNewMedication({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
         }
-        const record = {
-            id: Date.now().toString(),
-            name: newMedication.name,
-            dose: newMedication.dose || '',
-            notes: newMedication.notes || '',
-            startDate: newMedication.startDate || null,
-            stopDate: newMedication.stopDate || null,
-            intervalValue: newMedication.intervalValue ? Number(newMedication.intervalValue) : null,
-            intervalUnit: newMedication.intervalUnit || 'hours'
+    };
+
+    const calculateHealthStatus = () => {
+        const medications = parseJsonArrayField(formData.medications) || [];
+        const conditions = parseJsonArrayField(formData.medicalConditions) || [];
+        const allergies = parseJsonArrayField(formData.allergies) || [];
+        const quarantine = formData.quarantineDetails || {};
+        
+        let score = 5; // Start at excellent
+        let factors = [];
+
+        // Quarantine assessment
+        if (quarantine.status === 'Quarantine' || quarantine.status === 'Isolation') {
+            const qType = quarantine.type || 'unknown';
+            if (qType.includes('Medical') || qType.includes('Illness') || qType.includes('Disease')) {
+                score -= 2;
+                factors.push('Active medical quarantine');
+            } else if (qType.includes('Preventive') || qType.includes('New')) {
+                score -= 1;
+                factors.push('Preventive quarantine (new arrival)');
+            } else {
+                score -= 1.5;
+                factors.push(`${quarantine.status} status`);
+            }
+        }
+
+        // Medications count
+        if (medications.length > 0) {
+            const deduction = Math.min(medications.length, 2); // Max 2 points deducted
+            score -= deduction;
+            factors.push(`${medications.length} active medication(s)`);
+        }
+
+        // Conditions count
+        if (conditions.length > 0) {
+            const deduction = Math.min(conditions.length, 2);
+            score -= deduction;
+            factors.push(`${conditions.length} medical condition(s)`);
+        }
+
+        // Allergies
+        if (allergies.length > 2) {
+            score -= 0.5;
+            factors.push(`Multiple allergies (${allergies.length})`);
+        }
+
+        // Determine calculated status
+        let calculatedStatus = 'Excellent';
+        
+        if (score >= 4.5) {
+            calculatedStatus = 'Excellent';
+        } else if (score >= 3.5) {
+            calculatedStatus = 'Good';
+        } else if (score >= 2.5) {
+            calculatedStatus = 'Fair';
+        } else if (score >= 1.5) {
+            calculatedStatus = 'Poor';
+        } else {
+            calculatedStatus = 'Critical';
+        }
+
+        // Determine final status (override if set)
+        const status = healthStatusOverride || calculatedStatus;
+        const isOverridden = !!healthStatusOverride;
+
+        // Color coding
+        const colorMap = {
+            'Excellent': 'bg-green-100 text-green-800 border-green-200',
+            'Good': 'bg-blue-100 text-blue-800 border-blue-200',
+            'Fair': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            'Poor': 'bg-orange-100 text-orange-800 border-orange-200',
+            'Critical': 'bg-red-100 text-red-800 border-red-200'
         };
-        setFormData(prev => ({
-            ...prev,
-            medications: [...(parseJsonArrayField(prev.medications) || []), record]
-        }));
-        setNewMedication({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
+
+        const badgeColor = colorMap[status] || colorMap['Excellent'];
+
+        return { status, calculatedStatus, badgeColor, score, factors, isOverridden };
     };
 
     const handleQuarantineChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, quarantineDetails: { ...(prev.quarantineDetails || { status: 'None', reason: '', startDate: '', endDate: '' }), [name]: value } }));
+        setFormData(prev => ({ ...prev, quarantineDetails: { ...(prev.quarantineDetails || { status: 'None', type: '', reason: '', startDate: '', endDate: '' }), [name]: value } }));
     };
 
     const addVaccination = () => {
@@ -654,6 +1534,45 @@ const AnimalFormTestModal = ({
 
     const [tagInput, setTagInput] = useState('');
 
+    // ============================================================
+    // BACKWARDS COMPATIBILITY LAYER
+    // ============================================================
+    // These helpers ensure data from old database fields is read correctly
+    // while new code uses the standardized field names.
+    // Migration plan: See MIGRATION_PLAN.md
+    
+    const getDateValue = (obj, newField, oldField) => {
+        const value = obj?.[newField] || obj?.[oldField];
+        return value ? new Date(value).toISOString().substring(0, 10) : '';
+    };
+    
+    const getFieldValue = (obj, newField, oldField, defaultValue = '') => {
+        return obj?.[newField] || obj?.[oldField] || defaultValue;
+    };
+    
+    const getIdValue = (obj, newField, oldField, defaultValue = null) => {
+        return obj?.[newField] || obj?.[oldField] || defaultValue;
+    };
+    
+    // Ownership history: consolidates from old keeperHistory if not present
+    const getOwnershipHistory = (obj) => {
+        if (obj?.ownershipHistory && Array.isArray(obj.ownershipHistory)) {
+            return obj.ownershipHistory;
+        }
+        // Fallback: convert old keeperHistory format to new ownershipHistory
+        if (obj?.keeperHistory && Array.isArray(obj.keeperHistory)) {
+            return obj.keeperHistory.map(keeper => ({
+                ownerName: keeper.name || '',
+                userId_public: keeper.userId_public || null,
+                startDate: '',
+                endDate: '',
+                ownershipType: '',
+                country: keeper.country || ''
+            }));
+        }
+        return [];
+    };
+
     const FormSection = ({ title, icon, children, initiallyOpen = false }) => {
         const [isOpen, setIsOpen] = useState(initiallyOpen);
         return (
@@ -677,7 +1596,7 @@ const AnimalFormTestModal = ({
             name: animalToEdit.name || '',
             gender: animalToEdit.gender || 'Unknown',
             birthDate: animalToEdit.birthDate ? new Date(animalToEdit.birthDate).toISOString().substring(0, 10) : '',
-            deceasedDate: animalToEdit.deceasedDate ? new Date(animalToEdit.deceasedDate).toISOString().substring(0, 10) : '',
+            deceasedDate: getDateValue(animalToEdit, 'dateOfDeath', 'deceasedDate'),
             status: animalToEdit.status || 'Pet',
             color: animalToEdit.color || '',
             coat: animalToEdit.coat || '',
@@ -685,12 +1604,12 @@ const AnimalFormTestModal = ({
             remarks: animalToEdit.remarks || '',
             tags: animalToEdit.tags || [],
             geneticCode: animalToEdit.geneticCode || '',
-            fatherId_public: animalToEdit.fatherId_public || animalToEdit.sireId_public || null,
-            motherId_public: animalToEdit.motherId_public || animalToEdit.damId_public || null,
+            fatherId_public: getIdValue(animalToEdit, 'fatherId_public', 'sireId_public'),
+            motherId_public: getIdValue(animalToEdit, 'motherId_public', 'damId_public'),
             breederId_public: animalToEdit.breederId_public || null,
             manualBreederName: animalToEdit.manualBreederName || '',
-            ownerId_public: animalToEdit.ownerId_public || animalToEdit.ownerId || null,
-            manualownerName: animalToEdit.manualownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '',
+            ownerId_public: getIdValue(animalToEdit, 'ownerId_public', 'ownerId'),
+            manualownerName: getFieldValue(animalToEdit, 'manualownerName', 'currentOwner') || getFieldValue(animalToEdit, 'manualownerName', 'currentOwnerDisplay'),
             isDisplay: animalToEdit.isDisplay ?? false,
             coOwnership: animalToEdit.coOwnership || '',
             isForSale: animalToEdit.isForSale || false, // This will be superseded by status='Available'
@@ -798,10 +1717,11 @@ const AnimalFormTestModal = ({
             activityCycle: animalToEdit.activityCycle || '',
             lifeStage: animalToEdit.lifeStage || '',
             causeOfDeath: animalToEdit.causeOfDeath || '',
+            dateOfDeath: animalToEdit.dateOfDeath ? new Date(animalToEdit.dateOfDeath).toISOString().substring(0, 10) : '',
             necropsyResults: animalToEdit.necropsyResults || '',
             insurance: animalToEdit.insurance || '',
             legalStatus: animalToEdit.legalStatus || '',
-            keeperHistory: animalToEdit.keeperHistory || [],
+            ownershipHistory: getOwnershipHistory(animalToEdit),
             showTitles: animalToEdit.showTitles || '',
             showRatings: animalToEdit.showRatings || '',
             judgeComments: animalToEdit.judgeComments || '',
@@ -850,6 +1770,19 @@ const AnimalFormTestModal = ({
             exportRestrictions: animalToEdit.exportRestrictions || '',
             purchaseDate: animalToEdit.purchaseDate ? new Date(animalToEdit.purchaseDate).toISOString().substring(0, 10) : '',
             purchaseLocation: animalToEdit.purchaseLocation || '',
+            purchasePrice: animalToEdit.purchasePrice || '',
+            sellerName: animalToEdit.sellerName || '',
+            sellerContact: animalToEdit.sellerContact || '',
+            saleDate: animalToEdit.saleDate ? new Date(animalToEdit.saleDate).toISOString().substring(0, 10) : '',
+            salePrice: animalToEdit.salePrice || '',
+            buyerName: animalToEdit.buyerName || '',
+            buyerContact: animalToEdit.buyerContact || '',
+            breedingRightsPurchased: animalToEdit.breedingRightsPurchased || '',
+            showRightsPurchased: animalToEdit.showRightsPurchased || '',
+            exportRightsPurchased: animalToEdit.exportRightsPurchased || '',
+            studServicesAllowed: animalToEdit.studServicesAllowed || '',
+            resaleRestrictions: animalToEdit.resaleRestrictions || '',
+            breederBuybackClause: animalToEdit.breederBuybackClause || '',
             legalDocuments: animalToEdit.legalDocuments || [],
             growthRecords: parseJsonArrayField(animalToEdit.growthRecords),
             measurementUnits: animalToEdit.measurementUnits || { weight: 'g', length: 'cm' },
@@ -859,7 +1792,9 @@ const AnimalFormTestModal = ({
             dewormingRecords: parseJsonArrayField(animalToEdit.dewormingRecords),
             parasiteControl: parseJsonArrayField(animalToEdit.parasiteControl),
             medicalProcedures: parseJsonArrayField(animalToEdit.medicalProcedures),
-            labResults: parseJsonArrayField(animalToEdit.labResults || animalToEdit.laboratoryResults)
+            labResults: parseJsonArrayField(animalToEdit.labResults || animalToEdit.laboratoryResults),
+            timelineNotes: parseJsonArrayField(animalToEdit.timelineNotes),
+            pinnedEvents: parseJsonArrayField(animalToEdit.pinnedEvents)
         } : {
             ...(initialValues || {}),
             species: species,
@@ -976,10 +1911,11 @@ const AnimalFormTestModal = ({
             activityCycle: '',
             lifeStage: '',
             causeOfDeath: '',
+            dateOfDeath: '',
             necropsyResults: '',
             insurance: '',
             legalStatus: '',
-            keeperHistory: [],
+            ownershipHistory: [],
             showTitles: '',
             showRatings: '',
             judgeComments: '',
@@ -1031,6 +1967,19 @@ const AnimalFormTestModal = ({
             exportRestrictions: '',
             purchaseDate: '',
             purchaseLocation: '',
+            purchasePrice: '',
+            sellerName: '',
+            sellerContact: '',
+            saleDate: '',
+            salePrice: '',
+            buyerName: '',
+            buyerContact: '',
+            breedingRightsPurchased: '',
+            showRightsPurchased: '',
+            exportRightsPurchased: '',
+            studServicesAllowed: '',
+            resaleRestrictions: '',
+            breederBuybackClause: '',
             legalDocuments: [],
             growthRecords: [],
             measurementUnits: { weight: 'g', length: 'cm' },
@@ -1042,11 +1991,15 @@ const AnimalFormTestModal = ({
             medicalProcedures: [],
             labResults: [],
             ownerId_public: null,
-            ringId: ''
+            ringId: '',
+            timelineNotes: [],
+            pinnedEvents: []
         }
     );
 
     const [galleryImages, setGalleryImages] = useState([]);
+    const [imageEditorOpen, setImageEditorOpen] = useState(false);
+    const [imagesToEdit, setImagesToEdit] = useState([]);
 
     useEffect(() => {
         const initialImages = [];
@@ -1062,6 +2015,52 @@ const AnimalFormTestModal = ({
         }
         setGalleryImages(initialImages);
     }, [animalToEdit]);
+
+    // Track owner changes and auto-populate ownership history
+    useEffect(() => {
+        const currentOwner = formData.ownerId_public || formData.manualownerName;
+        const ownerChanged = lastOwnerId !== currentOwner;
+        
+        if (ownerChanged && lastOwnerId) {
+            // There was a previous owner that just changed
+            setFormData(prev => {
+                const updated = { ...prev };
+                const ownershipHistory = updated.ownershipHistory || [];
+                
+                // End-date the last entry if it doesn't have an end date
+                if (ownershipHistory.length > 0) {
+                    const lastEntry = ownershipHistory[ownershipHistory.length - 1];
+                    if (!lastEntry.endDate) {
+                        const today = new Date().toISOString().substring(0, 10);
+                        ownershipHistory[ownershipHistory.length - 1] = { ...lastEntry, endDate: today };
+                    }
+                }
+                
+                // Add new ownership entry if new owner exists
+                if (currentOwner) {
+                    const today = new Date().toISOString().substring(0, 10);
+                    const newEntry = {
+                        ownerName: formData.manualownerName || '',
+                        userId_public: formData.ownerId_public || null,
+                        startDate: today,
+                        endDate: '',
+                        ownershipType: '',
+                        country: ''
+                    };
+                    ownershipHistory.push(newEntry);
+                }
+                
+                return { ...updated, ownershipHistory };
+            });
+        }
+        
+        if (currentOwner) {
+            setLastOwnerId(currentOwner);
+        } else if (lastOwnerId) {
+            // Owner was cleared - still update lastOwnerId but don't create empty entry
+            setLastOwnerId('');
+        }
+    }, [formData.ownerId_public, formData.manualownerName]);
 
     useEffect(() => {
         if (formData.breederId_public) {
@@ -1091,17 +2090,65 @@ const AnimalFormTestModal = ({
         }
     }, [formData.ownerId_public, API_BASE_URL]);
 
+    // Sync breeding fertility state to formData
+    useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            fertilityStatus: currentReproductiveState.fertilityStatus,
+            lastReproductiveEventDate: reproductiveCycle.lastReproductiveEventDate,
+            reproductiveEventCycleLength: reproductiveCycle.reproductiveEventCycleLength,
+            currentReproductiveEventPhase: reproductiveCycle.currentReproductiveEventPhase,
+            lastConceptionDate: conceptionHistory.lastConceptionDate,
+            successfulConceptionCount: conceptionHistory.successfulConceptionCount,
+            unsuccessfulConceptionAttempts: conceptionHistory.unsuccessfulConceptionAttempts,
+            developmentPeriodStart: developmentDetails.developmentPeriodStart,
+            developmentPeriodLength: developmentDetails.developmentPeriodLength,
+            expectedDeliveryDate: developmentDetails.expectedDeliveryDate,
+            developmentMethod: developmentDetails.developmentMethod,
+            totalOffspringProduced: reproductiveOutcomes.totalOffspringProduced,
+            viableOffspringCount: reproductiveOutcomes.viableOffspringCount,
+            reproductiveEventCount: reproductiveOutcomes.reproductiveEventCount,
+            reproductiveEventOutcome: reproductiveOutcomes.reproductiveEventOutcome,
+            dependentCareEndDate: reproductiveOutcomes.dependentCareEndDate,
+            artificialReproductionMethod: reproductiveHealth.artificialReproductionMethod,
+            lastReproductiveInterventionDate: reproductiveHealth.lastReproductiveInterventionDate,
+            dependentCareRequired: reproductiveHealth.dependentCareRequired,
+            reproductiveHealthNotes: reproductiveHealth.reproductiveHealthNotes,
+            reproductiveStateOverride: reproductiveStateOverride ? true : false,
+            reproductiveStateOverrideReason: reproductiveStateOverrideReason
+        }));
+    }, [currentReproductiveState, reproductiveCycle, conceptionHistory, developmentDetails, reproductiveOutcomes, reproductiveHealth, reproductiveStateOverride, reproductiveStateOverrideReason]);
 
+    // Sync timeline data to formData
+    useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            timelineNotes: timelineNotes,
+            pinnedEvents: pinnedEvents
+        }));
+    }, [timelineNotes, pinnedEvents]);
 
     const handleFileChange = (e) => {
-        if (e.target.files) {
-            const newFiles = Array.from(e.target.files).map(file => ({
-                id: `new-${file.name}-${Date.now()}-${Math.random()}`,
-                url: URL.createObjectURL(file),
-                file: file,
-            }));
-            setGalleryImages(prevImages => [...prevImages, ...newFiles]);
+        if (e.target.files && e.target.files.length > 0) {
+            const filesArray = Array.from(e.target.files);
+            setImagesToEdit(filesArray);
+            setImageEditorOpen(true);
         }
+    };
+
+    const handleImageEditorComplete = (processedImages) => {
+        // Add processed images to gallery
+        const newGalleryImages = processedImages.map((img, idx) => ({
+            id: img.id,
+            url: img.url,
+            file: img.file,
+            originalSize: img.originalSize,
+            finalSize: img.finalSize,
+            warning: img.warning,
+        }));
+        setGalleryImages(prevImages => [...prevImages, ...newGalleryImages]);
+        setImageEditorOpen(false);
+        setImagesToEdit([]);
     };
 
     const setAsPrimaryImage = (id) => {
@@ -1122,6 +2169,13 @@ const AnimalFormTestModal = ({
             return updated;
         });
     };
+
+    // Pedigree edit state (Manual Pedigree Beta)
+    const [mpEditForm, setMpEditForm] = useState(() => animalToEdit?.manualPedigree || {});
+    const [mpCTCOpenSlot, setMpCTCOpenSlot] = useState(null);
+    const [mpSlotUploading, setMpSlotUploading] = useState({});
+    const mpAutoFetchedRef = useRef(false);
+    const animalToEditIdRef = useRef(animalToEdit?._id);
 
     const handleSelectContact = (selection) => {
         if (assignModalTarget === 'breeder') {
@@ -1178,6 +2232,279 @@ const AnimalFormTestModal = ({
         }));
     };
 
+    // Timeline helper functions
+    const aggregateTimelineEvents = () => {
+        const events = [];
+        const addEvent = (type, date, title, description, id) => {
+            if (date) {
+                events.push({
+                    id: id || `${type}-${Date.now()}`,
+                    type,
+                    date: new Date(date).toISOString().split('T')[0],
+                    title,
+                    description,
+                    isPinned: pinnedEvents.includes(id || `${type}-${Date.now()}`)
+                });
+            }
+        };
+
+        // Health events
+        if (eventVisibility.health) {
+            if (formData.quarantineDetails?.startDate) {
+                addEvent('health', formData.quarantineDetails.startDate, 'Quarantine Started', formData.quarantineDetails.reason || 'Quarantine');
+            }
+            (parseJsonArrayField(formData.vetVisits) || []).forEach(visit => {
+                if (visit.date) addEvent('health', visit.date, 'Vet Visit', visit.reason || 'Veterinary visit');
+            });
+            (parseJsonArrayField(formData.vaccinations) || []).forEach(vacc => {
+                if (vacc.date) addEvent('health', vacc.date, 'Vaccination', vacc.name || 'Vaccination');
+            });
+        }
+
+        // Breeding events
+        if (eventVisibility.breeding) {
+            if (formData.matingDate) addEvent('breeding', formData.matingDate, 'Mating', 'Animal mating date');
+            if (formData.expectedDueDate) addEvent('breeding', formData.expectedDueDate, 'Expected Delivery', 'Expected delivery/birth date');
+            (parseJsonArrayField(formData.breedingRecords) || []).forEach(record => {
+                if (record.birthEventDate) addEvent('breeding', record.birthEventDate, 'Birth/Hatching Event', `Litter size: ${record.litterSizeBorn || 'Unknown'}`);
+            });
+        }
+
+        // Keeper events
+        if (eventVisibility.keeper) {
+            (formData.ownershipHistory || []).forEach(ownership => {
+                if (keeper.date) addEvent('keeper', keeper.date, 'Keeper Changed', `New keeper: ${keeper.name || 'Unknown'}`);
+            });
+        }
+
+        // Show/Performance events
+        if (eventVisibility.shows) {
+            if (formData.showTitles) {
+                addEvent('shows', new Date().toISOString().split('T')[0], 'Show Title', formData.showTitles);
+            }
+        }
+
+        // Milestones
+        if (eventVisibility.milestones) {
+            (parseJsonArrayField(formData.milestones) || []).forEach(milestone => {
+                if (milestone.startDate) addEvent('milestones', milestone.startDate, milestone.label || 'Milestone', milestone.description || '');
+            });
+        }
+
+        return events.sort((a, b) => new Date(b.date) - new Date(a.date));
+    };
+
+    const addTimelineNote = () => {
+        if (!newTimelineNote.eventId || !newTimelineNote.noteText.trim()) {
+            showModalMessage('Missing Data', 'Please select an event and enter a note.');
+            return;
+        }
+        const note = {
+            id: Date.now().toString(),
+            eventId: newTimelineNote.eventId,
+            noteText: newTimelineNote.noteText,
+            dateAdded: new Date().toISOString().split('T')[0]
+        };
+        setTimelineNotes([...timelineNotes, note]);
+        setNewTimelineNote({ eventId: '', noteText: '' });
+        setShowNoteForm(false);
+    };
+
+    const deleteTimelineNote = (noteId) => {
+        setTimelineNotes(timelineNotes.filter(n => n.id !== noteId));
+    };
+
+    const toggleEventPin = (eventId) => {
+        if (pinnedEvents.includes(eventId)) {
+            setPinnedEvents(pinnedEvents.filter(id => id !== eventId));
+        } else {
+            setPinnedEvents([...pinnedEvents, eventId]);
+        }
+    };
+
+    const getNotesForEvent = (eventId) => {
+        return timelineNotes.filter(n => n.eventId === eventId);
+    };
+
+    // Pedigree helper functions
+    const mpEmptySlot = () => ({ mode: 'ctc', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+    const mpToSlot = (a) => {
+        const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+        return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+    };
+    const mpFetchByCtc = async (id) => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            return res.data || null;
+        } catch { return null; }
+    };
+    const MP_SLOT_CHILDREN = {
+        sire:    { father: 'sireSire',    mother: 'sireDam'    },
+        dam:     { father: 'damSire',     mother: 'damDam'     },
+        sireSire:{ father: 'sireSireSire',mother: 'sireSireDam'},
+        sireDam: { father: 'sireDamSire', mother: 'sireDamDam' },
+        damSire: { father: 'damSireSire', mother: 'damSireDam' },
+        damDam:  { father: 'damDamSire',  mother: 'damDamDam'  },
+    };
+    const mpLinkAnimal = async (slotKey, a) => {
+        const updates = { [slotKey]: mpToSlot(a) };
+        const queue = [{ animal: a, slot: slotKey }];
+        while (queue.length) {
+            const { animal: cur, slot } = queue.shift();
+            const children = MP_SLOT_CHILDREN[slot];
+            if (!children) continue;
+            const fatherId = cur.fatherId_public || cur.sireId_public;
+            const motherId = cur.motherId_public || cur.damId_public;
+            if (fatherId) { const f = await mpFetchByCtc(fatherId); if (f) { updates[children.father] = mpToSlot(f); queue.push({ animal: f, slot: children.father }); } }
+            if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
+        }
+        setMpEditForm(f => ({ ...f, ...updates }));
+    };
+
+    // Auto-fill pedigree when tab opens
+    useEffect(() => {
+        if (activeTab !== 'pedigree' || mpAutoFetchedRef.current || !authToken) return;
+        mpAutoFetchedRef.current = true;
+
+        const pedigree = animalToEdit?.manualPedigree || {};
+
+        const toSlot = (a, notes = '') => {
+            const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
+            return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes };
+        };
+
+        const fetchAnimal = (ctcId) =>
+            axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(r => r.data || null).catch(() => null);
+
+        const updates = {};
+        const queue = [];
+        const queued = new Set();
+
+        const enqueue = (slotKey, ctcId, notes = '') => {
+            if (!ctcId || queued.has(slotKey)) return;
+            queued.add(slotKey);
+            queue.push({ slotKey, ctcId, notes });
+        };
+
+        const allSlots = ['sire','dam','sireSire','sireDam','damSire','damDam',
+            'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
+            'damSireSire','damSireDam','damDamSire','damDamDam'];
+
+        allSlots.forEach(k => { if (pedigree[k]?.mode === 'ctc' && pedigree[k]?.ctcId) enqueue(k, pedigree[k].ctcId, pedigree[k].notes || ''); });
+
+        const sireId = animalToEdit?.fatherId_public || animalToEdit?.sireId_public;
+        const damId  = animalToEdit?.motherId_public || animalToEdit?.damId_public;
+        if (sireId && !pedigree.sire?.ctcId) enqueue('sire', sireId);
+        if (damId  && !pedigree.dam?.ctcId)  enqueue('dam',  damId);
+
+        if (!queue.length) return;
+
+        const processQueue = async () => {
+            while (queue.length) {
+                const batch = queue.splice(0, queue.length);
+                await Promise.all(batch.map(async ({ slotKey, ctcId, notes }) => {
+                    const a = await fetchAnimal(ctcId);
+                    if (!a) return;
+                    updates[slotKey] = toSlot(a, notes);
+                    const children = MP_SLOT_CHILDREN[slotKey];
+                    if (!children) return;
+                    const fId = a.fatherId_public || a.sireId_public;
+                    const mId = a.motherId_public || a.damId_public;
+                    if (fId && !pedigree[children.father]?.ctcId) enqueue(children.father, fId);
+                    if (mId && !pedigree[children.mother]?.ctcId) enqueue(children.mother, mId);
+                }));
+            }
+            if (Object.keys(updates).length) setMpEditForm(f => ({ ...f, ...updates }));
+        };
+
+        processQueue();
+    }, [activeTab, authToken, API_BASE_URL, animalToEdit?.manualPedigree]);
+
+    // Fetch medication supplies when switching to supply mode
+    useEffect(() => {
+        if (medicationMode === 'supply' && availableMedicationSupplies.length === 0 && !loadingMedicationSupplies) {
+            setLoadingMedicationSupplies(true);
+            axios.get(`${API_BASE_URL}/supplies?category=medication`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => {
+                    setAvailableMedicationSupplies(res.data || []);
+                })
+                .catch(err => {
+                    console.error('Failed to fetch medication supplies:', err);
+                    showModalMessage('Error', 'Failed to load available medication supplies.');
+                })
+                .finally(() => setLoadingMedicationSupplies(false));
+        }
+    }, [medicationMode, availableMedicationSupplies.length, loadingMedicationSupplies, API_BASE_URL, authToken, showModalMessage]);
+
+    // Reset form when switching medication mode
+    useEffect(() => {
+        setMedicationSupplySearch('');
+        setSelectedMedicationSupply(null);
+        if (medicationMode === 'manual') {
+            setNewMedication({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
+        }
+    }, [medicationMode]);
+
+    // Fetch diet supplies when switching to supply mode
+    useEffect(() => {
+        if (dietMode === 'supply' && availableDietSupplies.length === 0 && !loadingDietSupplies) {
+            setLoadingDietSupplies(true);
+            axios.get(`${API_BASE_URL}/supplies?category=diet`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => {
+                    setAvailableDietSupplies(res.data || []);
+                })
+                .catch(err => {
+                    console.error('Failed to fetch diet supplies:', err);
+                    showModalMessage('Error', 'Failed to load available diet supplies.');
+                })
+                .finally(() => setLoadingDietSupplies(false));
+        }
+    }, [dietMode, availableDietSupplies.length, loadingDietSupplies, API_BASE_URL, authToken, showModalMessage]);
+
+    // Reset form when switching diet mode
+    useEffect(() => {
+        setDietSupplySearch('');
+        setSelectedDietSupply(null);
+    }, [dietMode]);
+
+    // Fetch supplement supplies when switching to supply mode
+    useEffect(() => {
+        if (supplementMode === 'supply' && availableSupplementSupplies.length === 0 && !loadingSupplementSupplies) {
+            setLoadingSupplementSupplies(true);
+            axios.get(`${API_BASE_URL}/supplies?category=supplement`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => {
+                    setAvailableSupplementSupplies(res.data || []);
+                })
+                .catch(err => {
+                    console.error('Failed to fetch supplement supplies:', err);
+                    showModalMessage('Error', 'Failed to load available supplement supplies.');
+                })
+                .finally(() => setLoadingSupplementSupplies(false));
+        }
+    }, [supplementMode, availableSupplementSupplies.length, loadingSupplementSupplies, API_BASE_URL, authToken, showModalMessage]);
+
+    // Reset form when switching supplement mode
+    useEffect(() => {
+        setSupplementSupplySearch('');
+        setSelectedSupplementSupply(null);
+    }, [supplementMode]);
+
+    // Fetch enclosures when opening modal
+    useEffect(() => {
+        if (showEnclosureModal && availableEnclosures.length === 0 && !loadingEnclosures) {
+            setLoadingEnclosures(true);
+            axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => {
+                    setAvailableEnclosures(res.data || []);
+                })
+                .catch(err => {
+                    console.error('Failed to fetch enclosures:', err);
+                    // For now, continue gracefully even if API fails
+                })
+                .finally(() => setLoadingEnclosures(false));
+        }
+    }, [showEnclosureModal, availableEnclosures.length, loadingEnclosures, API_BASE_URL, authToken]);
 
     const deleteImage = (id) => {
         setGalleryImages(prevImages => prevImages.filter(img => img.id !== id));
@@ -1248,9 +2575,14 @@ const AnimalFormTestModal = ({
             payloadToSave.imageUrl = primaryImageUrl;
             payloadToSave.photoUrl = primaryImageUrl;
             payloadToSave.extraImages = extraImages;
+            
+            // Add manual pedigree data
+            if (Object.keys(mpEditForm).length > 0) {
+                payloadToSave.manualPedigree = mpEditForm;
+            }
 
             // Serialize array fields
-            const arrayFields = ['identifiers', 'vaccinations', 'dewormingRecords', 'parasiteControl', 'medicalProcedures', 'labResults', 'medicalConditions', 'allergies', 'medications', 'vetVisits', 'growthRecords', 'milestones', 'keeperHistory', 'legalDocuments', 'careTasks', 'animalCareTasks', 'dietSupplies', 'supplementSupplies'];
+            const arrayFields = ['identifiers', 'vaccinations', 'dewormingRecords', 'parasiteControl', 'medicalProcedures', 'labResults', 'medicalConditions', 'allergies', 'medications', 'vetVisits', 'growthRecords', 'milestones', 'ownershipHistory', 'legalDocuments', 'careTasks', 'animalCareTasks', 'dietSupplies', 'supplementSupplies'];
 
             arrayFields.forEach(field => {
                 if (Array.isArray(payloadToSave[field]) && payloadToSave[field].length > 0) {
@@ -1431,13 +2763,20 @@ const AnimalFormTestModal = ({
                                                 <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
-                                            <div className="md:col-span-2">
+                                            <div>
                                                 <label className="block text-xs font-medium text-gray-700">Status*</label>
                                                 <select name="status" value={formData.status} onChange={handleChange} required
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                                                 </select>
                                             </div>
+                                            {formData.status === 'Deceased' && (
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Date of Death</label>
+                                                    <input type="date" name="dateOfDeath" value={formData.dateOfDeath} onChange={handleChange}
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="md:col-span-3">
                                             <label className="block text-xs font-medium text-gray-700">Remarks</label>
@@ -1517,6 +2856,9 @@ const AnimalFormTestModal = ({
                                                             <input type="number" name="salePriceAmount" value={formData.salePriceAmount} onChange={handleChange} disabled={formData.salePriceCurrency === 'Negotiable'} placeholder="Price" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
                                                         </div>
                                                     )}
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        This animal will appear in the public Marketplace if its profile is also set to Public (Eye toggle in the top right of the detail view).
+                                                    </p>
                                                 </div>
                                                 {/* For Stud */}
                                                 <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
@@ -1769,51 +3111,168 @@ const AnimalFormTestModal = ({
                                         </div>
                                     </div>
                                 </FormSection>
-                                <FormSection title="Measurements & Growth" icon={<Ruler size={16} />}>
-                                    <div className="space-y-3">
-                                        <h4 className="text-sm font-semibold text-gray-600">Growth History</h4>
+                                <FormSection title="Measurements & Growth Tracking" icon={<Ruler size={16} />}>
+                                    <div className="space-y-6">
+                                        {/* Current Measurement Display */}
+                                        {(parseJsonArrayField(formData.growthRecords) || []).length > 0 && (() => {
+                                            const sorted = [...(parseJsonArrayField(formData.growthRecords) || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                            const mostRecentWeight = sorted[0];
+                                            const mostRecentLength = sorted.find(r => r.length);
+                                            const mostRecentHeight = sorted.find(r => r.height);
+                                            const mostRecentGirth = sorted.find(r => r.chestGirth);
+                                            
+                                            return (
+                                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Current Measurements</h4>
+                                                    <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-sm">
+                                                        <div>
+                                                            <span className="text-xs text-gray-600">Weight:</span>
+                                                            <p className="font-medium">{mostRecentWeight.weight} {measurementUnits.weight}</p>
+                                                        </div>
+                                                        {mostRecentLength && mostRecentLength.length && (
+                                                            <div>
+                                                                <span className="text-xs text-gray-600">Body Length:</span>
+                                                                <p className="font-medium">{mostRecentLength.length} {measurementUnits.length}</p>
+                                                            </div>
+                                                        )}
+                                                        {mostRecentHeight && mostRecentHeight.height && (
+                                                            <div>
+                                                                <span className="text-xs text-gray-600">Height:</span>
+                                                                <p className="font-medium">{mostRecentHeight.height} {measurementUnits.length}</p>
+                                                            </div>
+                                                        )}
+                                                        {mostRecentGirth && mostRecentGirth.chestGirth && (
+                                                            <div>
+                                                                <span className="text-xs text-gray-600">Chest Girth:</span>
+                                                                <p className="font-medium">{mostRecentGirth.chestGirth} {measurementUnits.length}</p>
+                                                            </div>
+                                                        )}
+                                                        {mostRecentWeight.bcs && (
+                                                            <div>
+                                                                <span className="text-xs text-gray-600">BCS:</span>
+                                                                <p className="font-medium">{mostRecentWeight.bcs}</p>
+                                                            </div>
+                                                        )}
+                                                        <div>
+                                                            <span className="text-xs text-gray-600">Date:</span>
+                                                            <p className="font-medium">{mostRecentWeight.date}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+
+                                        {/* Measurement Units */}
                                         <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                             <p className="text-xs font-medium text-gray-700 mb-2">Measurement Units</p>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-600">Weight Unit</label>
-                                                    <select
-                                                        value={formData.measurementUnits.weight}
-                                                        onChange={(e) => setFormData(prev => ({ ...prev, measurementUnits: { ...prev.measurementUnits, weight: e.target.value } }))}
-                                                        className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white"
-                                                    >
-                                                        <option value="g">Grams (g)</option><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lb)</option><option value="oz">Ounces (oz)</option>
+                                                    <select value={measurementUnits.weight} onChange={(e) => setMeasurementUnits({...measurementUnits, weight: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white">
+                                                        <option value="g">Grams (g)</option>
+                                                        <option value="kg">Kilograms (kg)</option>
+                                                        <option value="lb">Pounds (lb)</option>
+                                                        <option value="oz">Ounces (oz)</option>
                                                     </select>
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-600">Length Unit</label>
-                                                    <select
-                                                        value={formData.measurementUnits.length}
-                                                        onChange={(e) => setFormData(prev => ({ ...prev, measurementUnits: { ...prev.measurementUnits, length: e.target.value } }))}
-                                                        className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white"
-                                                    >
-                                                        <option value="cm">Centimeters (cm)</option><option value="m">Meters (m)</option><option value="in">Inches (in)</option><option value="ft">Feet (ft)</option>
+                                                    <select value={measurementUnits.length} onChange={(e) => setMeasurementUnits({...measurementUnits, length: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white">
+                                                        <option value="cm">Centimeters (cm)</option>
+                                                        <option value="m">Meters (m)</option>
+                                                        <option value="in">Inches (in)</option>
+                                                        <option value="ft">Feet (ft)</option>
                                                     </select>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {/* Add New Measurement */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
                                             <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
-                                            <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
-                                                <div><label className="block text-xs font-medium text-gray-700">Date</label><DatePicker value={newMeasurement.date} onChange={(e) => setNewMeasurement({ ...newMeasurement, date: e.target.value })} className="mt-1 p-2 text-sm" /></div>
-                                                <div><label className="block text-xs font-medium text-gray-700">Weight ({formData.measurementUnits.weight})</label><input type="number" step="0.1" value={newMeasurement.weight} onChange={(e) => setNewMeasurement({ ...newMeasurement, weight: e.target.value })} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md" /></div>
-                                                <div><label className="block text-xs font-medium text-gray-700">Body Length ({formData.measurementUnits.length})</label><input type="number" step="0.1" value={newMeasurement.length} onChange={(e) => setNewMeasurement({ ...newMeasurement, length: e.target.value })} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md" /></div>
+                                            <div className={`grid gap-3 ${(formData.species === 'Dog' || formData.species === 'Cat') ? 'grid-cols-1 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Date</label>
+                                                    <DatePicker value={newMeasurement.date} onChange={(e) => setNewMeasurement({...newMeasurement, date: e.target.value})} className="mt-1 p-2 text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Weight ({measurementUnits.weight})</label>
+                                                    <input type="number" step="0.1" value={newMeasurement.weight} onChange={(e) => setNewMeasurement({...newMeasurement, weight: e.target.value})} placeholder={`e.g., ${measurementUnits.weight === 'g' ? '450' : measurementUnits.weight === 'kg' ? '0.45' : measurementUnits.weight === 'lb' ? '1' : '16'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Body Length ({measurementUnits.length})</label>
+                                                    <input type="number" step="0.1" value={newMeasurement.length} onChange={(e) => setNewMeasurement({...newMeasurement, length: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '20' : measurementUnits.length === 'm' ? '0.2' : measurementUnits.length === 'in' ? '8' : '0.66'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                </div>
+                                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Height at Withers ({measurementUnits.length})</label>
+                                                        <input type="number" step="0.1" value={newMeasurement.height} onChange={(e) => setNewMeasurement({...newMeasurement, height: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '25' : measurementUnits.length === 'm' ? '0.25' : measurementUnits.length === 'in' ? '10' : '0.83'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className={`grid gap-3 ${(formData.species === 'Dog' || formData.species === 'Cat') ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+                                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Chest Girth ({measurementUnits.length})</label>
+                                                        <input type="number" step="0.1" value={newMeasurement.chestGirth} onChange={(e) => setNewMeasurement({...newMeasurement, chestGirth: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '30' : measurementUnits.length === 'm' ? '0.3' : measurementUnits.length === 'in' ? '12' : '1'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Body Condition Score</label>
+                                                    <select value={newMeasurement.bcs} onChange={(e) => setNewMeasurement({...newMeasurement, bcs: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                        <option value="">Select BCS</option>
+                                                        {formData.species === 'Dog' ? (
+                                                            <>
+                                                                <option value="1">1 - Emaciated</option>
+                                                                <option value="2">2 - Very Thin</option>
+                                                                <option value="3">3 - Thin</option>
+                                                                <option value="4">4 - Underweight</option>
+                                                                <option value="5">5 - Ideal</option>
+                                                                <option value="6">6 - Overweight</option>
+                                                                <option value="7">7 - Heavy</option>
+                                                                <option value="8">8 - Obese</option>
+                                                                <option value="9">9 - Severely Obese</option>
+                                                            </>
+                                                        ) : formData.species === 'Cat' ? (
+                                                            <>
+                                                                <option value="1">1 - Emaciated</option>
+                                                                <option value="2">2 - Lean</option>
+                                                                <option value="3">3 - Ideal</option>
+                                                                <option value="4">4 - Overweight</option>
+                                                                <option value="5">5 - Obese</option>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <option value="1">1 - Emaciated</option>
+                                                                <option value="2">2 - Thin</option>
+                                                                <option value="3">3 - Ideal</option>
+                                                                <option value="4">4 - Overweight</option>
+                                                                <option value="5">5 - Obese</option>
+                                                            </>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Notes</label>
+                                                    <input type="text" value={newMeasurement.notes} onChange={(e) => setNewMeasurement({...newMeasurement, notes: e.target.value})} placeholder="e.g., pregnant, sick" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                </div>
                                             </div>
                                             <button type="button" onClick={addMeasurement} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">Add Measurement</button>
                                         </div>
+
+                                        {/* Measurements List */}
                                         {(parseJsonArrayField(formData.growthRecords) || []).length > 0 && (
                                             <div className="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
                                                 {(parseJsonArrayField(formData.growthRecords) || []).map((record) => (
                                                     <div key={record.id} className="flex items-center justify-between p-2 bg-white rounded border border-gray-100 text-sm">
                                                         <div className="flex gap-4 text-gray-700 flex-1 flex-wrap">
                                                             <span className="font-medium">{record.date}</span>
-                                                            <span>{record.weight} {formData.measurementUnits.weight}</span>
-                                                            {record.length && (<span>L: {record.length} {formData.measurementUnits.length}</span>)}
+                                                            <span>{record.weight} {measurementUnits.weight}</span>
+                                                            {record.length && (<span>L: {record.length} {measurementUnits.length}</span>)}
+                                                            {record.height && (<span>H: {record.height} {measurementUnits.length}</span>)}
+                                                            {record.chestGirth && (<span>G: {record.chestGirth} {measurementUnits.length}</span>)}
+                                                            {record.bcs && (<><span className="mx-2"></span><span className="text-gray-700">BCS: {record.bcs}</span></>)}
+                                                            {record.notes && (<span className="ml-2 text-xs text-gray-500 italic">({record.notes})</span>)}
                                                         </div>
                                                         <button type="button" onClick={() => setFormData(prev => ({ ...prev, growthRecords: (parseJsonArrayField(prev.growthRecords) || []).filter(r => r.id !== record.id) }))} className="text-red-500 hover:text-red-700 p-1" title="Delete measurement">
                                                             <Trash2 size={14} />
@@ -1891,13 +3350,94 @@ const AnimalFormTestModal = ({
                         {activeTab === 'health' && (
                             <div className="space-y-4">
                                 <FormSection title={
-                                    <div className="flex items-center gap-3">
-                                        <span>Active Medical Records</span>
-                                        <span className="text-xs font-semibold bg-green-100 text-green-800 px-2.5 py-1 rounded-full border border-green-200">
-                                            Health Status: Excellent
-                                        </span>
-                                    </div>
+                                    (() => {
+                                        const { status, badgeColor, factors, isOverridden, calculatedStatus } = calculateHealthStatus();
+                                        return (
+                                            <div className="flex items-center justify-between w-full">
+                                                <span>Active Medical Records</span>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="text-right">
+                                                        <div className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${badgeColor} inline-block`}>
+                                                            {isOverridden && <span className="text-xs font-bold mr-1">⚙️ OVERRIDE:</span>}
+                                                            {status}
+                                                        </div>
+                                                        {isOverridden && (
+                                                            <div className="text-xs text-gray-500 mt-0.5">
+                                                                (calculated: {calculatedStatus})
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {factors.length > 0 && (
+                                                        <div className="group relative">
+                                                            <Info size={16} className="text-gray-500 cursor-help" />
+                                                            <div className="hidden group-hover:block absolute right-0 bg-gray-800 text-white text-xs p-2 rounded-md whitespace-nowrap z-10 -mr-2">
+                                                                <p className="font-semibold mb-1">Factors:</p>
+                                                                {factors.map((f, i) => <p key={i}>• {f}</p>)}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()
                                 } icon={<Pill size={16} />}>
+                                    {/* Health Status Override */}
+                                    <div className="space-y-2 mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-sm font-semibold text-gray-700">Manual Override</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (healthStatusOverride) {
+                                                        setHealthStatusOverride(null);
+                                                        setHealthStatusOverrideNotes('');
+                                                        setFormData(prev => ({ ...prev, healthStatusOverride: null, healthStatusOverrideNotes: '' }));
+                                                    } else {
+                                                        setHealthStatusOverride('Good');
+                                                        setFormData(prev => ({ ...prev, healthStatusOverride: 'Good', healthStatusOverrideNotes: '' }));
+                                                    }
+                                                }}
+                                                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${healthStatusOverride ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                                            >
+                                                {healthStatusOverride ? 'Disable Override' : 'Enable Override'}
+                                            </button>
+                                        </div>
+                                        {healthStatusOverride && (
+                                            <div className="space-y-3 mt-2">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Status</label>
+                                                    <select 
+                                                        value={healthStatusOverride} 
+                                                        onChange={(e) => {
+                                                            setHealthStatusOverride(e.target.value);
+                                                            setFormData(prev => ({ ...prev, healthStatusOverride: e.target.value }));
+                                                        }}
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                    >
+                                                        <option value="Excellent">Excellent</option>
+                                                        <option value="Good">Good</option>
+                                                        <option value="Fair">Fair</option>
+                                                        <option value="Poor">Poor</option>
+                                                        <option value="Critical">Critical</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Reason for Override</label>
+                                                    <textarea 
+                                                        value={healthStatusOverrideNotes}
+                                                        onChange={(e) => {
+                                                            setHealthStatusOverrideNotes(e.target.value);
+                                                            setFormData(prev => ({ ...prev, healthStatusOverrideNotes: e.target.value }));
+                                                        }}
+                                                        placeholder="e.g., Well-managed chronic condition, good prognosis, owner very attentive..."
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none"
+                                                        rows="2"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {/* Quarantine Status */}
                                     <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-gray-700">Quarantine Status</h4>
@@ -1911,9 +3451,25 @@ const AnimalFormTestModal = ({
                                                         <option value="Isolation">Isolation</option>
                                                     </select>
                                                 </div>
+                                                {(formData.quarantineDetails?.status === 'Quarantine' || formData.quarantineDetails?.status === 'Isolation') && (
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Type/Reason</label>
+                                                        <select name="type" value={formData.quarantineDetails?.type || ''} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                            <option value="">Select type...</option>
+                                                            <option value="Preventive - New Arrival">Preventive - New Arrival</option>
+                                                            <option value="Preventive - Intake">Preventive - Intake</option>
+                                                            <option value="Medical - Illness/URI">Medical - Illness/URI</option>
+                                                            <option value="Medical - Contagious Disease">Medical - Contagious Disease</option>
+                                                            <option value="Medical - Recovery">Medical - Recovery</option>
+                                                            <option value="Behavioral - Aggression">Behavioral - Aggression</option>
+                                                            <option value="Behavioral - Fear/Stress">Behavioral - Fear/Stress</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+                                                    </div>
+                                                )}
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Reason</label>
-                                                    <input type="text" name="reason" value={formData.quarantineDetails?.reason || ''} onChange={handleQuarantineChange} placeholder="e.g., New arrival, URI" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                    <label className="block text-xs font-medium text-gray-700">Additional Notes</label>
+                                                    <input type="text" name="reason" value={formData.quarantineDetails?.reason || ''} onChange={handleQuarantineChange} placeholder="e.g., Specific illness, concerns, observations" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-700">Start Date</label>
@@ -1931,24 +3487,115 @@ const AnimalFormTestModal = ({
                                     <div className="space-y-2 pt-3 border-t">
                                         <h4 className="text-sm font-semibold text-gray-700">Active Medications</h4>
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({ ...newMedication, name: e.target.value })} placeholder="Medication Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="Dose (e.g., 0.1ml)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <DatePicker value={newMedication.startDate} onChange={(e) => setNewMedication({ ...newMedication, startDate: e.target.value })} placeholder="Start Date" className="py-1.5 px-2 text-sm" />
-                                                <DatePicker value={newMedication.stopDate} onChange={(e) => setNewMedication({ ...newMedication, stopDate: e.target.value })} placeholder="Stop Date" className="py-1.5 px-2 text-sm" />
-                                                <div className="col-span-2 flex gap-2 items-center">
-                                                    <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="Interval" className="w-20 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                    <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
-                                                        <option value="hours">Hours</option><option value="days">Days</option><option value="weeks">Weeks</option>
-                                                    </select>
-                                                    <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Notes" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                </div>
+                                            {/* Mode Toggle */}
+                                            <div className="flex gap-2">
+                                                <button type="button" onClick={() => setMedicationMode('manual')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
+                                                <button type="button" onClick={() => setMedicationMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
                                             </div>
-                                            <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Medication</button>
+
+                                            {medicationMode === 'manual' ? (
+                                                <div className="space-y-3">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                        <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({ ...newMedication, name: e.target.value })} placeholder="Medication Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                        <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="Dose (e.g., 0.1ml)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                        <DatePicker value={newMedication.startDate} onChange={(e) => setNewMedication({ ...newMedication, startDate: e.target.value })} placeholder="Start Date" className="py-1.5 px-2 text-sm" />
+                                                        <DatePicker value={newMedication.stopDate} onChange={(e) => setNewMedication({ ...newMedication, stopDate: e.target.value })} placeholder="Stop Date" className="py-1.5 px-2 text-sm" />
+                                                        <div className="col-span-2 flex gap-2 items-center">
+                                                            <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="Interval" className="w-20 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                            <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                                <option value="hours">Hours</option><option value="days">Days</option><option value="weeks">Weeks</option>
+                                                            </select>
+                                                            <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Notes" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Medication</button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-3">
+                                                    <div className="space-y-2">
+                                                        <label className="block text-xs font-medium text-gray-700">Search & Select Medication Supply</label>
+                                                        <input type="text" value={medicationSupplySearch} onChange={(e) => setMedicationSupplySearch(e.target.value)} placeholder="Search for medication supplies..." className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                    </div>
+
+                                                    {loadingMedicationSupplies && (
+                                                        <div className="text-xs text-gray-500 py-2">Loading supplies...</div>
+                                                    )}
+
+                                                    {!loadingMedicationSupplies && (
+                                                        <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md">
+                                                            {availableMedicationSupplies.filter(supply =>
+                                                                supply.name?.toLowerCase().includes(medicationSupplySearch.toLowerCase()) ||
+                                                                supply.category?.toLowerCase().includes(medicationSupplySearch.toLowerCase())
+                                                            ).length > 0 ? (
+                                                                availableMedicationSupplies.filter(supply =>
+                                                                    supply.name?.toLowerCase().includes(medicationSupplySearch.toLowerCase()) ||
+                                                                    supply.category?.toLowerCase().includes(medicationSupplySearch.toLowerCase())
+                                                                ).map(supply => (
+                                                                    <button
+                                                                        key={supply.id || supply._id}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setSelectedMedicationSupply(supply);
+                                                                            setMedicationSupplySearch('');
+                                                                        }}
+                                                                        className={`w-full text-left px-3 py-2 text-xs rounded-md transition-colors ${selectedMedicationSupply?.id === supply.id || selectedMedicationSupply?._id === supply._id ? 'bg-primary text-black' : 'hover:bg-gray-100'}`}
+                                                                    >
+                                                                        <div className="font-medium">{supply.name}</div>
+                                                                        {supply.quantity && <div className="text-xs text-gray-600">Stock: {supply.quantity}</div>}
+                                                                    </button>
+                                                                ))
+                                                            ) : (
+                                                                <div className="px-3 py-2 text-xs text-gray-500 text-center">No medication supplies found</div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    {selectedMedicationSupply && (
+                                                        <div className="p-2 bg-blue-50 border border-blue-200 rounded-md">
+                                                            <p className="text-xs text-gray-600 mb-2"><strong>Selected:</strong> {selectedMedicationSupply.name}</p>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                <div>
+                                                                    <label className="block text-xs font-medium text-gray-700">Dose</label>
+                                                                    <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="e.g., 0.1ml" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-medium text-gray-700">Start Date</label>
+                                                                    <DatePicker value={newMedication.startDate} onChange={(e) => setNewMedication({ ...newMedication, startDate: e.target.value })} className="w-full py-1.5 px-2 text-sm" />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-medium text-gray-700">Stop Date</label>
+                                                                    <DatePicker value={newMedication.stopDate} onChange={(e) => setNewMedication({ ...newMedication, stopDate: e.target.value })} className="w-full py-1.5 px-2 text-sm" />
+                                                                </div>
+                                                                <div className="flex gap-2 items-end">
+                                                                    <div className="flex-1">
+                                                                        <label className="block text-xs font-medium text-gray-700">Interval</label>
+                                                                        <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="e.g., 12" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                                    </div>
+                                                                    <div className="flex-1">
+                                                                        <label className="block text-xs font-medium text-gray-700">Unit</label>
+                                                                        <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                                            <option value="hours">Hours</option>
+                                                                            <option value="days">Days</option>
+                                                                            <option value="weeks">Weeks</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-span-2">
+                                                                    <label className="block text-xs font-medium text-gray-700">Notes</label>
+                                                                    <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Additional notes" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                                </div>
+                                                            </div>
+                                                            <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 mt-2 bg-green-500 text-white rounded-md text-xs font-medium hover:bg-green-600">Add from Supply</button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                         {(formData.medications || []).filter(Boolean).map((rec, i) => (
                                             <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border">
-                                                <span>{rec.name} {rec.dose} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})</span>
+                                                <span>
+                                                    {rec.name} {rec.dose} {rec.source === 'supply' && <span className="text-xs text-blue-600 font-medium">(from supply)</span>} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})
+                                                </span>
                                                 <button type="button" onClick={() => removeArrayItem('medications', i)}><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
                                         ))}
@@ -2168,24 +3815,67 @@ const AnimalFormTestModal = ({
                                             </div>
 
                                             <div className="pt-2 border-t">
-                                                <label className="block text-xs font-medium text-gray-700">Diet Supplies (future: select from Supplies page)</label>
-                                                <textarea
-                                                    name="dietSupplies"
-                                                    value={Array.isArray(formData.dietSupplies) ? JSON.stringify(formData.dietSupplies, null, 0) : ''}
-                                                    onChange={(e) => {
-                                                        const raw = e.target.value;
-                                                        try {
-                                                            const parsed = raw.trim() ? JSON.parse(raw) : [];
-                                                            setFormData(prev => ({ ...prev, dietSupplies: Array.isArray(parsed) ? parsed : [] }));
-                                                        } catch {
-                                                            // ignore invalid JSON while typing
-                                                        }
-                                                    }}
-                                                    rows={2}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md font-mono"
-                                                    placeholder='[{"supplyId":"","name":""}]'
-                                                />
-                                                <p className="text-[11px] text-gray-500 mt-1">Stored as JSON for now; later this will be replaced with a Supplies selector modal.</p>
+                                                <label className="block text-xs font-semibold text-gray-700 mb-2">Diet Supplies</label>
+                                                <div className="flex gap-2 mb-2">
+                                                    <button type="button" onClick={() => setDietMode('manual')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${dietMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
+                                                    <button type="button" onClick={() => setDietMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${dietMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                                </div>
+                                                {dietMode === 'manual' ? (
+                                                    <textarea
+                                                        value={Array.isArray(formData.dietSupplies) ? JSON.stringify(formData.dietSupplies, null, 0) : ''}
+                                                        onChange={(e) => {
+                                                            const raw = e.target.value;
+                                                            try {
+                                                                const parsed = raw.trim() ? JSON.parse(raw) : [];
+                                                                setFormData(prev => ({ ...prev, dietSupplies: Array.isArray(parsed) ? parsed : [] }));
+                                                            } catch {
+                                                                // ignore invalid JSON while typing
+                                                            }
+                                                        }}
+                                                        rows={2}
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md font-mono"
+                                                        placeholder='[{"name":"Brand X Pellets"}]'
+                                                    />
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Search diet supplies..."
+                                                            value={dietSupplySearch}
+                                                            onChange={(e) => setDietSupplySearch(e.target.value)}
+                                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                        />
+                                                        {loadingDietSupplies && <p className="text-xs text-gray-500">Loading supplies...</p>}
+                                                        <div className="bg-gray-50 border border-gray-300 rounded-md max-h-40 overflow-y-auto">
+                                                            {availableDietSupplies
+                                                                .filter(s => s.name?.toLowerCase().includes(dietSupplySearch.toLowerCase()))
+                                                                .map(supply => (
+                                                                    <div key={supply.id} className="p-2 border-b hover:bg-gray-100 cursor-pointer flex justify-between items-center text-xs" onClick={() => {
+                                                                        setSelectedDietSupply(supply);
+                                                                        const existing = parseJsonArrayField(formData.dietSupplies) || [];
+                                                                        const newSupply = { id: supply.id, name: supply.name, category: supply.category };
+                                                                        setFormData(prev => ({ ...prev, dietSupplies: [...existing, newSupply] }));
+                                                                        setDietSupplySearch('');
+                                                                    }}>
+                                                                        <span>{supply.name}</span>
+                                                                        <PlusCircle size={14} className="text-primary" />
+                                                                    </div>
+                                                                ))
+                                                            }
+                                                        </div>
+                                                        <div className="text-xs text-gray-600">
+                                                            {parseJsonArrayField(formData.dietSupplies).map((s, i) => (
+                                                                <div key={i} className="flex justify-between items-center p-1 bg-blue-50 rounded mt-1">
+                                                                    <span>{s.name}</span>
+                                                                    <button type="button" onClick={() => {
+                                                                        const updated = parseJsonArrayField(formData.dietSupplies).filter((_, idx) => idx !== i);
+                                                                        setFormData(prev => ({ ...prev, dietSupplies: updated }));
+                                                                    }} className="text-red-500"><Trash2 size={12} /></button>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
@@ -2204,23 +3894,68 @@ const AnimalFormTestModal = ({
                                             </div>
 
                                             <div className="pt-2 border-t">
-                                                <label className="block text-xs font-medium text-gray-700">Supplement Supplies (future: select from Supplies page)</label>
-                                                <textarea
-                                                    name="supplementSupplies"
-                                                    value={Array.isArray(formData.supplementSupplies) ? JSON.stringify(formData.supplementSupplies, null, 0) : ''}
-                                                    onChange={(e) => {
-                                                        const raw = e.target.value;
-                                                        try {
-                                                            const parsed = raw.trim() ? JSON.parse(raw) : [];
-                                                            setFormData(prev => ({ ...prev, supplementSupplies: Array.isArray(parsed) ? parsed : [] }));
-                                                        } catch {
-                                                            // ignore invalid JSON while typing
-                                                        }
-                                                    }}
-                                                    rows={2}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md font-mono"
-                                                    placeholder='[{"supplyId":"","name":"","dosage":""}]'
-                                                />
+                                                <label className="block text-xs font-semibold text-gray-700 mb-2">Supplement Supplies</label>
+                                                <div className="flex gap-2 mb-2">
+                                                    <button type="button" onClick={() => setSupplementMode('manual')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${supplementMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
+                                                    <button type="button" onClick={() => setSupplementMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${supplementMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                                </div>
+                                                {supplementMode === 'manual' ? (
+                                                    <textarea
+                                                        name="supplementSupplies"
+                                                        value={Array.isArray(formData.supplementSupplies) ? JSON.stringify(formData.supplementSupplies, null, 0) : ''}
+                                                        onChange={(e) => {
+                                                            const raw = e.target.value;
+                                                            try {
+                                                                const parsed = raw.trim() ? JSON.parse(raw) : [];
+                                                                setFormData(prev => ({ ...prev, supplementSupplies: Array.isArray(parsed) ? parsed : [] }));
+                                                            } catch {
+                                                                // ignore invalid JSON while typing
+                                                            }
+                                                        }}
+                                                        rows={2}
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md font-mono"
+                                                        placeholder='[{"name":"Vitamin D3","dosage":"1000 IU"}]'
+                                                    />
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Search supplement supplies..."
+                                                            value={supplementSupplySearch}
+                                                            onChange={(e) => setSupplementSupplySearch(e.target.value)}
+                                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                        />
+                                                        {loadingSupplementSupplies && <p className="text-xs text-gray-500">Loading supplies...</p>}
+                                                        <div className="bg-gray-50 border border-gray-300 rounded-md max-h-40 overflow-y-auto">
+                                                            {availableSupplementSupplies
+                                                                .filter(s => s.name?.toLowerCase().includes(supplementSupplySearch.toLowerCase()))
+                                                                .map(supply => (
+                                                                    <div key={supply.id} className="p-2 border-b hover:bg-gray-100 cursor-pointer flex justify-between items-center text-xs" onClick={() => {
+                                                                        setSelectedSupplementSupply(supply);
+                                                                        const existing = parseJsonArrayField(formData.supplementSupplies) || [];
+                                                                        const newSupply = { id: supply.id, name: supply.name, category: supply.category, dosage: supply.dosage || '' };
+                                                                        setFormData(prev => ({ ...prev, supplementSupplies: [...existing, newSupply] }));
+                                                                        setSupplementSupplySearch('');
+                                                                    }}>
+                                                                        <span>{supply.name}</span>
+                                                                        <PlusCircle size={14} className="text-primary" />
+                                                                    </div>
+                                                                ))
+                                                            }
+                                                        </div>
+                                                        <div className="text-xs text-gray-600">
+                                                            {parseJsonArrayField(formData.supplementSupplies).map((s, i) => (
+                                                                <div key={i} className="flex justify-between items-center p-1 bg-purple-50 rounded mt-1">
+                                                                    <span>{s.name} {s.dosage && `(${s.dosage})`}</span>
+                                                                    <button type="button" onClick={() => {
+                                                                        const updated = parseJsonArrayField(formData.supplementSupplies).filter((_, idx) => idx !== i);
+                                                                        setFormData(prev => ({ ...prev, supplementSupplies: updated }));
+                                                                    }} className="text-red-500"><Trash2 size={12} /></button>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
@@ -2323,18 +4058,226 @@ const AnimalFormTestModal = ({
                                                 />
                                             </div>
                                         </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Details & Management</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Portion Size/Amount Per Feeding</label><input type="text" name="portionSize" value={formData.portionSize || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 2 cups, 50g, 1/4 cup pellets + 2 tbsp fresh" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Feeding Method</label><input type="text" name="feedingMethod" value={formData.feedingMethod || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Hand-fed, Self-fed, Free-choice, Timed bowl, Force-feeding" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Feeding Location/Container</label><input type="text" name="feedingLocation" value={formData.feedingLocation || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Separate bowl, Feeding station, Enclosure floor, Ceramic dish, Stainless steel feeder" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Water Access</label><input type="text" name="waterAccess" value={formData.waterAccess || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Free access, Water bottle, Water bowl (changed daily), Misting system, Soaking dish" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Feeding Pace & Behavior Notes</label><textarea name="feedingBehaviorNotes" value={formData.feedingBehaviorNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Fast eater, needs to be monitored, Slow feeder requires time, Aggressive during feeding, Picky about presentation" /></div>
+                                        </div>
                                     </div>
 
                                 </FormSection>
                                 <FormSection title="Housing & Environment" icon={<Home size={16} />}>
+                                    {/* Enclosure Assignment */}
+                                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 space-y-2 mb-4">
+                                        <label className="block text-xs font-semibold text-gray-700">Enclosure Assignment</label>
+                                        {selectedEnclosure ? (
+                                            <div className="flex items-center justify-between p-2 bg-white border border-blue-300 rounded-md">
+                                                <span className="text-sm font-medium text-gray-800">
+                                                    {typeof selectedEnclosure === 'string' ? selectedEnclosure : selectedEnclosure.name}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSelectedEnclosure(null);
+                                                        setFormData(prev => ({ ...prev, enclosureId: null }));
+                                                    }}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-2">
+                                                <input
+                                                    type="text"
+                                                    value={manualEnclosureName}
+                                                    onChange={(e) => {
+                                                        setManualEnclosureName(e.target.value);
+                                                        setFormData(prev => ({ ...prev, enclosureId: e.target.value || null }));
+                                                    }}
+                                                    placeholder="Enter enclosure name manually..."
+                                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowEnclosureModal(true)}
+                                                    className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium hover:bg-primary/90 transition-colors"
+                                                >
+                                                    Search & Assign Enclosure
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Other housing fields */}
                                     <div><label className="block text-xs font-medium text-gray-700">Housing Type</label><input type="text" name="housingType" value={formData.housingType} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700">Bedding/Substrate</label><input type="text" name="bedding" value={formData.bedding} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700">Temperature Range</label><input type="text" name="temperatureRange" value={formData.temperatureRange} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700">Humidity</label><input type="text" name="humidity" value={formData.humidity} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                 </FormSection>
-                                <FormSection title="Grooming" icon={<Scissors size={16} />}>
-                                    <div><label className="block text-xs font-medium text-gray-700">Grooming Needs</label><input type="text" name="groomingNeeds" value={formData.groomingNeeds} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Shedding Level</label><input type="text" name="sheddingLevel" value={formData.sheddingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+
+                                {/* Environment Setup */}
+                                <FormSection title="Environment Setup" icon={<Leaf size={16} />}>
+                                    <div className="space-y-3">
+                                        {/* Lighting */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Lighting</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Lighting Type</label><input type="text" name="lightingType" value={formData.lightingType || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., LED, UVB bulbs, Natural sunlight, Infrared heat lamp" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Lighting Schedule (On/Off Times)</label><input type="text" name="lightingSchedule" value={formData.lightingSchedule || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 12 hours on / 12 hours off, 14h on / 10h off" /></div>
+                                        </div>
+
+                                        {/* Sound & Noise */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Sound & Noise</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Noise Level Tolerance</label><input type="text" name="noiseToleranceLevel" value={formData.noiseToleranceLevel || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Quiet environment essential, Moderate noise okay, Tolerates loud sounds" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Sound Preferences & Triggers</label><input type="text" name="soundPreferences" value={formData.soundPreferences || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Avoids high frequencies, Enjoys soft music, Stressed by vacuum sounds" /></div>
+                                        </div>
+
+                                        {/* Enrichment */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Enrichment & Activity</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Enrichment Needs</label><textarea name="enrichmentNeeds" value={formData.enrichmentNeeds || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Climbing structures, Puzzle feeders, Toys, Digging substrate, Social interaction" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Enrichment Schedule/Frequency</label><input type="text" name="enrichmentFrequency" value={formData.enrichmentFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily rotation, Weekly new items, Continuous availability" /></div>
+                                        </div>
+
+                                        {/* Cleaning & Maintenance */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Cleaning & Maintenance Routines</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Spot Cleaning Frequency</label><input type="text" name="spotCleaningFrequency" value={formData.spotCleaningFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily, Every 2-3 days" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Deep Cleaning Frequency</label><input type="text" name="deepCleaningFrequency" value={formData.deepCleaningFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Weekly, Bi-weekly, Monthly" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Cleaning Checklist & Notes</label><textarea name="cleaningChecklist" value={formData.cleaningChecklist || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Remove soiled bedding, Wipe surfaces, Replace water, Check equipment function" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Maintenance Tasks Due</label><textarea name="maintenanceTasksDue" value={formData.maintenanceTasksDue || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Inspect lighting (monthly), Deep clean substrate change (quarterly), Equipment maintenance (annually)" /></div>
+                                        </div>
+
+                                        {/* Environment Notes */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Additional Environment Notes</h4>
+                                            <textarea name="environmentNotes" value={formData.environmentNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any other environmental considerations, sensitivities, or special requirements" />
+                                        </div>
+                                    </div>
+                                </FormSection>
+
+                                {/* Grooming & Coat Care */}
+                                <FormSection title="Grooming & Coat Care" icon={<Scissors size={16} />}>
+                                    <div className="space-y-3">
+                                        {/* General Grooming */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">General Grooming</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Grooming Needs</label><input type="text" name="groomingNeeds" value={formData.groomingNeeds} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, professional grooming" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Shedding Level</label><input type="text" name="sheddingLevel" value={formData.sheddingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Heavy, Moderate, Minimal" /></div>
+                                        </div>
+
+                                        {/* Brushing & Bathing */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Brushing & Bathing</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Brushing Frequency</label><input type="text" name="brushingFrequency" value={formData.brushingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily, 3x per week, Weekly" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Bathing Frequency & Requirements</label><input type="text" name="bathingFrequency" value={formData.bathingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monthly, As needed, Never (dry species)" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Coat/Feather/Scale Care Notes</label><textarea name="coatCareNotes" value={formData.coatCareNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Double coat requires undercoat removal, oils for feathers, misting for scales" /></div>
+                                        </div>
+
+                                        {/* Specialized Care */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Specialized Care</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Nail/Claw/Hoof Care Requirements</label><input type="text" name="nailCareRequirements" value={formData.nailCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monthly trim, File sharp edges, Natural wear" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Beak/Hoof/Scale Maintenance</label><input type="text" name="beakHoofScaleMaintenance" value={formData.beakHoofScaleMaintenance || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Beak trimming, Hoof conditioning, Scale inspection" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Skin & Ear Care Needs</label><input type="text" name="skinEarCareNeeds" value={formData.skinEarCareNeeds || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Ears cleaned weekly, Skin check for mites, Moisturizing needed" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Dental Care Requirements</label><input type="text" name="dentalCareRequirements" value={formData.dentalCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, Professional cleaning, Chew toys for wear" /></div>
+                                        </div>
+
+                                        {/* General Notes */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Grooming Notes & Preferences</h4>
+                                            <textarea name="groomingNotes" value={formData.groomingNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any additional grooming preferences, sensitivities, or special handling notes" />
+                                        </div>
+                                    </div>
+                                </FormSection>
+
+                                {/* Special Requirements */}
+                                <FormSection title="Special Requirements & Preferences" icon={<Heart size={16} />}>
+                                    <div className="space-y-3">
+                                        {/* Dietary */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Dietary Requirements & Restrictions</h4>
+                                            <textarea name="dietaryRestrictions" value={formData.dietaryRestrictions || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Allergies (dairy, grain), Food sensitivities, Picky eater, Requires specific protein source" />
+                                        </div>
+
+                                        {/* Dietary Preferences */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Dietary Preferences</h4>
+                                            <textarea name="dietaryPreferences" value={formData.dietaryPreferences || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Prefers wet food, Loves treats, Refuses certain vegetables, Needs hand-feeding" />
+                                        </div>
+
+                                        {/* Special Care Needs */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Special Care Needs</h4>
+                                            <textarea name="specialCareNeeds" value={formData.specialCareNeeds || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Requires medication at specific times, Needs isolation during molting, Heat lamp essential, Water depth requirements" />
+                                        </div>
+
+                                        {/* Medical/Health Monitoring Notes */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Health Monitoring & Special Observations</h4>
+                                            <textarea name="healthMonitoringNotes" value={formData.healthMonitoringNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monitor for respiratory issues, Watch for weight changes, Check skin condition weekly" />
+                                        </div>
+
+                                        {/* General Special Requirements */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Additional Special Requirements</h4>
+                                            <textarea name="additionalSpecialRequirements" value={formData.additionalSpecialRequirements || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any other special needs, preferences, or important care notes" />
+                                        </div>
+                                    </div>
+                                </FormSection>
+
+                                {/* Custom Care Tasks */}
+                                <FormSection title="Custom Care Tasks" icon={<CheckSquare size={16} />}>
+                                    <div className="space-y-3">
+                                        {/* Add New Care Task */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Add Care Task</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                <input type="text" value={newCareTaskName} onChange={e => setNewCareTaskName(e.target.value)} placeholder="Task name (e.g., Nail trim, Water change)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newCareTaskFreq} onChange={e => setNewCareTaskFreq(e.target.value)} placeholder="Frequency (e.g., Weekly, Monthly, As needed)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={() => {
+                                                if (newCareTaskName.trim()) {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        careTasks: [...(prev.careTasks || []), { name: newCareTaskName.trim(), frequency: newCareTaskFreq.trim() }]
+                                                    }));
+                                                    setNewCareTaskName('');
+                                                    setNewCareTaskFreq('');
+                                                }
+                                            }} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">+ Add Care Task</button>
+                                        </div>
+
+                                        {/* Existing Care Tasks */}
+                                        {(formData.careTasks || []).length > 0 && (
+                                            <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                                <h4 className="text-sm font-semibold text-gray-700">Care Tasks ({(formData.careTasks || []).length})</h4>
+                                                <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                    {(formData.careTasks || []).map((task, i) => (
+                                                        <div key={i} className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200 text-xs">
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="font-medium text-gray-700 truncate">{task.name}</p>
+                                                                {task.frequency && <p className="text-gray-500 text-xs">{task.frequency}</p>}
+                                                            </div>
+                                                            <button type="button" onClick={() => {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    careTasks: (prev.careTasks || []).filter((_, idx) => idx !== i)
+                                                                }));
+                                                            }} className="text-red-500 hover:text-red-700 ml-2 flex-shrink-0">
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </FormSection>
                             </div>
                         )}
@@ -2345,7 +4288,8 @@ const AnimalFormTestModal = ({
                                     <div><label className="block text-xs font-medium text-gray-700">Handling Tolerance</label><input type="text" name="handlingTolerance" value={formData.handlingTolerance} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Enjoys handling, tolerates briefly" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700">Social Structure</label><textarea name="socialStructure" value={formData.socialStructure} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Lives with 2 cage mates, solitary" /></div>
                                 </FormSection>
-                                <FormSection title="Activity & Training" icon={<Activity size={16} />}>
+
+                                <FormSection title="Temperament Assessment (1-5 Scale)" icon={<Brain size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Activity Cycle</label>
@@ -2368,15 +4312,334 @@ const AnimalFormTestModal = ({
                                         <label className="flex items-center gap-2"><input type="checkbox" name="freeFlightTrained" checked={!!formData.freeFlightTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Free-Flight Trained</label>
                                     </div>
                                 </FormSection>
-                                <FormSection title="Known Issues" icon={<AlertTriangle size={16} />}>
-                                    <div><label className="block text-xs font-medium text-gray-700">Behavioral Issues</label><textarea name="behavioralIssues" value={formData.behavioralIssues} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Resource guarding, separation anxiety" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Bite History</label><textarea name="biteHistory" value={formData.biteHistory} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any bite incidents, context, and outcome" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Reactivity Notes</label><textarea name="reactivityNotes" value={formData.reactivityNotes} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Triggers, thresholds, management strategies" /></div>
+
+                                <FormSection title="Working Role & Certifications" icon={<Trophy size={16} />}>
+                                    <div className="space-y-3">
+                                        <div><label className="block text-xs font-medium text-gray-700">Working Role</label><input type="text" name="workingRole" value={formData.workingRole || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Service dog, Therapy dog, Show dog, Guard dog, Working animal" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Certifications & Titles</label><textarea name="certifications" value={formData.certifications || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., CGC, AKC titles (CH, GCH), Service Dog Certified, Therapy Dog International, Show wins" /></div>
+                                    </div>
+                                </FormSection>
+
+                                <FormSection title="Known Issues & Safety Concerns" icon={<AlertTriangle size={16} />}>
+                                    <div className="space-y-3">
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Behavioral Issues</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Behavioral Issues</label><textarea name="behavioralIssues" value={formData.behavioralIssues} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Resource guarding, separation anxiety" /></div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Bite History</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Bite History</label><textarea name="biteHistory" value={formData.biteHistory} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any bite incidents, context, and outcome" /></div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Reactivity & Triggers</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Reactivity Notes</label><textarea name="reactivityNotes" value={formData.reactivityNotes} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Triggers, thresholds, management strategies" /></div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Escape & Flight Risk</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Escape Risk Level</label><select name="escapeRiskLevel" value={formData.escapeRiskLevel || 'Low'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="None">No Risk</option><option value="Low">Low</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Critical">Critical</option></select></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Escape Methods & Flight Triggers</label><textarea name="escapeBehavior" value={formData.escapeBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Climbs, digs, flies, jumps; triggered by loud noises, open doors, stress" /></div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Stereotypic & Stress Behaviors</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Stereotypic Behaviors Present</label><textarea name="stereotypicBehaviors" value={formData.stereotypicBehaviors || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Pacing, feather plucking, bar biting, over-grooming, head bobbing, spinning" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Stress Indicators</label><textarea name="stressIndicators" value={formData.stressIndicators || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Panting, freezing, hiding, aggression, loss of appetite" /></div>
+                                        </div>
+                                    </div>
+                                </FormSection>
+
+                                <FormSection title="Temperament Assessment (1-5 Scale)" icon={<Brain size={16} />}>
+                                    <div className="space-y-3">
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-semibold text-gray-700">Aggression Level</label>
+                                                <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.aggressionLevel || 3}</span>
+                                            </div>
+                                            <input type="range" name="aggressionLevel" min="1" max="5" value={formData.aggressionLevel || 3} onChange={handleChange} className="w-full" />
+                                            <p className="text-xs text-gray-500">1=Passive | 3=Neutral | 5=Highly Aggressive</p>
+                                            <div><label className="block text-xs font-medium text-gray-700 mt-2">Aggression Triggers & Types</label><textarea name="aggressionTriggers" value={formData.aggressionTriggers || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Territorial aggression, food guarding, fear-based, dominance, predatory drive" /></div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-semibold text-gray-700">Fear/Anxiety Level</label>
+                                                <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.fearAnxietyLevel || 3}</span>
+                                            </div>
+                                            <input type="range" name="fearAnxietyLevel" min="1" max="5" value={formData.fearAnxietyLevel || 3} onChange={handleChange} className="w-full" />
+                                            <p className="text-xs text-gray-500">1=Very Confident | 3=Moderate | 5=Highly Fearful/Anxious</p>
+                                            <div><label className="block text-xs font-medium text-gray-700 mt-2">Specific Fears & Coping Mechanisms</label><textarea name="specificFears" value={formData.specificFears || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Afraid of loud noises, uses hiding as coping, needs reassurance, freezes when scared" /></div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-semibold text-gray-700">Boldness/Exploratory Level</label>
+                                                <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.boldnessLevel || 3}</span>
+                                            </div>
+                                            <input type="range" name="boldnessLevel" min="1" max="5" value={formData.boldnessLevel || 3} onChange={handleChange} className="w-full" />
+                                            <p className="text-xs text-gray-500">1=Very Cautious | 3=Moderate | 5=Highly Bold/Adventurous</p>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-semibold text-gray-700">Sociability Level</label>
+                                                <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.sociabilityLevel || 3}</span>
+                                            </div>
+                                            <input type="range" name="sociabilityLevel" min="1" max="5" value={formData.sociabilityLevel || 3} onChange={handleChange} className="w-full" />
+                                            <p className="text-xs text-gray-500">1=Solitary/Aloof | 3=Moderate Social | 5=Highly Social/Bonded</p>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-semibold text-gray-700">Independence Level</label>
+                                                <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.independenceLevel || 3}</span>
+                                            </div>
+                                            <input type="range" name="independenceLevel" min="1" max="5" value={formData.independenceLevel || 3} onChange={handleChange} className="w-full" />
+                                            <p className="text-xs text-gray-500">1=Highly Dependent | 3=Moderate | 5=Very Independent</p>
+                                        </div>
+                                    </div>
+                                </FormSection>
+
+                                <FormSection title="Specialized Behavioral Traits" icon={<Sparkles size={16} />}>
+                                    <div className="space-y-3">
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Prey Drive & Hunting Behavior</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Prey Drive Level</label><select name="preyDriveLevel" value={formData.preyDriveLevel || 'Unknown'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Unknown">Unknown</option><option value="None">None</option><option value="Low">Low</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Very High">Very High</option></select></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Hunting/Predatory Behavior Notes</label><textarea name="huntingBehavior" value={formData.huntingBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Stalks small animals, pounces, tracking instincts, bird/rodent specific" /></div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Behavior & Food Behavior</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                <div><label className="block text-xs font-medium text-gray-700">Food Aggression Level</label><select name="foodAggressionLevel" value={formData.foodAggressionLevel || 'None'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="None">None</option><option value="Mild">Mild</option><option value="Moderate">Moderate</option><option value="Severe">Severe</option></select></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Eating Speed</label><select name="eatingSpeed" value={formData.eatingSpeed || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Very Slow">Very Slow</option><option value="Slow">Slow</option><option value="Normal">Normal</option><option value="Fast">Fast</option><option value="Very Fast">Very Fast</option></select></div>
+                                            </div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Food Preferences & Pickiness</label><textarea name="foodPreferences" value={formData.foodPreferences || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Picky eater, refuses certain foods, competitive feeding, hoards food" /></div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Bonding & Attachment Style</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700">Attachment Type</label><select name="attachmentStyle" value={formData.attachmentStyle || 'Unknown'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Unknown">Unknown</option><option value="Solitary">Solitary (no bonding)</option><option value="Pair Bonded">Pair Bonded</option><option value="Group Bonded">Group Bonded</option><option value="Handler Bonded">Bonded to Handler</option><option value="Multi-individual">Multi-individual Bonds</option></select></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Bonding Behavior & Preferences</label><textarea name="bondingBehavior" value={formData.bondingBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Seeks out handler, displays affection, bond with specific individuals, forms hierarchies" /></div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Sensory Sensitivities</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <div><label className="block text-xs font-medium text-gray-700">Noise Sensitivity</label><select name="noiseSensitivity" value={formData.noiseSensitivity || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Normal">Normal</option><option value="Mildly Sensitive">Mildly Sensitive</option><option value="Highly Sensitive">Highly Sensitive</option></select></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Touch Sensitivity</label><select name="touchSensitivity" value={formData.touchSensitivity || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Normal">Normal</option><option value="Mildly Sensitive">Mildly Sensitive</option><option value="Highly Sensitive">Highly Sensitive</option></select></div>
+                                                <div><label className="block text-xs font-medium text-gray-700">Light Sensitivity</label><select name="lightSensitivity" value={formData.lightSensitivity || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Normal">Normal</option><option value="Prefers Dim">Prefers Dim</option><option value="Highly Sensitive">Highly Sensitive</option></select></div>
+                                            </div>
+                                            <div><label className="block text-xs font-medium text-gray-700">Sensory Sensitivity Notes</label><textarea name="sensoryNotes" value={formData.sensoryNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Avoids certain textures, loud noises trigger panic, prefers darkness" /></div>
+                                        </div>
+                                    </div>
                                 </FormSection>
                             </div>
                         )}
                         {activeTab === 'breeding' && (
                             <div className="space-y-4">
+                                {/* SECTION 1: Current Reproductive State */}
+                                <FormSection title="Current Reproductive State" icon={<Heart size={16} />}>
+                                    {/* Auto-calculated display */}
+                                    <div className="space-y-2 p-3 bg-blue-50 border border-blue-200 rounded-lg mb-3">
+                                        <h4 className="text-sm font-semibold text-gray-700">Auto-Calculated from Litters:</h4>
+                                        <div className="space-y-1 text-sm text-gray-700">
+                                            <div>📋 Planned Mating: {formData.isPlannedMating ? '✓' : '✗'}</div>
+                                            <div>⚡ In Mating: {formData.isInMating ? '✓' : '✗'}</div>
+                                            <div>🤰 Pregnant: {formData.isPregnant ? '✓' : '✗'}</div>
+                                            <div>🍼 Nursing: {formData.isNursing ? '✓' : '✗'}</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Override controls */}
+                                    <div className="flex items-center justify-between mb-3">
+                                        <label className="text-sm font-semibold text-gray-700">Manual Override</label>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (reproductiveStateOverride) {
+                                                    setReproductiveStateOverride(null);
+                                                    setReproductiveStateOverrideReason('');
+                                                } else {
+                                                    setReproductiveStateOverride({});
+                                                }
+                                            }}
+                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${reproductiveStateOverride ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                                        >
+                                            {reproductiveStateOverride ? 'Clear Override' : 'Enable Override'}
+                                        </button>
+                                    </div>
+
+                                    {/* Override options */}
+                                    {reproductiveStateOverride && (
+                                        <div className="space-y-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" onChange={(e) => setFormData(p => ({...p, isPlannedMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Planned Mating</label></div>
+                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" onChange={(e) => setFormData(p => ({...p, isInMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: In Mating</label></div>
+                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" onChange={(e) => setFormData(p => ({...p, isPregnant: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Pregnant</label></div>
+                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" onChange={(e) => setFormData(p => ({...p, isNursing: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Nursing</label></div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Reason for Override</label>
+                                                <textarea value={reproductiveStateOverrideReason} onChange={(e) => setReproductiveStateOverrideReason(e.target.value)} placeholder="Why overriding auto-calculated state..." className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none" rows="2" />
+                                            </div>
+                                        </div>
+                                    )}
+                                </FormSection>
+
+                                {/* SECTION 2: Fertility Status */}
+                                <FormSection title="Fertility Status" icon={<Sparkles size={16} />}>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Fertility Status</label>
+                                        <select value={currentReproductiveState.fertilityStatus} onChange={(e) => setCurrentReproductiveState({...currentReproductiveState, fertilityStatus: e.target.value})} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                            <option>Fertile</option>
+                                            <option>Subfertile</option>
+                                            <option>Infertile</option>
+                                            <option>Spayed (Female)</option>
+                                            <option>Neutered (Male)</option>
+                                            <option>Castrated</option>
+                                            <option>Unknown</option>
+                                            <option>Not Applicable</option>
+                                        </select>
+                                    </div>
+                                </FormSection>
+
+                                {/* SECTION 3: Reproductive Cycle (Conditional) */}
+                                {['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
+                                    <FormSection title="Reproductive Cycle" icon={<Activity size={16} />}>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Last Reproductive Event Date</label>
+                                                <DatePicker value={reproductiveCycle.lastReproductiveEventDate} onChange={(e) => setReproductiveCycle({...reproductiveCycle, lastReproductiveEventDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Cycle Length (days)</label>
+                                                <input type="number" value={reproductiveCycle.reproductiveEventCycleLength} onChange={(e) => setReproductiveCycle({...reproductiveCycle, reproductiveEventCycleLength: e.target.value})} placeholder="e.g., 21" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-xs font-medium text-gray-700">Current Reproductive Phase</label>
+                                                <select value={reproductiveCycle.currentReproductiveEventPhase} onChange={(e) => setReproductiveCycle({...reproductiveCycle, currentReproductiveEventPhase: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                    <option>Available</option>
+                                                    <option>In Cycle</option>
+                                                    <option>Resting</option>
+                                                    <option>Unknown</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </FormSection>
+                                )}
+
+                                {/* SECTION 4: Conception & Mating History (Conditional) */}
+                                {['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
+                                    <FormSection title="Conception & Mating History" icon={<MessageSquare size={16} />}>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Last Conception Date</label>
+                                                <DatePicker value={conceptionHistory.lastConceptionDate} onChange={(e) => setConceptionHistory({...conceptionHistory, lastConceptionDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Successful Conceptions (Lifetime)</label>
+                                                <input type="number" value={conceptionHistory.successfulConceptionCount} onChange={(e) => setConceptionHistory({...conceptionHistory, successfulConceptionCount: e.target.value})} placeholder="e.g., 5" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-xs font-medium text-gray-700">Unsuccessful Conception Attempts</label>
+                                                <input type="number" value={conceptionHistory.unsuccessfulConceptionAttempts} onChange={(e) => setConceptionHistory({...conceptionHistory, unsuccessfulConceptionAttempts: e.target.value})} placeholder="e.g., 2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                        </div>
+                                    </FormSection>
+                                )}
+
+                                {/* SECTION 5: Pregnancy/Development Details (Conditional) */}
+                                {['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
+                                    <FormSection title="Pregnancy/Development Details" icon={<AlertTriangle size={16} />}>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Development Period Start</label>
+                                                <DatePicker value={developmentDetails.developmentPeriodStart} onChange={(e) => setDevelopmentDetails({...developmentDetails, developmentPeriodStart: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Development Period Length (days)</label>
+                                                <input type="number" value={developmentDetails.developmentPeriodLength} onChange={(e) => setDevelopmentDetails({...developmentDetails, developmentPeriodLength: e.target.value})} placeholder="e.g., 63" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Expected Delivery Date</label>
+                                                <DatePicker value={developmentDetails.expectedDeliveryDate} onChange={(e) => setDevelopmentDetails({...developmentDetails, expectedDeliveryDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Development Method</label>
+                                                <select value={developmentDetails.developmentMethod} onChange={(e) => setDevelopmentDetails({...developmentDetails, developmentMethod: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                    <option>Natural</option>
+                                                    <option>Assisted</option>
+                                                    <option>Artificial Incubation</option>
+                                                    <option>Unknown</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </FormSection>
+                                )}
+
+                                {/* SECTION 6: Reproductive Outcomes & Nursing */}
+                                <FormSection title="Reproductive Outcomes & Nursing" icon={<Trophy size={16} />}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Total Offspring Produced (Lifetime)</label>
+                                            <input type="number" value={reproductiveOutcomes.totalOffspringProduced} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, totalOffspringProduced: e.target.value})} placeholder="e.g., 45" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Viable Offspring Count</label>
+                                            <input type="number" value={reproductiveOutcomes.viableOffspringCount} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, viableOffspringCount: e.target.value})} placeholder="e.g., 43" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Reproductive Event Count (Litters/Clutches)</label>
+                                            <input type="number" value={reproductiveOutcomes.reproductiveEventCount} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, reproductiveEventCount: e.target.value})} placeholder="e.g., 8" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Reproductive Event Outcome</label>
+                                            <select value={reproductiveOutcomes.reproductiveEventOutcome} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, reproductiveEventOutcome: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <option>Successful</option>
+                                                <option>Partial</option>
+                                                <option>Failed</option>
+                                                <option>Unknown</option>
+                                            </select>
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Dependent Care End Date (Weaning/Fledging/Independence)</label>
+                                            <DatePicker value={reproductiveOutcomes.dependentCareEndDate} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, dependentCareEndDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                        </div>
+                                    </div>
+                                </FormSection>
+
+                                {/* SECTION 7: Reproductive Health & Procedures */}
+                                <FormSection title="Reproductive Health & Procedures" icon={<Leaf size={16} />}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Artificial Reproduction Method</label>
+                                            <select value={reproductiveHealth.artificialReproductionMethod} onChange={(e) => setReproductiveHealth({...reproductiveHealth, artificialReproductionMethod: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <option>None</option>
+                                                <option>AI (Artificial Insemination)</option>
+                                                <option>Embryo Transfer</option>
+                                                <option>In Vitro</option>
+                                                <option>Other</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Last Reproductive Intervention Date</label>
+                                            <DatePicker value={reproductiveHealth.lastReproductiveInterventionDate} onChange={(e) => setReproductiveHealth({...reproductiveHealth, lastReproductiveInterventionDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <div className="flex items-center gap-2">
+                                                <input type="checkbox" id="dependentCare" checked={reproductiveHealth.dependentCareRequired} onChange={(e) => setReproductiveHealth({...reproductiveHealth, dependentCareRequired: e.target.checked})} className="w-4 h-4" />
+                                                <label htmlFor="dependentCare" className="text-xs font-medium text-gray-700">Dependent Care Required (Species Needs Parental Care)</label>
+                                            </div>
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Reproductive Health Notes (Clearances, Restrictions, Procedures)</label>
+                                            <textarea value={reproductiveHealth.reproductiveHealthNotes} onChange={(e) => setReproductiveHealth({...reproductiveHealth, reproductiveHealthNotes: e.target.value})} placeholder="e.g., PennHIP certified, genetic clearances pending, spay/neuter date..." className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none" rows="3" />
+                                        </div>
+                                    </div>
+                                </FormSection>
+
+                                {/* Original Breeding Records Section (kept for history) */}
                                 <FormSection title="Add Breeding Record" icon={<Egg size={16} />} initiallyOpen>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
@@ -2426,23 +4689,597 @@ const AnimalFormTestModal = ({
                                 </FormSection>
                             </div>
                         )}
-                        {activeTab === 'pedigree' && <div className="text-center p-8 bg-gray-50 rounded-lg">Pedigree Fields Go Here</div>}
-                        {activeTab === 'timeline' && <div className="text-center p-8 bg-gray-50 rounded-lg">Timeline/Events Go Here</div>}
+                        {activeTab === 'pedigree' && (() => {
+                            // CTC selector modal ? always rendered so it works regardless of activeTab
+                            const ctcModal = mpCTCOpenSlot ? (
+                                <ParentSearchModal
+                                    title={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Sire' : 'Dam'}
+                                    currentId={animalToEdit?.id_public}
+                                    onSelect={async (a) => { setMpCTCOpenSlot(null); if (a) await mpLinkAnimal(mpCTCOpenSlot, a); }}
+                                    onClose={() => setMpCTCOpenSlot(null)}
+                                    authToken={authToken}
+                                    showModalMessage={showModalMessage}
+                                    API_BASE_URL={API_BASE_URL}
+                                    X={X}
+                                    Search={Search}
+                                    Loader2={Loader2}
+                                    LoadingSpinner={LoadingSpinner}
+                                    requiredGender={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Male' : 'Female'}
+                                    species={formData.species}
+                                />
+                            ) : null;
+
+                            const getSlot = (key) => mpEditForm[key] || mpEmptySlot();
+                            const setSlotField = (key, field, val) => setMpEditForm(f => ({ ...f, [key]: { ...(f[key] || mpEmptySlot()), [field]: val } }));
+
+                            const renderEditSlot = (slotKey, label, sideColor) => {
+                                const d = getSlot(slotKey);
+                                const isSire = slotKey === 'sire' || slotKey.endsWith('Sire');
+                                const isCTC = d.mode === 'ctc';
+                                const isParent = slotKey === 'sire' || slotKey === 'dam';
+                                const bdr = isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40';
+                                const lbl = isSire ? 'text-blue-500' : 'text-pink-500';
+
+                                return (
+                                    <div key={slotKey} className={`rounded-lg border ${isParent ? 'p-4' : 'p-3'} space-y-2 text-xs ${bdr}`}>
+                                        <div className="flex items-center justify-between">
+                                            <p className={`${isParent ? 'text-xs' : 'text-[10px]'} font-bold uppercase tracking-widest ${lbl}`}>{label}</p>
+                                            <div className="flex rounded border border-gray-300 overflow-hidden text-[10px]">
+                                                <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'manual')}
+                                                    className={`px-2 py-0.5 transition-colors ${!isCTC ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Manual</button>
+                                                <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'ctc')}
+                                                    className={`px-2 py-0.5 transition-colors ${isCTC ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Link CTC</button>
+                                            </div>
+                                        </div>
+
+                                        {isCTC ? (
+                                            d.ctcId ? (
+                                                <div className="space-y-1.5">
+                                                    <div className={`flex items-center gap-3 ${isParent ? 'p-3' : 'p-2'} bg-white rounded border border-primary/30`}>
+                                                        {d.imageUrl
+                                                            ? <img src={d.imageUrl} className={`${isParent ? 'w-16 h-16' : 'w-10 h-10'} rounded-full object-cover flex-shrink-0`} alt="" />
+                                                            : <div className={`${isParent ? 'w-16 h-16' : 'w-10 h-10'} rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0`}><Cat size={isParent ? 22 : 16} className="text-gray-300" /></div>
+                                                        }
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className={`${isParent ? 'text-sm' : 'text-xs'} font-semibold text-gray-800 truncate`}>{[d.prefix,d.name,d.suffix].filter(Boolean).join(' ')}</p>
+                                                            {d.variety && <p className={`${isParent ? 'text-xs' : 'text-[11px]'} text-gray-500 truncate`}>{d.variety}</p>}
+                                                            <p className="text-[10px] font-mono text-gray-500">{d.ctcId}</p>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button"
+                                                        onClick={() => {
+                                                            setMpEditForm(f => ({ ...f, [slotKey]: { ...f[slotKey], mode: 'ctc', ctcId: '' } }));
+                                                        }}
+                                                        className="text-[10px] text-red-400 hover:text-red-600 transition-colors">Unlink</button>
+                                            </div>
+                                            ) : (
+                                                <div className="space-y-1.5">
+                                                    <button type="button" onClick={() => setMpCTCOpenSlot(slotKey)}
+                                                        className={`w-full px-2 ${isParent ? 'py-4 text-sm' : 'py-1.5 text-xs'} border border-dashed border-primary/40 rounded text-primary hover:bg-primary/5 transition flex items-center gap-1.5 justify-center`}>
+                                                        <Search size={isParent ? 15 : 12} /> Search CTC Animal?
+                                                    </button>
+                                                </div>
+                                            )
+                                        ) : (
+                                            <>
+                                                <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                <input placeholder="Variety / Morph" value={d.variety || ''} onChange={e => setSlotField(slotKey, 'variety', e.target.value)}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                <input placeholder="Genetic Code" value={d.genCode || ''} onChange={e => setSlotField(slotKey, 'genCode', e.target.value)}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                <input type="date" value={d.birthDate || ''} onChange={e => setSlotField(slotKey, 'birthDate', e.target.value)}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                <input placeholder="Breeder Name" value={d.breederName || ''} onChange={e => setSlotField(slotKey, 'breederName', e.target.value)}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                <div className="flex items-center gap-2">
+                                                    {d.imageUrl && <img src={d.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200" />}
+                                                    <label className={`flex-1 flex items-center gap-1.5 px-2 py-1 border border-gray-300 rounded text-xs cursor-pointer bg-white hover:bg-gray-50 transition ${mpSlotUploading[slotKey] ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                        {mpSlotUploading[slotKey] ? <><Loader2 size={11} className="animate-spin" /> Uploading?</> : <><Camera size={11} /> {d.imageUrl ? 'Change Photo' : 'Add Photo'}</>}
+                                                        <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                                            const file = e.target.files?.[0];
+                                                            e.target.value = '';
+                                                            if (!file) return;
+                                                            setMpSlotUploading(p => ({ ...p, [slotKey]: true }));
+                                                            try {
+                                                                // Simplified image compression - using standard fetch
+                                                                const fd = new FormData();
+                                                                fd.append('file', file);
+                                                                const up = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' } });
+                                                                setSlotField(slotKey, 'imageUrl', up.data.url);
+                                                            } catch { showModalMessage('Upload failed', 'Could not upload ancestor image. Please try again.'); }
+                                                            setMpSlotUploading(p => ({ ...p, [slotKey]: false }));
+                                                        }} />
+                                                    </label>
+                                                    {d.imageUrl && <button type="button" onClick={() => setSlotField(slotKey, 'imageUrl', '')} className="text-[10px] text-red-400 hover:text-red-600 transition-colors flex-shrink-0">Remove</button>}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            };
+
+                            return (<>
+                                {ctcModal}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-2">
+                                        <Dna size={18} className="text-orange-500" />
+                                        <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
+                                    </div>
+                                    <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Changes are saved when you click Save Animal.</p>
+
+                                    <div>
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {renderEditSlot('sire', 'Sire', 'sire')}
+                                            {renderEditSlot('dam', 'Dam', 'dam')}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                                {renderEditSlot('sireSire', 'Grandsire', 'sire')}
+                                                {renderEditSlot('sireDam', 'Granddam', 'sire')}
+                                            </div>
+                                            <div className="space-y-2">
+                                                <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                                {renderEditSlot('damSire', 'Grandsire', 'dam')}
+                                                {renderEditSlot('damDam', 'Granddam', 'dam')}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                                <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                                {renderEditSlot('sireSireSire', 'Great-Grandsire', 'sire')}
+                                                {renderEditSlot('sireSireDam', 'Great-Granddam', 'sire')}
+                                                <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                                {renderEditSlot('sireDamSire', 'Great-Grandsire', 'sire')}
+                                                {renderEditSlot('sireDamDam', 'Great-Granddam', 'sire')}
+                                            </div>
+                                            <div className="space-y-2">
+                                                <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                                <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                                {renderEditSlot('damSireSire', 'Great-Grandsire', 'dam')}
+                                                {renderEditSlot('damSireDam', 'Great-Granddam', 'dam')}
+                                                <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                                {renderEditSlot('damDamSire', 'Great-Grandsire', 'dam')}
+                                                {renderEditSlot('damDamDam', 'Great-Granddam', 'dam')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>);
+                        })()}
+                        
+                        
+                        
+                        {activeTab === 'timeline' && (
+                            <div className="space-y-4">
+                                {/* Event Visibility Toggles */}
+                                <FormSection title="Event Filters" icon={<Eye size={16} />} initiallyOpen>
+                                    <div className="space-y-2">
+                                        {['health', 'breeding', 'keeper', 'shows', 'milestones'].map(type => (
+                                            <label key={type} className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded transition">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={eventVisibility[type]}
+                                                    onChange={(e) => setEventVisibility({...eventVisibility, [type]: e.target.checked})}
+                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700 capitalize">{type} Events</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </FormSection>
+
+                                {/* Milestones Section */}
+                                <FormSection title="Milestones" icon={<Target size={16} />} initiallyOpen>
+                                    {(formData.milestones || []).length > 0 && (
+                                        <div className="space-y-2 mb-4">
+                                            {(formData.milestones || []).map((milestone, idx) => (
+                                                <div key={idx} className="flex items-start justify-between bg-white border border-yellow-200 rounded-lg p-3">
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-semibold text-gray-800">{milestone.label}</p>
+                                                        <p className="text-xs text-gray-500">{formatDate(milestone.startDate)}</p>
+                                                        {milestone.description && <p className="text-xs text-gray-600 mt-1">{milestone.description}</p>}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const updatedMilestones = formData.milestones.filter((_, i) => i !== idx);
+                                                            setFormData(prev => ({...prev, milestones: updatedMilestones}));
+                                                        }}
+                                                        className="text-red-400 hover:text-red-600 transition-colors ml-2"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div className="space-y-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                        <input
+                                            type="text"
+                                            placeholder="Milestone label"
+                                            value={newMilestoneLabel}
+                                            onChange={(e) => setNewMilestoneLabel(e.target.value)}
+                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                        />
+                                        <DatePicker
+                                            value={newMilestoneDate}
+                                            onChange={setNewMilestoneDate}
+                                            label="Date"
+                                        />
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="number"
+                                                placeholder="Interval"
+                                                value={newMilestoneInterval}
+                                                onChange={(e) => setNewMilestoneInterval(e.target.value)}
+                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                            />
+                                            <select
+                                                value={newMilestoneUnit}
+                                                onChange={(e) => setNewMilestoneUnit(e.target.value)}
+                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                            >
+                                                <option>week</option>
+                                                <option>month</option>
+                                                <option>year</option>
+                                            </select>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (!newMilestoneLabel.trim() || !newMilestoneDate) {
+                                                    showModalMessage('Missing Data', 'Please enter a label and date.');
+                                                    return;
+                                                }
+                                                const newMilestone = {
+                                                    id: Date.now().toString(),
+                                                    label: newMilestoneLabel,
+                                                    startDate: newMilestoneDate,
+                                                    interval: newMilestoneInterval || null,
+                                                    intervalUnit: newMilestoneUnit,
+                                                    description: ''
+                                                };
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    milestones: [...(prev.milestones || []), newMilestone]
+                                                }));
+                                                setNewMilestoneLabel('');
+                                                setNewMilestoneDate(new Date().toISOString().split('T')[0]);
+                                                setNewMilestoneInterval('');
+                                            }}
+                                            className="w-full py-1.5 px-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-1"
+                                        >
+                                            <Plus size={16} /> Add Milestone
+                                        </button>
+                                    </div>
+                                </FormSection>
+
+                                {/* Timeline Events */}
+                                <FormSection title="Timeline Events" icon={<Clock size={16} />} initiallyOpen>
+                                    {(() => {
+                                        const events = aggregateTimelineEvents();
+                                        const pinnedEvents_filtered = events.filter(e => pinnedEvents.includes(e.id));
+                                        const regularEvents = events.filter(e => !pinnedEvents.includes(e.id));
+                                        
+                                        return (
+                                            <div className="space-y-3">
+                                                {/* Pinned Events */}
+                                                {pinnedEvents_filtered.length > 0 && (
+                                                    <div className="space-y-2">
+                                                        <h4 className="text-xs font-semibold text-gray-600 uppercase">📌 Pinned Events</h4>
+                                                        {pinnedEvents_filtered.map(event => (
+                                                            <div key={event.id} className="border-l-4 border-yellow-400 bg-yellow-50 p-3 rounded-lg">
+                                                                <div className="flex items-start justify-between">
+                                                                    <div className="flex-1">
+                                                                        <p className="text-sm font-semibold text-gray-800">{event.title}</p>
+                                                                        <p className="text-xs text-gray-600">{event.date} • {event.type}</p>
+                                                                        {event.description && <p className="text-xs text-gray-700 mt-1">{event.description}</p>}
+                                                                    </div>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => toggleEventPin(event.id)}
+                                                                        className="text-yellow-500 hover:text-yellow-700 transition-colors ml-2"
+                                                                    >
+                                                                        <Star size={16} fill="currentColor" />
+                                                                    </button>
+                                                                </div>
+                                                                {getNotesForEvent(event.id).length > 0 && (
+                                                                    <div className="mt-2 space-y-1">
+                                                                        {getNotesForEvent(event.id).map(note => (
+                                                                            <div key={note.id} className="text-xs bg-white p-2 rounded border border-yellow-200">
+                                                                                <p className="text-gray-700">{note.noteText}</p>
+                                                                                <div className="flex justify-between items-center mt-1">
+                                                                                    <span className="text-gray-400 text-[10px]">{note.dateAdded}</span>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => deleteTimelineNote(note.id)}
+                                                                                        className="text-red-400 hover:text-red-600"
+                                                                                    >
+                                                                                        <Trash2 size={12} />
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* Regular Events */}
+                                                {regularEvents.length > 0 && (
+                                                    <div className="space-y-2">
+                                                        {pinnedEvents_filtered.length > 0 && <hr className="my-3" />}
+                                                        <h4 className="text-xs font-semibold text-gray-600 uppercase">All Events</h4>
+                                                        {regularEvents.map(event => (
+                                                            <div key={event.id} className="border-l-4 border-gray-300 bg-gray-50 p-3 rounded-lg">
+                                                                <div className="flex items-start justify-between">
+                                                                    <div className="flex-1">
+                                                                        <p className="text-sm font-semibold text-gray-800">{event.title}</p>
+                                                                        <p className="text-xs text-gray-600">{event.date} • {event.type}</p>
+                                                                        {event.description && <p className="text-xs text-gray-700 mt-1">{event.description}</p>}
+                                                                    </div>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => toggleEventPin(event.id)}
+                                                                        className="text-gray-400 hover:text-yellow-500 transition-colors ml-2"
+                                                                    >
+                                                                        <Star size={16} />
+                                                                    </button>
+                                                                </div>
+                                                                {getNotesForEvent(event.id).length > 0 && (
+                                                                    <div className="mt-2 space-y-1">
+                                                                        {getNotesForEvent(event.id).map(note => (
+                                                                            <div key={note.id} className="text-xs bg-white p-2 rounded border border-gray-200">
+                                                                                <p className="text-gray-700">{note.noteText}</p>
+                                                                                <div className="flex justify-between items-center mt-1">
+                                                                                    <span className="text-gray-400 text-[10px]">{note.dateAdded}</span>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => deleteTimelineNote(note.id)}
+                                                                                        className="text-red-400 hover:text-red-600"
+                                                                                    >
+                                                                                        <Trash2 size={12} />
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {events.length === 0 && (
+                                                    <p className="text-sm text-gray-500 italic text-center py-4">No events to display. Check the filters or add milestones to get started.</p>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
+                                </FormSection>
+
+                                {/* Add Event Note */}
+                                <FormSection title="Event Annotations" icon={<MessageSquare size={16} />} initiallyOpen={showNoteForm}>
+                                    {!showNoteForm ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNoteForm(true)}
+                                            className="w-full py-2 px-3 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-1"
+                                        >
+                                            <Plus size={16} /> Add Note to Event
+                                        </button>
+                                    ) : (
+                                        <div className="space-y-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <label className="block text-sm font-medium text-gray-700">Select Event</label>
+                                            <select
+                                                value={newTimelineNote.eventId}
+                                                onChange={(e) => setNewTimelineNote({...newTimelineNote, eventId: e.target.value})}
+                                                className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                            >
+                                                <option value="">Choose an event...</option>
+                                                {aggregateTimelineEvents().map(event => (
+                                                    <option key={event.id} value={event.id}>
+                                                        {event.title} ({event.date})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <label className="block text-sm font-medium text-gray-700 mt-2">Note</label>
+                                            <textarea
+                                                value={newTimelineNote.noteText}
+                                                onChange={(e) => setNewTimelineNote({...newTimelineNote, noteText: e.target.value})}
+                                                placeholder="Add context or notes about this event..."
+                                                className="w-full py-2 px-2 text-sm border border-gray-300 rounded-md resize-none"
+                                                rows={3}
+                                            />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={addTimelineNote}
+                                                    className="flex-1 py-1.5 px-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
+                                                >
+                                                    Save Note
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setShowNoteForm(false);
+                                                        setNewTimelineNote({ eventId: '', noteText: '' });
+                                                    }}
+                                                    className="flex-1 py-1.5 px-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 transition"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </FormSection>
+                            </div>
+                        )}
                         {activeTab === 'records' && (
                             <div className="space-y-4">
-                                <FormSection title="Milestones" icon={<Bell size={16} />} initiallyOpen>
-                                    <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                            <input type="text" value={newMilestoneLabel} onChange={e => setNewMilestoneLabel(e.target.value)} placeholder="Milestone Label" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                            <DatePicker value={newMilestoneDate} onChange={(e) => setNewMilestoneDate(e.target.value)} className="py-1.5 px-2 text-sm" />
+                                <FormSection title="Ownership History" icon={<Home size={16} />} initiallyOpen>
+                                    {/* Existing entries */}
+                                    {(formData.ownershipHistory || []).length > 0 && (
+                                        <div className="space-y-2 mb-4">
+                                            {(formData.ownershipHistory || []).map((entry, idx) => (
+                                                <div key={idx} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3">
+                                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                        {entry.country && <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-sm font-medium text-gray-800 truncate">{entry.ownerName || 'Unnamed'}</p>
+                                                            {entry.userId_public && <p className="text-xs text-gray-400 font-mono">{entry.userId_public}</p>}
+                                                            <div className="flex gap-2 text-xs text-gray-500 mt-1">
+                                                                <span>{entry.startDate || 'TBD'}</span>
+                                                                {entry.endDate && <span>→ {entry.endDate}</span>}
+                                                                {entry.ownershipType && <span className="bg-gray-100 px-1.5 py-0.5 rounded">{entry.ownershipType}</span>}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, ownershipHistory: (prev.ownershipHistory || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-1 flex-shrink-0 ml-2">
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
-                                        <button type="button" onClick={addMilestone} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Milestone</button>
+                                    )}
+
+                                    {/* Add new entry */}
+                                    <div className="bg-white border border-dashed border-gray-300 rounded-lg p-3 space-y-3">
+                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Add Manual Entry</p>
+
+                                        {/* Mode toggle */}
+                                        <div className="flex gap-2">
+                                            <button type="button" onClick={() => { setOhMode('manual'); setOhSelectedUser(null); setOhUserSearch(''); setOhUserResults([]); }} className={`px-3 py-1 text-xs rounded-full border transition ${ohMode === 'manual' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'}`}>Manual Name</button>
+                                            <button type="button" onClick={() => setOhMode('user')} className={`px-3 py-1 text-xs rounded-full border transition ${ohMode === 'user' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'}`}>Select User</button>
+                                        </div>
+
+                                        {ohMode === 'manual' ? (
+                                            <input type="text" value={ohOwnerName} onChange={e => setOhOwnerName(e.target.value)} placeholder="Owner name" className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary" />
+                                        ) : (
+                                            <div className="space-y-2">
+                                                <div className="flex gap-2">
+                                                    <input type="text" value={ohUserSearch} onChange={e => { setOhUserSearch(e.target.value); setOhUserResults([]); setOhSelectedUser(null); setOhOwnerName(''); }} placeholder="Search by name or CTUID" className="flex-1 p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary" />
+                                                    <button type="button" disabled={ohSearching || !ohUserSearch.trim()} onClick={async () => {
+                                                        if (!ohUserSearch.trim()) return;
+                                                        setOhSearching(true);
+                                                        try {
+                                                            const res = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(ohUserSearch.trim())}&limit=10`);
+                                                            setOhUserResults(res.data || []);
+                                                        } catch(e) {}
+                                                        setOhSearching(false);
+                                                    }} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-40 transition flex-shrink-0">
+                                                        {ohSearching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                                                    </button>
+                                                </div>
+                                                {ohUserResults.length > 0 && !ohSelectedUser && (
+                                                    <div className="border border-gray-200 rounded divide-y divide-gray-100 max-h-44 overflow-y-auto bg-white shadow-sm">
+                                                        {ohUserResults.map(u => {
+                                                            const showP = u.showPersonalName ?? false;
+                                                            const showB = u.showBreederName ?? false;
+                                                            const dName = (showP && showB && u.personalName && u.breederName) ? `${u.personalName} (${u.breederName})` : (showB && u.breederName) ? u.breederName : (showP && u.personalName) ? u.personalName : 'Anonymous';
+                                                            return (
+                                                                <button key={u.id_public} type="button" onClick={() => { setOhSelectedUser(u); setOhOwnerName(dName); setOhCountry(u.country || ''); setOhUserResults([]); }} className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2">
+                                                                    {u.profileImage && u.profileImage !== 'present' ? <img src={u.profileImage} className="w-7 h-7 rounded-full object-cover flex-shrink-0" alt="" /> : <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><User size={12} className="text-gray-400" /></div>}
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <p className="text-sm font-medium text-gray-800 truncate">{dName}</p>
+                                                                        <p className="text-xs text-gray-400 font-mono">{u.id_public}</p>
+                                                                    </div>
+                                                                    {u.country && <span className={`${getCountryFlag(u.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                                {ohSelectedUser && (
+                                                    <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg p-2">
+                                                        {ohSelectedUser.profileImage && ohSelectedUser.profileImage !== 'present' ? <img src={ohSelectedUser.profileImage} className="w-9 h-9 rounded-full object-cover flex-shrink-0" alt="" /> : <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><User size={14} className="text-gray-400" /></div>}
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-semibold text-gray-800 truncate">{ohOwnerName}</p>
+                                                            <p className="text-xs text-gray-500 font-mono">{ohSelectedUser.id_public}</p>
+                                                        </div>
+                                                        {ohSelectedUser.country && <span className={`${getCountryFlag(ohSelectedUser.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
+                                                        <button type="button" onClick={() => { setOhSelectedUser(null); setOhOwnerName(''); setOhUserSearch(''); setOhCountry(''); }} className="text-gray-400 hover:text-gray-600 p-0.5"><X size={13} /></button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Ownership Type */}
+                                        <select value={ohOwnershipType} onChange={e => setOhOwnershipType(e.target.value)} className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary">
+                                            <option value="">Ownership Type (optional)</option>
+                                            <option value="Breeder">Breeder</option>
+                                            <option value="Pet Owner">Pet Owner</option>
+                                            <option value="Sanctuary">Sanctuary</option>
+                                            <option value="Foster">Foster</option>
+                                            <option value="Show Home">Show Home</option>
+                                            <option value="Research">Research</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+
+                                        {/* Start Date */}
+                                        <input type="date" value={ohStartDate} onChange={e => setOhStartDate(e.target.value)} placeholder="Start Date" className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary" />
+
+                                        {/* Country dropdown */}
+                                        <select value={ohCountry} onChange={e => setOhCountry(e.target.value)} className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary">
+                                            <option value="">Country (optional)</option>
+                                            {[['US','United States'],['CA','Canada'],['GB','United Kingdom'],['AU','Australia'],['NZ','New Zealand'],['DE','Germany'],['FR','France'],['IT','Italy'],['ES','Spain'],['NL','Netherlands'],['SE','Sweden'],['NO','Norway'],['DK','Denmark'],['CH','Switzerland'],['BE','Belgium'],['AT','Austria'],['PL','Poland'],['CZ','Czech Republic'],['IE','Ireland'],['PT','Portugal'],['GR','Greece'],['RU','Russia'],['JP','Japan'],['KR','South Korea'],['CN','China'],['IN','India'],['BR','Brazil'],['MX','Mexico'],['ZA','South Africa'],['SG','Singapore'],['HK','Hong Kong'],['MY','Malaysia'],['TH','Thailand']].map(([code, name]) => (
+                                                <option key={code} value={code}>{name}</option>
+                                            ))}
+                                        </select>
+
+                                        <button type="button" disabled={!ohOwnerName.trim()} onClick={() => {
+                                            const entry = { ownerName: ohOwnerName.trim(), userId_public: ohSelectedUser?.id_public || null, country: ohCountry || null, startDate: ohStartDate || '', endDate: '', ownershipType: ohOwnershipType || '' };
+                                            setFormData(prev => ({ ...prev, ownershipHistory: [...(prev.ownershipHistory || []), entry] }));
+                                            setOhOwnerName(''); setOhCountry(''); setOhSelectedUser(null); setOhUserSearch(''); setOhUserResults([]); setOhOwnershipType(''); setOhStartDate('');
+                                        }} className="w-full py-1.5 bg-gray-700 hover:bg-gray-800 text-white text-sm rounded transition disabled:opacity-40 disabled:cursor-not-allowed">
+                                            + Add Entry
+                                        </button>
                                     </div>
-                                    {(formData.milestones || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.startDate}: {rec.label}</span><button type="button" onClick={() => removeArrayItem('milestones', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                 </FormSection>
                                 <FormSection title="Show & Performance" icon={<Trophy size={16} />}>
                                     <div><label className="block text-xs font-medium text-gray-700">Show Titles</label><textarea name="showTitles" value={formData.showTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700">Working Titles</label><textarea name="workingTitles" value={formData.workingTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Show Ratings & Placements</label><textarea name="showRatings" value={formData.showRatings || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Grand Champion 2024, Reserve Winner, Points: 50" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Judge Comments & Evaluations</label><textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Notable feedback from judges, critiques, recommendations" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Performance Scores & Assessments</label><textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Agility: 9/10, Obedience: 8/10, Temperament: 10/10" /></div>
+                                </FormSection>
+                                <FormSection title="Sale & Purchase" icon={<DollarSign size={16} />}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">
+                                        <div><label className="block text-xs font-medium text-gray-700">Purchase Date</label><input type="date" name="purchaseDate" value={formData.purchaseDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Purchase Price</label><input type="text" name="purchasePrice" value={formData.purchasePrice} onChange={handleChange} placeholder="e.g., $500, €250" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Seller/Breeder Name</label><input type="text" name="sellerName" value={formData.sellerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Seller Contact Info</label><input type="text" name="sellerContact" value={formData.sellerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">
+                                        <div><label className="block text-xs font-medium text-gray-700">Sale Date</label><input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Sale Price</label><input type="text" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="e.g., $800, €400" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Buyer Name</label><input type="text" name="buyerName" value={formData.buyerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Buyer Contact Info</label><input type="text" name="buyerContact" value={formData.buyerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div><label className="block text-xs font-medium text-gray-700">Breeding Rights</label><select name="breedingRightsPurchased" value={formData.breedingRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="">Not Specified</option><option value="yes">Yes - Breeding Rights Included</option><option value="conditional">Conditional - Limited Terms</option><option value="no">No - Breeding Rights Not Included</option></select></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Show Rights</label><select name="showRightsPurchased" value={formData.showRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="">Not Specified</option><option value="yes">Yes - Show Rights Included</option><option value="conditional">Conditional - Limited Terms</option><option value="no">No - Show Rights Not Included</option></select></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Export Rights</label><select name="exportRightsPurchased" value={formData.exportRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="">Not Specified</option><option value="yes">Yes - Export Rights Included</option><option value="no">No - Export Rights Not Included</option></select></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Stud Services Allowed</label><select name="studServicesAllowed" value={formData.studServicesAllowed} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="">Not Specified</option><option value="yes">Yes</option><option value="conditional">Conditional</option><option value="no">No</option></select></div>
+                                    </div>
+                                    <div className="space-y-3 mt-4">
+                                        <div><label className="block text-xs font-medium text-gray-700">Resale Restrictions</label><textarea name="resaleRestrictions" value={formData.resaleRestrictions} onChange={handleChange} rows="2" placeholder="Any restrictions on reselling or transferring this animal" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Breeder Buyback Clause</label><textarea name="breederBuybackClause" value={formData.breederBuybackClause} onChange={handleChange} rows="2" placeholder="Details on whether original breeder has right to repurchase or buyback terms" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    </div>
                                 </FormSection>
                                 <FormSection title="Legal & Documentation" icon={<FileCheck size={16} />}>
                                     <div><label className="block text-xs font-medium text-gray-700">License Number</label><input type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
@@ -2470,6 +5307,34 @@ const AnimalFormTestModal = ({
                         species={formData.species}
                     />
                 )}
+                
+                {imageEditorOpen && (
+                    <ImageEditorModal
+                        files={imagesToEdit}
+                        onComplete={handleImageEditorComplete}
+                        onCancel={() => {
+                            setImageEditorOpen(false);
+                            setImagesToEdit([]);
+                        }}
+                    />
+                )}
+
+                {showEnclosureModal && (
+                    <AssignEnclosureModal
+                        isOpen={showEnclosureModal}
+                        onClose={() => setShowEnclosureModal(false)}
+                        onSelect={(enclosure) => {
+                            setSelectedEnclosure(enclosure);
+                            setFormData(prev => ({ ...prev, enclosureId: enclosure.id || enclosure.name }));
+                        }}
+                        availableEnclosures={availableEnclosures}
+                        loadingEnclosures={loadingEnclosures}
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
+                        showModalMessage={showModalMessage}
+                    />
+                )}
+                
                 {/* Footer */}
                 <div className="p-6 border-t border-gray-300 flex-shrink-0">
                     <div className="flex justify-between items-center">
@@ -2494,6 +5359,5 @@ const AnimalFormTestModal = ({
             </form>
         </div>
     );
-};
 
 export default AnimalFormTestModal;
