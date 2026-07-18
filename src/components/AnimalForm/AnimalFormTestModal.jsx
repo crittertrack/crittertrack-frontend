@@ -1731,7 +1731,6 @@ const AnimalFormTestModal = ({
             adultWeight: animalToEdit.adultWeight || '',
             licenseNumber: animalToEdit.licenseNumber || '',
             licenseJurisdiction: animalToEdit.licenseJurisdiction || '',
-            RingId: animalToEdit.RingId || '',
             estrusCycleLength: animalToEdit.estrusCycleLength || '',
             gestationLength: animalToEdit.gestationLength || '',
             artificialInseminationUsed: animalToEdit.artificialInseminationUsed || false,
@@ -1926,7 +1925,6 @@ const AnimalFormTestModal = ({
             licenseNumber: '',
             licenseJurisdiction: '',
             tattooId: '',
-            RingId: '',
             eartagNumber: '',
             estrusCycleLength: '',
             gestationLength: '',
@@ -2582,7 +2580,7 @@ const AnimalFormTestModal = ({
             }
 
             // Serialize array fields
-            const arrayFields = ['identifiers', 'vaccinations', 'dewormingRecords', 'parasiteControl', 'medicalProcedures', 'labResults', 'medicalConditions', 'allergies', 'medications', 'vetVisits', 'growthRecords', 'milestones', 'ownershipHistory', 'legalDocuments', 'careTasks', 'animalCareTasks', 'dietSupplies', 'supplementSupplies'];
+            const arrayFields = ['identifiers', 'vaccinations', 'dewormingRecords', 'parasiteControl', 'medicalProcedures', 'labResults', 'medicalConditions', 'allergies', 'medications', 'vetVisits', 'growthRecords', 'milestones', 'ownershipHistory', 'legalDocuments', 'careTasks', 'animalCareTasks', 'dietSupplies', 'supplementSupplies', 'breedingRecords', 'timelineNotes', 'pinnedEvents'];
 
             arrayFields.forEach(field => {
                 if (Array.isArray(payloadToSave[field]) && payloadToSave[field].length > 0) {
@@ -2591,10 +2589,6 @@ const AnimalFormTestModal = ({
                     payloadToSave[field] = null; // Send null for empty arrays
                 }
             });
-
-            if (Array.isArray(payloadToSave.identifiers)) {
-                payloadToSave.identifiers = JSON.stringify(payloadToSave.identifiers);
-            }
 
             // Serialize structured nutrition schedule (object) as JSON
             if (payloadToSave.nutritionSchedule && typeof payloadToSave.nutritionSchedule === 'object') {
