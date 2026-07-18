@@ -432,6 +432,24 @@ const AnimalFormTestModal = ({
         setNewDeworming({ date: new Date().toISOString().substring(0, 10), medication: '', notes: '' });
     };
 
+    const addParasiteControl = () => {
+        if (!newParasiteControl.date || !newParasiteControl.treatment) {
+            showModalMessage('Missing Data', 'Please enter at least a date and treatment.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            date: newParasiteControl.date,
+            treatment: newParasiteControl.treatment,
+            notes: newParasiteControl.notes || ''
+        };
+        setFormData(prev => ({
+            ...prev,
+            parasiteControl: [...(parseJsonArrayField(prev.parasiteControl) || []), record]
+        }));
+        setNewParasiteControl({ date: new Date().toISOString().substring(0, 10), treatment: '', notes: '' });
+    };
+
     const addMedicalProcedure = () => {
         if (!newProcedure.date || !newProcedure.name) {
             showModalMessage('Missing Data', 'Please enter at least a date and procedure name.');
@@ -1490,17 +1508,17 @@ const AnimalFormTestModal = ({
                                     <div className="mt-4 pt-4 border-t border-gray-200">
                                         <h4 className="text-sm font-semibold text-gray-600 mb-2">Additional Identifiers</h4>
                                     {(formData.identifiers || []).filter(Boolean).map((identifier, index) => (
-                                            <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-white border rounded-md">
-                                                <div className="flex-1 grid grid-cols-2 gap-2">
-                                                    <input type="text" value={identifier.title} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
-                                                    <input type="text" value={identifier.value} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
-                                                </div>
-                                                <button type="button" onClick={() => removeIdentifier(index)} className="p-1 text-red-500 hover:text-red-700">
-                                                    <Trash2 size={16} />
-                                                </button>
+                                        <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-white border rounded-md">
+                                            <div className="flex-1 grid grid-cols-2 gap-2">
+                                                <input type="text" value={identifier.title} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
+                                                <input type="text" value={identifier.value} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
                                             </div>
-                                        ))}
-                                        <div className="flex items-center gap-2 p-2 bg-white border border-dashed rounded-md">
+                                            <button type="button" onClick={() => removeIdentifier(index)} className="p-1 text-red-500 hover:text-red-700">
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <div className="flex items-center gap-2 p-2 bg-white border border-dashed rounded-md">
                                             <div className="flex-1 grid grid-cols-2 gap-2">
                                                 <input
                                                     type="text"
@@ -1698,6 +1716,19 @@ const AnimalFormTestModal = ({
                                         </div>
                                     {(formData.dewormingRecords || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
+                                    {/* Parasite Control */}
+                                    <div className="space-y-2 pt-2 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Parasite Control</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <DatePicker value={newParasiteControl.date} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, date: e.target.value })} className="py-1.5 px-2 text-sm" />
+                                                <input type="text" value={newParasiteControl.treatment} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, treatment: e.target.value })} placeholder="e.g., Flea/tick treatment" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newParasiteControl.notes} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addParasiteControl} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Parasite Control</button>
+                                        </div>
+                                    {(formData.parasiteControl || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.treatment} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('parasiteControl', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    </div>
                                 </FormSection>
 
                                 <FormSection title="Procedures & Diagnostics" icon={<Microscope size={16} />}>
@@ -1740,7 +1771,7 @@ const AnimalFormTestModal = ({
                                             </div>
                                             <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Condition</button>
                                         </div>
-                                    {(formData.medicalConditions || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                        {(formData.medicalConditions || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Allergies */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -1789,6 +1820,12 @@ const AnimalFormTestModal = ({
                                         <div className="md:col-span-2">
                                             <label className="block text-xs font-medium text-gray-700">Necropsy Results</label>
                                             <textarea name="necropsyResults" value={formData.necropsyResults} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">End of Life Care Notes</label>
+                                            <textarea name="endOfLifeCareNotes" value={formData.endOfLifeCareNotes || ''} onChange={handleChange} rows="2"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                placeholder="Wishes for cremation, burial, memorial" />
                                         </div>
                                     </div>
                                 </FormSection>
@@ -1898,37 +1935,6 @@ const AnimalFormTestModal = ({
                                         </div>
                                     </div>
                                     <button type="button" onClick={addBreedingRecord} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-sm font-medium mt-2">Add Breeding Record</button>
-                                </FormSection>
-
-                                <FormSection title="Breeding History" icon={<ClipboardList size={16} />}>
-                                    {(formData.breedingRecords || []).length === 0 ? (
-                                        <p className="text-sm text-gray-500">No breeding records yet.</p>
-                                    ) : (
-                                        <div className="space-y-2">
-                                        {(formData.breedingRecords || []).filter(Boolean).map((rec, i) => (
-                                                <div key={i} className="p-3 bg-white rounded-lg border border-gray-200 text-sm">
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <p className="font-semibold">Mate: {rec.mate || rec.mateAnimalId}</p>
-                                                            <p className="text-xs text-gray-500">Mating Date: {rec.matingDate || 'N/A'}</p>
-                                                        </div>
-                                                        <button type="button" onClick={() => removeArrayItem('breedingRecords', i)}><Trash2 size={14} className="text-red-500" /></button>
-                                                    </div>
-                                                    <div className="mt-2 pt-2 border-t text-xs grid grid-cols-2 gap-1">
-                                                        <p><strong>Outcome:</strong> {rec.outcome}</p>
-                                                        <p><strong>Birth/Lay Date:</strong> {rec.birthEventDate || 'N/A'}</p>
-                                                        <p><strong>Litter Size:</strong> {rec.litterSizeBorn || 'N/A'}</p>
-                                                        <p><strong>Method:</strong> {rec.breedingMethod}</p>
-                                                        {rec.notes && <p className="col-span-2"><strong>Notes:</strong> {rec.notes}</p>}
-                                                    </div>
-                                                    <div className="mt-2 flex gap-2">
-                                                        <button type="button" className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">Create Litter</button>
-                                                        <button type="button" className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">Link Litter</button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
                                 </FormSection>
                             </div>
                         )}
