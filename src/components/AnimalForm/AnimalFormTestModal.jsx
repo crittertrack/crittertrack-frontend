@@ -1,15 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-    ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock,
+    ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock, Shield, Pill, Microscope, Stethoscope, Scissors, MessageSquare, AlertTriangle, Activity, Cat,
     Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit, Users, HeartPulse,
-    Hash, Sparkles, Ruler, Sprout, Key, FolderOpen, Globe, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets,
+    Hash, Sparkles, Ruler, Sprout, Key, FolderOpen, Globe, Leaf, UtensilsCrossed, Droplets,
     Thermometer, Feather, Medal, Target, Ban, Package, ScrollText, Link, Unlink, Baby, Bell, Plus, RotateCcw, Camera, Upload, Search, Star, ArrowRight,
     Loader2, ChevronDown, ChevronUp, ChevronRight, Info,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
+
+const LoadingSpinner = ({ message = 'Loading...' }) => (
+    <div className="flex items-center justify-center p-8">
+        <Loader2 className="animate-spin text-primary-dark mr-2" size={24} />
+        <span className="text-gray-600">{message}</span>
+    </div>
+);
+
+const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-cover", iconSize = 24 }) => {
+    const [imageError, setImageError] = useState(false);
+    const [imageSrc, setImageSrc] = useState(src);
+
+    useEffect(() => {
+        setImageSrc(src);
+        setImageError(false);
+    }, [src]);
+
+    const handleError = () => {
+        setImageError(true);
+    };
+
+    if (!imageSrc || imageError) {
+        return <Cat size={iconSize} className="text-gray-400" />;
+    }
+
+    return (
+        <img
+            src={imageSrc}
+            alt={alt}
+            className={className}
+            onError={handleError}
+            loading="lazy"
+        />
+    );
+};
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -140,6 +175,159 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
     );
 };
 
+const ParentSearchModal = ({
+    title,
+    currentId,
+    onSelect,
+    onClose,
+    authToken,
+    showModalMessage,
+    API_BASE_URL,
+    requiredGender,
+    species
+}) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [hasSearched, setHasSearched] = useState(false);
+    const [localAnimals, setLocalAnimals] = useState([]);
+    const [globalAnimals, setGlobalAnimals] = useState([]);
+    const [loadingLocal, setLoadingLocal] = useState(false);
+    const [loadingGlobal, setLoadingGlobal] = useState(false);
+    const [scope, setScope] = useState('both'); // 'local' | 'global' | 'both'
+
+    const SearchResultItem = ({ animal, isGlobal }) => {
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
+
+        return (
+            <div
+                className="flex items-center space-x-3 p-3 border-b hover:bg-gray-50 cursor-pointer"
+                onClick={() => onSelect(animal)}
+            >
+                <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} />
+                </div>
+                <div className="flex-grow">
+                    <p className="font-semibold text-gray-800">
+                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                    </p>
+                    <p className="text-xs text-gray-500">{animal.id_public}</p>
+                    <p className="text-sm text-gray-600">
+                        {animal.species} &bull; {animal.gender} &bull; {animal.status || 'Unknown'}
+                    </p>
+                </div>
+                {isGlobal && <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>}
+            </div>
+        );
+    };
+
+    const handleSearch = async () => {
+        setHasSearched(true);
+        const trimmedSearchTerm = searchTerm.trim();
+        if (!trimmedSearchTerm) return;
+
+        const idMatch = trimmedSearchTerm.match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
+        const isIdSearch = !!idMatch;
+        const idValue = isIdSearch ? `CTC${idMatch[1]}` : null;
+
+        const genderQuery = requiredGender ? (Array.isArray(requiredGender) ? `&gender=${requiredGender.map(g => encodeURIComponent(g)).join('&gender=')}` : `&gender=${requiredGender}`) : '';
+        const speciesQuery = species ? `&species=${encodeURIComponent(species)}` : '';
+
+        setLoadingLocal(scope === 'local' || scope === 'both');
+        setLoadingGlobal(scope === 'global' || scope === 'both');
+
+        if (scope === 'local' || scope === 'both') {
+            try {
+                const localUrl = isIdSearch
+                    ? `${API_BASE_URL}/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${speciesQuery}`;
+                const localResponse = await axios.get(localUrl, { headers: { Authorization: `Bearer ${authToken}` } });
+                setLocalAnimals(localResponse.data.filter(a => a.id_public !== currentId));
+            } catch (error) {
+                showModalMessage('Search Error', 'Failed to search your animals.');
+                setLocalAnimals([]);
+            } finally {
+                setLoadingLocal(false);
+            }
+        }
+
+        if (scope === 'global' || scope === 'both') {
+            try {
+                const globalUrl = isIdSearch
+                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${speciesQuery}`;
+                const globalResponse = await axios.get(globalUrl);
+                setGlobalAnimals(globalResponse.data.filter(a => a.id_public !== currentId));
+            } catch (error) {
+                setGlobalAnimals([]);
+            } finally {
+                setLoadingGlobal(false);
+            }
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[100]">
+            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
+                <div className="flex justify-between items-center border-b pb-3 mb-4">
+                    <h3 className="text-xl font-bold text-gray-800">{title} Selector</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                </div>
+                <div className="mb-3">
+                    <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-sm font-medium text-gray-600">Search Scope:</span>
+                        {['local', 'global', 'both'].map(s => (
+                            <button key={s} type="button" onClick={() => setScope(s)}
+                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                {s.charAt(0).toUpperCase() + s.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex space-x-2">
+                        <input
+                            type="text"
+                            placeholder="Search by Name or ID..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="flex-grow p-2 border border-gray-300 rounded-lg"
+                        />
+                        <button
+                            onClick={handleSearch}
+                            disabled={loadingLocal || loadingGlobal || !searchTerm.trim()}
+                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition flex items-center disabled:opacity-50"
+                        >
+                            {loadingLocal || loadingGlobal ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
+                        </button>
+                    </div>
+                </div>
+                <div className="flex-grow overflow-y-auto space-y-4">
+                    {loadingLocal ? <LoadingSpinner message="Searching your animals..." /> : localAnimals.length > 0 && (
+                        <div className="border p-3 rounded-lg bg-white shadow-sm">
+                            <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>
+                            {localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={false} />)}
+                        </div>
+                    )}
+                    {loadingGlobal ? <LoadingSpinner message="Searching global animals..." /> : globalAnimals.length > 0 && (
+                        <div className="border p-3 rounded-lg bg-white shadow-sm">
+                            <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Global Animals ({globalAnimals.length})</h4>
+                            {globalAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={true} />)}
+                        </div>
+                    )}
+                    {hasSearched && !loadingLocal && !loadingGlobal && localAnimals.length === 0 && globalAnimals.length === 0 && (
+                        <p className="text-center text-gray-500 py-4">No animals found.</p>
+                    )}
+                </div>
+                <div className="mt-4 pt-4 border-t">
+                    <button
+                        onClick={() => onSelect(null)}
+                        className="w-full text-sm text-gray-500 hover:text-red-500 transition"
+                    >
+                        Clear Selection
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const AnimalFormTestModal = ({
     formTitle = "Create New Animal",
     animalToEdit,
@@ -161,6 +349,39 @@ const AnimalFormTestModal = ({
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [assignModalTarget, setAssignModalTarget] = useState(null); // 'breeder' or 'keeper'
     const [breederInfo, setBreederInfo] = useState(null);
+    const [parentSearchModalOpen, setParentSearchModalOpen] = useState(false);
+    const [parentSearchModalConfig, setParentSearchModalConfig] = useState({});
+    const [newBreedingRecord, setNewBreedingRecord] = useState({
+        breedingMethod: 'Unknown',
+        matingDate: '',
+        mate: '',
+        mateAnimalId: null,
+        outcome: 'Unknown',
+        birthEventDate: '',
+        litterSizeBorn: '',
+        notes: ''
+    });
+    const [mateInfo, setMateInfo] = useState(null);
+    const [newVaccination, setNewVaccination] = useState({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
+    const [newDeworming, setNewDeworming] = useState({ date: new Date().toISOString().substring(0, 10), medication: '', notes: '' });
+    const [newParasiteControl, setNewParasiteControl] = useState({ date: new Date().toISOString().substring(0, 10), treatment: '', notes: '' });
+    const [newProcedure, setNewProcedure] = useState({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
+    const [newLabResult, setNewLabResult] = useState({ date: new Date().toISOString().substring(0, 10), testName: '', result: '', notes: '' });
+    const [newMedicalCondition, setNewMedicalCondition] = useState({ name: '', notes: '' });
+    const [newAllergy, setNewAllergy] = useState({ name: '', notes: '' });
+    const [newMedication, setNewMedication] = useState({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
+    const [newVetVisit, setNewVetVisit] = useState({ date: new Date().toISOString().substring(0, 10), reason: '', notes: '' });
+    const [newCareTaskName, setNewCareTaskName] = useState('');
+    const [newCareTaskFreq, setNewCareTaskFreq] = useState('');
+    const [newAnimalCareTaskName, setNewAnimalCareTaskName] = useState('');
+    const [newAnimalCareTaskFreq, setNewAnimalCareTaskFreq] = useState('');
+    const [newMilestoneLabel, setNewMilestoneLabel] = useState('');
+    const [newMilestoneDate, setNewMilestoneDate] = useState(() => new Date().toISOString().split('T')[0]);
+    const [newMilestoneInterval, setNewMilestoneInterval] = useState('');
+    const [newMilestoneUnit, setNewMilestoneUnit] = useState('week');
+    const [newMeasurement, setNewMeasurement] = useState({ date: new Date().toISOString().substring(0, 10), weight: '', length: '', bcs: '', notes: '' });
+
+
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [sectionsCollapsed, setSectionsCollapsed] = useState({
         identity: false,
@@ -282,6 +503,7 @@ const AnimalFormTestModal = ({
             damFertilityStatus: animalToEdit.damFertilityStatus || 'Unknown',
             lastPregnancyDate: animalToEdit.lastPregnancyDate ? new Date(animalToEdit.lastPregnancyDate).toISOString().substring(0, 10) : '',
             offspringCount: animalToEdit.offspringCount || '',
+            breedingRecords: parseJsonArrayField(animalToEdit.breedingRecords),
             damFertilityNotes: animalToEdit.damFertilityNotes || '',
             medicalConditions: parseJsonArrayField(animalToEdit.medicalConditions),
             allergies: parseJsonArrayField(animalToEdit.allergies),
@@ -451,6 +673,7 @@ const AnimalFormTestModal = ({
             damFertilityStatus: '',
             lastPregnancyDate: '',
             offspringCount: '',
+            breedingRecords: [],
             damFertilityNotes: '',
             medicalConditions: '',
             allergies: '',
@@ -745,6 +968,16 @@ const AnimalFormTestModal = ({
             payloadToSave.imageUrl = primaryImageUrl;
             payloadToSave.photoUrl = primaryImageUrl;
             payloadToSave.extraImages = extraImages;
+
+            // Serialize array fields
+            const arrayFields = ['identifiers', 'vaccinations', 'dewormingRecords', 'parasiteControl', 'medicalProcedures', 'labResults', 'medicalConditions', 'allergies', 'medications', 'vetVisits', 'growthRecords', 'milestones', 'keeperHistory', 'legalDocuments', 'careTasks', 'animalCareTasks'];
+            arrayFields.forEach(field => {
+                if (Array.isArray(payloadToSave[field]) && payloadToSave[field].length > 0) {
+                    payloadToSave[field] = JSON.stringify(payloadToSave[field]);
+                } else if (Array.isArray(payloadToSave[field]) && payloadToSave[field].length === 0) {
+                    payloadToSave[field] = null; // Send null for empty arrays
+                }
+            });
 
             if (Array.isArray(payloadToSave.identifiers)) {
                 payloadToSave.identifiers = JSON.stringify(payloadToSave.identifiers);
@@ -1244,12 +1477,313 @@ const AnimalFormTestModal = ({
                         )}
 
                         {/* Placeholder for other new tabs */}
-                        {activeTab === 'health' && <div className="text-center p-8 bg-gray-50 rounded-lg">Health Fields Go Here</div>}
-                        {activeTab === 'care' && <div className="text-center p-8 bg-gray-50 rounded-lg">Routine Care Fields Go Here</div>}
-                        {activeTab === 'behavior' && <div className="text-center p-8 bg-gray-50 rounded-lg">Behavior Fields Go Here</div>}
+                        {activeTab === 'health' && (
+                            <div className="space-y-4">
+                                <FormSection title="Preventive Care" icon={<Shield size={16} />} initiallyOpen>
+                                    {/* Vaccinations */}
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700">Vaccinations</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <DatePicker value={newVaccination.date} onChange={(e) => setNewVaccination({ ...newVaccination, date: e.target.value })} className="py-1.5 px-2 text-sm" />
+                                                <input type="text" value={newVaccination.name} onChange={(e) => setNewVaccination({ ...newVaccination, name: e.target.value })} placeholder="Vaccination Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newVaccination.notes} onChange={(e) => setNewVaccination({ ...newVaccination, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addVaccination} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vaccination</button>
+                                        </div>
+                                        {(formData.vaccinations || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    </div>
+                                    {/* Deworming */}
+                                    <div className="space-y-2 pt-2 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Deworming</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <DatePicker value={newDeworming.date} onChange={(e) => setNewDeworming({ ...newDeworming, date: e.target.value })} className="py-1.5 px-2 text-sm" />
+                                                <input type="text" value={newDeworming.medication} onChange={(e) => setNewDeworming({ ...newDeworming, medication: e.target.value })} placeholder="Medication" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newDeworming.notes} onChange={(e) => setNewDeworming({ ...newDeworming, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addDeworming} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Deworming</button>
+                                        </div>
+                                        {(formData.dewormingRecords || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    </div>
+                                </FormSection>
+
+                                <FormSection title="Procedures & Diagnostics" icon={<Microscope size={16} />}>
+                                    {/* Medical Procedures */}
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700">Medical Procedures</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <DatePicker value={newProcedure.date} onChange={(e) => setNewProcedure({ ...newProcedure, date: e.target.value })} className="py-1.5 px-2 text-sm" />
+                                                <input type="text" value={newProcedure.name} onChange={(e) => setNewProcedure({ ...newProcedure, name: e.target.value })} placeholder="Procedure Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newProcedure.notes} onChange={(e) => setNewProcedure({ ...newProcedure, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addMedicalProcedure} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Procedure</button>
+                                        </div>
+                                        {(formData.medicalProcedures || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    </div>
+                                    {/* Lab Results */}
+                                    <div className="space-y-2 pt-2 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Lab Results</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <DatePicker value={newLabResult.date} onChange={(e) => setNewLabResult({ ...newLabResult, date: e.target.value })} className="py-1.5 px-2 text-sm" />
+                                                <input type="text" value={newLabResult.testName} onChange={(e) => setNewLabResult({ ...newLabResult, testName: e.target.value })} placeholder="Test Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newLabResult.result} onChange={(e) => setNewLabResult({ ...newLabResult, result: e.target.value })} placeholder="Result" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addLabResult} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Lab Result</button>
+                                        </div>
+                                        {(formData.labResults || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    </div>
+                                </FormSection>
+
+                                <FormSection title="Active Medical Records" icon={<Pill size={16} />}>
+                                    {/* Medical Conditions */}
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700">Medical Conditions</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                <input type="text" value={newMedicalCondition.name} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, name: e.target.value })} placeholder="Condition Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newMedicalCondition.notes} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Condition</button>
+                                        </div>
+                                        {(formData.medicalConditions || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    </div>
+                                    {/* Allergies */}
+                                    <div className="space-y-2 pt-2 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Allergies</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                <input type="text" value={newAllergy.name} onChange={(e) => setNewAllergy({ ...newAllergy, name: e.target.value })} placeholder="Allergy Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newAllergy.notes} onChange={(e) => setNewAllergy({ ...newAllergy, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addAllergy} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Allergy</button>
+                                        </div>
+                                        {(formData.allergies || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('allergies', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    </div>
+                                </FormSection>
+
+                                <FormSection title="Veterinary Care" icon={<Stethoscope size={16} />}>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700">Primary Veterinarian</label>
+                                        <input type="text" name="primaryVet" value={formData.primaryVet} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    </div>
+                                    {/* Vet Visits */}
+                                    <div className="space-y-2 pt-2 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Veterinary Visits</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <DatePicker value={newVetVisit.date} onChange={(e) => setNewVetVisit({ ...newVetVisit, date: e.target.value })} className="py-1.5 px-2 text-sm" />
+                                                <input type="text" value={newVetVisit.reason} onChange={(e) => setNewVetVisit({ ...newVetVisit, reason: e.target.value })} placeholder="Reason for visit" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newVetVisit.notes} onChange={(e) => setNewVetVisit({ ...newVetVisit, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <button type="button" onClick={addVetVisit} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vet Visit</button>
+                                        </div>
+                                        {(formData.vetVisits || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    </div>
+                                </FormSection>
+
+                                <FormSection title="End of Life" icon={<Scale size={16} />}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Date of Death</label>
+                                            <DatePicker name="deceasedDate" value={formData.deceasedDate} onChange={handleChange} maxDate={new Date()} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Cause of Death</label>
+                                            <input type="text" name="causeOfDeath" value={formData.causeOfDeath} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Necropsy Results</label>
+                                            <textarea name="necropsyResults" value={formData.necropsyResults} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                    </div>
+                                </FormSection>
+                            </div>
+                        )}
+                        {activeTab === 'care' && (
+                            <div className="space-y-4">
+                                <FormSection title="Nutrition" icon={<UtensilsCrossed size={16} />} initiallyOpen>
+                                    <div><label className="block text-xs font-medium text-gray-700">Diet Type</label><input type="text" name="dietType" value={formData.dietType} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Feeding Schedule</label><textarea name="feedingSchedule" value={formData.feedingSchedule} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Supplements</label><textarea name="supplements" value={formData.supplements} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                </FormSection>
+                                <FormSection title="Housing & Environment" icon={<Home size={16} />}>
+                                    <div><label className="block text-xs font-medium text-gray-700">Housing Type</label><input type="text" name="housingType" value={formData.housingType} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Bedding/Substrate</label><input type="text" name="bedding" value={formData.bedding} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Temperature Range</label><input type="text" name="temperatureRange" value={formData.temperatureRange} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Humidity</label><input type="text" name="humidity" value={formData.humidity} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                </FormSection>
+                                <FormSection title="Grooming" icon={<Scissors size={16} />}>
+                                    <div><label className="block text-xs font-medium text-gray-700">Grooming Needs</label><input type="text" name="groomingNeeds" value={formData.groomingNeeds} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Shedding Level</label><input type="text" name="sheddingLevel" value={formData.sheddingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                </FormSection>
+                            </div>
+                        )}
+                        {activeTab === 'behavior' && (
+                            <div className="space-y-4">
+                                <FormSection title="Behavior & Temperament" icon={<MessageSquare size={16} />} initiallyOpen>
+                                    <div><label className="block text-xs font-medium text-gray-700">Temperament</label><input type="text" name="temperament" value={formData.temperament} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Friendly, skittish, aggressive, calm" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Handling Tolerance</label><input type="text" name="handlingTolerance" value={formData.handlingTolerance} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Enjoys handling, tolerates briefly" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Social Structure</label><textarea name="socialStructure" value={formData.socialStructure} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Lives with 2 cage mates, solitary" /></div>
+                                </FormSection>
+                                <FormSection title="Activity & Training" icon={<Activity size={16} />}>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Activity Cycle</label>
+                                            <select name="activityCycle" value={formData.activityCycle} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <option value="">Select...</option>
+                                                <option value="Diurnal">Diurnal (day active)</option>
+                                                <option value="Nocturnal">Nocturnal (night active)</option>
+                                                <option value="Crepuscular">Crepuscular (dawn/dusk)</option>
+                                            </select>
+                                        </div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Exercise Requirements</label><input type="text" name="exerciseRequirements" value={formData.exerciseRequirements} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Daily Exercise (min)</label><input type="number" name="dailyExerciseMinutes" value={formData.dailyExerciseMinutes} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    </div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Training Level</label><input type="text" name="trainingLevel" value={formData.trainingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Training Disciplines</label><input type="text" name="trainingDisciplines" value={formData.trainingDisciplines} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div className="flex flex-wrap gap-4 pt-2">
+                                        <label className="flex items-center gap-2"><input type="checkbox" name="crateTrained" checked={!!formData.crateTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Crate Trained</label>
+                                        <label className="flex items-center gap-2"><input type="checkbox" name="litterTrained" checked={!!formData.litterTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Litter Trained</label>
+                                        <label className="flex items-center gap-2"><input type="checkbox" name="leashTrained" checked={!!formData.leashTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Leash Trained</label>
+                                        <label className="flex items-center gap-2"><input type="checkbox" name="freeFlightTrained" checked={!!formData.freeFlightTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Free-Flight Trained</label>
+                                    </div>
+                                </FormSection>
+                                <FormSection title="Known Issues" icon={<AlertTriangle size={16} />}>
+                                    <div><label className="block text-xs font-medium text-gray-700">Behavioral Issues</label><textarea name="behavioralIssues" value={formData.behavioralIssues} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Resource guarding, separation anxiety" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Bite History</label><textarea name="biteHistory" value={formData.biteHistory} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any bite incidents, context, and outcome" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Reactivity Notes</label><textarea name="reactivityNotes" value={formData.reactivityNotes} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Triggers, thresholds, management strategies" /></div>
+                                </FormSection>
+                            </div>
+                        )}
+                        {activeTab === 'breeding' && (
+                            <div className="space-y-4">
+                                <FormSection title="Add Breeding Record" icon={<Egg size={16} />} initiallyOpen>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Breeding Method</label>
+                                            <select name="breedingMethod" value={newBreedingRecord.breedingMethod} onChange={(e) => setNewBreedingRecord(p => ({ ...p, breedingMethod: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <option>Natural</option><option>AI</option><option>Assisted</option><option>Unknown</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Mating Date</label>
+                                            <DatePicker value={newBreedingRecord.matingDate} onChange={(e) => setNewBreedingRecord(p => ({ ...p, matingDate: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Mate</label>
+                                            {mateInfo ? (
+                                                <div className="flex items-center gap-2 mt-1 p-2 border rounded-md bg-white">
+                                                    <span className="flex-1">{[mateInfo.prefix, mateInfo.name, mateInfo.suffix].filter(Boolean).join(' ')} ({mateInfo.id_public})</span>
+                                                    <button type="button" onClick={clearMateSelection} className="text-red-500"><X size={16} /></button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <input type="text" value={newBreedingRecord.mate} onChange={(e) => setNewBreedingRecord(p => ({ ...p, mate: e.target.value, mateAnimalId: null }))} placeholder="Enter mate name manually" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                    <button type="button" onClick={() => { setParentSearchModalConfig({ title: 'Select Mate', onSelect: handleSelectMate, requiredGender: formData.gender === 'Male' ? ['Female', 'Intersex', 'Unknown'] : ['Male', 'Intersex', 'Unknown'] }); setParentSearchModalOpen(true); }} className="px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Select from DB</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Outcome</label>
+                                            <select name="outcome" value={newBreedingRecord.outcome} onChange={(e) => setNewBreedingRecord(p => ({ ...p, outcome: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <option>Successful</option><option>Unsuccessful</option><option>Pending</option><option>Unknown</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Birth/Lay Date</label>
+                                            <DatePicker value={newBreedingRecord.birthEventDate} onChange={(e) => setNewBreedingRecord(p => ({ ...p, birthEventDate: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Litter Size</label>
+                                            <input type="number" value={newBreedingRecord.litterSizeBorn} onChange={(e) => setNewBreedingRecord(p => ({ ...p, litterSizeBorn: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Notes</label>
+                                            <textarea value={newBreedingRecord.notes} onChange={(e) => setNewBreedingRecord(p => ({ ...p, notes: e.target.value }))} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                    </div>
+                                    <button type="button" onClick={addBreedingRecord} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-sm font-medium mt-2">Add Breeding Record</button>
+                                </FormSection>
+
+                                <FormSection title="Breeding History" icon={<ClipboardList size={16} />}>
+                                    {(formData.breedingRecords || []).length === 0 ? (
+                                        <p className="text-sm text-gray-500">No breeding records yet.</p>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {(formData.breedingRecords || []).map((rec, i) => (
+                                                <div key={i} className="p-3 bg-white rounded-lg border border-gray-200 text-sm">
+                                                    <div className="flex justify-between items-start">
+                                                        <div>
+                                                            <p className="font-semibold">Mate: {rec.mate || rec.mateAnimalId}</p>
+                                                            <p className="text-xs text-gray-500">Mating Date: {rec.matingDate || 'N/A'}</p>
+                                                        </div>
+                                                        <button type="button" onClick={() => removeArrayItem('breedingRecords', i)}><Trash2 size={14} className="text-red-500" /></button>
+                                                    </div>
+                                                    <div className="mt-2 pt-2 border-t text-xs grid grid-cols-2 gap-1">
+                                                        <p><strong>Outcome:</strong> {rec.outcome}</p>
+                                                        <p><strong>Birth/Lay Date:</strong> {rec.birthEventDate || 'N/A'}</p>
+                                                        <p><strong>Litter Size:</strong> {rec.litterSizeBorn || 'N/A'}</p>
+                                                        <p><strong>Method:</strong> {rec.breedingMethod}</p>
+                                                        {rec.notes && <p className="col-span-2"><strong>Notes:</strong> {rec.notes}</p>}
+                                                    </div>
+                                                    <div className="mt-2 flex gap-2">
+                                                        <button type="button" className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">Create Litter</button>
+                                                        <button type="button" className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">Link Litter</button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </FormSection>
+                            </div>
+                        )}
+                        {activeTab === 'pedigree' && <div className="text-center p-8 bg-gray-50 rounded-lg">Pedigree Fields Go Here</div>}
+                        {activeTab === 'timeline' && <div className="text-center p-8 bg-gray-50 rounded-lg">Timeline/Events Go Here</div>}
+                        {activeTab === 'records' && (
+                            <div className="space-y-4">
+                                <FormSection title="Milestones" icon={<Bell size={16} />} initiallyOpen>
+                                    <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            <input type="text" value={newMilestoneLabel} onChange={e => setNewMilestoneLabel(e.target.value)} placeholder="Milestone Label" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <DatePicker value={newMilestoneDate} onChange={(e) => setNewMilestoneDate(e.target.value)} className="py-1.5 px-2 text-sm" />
+                                        </div>
+                                        <button type="button" onClick={addMilestone} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Milestone</button>
+                                    </div>
+                                    {(formData.milestones || []).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.startDate}: {rec.label}</span><button type="button" onClick={() => removeArrayItem('milestones', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                </FormSection>
+                                <FormSection title="Show & Performance" icon={<Trophy size={16} />}>
+                                    <div><label className="block text-xs font-medium text-gray-700">Show Titles</label><textarea name="showTitles" value={formData.showTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Working Titles</label><textarea name="workingTitles" value={formData.workingTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                </FormSection>
+                                <FormSection title="Legal & Documentation" icon={<FileCheck size={16} />}>
+                                    <div><label className="block text-xs font-medium text-gray-700">License Number</label><input type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">License Jurisdiction</label><input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Insurance</label><input type="text" name="insurance" value={formData.insurance} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Legal Status</label><input type="text" name="legalStatus" value={formData.legalStatus} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Breeding Restrictions</label><textarea name="breedingRestrictions" value={formData.breedingRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700">Export Restrictions</label><textarea name="exportRestrictions" value={formData.exportRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                </FormSection>
+                            </div>
+                        )}
                     </div>
                 </div>
 
+                {parentSearchModalOpen && (
+                    <ParentSearchModal
+                        title={parentSearchModalConfig.title}
+                        currentId={animalToEdit?.id_public}
+                        onSelect={parentSearchModalConfig.onSelect}
+                        onClose={() => setParentSearchModalOpen(false)}
+                        authToken={authToken}
+                        API_BASE_URL={API_BASE_URL}
+                        showModalMessage={showModalMessage}
+                        requiredGender={parentSearchModalConfig.requiredGender}
+                        species={formData.species}
+                    />
+                )}
                 {/* Footer */}
                 <div className="p-6 border-t border-gray-300 flex-shrink-0">
                     <div className="flex justify-between items-center">
