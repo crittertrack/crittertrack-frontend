@@ -40,6 +40,7 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
     const hasHousing = animal.housingType || animal.bedding || animal.enrichment;
     const hasEnvironment = animal.temperatureRange || animal.humidity || animal.lighting || animal.noise || animal.lastBulbChange;
     const hasGrooming = animal.groomingNeeds || animal.sheddingLevel;
+    const hasCareAndGrooming = animal.specialCareRequirements || hasGrooming || hasTraining;
     const hasTraining = animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained;
 
     return (
@@ -78,24 +79,28 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
             {/* Column 2 */}
             <div className="space-y-6">
                 <InfoCard title="Animal Care & Grooming" icon={<Droplets size={18} className="text-gray-400" />}>
-                    {animal.specialCareRequirements && <InfoItem label="Special Care Requirements">
-                        <p className="whitespace-pre-wrap">{animal.specialCareRequirements}</p>
-                    </InfoItem>}
-                    
-                    {hasGrooming && <div className="pt-3 mt-3 border-t border-gray-200 space-y-2">
-                        {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} icon={<Scissors size={14} />} />}
-                        {animal.sheddingLevel && <InfoItem label={getLabel('sheddingLevel', 'Shedding Level')} value={animal.sheddingLevel} />}
-                    </div>}
+                    {hasCareAndGrooming ? (
+                        <>
+                            {animal.specialCareRequirements && <InfoItem label="Special Care Requirements">
+                                <p className="whitespace-pre-wrap">{animal.specialCareRequirements}</p>
+                            </InfoItem>}
+                            
+                            {hasGrooming && <div className="pt-3 mt-3 border-t border-gray-200 space-y-2">
+                                {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} icon={<Scissors size={14} />} />}
+                                {animal.sheddingLevel && <InfoItem label={getLabel('sheddingLevel', 'Shedding Level')} value={animal.sheddingLevel} />}
+                            </div>}
 
-                    {hasTraining && <div className="pt-3 mt-3 border-t border-gray-200">
-                        <h4 className="text-sm font-semibold text-gray-600 mb-2">Training</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {animal.crateTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('crateTrained', 'Crate Trained')}</span>}
-                            {animal.litterTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('litterTrained', 'Litter Trained')}</span>}
-                            {animal.leashTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('leashTrained', 'Leash Trained')}</span>}
-                            {animal.freeFlightTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
-                        </div>
-                    </div>}
+                            {hasTraining && <div className="pt-3 mt-3 border-t border-gray-200">
+                                <h4 className="text-sm font-semibold text-gray-600 mb-2">Training</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {animal.crateTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('crateTrained', 'Crate Trained')}</span>}
+                                    {animal.litterTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('litterTrained', 'Litter Trained')}</span>}
+                                    {animal.leashTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('leashTrained', 'Leash Trained')}</span>}
+                                    {animal.freeFlightTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
+                                </div>
+                            </div>}
+                        </>
+                    ) : <p className="text-sm text-gray-400">No care, grooming, or training information recorded.</p>}
                 </InfoCard>
 
                 <InfoCard title="Scheduled Tasks" icon={<Activity size={18} className="text-gray-400" />}>

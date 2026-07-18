@@ -4,7 +4,7 @@ import { useDetailFieldTemplate } from './utils';
 import { formatDate } from '../../utils/dateFormatter';
 import { InfoCard, InfoItem } from './DashboardComponents';
 
-export const FertilityTabContent = ({ animal, API_BASE_URL }) => {
+export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
     const isFemale = animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown';

@@ -11,15 +11,6 @@ export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
     const hasKnownIssues = animal.behavioralIssues || animal.biteHistory || animal.reactivityNotes;
     const hasAnyData = hasBehavior || hasActivity || hasKnownIssues;
 
-    if (!hasAnyData) {
-        return (
-            <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg text-gray-400">
-                <MessageSquare size={48} className="mb-2" />
-                <p className="text-sm">No behavior information recorded.</p>
-            </div>
-        );
-    }
-
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <InfoCard title="Temperament & Social" icon={<MessageSquare size={18} className="text-gray-400" />}>
