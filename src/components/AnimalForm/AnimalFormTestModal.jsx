@@ -72,12 +72,12 @@ const parseJsonArrayField = (data) => {
     if (typeof data === 'string') {
         try {
             const parsed = JSON.parse(data);
-            return Array.isArray(parsed) ? parsed : [];
+            return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
         } catch (e) {
             return [];
         }
     }
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data.filter(Boolean) : [];
 };
 
 const getContactDisplayName = (contact) => {
@@ -1267,12 +1267,14 @@ const AnimalFormTestModal = ({
     const [availableDietSupplies, setAvailableDietSupplies] = useState([]);
     const [dietSupplySearch, setDietSupplySearch] = useState('');
     const [loadingDietSupplies, setLoadingDietSupplies] = useState(false);
+    const [dietManualEntry, setDietManualEntry] = useState({ name: '' });
 
     // Supplement supply selection states
     const [supplementMode, setSupplementMode] = useState('manual'); // 'manual' | 'supply'
     const [selectedSupplementSupply, setSelectedSupplementSupply] = useState(null);
     const [availableSupplementSupplies, setAvailableSupplementSupplies] = useState([]);
     const [supplementSupplySearch, setSupplementSupplySearch] = useState('');
+    const [supplementManualEntry, setSupplementManualEntry] = useState({ name: '', dosage: '' });
     const [loadingSupplementSupplies, setLoadingSupplementSupplies] = useState(false);
 
     // Health status override states
@@ -2460,10 +2462,10 @@ const AnimalFormTestModal = ({
                 addEvent('health', formData.quarantineDetails.startDate, 'Quarantine Started', formData.quarantineDetails.reason || 'Quarantine');
             }
             (parseJsonArrayField(formData.vetVisits) || []).forEach(visit => {
-                if (visit.date) addEvent('health', visit.date, 'Vet Visit', visit.reason || 'Veterinary visit');
+                if (visit?.date) addEvent('health', visit.date, 'Vet Visit', visit.reason || 'Veterinary visit');
             });
             (parseJsonArrayField(formData.vaccinations) || []).forEach(vacc => {
-                if (vacc.date) addEvent('health', vacc.date, 'Vaccination', vacc.name || 'Vaccination');
+                if (vacc?.date) addEvent('health', vacc.date, 'Vaccination', vacc.name || 'Vaccination');
             });
         }
 
@@ -2472,7 +2474,7 @@ const AnimalFormTestModal = ({
             if (formData.matingDate) addEvent('breeding', formData.matingDate, 'Mating', 'Animal mating date');
             if (formData.expectedDueDate) addEvent('breeding', formData.expectedDueDate, 'Expected Delivery', 'Expected delivery/birth date');
             (parseJsonArrayField(formData.breedingRecords) || []).forEach(record => {
-                if (record.birthEventDate) addEvent('breeding', record.birthEventDate, 'Birth/Hatching Event', `Litter size: ${record.litterSizeBorn || 'Unknown'}`);
+                if (record?.birthEventDate) addEvent('breeding', record.birthEventDate, 'Birth/Hatching Event', `Litter size: ${record.litterSizeBorn || 'Unknown'}`);
             });
         }
 
@@ -2493,7 +2495,7 @@ const AnimalFormTestModal = ({
         // Milestones
         if (eventVisibility.milestones) {
             (parseJsonArrayField(formData.milestones) || []).forEach(milestone => {
-                if (milestone.startDate) addEvent('milestones', milestone.startDate, milestone.label || 'Milestone', milestone.description || '');
+                if (milestone?.startDate) addEvent('milestones', milestone.startDate, milestone.label || 'Milestone', milestone.description || '');
             });
         }
 
@@ -4146,21 +4148,53 @@ const AnimalFormTestModal = ({
                                                     <button type="button" onClick={() => setDietMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${dietMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
                                                 </div>
                                                 {dietMode === 'manual' ? (
-                                                    <textarea
-                                                        value={Array.isArray(formData.dietSupplies) && formData.dietSupplies.length > 0 ? JSON.stringify(formData.dietSupplies, null, 0) : ''}
-                                                        onChange={(e) => {
-                                                            const raw = e.target.value;
-                                                            try {
-                                                                const parsed = raw.trim() ? JSON.parse(raw) : [];
-                                                                setFormData(prev => ({ ...prev, dietSupplies: Array.isArray(parsed) ? parsed : [] }));
-                                                            } catch {
-                                                                // ignore invalid JSON while typing
-                                                            }
-                                                        }}
-                                                        rows={2}
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md font-mono"
-                                                        placeholder='[{"name":"Brand X Pellets"}]'
-                                                    />
+                                                    <div className="space-y-2">
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                placeholder="e.g., Brand X Pellets"
+                                                                value={dietManualEntry.name}
+                                                                onChange={(e) => setDietManualEntry({ name: e.target.value })}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        if (!dietManualEntry.name.trim()) return;
+                                                                        const existing = parseJsonArrayField(formData.dietSupplies) || [];
+                                                                        setFormData(prev => ({ ...prev, dietSupplies: [...existing, { name: dietManualEntry.name.trim() }] }));
+                                                                        setDietManualEntry({ name: '' });
+                                                                    }
+                                                                }}
+                                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    if (!dietManualEntry.name.trim()) return;
+                                                                    const existing = parseJsonArrayField(formData.dietSupplies) || [];
+                                                                    setFormData(prev => ({ ...prev, dietSupplies: [...existing, { name: dietManualEntry.name.trim() }] }));
+                                                                    setDietManualEntry({ name: '' });
+                                                                }}
+                                                                className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-black hover:bg-primary-dark flex items-center gap-1 flex-shrink-0"
+                                                            >
+                                                                <PlusCircle size={14} /> Add
+                                                            </button>
+                                                        </div>
+                                                        {parseJsonArrayField(formData.dietSupplies).length > 0 ? (
+                                                            <div className="space-y-1">
+                                                                {parseJsonArrayField(formData.dietSupplies).map((s, i) => (
+                                                                    <div key={i} className="flex justify-between items-center p-1.5 bg-blue-50 rounded text-xs">
+                                                                        <span>{s.name}</span>
+                                                                        <button type="button" onClick={() => {
+                                                                            const updated = parseJsonArrayField(formData.dietSupplies).filter((_, idx) => idx !== i);
+                                                                            setFormData(prev => ({ ...prev, dietSupplies: updated }));
+                                                                        }} className="text-red-500"><Trash2 size={12} /></button>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-xs text-gray-400 italic">No diet supplies added yet.</p>
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <div className="space-y-2">
                                                         <input
@@ -4225,22 +4259,60 @@ const AnimalFormTestModal = ({
                                                     <button type="button" onClick={() => setSupplementMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${supplementMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
                                                 </div>
                                                 {supplementMode === 'manual' ? (
-                                                    <textarea
-                                                        name="supplementSupplies"
-                                                        value={Array.isArray(formData.supplementSupplies) && formData.supplementSupplies.length > 0 ? JSON.stringify(formData.supplementSupplies, null, 0) : ''}
-                                                        onChange={(e) => {
-                                                            const raw = e.target.value;
-                                                            try {
-                                                                const parsed = raw.trim() ? JSON.parse(raw) : [];
-                                                                setFormData(prev => ({ ...prev, supplementSupplies: Array.isArray(parsed) ? parsed : [] }));
-                                                            } catch {
-                                                                // ignore invalid JSON while typing
-                                                            }
-                                                        }}
-                                                        rows={2}
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md font-mono"
-                                                        placeholder='[{"name":"Vitamin D3","dosage":"1000 IU"}]'
-                                                    />
+                                                    <div className="space-y-2">
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Name (e.g., Vitamin D3)"
+                                                                value={supplementManualEntry.name}
+                                                                onChange={(e) => setSupplementManualEntry(prev => ({ ...prev, name: e.target.value }))}
+                                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                            />
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Dosage (e.g., 1000 IU)"
+                                                                value={supplementManualEntry.dosage}
+                                                                onChange={(e) => setSupplementManualEntry(prev => ({ ...prev, dosage: e.target.value }))}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        if (!supplementManualEntry.name.trim()) return;
+                                                                        const existing = parseJsonArrayField(formData.supplementSupplies) || [];
+                                                                        setFormData(prev => ({ ...prev, supplementSupplies: [...existing, { name: supplementManualEntry.name.trim(), dosage: supplementManualEntry.dosage.trim() }] }));
+                                                                        setSupplementManualEntry({ name: '', dosage: '' });
+                                                                    }
+                                                                }}
+                                                                className="w-32 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    if (!supplementManualEntry.name.trim()) return;
+                                                                    const existing = parseJsonArrayField(formData.supplementSupplies) || [];
+                                                                    setFormData(prev => ({ ...prev, supplementSupplies: [...existing, { name: supplementManualEntry.name.trim(), dosage: supplementManualEntry.dosage.trim() }] }));
+                                                                    setSupplementManualEntry({ name: '', dosage: '' });
+                                                                }}
+                                                                className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-black hover:bg-primary-dark flex items-center gap-1 flex-shrink-0"
+                                                            >
+                                                                <PlusCircle size={14} /> Add
+                                                            </button>
+                                                        </div>
+                                                        {parseJsonArrayField(formData.supplementSupplies).length > 0 ? (
+                                                            <div className="space-y-1">
+                                                                {parseJsonArrayField(formData.supplementSupplies).map((s, i) => (
+                                                                    <div key={i} className="flex justify-between items-center p-1.5 bg-purple-50 rounded text-xs">
+                                                                        <span>{s.name} {s.dosage && `(${s.dosage})`}</span>
+                                                                        <button type="button" onClick={() => {
+                                                                            const updated = parseJsonArrayField(formData.supplementSupplies).filter((_, idx) => idx !== i);
+                                                                            setFormData(prev => ({ ...prev, supplementSupplies: updated }));
+                                                                        }} className="text-red-500"><Trash2 size={12} /></button>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-xs text-gray-400 italic">No supplements added yet.</p>
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <div className="space-y-2">
                                                         <input
