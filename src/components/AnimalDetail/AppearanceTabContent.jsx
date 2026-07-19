@@ -70,16 +70,30 @@ export const AppearanceTabContent = ({ animal }) => {
                     return (
                         <>
                             <InfoCard title="Measurement History" icon={<Ruler size={18} className="text-gray-400" />}>
-                                <div className="space-y-2 max-h-64 overflow-y-auto">
+                                <div className="space-y-3 max-h-96 overflow-y-auto">
                                     {growthRecords.length > 0 ? growthRecords.map((rec, i) => (
-                                        <div key={i} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
-                                            <div>
-                                                <p className="font-semibold">{formatDate(rec.date)}</p>
-                                                <p className="text-sm text-gray-600">
-                                                    {rec.weight && `${rec.weight}${animal.measurementUnits?.weight || 'g'}`}
-                                                    {rec.length && `, ${rec.length}${animal.measurementUnits?.length || 'cm'}`}
-                                                </p>
+                                        <div key={i} className="p-3 bg-gray-50 rounded-md border-l-4 border-blue-300">
+                                            <p className="font-semibold text-gray-900 mb-2">{formatDate(rec.date)}</p>
+                                            <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                                                {rec.weight && (
+                                                    <div><span className="font-medium">Weight:</span> {rec.weight}{animal.measurementUnits?.weight || 'g'}</div>
+                                                )}
+                                                {rec.length && (
+                                                    <div><span className="font-medium">Length:</span> {rec.length}{animal.measurementUnits?.length || 'cm'}</div>
+                                                )}
+                                                {rec.height && (
+                                                    <div><span className="font-medium">Height at Withers:</span> {rec.height}cm</div>
+                                                )}
+                                                {rec.chestGirth && (
+                                                    <div><span className="font-medium">Chest Girth:</span> {rec.chestGirth}cm</div>
+                                                )}
+                                                {rec.bcs && (
+                                                    <div><span className="font-medium">Body Condition:</span> {rec.bcs}</div>
+                                                )}
                                             </div>
+                                            {rec.notes && (
+                                                <p className="mt-2 text-xs text-gray-600 italic">Note: {rec.notes}</p>
+                                            )}
                                         </div>
                                     )) : (
                                         <p className="text-sm text-gray-400">No measurements recorded.</p>
