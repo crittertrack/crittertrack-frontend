@@ -150,16 +150,16 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                     <h3 className="text-lg font-semibold">Assign {target}</h3>
                 </div>
                 <div className="p-4 border-b flex gap-2">
-                    <button onClick={() => setMode('user')} className={`px-3 py-1 text-sm rounded-full ${mode === 'user' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Search User</button>
-                    <button onClick={() => setMode('contact')} className={`px-3 py-1 text-sm rounded-full ${mode === 'contact' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Select Contact</button>
-                    <button onClick={() => setMode('manual')} className={`px-3 py-1 text-sm rounded-full ${mode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Manual Entry</button>
+                    <button type="button" onClick={() => setMode('user')} className={`px-3 py-1 text-sm rounded-full ${mode === 'user' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Search User</button>
+                    <button type="button" onClick={() => setMode('contact')} className={`px-3 py-1 text-sm rounded-full ${mode === 'contact' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Select Contact</button>
+                    <button type="button" onClick={() => setMode('manual')} className={`px-3 py-1 text-sm rounded-full ${mode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Manual Entry</button>
                 </div>
                 <div className="p-4 overflow-y-auto flex-1">
                     {mode === 'user' && (
                         <div className="space-y-2">
                             <div className="flex gap-2">
                                 <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or CTU ID" className="w-full p-2 border rounded-md" onKeyPress={e => e.key === 'Enter' && handleUserSearch()} />
-                                <button onClick={handleUserSearch} disabled={loading} className="p-2 bg-primary rounded-md disabled:opacity-50">{loading ? <Loader2 className="animate-spin" /> : <Search />}</button>
+                                <button type="button" onClick={handleUserSearch} disabled={loading} className="p-2 bg-primary rounded-md disabled:opacity-50">{loading ? <Loader2 className="animate-spin" /> : <Search />}</button>
                             </div>
                             <div className="space-y-1">
                                 {searchResults.map(user => (
@@ -184,12 +184,12 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                     {mode === 'manual' && (
                         <div className="space-y-2">
                             <input type="text" value={manualName} onChange={e => setManualName(e.target.value)} placeholder={`Enter ${target} name`} className="w-full p-2 border rounded-md" />
-                            <button onClick={() => onSelect({ name: manualName })} className="w-full p-2 bg-primary rounded-md">Assign Name</button>
+                            <button type="button" onClick={() => onSelect({ name: manualName })} className="w-full p-2 bg-primary rounded-md">Assign Name</button>
                         </div>
                     )}
                 </div>
                 <div className="p-4 border-t">
-                    <button onClick={onClose} className="w-full p-2 bg-gray-200 rounded-md">Cancel</button>
+                    <button type="button" onClick={onClose} className="w-full p-2 bg-gray-200 rounded-md">Cancel</button>
                 </div>
             </div>
         </div>
@@ -290,7 +290,7 @@ const ParentSearchModal = ({
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <h3 className="text-xl font-bold text-gray-800">{title} Selector</h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                    <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
                 <div className="mb-3">
                     <div className="flex items-center space-x-2 mb-2">
@@ -311,6 +311,7 @@ const ParentSearchModal = ({
                             className="flex-grow p-2 border border-gray-300 rounded-lg"
                         />
                         <button
+                            type="button"
                             onClick={handleSearch}
                             disabled={loadingLocal || loadingGlobal || !searchTerm.trim()}
                             className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition flex items-center disabled:opacity-50"
@@ -338,6 +339,7 @@ const ParentSearchModal = ({
                 </div>
                 <div className="mt-4 pt-4 border-t">
                     <button
+                        type="button"
                         onClick={() => onSelect(null)}
                         className="w-full text-sm text-gray-500 hover:text-red-500 transition"
                     >
@@ -552,7 +554,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                 {/* Header */}
                 <div className="sticky top-0 bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
                     <h2 className="text-lg font-semibold text-gray-800">Edit Image ({progress})</h2>
-                    <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
+                    <button type="button" onClick={onCancel} className="text-gray-400 hover:text-gray-600">
                         <X size={24} />
                     </button>
                 </div>
@@ -578,6 +580,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                             </label>
                             <div className="flex gap-2">
                                 <button
+                                    type="button"
                                     onClick={rotateImage}
                                     disabled={processing}
                                     className="flex-1 px-3 py-2 bg-primary text-black rounded-md text-sm font-medium hover:bg-primary-dark disabled:opacity-50 flex items-center justify-center gap-2"
@@ -686,12 +689,14 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                 {/* Footer */}
                 <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex gap-2 justify-end">
                     <button
+                        type="button"
                         onClick={onCancel}
                         className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50"
                     >
                         Cancel
                     </button>
                     <button
+                        type="button"
                         onClick={processCurrentImage}
                         disabled={processing}
                         className="px-4 py-2 bg-primary text-black rounded-md text-sm font-medium hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
@@ -764,23 +769,26 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
                 <div className="p-4 border-b flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Assign Enclosure</h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
+                    <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
                 </div>
 
                 <div className="flex gap-2 p-4 border-b">
                     <button
+                        type="button"
                         onClick={() => { setMode('search'); setSearchTerm(''); }}
                         className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'search' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                     >
                         Search Existing
                     </button>
                     <button
+                        type="button"
                         onClick={() => { setMode('create'); setNewEnclosureForm({ name: '', roomType: '', location: '', capacity: '', dimensions: { length: '', width: '', height: '', unit: 'cm' }, temperatureRange: { min: '', max: '', unit: 'C' }, humidityRange: { min: '', max: '' }, description: '' }); }}
                         className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                     >
                         Create New
                     </button>
                     <button
+                        type="button"
                         onClick={() => { setMode('manual'); setManualName(''); }}
                         className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                     >
@@ -927,12 +935,14 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
 
                 <div className="p-4 border-t flex gap-2">
                     <button
+                        type="button"
                         onClick={onClose}
                         className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
                     >
                         Cancel
                     </button>
                     <button
+                        type="button"
                         onClick={() => {
                             if (mode === 'create') {
                                 handleCreateEnclosure();
