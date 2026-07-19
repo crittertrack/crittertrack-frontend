@@ -638,52 +638,6 @@ const AnimalTestModal = ({
                             </div>
                             
                             </div>
-                            {/* Identity & Ownership Information */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Core Identity */}
-                                <InfoCard title="Identity" icon={<Tag size={18} className="text-gray-400" />}>
-                                    <dl className="space-y-3">
-                                        {animal.prefix && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Prefix</label><p className="mt-1 text-sm text-gray-700">{animal.prefix}</p></div>}
-                                        {animal.suffix && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Suffix</label><p className="mt-1 text-sm text-gray-700">{animal.suffix}</p></div>}
-                                        {animal.status && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Status</label><p className="mt-1 text-sm text-gray-700">{animal.status}</p></div>}
-                                        {animal.dateOfDeath && <div className="p-2 bg-red-50 border-l-4 border-red-400"><label className="text-xs font-semibold uppercase tracking-wider text-red-700">Deceased</label><p className="mt-1 text-sm text-red-900">{formatDate(animal.dateOfDeath)}</p></div>}
-                                    </dl>
-                                </InfoCard>
-                                {/* Breeder & Owner Information */}
-                                {(animal.breederId_public || animal.manualBreederName || animal.ownerId_public || animal.manualOwnerName) && (
-                                    <InfoCard title="Breeder & Owner" icon={<Users size={18} className="text-gray-400" />}>
-                                        <dl className="space-y-3">
-                                            {animal.breederId_public && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Breeder ID</label><p className="mt-1 text-sm text-gray-700">{animal.breederId_public}</p></div>}
-                                            {animal.manualBreederName && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Breeder</label><p className="mt-1 text-sm text-gray-700">{animal.manualBreederName}</p></div>}
-                                            {animal.ownerId_public && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Owner ID</label><p className="mt-1 text-sm text-gray-700">{animal.ownerId_public}</p></div>}
-                                            {animal.manualOwnerName && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Owner</label><p className="mt-1 text-sm text-gray-700">{animal.manualOwnerName}</p></div>}
-                                        </dl>
-                                    </InfoCard>
-                                )}
-                                {/* Remarks */}
-                                {animal.remarks && (
-                                    <InfoCard title="Remarks" icon={<MessageSquare size={18} className="text-gray-400" />}>
-                                        <p className="whitespace-pre-wrap text-sm text-gray-700">{animal.remarks}</p>
-                                    </InfoCard>
-                                )}
-                                {/* Co-Ownership */}
-                                {animal.coOwnership && (
-                                    <InfoCard title="Co-Ownership" icon={<Users size={18} className="text-gray-400" />}>
-                                        <p className="whitespace-pre-wrap text-sm text-gray-700">{animal.coOwnership}</p>
-                                    </InfoCard>
-                                )}
-                                {/* For-Sale Information */}
-                                {(animal.isForSale || animal.salePriceAmount || animal.availableForBreeding || animal.studFeeAmount) && (
-                                    <InfoCard title="Availability" icon={<Tag size={18} className="text-gray-400" />}>
-                                        <dl className="space-y-3">
-                                            {animal.isForSale !== undefined && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">For Sale</label><p className="mt-1 text-sm text-gray-700">{animal.isForSale ? 'Yes' : 'No'}</p></div>}
-                                            {animal.salePriceAmount && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Sale Price</label><p className="mt-1 text-sm text-gray-700">{animal.salePriceCurrency} {animal.salePriceAmount}</p></div>}
-                                            {animal.availableForBreeding !== undefined && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Available for Breeding</label><p className="mt-1 text-sm text-gray-700">{animal.availableForBreeding ? 'Yes' : 'No'}</p></div>}
-                                            {animal.studFeeAmount && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Stud Fee</label><p className="mt-1 text-sm text-gray-700">{animal.studFeeCurrency} {animal.studFeeAmount}</p></div>}
-                                        </dl>
-                                    </InfoCard>
-                                )}
-                            </div>
                             <div className="bg-blue-50 rounded-lg border border-blue-200">
                                 <button
                                     type="button"

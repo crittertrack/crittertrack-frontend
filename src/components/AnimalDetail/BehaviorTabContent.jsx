@@ -16,19 +16,19 @@ export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
         <div className="space-y-6">
             <InfoCard title="Temperament & Social" icon={<MessageSquare size={18} className="text-gray-400" />}>
                 {hasBehavior ? (
-                    <dl className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.temperament && <InfoItem label="Temperament" value={animal.temperament} />}
                         {animal.handlingTolerance && <InfoItem label={getLabel('handlingTolerance', 'Handling Tolerance')} value={animal.handlingTolerance} />}
                         {animal.socialStructure && <InfoItem label="Social Structure" value={animal.socialStructure} />}
-                        {animal.handlingNotes && <InfoItem label="Handling Notes"><p className="whitespace-pre-wrap text-sm">{animal.handlingNotes}</p></InfoItem>}
-                        {animal.socializationNotes && <InfoItem label="Socialization Notes"><p className="whitespace-pre-wrap text-sm">{animal.socializationNotes}</p></InfoItem>}
-                    </dl>
+                        {animal.handlingNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Handling Notes"><p className="whitespace-pre-wrap text-sm">{animal.handlingNotes}</p></InfoItem></div>}
+                        {animal.socializationNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Socialization Notes"><p className="whitespace-pre-wrap text-sm">{animal.socializationNotes}</p></InfoItem></div>}
+                    </div>
                 ) : <p className="text-sm text-gray-400">No temperament or social information recorded.</p>}
             </InfoCard>
 
             <InfoCard title="Activity & Training" icon={<Activity size={18} className="text-gray-400" />}>
                 {hasActivity ? (
-                     <dl className="space-y-4">
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.activityCycle && <InfoItem label="Activity Cycle" value={animal.activityCycle} />}
                         {animal.exerciseRequirements && <InfoItem label={getLabel('exerciseRequirements', 'Exercise Requirements')} value={animal.exerciseRequirements} />}
                         {animal.dailyExerciseMinutes && <InfoItem label={getLabel('dailyExerciseMinutes', 'Daily Exercise (min)')} value={animal.dailyExerciseMinutes} />}
@@ -36,7 +36,7 @@ export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
                         {animal.trainingDisciplines && <InfoItem label={getLabel('trainingDisciplines', 'Training Disciplines')} value={animal.trainingDisciplines} />}
                         {animal.workingRole && <InfoItem label={getLabel('workingRole', 'Working Role')} value={animal.workingRole} />}
                         {animal.certifications && <InfoItem label={getLabel('certifications', 'Certifications')} value={animal.certifications} />}
-                    </dl>
+                    </div>
                 ) : <p className="text-sm text-gray-400">No activity or training information recorded.</p>}
             </InfoCard>
 
@@ -54,11 +54,11 @@ export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
 
             <InfoCard title="Known Issues" icon={<AlertTriangle size={18} className="text-gray-400" />}>
                 {hasKnownIssues ? (
-                    <dl className="space-y-4">
-                        {animal.behavioralIssues && <InfoItem label={getLabel('behavioralIssues', 'Behavioral Issues')}><p className="whitespace-pre-wrap text-sm">{animal.behavioralIssues}</p></InfoItem>}
-                        {animal.biteHistory && <InfoItem label={getLabel('biteHistory', 'Bite History')}><p className="whitespace-pre-wrap text-sm">{animal.biteHistory}</p></InfoItem>}
-                        {animal.reactivityNotes && <InfoItem label={getLabel('reactivityNotes', 'Reactivity Notes')}><p className="whitespace-pre-wrap text-sm">{animal.reactivityNotes}</p></InfoItem>}
-                    </dl>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {animal.behavioralIssues && <div className="md:col-span-2 lg:col-span-3"><InfoItem label={getLabel('behavioralIssues', 'Behavioral Issues')}><p className="whitespace-pre-wrap text-sm">{animal.behavioralIssues}</p></InfoItem></div>}
+                        {animal.biteHistory && <div className="md:col-span-2 lg:col-span-3"><InfoItem label={getLabel('biteHistory', 'Bite History')}><p className="whitespace-pre-wrap text-sm">{animal.biteHistory}</p></InfoItem></div>}
+                        {animal.reactivityNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label={getLabel('reactivityNotes', 'Reactivity Notes')}><p className="whitespace-pre-wrap text-sm">{animal.reactivityNotes}</p></InfoItem></div>}
+                    </div>
                 ) : <p className="text-sm text-gray-400">No known issues recorded.</p>}
             </InfoCard>
         </div>

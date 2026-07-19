@@ -30,7 +30,7 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
         <div className="space-y-6">
                 <InfoCard title="Reproductive Status" icon={<Leaf size={18} className="text-gray-400" />}>
                     {hasReproStatus ? (
-                        <dl className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <InfoItem label="Neutered/Spayed" value={animal.isNeutered ? 'Yes' : 'No'} />
                             <InfoItem label="Infertile" value={animal.isInfertile ? 'Yes' : 'No'} />
                             {!animal.isNeutered && !animal.isInfertile && <InfoItem label="In Mating" value={animal.isInMating ? 'Yes' : 'No'} />}
@@ -44,75 +44,75 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                                     {animal.reproductiveStateOverrideReason && <p className="text-sm text-purple-900">{animal.reproductiveStateOverrideReason}</p>}
                                 </div>
                             )}
-                        </dl>
+                        </div>
                     ) : <p className="text-sm text-gray-400">No reproductive status information recorded.</p>}
                 </InfoCard>
                 <InfoCard title="Estrus/Cycle Information" icon={<RefreshCw size={18} className="text-gray-400" />}>
                     {hasCycleInfo || isFemale ? (
-                        <dl className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.heatStatus && <InfoItem label="Heat Status" value={animal.heatStatus} />}
                             {animal.lastHeatDate && <InfoItem label="Last Heat Date" value={formatDate(animal.lastHeatDate)} />}
                             {animal.ovulationDate && <InfoItem label={getLabel('ovulationDate', 'Ovulation Date')} value={formatDate(animal.ovulationDate)} />}
                             {animal.estrusCycleLength && <InfoItem label="Estrus Cycle Length" value={`${animal.estrusCycleLength} days`} />}
                             {animal.currentReproductiveEventPhase && <InfoItem label="Current Reproductive Phase" value={animal.currentReproductiveEventPhase} />}
                             {animal.reproductiveEventCycleLength && <InfoItem label="Reproductive Event Cycle Length" value={`${animal.reproductiveEventCycleLength} days`} />}
-                        </dl>
+                        </div>
                     ) : <p className="text-sm text-gray-400">No estrus or cycle information recorded.</p>}
                 </InfoCard>
                 {/* Mating & Conception */}
                 {(animal.matingDate || animal.lastMatingDate || animal.lastConceptionDate || animal.successfulConceptionCount) && (
                     <InfoCard title="Mating & Conception History" icon={<RefreshCw size={18} className="text-gray-400" />}>
-                        <dl className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.matingDate && <InfoItem label="Mating Date" value={formatDate(animal.matingDate)} />}
                             {animal.lastMatingDate && <InfoItem label="Last Mating Date" value={formatDate(animal.lastMatingDate)} />}
                             {animal.lastConceptionDate && <InfoItem label="Last Conception Date" value={formatDate(animal.lastConceptionDate)} />}
                             {animal.successfulConceptionCount && <InfoItem label="Successful Conceptions" value={animal.successfulConceptionCount} />}
                             {animal.unsuccessfulConceptionAttempts && <InfoItem label="Unsuccessful Conception Attempts" value={animal.unsuccessfulConceptionAttempts} />}
-                        </dl>
+                        </div>
                     </InfoCard>
                 )}
                 {/* Pregnancy & Development */}
                 {(animal.expectedDueDate || animal.developmentPeriodStart || animal.developmentPeriodLength || animal.expectedDeliveryDate || animal.developmentMethod) && (
                     <InfoCard title="Pregnancy & Development" icon={<Leaf size={18} className="text-gray-400" />}>
-                        <dl className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.expectedDueDate && <InfoItem label="Expected Due Date" value={formatDate(animal.expectedDueDate)} />}
                             {animal.developmentPeriodStart && <InfoItem label="Development Period Start" value={formatDate(animal.developmentPeriodStart)} />}
                             {animal.developmentPeriodLength && <InfoItem label="Development Period Length" value={`${animal.developmentPeriodLength} days`} />}
                             {animal.expectedDeliveryDate && <InfoItem label="Expected Delivery Date" value={formatDate(animal.expectedDeliveryDate)} />}
                             {animal.developmentMethod && <InfoItem label="Development Method" value={animal.developmentMethod} />}
-                        </dl>
+                        </div>
                     </InfoCard>
                 )}
                 <InfoCard title="Sire/Male Information" icon={<Mars size={18} className="text-gray-400" />}>
                     {hasSireInfo ? (
-                        <dl className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.fertilityStatus && <InfoItem label="Fertility Status" value={animal.fertilityStatus} />}
-                            {animal.fertilityNotes && <InfoItem label="Notes"><p className="whitespace-pre-wrap text-sm">{animal.fertilityNotes}</p></InfoItem>}
-                            {animal.reproductiveClearances && <InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem>}
-                            {animal.reproductiveComplications && <InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem>}
                             {animal.successfulMatings && <InfoItem label="Successful Matings" value={animal.successfulMatings} />}
-                        </dl>
+                            {animal.fertilityNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Notes"><p className="whitespace-pre-wrap text-sm">{animal.fertilityNotes}</p></InfoItem></div>}
+                            {animal.reproductiveClearances && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem></div>}
+                            {animal.reproductiveComplications && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem></div>}
+                        </div>
                     ) : <p className="text-sm text-gray-400">No sire-specific fertility information recorded.</p>}
                 </InfoCard>
                 <InfoCard title="Dam/Female Information" icon={<Venus size={18} className="text-gray-400" />}>
                     {hasDamInfo ? (
-                        <dl className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.damFertilityStatus && <InfoItem label={getLabel('damFertilityStatus', 'Dam Fertility Status')} value={animal.damFertilityStatus} />}
                             {animal.gestationLength && <InfoItem label={getLabel('gestationLength', 'Gestation Length')} value={`${animal.gestationLength} days`} />}
                             {animal.deliveryMethod && <InfoItem label={getLabel('deliveryMethod', 'Delivery Method')} value={animal.deliveryMethod} />}
                             {animal.whelpingDate && <InfoItem label={getLabel('whelpingDate', 'Whelping Date')} value={formatDate(animal.whelpingDate)} />}
                             {animal.queeningDate && <InfoItem label={getLabel('queeningDate', 'Queening Date')} value={formatDate(animal.queeningDate)} />}
-                            {animal.damFertilityNotes && <InfoItem label="Notes"><p className="whitespace-pre-wrap text-sm">{animal.damFertilityNotes}</p></InfoItem>}
-                            {animal.reproductiveHealthNotes && <InfoItem label="Reproductive Health Notes"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveHealthNotes}</p></InfoItem>}
-                            {animal.reproductiveComplications && <InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem>}
                             {animal.lastReproductiveInterventionDate && <InfoItem label="Last Reproductive Intervention" value={formatDate(animal.lastReproductiveInterventionDate)} />}
-                        </dl>
+                            {animal.damFertilityNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Notes"><p className="whitespace-pre-wrap text-sm">{animal.damFertilityNotes}</p></InfoItem></div>}
+                            {animal.reproductiveHealthNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Health Notes"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveHealthNotes}</p></InfoItem></div>}
+                            {animal.reproductiveComplications && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem></div>}
+                        </div>
                     ) : <p className="text-sm text-gray-400">No dam-specific fertility information recorded.</p>}
                 </InfoCard>
                 {/* Offspring & Litter Information */}
                 {(animal.litterCount || animal.litterSizeBorn || animal.litterSizeWeaned || animal.totalOffspringProduced || animal.viableOffspringCount || animal.offspringCount) && (
                     <InfoCard title="Offspring & Litter Information" icon={<Leaf size={18} className="text-gray-400" />}>
-                        <dl className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.litterCount && <InfoItem label="Litter Count" value={animal.litterCount} />}
                             {animal.litterSizeBorn && <InfoItem label="Litter Size (Born)" value={animal.litterSizeBorn} />}
                             {animal.litterSizeWeaned && <InfoItem label="Litter Size (Weaned)" value={animal.litterSizeWeaned} />}
@@ -121,27 +121,27 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                             {animal.viableOffspringCount && <InfoItem label="Viable Offspring Count" value={animal.viableOffspringCount} />}
                             {animal.offspringCount && <InfoItem label="Offspring Count" value={animal.offspringCount} />}
                             {animal.reproductiveEventOutcome && <InfoItem label="Reproductive Event Outcome" value={animal.reproductiveEventOutcome} />}
-                        </dl>
+                        </div>
                     </InfoCard>
                 )}
                 {/* Nursing & Dependency */}
                 {(animal.nursingStartDate || animal.weaningDate || animal.dependentCareRequired || animal.dependentCareEndDate) && (
                     <InfoCard title="Nursing & Dependency" icon={<Leaf size={18} className="text-gray-400" />}>
-                        <dl className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.nursingStartDate && <InfoItem label="Nursing Start Date" value={formatDate(animal.nursingStartDate)} />}
                             {animal.weaningDate && <InfoItem label="Weaning Date" value={formatDate(animal.weaningDate)} />}
                             {animal.dependentCareRequired !== undefined && <InfoItem label="Dependent Care Required" value={animal.dependentCareRequired ? 'Yes' : 'No'} />}
                             {animal.dependentCareEndDate && <InfoItem label="Dependent Care End Date" value={formatDate(animal.dependentCareEndDate)} />}
-                        </dl>
+                        </div>
                     </InfoCard>
                 )}
                 {/* Artificial Reproduction */}
                 {(animal.artificialInseminationUsed || animal.artificialReproductionMethod) && (
                     <InfoCard title="Artificial Reproduction Methods" icon={<Leaf size={18} className="text-gray-400" />}>
-                        <dl className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.artificialInseminationUsed !== undefined && <InfoItem label="Artificial Insemination Used" value={animal.artificialInseminationUsed ? 'Yes' : 'No'} />}
                             {animal.artificialReproductionMethod && <InfoItem label="Artificial Reproduction Method" value={animal.artificialReproductionMethod} />}
-                        </dl>
+                        </div>
                     </InfoCard>
                 )}
             </div>
