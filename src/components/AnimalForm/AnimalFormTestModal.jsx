@@ -1138,6 +1138,7 @@ const AnimalFormTestModal = ({
     const [loading, setLoading] = useState(false);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [assignModalTarget, setAssignModalTarget] = useState(null); // 'breeder' or 'keeper'
+    const [uploadingDocument, setUploadingDocument] = useState(false);
     const [breederInfo, setBreederInfo] = useState(null);
     const [parentSearchModalOpen, setParentSearchModalOpen] = useState(false);
     const [parentSearchModalConfig, setParentSearchModalConfig] = useState({});
@@ -2378,6 +2379,44 @@ const AnimalFormTestModal = ({
             }));
             setOwnerInfo(null);
         }
+    };
+
+    const handleDocumentUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingDocument(true);
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await axios.post(`${API_BASE_URL}/upload-document`, fd, {
+                headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
+            });
+            setFormData(prev => ({
+                ...prev,
+                legalDocuments: [
+                    ...(prev.legalDocuments || []),
+                    {
+                        id: `doc-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                        filename: file.name,
+                        url: res.data.url,
+                        uploadedAt: new Date().toISOString(),
+                        uploadedBy: userProfile?.id_public || null,
+                    }
+                ]
+            }));
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to upload document. Allowed types: PDF, DOC, DOCX, Pages. Max size 10MB.');
+        } finally {
+            setUploadingDocument(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleRemoveDocument = (id) => {
+        setFormData(prev => ({
+            ...prev,
+            legalDocuments: (prev.legalDocuments || []).filter(doc => doc.id !== id)
+        }));
     };
 
     const addIdentifier = () => {
@@ -5600,6 +5639,31 @@ const AnimalFormTestModal = ({
                                     <div><label className="block text-xs font-medium text-gray-700">Legal Status</label><input type="text" name="legalStatus" value={formData.legalStatus} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700">Breeding Restrictions</label><textarea name="breedingRestrictions" value={formData.breedingRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700">Export Restrictions</label><textarea name="exportRestrictions" value={formData.exportRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+
+                                    {/* Document uploads (PDF, DOC, DOCX, Pages — max 10MB) */}
+                                    <div className="md:col-span-2">
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Documents (Registration papers, contracts, health certificates, etc.)</label>
+                                        {(formData.legalDocuments || []).length > 0 && (
+                                            <div className="space-y-1 mb-2">
+                                                {formData.legalDocuments.map(doc => (
+                                                    <div key={doc.id} className="flex items-center justify-between gap-2 p-2 border border-gray-300 rounded-md bg-white">
+                                                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary-dark hover:underline truncate min-w-0">
+                                                            <FileText size={14} className="flex-shrink-0" />
+                                                            <span className="truncate">{doc.filename || 'Document'}</span>
+                                                        </a>
+                                                        <button type="button" onClick={() => handleRemoveDocument(doc.id)} className="text-red-500 hover:text-red-700 flex-shrink-0" title="Remove document">
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <label className={`flex items-center justify-center gap-2 w-full py-2 px-3 text-sm font-medium rounded-md border-2 border-dashed cursor-pointer transition-colors ${uploadingDocument ? 'border-gray-300 text-gray-400 cursor-not-allowed' : 'border-primary text-primary-dark hover:bg-primary/10'}`}>
+                                            {uploadingDocument ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                                            <span>{uploadingDocument ? 'Uploading...' : 'Upload Document'}</span>
+                                            <input type="file" accept=".pdf,.doc,.docx,.pages,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.apple.pages" onChange={handleDocumentUpload} disabled={uploadingDocument} className="hidden" />
+                                        </label>
+                                    </div>
                                 </FormSection>
                             </div>
                         )}
