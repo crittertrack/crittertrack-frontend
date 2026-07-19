@@ -179,22 +179,41 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                     )}
                 </InfoCard>
             <InfoCard title="Health Clearances & Screening" icon={<HeartPulse size={18} className="text-gray-400" />}>
-                    {!hasClearances ? (
+                    {!hasClearances && (!animal.healthClearances || animal.healthClearances.length === 0) ? (
                         <p className="text-sm text-gray-400">No health clearances recorded.</p>
                     ) : (
                         <div className="space-y-3">
-                            {animal.spayNeuterDate && <InfoItem label={getLabel('spayNeuterDate', 'Spay/Neuter Date')} value={formatDate(animal.spayNeuterDate)} />}
-                            {animal.heartwormStatus && <InfoItem label={getLabel('heartwormStatus', 'Heartworm Status')} value={animal.heartwormStatus} />}
-                            {animal.hipElbowScores && <InfoItem label="Hip/Elbow Scores" value={animal.hipElbowScores} />}
-                            {animal.eyeClearance && <InfoItem label="Eye Clearance" value={animal.eyeClearance} />}
-                            {animal.cardiacClearance && <InfoItem label="Cardiac Clearance" value={animal.cardiacClearance} />}
-                            {animal.dentalRecords && <InfoItem label="Dental Records" value={animal.dentalRecords} />}
-                            {animal.geneticTestResults && <InfoItem label="Genetic Test Results" value={animal.geneticTestResults} />}
-                            {animal.chronicConditions && <InfoItem label="Chronic Conditions" value={animal.chronicConditions} />}
-                            
-                            <p className="text-xs text-gray-400 pt-2 border-t">Future structured clearances (example):</p>
-                            <StructuredClearanceItem test="OFA Hips" score="Excellent" date="2026-05-10" certId="XX-12345E24M-VPI" />
-                            <InfoItem label="Public Health Panel Link"><a href="#" className="text-primary hover:underline text-sm">View on OFA.org (example)</a></InfoItem>
+                            {/* Structured Health Clearances */}
+                            {animal.healthClearances && animal.healthClearances.length > 0 && (
+                                <div className="space-y-2">
+                                    <p className="text-xs font-semibold text-gray-600 uppercase">Clearances</p>
+                                    {animal.healthClearances.map((clearance, i) => (
+                                        <StructuredClearanceItem 
+                                            key={i}
+                                            test={clearance.clearanceType} 
+                                            score={clearance.result} 
+                                            date={clearance.dateIssued} 
+                                            certId={clearance.certificateId}
+                                            notes={clearance.notes}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Legacy Fields */}
+                            {(animal.spayNeuterDate || animal.heartwormStatus || animal.hipElbowScores || animal.eyeClearance || 
+                              animal.cardiacClearance || animal.dentalRecords || animal.geneticTestResults || animal.chronicConditions) && (
+                                <div className="pt-2 border-t">
+                                    {animal.spayNeuterDate && <InfoItem label={getLabel('spayNeuterDate', 'Spay/Neuter Date')} value={formatDate(animal.spayNeuterDate)} />}
+                                    {animal.heartwormStatus && <InfoItem label={getLabel('heartwormStatus', 'Heartworm Status')} value={animal.heartwormStatus} />}
+                                    {animal.hipElbowScores && <InfoItem label="Hip/Elbow Scores" value={animal.hipElbowScores} />}
+                                    {animal.eyeClearance && <InfoItem label="Eye Clearance" value={animal.eyeClearance} />}
+                                    {animal.cardiacClearance && <InfoItem label="Cardiac Clearance" value={animal.cardiacClearance} />}
+                                    {animal.dentalRecords && <InfoItem label="Dental Records" value={animal.dentalRecords} />}
+                                    {animal.geneticTestResults && <InfoItem label="Genetic Test Results" value={animal.geneticTestResults} />}
+                                    {animal.chronicConditions && <InfoItem label="Chronic Conditions" value={animal.chronicConditions} />}
+                                </div>
+                            )}
                         </div>
                     )}
                 </InfoCard>

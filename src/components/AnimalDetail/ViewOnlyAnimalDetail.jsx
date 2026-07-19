@@ -1631,18 +1631,46 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                     { key: 'chronicConditions', label: 'Chronic Conditions' },
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 const spayDate = fieldTemplate?.fields?.spayNeuterDate?.enabled !== false && animal.spayNeuterDate;
-                                return (clearanceFields.length > 0 || spayDate) && (
+                                const hasStructuredClearances = animal.healthClearances && animal.healthClearances.length > 0;
+                                return (clearanceFields.length > 0 || spayDate || hasStructuredClearances) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
                                             <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
                                             <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
                                         </button>
-                                        {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
-                                            {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
-                                            {clearanceFields.map(f => (
-                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
-                                            ))}
-                                        </div>)}
+                                        {!collapsedHealthSections.healthClearances && (
+                                            <div className="mt-4 space-y-4 text-sm">
+                                                {/* Structured Health Clearances */}
+                                                {hasStructuredClearances && (
+                                                    <div className="space-y-2">
+                                                        <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Clearances</p>
+                                                        {animal.healthClearances.map((clearance, i) => (
+                                                            <div key={i} className="p-3 bg-white border border-green-200 rounded-lg">
+                                                                <div className="flex justify-between items-start">
+                                                                    <p className="font-semibold text-gray-800">{clearance.clearanceType}</p>
+                                                                    <span className="text-xs bg-green-100 text-green-800 font-semibold px-2 py-0.5 rounded-full">{clearance.result}</span>
+                                                                </div>
+                                                                <div className="text-xs text-gray-600 mt-1 space-y-0.5">
+                                                                    <div><span className="font-medium">Date:</span> {formatDate(clearance.dateIssued)}</div>
+                                                                    {clearance.certificateId && <div><span className="font-medium">ID:</span> <span className="font-mono">{clearance.certificateId}</span></div>}
+                                                                    {clearance.notes && <div className="italic text-gray-500 mt-1">{clearance.notes}</div>}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Legacy Fields */}
+                                                {(clearanceFields.length > 0 || spayDate) && (
+                                                    <div className={hasStructuredClearances ? 'pt-3 border-t' : ''}>
+                                                        {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
+                                                        {clearanceFields.map(f => (
+                                                            <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })()}

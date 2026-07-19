@@ -1234,6 +1234,7 @@ const AnimalFormTestModal = ({
         length: animalToEdit?.measurementUnits?.length || 'cm'
     });
     const [newShow, setNewShow] = useState({ date: new Date().toISOString().substring(0, 10), showName: '', titleEarned: '', judgeName: '', score: '', judgeComments: '' });
+    const [newHealthClearance, setNewHealthClearance] = useState({ clearanceType: '', result: '', dateIssued: new Date().toISOString().substring(0, 10), certificateId: '', notes: '' });
 
     // Ownership History add-entry states
     const [ohMode, setOhMode] = useState('manual'); // 'manual' | 'user'
@@ -1613,6 +1614,26 @@ const AnimalFormTestModal = ({
         setNewProcedure({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
     };
 
+     const addHealthClearance = () => {
+        if (!newHealthClearance.clearanceType || !newHealthClearance.result || !newHealthClearance.dateIssued) {
+            showModalMessage('Missing Data', 'Please enter clearance type, result, and date issued.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            clearanceType: newHealthClearance.clearanceType,
+            result: newHealthClearance.result,
+            dateIssued: newHealthClearance.dateIssued,
+            certificateId: newHealthClearance.certificateId || '',
+            notes: newHealthClearance.notes || ''
+        };
+        setFormData(prev => ({
+            ...prev,
+            healthClearances: [...(prev.healthClearances || []), record]
+        }));
+        setNewHealthClearance({ clearanceType: '', result: '', dateIssued: new Date().toISOString().substring(0, 10), certificateId: '', notes: '' });
+    };
+
      const addLabResult = () => {
         if (!newLabResult.date || !newLabResult.testName) {
             showModalMessage('Missing Data', 'Please enter at least a date and test name.');
@@ -1946,6 +1967,7 @@ const AnimalFormTestModal = ({
             cardiacClearance: animalToEdit.cardiacClearance || '',
             dentalRecords: animalToEdit.dentalRecords || '',
             chronicConditions: animalToEdit.chronicConditions || '',
+            healthClearances: parseJsonArrayField(animalToEdit.healthClearances),
             exerciseRequirements: animalToEdit.exerciseRequirements || '',
             dailyExerciseMinutes: animalToEdit.dailyExerciseMinutes || '',
             groomingNeeds: animalToEdit.groomingNeeds || '',
@@ -2136,6 +2158,7 @@ const AnimalFormTestModal = ({
             cardiacClearance: '',
             dentalRecords: '',
             chronicConditions: '',
+            healthClearances: [],
             exerciseRequirements: '',
             dailyExerciseMinutes: '',
             groomingNeeds: '',
@@ -4160,44 +4183,81 @@ const AnimalFormTestModal = ({
                                 </FormSection>
 
                                 <FormSection title="Health Clearances & Screening" icon={<Hospital size={16} />}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Spay/Neuter Date</label>
-                                            <DatePicker name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                    <div className="space-y-4">
+                                        {/* Structured Health Clearances */}
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <h4 className="text-sm font-semibold text-gray-700">Add Health Clearance</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                <select value={newHealthClearance.clearanceType} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, clearanceType: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                    <option value="">Select Clearance Type...</option>
+                                                    <option value="OFA Hips">OFA Hips</option>
+                                                    <option value="OFA Elbows">OFA Elbows</option>
+                                                    <option value="OFA Cardiac">OFA Cardiac</option>
+                                                    <option value="OFA Eyes">OFA Eyes</option>
+                                                    <option value="PennHIP Hips">PennHIP Hips</option>
+                                                    <option value="CAER Eyes">CAER Eyes</option>
+                                                    <option value="Genetic Test">Genetic Test</option>
+                                                    <option value="Health Panel">Health Panel</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                                <input type="text" value={newHealthClearance.result} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, result: e.target.value })} placeholder="Result (e.g., Excellent, Good)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <DatePicker value={newHealthClearance.dateIssued} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, dateIssued: e.target.value })} className="py-1.5 px-2 text-sm" />
+                                                <input type="text" value={newHealthClearance.certificateId} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, certificateId: e.target.value })} placeholder="Certificate ID (e.g., XX-12345E24M)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            </div>
+                                            <textarea value={newHealthClearance.notes} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, notes: e.target.value })} placeholder="Additional notes (optional)" rows="2" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <button type="button" onClick={addHealthClearance} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Clearance</button>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Heartworm Status</label>
-                                            <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
-                                                <option value="">Select...</option>
-                                                <option value="Negative">Negative</option>
-                                                <option value="Positive">Positive</option>
-                                                <option value="On Prevention">On Prevention</option>
-                                                <option value="Unknown">Unknown</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Hip/Elbow Scores</label>
-                                            <input type="text" name="hipElbowScores" value={formData.hipElbowScores || ''} onChange={handleChange} placeholder="e.g., OFA Good" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Eye Clearance</label>
-                                            <input type="text" name="eyeClearance" value={formData.eyeClearance || ''} onChange={handleChange} placeholder="e.g., CAER Clear 2024" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Cardiac Clearance</label>
-                                            <input type="text" name="cardiacClearance" value={formData.cardiacClearance || ''} onChange={handleChange} placeholder="e.g., OFA Normal" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Dental Records</label>
-                                            <input type="text" name="dentalRecords" value={formData.dentalRecords || ''} onChange={handleChange} placeholder="e.g., Last cleaning 01/2024" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Genetic Test Results</label>
-                                            <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Embark: Clear for DM, vWD" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Chronic Conditions</label>
-                                            <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Allergies, arthritis" />
+
+                                        {/* Display existing clearances */}
+                                        {(formData.healthClearances || []).length > 0 && (
+                                            <div className="space-y-2">
+                                                <h4 className="text-sm font-semibold text-gray-700">Recorded Clearances</h4>
+                                                <div className="space-y-2 max-h-64 overflow-y-auto">
+                                                    {(formData.healthClearances || []).map((clearance, i) => (
+                                                        <div key={i} className="p-2 bg-green-50 rounded-md border border-green-200 flex justify-between items-start">
+                                                            <div className="flex-1 text-xs">
+                                                                <p className="font-semibold text-gray-800">{clearance.clearanceType}</p>
+                                                                <p className="text-gray-600">Result: <span className="font-medium">{clearance.result}</span></p>
+                                                                <p className="text-gray-600">Date: {formatDate(clearance.dateIssued)}</p>
+                                                                {clearance.certificateId && <p className="text-gray-600">ID: <span className="font-mono text-xs">{clearance.certificateId}</span></p>}
+                                                                {clearance.notes && <p className="text-gray-600 mt-1 italic">Note: {clearance.notes}</p>}
+                                                            </div>
+                                                            <button type="button" onClick={() => removeArrayItem('healthClearances', i)} className="ml-2 flex-shrink-0">
+                                                                <Trash2 size={14} className="text-red-500" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Legacy fields - still available for reference */}
+                                        <div className="border-t pt-3 mt-3">
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">Other Health Information</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Spay/Neuter Date</label>
+                                                    <DatePicker name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Heartworm Status</label>
+                                                    <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                        <option value="">Select...</option>
+                                                        <option value="Negative">Negative</option>
+                                                        <option value="Positive">Positive</option>
+                                                        <option value="On Prevention">On Prevention</option>
+                                                        <option value="Unknown">Unknown</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Genetic Test Results</label>
+                                                    <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Embark: Clear for DM, vWD" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Chronic Conditions</label>
+                                                    <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Allergies, arthritis" />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </FormSection>

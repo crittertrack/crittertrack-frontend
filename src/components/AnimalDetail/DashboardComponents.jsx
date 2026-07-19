@@ -35,15 +35,16 @@ export const TimelineItem = ({ icon, title, description, date }) => (
     </div>
 );
 
-export const StructuredClearanceItem = ({ test, score, date, certId }) => (
-    <div className="p-3 bg-gray-50 rounded-lg border">
+export const StructuredClearanceItem = ({ test, score, date, certId, notes }) => (
+    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
         <div className="flex justify-between items-start">
             <p className="font-semibold text-sm text-gray-800">{test}</p>
-            <span className="text-xs bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded-full">{score}</span>
+            <span className="text-xs bg-green-100 text-green-800 font-semibold px-2 py-0.5 rounded-full">{score}</span>
         </div>
-        <div className="text-xs text-gray-500 mt-1">
-            <span>{formatDate(date)}</span>
-            {certId && <span className="ml-2 font-mono">#{certId}</span>}
+        <div className="text-xs text-gray-600 mt-1 space-y-0.5">
+            <div><span className="font-medium">Date:</span> {formatDate(date)}</div>
+            {certId && <div><span className="font-medium">ID:</span> <span className="font-mono text-xs">{certId}</span></div>}
+            {notes && <div className="italic text-gray-500 mt-1">{notes}</div>}
         </div>
     </div>
 );
