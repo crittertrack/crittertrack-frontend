@@ -1225,6 +1225,7 @@ const AnimalFormTestModal = ({
         weight: animalToEdit?.measurementUnits?.weight || 'g',
         length: animalToEdit?.measurementUnits?.length || 'cm'
     });
+    const [newShow, setNewShow] = useState({ date: new Date().toISOString().substring(0, 10), showName: '', titleEarned: '', judgeName: '', score: '', judgeComments: '' });
 
     // Ownership History add-entry states
     const [ohMode, setOhMode] = useState('manual'); // 'manual' | 'user'
@@ -1351,8 +1352,9 @@ const AnimalFormTestModal = ({
         health: true,
         breeding: true,
         keeper: true,
-        shows: true,
-        milestones: true
+        show: true,
+        milestones: true,
+        status: true
     });
     const [pinnedEvents, setPinnedEvents] = useState(parseJsonArrayField(animalToEdit?.pinnedEvents) || []);
     const [newTimelineNote, setNewTimelineNote] = useState({ eventId: '', noteText: '' });
@@ -1678,6 +1680,27 @@ const AnimalFormTestModal = ({
         setMateInfo(null);
     };
 
+    const addShow = () => {
+        if (!newShow.date || !newShow.showName) {
+            showModalMessage('Missing Data', 'Please enter at least a date and show name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            date: newShow.date,
+            showName: newShow.showName,
+            titleEarned: newShow.titleEarned || '',
+            judgeName: newShow.judgeName || '',
+            score: newShow.score || '',
+            judgeComments: newShow.judgeComments || ''
+        };
+        setFormData(prev => ({
+            ...prev,
+            shows: [...(parseJsonArrayField(prev.shows) || []), record]
+        }));
+        setNewShow({ date: new Date().toISOString().substring(0, 10), showName: '', titleEarned: '', judgeName: '', score: '', judgeComments: '' });
+    };
+
     const clearMateSelection = () => {
         setNewBreedingRecord(prev => ({ ...prev, mateAnimalId: null, mate: '' }));
         setMateInfo(null);
@@ -1834,14 +1857,10 @@ const AnimalFormTestModal = ({
             stillbornCount: animalToEdit.stillbornCount || '',
             nursingStartDate: animalToEdit.nursingStartDate ? new Date(animalToEdit.nursingStartDate).toISOString().substring(0, 10) : '',
             weaningDate: animalToEdit.weaningDate ? new Date(animalToEdit.weaningDate).toISOString().substring(0, 10) : '',
-            isStudAnimal: animalToEdit.isStudAnimal || false,
             fertilityStatus: animalToEdit.fertilityStatus || 'Unknown',
             lastMatingDate: animalToEdit.lastMatingDate ? new Date(animalToEdit.lastMatingDate).toISOString().substring(0, 10) : '',
             successfulMatings: animalToEdit.successfulMatings || '',
-            fertilityNotes: animalToEdit.fertilityNotes || '',
-            isDamAnimal: animalToEdit.isDamAnimal || false,
-            damFertilityStatus: animalToEdit.damFertilityStatus || 'Unknown',
-            lastPregnancyDate: animalToEdit.lastPregnancyDate ? new Date(animalToEdit.lastPregnancyDate).toISOString().substring(0, 10) : '',
+            pregnancyHistory: Array.isArray(animalToEdit.pregnancyHistory) ? animalToEdit.pregnancyHistory : [],
             offspringCount: animalToEdit.offspringCount || '',
             medicalConditions: parseJsonArrayField(animalToEdit.medicalConditions),
             allergies: parseJsonArrayField(animalToEdit.allergies),
@@ -1882,20 +1901,16 @@ const AnimalFormTestModal = ({
             insurance: animalToEdit.insurance || '',
             legalStatus: animalToEdit.legalStatus || '',
             ownershipHistory: getOwnershipHistory(animalToEdit),
+            shows: parseJsonArrayField(animalToEdit.shows),
             showTitles: animalToEdit.showTitles || '',
             showRatings: animalToEdit.showRatings || '',
             judgeComments: animalToEdit.judgeComments || '',
             workingTitles: animalToEdit.workingTitles || '',
             performanceScores: animalToEdit.performanceScores || '',
             chestGirth: animalToEdit.chestGirth || '',
-            adultWeight: animalToEdit.adultWeight || '',
             licenseNumber: animalToEdit.licenseNumber || '',
             licenseJurisdiction: animalToEdit.licenseJurisdiction || '',
-            estrusCycleLength: animalToEdit.estrusCycleLength || '',
-            gestationLength: animalToEdit.gestationLength || '',
-            artificialInseminationUsed: animalToEdit.artificialInseminationUsed || false,
-            whelpingDate: animalToEdit.whelpingDate ? new Date(animalToEdit.whelpingDate).toISOString().substring(0, 10) : '',
-            queeningDate: animalToEdit.queeningDate ? new Date(animalToEdit.queeningDate).toISOString().substring(0, 10) : '',
+            lastDeliveryDate: animalToEdit.lastDeliveryDate ? new Date(animalToEdit.lastDeliveryDate).toISOString().substring(0, 10) : '',
             deliveryMethod: animalToEdit.deliveryMethod || '',
             reproductiveComplications: animalToEdit.reproductiveComplications || '',
             reproductiveClearances: animalToEdit.reproductiveClearances || '',
@@ -2020,7 +2035,6 @@ const AnimalFormTestModal = ({
             stillbornCount: '',
             nursingStartDate: '',
             weaningDate: '',
-            isStudAnimal: false,
             availableForBreeding: false,
             studFeeCurrency: 'USD',
             studFeeAmount: '',
@@ -2030,15 +2044,13 @@ const AnimalFormTestModal = ({
             fertilityStatus: '',
             lastMatingDate: '',
             successfulMatings: '',
-            fertilityNotes: '',
-            isDamAnimal: false,
-            damFertilityStatus: '',
-            lastPregnancyDate: '',
+            pregnancyHistory: [],
             offspringCount: '',
             medicalConditions: [],
             allergies: [],
             medications: [],
             breedingRecords: [],
+            pregnancyHistory: [],
             vetVisits: '',
             primaryVet: '',
             // Backward compatible legacy fields
@@ -2075,22 +2087,18 @@ const AnimalFormTestModal = ({
             insurance: '',
             legalStatus: '',
             ownershipHistory: [],
+            shows: [],
             showTitles: '',
             showRatings: '',
             judgeComments: '',
             workingTitles: '',
             performanceScores: '',
             chestGirth: '',
-            adultWeight: '',
             licenseNumber: '',
             licenseJurisdiction: '',
             tattooId: '',
             eartagNumber: '',
-            estrusCycleLength: '',
-            gestationLength: '',
-            artificialInseminationUsed: false,
-            whelpingDate: '',
-            queeningDate: '',
+            lastDeliveryDate: '',
             deliveryMethod: '',
             reproductiveComplications: '',
             reproductiveClearances: '',
@@ -2461,42 +2469,102 @@ const AnimalFormTestModal = ({
             if (formData.quarantineDetails?.startDate) {
                 addEvent('health', formData.quarantineDetails.startDate, 'Quarantine Started', formData.quarantineDetails.reason || 'Quarantine');
             }
-            (parseJsonArrayField(formData.vetVisits) || []).forEach(visit => {
-                if (visit?.date) addEvent('health', visit.date, 'Vet Visit', visit.reason || 'Veterinary visit');
+            if (formData.spayNeuterDate) {
+                addEvent('health', formData.spayNeuterDate, 'Spay/Neuter Surgery', 'Surgical sterilization');
+            }
+            (parseJsonArrayField(formData.vetVisits) || []).forEach((visit, idx) => {
+                if (visit?.date) addEvent('health', visit.date, 'Vet Visit', visit.reason || 'Veterinary visit', `vet-${visit.date}-${idx}`);
             });
-            (parseJsonArrayField(formData.vaccinations) || []).forEach(vacc => {
-                if (vacc?.date) addEvent('health', vacc.date, 'Vaccination', vacc.name || 'Vaccination');
+            (parseJsonArrayField(formData.vaccinations) || []).forEach((vacc, idx) => {
+                if (vacc?.date) addEvent('health', vacc.date, 'Vaccination', vacc.name || 'Vaccination', `vacc-${vacc.date}-${idx}`);
+            });
+            (parseJsonArrayField(formData.medicalProcedures) || []).forEach((proc, idx) => {
+                if (proc?.date) addEvent('health', proc.date, 'Medical Procedure', proc.name || proc.procedure || 'Procedure', `proc-${proc.date}-${idx}`);
+            });
+            (parseJsonArrayField(formData.labResults) || []).forEach((lab, idx) => {
+                if (lab?.date) addEvent('health', lab.date, 'Lab Results', lab.testName || lab.name || 'Lab test', `lab-${lab.date}-${idx}`);
+            });
+            (parseJsonArrayField(formData.dewormingRecords) || []).forEach((deworming, idx) => {
+                if (deworming?.date) addEvent('health', deworming.date, 'Deworming Treatment', deworming.type || 'Deworming', `deworming-${deworming.date}-${idx}`);
+            });
+            (parseJsonArrayField(formData.parasiteControl) || []).forEach((parasite, idx) => {
+                if (parasite?.date) addEvent('health', parasite.date, 'Parasite Prevention', parasite.type || 'Parasite control', `parasite-${parasite.date}-${idx}`);
             });
         }
 
         // Breeding events
         if (eventVisibility.breeding) {
-            if (formData.matingDate) addEvent('breeding', formData.matingDate, 'Mating', 'Animal mating date');
-            if (formData.expectedDueDate) addEvent('breeding', formData.expectedDueDate, 'Expected Delivery', 'Expected delivery/birth date');
-            (parseJsonArrayField(formData.breedingRecords) || []).forEach(record => {
-                if (record?.birthEventDate) addEvent('breeding', record.birthEventDate, 'Birth/Hatching Event', `Litter size: ${record.litterSizeBorn || 'Unknown'}`);
+            if (formData.lastHeatDate) {
+                addEvent('breeding', formData.lastHeatDate, 'Heat Cycle', 'Last estrus cycle');
+            }
+            if (formData.lastReproductiveEventDate) {
+                addEvent('breeding', formData.lastReproductiveEventDate, 'Reproductive Event', 'Last reproductive event');
+            }
+            if (formData.lastMatingDate) {
+                addEvent('breeding', formData.lastMatingDate, 'Last Mating', 'Previous mating event');
+            }
+            if (formData.lastConceptionDate) {
+                addEvent('breeding', formData.lastConceptionDate, 'Conception', 'Successful conception');
+            }
+            if (formData.matingDate) {
+                addEvent('breeding', formData.matingDate, 'Mating', 'Animal mating date');
+            }
+            if (formData.expectedDueDate) {
+                addEvent('breeding', formData.expectedDueDate, 'Expected Delivery', 'Expected delivery/birth date');
+            }
+            if (formData.developmentPeriodStart) {
+                addEvent('breeding', formData.developmentPeriodStart, 'Development Period Started', 'Pregnancy/development period beginning');
+            }
+            if (formData.nursingStartDate) {
+                addEvent('breeding', formData.nursingStartDate, 'Nursing Started', 'Nursing period began');
+            }
+            if (formData.weaningDate) {
+                addEvent('breeding', formData.weaningDate, 'Weaning', 'Offspring weaning date');
+            }
+            if (formData.lastPregnancyDate) {
+                addEvent('breeding', formData.lastPregnancyDate, 'Last Pregnancy', 'Previous pregnancy occurrence');
+            }
+            (parseJsonArrayField(formData.breedingRecords) || []).forEach((record, idx) => {
+                if (record?.birthEventDate) addEvent('breeding', record.birthEventDate, 'Birth/Hatching Event', `Litter size: ${record.litterSizeBorn || 'Unknown'}`, `birth-${record.birthEventDate}-${idx}`);
             });
         }
 
         // Keeper events
         if (eventVisibility.keeper) {
-            (formData.ownershipHistory || []).forEach(ownership => {
-                if (ownership?.startDate) addEvent('keeper', ownership.startDate, 'Keeper Changed', `New keeper: ${ownership.ownerName || 'Unknown'}`);
+            (formData.ownershipHistory || []).forEach((ownership, idx) => {
+                if (ownership?.startDate) addEvent('keeper', ownership.startDate, 'Keeper Changed', `New keeper: ${ownership.ownerName || 'Unknown'}`, `keeper-${ownership.startDate}-${idx}`);
             });
+            if (formData.purchaseDate) {
+                addEvent('keeper', formData.purchaseDate, 'Animal Purchased', `Purchased for: ${formData.purchasePrice ? `${getCurrencySymbol(formData.salePriceCurrency)}${formData.purchasePrice}` : 'Unknown price'}`);
+            }
+            if (formData.saleDate) {
+                addEvent('keeper', formData.saleDate, 'Animal Sold', `Sold for: ${formData.salePrice ? `${getCurrencySymbol(formData.salePriceCurrency)}${formData.salePrice}` : 'Unknown price'}`);
+            }
         }
 
-        // Show/Performance events
-        if (eventVisibility.shows) {
-            if (formData.showTitles) {
-                addEvent('shows', new Date().toISOString().split('T')[0], 'Show Title', formData.showTitles);
-            }
+        // Show events
+        if (eventVisibility.show) {
+            (parseJsonArrayField(formData.shows) || []).forEach((show, idx) => {
+                if (show?.date) {
+                    const titleText = show.titleEarned ? ` - ${show.titleEarned}` : '';
+                    const scoreText = show.score ? ` (${show.score})` : '';
+                    addEvent('show', show.date, `Show: ${show.showName}${titleText}`, `Judge: ${show.judgeName || 'Unknown'}${scoreText}${show.judgeComments ? ` - ${show.judgeComments}` : ''}`, `show-${show.date}-${idx}`);
+                }
+            });
         }
 
         // Milestones
         if (eventVisibility.milestones) {
-            (parseJsonArrayField(formData.milestones) || []).forEach(milestone => {
-                if (milestone?.startDate) addEvent('milestones', milestone.startDate, milestone.label || 'Milestone', milestone.description || '');
+            (parseJsonArrayField(formData.milestones) || []).forEach((milestone, idx) => {
+                if (milestone?.startDate) addEvent('milestones', milestone.startDate, milestone.label || 'Milestone', milestone.description || '', `milestone-${milestone.startDate}-${idx}`);
             });
+        }
+
+        // Status changes
+        if (eventVisibility.status) {
+            if (formData.dateOfDeath) {
+                addEvent('status', formData.dateOfDeath, 'Animal Deceased', `Status: ${formData.status || 'Deceased'}`);
+            }
         }
 
         return events.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -2697,6 +2765,22 @@ const AnimalFormTestModal = ({
         setSupplementSupplySearch('');
         setSelectedSupplementSupply(null);
     }, [supplementMode]);
+
+    // Auto-capture pregnancy dates when isPregnant is set to true
+    useEffect(() => {
+        const prevIsPregnant = useRef(formData.isPregnant);
+        
+        if (formData.isPregnant && !prevIsPregnant.current) {
+            // Changed from false to true - add today's date to history
+            const today = new Date().toISOString().split('T')[0];
+            setFormData(prev => ({
+                ...prev,
+                pregnancyHistory: [...(prev.pregnancyHistory || []), today]
+            }));
+        }
+        
+        prevIsPregnant.current = formData.isPregnant;
+    }, [formData.isPregnant]);
 
     // Fetch enclosures when opening modal
     useEffect(() => {
@@ -3517,7 +3601,7 @@ const AnimalFormTestModal = ({
                                         {/* Add New Measurement */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
                                             <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
-                                            <div className={`grid gap-3 ${(formData.species === 'Dog' || formData.species === 'Cat') ? 'grid-cols-1 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
+                                            <div className="grid gap-3 grid-cols-1 md:grid-cols-4">
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-700">Date</label>
                                                     <DatePicker value={newMeasurement.date} onChange={(e) => setNewMeasurement({...newMeasurement, date: e.target.value})} className="mt-1 p-2 text-sm" />
@@ -3530,20 +3614,16 @@ const AnimalFormTestModal = ({
                                                     <label className="block text-xs font-medium text-gray-700">Body Length ({measurementUnits.length})</label>
                                                     <input type="number" step="0.1" value={newMeasurement.length} onChange={(e) => setNewMeasurement({...newMeasurement, length: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '20' : measurementUnits.length === 'm' ? '0.2' : measurementUnits.length === 'in' ? '8' : '0.66'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                                 </div>
-                                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-gray-700">Height at Withers ({measurementUnits.length})</label>
-                                                        <input type="number" step="0.1" value={newMeasurement.height} onChange={(e) => setNewMeasurement({...newMeasurement, height: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '25' : measurementUnits.length === 'm' ? '0.25' : measurementUnits.length === 'in' ? '10' : '0.83'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                                    </div>
-                                                )}
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Height at Withers ({measurementUnits.length})</label>
+                                                    <input type="number" step="0.1" value={newMeasurement.height} onChange={(e) => setNewMeasurement({...newMeasurement, height: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '25' : measurementUnits.length === 'm' ? '0.25' : measurementUnits.length === 'in' ? '10' : '0.83'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                </div>
                                             </div>
-                                            <div className={`grid gap-3 ${(formData.species === 'Dog' || formData.species === 'Cat') ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
-                                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-gray-700">Chest Girth ({measurementUnits.length})</label>
-                                                        <input type="number" step="0.1" value={newMeasurement.chestGirth} onChange={(e) => setNewMeasurement({...newMeasurement, chestGirth: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '30' : measurementUnits.length === 'm' ? '0.3' : measurementUnits.length === 'in' ? '12' : '1'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                                    </div>
-                                                )}
+                                            <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Chest Girth ({measurementUnits.length})</label>
+                                                    <input type="number" step="0.1" value={newMeasurement.chestGirth} onChange={(e) => setNewMeasurement({...newMeasurement, chestGirth: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '30' : measurementUnits.length === 'm' ? '0.3' : measurementUnits.length === 'in' ? '12' : '1'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                </div>
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-700">Body Condition Score</label>
                                                     <select value={newMeasurement.bcs} onChange={(e) => setNewMeasurement({...newMeasurement, bcs: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
@@ -4888,6 +4968,25 @@ const AnimalFormTestModal = ({
                                             <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isPlannedMating} onChange={(e) => setFormData(p => ({...p, isPlannedMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Planned Mating</label></div>
                                             <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isInMating} onChange={(e) => setFormData(p => ({...p, isInMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: In Mating</label></div>
                                             {formData.gender !== 'Male' && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isPregnant} onChange={(e) => setFormData(p => ({...p, isPregnant: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Pregnant</label></div>}
+                                            {formData.gender !== 'Male' && formData.pregnancyHistory && formData.pregnancyHistory.length > 0 && (
+                                                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
+                                                    <p className="text-xs font-semibold text-blue-700">Pregnancy History ({formData.pregnancyHistory.length})</p>
+                                                    <div className="space-y-1">
+                                                        {formData.pregnancyHistory.map((date, idx) => (
+                                                            <div key={idx} className="flex items-center justify-between text-xs p-1 bg-white border border-blue-100 rounded">
+                                                                <span>🤰 {new Date(date + 'T00:00:00').toLocaleDateString()}</span>
+                                                                <button 
+                                                                    type="button"
+                                                                    onClick={() => setFormData(p => ({...p, pregnancyHistory: p.pregnancyHistory.filter((_, i) => i !== idx)}))}
+                                                                    className="text-red-500 hover:text-red-700 font-bold"
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                             {formData.gender !== 'Male' && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isNursing} onChange={(e) => setFormData(p => ({...p, isNursing: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Nursing</label></div>}
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Reason for Override</label>
@@ -4905,8 +5004,8 @@ const AnimalFormTestModal = ({
                                             <option>Fertile</option>
                                             <option>Subfertile</option>
                                             <option>Infertile</option>
-                                            <option>Spayed (Female)</option>
-                                            <option>Neutered (Male)</option>
+                                            {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && <option>Spayed (Female)</option>}
+                                            {(formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && <option>Neutered (Male)</option>}
                                             <option>Castrated</option>
                                             <option>Unknown</option>
                                             <option>Not Applicable</option>
@@ -5045,6 +5144,28 @@ const AnimalFormTestModal = ({
                                         <div className="md:col-span-2">
                                             <label className="block text-xs font-medium text-gray-700">Reproductive Health Notes (Clearances, Restrictions, Procedures)</label>
                                             <textarea value={reproductiveHealth.reproductiveHealthNotes} onChange={(e) => setReproductiveHealth({...reproductiveHealth, reproductiveHealthNotes: e.target.value})} placeholder="e.g., PennHIP certified, genetic clearances pending, spay/neuter date..." className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none" rows="3" />
+                                        </div>
+                                    </div>
+                                </FormSection>
+
+                                {/* Delivery & Breeding Health Details */}
+                                <FormSection title="Delivery & Breeding Health" icon={<Heart size={16} />}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Last Delivery Date</label>
+                                            <DatePicker value={formData.lastDeliveryDate} onChange={(e) => setFormData({...formData, lastDeliveryDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Delivery Method</label>
+                                            <input type="text" value={formData.deliveryMethod} onChange={(e) => setFormData({...formData, deliveryMethod: e.target.value})} placeholder="e.g., Natural, C-section, Assisted" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Reproductive Complications</label>
+                                            <input type="text" value={formData.reproductiveComplications} onChange={(e) => setFormData({...formData, reproductiveComplications: e.target.value})} placeholder="e.g., Dystocia, retained placenta, infection" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Reproductive Clearances</label>
+                                            <input type="text" value={formData.reproductiveClearances} onChange={(e) => setFormData({...formData, reproductiveClearances: e.target.value})} placeholder="e.g., OFA certified, genetic screening passed" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                         </div>
                                     </div>
                                 </FormSection>
@@ -5276,15 +5397,22 @@ const AnimalFormTestModal = ({
                                 {/* Event Visibility Toggles */}
                                 <FormSection title="Event Filters" icon={<Eye size={16} />} initiallyOpen>
                                     <div className="space-y-2">
-                                        {['health', 'breeding', 'keeper', 'shows', 'milestones'].map(type => (
-                                            <label key={type} className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded transition">
+                                        {[
+                                            { key: 'health', label: 'Health Events' },
+                                            { key: 'breeding', label: 'Breeding Events' },
+                                            { key: 'keeper', label: 'Keeper & Ownership Events' },
+                                            { key: 'show', label: 'Show Events' },
+                                            { key: 'milestones', label: 'Milestones' },
+                                            { key: 'status', label: 'Status Changes' }
+                                        ].map(({key, label}) => (
+                                            <label key={key} className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded transition">
                                                 <input
                                                     type="checkbox"
-                                                    checked={eventVisibility[type]}
-                                                    onChange={(e) => setEventVisibility({...eventVisibility, [type]: e.target.checked})}
+                                                    checked={eventVisibility[key]}
+                                                    onChange={(e) => setEventVisibility({...eventVisibility, [key]: e.target.checked})}
                                                     className="w-4 h-4 rounded border-gray-300 text-blue-600"
                                                 />
-                                                <span className="text-sm font-medium text-gray-700 capitalize">{type} Events</span>
+                                                <span className="text-sm font-medium text-gray-700">{label}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -5662,11 +5790,43 @@ const AnimalFormTestModal = ({
                                     </div>
                                 </FormSection>
                                 <FormSection title="Show & Performance" icon={<Trophy size={16} />}>
-                                    <div><label className="block text-xs font-medium text-gray-700">Show Titles</label><textarea name="showTitles" value={formData.showTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Working Titles</label><textarea name="workingTitles" value={formData.workingTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Show Ratings & Placements</label><textarea name="showRatings" value={formData.showRatings || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Grand Champion 2024, Reserve Winner, Points: 50" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Judge Comments & Evaluations</label><textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Notable feedback from judges, critiques, recommendations" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Performance Scores & Assessments</label><textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Agility: 9/10, Obedience: 8/10, Temperament: 10/10" /></div>
+                                    {/* Structured Show Events */}
+                                    <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
+                                        <h4 className="text-sm font-semibold text-gray-700">Show Events</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                                <DatePicker value={newShow.date} onChange={(e) => setNewShow({ ...newShow, date: e.target.value })} className="py-1.5 px-2 text-sm" />
+                                                <input type="text" value={newShow.showName} onChange={(e) => setNewShow({ ...newShow, showName: e.target.value })} placeholder="Show Name (e.g., Westminster)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newShow.titleEarned} onChange={(e) => setNewShow({ ...newShow, titleEarned: e.target.value })} placeholder="Title Earned (e.g., Best in Show)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newShow.judgeName} onChange={(e) => setNewShow({ ...newShow, judgeName: e.target.value })} placeholder="Judge Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newShow.score} onChange={(e) => setNewShow({ ...newShow, score: e.target.value })} placeholder="Score/Placement (e.g., 95/100)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <textarea value={newShow.judgeComments} onChange={(e) => setNewShow({ ...newShow, judgeComments: e.target.value })} placeholder="Judge Comments" rows="2" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md md:col-span-2 lg:col-span-1" />
+                                            </div>
+                                            <button type="button" onClick={addShow} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">+ Add Show Event</button>
+                                        </div>
+                                        {(parseJsonArrayField(formData.shows) || []).map((show, i) => (
+                                            <div key={i} className="flex justify-between items-start text-xs p-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded border border-purple-200">
+                                                <div className="flex-1">
+                                                    <div className="font-semibold text-purple-900">{show.showName}</div>
+                                                    <div className="text-gray-700">{show.date}: {show.titleEarned || '(no title)'}</div>
+                                                    {show.judgeName && <div className="text-gray-600">Judge: {show.judgeName}</div>}
+                                                    {show.score && <div className="text-gray-600">Score: {show.score}</div>}
+                                                    {show.judgeComments && <div className="text-gray-600 italic">{show.judgeComments}</div>}
+                                                </div>
+                                                <button type="button" onClick={() => removeArrayItem('shows', i)} className="ml-2"><Trash2 size={14} className="text-red-500" /></button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Legacy Text Fields for Backward Compatibility */}
+                                    <div className="space-y-2 text-xs text-gray-500 italic">
+                                        <p className="font-semibold">Legacy Fields (for import compatibility)</p>
+                                        <div><label className="block text-xs font-medium text-gray-700">Show Titles</label><textarea name="showTitles" value={formData.showTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Working Titles</label><textarea name="workingTitles" value={formData.workingTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Show Ratings & Placements</label><textarea name="showRatings" value={formData.showRatings || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Grand Champion 2024, Reserve Winner, Points: 50" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Judge Comments & Evaluations</label><textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Notable feedback from judges, critiques, recommendations" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700">Performance Scores & Assessments</label><textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Agility: 9/10, Obedience: 8/10, Temperament: 10/10" /></div>
+                                    </div>
                                 </FormSection>
                                 <FormSection title="Sale & Purchase" icon={<DollarSign size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">

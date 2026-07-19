@@ -13,7 +13,7 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
     const hasReproStatus = animal.isNeutered || animal.isInfertile || animal.isInMating || (isFemale && (animal.isPregnant || animal.isNursing)) || (isMale && animal.isStudAnimal) || (isFemale && animal.isDamAnimal);
     const hasCycleInfo = isFemale && !animal.isNeutered && (animal.heatStatus || animal.lastHeatDate || animal.ovulationDate || animal.estrusCycleLength);
     const hasSireInfo = isMale && !animal.isNeutered && !animal.isInfertile && (animal.fertilityStatus || animal.fertilityNotes || animal.reproductiveClearances || animal.reproductiveComplications);
-    const hasDamInfo = isFemale && !animal.isNeutered && !animal.isInfertile && (animal.damFertilityStatus || animal.fertilityStatus || animal.gestationLength || animal.deliveryMethod || animal.whelpingDate || animal.queeningDate || animal.damFertilityNotes || animal.reproductiveClearances || animal.reproductiveComplications);
+    const hasDamInfo = isFemale && !animal.isNeutered && !animal.isInfertile && (animal.fertilityStatus || animal.gestationLength || animal.deliveryMethod || animal.lastDeliveryDate || animal.reproductiveHealthNotes || animal.reproductiveClearances || animal.reproductiveComplications);
 
     const hasAnyData = hasReproStatus || hasCycleInfo || hasSireInfo || hasDamInfo;
 
@@ -52,6 +52,7 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.heatStatus && <InfoItem label="Heat Status" value={animal.heatStatus} />}
                             {animal.lastHeatDate && <InfoItem label="Last Heat Date" value={formatDate(animal.lastHeatDate)} />}
+                            {animal.lastReproductiveEventDate && <InfoItem label="Last Reproductive Event Date" value={formatDate(animal.lastReproductiveEventDate)} />}
                             {animal.ovulationDate && <InfoItem label={getLabel('ovulationDate', 'Ovulation Date')} value={formatDate(animal.ovulationDate)} />}
                             {animal.estrusCycleLength && <InfoItem label="Estrus Cycle Length" value={`${animal.estrusCycleLength} days`} />}
                             {animal.currentReproductiveEventPhase && <InfoItem label="Current Reproductive Phase" value={animal.currentReproductiveEventPhase} />}
@@ -97,14 +98,12 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                 <InfoCard title="Dam/Female Information" icon={<Venus size={18} className="text-gray-400" />}>
                     {hasDamInfo ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {animal.damFertilityStatus && <InfoItem label={getLabel('damFertilityStatus', 'Dam Fertility Status')} value={animal.damFertilityStatus} />}
-                            {animal.gestationLength && <InfoItem label={getLabel('gestationLength', 'Gestation Length')} value={`${animal.gestationLength} days`} />}
+                            {animal.fertilityStatus && <InfoItem label="Fertility Status" value={animal.fertilityStatus} />}
+                            {animal.lastDeliveryDate && <InfoItem label="Last Delivery Date" value={formatDate(animal.lastDeliveryDate)} />}
                             {animal.deliveryMethod && <InfoItem label={getLabel('deliveryMethod', 'Delivery Method')} value={animal.deliveryMethod} />}
-                            {animal.whelpingDate && <InfoItem label={getLabel('whelpingDate', 'Whelping Date')} value={formatDate(animal.whelpingDate)} />}
-                            {animal.queeningDate && <InfoItem label={getLabel('queeningDate', 'Queening Date')} value={formatDate(animal.queeningDate)} />}
                             {animal.lastReproductiveInterventionDate && <InfoItem label="Last Reproductive Intervention" value={formatDate(animal.lastReproductiveInterventionDate)} />}
-                            {animal.damFertilityNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Notes"><p className="whitespace-pre-wrap text-sm">{animal.damFertilityNotes}</p></InfoItem></div>}
                             {animal.reproductiveHealthNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Health Notes"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveHealthNotes}</p></InfoItem></div>}
+                            {animal.reproductiveClearances && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem></div>}
                             {animal.reproductiveComplications && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem></div>}
                         </div>
                     ) : <p className="text-sm text-gray-400">No dam-specific fertility information recorded.</p>}
@@ -121,6 +120,41 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                             {animal.viableOffspringCount && <InfoItem label="Viable Offspring Count" value={animal.viableOffspringCount} />}
                             {animal.offspringCount && <InfoItem label="Offspring Count" value={animal.offspringCount} />}
                             {animal.reproductiveEventOutcome && <InfoItem label="Reproductive Event Outcome" value={animal.reproductiveEventOutcome} />}
+                        </div>
+                    </InfoCard>
+                )}
+                {/* Breeding Records */}
+                {animal.breedingRecords && Array.isArray(animal.breedingRecords) && animal.breedingRecords.length > 0 && (
+                    <InfoCard title="Breeding Records" icon={<RefreshCw size={18} className="text-gray-400" />}>
+                        <div className="space-y-3">
+                            {animal.breedingRecords.map((record, idx) => (
+                                <div key={record.id || idx} className="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                        {record.breedingMethod && <div><span className="font-semibold">Method:</span> {record.breedingMethod}</div>}
+                                        {record.matingDate && <div><span className="font-semibold">Mating Date:</span> {formatDate(record.matingDate)}</div>}
+                                        {record.mate && <div><span className="font-semibold">Mate:</span> {record.mate}</div>}
+                                        {record.outcome && <div><span className="font-semibold">Outcome:</span> {record.outcome}</div>}
+                                        {record.birthEventDate && <div><span className="font-semibold">Birth Date:</span> {formatDate(record.birthEventDate)}</div>}
+                                        {record.litterSizeBorn && <div><span className="font-semibold">Litter Size:</span> {record.litterSizeBorn}</div>}
+                                    </div>
+                                    {record.notes && <p className="text-xs text-gray-600 whitespace-pre-wrap">{record.notes}</p>}
+                                </div>
+                            ))}
+                        </div>
+                    </InfoCard>
+                )}
+                {/* Pregnancy History */}
+                {animal.pregnancyHistory && Array.isArray(animal.pregnancyHistory) && animal.pregnancyHistory.length > 0 && (
+                    <InfoCard title="Pregnancy History" icon={<Leaf size={18} className="text-gray-400" />}>
+                        <div className="space-y-2">
+                            <p className="text-sm text-gray-600">Total confirmations: {animal.pregnancyHistory.length}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {animal.pregnancyHistory.map((date, idx) => (
+                                    <div key={idx} className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
+                                        <span className="font-semibold">🤰 Confirmed:</span> {formatDate(date)}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </InfoCard>
                 )}

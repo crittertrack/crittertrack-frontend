@@ -24,7 +24,10 @@ const parseHealthRecords = (data) => {
 // New component for status
 const StatusIndicator = ({ status }) => {
     const statusStyles = {
+        'Excellent': 'bg-emerald-100 text-emerald-800',
         'Good': 'bg-green-100 text-green-800',
+        'Fair': 'bg-yellow-100 text-yellow-800',
+        'Poor': 'bg-orange-100 text-orange-800',
         'Under Observation': 'bg-yellow-100 text-yellow-800',
         'Under Treatment': 'bg-blue-100 text-blue-800',
         'Quarantined': 'bg-orange-100 text-orange-800',
@@ -78,7 +81,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                             <div className="flex items-center gap-2 p-2 bg-orange-50 border-l-4 border-orange-400">
                                 <AlertTriangle size={16} className="text-orange-500" />
                                 <div className="text-xs">
-                                    <p className="font-semibold text-orange-700">Quarantined</p>
+                                    <p className="font-semibold text-orange-700">⚠️ Currently Quarantined</p>
                                     <p className="text-gray-600">{animal.quarantineStatus.reason || 'No reason specified'}</p>
                                     {animal.quarantineStatus.endDate && <p className="text-gray-500">Until: {formatDate(animal.quarantineStatus.endDate)}</p>}
                                 </div>
@@ -93,15 +96,56 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                     </div>
                     {hasPreventiveCare ? (
                         <>
+                            {animal.parasitePreventionSchedule && (
+                                <div className="p-3 bg-blue-50 border-l-4 border-blue-400 rounded mb-4">
+                                    <p className="text-xs font-semibold text-blue-700 mb-2">📅 Upcoming Prevention Schedule</p>
+                                    <p className="text-sm text-blue-900">{animal.parasitePreventionSchedule}</p>
+                                </div>
+                            )}
                             {vaccinations.length > 0 && <DetailJsonList label={getLabel('vaccinations', 'Vaccinations')} data={vaccinations} renderItem={v => `${v.name} ${v.date ? `(${formatDate(v.date)})` : ''}`} />}
                             {dewormingRecords.length > 0 && <DetailJsonList label="Deworming Records" data={dewormingRecords} renderItem={r => `${r.medication} ${r.date ? `(${formatDate(r.date)})` : ''}`} />}
                             {parasiteControl.length > 0 && <DetailJsonList label="Parasite Control" data={parasiteControl} renderItem={r => `${r.treatment} ${r.date ? `(${formatDate(r.date)})` : ''}`} />}
-                            {animal.parasitePreventionSchedule && <InfoItem label={getLabel('parasitePreventionSchedule', 'Parasite Prevention Schedule')} value={animal.parasitePreventionSchedule} />}
                         </>
                     ) : (
                         <p className="text-sm text-gray-400">No preventive care records.</p>
                     )}
+
+                    {/* Quarantine Details - Inside Health Status Card */}
+                    {(() => {
+                        if (animal.quarantineDetails || animal.quarantineStatus) {
+                            const quarantine = animal.quarantineDetails || animal.quarantineStatus || {};
+                            const status = quarantine.status || (quarantine.active ? 'Quarantine' : 'None');
+                            
+                            if (!status || status === 'None') {
+                                return null;
+                            }
+                            
+                            return (
+                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                    <p className="text-xs font-semibold text-orange-700 mb-3">Quarantine Information</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <InfoItem label="Status" value={status} />
+                                        {(quarantine.type || quarantine.reason) && (
+                                            <InfoItem label="Type/Reason" value={quarantine.type || quarantine.reason || 'Not specified'} />
+                                        )}
+                                        {quarantine.reason && (
+                                            <InfoItem label="Details" value={quarantine.reason} />
+                                        )}
+                                        {quarantine.startDate && (
+                                            <InfoItem label="Start Date" value={formatDate(quarantine.startDate)} />
+                                        )}
+                                        {quarantine.endDate && (
+                                            <InfoItem label="End Date" value={formatDate(quarantine.endDate)} />
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })()}
                 </InfoCard>
+
+                {/* Quarantine Information - REMOVED - Now inside Health Status Card */}
 
                 <InfoCard title="Procedures & Diagnostics" icon={<Microscope size={18} className="text-gray-400" />}>
                     {hasProcedures ? (
@@ -141,12 +185,12 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                         <div className="space-y-3">
                             {animal.spayNeuterDate && <InfoItem label={getLabel('spayNeuterDate', 'Spay/Neuter Date')} value={formatDate(animal.spayNeuterDate)} />}
                             {animal.heartwormStatus && <InfoItem label={getLabel('heartwormStatus', 'Heartworm Status')} value={animal.heartwormStatus} />}
-                            {animal.hipElbowScores && <InfoItem label="Hip/Elbow Scores (Legacy)" value={animal.hipElbowScores} />}
-                            {animal.eyeClearance && <InfoItem label="Eye Clearance (Legacy)" value={animal.eyeClearance} />}
-                            {animal.cardiacClearance && <InfoItem label="Cardiac Clearance (Legacy)" value={animal.cardiacClearance} />}
-                            {animal.dentalRecords && <InfoItem label="Dental Records (Legacy)" value={animal.dentalRecords} />}
-                            {animal.geneticTestResults && <InfoItem label="Genetic Test Results (Legacy)" value={animal.geneticTestResults} />}
-                            {animal.chronicConditions && <InfoItem label="Chronic Conditions (Legacy)" value={animal.chronicConditions} />}
+                            {animal.hipElbowScores && <InfoItem label="Hip/Elbow Scores" value={animal.hipElbowScores} />}
+                            {animal.eyeClearance && <InfoItem label="Eye Clearance" value={animal.eyeClearance} />}
+                            {animal.cardiacClearance && <InfoItem label="Cardiac Clearance" value={animal.cardiacClearance} />}
+                            {animal.dentalRecords && <InfoItem label="Dental Records" value={animal.dentalRecords} />}
+                            {animal.geneticTestResults && <InfoItem label="Genetic Test Results" value={animal.geneticTestResults} />}
+                            {animal.chronicConditions && <InfoItem label="Chronic Conditions" value={animal.chronicConditions} />}
                             
                             <p className="text-xs text-gray-400 pt-2 border-t">Future structured clearances (example):</p>
                             <StructuredClearanceItem test="OFA Hips" score="Excellent" date="2026-05-10" certId="XX-12345E24M-VPI" />

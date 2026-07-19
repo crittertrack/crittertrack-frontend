@@ -3,8 +3,8 @@ import {
     X, Cat, Mars, Venus, Edit, Archive, Users, Heart, Tag, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Sprout,
     Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList, Hourglass,
-    Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info, Network,
-    Scale, HeartOff, Eye, EyeOff, RotateCcw,
+    Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info, Network, Star,
+    Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2,
 } from 'lucide-react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
@@ -37,7 +37,10 @@ const parseJsonArrayField = (data) => {
 
 const StatusIndicator = ({ status }) => {
     const statusStyles = {
+        'Excellent': 'bg-emerald-100 text-emerald-800',
         'Good': 'bg-green-100 text-green-800',
+        'Fair': 'bg-yellow-100 text-yellow-800',
+        'Poor': 'bg-orange-100 text-orange-800',
         'Under Observation': 'bg-yellow-100 text-yellow-800',
         'Under Treatment': 'bg-blue-100 text-blue-800',
         'Quarantined': 'bg-orange-100 text-orange-800',
@@ -76,6 +79,8 @@ const AnimalTestModal = ({
     handleRejectTransfer,
     breedingLineDefs = [], 
     animalBreedingLines = {},
+    toggleAnimalBreedingLine,
+    setAnimalBreedingLinesDirect,
     setShowImageModal,
     setEnlargedImageUrl
 }) => {
@@ -628,10 +633,171 @@ const AnimalTestModal = ({
                             <div>
                                 <InfoCard title="Recent Activity" icon={<Clock size={18} className="text-gray-400" />}>
                                     {(() => {
-                                        const milestones = parseJsonArrayField(animal.milestones).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-                                        if (milestones.length === 0) return <p className="text-sm text-gray-400">No recent activity.</p>;
-                                        return milestones.slice(0, 3).map((m, i) => (
-                                            <TimelineItem key={i} icon={<Calendar size={16} />} title={m.label} date={m.startDate} />
+                                        // Aggregate all timeline events
+                                        const timelineEvents = [];
+
+                                        // Milestones
+                                        const milestones = parseJsonArrayField(animal.milestones) || [];
+                                        milestones.forEach(m => {
+                                            if (m?.startDate) {
+                                                timelineEvents.push({
+                                                    date: new Date(m.startDate),
+                                                    icon: <Target size={14} className="text-purple-500" />,
+                                                    title: m.label || 'Milestone',
+                                                    displayDate: m.startDate
+                                                });
+                                            }
+                                        });
+
+                                        // Health events
+                                        if (animal.quarantineDetails?.startDate) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.quarantineDetails.startDate),
+                                                icon: <Shield size={14} className="text-orange-500" />,
+                                                title: 'Quarantine Started',
+                                                displayDate: animal.quarantineDetails.startDate
+                                            });
+                                        }
+
+                                        if (animal.spayNeuterDate) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.spayNeuterDate),
+                                                icon: <Stethoscope size={14} className="text-red-500" />,
+                                                title: 'Spay/Neuter Surgery',
+                                                displayDate: animal.spayNeuterDate
+                                            });
+                                        }
+
+                                        (parseJsonArrayField(animal.vetVisits) || []).forEach((visit, idx) => {
+                                            if (visit?.date) {
+                                                timelineEvents.push({
+                                                    date: new Date(visit.date),
+                                                    icon: <Stethoscope size={14} className="text-blue-500" />,
+                                                    title: 'Vet Visit',
+                                                    displayDate: visit.date
+                                                });
+                                            }
+                                        });
+
+                                        (parseJsonArrayField(animal.vaccinations) || []).forEach((vacc, idx) => {
+                                            if (vacc?.date) {
+                                                timelineEvents.push({
+                                                    date: new Date(vacc.date),
+                                                    icon: <Droplets size={14} className="text-green-500" />,
+                                                    title: 'Vaccination',
+                                                    displayDate: vacc.date
+                                                });
+                                            }
+                                        });
+
+                                        // Breeding events
+                                        if (animal.lastHeatDate) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.lastHeatDate),
+                                                icon: <Heart size={14} className="text-pink-500" />,
+                                                title: 'Heat Cycle',
+                                                displayDate: animal.lastHeatDate
+                                            });
+                                        }
+
+                                        if (animal.matingDate) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.matingDate),
+                                                icon: <Heart size={14} className="text-red-500" />,
+                                                title: 'Mating',
+                                                displayDate: animal.matingDate
+                                            });
+                                        }
+
+                                        if (animal.expectedDueDate) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.expectedDueDate),
+                                                icon: <Heart size={14} className="text-pink-600" />,
+                                                title: 'Expected Delivery',
+                                                displayDate: animal.expectedDueDate
+                                            });
+                                        }
+
+                                        (parseJsonArrayField(animal.breedingRecords) || []).forEach((record, idx) => {
+                                            if (record?.birthEventDate) {
+                                                timelineEvents.push({
+                                                    date: new Date(record.birthEventDate),
+                                                    icon: <Users size={14} className="text-emerald-500" />,
+                                                    title: 'Birth/Hatching Event',
+                                                    displayDate: record.birthEventDate
+                                                });
+                                            }
+                                        });
+
+                                        if (animal.weaningDate) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.weaningDate),
+                                                icon: <Users size={14} className="text-teal-500" />,
+                                                title: 'Weaning',
+                                                displayDate: animal.weaningDate
+                                            });
+                                        }
+
+                                        // Keeper events
+                                        (animal.ownershipHistory || []).forEach((ownership, idx) => {
+                                            if (ownership?.startDate) {
+                                                timelineEvents.push({
+                                                    date: new Date(ownership.startDate),
+                                                    icon: <User size={14} className="text-slate-500" />,
+                                                    title: 'Keeper Changed',
+                                                    displayDate: ownership.startDate
+                                                });
+                                            }
+                                        });
+
+                                        if (animal.purchaseDate) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.purchaseDate),
+                                                icon: <User size={14} className="text-indigo-500" />,
+                                                title: 'Animal Purchased',
+                                                displayDate: animal.purchaseDate
+                                            });
+                                        }
+
+                                        if (animal.saleDate) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.saleDate),
+                                                icon: <User size={14} className="text-violet-500" />,
+                                                title: 'Animal Sold',
+                                                displayDate: animal.saleDate
+                                            });
+                                        }
+
+                                        // Show events
+                                        (parseJsonArrayField(animal.shows) || []).forEach((show, idx) => {
+                                            if (show?.date) {
+                                                timelineEvents.push({
+                                                    date: new Date(show.date),
+                                                    icon: <Medal size={14} className="text-amber-500" />,
+                                                    title: `Show: ${show.showName}${show.titleEarned ? ` - ${show.titleEarned}` : ''}`,
+                                                    displayDate: show.date
+                                                });
+                                            }
+                                        });
+
+                                        // Status changes
+                                        if (animal.dateOfDeath) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.dateOfDeath),
+                                                icon: <AlertTriangle size={14} className="text-gray-600" />,
+                                                title: 'Animal Deceased',
+                                                displayDate: animal.dateOfDeath
+                                            });
+                                        }
+
+                                        // Sort by date (most recent first) and take top 5
+                                        const recentEvents = timelineEvents
+                                            .sort((a, b) => b.date - a.date)
+                                            .slice(0, 5);
+
+                                        if (recentEvents.length === 0) return <p className="text-sm text-gray-400">No recent activity.</p>;
+                                        return recentEvents.map((event, i) => (
+                                            <TimelineItem key={i} icon={event.icon} title={event.title} date={event.displayDate} />
                                         ));
                                     })()}
                                 </InfoCard>
@@ -1177,6 +1343,8 @@ const AnimalTestModal = ({
                             animal={animal}
                             breedingLineDefs={breedingLineDefs}
                             animalBreedingLines={animalBreedingLines}
+                            toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                            setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
                         />
                     )}
                     {activeTab === 'appearance' && (

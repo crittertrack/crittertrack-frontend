@@ -15,7 +15,13 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data : [];
 };
 
-export const IdentificationTabContent = ({ animal, breedingLineDefs = [], animalBreedingLines = {} }) => {
+export const IdentificationTabContent = ({ 
+    animal, 
+    breedingLineDefs = [], 
+    animalBreedingLines = {},
+    toggleAnimalBreedingLine,
+    setAnimalBreedingLinesDirect
+}) => {
     return (
         <div className="space-y-6">
             <InfoCard title="Identification Numbers" icon={<Hash size={18} className="text-gray-400" />}>
@@ -57,13 +63,75 @@ export const IdentificationTabContent = ({ animal, breedingLineDefs = [], animal
                     )}
             </InfoCard>
             <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400" />}>
-                    {breedingLineDefs.length > 0 && (animalBreedingLines[animal.id_public] || []).length > 0 ? (
-                            <div className="flex flex-wrap gap-2">
-                                {(animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean).map(line => <span key={line.id} style={{ backgroundColor: line.color, color: '#fff' }} className="text-xs font-semibold px-2 py-0.5 rounded-full">{line.name}</span>)}
+                {(() => {
+                    const namedLines = breedingLineDefs.filter(l => l.name);
+                    if (namedLines.length === 0) {
+                        return <p className="text-sm text-gray-400">No breeding lines available.</p>;
+                    }
+
+                    const assignedIds = animalBreedingLines[animal.id_public] || [];
+                    
+                    // Compute lines inherited from parents
+                    const sireId = animal.sireId_public || animal.fatherId_public;
+                    const damId = animal.damId_public || animal.motherId_public;
+                    const parentLineIds = [...new Set([
+                        ...(sireId ? (animalBreedingLines[sireId] || []) : []),
+                        ...(damId ? (animalBreedingLines[damId] || []) : []),
+                    ])];
+                    const uninheritedParentLines = parentLineIds.filter(id => !assignedIds.includes(id));
+                    const inheritedLineNames = uninheritedParentLines
+                        .map(id => breedingLineDefs.find(l => l.id === id)?.name)
+                        .filter(Boolean);
+
+                    return (
+                        <div>
+                            <div className="flex items-center justify-end flex-wrap gap-2 -mt-2 -mr-1 mb-3">
+                                {uninheritedParentLines.length > 0 && setAnimalBreedingLinesDirect && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const merged = [...new Set([
+                                                ...assignedIds,
+                                                ...parentLineIds
+                                            ])];
+                                            setAnimalBreedingLinesDirect(animal.id_public, merged);
+                                        }}
+                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-400 text-purple-700 bg-purple-50 hover:bg-purple-100 text-xs font-medium transition"
+                                        title={`Inherit: ${inheritedLineNames.join(', ')}`}
+                                    >
+                                        <span>↑</span> Inherit from parents
+                                    </button>
+                                )}
                             </div>
-                    ) : (
-                        <p className="text-sm text-gray-400">No breeding lines assigned.</p>
-                    )}
+                            <div className="flex flex-wrap gap-2">
+                                {namedLines.map(l => {
+                                    const assigned = assignedIds.includes(l.id);
+                                    return (
+                                        <button 
+                                            key={l.id} 
+                                            type="button"
+                                            onClick={() => toggleAnimalBreedingLine && toggleAnimalBreedingLine(animal.id_public, l.id)}
+                                            disabled={!toggleAnimalBreedingLine}
+                                            style={{ 
+                                                borderColor: l.color, 
+                                                color: assigned ? '#fff' : l.color, 
+                                                backgroundColor: assigned ? l.color : 'transparent',
+                                                opacity: toggleAnimalBreedingLine ? 1 : 0.6,
+                                                cursor: toggleAnimalBreedingLine ? 'pointer' : 'default'
+                                            }}
+                                            className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition"
+                                        >
+                                            <span>&#x25C6;</span> {l.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {assignedIds.length === 0 && parentLineIds.length === 0 && (
+                                <p className="text-sm text-gray-400 mt-2">No breeding lines assigned.</p>
+                            )}
+                        </div>
+                    );
+                })()}
             </InfoCard>
         </div>
     );

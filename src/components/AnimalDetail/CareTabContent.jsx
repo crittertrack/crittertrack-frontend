@@ -35,8 +35,11 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
     const sheddingRecords = parseJsonField(animal.sheddingRecords);
     const moltingRecords = parseJsonField(animal.moltingRecords);
     const waterParameterChecks = parseJsonField(animal.waterParameterChecks);
+    const dietSupplies = parseJsonField(animal.dietSupplies);
+    const supplementSupplies = parseJsonField(animal.supplementSupplies);
+    const nutritionSchedule = animal.nutritionSchedule ? (typeof animal.nutritionSchedule === 'string' ? JSON.parse(animal.nutritionSchedule) : animal.nutritionSchedule) : null;
 
-    const hasNutrition = animal.dietType || animal.feedingSchedule || animal.supplements;
+    const hasNutrition = animal.dietType || animal.feedingSchedule || animal.supplements || dietSupplies.length > 0 || supplementSupplies.length > 0 || nutritionSchedule;
     const hasHousing = animal.housingType || animal.bedding || animal.enrichment;
     const hasEnvironment = animal.temperatureRange || animal.humidity || animal.lighting || animal.noise || animal.lastBulbChange;
     const hasGrooming = animal.groomingNeeds || animal.sheddingLevel;
@@ -46,17 +49,37 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
             {/* Nutrition & Feeding */}
             <InfoCard title="Nutrition & Feeding" icon={<UtensilsCrossed size={18} className="text-gray-400" />}>
                 {hasNutrition || animal.portionSize || animal.feedingMethod || animal.waterAccess || animal.feedingBehaviorNotes || animal.lastFedDate || animal.feedingFrequencyDays ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {animal.dietType && <InfoItem label="Diet Type" value={animal.dietType} />}
-                        {animal.feedingSchedule && <InfoItem label="Feeding Schedule" value={animal.feedingSchedule} />}
-                        {animal.portionSize && <InfoItem label="Portion Size" value={animal.portionSize} />}
-                        {animal.feedingMethod && <InfoItem label="Feeding Method" value={animal.feedingMethod} />}
-                        {animal.feedingLocation && <InfoItem label="Feeding Location" value={animal.feedingLocation} />}
-                        {animal.waterAccess && <InfoItem label="Water Access" value={animal.waterAccess} />}
-                        {animal.lastFedDate && <InfoItem label="Last Fed Date" value={formatDate(animal.lastFedDate)} />}
-                        {animal.feedingFrequencyDays && <InfoItem label="Feeding Frequency" value={`Every ${animal.feedingFrequencyDays} days`} />}
-                        {animal.supplements && <InfoItem label="Supplements" value={animal.supplements} />}
-                        {animal.feedingBehaviorNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Feeding Behavior Notes"><p className="whitespace-pre-wrap text-sm">{animal.feedingBehaviorNotes}</p></InfoItem></div>}
+                    <div className="space-y-4">
+                        {nutritionSchedule && (
+                            <div className="p-3 bg-green-50 border-l-4 border-green-400 rounded mb-4">
+                                <p className="text-xs font-semibold text-green-700 mb-2">📋 Nutrition Schedule</p>
+                                <div className="text-sm text-green-900 space-y-1">
+                                    <p><strong>Status:</strong> {nutritionSchedule.enabled ? 'Active' : 'Inactive'}</p>
+                                    {nutritionSchedule.startDate && <p><strong>Started:</strong> {formatDate(nutritionSchedule.startDate)}</p>}
+                                    {nutritionSchedule.frequency && nutritionSchedule.unit && <p><strong>Frequency:</strong> Every {nutritionSchedule.frequency} {nutritionSchedule.unit}</p>}
+                                    {nutritionSchedule.timesPerDay && <p><strong>Daily Feedings:</strong> {nutritionSchedule.timesPerDay}x</p>}
+                                    {nutritionSchedule.notes && <p><strong>Notes:</strong> {nutritionSchedule.notes}</p>}
+                                </div>
+                            </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {animal.dietType && <InfoItem label="Diet Type" value={animal.dietType} />}
+                            {animal.feedingSchedule && <InfoItem label="Feeding Schedule" value={animal.feedingSchedule} />}
+                            {animal.portionSize && <InfoItem label="Portion Size" value={animal.portionSize} />}
+                            {animal.feedingMethod && <InfoItem label="Feeding Method" value={animal.feedingMethod} />}
+                            {animal.feedingLocation && <InfoItem label="Feeding Location" value={animal.feedingLocation} />}
+                            {animal.waterAccess && <InfoItem label="Water Access" value={animal.waterAccess} />}
+                            {animal.lastFedDate && <InfoItem label="Last Fed Date" value={formatDate(animal.lastFedDate)} />}
+                            {animal.feedingFrequencyDays && <InfoItem label="Feeding Frequency" value={`Every ${animal.feedingFrequencyDays} days`} />}
+                            {animal.supplements && <InfoItem label="Supplements" value={animal.supplements} />}
+                        </div>
+                        {(dietSupplies.length > 0 || supplementSupplies.length > 0) && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
+                                {dietSupplies.length > 0 && <DetailJsonList label="Diet Supplies" data={dietSupplies} renderItem={d => d.name ? `${d.name}${d.quantity ? ` (${d.quantity})` : ''}` : 'Diet supply'} />}
+                                {supplementSupplies.length > 0 && <DetailJsonList label="Supplement Supplies" data={supplementSupplies} renderItem={s => s.name ? `${s.name}${s.dosage ? ` (${s.dosage})` : ''}` : 'Supplement'} />}
+                            </div>
+                        )}
+                        {animal.feedingBehaviorNotes && <div className="md:col-span-2 lg:col-span-3 pt-2 border-t"><InfoItem label="Feeding Behavior Notes"><p className="whitespace-pre-wrap text-sm">{animal.feedingBehaviorNotes}</p></InfoItem></div>}
                     </div>
                 ) : <p className="text-sm text-gray-400">No nutrition information.</p>}
             </InfoCard>

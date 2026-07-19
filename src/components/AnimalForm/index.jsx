@@ -33,6 +33,7 @@ import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
+import LoadingSpinner from '../shared/LoadingSpinner';
 import AnimalFormTestModal from './AnimalFormTestModal';
 
 const getPedigreeCacheKey = (rootId, authToken) => {
