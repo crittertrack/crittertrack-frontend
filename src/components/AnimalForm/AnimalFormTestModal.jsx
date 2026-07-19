@@ -1172,6 +1172,15 @@ const AnimalFormTestModal = ({
         breederOwner: true,
         availability: true,
     });
+
+    // Persist section collapse state in localStorage to survive re-renders
+    useEffect(() => {
+        try {
+            localStorage.setItem('crittertrack_sections_collapsed', JSON.stringify(sectionsCollapsed));
+        } catch (e) {
+            // Ignore localStorage errors
+        }
+    }, [sectionsCollapsed]);
     const [newIdentifier, setNewIdentifier] = useState({ title: '', value: '' });
 
     // Timeline tab states
@@ -2727,59 +2736,66 @@ const AnimalFormTestModal = ({
 
                                 {/* Right Column: Identity Fields */}
                                 <div className="w-3/4 flex-1 flex flex-col gap-4">
-                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
-                                        <h3 className="text-base font-semibold text-gray-700 border-b pb-2">Identity</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Prefix</label>
-                                                <input type="text" name="prefix" value={formData.prefix} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Name*</label>
-                                                <input type="text" name="name" value={formData.name} onChange={handleChange} required
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Suffix</label>
-                                                <input type="text" name="suffix" value={formData.suffix} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Gender*</label>
-                                                <select name="gender" value={formData.gender} onChange={handleChange} required
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                    {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Date of Birth</label>
-                                                <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Status*</label>
-                                                <select name="status" value={formData.status} onChange={handleChange} required
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                    {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                                                </select>
-                                            </div>
-                                            {formData.status === 'Deceased' && (
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Date of Death</label>
-                                                    <input type="date" name="dateOfDeath" value={formData.dateOfDeath} onChange={handleChange}
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                        <button type="button" onClick={() => toggleSection('identity')} className="w-full flex justify-between items-center text-left">
+                                            <h3 className="text-base font-semibold text-gray-700">Identity</h3>
+                                            {sectionsCollapsed.identity ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                        </button>
+                                        {!sectionsCollapsed.identity && (
+                                            <div className="mt-3 pt-3 border-t space-y-3">
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Prefix</label>
+                                                        <input type="text" name="prefix" value={formData.prefix} onChange={handleChange}
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Name*</label>
+                                                        <input type="text" name="name" value={formData.name} onChange={handleChange} required
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Suffix</label>
+                                                        <input type="text" name="suffix" value={formData.suffix} onChange={handleChange}
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    </div>
                                                 </div>
-                                            )}
-                                        </div>
-                                        <div className="md:col-span-3">
-                                            <label className="block text-xs font-medium text-gray-700">Remarks</label>
-                                            <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="3"
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                placeholder="General notes, observations, and records..." />
-                                        </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Gender*</label>
+                                                        <select name="gender" value={formData.gender} onChange={handleChange} required
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                            {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Date of Birth</label>
+                                                        <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()}
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Status*</label>
+                                                        <select name="status" value={formData.status} onChange={handleChange} required
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                                        </select>
+                                                    </div>
+                                                    {formData.status === 'Deceased' && (
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-gray-700">Date of Death</label>
+                                                            <input type="date" name="dateOfDeath" value={formData.dateOfDeath} onChange={handleChange}
+                                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="md:col-span-3">
+                                                    <label className="block text-xs font-medium text-gray-700">Remarks</label>
+                                                    <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="3"
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                        placeholder="General notes, observations, and records..." />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Breeder & Keeper */}
