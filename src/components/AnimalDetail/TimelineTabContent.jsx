@@ -27,40 +27,40 @@ const getEventIcon = (type) => {
 };
 
 const TimelineEvent = ({ event, notes, isPinned }) => (
-    <div className="relative pl-10 pb-8 group">
+    <div className="relative pl-10 pb-6 group">
         {/* Vertical line */}
-        <div className="absolute top-2 left-4 -ml-px h-full w-0.5 bg-gray-200 group-last:hidden"></div>
+        <div className="absolute top-3 left-4 -ml-px h-full w-0.5 bg-purple-500 group-last:hidden"></div>
         {/* Icon */}
         <div className="flex items-center absolute top-0 left-0">
-            <div className={`rounded-full h-8 w-8 flex items-center justify-center ring-4 ring-white ${
-                isPinned ? 'bg-yellow-200 text-yellow-700' : 'bg-gray-200 text-gray-600'
+            <div className={`rounded-full h-9 w-9 flex items-center justify-center ring-4 shadow-sm ${
+                isPinned ? 'bg-yellow-300 text-yellow-800 ring-yellow-100' : 'bg-white text-gray-700 ring-gray-100 border border-gray-300'
             }`}>
                 {isPinned ? <Star size={14} fill="currentColor" /> : getEventIcon(event.type)}
             </div>
         </div>
         {/* Content */}
-        <div className="ml-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between mb-1">
+        <div className="ml-2 bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2 mb-1">
                 <div>
-                    <p className={`font-semibold ${isPinned ? 'text-yellow-700' : 'text-gray-800'}`}>
+                    <p className={`font-semibold text-sm ${isPinned ? 'text-yellow-800' : 'text-gray-900'}`}>
                         {event.title}
                         {isPinned && <Star size={12} className="inline ml-1" fill="currentColor" />}
                     </p>
-                    <p className="text-xs text-gray-500 capitalize">{event.type}</p>
+                    <p className={`text-xs font-medium capitalize ${isPinned ? 'text-yellow-700' : 'text-gray-600'}`}>{event.type}</p>
                 </div>
-                <time className="text-xs text-gray-400 sm:ml-4 whitespace-nowrap mt-1 sm:mt-0">{formatDate(event.date)}</time>
+                <time className="text-xs font-medium text-gray-600 whitespace-nowrap">{formatDate(event.date)}</time>
             </div>
-            {event.description && <p className="text-xs text-gray-600 mb-2">{event.description}</p>}
+            {event.description && <p className="text-xs text-gray-700 mb-2">{event.description}</p>}
             {notes && notes.length > 0 && (
                 <div className="mt-2 space-y-1">
                     {notes.map(note => (
-                        <div key={note.id} className="text-xs bg-blue-50 p-2 rounded border border-blue-200">
-                            <div className="flex gap-1 mb-1 items-center text-blue-700">
+                        <div key={note.id} className="text-xs bg-blue-50 p-2 rounded border border-blue-300">
+                            <div className="flex gap-1 mb-1 items-center text-blue-800 font-medium">
                                 <MessageSquare size={12} />
-                                <span className="font-semibold">Note</span>
+                                <span>Note</span>
                             </div>
-                            <p className="text-gray-700">{note.noteText}</p>
-                            <p className="text-gray-400 text-[10px] mt-1">{formatDate(note.dateAdded)}</p>
+                            <p className="text-gray-800">{note.noteText}</p>
+                            <p className="text-gray-600 text-[10px] mt-1">{formatDate(note.dateAdded)}</p>
                         </div>
                     ))}
                 </div>
@@ -365,7 +365,7 @@ export const TimelineTabContent = ({ animal }) => {
 
     if (allEvents.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg text-gray-400">
+            <div className="bg-white rounded-lg p-6 flex flex-col items-center justify-center h-64 text-gray-400">
                 <Calendar size={48} className="mb-2" />
                 <p className="text-sm">No timeline events recorded.</p>
             </div>
@@ -373,20 +373,20 @@ export const TimelineTabContent = ({ animal }) => {
     }
 
     return (
-        <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+        <div className="bg-white rounded-lg p-6 space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 <Clock size={18} className="inline-block align-middle mr-2" /> 
                 Animal Timeline
             </h3>
 
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl mx-auto space-y-4">
                 {/* Pinned Events */}
                 {pinnedEventsList.length > 0 && (
-                    <div className="mb-6">
-                        <h4 className="text-sm font-semibold text-yellow-700 uppercase mb-3 flex items-center gap-2">
+                    <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                        <h4 className="text-sm font-semibold text-yellow-900 uppercase mb-4 flex items-center gap-2">
                             <Star size={14} fill="currentColor" /> Pinned Events
                         </h4>
-                        <div className="space-y-1">
+                        <div className="space-y-3">
                             {pinnedEventsList.map((event) => (
                                 <TimelineEvent 
                                     key={event.id} 
@@ -396,7 +396,6 @@ export const TimelineTabContent = ({ animal }) => {
                                 />
                             ))}
                         </div>
-                        {regularEventsList.length > 0 && <hr className="my-6" />}
                     </div>
                 )}
 
@@ -404,9 +403,9 @@ export const TimelineTabContent = ({ animal }) => {
                 {regularEventsList.length > 0 && (
                     <div>
                         {pinnedEventsList.length > 0 && (
-                            <h4 className="text-sm font-semibold text-gray-600 uppercase mb-3">All Events</h4>
+                            <h4 className="text-sm font-semibold text-gray-800 uppercase mb-4">All Events</h4>
                         )}
-                        <div className="space-y-1">
+                        <div className="space-y-3">
                             {regularEventsList.map((event) => (
                                 <TimelineEvent 
                                     key={event.id} 
