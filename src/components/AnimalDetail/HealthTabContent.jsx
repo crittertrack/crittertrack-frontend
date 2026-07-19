@@ -170,6 +170,5 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                     )}
                 </InfoCard>
             </div>
-        </div>
     );
 };

@@ -203,6 +203,5 @@ export const AppearanceTabContent = ({ animal, onUpdateAnimal, authToken, API_BA
                     );
                 })()}
             </div>
-        </div>
     );
 };

@@ -145,6 +145,5 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                     </InfoCard>
                 )}
             </div>
-        </div>
     );
 };
