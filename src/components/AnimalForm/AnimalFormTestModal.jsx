@@ -2730,8 +2730,12 @@ const AnimalFormTestModal = ({
                 payloadToSave.manualPedigree = mpEditForm;
             }
 
-            // Serialize array fields
-            const arrayFields = ['identifiers', 'vaccinations', 'dewormingRecords', 'parasiteControl', 'medicalProcedures', 'labResults', 'medicalConditions', 'allergies', 'medications', 'vetVisits', 'growthRecords', 'milestones', 'ownershipHistory', 'legalDocuments', 'careTasks', 'animalCareTasks', 'dietSupplies', 'supplementSupplies', 'breedingRecords', 'timelineNotes', 'pinnedEvents'];
+            // Serialize array fields that the backend schema stores as a JSON string.
+            // NOTE: Most array fields (growthRecords, vaccinations, milestones, breedingRecords, etc.)
+            // are real Mongoose embedded-array schemas on the backend and must be sent as actual
+            // arrays, NOT JSON strings, or `findOneAndUpdate` with runValidators will throw a
+            // "Cast to embedded failed" error. Only `identifiers` is stored as a String column.
+            const arrayFields = ['identifiers'];
 
             arrayFields.forEach(field => {
                 if (Array.isArray(payloadToSave[field]) && payloadToSave[field].length > 0) {
