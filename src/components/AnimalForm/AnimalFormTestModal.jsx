@@ -5351,7 +5351,6 @@ const AnimalFormTestModal = ({
                         )}
                     </div>
                 </div>
-            </form>
 
                 {parentSearchModalOpen && (
                     <ParentSearchModal
@@ -5415,6 +5414,7 @@ const AnimalFormTestModal = ({
                         </button>
                     </div>
                 </div>
+            </form>
         </div>
     );
 };
