@@ -3360,6 +3360,76 @@ const AnimalFormTestModal = ({
                                             );
                                         })()}
 
+                                        {/* Weight Growth Curve (shown once 2+ dated weight entries exist) */}
+                                        {(() => {
+                                            const records = parseJsonArrayField(formData.growthRecords) || [];
+                                            const sorted = records
+                                                .filter(r => r.date && r.weight && !isNaN(parseFloat(r.weight)))
+                                                .sort((a, b) => new Date(a.date) - new Date(b.date));
+                                            if (sorted.length < 2) return null;
+
+                                            const weights = sorted.map(r => parseFloat(r.weight));
+                                            const width = 500;
+                                            const height = 220;
+                                            const margin = { top: 16, right: 20, bottom: 36, left: 60 };
+                                            const graphWidth = width - margin.left - margin.right;
+                                            const graphHeight = height - margin.top - margin.bottom;
+
+                                            const minWeight = Math.min(...weights);
+                                            const maxWeight = Math.max(...weights);
+                                            const padding = (maxWeight - minWeight) * 0.1 || 5;
+                                            const chartMin = Math.max(0, minWeight - padding);
+                                            const chartMax = maxWeight + padding;
+                                            const range = chartMax - chartMin || 1;
+
+                                            const points = sorted.map((r, idx) => ({
+                                                x: margin.left + (idx / Math.max(1, sorted.length - 1)) * graphWidth,
+                                                y: margin.top + graphHeight - ((parseFloat(r.weight) - chartMin) / range) * graphHeight,
+                                                weight: r.weight,
+                                                date: r.date,
+                                                notes: r.notes,
+                                            }));
+
+                                            const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+                                            return (
+                                                <div className="bg-white p-3 rounded-lg border border-gray-200">
+                                                    <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                                        <span className="inline-block w-3 h-1 bg-blue-500 rounded"></span>
+                                                        Weight Growth Curve
+                                                    </h4>
+                                                    <svg width="100%" height="220" viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: '100%' }} preserveAspectRatio="xMidYMid meet">
+                                                        {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+                                                            const y = margin.top + graphHeight * (1 - ratio);
+                                                            const axisLabel = (chartMin + range * ratio).toFixed(1);
+                                                            return (
+                                                                <g key={`weight-grid-${i}`}>
+                                                                    <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
+                                                                    <text x={margin.left - 10} y={y} textAnchor="end" dy="0.3em" fontSize="10" fill="#666">{axisLabel}</text>
+                                                                </g>
+                                                            );
+                                                        })}
+                                                        <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke="#3b82f6" strokeWidth="2" />
+                                                        <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                                        {points.map((p, i) => (
+                                                            i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
+                                                                <text key={`weight-date-${i}`} x={p.x} y={height - margin.bottom + 16} textAnchor="middle" fontSize="9" fill="#666">
+                                                                    {new Date(p.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                                </text>
+                                                            )
+                                                        ))}
+                                                        <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                        {points.map((p, i) => (
+                                                            <circle key={`weight-point-${i}`} cx={p.x} cy={p.y} r="4" fill="#3b82f6" stroke="#fff" strokeWidth="1.5">
+                                                                <title>{`Date: ${p.date}\nWeight: ${p.weight} ${measurementUnits.weight}${p.notes ? `\nNotes: ${p.notes}` : ''}`}</title>
+                                                            </circle>
+                                                        ))}
+                                                    </svg>
+                                                    <p className="text-xs text-gray-500 mt-1">Hover over points to see exact values.</p>
+                                                </div>
+                                            );
+                                        })()}
+
                                         {/* Measurement Units */}
                                         <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                             <p className="text-xs font-medium text-gray-700 mb-2">Measurement Units</p>
@@ -4020,7 +4090,7 @@ const AnimalFormTestModal = ({
                                                 </div>
                                                 {dietMode === 'manual' ? (
                                                     <textarea
-                                                        value={Array.isArray(formData.dietSupplies) ? JSON.stringify(formData.dietSupplies, null, 0) : ''}
+                                                        value={Array.isArray(formData.dietSupplies) && formData.dietSupplies.length > 0 ? JSON.stringify(formData.dietSupplies, null, 0) : ''}
                                                         onChange={(e) => {
                                                             const raw = e.target.value;
                                                             try {
@@ -4100,7 +4170,7 @@ const AnimalFormTestModal = ({
                                                 {supplementMode === 'manual' ? (
                                                     <textarea
                                                         name="supplementSupplies"
-                                                        value={Array.isArray(formData.supplementSupplies) ? JSON.stringify(formData.supplementSupplies, null, 0) : ''}
+                                                        value={Array.isArray(formData.supplementSupplies) && formData.supplementSupplies.length > 0 ? JSON.stringify(formData.supplementSupplies, null, 0) : ''}
                                                         onChange={(e) => {
                                                             const raw = e.target.value;
                                                             try {
@@ -4488,7 +4558,7 @@ const AnimalFormTestModal = ({
                                     <div><label className="block text-xs font-medium text-gray-700">Social Structure</label><textarea name="socialStructure" value={formData.socialStructure} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Lives with 2 cage mates, solitary" /></div>
                                 </FormSection>
 
-                                <FormSection title="Temperament Assessment (1-5 Scale)" icon={<Brain size={16} />}>
+                                <FormSection title="Activity & Training" icon={<Brain size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Activity Cycle</label>
