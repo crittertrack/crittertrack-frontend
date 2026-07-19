@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
 import { formatDate } from '../../utils/dateFormatter';
+import { getCurrencySymbol } from '../../utils/locationUtils';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
 
@@ -1967,10 +1968,12 @@ const AnimalFormTestModal = ({
             purchaseDate: animalToEdit.purchaseDate ? new Date(animalToEdit.purchaseDate).toISOString().substring(0, 10) : '',
             purchaseLocation: animalToEdit.purchaseLocation || '',
             purchasePrice: animalToEdit.purchasePrice || '',
+            purchasePriceCurrency: animalToEdit.purchasePriceCurrency || 'USD',
             sellerName: animalToEdit.sellerName || '',
             sellerContact: animalToEdit.sellerContact || '',
             saleDate: animalToEdit.saleDate ? new Date(animalToEdit.saleDate).toISOString().substring(0, 10) : '',
             salePrice: animalToEdit.salePrice || '',
+            salePriceCurrency: animalToEdit.salePriceCurrency || 'USD',
             buyerName: animalToEdit.buyerName || '',
             buyerContact: animalToEdit.buyerContact || '',
             breedingRightsPurchased: animalToEdit.breedingRightsPurchased || '',
@@ -2156,10 +2159,12 @@ const AnimalFormTestModal = ({
             purchaseDate: '',
             purchaseLocation: '',
             purchasePrice: '',
+            purchasePriceCurrency: 'USD',
             sellerName: '',
             sellerContact: '',
             saleDate: '',
             salePrice: '',
+            salePriceCurrency: 'USD',
             buyerName: '',
             buyerContact: '',
             breedingRightsPurchased: '',
@@ -2558,7 +2563,7 @@ const AnimalFormTestModal = ({
                 if (ownership?.startDate) addEvent('keeper', ownership.startDate, 'Keeper Changed', `New keeper: ${ownership.ownerName || 'Unknown'}`, `keeper-${ownership.startDate}-${idx}`);
             });
             if (formData.purchaseDate) {
-                addEvent('keeper', formData.purchaseDate, 'Animal Purchased', `Purchased for: ${formData.purchasePrice ? `${getCurrencySymbol(formData.salePriceCurrency)}${formData.purchasePrice}` : 'Unknown price'}`);
+                addEvent('keeper', formData.purchaseDate, 'Animal Purchased', `Purchased for: ${formData.purchasePrice ? `${getCurrencySymbol(formData.purchasePriceCurrency)}${formData.purchasePrice}` : 'Unknown price'}`);
             }
             if (formData.saleDate) {
                 addEvent('keeper', formData.saleDate, 'Animal Sold', `Sold for: ${formData.salePrice ? `${getCurrencySymbol(formData.salePriceCurrency)}${formData.salePrice}` : 'Unknown price'}`);
@@ -5898,7 +5903,10 @@ const AnimalFormTestModal = ({
                                 <FormSection title="Sale & Purchase" icon={<DollarSign size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">
                                         <div><label className="block text-xs font-medium text-gray-700">Purchase Date</label><input type="date" name="purchaseDate" value={formData.purchaseDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Purchase Price</label><input type="text" name="purchasePrice" value={formData.purchasePrice} onChange={handleChange} placeholder="e.g., $500, €250" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div className="flex gap-2">
+                                            <div className="flex-1"><label className="block text-xs font-medium text-gray-700">Purchase Price</label><input type="text" name="purchasePrice" value={formData.purchasePrice} onChange={handleChange} placeholder="e.g., 500, 250" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                            <div className="w-24"><label className="block text-xs font-medium text-gray-700">Currency</label><select name="purchasePriceCurrency" value={formData.purchasePriceCurrency} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="USD">USD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="CAD">CAD C$</option><option value="AUD">AUD A$</option><option value="JPY">JPY ¥</option><option value="CHF">CHF</option><option value="INR">INR ₹</option><option value="AED">AED د.إ</option></select></div>
+                                        </div>
                                         <div><label className="block text-xs font-medium text-gray-700">Seller/Breeder Name</label><input type="text" name="sellerName" value={formData.sellerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                         <div>
                                             <div className="flex items-center justify-between">
@@ -5910,7 +5918,10 @@ const AnimalFormTestModal = ({
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">
                                         <div><label className="block text-xs font-medium text-gray-700">Sale Date</label><input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Sale Price</label><input type="text" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="e.g., $800, €400" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div className="flex gap-2">
+                                            <div className="flex-1"><label className="block text-xs font-medium text-gray-700">Sale Price</label><input type="text" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="e.g., 800, 400" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                            <div className="w-24"><label className="block text-xs font-medium text-gray-700">Currency</label><select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="USD">USD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="CAD">CAD C$</option><option value="AUD">AUD A$</option><option value="JPY">JPY ¥</option><option value="CHF">CHF</option><option value="INR">INR ₹</option><option value="AED">AED د.إ</option></select></div>
+                                        </div>
                                         <div><label className="block text-xs font-medium text-gray-700">Buyer Name</label><input type="text" name="buyerName" value={formData.buyerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                         <div>
                                             <div className="flex items-center justify-between">
