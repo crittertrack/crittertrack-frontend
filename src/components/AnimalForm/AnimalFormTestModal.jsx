@@ -2737,9 +2737,11 @@ const AnimalFormTestModal = ({
                                 {/* Right Column: Identity Fields */}
                                 <div className="w-3/4 flex-1 flex flex-col gap-4">
                                     <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                        <button type="button" onClick={() => toggleSection('identity')} className="w-full flex justify-between items-center text-left">
+                                        <button type="button" onClick={() => toggleSection('identity')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
                                             <h3 className="text-base font-semibold text-gray-700">Identity</h3>
-                                            {sectionsCollapsed.identity ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                            <div className="text-gray-700 flex-shrink-0">
+                                                {sectionsCollapsed.identity ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                            </div>
                                         </button>
                                         {!sectionsCollapsed.identity && (
                                             <div className="mt-3 pt-3 border-t space-y-3">
@@ -2800,9 +2802,11 @@ const AnimalFormTestModal = ({
 
                                     {/* Breeder & Keeper */}
                                     <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                        <button type="button" onClick={() => toggleSection('breederOwner')} className="w-full flex justify-between items-center text-left">
+                                        <button type="button" onClick={() => toggleSection('breederOwner')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
                                             <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><User size={16} />Breeder & Owner</h3>
-                                            {sectionsCollapsed.breederOwner ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                            <div className="text-gray-700 flex-shrink-0">
+                                                {sectionsCollapsed.breederOwner ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                            </div>
                                         </button>
                                         {!sectionsCollapsed.breederOwner && (
                                             <div className="mt-3 pt-3 border-t space-y-3">
@@ -2848,9 +2852,11 @@ const AnimalFormTestModal = ({
 
                                     {/* Availability */}
                                     <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                        <button type="button" onClick={() => toggleSection('availability')} className="w-full flex justify-between items-center text-left">
+                                        <button type="button" onClick={() => toggleSection('availability')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
                                             <h3 className="text-base font-semibold text-gray-700">Availability</h3>
-                                            {sectionsCollapsed.availability ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                            <div className="text-gray-700 flex-shrink-0">
+                                                {sectionsCollapsed.availability ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                            </div>
                                         </button>
                                         {!sectionsCollapsed.availability && (
                                             <div className="mt-3 pt-3 border-t space-y-3">
