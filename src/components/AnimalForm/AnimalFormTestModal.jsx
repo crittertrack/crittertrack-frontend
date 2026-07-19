@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import {
     ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock, Shield, Pill, Microscope, Stethoscope, Scissors, MessageSquare, AlertTriangle, Activity, Cat,
@@ -360,8 +360,11 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
     const [cropBox, setCropBox] = useState({ x: 0, y: 0, width: 100, height: 100 });
     const [processing, setProcessing] = useState(false);
     const [fileSizeWarning, setFileSizeWarning] = useState('');
+    const [imageBox, setImageBox] = useState(null); // rendered image position/size relative to preview container
     const canvasRef = useRef(null);
     const imgRef = useRef(null);
+    const previewContainerRef = useRef(null);
+    const dragStateRef = useRef(null);
 
     const MAX_FILE_SIZE = 200 * 1024; // 200KB
 
@@ -374,6 +377,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
             reader.readAsDataURL(files[currentIndex]);
             setRotation(0);
             setCropMode(false);
+            setCropBox({ x: 0, y: 0, width: 100, height: 100 });
             setFileSizeWarning('');
         }
     }, [currentIndex, files]);
@@ -387,6 +391,96 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
         transformOrigin: 'center',
         transition: 'transform 0.3s ease'
     });
+
+    // Recompute the rendered image's box relative to the preview container so the
+    // crop overlay can be positioned/sized correctly (accounts for object-contain
+    // scaling and CSS rotation transforms).
+    const updateImageBox = useCallback(() => {
+        if (!imgRef.current || !previewContainerRef.current) return;
+        const imgRect = imgRef.current.getBoundingClientRect();
+        const containerRect = previewContainerRef.current.getBoundingClientRect();
+        if (imgRect.width === 0 || imgRect.height === 0) return;
+        setImageBox({
+            left: imgRect.left - containerRect.left,
+            top: imgRect.top - containerRect.top,
+            width: imgRect.width,
+            height: imgRect.height,
+        });
+    }, []);
+
+    useEffect(() => {
+        // Rotation changes the visual bounding box (getBoundingClientRect reflects
+        // the CSS transform), so recompute after the rotation transition settles.
+        updateImageBox();
+        const timeout = setTimeout(updateImageBox, 320);
+        window.addEventListener('resize', updateImageBox);
+        return () => {
+            clearTimeout(timeout);
+            window.removeEventListener('resize', updateImageBox);
+        };
+    }, [rotation, currentIndex, updateImageBox]);
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+    const handleCropDragStart = (e, mode) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!imgRef.current) return;
+        const imageRect = imgRef.current.getBoundingClientRect();
+        dragStateRef.current = {
+            mode,
+            startCropBox: { ...cropBox },
+            imageRect,
+            startClientX: e.clientX,
+            startClientY: e.clientY,
+        };
+        window.addEventListener('mousemove', handleCropDragMove);
+        window.addEventListener('mouseup', handleCropDragEnd);
+    };
+
+    const handleCropDragMove = (e) => {
+        const drag = dragStateRef.current;
+        if (!drag || !drag.imageRect.width || !drag.imageRect.height) return;
+        const { mode, startCropBox, imageRect, startClientX, startClientY } = drag;
+        const dxPct = ((e.clientX - startClientX) / imageRect.width) * 100;
+        const dyPct = ((e.clientY - startClientY) / imageRect.height) * 100;
+        const MIN_SIZE = 5;
+
+        if (mode === 'move') {
+            const x = clamp(startCropBox.x + dxPct, 0, 100 - startCropBox.width);
+            const y = clamp(startCropBox.y + dyPct, 0, 100 - startCropBox.height);
+            setCropBox((prev) => ({ ...prev, x: Math.round(x), y: Math.round(y) }));
+            return;
+        }
+
+        let left = startCropBox.x;
+        let top = startCropBox.y;
+        let right = startCropBox.x + startCropBox.width;
+        let bottom = startCropBox.y + startCropBox.height;
+
+        if (mode.includes('l')) left = clamp(startCropBox.x + dxPct, 0, right - MIN_SIZE);
+        if (mode.includes('r')) right = clamp(right + dxPct, left + MIN_SIZE, 100);
+        if (mode.includes('t')) top = clamp(startCropBox.y + dyPct, 0, bottom - MIN_SIZE);
+        if (mode.includes('b')) bottom = clamp(bottom + dyPct, top + MIN_SIZE, 100);
+
+        setCropBox({
+            x: Math.round(left),
+            y: Math.round(top),
+            width: Math.round(right - left),
+            height: Math.round(bottom - top),
+        });
+    };
+
+    const handleCropDragEnd = () => {
+        dragStateRef.current = null;
+        window.removeEventListener('mousemove', handleCropDragMove);
+        window.removeEventListener('mouseup', handleCropDragEnd);
+    };
+
+    useEffect(() => () => {
+        window.removeEventListener('mousemove', handleCropDragMove);
+        window.removeEventListener('mouseup', handleCropDragEnd);
+    }, []);
 
     const processCurrentImage = async () => {
         const file = files[currentIndex];
@@ -432,7 +526,10 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
             if (currentIndex < files.length - 1) {
                 setCurrentIndex((i) => i + 1);
             } else {
-                onComplete(processedImages.slice(1)); // Skip this iteration's added image to avoid duplication
+                setProcessedImages((prev) => {
+                    onComplete(prev);
+                    return prev;
+                });
             }
         } catch (error) {
             console.error('Image processing error:', error);
@@ -562,13 +659,43 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                 {/* Content */}
                 <div className="p-6 space-y-4">
                     {/* Preview */}
-                    <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center h-96 overflow-hidden">
+                    <div ref={previewContainerRef} className="relative bg-gray-100 rounded-lg p-4 flex items-center justify-center h-96 overflow-hidden">
                         <img
                             ref={imgRef}
                             style={getRotationStyle()}
                             className="max-w-full max-h-full object-contain"
                             alt="Preview"
+                            onLoad={updateImageBox}
                         />
+                        {cropMode && imageBox && (
+                            <div
+                                onMouseDown={(e) => handleCropDragStart(e, 'move')}
+                                className="absolute border-2 border-primary bg-primary/10 cursor-move"
+                                style={{
+                                    left: imageBox.left + (cropBox.x / 100) * imageBox.width,
+                                    top: imageBox.top + (cropBox.y / 100) * imageBox.height,
+                                    width: (cropBox.width / 100) * imageBox.width,
+                                    height: (cropBox.height / 100) * imageBox.height,
+                                }}
+                            >
+                                <div
+                                    onMouseDown={(e) => handleCropDragStart(e, 'tl')}
+                                    className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-primary border-2 border-white rounded-full shadow cursor-nwse-resize"
+                                />
+                                <div
+                                    onMouseDown={(e) => handleCropDragStart(e, 'tr')}
+                                    className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-primary border-2 border-white rounded-full shadow cursor-nesw-resize"
+                                />
+                                <div
+                                    onMouseDown={(e) => handleCropDragStart(e, 'bl')}
+                                    className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 bg-primary border-2 border-white rounded-full shadow cursor-nesw-resize"
+                                />
+                                <div
+                                    onMouseDown={(e) => handleCropDragStart(e, 'br')}
+                                    className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 bg-primary border-2 border-white rounded-full shadow cursor-nwse-resize"
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* Controls */}
