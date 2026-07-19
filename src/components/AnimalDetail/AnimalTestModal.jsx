@@ -4,7 +4,7 @@ import {
     Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList, Hourglass,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info, Network, Star,
-    Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2,
+    Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital,
 } from 'lucide-react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
@@ -789,6 +789,30 @@ const AnimalTestModal = ({
                                                 displayDate: animal.dateOfDeath
                                             });
                                         }
+
+                                        // Health clearances
+                                        (parseJsonArrayField(animal.healthClearances) || []).forEach((clearance) => {
+                                            if (clearance?.dateIssued) {
+                                                timelineEvents.push({
+                                                    date: new Date(clearance.dateIssued),
+                                                    icon: <Hospital size={14} className="text-green-600" />,
+                                                    title: `Health Clearance: ${clearance.clearanceType}`,
+                                                    displayDate: clearance.dateIssued
+                                                });
+                                            }
+                                        });
+
+                                        // Parasite prevention schedule
+                                        (parseJsonArrayField(animal.parasitePreventionSchedule) || []).forEach((schedule) => {
+                                            if (schedule?.startDate) {
+                                                timelineEvents.push({
+                                                    date: new Date(schedule.startDate),
+                                                    icon: <Shield size={14} className="text-blue-600" />,
+                                                    title: `Parasite Prevention: ${schedule.treatment}`,
+                                                    displayDate: schedule.startDate
+                                                });
+                                            }
+                                        });
 
                                         // Sort by date (most recent first) and take top 5
                                         const recentEvents = timelineEvents
