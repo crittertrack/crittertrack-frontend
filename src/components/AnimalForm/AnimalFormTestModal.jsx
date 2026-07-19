@@ -361,7 +361,6 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
     const [processing, setProcessing] = useState(false);
     const [fileSizeWarning, setFileSizeWarning] = useState('');
     const [imageBox, setImageBox] = useState(null); // rendered image position/size relative to preview container
-    const canvasRef = useRef(null);
     const imgRef = useRef(null);
     const previewContainerRef = useRef(null);
     const dragStateRef = useRef(null);
@@ -495,7 +494,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
             }
 
             // Step 2: Crop if enabled
-            if (cropMode && canvasRef.current) {
+            if (cropMode) {
                 const croppedBlob = await cropImageFile(processedFile, cropBox);
                 processedFile = new File([croppedBlob], file.name, { type: 'image/jpeg' });
             }
@@ -1096,6 +1095,19 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                     </button>
                 </div>
             </div>
+        </div>
+    );
+};
+
+const FormSection = ({ title, icon, children, initiallyOpen = false }) => {
+    const [isOpen, setIsOpen] = useState(initiallyOpen);
+    return (
+        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center text-left">
+                <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5">{icon}{title}</h3>
+                {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </button>
+            {isOpen && <div className="mt-3 pt-3 border-t space-y-3">{children}</div>}
         </div>
     );
 };
@@ -1723,19 +1735,6 @@ const AnimalFormTestModal = ({
             }));
         }
         return [];
-    };
-
-    const FormSection = ({ title, icon, children, initiallyOpen = false }) => {
-        const [isOpen, setIsOpen] = useState(initiallyOpen);
-        return (
-            <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center text-left">
-                    <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5">{icon}{title}</h3>
-                    {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
-                {isOpen && <div className="mt-3 pt-3 border-t space-y-3">{children}</div>}
-            </div>
-        );
     };
 
     const [formData, setFormData] = useState(
