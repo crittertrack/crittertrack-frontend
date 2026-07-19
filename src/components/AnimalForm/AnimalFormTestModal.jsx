@@ -2761,7 +2761,7 @@ const AnimalFormTestModal = ({
             }
             onCancel();
         } catch (error) {
-            console.error('Animal Save Error:', error.response?.data || error.message);
+            console.error('Animal Save Error:', JSON.stringify(error.response?.data ?? { message: error.message }, null, 2));
             showModalMessage('Error', error.response?.data?.message || `Failed to ${animalToEdit ? 'update' : 'add'} animal.`);
         } finally {
             setLoading(false);
