@@ -1014,7 +1014,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Dimensions (L x W x H)</label>
-                                <div className="grid grid-cols-3 gap-2 items-end">
+                                <div className="grid grid-cols-4 gap-2 items-end">
                                     <input
                                         type="number"
                                         value={newEnclosureForm.dimensions.length}
@@ -1027,6 +1027,13 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                         value={newEnclosureForm.dimensions.width}
                                         onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, dimensions: { ...newEnclosureForm.dimensions, width: e.target.value } })}
                                         placeholder="Width"
+                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                    />
+                                    <input
+                                        type="number"
+                                        value={newEnclosureForm.dimensions.height}
+                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, dimensions: { ...newEnclosureForm.dimensions, height: e.target.value } })}
+                                        placeholder="Height"
                                         className="py-1.5 px-2 text-sm border border-gray-300 rounded-md"
                                     />
                                     <select
