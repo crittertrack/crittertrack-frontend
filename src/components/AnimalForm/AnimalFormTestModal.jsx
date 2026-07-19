@@ -3080,71 +3080,71 @@ const AnimalFormTestModal = ({
                                 <FormSection title="Appearance" icon={<Palette size={16} />} initiallyOpen>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Color</label>
+                                            <label className="block text-xs font-medium text-gray-700">Color</label>
                                             <input type="text" name="color" value={formData.color} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Pattern</label>
+                                            <label className="block text-xs font-medium text-gray-700">Pattern</label>
                                             <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="e.g., Solid, Hooded, Brindle" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Coat Type</label>
+                                            <label className="block text-xs font-medium text-gray-700">Coat Type</label>
                                             <input type="text" name="coat" value={formData.coat} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="e.g., Short, Long, Rex" />
                                         </div>
                                         {(formData.species === 'Rat' || formData.species === 'Fancy Rat') && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Earset</label>
+                                                <label className="block text-xs font-medium text-gray-700">Earset</label>
                                                 <input type="text" name="earset" value={formData.earset} onChange={handleChange}
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                     placeholder="e.g., Standard, Dumbo" />
                                             </div>
                                         )}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Phenotype</label>
+                                            <label className="block text-xs font-medium text-gray-700">Phenotype</label>
                                             <input type="text" name="phenotype" value={formData.phenotype || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="Observable traits" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Morph</label>
+                                            <label className="block text-xs font-medium text-gray-700">Morph</label>
                                             <input type="text" name="morph" value={formData.morph || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="Mutation/Morph" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Markings</label>
+                                            <label className="block text-xs font-medium text-gray-700">Markings</label>
                                             <input type="text" name="markings" value={formData.markings || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="Body markings/patterns" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Eye Color</label>
+                                            <label className="block text-xs font-medium text-gray-700">Eye Color</label>
                                             <input type="text" name="eyeColor" value={formData.eyeColor || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="Eye color" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Nail Color</label>
+                                            <label className="block text-xs font-medium text-gray-700">Nail Color</label>
                                             <input type="text" name="nailColor" value={formData.nailColor || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="Nail/claw color" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Size</label>
+                                            <label className="block text-xs font-medium text-gray-700">Size</label>
                                             <input type="text" name="size" value={formData.size || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="e.g., Standard, Dwarf" />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Carrier Traits</label>
+                                            <label className="block text-xs font-medium text-gray-700">Carrier Traits</label>
                                             <input type="text" name="carrierTraits" value={formData.carrierTraits || ''} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="Genetic traits carried" />
                                         </div>
                                     </div>
@@ -3155,9 +3155,9 @@ const AnimalFormTestModal = ({
                                 <FormSection title="Life Stage" icon={<Sprout size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Life Stage</label>
+                                            <label className="block text-xs font-medium text-gray-700">Life Stage</label>
                                             <select name="lifeStage" value={formData.lifeStage} onChange={handleChange}
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                 <option value="">Unknown</option>
                                                 <option value="Newborn">Newborn</option>
                                                 <option value="Juvenile">Juvenile</option>
@@ -4043,6 +4043,7 @@ const AnimalFormTestModal = ({
                                                             const val = e.target.value;
                                                             setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), startDate: val } }));
                                                         }}
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
                                                     />
                                                 </div>
                                             </div>
@@ -4975,6 +4976,7 @@ const AnimalFormTestModal = ({
                                             value={newMilestoneDate}
                                             onChange={setNewMilestoneDate}
                                             label="Date"
+                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
                                         />
                                         <div className="flex gap-2">
                                             <input
