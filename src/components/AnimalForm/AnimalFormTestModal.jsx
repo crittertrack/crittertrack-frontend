@@ -2342,6 +2342,7 @@ const AnimalFormTestModal = ({
     const [mpSlotUploading, setMpSlotUploading] = useState({});
     const mpAutoFetchedRef = useRef(false);
     const animalToEditIdRef = useRef(animalToEdit?._id);
+    const prevIsPregnantRef = useRef(false);
 
     const handleSelectContact = (selection) => {
         if (assignModalTarget === 'breeder') {
@@ -2768,9 +2769,7 @@ const AnimalFormTestModal = ({
 
     // Auto-capture pregnancy dates when isPregnant is set to true
     useEffect(() => {
-        const prevIsPregnant = useRef(formData.isPregnant);
-        
-        if (formData.isPregnant && !prevIsPregnant.current) {
+        if (formData.isPregnant && !prevIsPregnantRef.current) {
             // Changed from false to true - add today's date to history
             const today = new Date().toISOString().split('T')[0];
             setFormData(prev => ({
@@ -2779,7 +2778,7 @@ const AnimalFormTestModal = ({
             }));
         }
         
-        prevIsPregnant.current = formData.isPregnant;
+        prevIsPregnantRef.current = formData.isPregnant;
     }, [formData.isPregnant]);
 
     // Fetch enclosures when opening modal
