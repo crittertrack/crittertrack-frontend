@@ -111,15 +111,13 @@ export const IdentificationTabContent = ({
                                             key={l.id} 
                                             type="button"
                                             onClick={() => toggleAnimalBreedingLine && toggleAnimalBreedingLine(animal.id_public, l.id)}
-                                            disabled={!toggleAnimalBreedingLine}
                                             style={{ 
                                                 borderColor: l.color, 
                                                 color: assigned ? '#fff' : l.color, 
                                                 backgroundColor: assigned ? l.color : 'transparent',
-                                                opacity: toggleAnimalBreedingLine ? 1 : 0.6,
-                                                cursor: toggleAnimalBreedingLine ? 'pointer' : 'default'
+                                                cursor: 'pointer'
                                             }}
-                                            className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition"
+                                            className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition hover:opacity-80"
                                         >
                                             <span>&#x25C6;</span> {l.name}
                                         </button>
