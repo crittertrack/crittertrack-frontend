@@ -40,94 +40,167 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
     const hasHousing = animal.housingType || animal.bedding || animal.enrichment;
     const hasEnvironment = animal.temperatureRange || animal.humidity || animal.lighting || animal.noise || animal.lastBulbChange;
     const hasGrooming = animal.groomingNeeds || animal.sheddingLevel;
-    const hasCareAndGrooming = animal.specialCareRequirements || hasGrooming || hasTraining;
     const hasTraining = animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained;
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Column 1 */}
-            <div className="space-y-6">
-                <InfoCard title="Nutrition" icon={<UtensilsCrossed size={18} className="text-gray-400" />}>
-                    {hasNutrition ? (
-                        <>
-                            {animal.dietType && <InfoItem label="Diet Type" value={animal.dietType} />}
-                            {animal.feedingSchedule && <InfoItem label="Feeding Schedule" value={animal.feedingSchedule} />}
-                            {animal.supplements && <InfoItem label="Supplements" value={animal.supplements} />}
-                        </>
-                    ) : <p className="text-sm text-gray-400">No nutrition information.</p>}
-                </InfoCard>
+        <div className="space-y-6">
+            {/* Nutrition & Feeding */}
+            <InfoCard title="Nutrition & Feeding" icon={<UtensilsCrossed size={18} className="text-gray-400" />}>
+                {hasNutrition || animal.portionSize || animal.feedingMethod || animal.waterAccess || animal.feedingBehaviorNotes || animal.lastFedDate || animal.feedingFrequencyDays ? (
+                    <div className="space-y-4">
+                        {animal.dietType && <InfoItem label="Diet Type" value={animal.dietType} />}
+                        {animal.feedingSchedule && <InfoItem label="Feeding Schedule" value={animal.feedingSchedule} />}
+                        {animal.portionSize && <InfoItem label="Portion Size" value={animal.portionSize} />}
+                        {animal.feedingMethod && <InfoItem label="Feeding Method" value={animal.feedingMethod} />}
+                        {animal.feedingLocation && <InfoItem label="Feeding Location" value={animal.feedingLocation} />}
+                        {animal.waterAccess && <InfoItem label="Water Access" value={animal.waterAccess} />}
+                        {animal.lastFedDate && <InfoItem label="Last Fed Date" value={formatDate(animal.lastFedDate)} />}
+                        {animal.feedingFrequencyDays && <InfoItem label="Feeding Frequency" value={`Every ${animal.feedingFrequencyDays} days`} />}
+                        {animal.feedingBehaviorNotes && <InfoItem label="Feeding Behavior Notes"><p className="whitespace-pre-wrap text-sm">{animal.feedingBehaviorNotes}</p></InfoItem>}
+                        {animal.supplements && <InfoItem label="Supplements" value={animal.supplements} />}
+                    </div>
+                ) : <p className="text-sm text-gray-400">No nutrition information.</p>}
+            </InfoCard>
 
-                <InfoCard title="Housing & Environment" icon={<Home size={18} className="text-gray-400" />}>
-                    {hasHousing || hasEnvironment ? (
-                        <>
-                            {animal.housingType && <InfoItem label={getLabel('housingType', 'Housing Type')} value={animal.housingType} />}
-                            {animal.bedding && <InfoItem label={getLabel('bedding', 'Bedding')} value={animal.bedding} />}
-                            {animal.enrichment && <InfoItem label="Enrichment" value={animal.enrichment} />}
-                            
-                            {hasEnvironment && <div className="pt-3 mt-3 border-t border-gray-200 space-y-2">
-                                {animal.temperatureRange && <InfoItem label="Temperature Range" value={animal.temperatureRange} icon={<Thermometer size={14} />} />}
-                                {animal.humidity && <InfoItem label={getLabel('humidity', 'Humidity')} value={animal.humidity} icon={<Wind size={14} />} />}
-                                {animal.lighting && <InfoItem label="Lighting" value={animal.lighting} icon={<Sun size={14} />} />}
-                                {animal.lastBulbChange && <InfoItem label="Last Bulb Change" value={formatDate(animal.lastBulbChange)} icon={<Sun size={14} />} />}
-                                {animal.noise && <InfoItem label={getLabel('noise', 'Noise Level')} value={animal.noise} />}
-                            </div>}
-                        </>
-                    ) : <p className="text-sm text-gray-400">No housing or environment details.</p>}
+            {/* Dietary Preferences & Restrictions */}
+            {(animal.dietaryRestrictions || animal.dietaryPreferences) && (
+                <InfoCard title="Dietary Information" icon={<UtensilsCrossed size={18} className="text-gray-400" />}>
+                    <div className="space-y-4">
+                        {animal.dietaryRestrictions && <InfoItem label="Dietary Restrictions"><p className="whitespace-pre-wrap text-sm">{animal.dietaryRestrictions}</p></InfoItem>}
+                        {animal.dietaryPreferences && <InfoItem label="Dietary Preferences"><p className="whitespace-pre-wrap text-sm">{animal.dietaryPreferences}</p></InfoItem>}
+                    </div>
                 </InfoCard>
-            </div>
+            )}
 
-            {/* Column 2 */}
-            <div className="space-y-6">
-                <InfoCard title="Animal Care & Grooming" icon={<Droplets size={18} className="text-gray-400" />}>
-                    {hasCareAndGrooming ? (
-                        <>
-                            {animal.specialCareRequirements && <InfoItem label="Special Care Requirements">
-                                <p className="whitespace-pre-wrap">{animal.specialCareRequirements}</p>
-                            </InfoItem>}
-                            
-                            {hasGrooming && <div className="pt-3 mt-3 border-t border-gray-200 space-y-2">
-                                {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} icon={<Scissors size={14} />} />}
-                                {animal.sheddingLevel && <InfoItem label={getLabel('sheddingLevel', 'Shedding Level')} value={animal.sheddingLevel} />}
-                            </div>}
+            {/* Housing & Environment */}
+            <InfoCard title="Housing & Environment" icon={<Home size={18} className="text-gray-400" />}>
+                {hasHousing || hasEnvironment ? (
+                    <div className="space-y-4">
+                        {animal.housingType && <InfoItem label={getLabel('housingType', 'Housing Type')} value={animal.housingType} />}
+                        {animal.bedding && <InfoItem label={getLabel('bedding', 'Bedding')} value={animal.bedding} />}
+                        {animal.enclosureId && <InfoItem label="Enclosure ID" value={animal.enclosureId} />}
+                        {animal.temperatureRange && <InfoItem label="Temperature Range" value={animal.temperatureRange} icon={<Thermometer size={14} />} />}
+                        {animal.humidity && <InfoItem label={getLabel('humidity', 'Humidity')} value={animal.humidity} icon={<Wind size={14} />} />}
+                    </div>
+                ) : <p className="text-sm text-gray-400">No housing or environment details.</p>}
+            </InfoCard>
 
-                            {hasTraining && <div className="pt-3 mt-3 border-t border-gray-200">
-                                <h4 className="text-sm font-semibold text-gray-600 mb-2">Training</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {animal.crateTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('crateTrained', 'Crate Trained')}</span>}
-                                    {animal.litterTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('litterTrained', 'Litter Trained')}</span>}
-                                    {animal.leashTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('leashTrained', 'Leash Trained')}</span>}
-                                    {animal.freeFlightTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
-                                </div>
-                            </div>}
-                        </>
-                    ) : <p className="text-sm text-gray-400">No care, grooming, or training information recorded.</p>}
+            {/* Lighting & Environmental Controls */}
+            {(animal.lightingType || animal.lightingSchedule) && (
+                <InfoCard title="Lighting & Controls" icon={<Sun size={18} className="text-gray-400" />}>
+                    <div className="space-y-4">
+                        {animal.lightingType && <InfoItem label="Lighting Type" value={animal.lightingType} />}
+                        {animal.lightingSchedule && <InfoItem label="Lighting Schedule" value={animal.lightingSchedule} />}
+                        {animal.lastBulbChange && <InfoItem label="Last Bulb Change" value={formatDate(animal.lastBulbChange)} />}
+                    </div>
                 </InfoCard>
+            )}
 
-                <InfoCard title="Scheduled Tasks" icon={<Activity size={18} className="text-gray-400" />}>
-                    <TaskList tasks={animalCareTasks} label="Animal-Specific Tasks" />
-                    <TaskList tasks={careTasks} label="Enclosure-Related Tasks" />
-                    {animalCareTasks.length === 0 && careTasks.length === 0 && <p className="text-sm text-gray-400">No scheduled care tasks.</p>}
+            {/* Noise & Sound Environment */}
+            {(animal.noiseToleranceLevel || animal.soundPreferences) && (
+                <InfoCard title="Noise & Sound Environment" icon={<Wind size={18} className="text-gray-400" />}>
+                    <div className="space-y-4">
+                        {animal.noiseToleranceLevel && <InfoItem label="Noise Tolerance Level" value={animal.noiseToleranceLevel} />}
+                        {animal.soundPreferences && <InfoItem label="Sound Preferences" value={animal.soundPreferences} />}
+                    </div>
                 </InfoCard>
-            </div>
+            )}
 
-            {/* Column 3 */}
-            <div className="space-y-6">
-                <InfoCard title="Shedding History" icon={<Bug size={18} className="text-gray-400" />}>
-                    {sheddingRecords.length > 0 ? (
-                        <DetailJsonList label="" data={sheddingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
-                    ) : <p className="text-sm text-gray-400">No shedding records.</p>}
+            {/* Enrichment & Environmental Maintenance */}
+            {(animal.enrichment || animal.enrichmentNeeds || animal.enrichmentFrequency) && (
+                <InfoCard title="Enrichment & Environmental Maintenance" icon={<Activity size={18} className="text-gray-400" />}>
+                    <div className="space-y-4">
+                        {animal.enrichment && <InfoItem label="Current Enrichment" value={animal.enrichment} />}
+                        {animal.enrichmentNeeds && <InfoItem label="Enrichment Needs"><p className="whitespace-pre-wrap text-sm">{animal.enrichmentNeeds}</p></InfoItem>}
+                        {animal.enrichmentFrequency && <InfoItem label="Enrichment Rotation Frequency" value={animal.enrichmentFrequency} />}
+                        {animal.environmentNotes && <InfoItem label="Environment Notes"><p className="whitespace-pre-wrap text-sm">{animal.environmentNotes}</p></InfoItem>}
+                    </div>
                 </InfoCard>
-                <InfoCard title="Molting History" icon={<Bug size={18} className="text-gray-400" />}>
-                    {moltingRecords.length > 0 ? (
-                        <DetailJsonList label="" data={moltingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
-                    ) : <p className="text-sm text-gray-400">No molting records.</p>}
+            )}
+
+            {/* Cleaning & Maintenance Schedule */}
+            {(animal.spotCleaningFrequency || animal.deepCleaningFrequency || animal.cleaningChecklist || animal.maintenanceTasksDue) && (
+                <InfoCard title="Cleaning & Maintenance Schedule" icon={<Scissors size={18} className="text-gray-400" />}>
+                    <div className="space-y-4">
+                        {animal.spotCleaningFrequency && <InfoItem label="Spot Cleaning Frequency" value={animal.spotCleaningFrequency} />}
+                        {animal.deepCleaningFrequency && <InfoItem label="Deep Cleaning Frequency" value={animal.deepCleaningFrequency} />}
+                        {animal.lastMaintenanceDate && <InfoItem label="Last Maintenance Date" value={formatDate(animal.lastMaintenanceDate)} />}
+                        {animal.maintenanceFrequencyDays && <InfoItem label="Maintenance Frequency" value={`Every ${animal.maintenanceFrequencyDays} days`} />}
+                        {animal.cleaningChecklist && <InfoItem label="Cleaning Checklist"><p className="whitespace-pre-wrap text-sm">{animal.cleaningChecklist}</p></InfoItem>}
+                        {animal.maintenanceTasksDue && <InfoItem label="Maintenance Tasks Due"><p className="whitespace-pre-wrap text-sm">{animal.maintenanceTasksDue}</p></InfoItem>}
+                    </div>
                 </InfoCard>
-                <InfoCard title="Water Quality Checks" icon={<Droplets size={18} className="text-gray-400" />}>
-                    {waterParameterChecks.length > 0 ? (
-                        <DetailJsonList label="" data={waterParameterChecks.filter(Boolean)} renderItem={r => `${formatDate(r.date)} - pH: ${r.ph}, Ammonia: ${r.ammonia}`} />
-                    ) : <p className="text-sm text-gray-400">No water quality records.</p>}
+            )}
+
+            {/* Detailed Grooming */}
+            {(animal.groomingNeeds || animal.sheddingLevel || animal.brushingFrequency || animal.bathingFrequency || animal.coatCareNotes || animal.nailCareRequirements || animal.beakHoofScaleMaintenance || animal.skinEarCareNeeds || animal.dentalCareRequirements || animal.groomingNotes) && (
+                <InfoCard title="Grooming & Personal Care" icon={<Scissors size={18} className="text-gray-400" />}>
+                    <div className="space-y-4">
+                        {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} />}
+                        {animal.sheddingLevel && <InfoItem label={getLabel('sheddingLevel', 'Shedding Level')} value={animal.sheddingLevel} />}
+                        {animal.brushingFrequency && <InfoItem label="Brushing Frequency" value={animal.brushingFrequency} />}
+                        {animal.bathingFrequency && <InfoItem label="Bathing Frequency" value={animal.bathingFrequency} />}
+                        {animal.coatCareNotes && <InfoItem label="Coat Care Notes"><p className="whitespace-pre-wrap text-sm">{animal.coatCareNotes}</p></InfoItem>}
+                        {animal.nailCareRequirements && <InfoItem label="Nail Care Requirements" value={animal.nailCareRequirements} />}
+                        {animal.beakHoofScaleMaintenance && <InfoItem label="Beak/Hoof/Scale Maintenance" value={animal.beakHoofScaleMaintenance} />}
+                        {animal.skinEarCareNeeds && <InfoItem label="Skin & Ear Care Needs" value={animal.skinEarCareNeeds} />}
+                        {animal.dentalCareRequirements && <InfoItem label="Dental Care Requirements" value={animal.dentalCareRequirements} />}
+                        {animal.groomingNotes && <InfoItem label="Grooming Notes"><p className="whitespace-pre-wrap text-sm">{animal.groomingNotes}</p></InfoItem>}
+                    </div>
                 </InfoCard>
-            </div>
+            )}
+
+            {/* Special Care & Health Monitoring */}
+            {(animal.specialCareRequirements || animal.specialCareNeeds || animal.healthMonitoringNotes || animal.additionalSpecialRequirements) && (
+                <InfoCard title="Special Care & Health Monitoring" icon={<Droplets size={18} className="text-gray-400" />}>
+                    <div className="space-y-4">
+                        {animal.specialCareRequirements && <InfoItem label="Special Care Requirements"><p className="whitespace-pre-wrap text-sm">{animal.specialCareRequirements}</p></InfoItem>}
+                        {animal.specialCareNeeds && <InfoItem label="Special Care Needs"><p className="whitespace-pre-wrap text-sm">{animal.specialCareNeeds}</p></InfoItem>}
+                        {animal.healthMonitoringNotes && <InfoItem label="Health Monitoring Notes"><p className="whitespace-pre-wrap text-sm">{animal.healthMonitoringNotes}</p></InfoItem>}
+                        {animal.additionalSpecialRequirements && <InfoItem label="Additional Special Requirements"><p className="whitespace-pre-wrap text-sm">{animal.additionalSpecialRequirements}</p></InfoItem>}
+                    </div>
+                </InfoCard>
+            )}
+
+            {/* Training Status */}
+            {hasTraining && (
+                <InfoCard title="Training Status" icon={<CheckSquare size={18} className="text-gray-400" />}>
+                    <div className="flex flex-wrap gap-2">
+                        {animal.crateTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('crateTrained', 'Crate Trained')}</span>}
+                        {animal.litterTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('litterTrained', 'Litter Trained')}</span>}
+                        {animal.leashTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('leashTrained', 'Leash Trained')}</span>}
+                        {animal.freeFlightTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
+                    </div>
+                </InfoCard>
+            )}
+
+            {/* Scheduled Tasks */}
+            <InfoCard title="Scheduled Tasks" icon={<Activity size={18} className="text-gray-400" />}>
+                <TaskList tasks={animalCareTasks} label="Animal-Specific Tasks" />
+                <TaskList tasks={careTasks} label="Enclosure-Related Tasks" />
+                {animalCareTasks.length === 0 && careTasks.length === 0 && <p className="text-sm text-gray-400">No scheduled care tasks.</p>}
+            </InfoCard>
+
+            {/* Shedding History */}
+            <InfoCard title="Shedding History" icon={<Bug size={18} className="text-gray-400" />}>
+                {sheddingRecords.length > 0 ? (
+                    <DetailJsonList label="" data={sheddingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
+                ) : <p className="text-sm text-gray-400">No shedding records.</p>}
+            </InfoCard>
+
+            {/* Molting History */}
+            <InfoCard title="Molting History" icon={<Bug size={18} className="text-gray-400" />}>
+                {moltingRecords.length > 0 ? (
+                    <DetailJsonList label="" data={moltingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
+                ) : <p className="text-sm text-gray-400">No molting records.</p>}
+            </InfoCard>
+
+            {/* Water Quality Checks */}
+            <InfoCard title="Water Quality Checks" icon={<Droplets size={18} className="text-gray-400" />}>
+                {waterParameterChecks.length > 0 ? (
+                    <DetailJsonList label="" data={waterParameterChecks.filter(Boolean)} renderItem={r => `${formatDate(r.date)} - pH: ${r.ph}, Ammonia: ${r.ammonia}`} />
+                ) : <p className="text-sm text-gray-400">No water quality records.</p>}
+            </InfoCard>
         </div>
     );
 };

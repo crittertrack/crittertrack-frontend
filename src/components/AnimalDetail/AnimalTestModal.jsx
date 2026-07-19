@@ -35,6 +35,28 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data : [];
 };
 
+const StatusIndicator = ({ status }) => {
+    const statusStyles = {
+        'Good': 'bg-green-100 text-green-800',
+        'Under Observation': 'bg-yellow-100 text-yellow-800',
+        'Under Treatment': 'bg-blue-100 text-blue-800',
+        'Quarantined': 'bg-orange-100 text-orange-800',
+        'Critical': 'bg-red-100 text-red-800',
+        'Unknown': 'bg-gray-100 text-gray-800',
+    };
+    const style = statusStyles[status] || statusStyles['Unknown'];
+    return <span className={`px-2 py-1 text-xs font-bold rounded-full ${style}`}>{status}</span>;
+};
+
+const getReproductionState = (animal) => {
+    if (animal.gender === 'Male') return null;
+    if (animal.isPregnant) return { label: 'Pregnant', color: 'bg-pink-100 text-pink-800', icon: '🤰' };
+    if (animal.isNursing) return { label: 'Nursing', color: 'bg-orange-100 text-orange-800', icon: '🍼' };
+    if (animal.isInMating) return { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: '💑' };
+    if (animal.isPlannedMating) return { label: 'Planned Mating', color: 'bg-purple-100 text-purple-800', icon: '📅' };
+    return null;
+};
+
 const AnimalTestModal = ({
     animal,
     onClose,
@@ -353,7 +375,11 @@ const AnimalTestModal = ({
                                                 </span>
                                                 {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
                                                 {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
-                                                {animal.healthStatus && <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><HeartPulse size={12} />{animal.healthStatus}</span>}
+                                                {animal.healthStatus && <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><HeartPulse size={12} /><StatusIndicator status={animal.healthStatus} /></span>}
+                                                {(() => {
+                                                    const reproState = getReproductionState(animal);
+                                                    return reproState ? <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${reproState.color}`}>{reproState.icon} {reproState.label}</span> : null;
+                                                })()}
                                                 {animal.isForSale && <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Tag size={12} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}</span>}
                                                 {animal.availableForBreeding && <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart size={12} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}</span>}
                                             </div>
@@ -573,9 +599,29 @@ const AnimalTestModal = ({
                             {/* Health Summary Card */}
                             <div>
                                 <InfoCard title="Health Summary" icon={<Heart size={18} className="text-gray-400" />}>
-                                    <InfoItem label="Health Status" value={animal.healthStatus || 'N/A'} />
-                                    <InfoItem label="Last Vet Check" value={animal.lastVetCheck ? formatDate(animal.lastVetCheck) : 'N/A'} />
-                                    <InfoItem label="Medical Conditions" value={parseJsonArrayField(animal.medicalConditions).filter(Boolean).map(c => c.condition || c.name).join(', ')} />
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Health Status</label>
+                                            <div className="mt-1">
+                                                <StatusIndicator status={animal.healthStatus || 'Unknown'} />
+                                            </div>
+                                        </div>
+                                        {animal.lastVetCheck && (
+                                            <div>
+                                                <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Last Vet Check</label>
+                                                <p className="mt-1 text-sm text-gray-700">{formatDate(animal.lastVetCheck)}</p>
+                                            </div>
+                                        )}
+                                        {(() => {
+                                            const conditions = parseJsonArrayField(animal.medicalConditions).filter(Boolean);
+                                            return conditions.length > 0 ? (
+                                                <div>
+                                                    <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Medical Conditions</label>
+                                                    <p className="mt-1 text-sm text-gray-700">{conditions.map(c => c.condition || c.name).join(', ')}</p>
+                                                </div>
+                                            ) : null;
+                                        })()}
+                                    </div>
                                 </InfoCard>
                             </div>
                             {/* Recent Activity Card */}
@@ -591,6 +637,52 @@ const AnimalTestModal = ({
                                 </InfoCard>
                             </div>
                             
+                            </div>
+                            {/* Identity & Ownership Information */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Core Identity */}
+                                <InfoCard title="Identity" icon={<Tag size={18} className="text-gray-400" />}>
+                                    <dl className="space-y-3">
+                                        {animal.prefix && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Prefix</label><p className="mt-1 text-sm text-gray-700">{animal.prefix}</p></div>}
+                                        {animal.suffix && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Suffix</label><p className="mt-1 text-sm text-gray-700">{animal.suffix}</p></div>}
+                                        {animal.status && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Status</label><p className="mt-1 text-sm text-gray-700">{animal.status}</p></div>}
+                                        {animal.dateOfDeath && <div className="p-2 bg-red-50 border-l-4 border-red-400"><label className="text-xs font-semibold uppercase tracking-wider text-red-700">Deceased</label><p className="mt-1 text-sm text-red-900">{formatDate(animal.dateOfDeath)}</p></div>}
+                                    </dl>
+                                </InfoCard>
+                                {/* Breeder & Owner Information */}
+                                {(animal.breederId_public || animal.manualBreederName || animal.ownerId_public || animal.manualOwnerName) && (
+                                    <InfoCard title="Breeder & Owner" icon={<Users size={18} className="text-gray-400" />}>
+                                        <dl className="space-y-3">
+                                            {animal.breederId_public && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Breeder ID</label><p className="mt-1 text-sm text-gray-700">{animal.breederId_public}</p></div>}
+                                            {animal.manualBreederName && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Breeder</label><p className="mt-1 text-sm text-gray-700">{animal.manualBreederName}</p></div>}
+                                            {animal.ownerId_public && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Owner ID</label><p className="mt-1 text-sm text-gray-700">{animal.ownerId_public}</p></div>}
+                                            {animal.manualOwnerName && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Owner</label><p className="mt-1 text-sm text-gray-700">{animal.manualOwnerName}</p></div>}
+                                        </dl>
+                                    </InfoCard>
+                                )}
+                                {/* Remarks */}
+                                {animal.remarks && (
+                                    <InfoCard title="Remarks" icon={<MessageSquare size={18} className="text-gray-400" />}>
+                                        <p className="whitespace-pre-wrap text-sm text-gray-700">{animal.remarks}</p>
+                                    </InfoCard>
+                                )}
+                                {/* Co-Ownership */}
+                                {animal.coOwnership && (
+                                    <InfoCard title="Co-Ownership" icon={<Users size={18} className="text-gray-400" />}>
+                                        <p className="whitespace-pre-wrap text-sm text-gray-700">{animal.coOwnership}</p>
+                                    </InfoCard>
+                                )}
+                                {/* For-Sale Information */}
+                                {(animal.isForSale || animal.salePriceAmount || animal.availableForBreeding || animal.studFeeAmount) && (
+                                    <InfoCard title="Availability" icon={<Tag size={18} className="text-gray-400" />}>
+                                        <dl className="space-y-3">
+                                            {animal.isForSale !== undefined && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">For Sale</label><p className="mt-1 text-sm text-gray-700">{animal.isForSale ? 'Yes' : 'No'}</p></div>}
+                                            {animal.salePriceAmount && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Sale Price</label><p className="mt-1 text-sm text-gray-700">{animal.salePriceCurrency} {animal.salePriceAmount}</p></div>}
+                                            {animal.availableForBreeding !== undefined && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Available for Breeding</label><p className="mt-1 text-sm text-gray-700">{animal.availableForBreeding ? 'Yes' : 'No'}</p></div>}
+                                            {animal.studFeeAmount && <div><label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Stud Fee</label><p className="mt-1 text-sm text-gray-700">{animal.studFeeCurrency} {animal.studFeeAmount}</p></div>}
+                                        </dl>
+                                    </InfoCard>
+                                )}
                             </div>
                             <div className="bg-blue-50 rounded-lg border border-blue-200">
                                 <button

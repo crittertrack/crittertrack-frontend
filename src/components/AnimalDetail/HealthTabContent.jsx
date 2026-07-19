@@ -61,13 +61,19 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
     const isUnderTreatment = hasActiveMedication || hasActiveCriticalCondition;
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="space-y-6">
+        <div className="space-y-6">
                 <InfoCard title="Health Status & Preventive Care" icon={<Shield size={18} className="text-gray-400" />}>
                     <div className="pb-3 border-b border-gray-200 space-y-3">
                         <InfoItem label="Overall Health Status">
                             <StatusIndicator status={animal.healthStatus || 'Unknown'} />
                         </InfoItem>
+                        {animal.healthStatusOverride && (
+                            <div className="p-2 bg-purple-50 border-l-4 border-purple-400">
+                                <p className="text-xs font-semibold text-purple-700">Health Status Override</p>
+                                <p className="text-sm text-purple-900">{animal.healthStatusOverride}</p>
+                                {animal.healthStatusOverrideNotes && <p className="text-xs text-purple-700 mt-1">{animal.healthStatusOverrideNotes}</p>}
+                            </div>
+                        )}
                         {isQuarantined && (
                             <div className="flex items-center gap-2 p-2 bg-orange-50 border-l-4 border-orange-400">
                                 <AlertTriangle size={16} className="text-orange-500" />
@@ -107,10 +113,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                         <p className="text-sm text-gray-400">No procedures or diagnostics recorded.</p>
                     )}
                 </InfoCard>
-            </div>
-
-            <div className="space-y-6">
-                <InfoCard title="Active Medical Records" icon={<HeartPulse size={18} className="text-gray-400" />}>
+            <InfoCard title="Active Medical Records" icon={<HeartPulse size={18} className="text-gray-400" />}>
                     {hasActiveRecords ? (
                          <>
                             {medicalConditions.length > 0 && <DetailJsonList label="Medical Conditions" data={medicalConditions.filter(Boolean)} renderItem={item => `${item.condition || item.name}`} />}
@@ -121,8 +124,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                          <p className="text-sm text-gray-400">No active medical records.</p>
                     )}
                 </InfoCard>
-
-                <InfoCard title="Veterinary Care" icon={<Stethoscope size={18} className="text-gray-400" />}>
+            <InfoCard title="Veterinary Care" icon={<Stethoscope size={18} className="text-gray-400" />}>
                     {hasVetCare ? (
                         <>
                             {animal.primaryVet && <InfoItem label="Primary Veterinarian" value={animal.primaryVet} />}
@@ -132,10 +134,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                         <p className="text-sm text-gray-400">No veterinary information.</p>
                     )}
                 </InfoCard>
-            </div>
-
-            <div className="space-y-6">
-                 <InfoCard title="Health Clearances & Screening" icon={<HeartPulse size={18} className="text-gray-400" />}>
+            <InfoCard title="Health Clearances & Screening" icon={<HeartPulse size={18} className="text-gray-400" />}>
                     {!hasClearances ? (
                         <p className="text-sm text-gray-400">No health clearances recorded.</p>
                     ) : (
