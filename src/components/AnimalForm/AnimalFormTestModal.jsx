@@ -98,6 +98,12 @@ const getContactDisplayName = (contact) => {
     return [prefix, personalName, suffix].filter(Boolean).join(' ') || 'Unnamed Contact';
 };
 
+const getContactInfoString = (contact) => {
+    const addr = contact?.address || {};
+    const parts = [addr.street, addr.city, addr.state, addr.postalCode, addr.country].filter(Boolean);
+    return parts.join(', ');
+};
+
 const ContactDisplayField = ({ label, value, onEdit }) => (
     <div>
         <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600">{label}</label>
@@ -174,7 +180,7 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                     {mode === 'contact' && (
                         <div className="space-y-1">
                             {loadingContacts ? <Loader2 className="animate-spin" /> : contacts.map(contact => (
-                                <div key={contact._id} onClick={() => onSelect({ name: getContactDisplayName(contact), userId: contact.linkedCTUID })} className="p-2 border rounded-md hover:bg-gray-100 cursor-pointer">
+                                <div key={contact._id} onClick={() => onSelect({ name: getContactDisplayName(contact), userId: contact.linkedCTUID, contactInfo: getContactInfoString(contact) })} className="p-2 border rounded-md hover:bg-gray-100 cursor-pointer">
                                     <p className="font-semibold">{getContactDisplayName(contact)}</p>
                                     {contact.linkedCTUID && <p className="text-xs text-gray-500">{contact.linkedCTUID}</p>}
                                 </div>
@@ -2339,6 +2345,18 @@ const AnimalFormTestModal = ({
                 ownerId_public: selection.userId || null, // The new linked user ID
                 manualownerName: selection.name || '', // The manual name, falls back for display
             }));
+        } else if (assignModalTarget === 'seller') {
+            setFormData(prev => ({
+                ...prev,
+                sellerName: selection.name || '',
+                sellerContact: selection.contactInfo || selection.userId || '',
+            }));
+        } else if (assignModalTarget === 'buyer') {
+            setFormData(prev => ({
+                ...prev,
+                buyerName: selection.name || '',
+                buyerContact: selection.contactInfo || selection.userId || '',
+            }));
         }
         setAssignModalOpen(false);
         setAssignModalTarget(null);
@@ -2422,7 +2440,7 @@ const AnimalFormTestModal = ({
         // Keeper events
         if (eventVisibility.keeper) {
             (formData.ownershipHistory || []).forEach(ownership => {
-                if (keeper.date) addEvent('keeper', keeper.date, 'Keeper Changed', `New keeper: ${keeper.name || 'Unknown'}`);
+                if (ownership?.startDate) addEvent('keeper', ownership.startDate, 'Keeper Changed', `New keeper: ${ownership.ownerName || 'Unknown'}`);
             });
         }
 
@@ -4717,9 +4735,21 @@ const AnimalFormTestModal = ({
                                         <div className="space-y-1 text-sm text-gray-700">
                                             <div>📋 Planned Mating: {formData.isPlannedMating ? '✓' : '✗'}</div>
                                             <div>⚡ In Mating: {formData.isInMating ? '✓' : '✗'}</div>
-                                            <div>🤰 Pregnant: {formData.isPregnant ? '✓' : '✗'}</div>
-                                            <div>🍼 Nursing: {formData.isNursing ? '✓' : '✗'}</div>
+                                            {formData.gender !== 'Male' && <div>🤰 Pregnant: {formData.isPregnant ? '✓' : '✗'}</div>}
+                                            {formData.gender !== 'Male' && <div>🍼 Nursing: {formData.isNursing ? '✓' : '✗'}</div>}
                                         </div>
+                                        {(formData.isPlannedMating || formData.isInMating || (formData.gender !== 'Male' && (formData.isPregnant || formData.isNursing))) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (!window.confirm('Clear all current reproductive state flags (Planned Mating, In Mating, Pregnant, Nursing)? Use this once a litter/mating cycle is fully finished.')) return;
+                                                    setFormData(p => ({ ...p, isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false }));
+                                                }}
+                                                className="mt-1 w-full px-3 py-1.5 text-xs font-medium rounded-md bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+                                            >
+                                                Finish Cycle / Clear State
+                                            </button>
+                                        )}
                                     </div>
 
                                     {/* Override controls */}
@@ -4744,10 +4774,10 @@ const AnimalFormTestModal = ({
                                     {/* Override options */}
                                     {reproductiveStateOverride && (
                                         <div className="space-y-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" onChange={(e) => setFormData(p => ({...p, isPlannedMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Planned Mating</label></div>
-                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" onChange={(e) => setFormData(p => ({...p, isInMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: In Mating</label></div>
-                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" onChange={(e) => setFormData(p => ({...p, isPregnant: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Pregnant</label></div>
-                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" onChange={(e) => setFormData(p => ({...p, isNursing: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Nursing</label></div>
+                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isPlannedMating} onChange={(e) => setFormData(p => ({...p, isPlannedMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Planned Mating</label></div>
+                                            <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isInMating} onChange={(e) => setFormData(p => ({...p, isInMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: In Mating</label></div>
+                                            {formData.gender !== 'Male' && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isPregnant} onChange={(e) => setFormData(p => ({...p, isPregnant: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Pregnant</label></div>}
+                                            {formData.gender !== 'Male' && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isNursing} onChange={(e) => setFormData(p => ({...p, isNursing: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Nursing</label></div>}
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Reason for Override</label>
                                                 <textarea value={reproductiveStateOverrideReason} onChange={(e) => setReproductiveStateOverrideReason(e.target.value)} placeholder="Why overriding auto-calculated state..." className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none" rows="2" />
@@ -4818,8 +4848,8 @@ const AnimalFormTestModal = ({
                                     </FormSection>
                                 )}
 
-                                {/* SECTION 5: Pregnancy/Development Details (Conditional) */}
-                                {['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
+                                {/* SECTION 5: Pregnancy/Development Details (Conditional, not applicable to males) */}
+                                {formData.gender !== 'Male' && ['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
                                     <FormSection title="Pregnancy/Development Details" icon={<AlertTriangle size={16} />}>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
@@ -5532,13 +5562,25 @@ const AnimalFormTestModal = ({
                                         <div><label className="block text-xs font-medium text-gray-700">Purchase Date</label><input type="date" name="purchaseDate" value={formData.purchaseDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                         <div><label className="block text-xs font-medium text-gray-700">Purchase Price</label><input type="text" name="purchasePrice" value={formData.purchasePrice} onChange={handleChange} placeholder="e.g., $500, €250" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                         <div><label className="block text-xs font-medium text-gray-700">Seller/Breeder Name</label><input type="text" name="sellerName" value={formData.sellerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Seller Contact Info</label><input type="text" name="sellerContact" value={formData.sellerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div>
+                                            <div className="flex items-center justify-between">
+                                                <label className="block text-xs font-medium text-gray-700">Seller Contact Info</label>
+                                                <button type="button" onClick={() => { setAssignModalTarget('seller'); setAssignModalOpen(true); }} className="text-xs text-primary-dark font-medium hover:underline">Select Contact</button>
+                                            </div>
+                                            <input type="text" name="sellerContact" value={formData.sellerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">
                                         <div><label className="block text-xs font-medium text-gray-700">Sale Date</label><input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                         <div><label className="block text-xs font-medium text-gray-700">Sale Price</label><input type="text" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="e.g., $800, €400" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                         <div><label className="block text-xs font-medium text-gray-700">Buyer Name</label><input type="text" name="buyerName" value={formData.buyerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Buyer Contact Info</label><input type="text" name="buyerContact" value={formData.buyerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div>
+                                            <div className="flex items-center justify-between">
+                                                <label className="block text-xs font-medium text-gray-700">Buyer Contact Info</label>
+                                                <button type="button" onClick={() => { setAssignModalTarget('buyer'); setAssignModalOpen(true); }} className="text-xs text-primary-dark font-medium hover:underline">Select Contact</button>
+                                            </div>
+                                            <input type="text" name="buyerContact" value={formData.buyerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div><label className="block text-xs font-medium text-gray-700">Breeding Rights</label><select name="breedingRightsPurchased" value={formData.breedingRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="">Not Specified</option><option value="yes">Yes - Breeding Rights Included</option><option value="conditional">Conditional - Limited Terms</option><option value="no">No - Breeding Rights Not Included</option></select></div>

@@ -1214,6 +1214,38 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const handleMarkAsPregnant = async (litter) => {
+        if (!litter.damId_public) {
+            showModalMessage('Error', 'This litter has no dam assigned.');
+            return;
+        }
+        try {
+            await axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isPregnant: true }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            await Promise.all([fetchLitters(), fetchMyAnimals()]);
+            window.dispatchEvent(new Event('animals-changed'));
+        } catch (err) {
+            showModalMessage('Error', 'Failed to mark dam as pregnant');
+        }
+    };
+
+    // Auto-transition a dam from Pregnant -> Nursing whenever a litter's birthDate is
+    // recorded for the first time (covers both new litters created with a birth date,
+    // and planned/mated litters being converted to a litter via "Convert to Litter").
+    const syncDamPostBirth = async (damId_public) => {
+        if (!damId_public) return;
+        try {
+            await axios.put(`${API_BASE_URL}/animals/${damId_public}`, { isPregnant: false, isNursing: true }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            await fetchMyAnimals();
+            window.dispatchEvent(new Event('animals-changed'));
+        } catch (err) {
+            console.warn('Failed to sync dam nursing state after birth:', err?.response?.data?.message || err?.message);
+        }
+    };
+
     // -- Litter form save-time reconciliation ---------------------------------
     // Returns { correctedCounts, warnings[] } based on form values + linked animals.
     // Rule 1: gender sum > total ? bump total (silent)
@@ -1332,6 +1364,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
 
             const litterId = litterResponse.data.litterId_backend;
+
+            // Litter was created with a birth date already recorded ? dam transitions to nursing
+            if (formData.birthDate) {
+                syncDamPostBirth(formData.damId_public);
+            }
 
             // Upload any images that were staged during creation
             if (pendingLitterImages.length > 0) {
@@ -1890,6 +1927,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 if (!proceed) return;
             }
 
+            // Detect a first-time birth recording (no birthDate previously ? one now) so we
+            // can auto-transition the dam from Pregnant -> Nursing after the litter save succeeds.
+            const originalLitter = litters.find(l => l._id === editingLitter);
+            const isNewBirth = !!formData.birthDate && !originalLitter?.birthDate;
+
             await axios.put(`${API_BASE_URL}/litters/${editingLitter}`, {
                 breedingPairCodeName: formData.breedingPairCodeName,
                 sireId_public: formData.sireId_public,
@@ -1925,6 +1967,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+
+            // First-time birth recorded on this litter ? dam transitions Pregnant -> Nursing
+            if (isNewBirth) {
+                syncDamPostBirth(formData.damId_public);
+            }
 
             // Update all linked offspring to have the correct parents.
             // Use allSettled so that offspring the user no longer owns (transferred/sold)
@@ -2098,9 +2145,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         // Status filter
         if (litterStatusFilter !== 'all') {
             const today = new Date();
-            const isMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= today;
-            const isPlannedOnly = litter.isPlanned && !isMated;
-            const isBorn = !litter.isPlanned;
+            const hasBirth = !!litter.birthDate;
+            const isMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= today && !hasBirth;
+            const isPlannedOnly = litter.isPlanned && !isMated && !hasBirth;
+            const isBorn = hasBirth || !litter.isPlanned;
             if (litterStatusFilter === 'planned' && !isPlannedOnly) return false;
             if (litterStatusFilter === 'mated'   && !isMated)       return false;
             if (litterStatusFilter === 'born'    && !isBorn)        return false;
@@ -2143,12 +2191,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         
         return false;
     }).sort((a, b) => {
-        // Sort order: Mated (isPlanned + past matingDate) ? Planned-only ? Born (newest first)
+        // Sort order: Mated (isPlanned + past matingDate, no birth yet) ? Planned-only ? Born (newest first)
         const today = new Date();
-        const aIsMated = a.isPlanned && a.matingDate && new Date(a.matingDate) <= today;
-        const bIsMated = b.isPlanned && b.matingDate && new Date(b.matingDate) <= today;
-        const aIsPlannedOnly = a.isPlanned && !aIsMated;
-        const bIsPlannedOnly = b.isPlanned && !bIsMated;
+        const aHasBirth = !!a.birthDate;
+        const bHasBirth = !!b.birthDate;
+        const aIsMated = a.isPlanned && a.matingDate && new Date(a.matingDate) <= today && !aHasBirth;
+        const bIsMated = b.isPlanned && b.matingDate && new Date(b.matingDate) <= today && !bHasBirth;
+        const aIsPlannedOnly = a.isPlanned && !aIsMated && !aHasBirth;
+        const bIsPlannedOnly = b.isPlanned && !bIsMated && !bHasBirth;
         const rank = (l, isMated, isPlannedOnly) => isMated ? 0 : isPlannedOnly ? 1 : 2;
         const aRank = rank(a, aIsMated, aIsPlannedOnly);
         const bRank = rank(b, bIsMated, bIsPlannedOnly);
@@ -3603,8 +3653,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const offspringList = litterOffspringMap[litter._id] ?? [];
                         const offspringLoading = isExpanded && litterOffspringMap[litter._id] === undefined;
                         // Mating state helpers
-                        const isMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= new Date();
-                        const isPlannedOnly = litter.isPlanned && !isMated;
+                        const hasBirth = !!litter.birthDate;
+                        const isMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= new Date() && !hasBirth;
+                        const isPlannedOnly = litter.isPlanned && !isMated && !hasBirth;
                         
                         return (
                             <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
@@ -3696,7 +3747,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPlannedOnly
                                                 ? <span className="text-xs font-semibold text-indigo-500">Awaiting mating</span>
                                                 : isMated
-                                                ? <span className="text-xs font-semibold text-purple-500">Awaiting birth</span>
+                                                ? (dam?.isPregnant
+                                                    ? <span className="text-xs font-semibold text-pink-600">🤰 Pregnant</span>
+                                                    : <button
+                                                        type="button"
+                                                        onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
+                                                        title="Mark dam as pregnant"
+                                                        className="text-[11px] font-semibold text-pink-700 bg-pink-50 border border-pink-200 rounded-lg px-2 py-1 hover:bg-pink-100 transition"
+                                                      >
+                                                        🤰 Assign Pregnant
+                                                      </button>)
                                                 : <div className="flex items-center gap-1.5">
                                                     <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                                     {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
@@ -3745,6 +3805,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 >
                                                     <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     <span>Mated Today</span>
+                                                </button>
+                                            )}
+                                            {isMated && !dam?.isPregnant && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
+                                                    className="flex items-center gap-1 bg-pink-500 hover:bg-pink-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                >
+                                                    <span>🤰</span>
+                                                    <span>Assign Pregnant</span>
                                                 </button>
                                             )}
                                             <button
