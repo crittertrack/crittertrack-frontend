@@ -1220,6 +1220,13 @@ const AnimalFormTestModal = ({
     const [newMilestoneDate, setNewMilestoneDate] = useState(() => new Date().toISOString().split('T')[0]);
     const [newMilestoneInterval, setNewMilestoneInterval] = useState('');
     const [newMilestoneUnit, setNewMilestoneUnit] = useState('week');
+    
+    // Parasite prevention schedule event state
+    const [newParasiteScheduleTreatment, setNewParasiteScheduleTreatment] = useState('');
+    const [newParasiteScheduleDate, setNewParasiteScheduleDate] = useState(() => new Date().toISOString().split('T')[0]);
+    const [newParasiteScheduleInterval, setNewParasiteScheduleInterval] = useState('');
+    const [newParasiteScheduleUnit, setNewParasiteScheduleUnit] = useState('month');
+    
     const [newMeasurement, setNewMeasurement] = useState({ date: new Date().toISOString().substring(0, 10), weight: '', length: '', height: '', chestGirth: '', bcs: '', notes: '' });
     const [measurementUnits, setMeasurementUnits] = useState({
         weight: animalToEdit?.measurementUnits?.weight || 'g',
@@ -1657,6 +1664,21 @@ const AnimalFormTestModal = ({
         setNewMilestoneUnit('week');
     };
 
+    const addParasiteScheduleEvent = () => {
+        if (!newParasiteScheduleTreatment.trim() || !newParasiteScheduleDate) return;
+        const entry = {
+            treatment: newParasiteScheduleTreatment.trim(),
+            startDate: newParasiteScheduleDate,
+            interval: newParasiteScheduleInterval ? Number(newParasiteScheduleInterval) : null,
+            intervalUnit: newParasiteScheduleInterval ? newParasiteScheduleUnit : null,
+        };
+        setFormData(prev => ({ ...prev, parasitePreventionSchedule: [...(prev.parasitePreventionSchedule || []), entry] }));
+        setNewParasiteScheduleTreatment('');
+        setNewParasiteScheduleDate(new Date().toISOString().split('T')[0]);
+        setNewParasiteScheduleInterval('');
+        setNewParasiteScheduleUnit('month');
+    };
+
     const addBreedingRecord = () => {
         const record = {
             id: Date.now().toString(),
@@ -1915,7 +1937,7 @@ const AnimalFormTestModal = ({
             reproductiveComplications: animalToEdit.reproductiveComplications || '',
             reproductiveClearances: animalToEdit.reproductiveClearances || '',
             spayNeuterDate: animalToEdit.spayNeuterDate ? new Date(animalToEdit.spayNeuterDate).toISOString().substring(0, 10) : '',
-            parasitePreventionSchedule: animalToEdit.parasitePreventionSchedule || '',
+            parasitePreventionSchedule: parseJsonArrayField(animalToEdit.parasitePreventionSchedule),
             heartwormStatus: animalToEdit.heartwormStatus || '',
             hipElbowScores: animalToEdit.hipElbowScores || '',
             geneticTestResults: animalToEdit.geneticTestResults || '',
@@ -2103,7 +2125,7 @@ const AnimalFormTestModal = ({
             reproductiveComplications: '',
             reproductiveClearances: '',
             spayNeuterDate: '',
-            parasitePreventionSchedule: '',
+            parasitePreventionSchedule: [],
             heartwormStatus: '',
             hipElbowScores: '',
             geneticTestResults: '',
@@ -2558,6 +2580,16 @@ const AnimalFormTestModal = ({
         if (eventVisibility.milestones) {
             (parseJsonArrayField(formData.milestones) || []).forEach((milestone, idx) => {
                 if (milestone?.startDate) addEvent('milestones', milestone.startDate, milestone.label || 'Milestone', milestone.description || '', `milestone-${milestone.startDate}-${idx}`);
+            });
+        }
+
+        // Parasite Prevention Schedule
+        if (eventVisibility.health) {
+            (parseJsonArrayField(formData.parasitePreventionSchedule) || []).forEach((schedule, idx) => {
+                if (schedule?.startDate) {
+                    const frequency = schedule.interval && schedule.intervalUnit ? ` (every ${schedule.interval} ${schedule.intervalUnit}s)` : '';
+                    addEvent('health', schedule.startDate, 'Parasite Prevention', `${schedule.treatment}${frequency}`, `parasite-schedule-${schedule.startDate}-${idx}`);
+                }
             });
         }
 
@@ -4083,6 +4115,42 @@ const AnimalFormTestModal = ({
                                             <button type="button" onClick={addParasiteControl} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Parasite Control</button>
                                         </div>
                                     {(formData.parasiteControl || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.treatment} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('parasiteControl', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    
+                                    {/* Parasite Prevention Schedule - Timeline Events */}
+                                    <div className="space-y-2 pt-2 border-t">
+                                        <h4 className="text-sm font-semibold text-gray-700">Prevention Schedule (Recurring Events)</h4>
+                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                <input type="text" value={newParasiteScheduleTreatment} onChange={(e) => setNewParasiteScheduleTreatment(e.target.value)} placeholder="e.g., Flea/Tick Prevention, Deworming" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <DatePicker value={newParasiteScheduleDate} onChange={(e) => setNewParasiteScheduleDate(e.target.value)} className="py-1.5 px-2 text-sm" />
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Interval</label>
+                                                    <input type="number" value={newParasiteScheduleInterval} onChange={(e) => setNewParasiteScheduleInterval(e.target.value)} placeholder="e.g., 1, 30, 90" min="1" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Unit</label>
+                                                    <select value={newParasiteScheduleUnit} onChange={(e) => setNewParasiteScheduleUnit(e.target.value)} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                        <option value="day">Days</option>
+                                                        <option value="week">Weeks</option>
+                                                        <option value="month">Months</option>
+                                                        <option value="year">Years</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <button type="button" onClick={addParasiteScheduleEvent} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Schedule Event</button>
+                                        </div>
+                                        {(parseJsonArrayField(formData.parasitePreventionSchedule) || []).filter(Boolean).map((schedule, i) => (
+                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-blue-50 rounded border border-blue-200">
+                                                <span>
+                                                    <strong>{schedule.treatment}</strong> starting {schedule.startDate}
+                                                    {schedule.interval && schedule.intervalUnit ? ` (every ${schedule.interval} ${schedule.intervalUnit}s)` : ''}
+                                                </span>
+                                                <button type="button" onClick={() => removeArrayItem('parasitePreventionSchedule', i)}><Trash2 size={14} className="text-red-500" /></button>
+                                            </div>
+                                        ))}
+                                    </div>
                                     </div>
                                 </FormSection>
 
@@ -5334,9 +5402,9 @@ const AnimalFormTestModal = ({
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-2">
                                         <Dna size={18} className="text-orange-500" />
-                                        <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
+                                        <h3 className="text-base font-semibold text-gray-700">Pedigree</h3>
                                     </div>
-                                    <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Changes are saved when you click Save Animal.</p>
+                                    <p className="text-xs text-gray-400 -mt-3">This Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Changes are saved when you click Save Animal.</p>
 
                                     <div>
                                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>

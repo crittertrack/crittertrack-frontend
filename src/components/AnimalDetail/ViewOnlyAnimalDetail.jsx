@@ -2022,7 +2022,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                             link.download = `beta-pedigree-${animal.name || animal.id_public}.png`;
                             link.href = outCanvas.toDataURL('image/png');
                             link.click();
-                        } catch(e) { console.error('Beta pedigree download failed', e); }
+                        } catch(e) { console.error('Pedigree download failed', e); }
                         finally { setMpDownloading(false); }
                     };
                     const handleDownloadMPPDF = async () => {
