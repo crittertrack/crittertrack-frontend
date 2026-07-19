@@ -137,33 +137,40 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
      */
     const toggleAnimalBreedingLine = useCallback(
         (animalId: any, lineId: any) => {
-            const current = animalBreedingLines[animalId] || [];
-            const updated = current.includes(lineId) ? current.filter((id: any) => id !== lineId) : [...current, lineId];
-            const next = { ...animalBreedingLines, [animalId]: updated };
+            console.log('[BREEDING LINES] Toggle called:', { animalId, lineId });
+            setAnimalBreedingLines((prevAssignments: any) => {
+                const current = prevAssignments[animalId] || [];
+                const updated = current.includes(lineId) ? current.filter((id: any) => id !== lineId) : [...current, lineId];
+                const next = { ...prevAssignments, [animalId]: updated };
 
-            setAnimalBreedingLines(next);
-            try {
-                localStorage.setItem('ct_blassign', JSON.stringify(next));
-            } catch (e) {
-                console.warn('[BREEDING LINES] Failed to save assignments to localStorage:', e);
-            }
+                console.log('[BREEDING LINES] Toggle update:', { current, updated, next });
 
-            if (authToken) {
-                axios
-                    .put(
-                        `${API_BASE_URL}/users/breeding-lines`,
-                        {
-                            breedingLineDefs: breedingLineDefsRef.current,
-                            animalBreedingLines: next
-                        },
-                        {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        }
-                    )
-                    .catch(err => console.error('[BREEDING LINES] Failed to save assignment to backend:', err));
-            }
+                try {
+                    localStorage.setItem('ct_blassign', JSON.stringify(next));
+                } catch (e) {
+                    console.warn('[BREEDING LINES] Failed to save assignments to localStorage:', e);
+                }
+
+                if (authToken) {
+                    axios
+                        .put(
+                            `${API_BASE_URL}/users/breeding-lines`,
+                            {
+                                breedingLineDefs: breedingLineDefsRef.current,
+                                animalBreedingLines: next
+                            },
+                            {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            }
+                        )
+                        .then(() => console.log('[BREEDING LINES] Toggle saved to backend'))
+                        .catch(err => console.error('[BREEDING LINES] Failed to save assignment to backend:', err));
+                }
+
+                return next;
+            });
         },
-        [animalBreedingLines, authToken, API_BASE_URL]
+        [authToken, API_BASE_URL]
     );
 
     /**
@@ -184,31 +191,34 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
      */
     const clearAnimalBreedingLines = useCallback(
         (animalId: any) => {
-            const next = { ...animalBreedingLines };
-            delete next[animalId];
-            setAnimalBreedingLines(next);
-            try {
-                localStorage.setItem('ct_blassign', JSON.stringify(next));
-            } catch (e) {
-                console.warn('[BREEDING LINES] Failed to clear assignments:', e);
-            }
+            setAnimalBreedingLines((prevAssignments: any) => {
+                const next = { ...prevAssignments };
+                delete next[animalId];
+                try {
+                    localStorage.setItem('ct_blassign', JSON.stringify(next));
+                } catch (e) {
+                    console.warn('[BREEDING LINES] Failed to clear assignments:', e);
+                }
 
-            if (authToken) {
-                axios
-                    .put(
-                        `${API_BASE_URL}/users/breeding-lines`,
-                        {
-                            breedingLineDefs: breedingLineDefsRef.current,
-                            animalBreedingLines: next
-                        },
-                        {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        }
-                    )
-                    .catch(err => console.error('[BREEDING LINES] Failed to clear assignments:', err));
-            }
+                if (authToken) {
+                    axios
+                        .put(
+                            `${API_BASE_URL}/users/breeding-lines`,
+                            {
+                                breedingLineDefs: breedingLineDefsRef.current,
+                                animalBreedingLines: next
+                            },
+                            {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            }
+                        )
+                        .catch(err => console.error('[BREEDING LINES] Failed to clear assignments:', err));
+                }
+
+                return next;
+            });
         },
-        [animalBreedingLines, authToken, API_BASE_URL]
+        [authToken, API_BASE_URL]
     );
 
     /**
@@ -217,30 +227,33 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
      */
     const setAnimalBreedingLinesDirect = useCallback(
         (animalId: string, lineIds: number[]) => {
-            const next = { ...animalBreedingLines, [animalId]: lineIds };
-            setAnimalBreedingLines(next);
-            try {
-                localStorage.setItem('ct_blassign', JSON.stringify(next));
-            } catch (e) {
-                console.warn('[BREEDING LINES] Failed to save direct assignment to localStorage:', e);
-            }
+            setAnimalBreedingLines((prevAssignments: any) => {
+                const next = { ...prevAssignments, [animalId]: lineIds };
+                try {
+                    localStorage.setItem('ct_blassign', JSON.stringify(next));
+                } catch (e) {
+                    console.warn('[BREEDING LINES] Failed to save direct assignment to localStorage:', e);
+                }
 
-            if (authToken) {
-                axios
-                    .put(
-                        `${API_BASE_URL}/users/breeding-lines`,
-                        {
-                            breedingLineDefs: breedingLineDefsRef.current,
-                            animalBreedingLines: next
-                        },
-                        {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        }
-                    )
-                    .catch(err => console.error('[BREEDING LINES] Failed to save direct assignment:', err));
-            }
+                if (authToken) {
+                    axios
+                        .put(
+                            `${API_BASE_URL}/users/breeding-lines`,
+                            {
+                                breedingLineDefs: breedingLineDefsRef.current,
+                                animalBreedingLines: next
+                            },
+                            {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            }
+                        )
+                        .catch(err => console.error('[BREEDING LINES] Failed to save direct assignment:', err));
+                }
+
+                return next;
+            });
         },
-        [animalBreedingLines, authToken, API_BASE_URL]
+        [authToken, API_BASE_URL]
     );
 
     // ========== RETURN ALL STATE & HANDLERS ==========
