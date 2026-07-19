@@ -1171,6 +1171,10 @@ const AnimalFormTestModal = ({
         identity: false,
         breederOwner: true,
         availability: true,
+        identificationNumbers: false,
+        classification: false,
+        origin: false,
+        tags: false,
     });
 
     // Persist section collapse state in localStorage to survive re-renders
@@ -2902,133 +2906,169 @@ const AnimalFormTestModal = ({
                         {activeTab === 'identification' && (
                             <div className="space-y-4">
                                 {/* Identification Numbers */}
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
-                                    <h3 className="text-base font-semibold text-gray-700 border-b pb-2"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Breeder Assigned ID</label>
-                                            <input type="text" name="breederAssignedId" value={formData.breederAssignedId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    <button type="button" onClick={() => toggleSection('identificationNumbers')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
+                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><Hash size={16} className="flex-shrink-0" /> Identification Numbers</h3>
+                                        <div className="text-gray-700 flex-shrink-0">
+                                            {sectionsCollapsed.identificationNumbers ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Microchip Number</label>
-                                            <input type="text" name="microchipNumber" value={formData.microchipNumber || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Pedigree Registration ID</label>
-                                            <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Colony ID</label>
-                                            <input type="text" name="colonyId" value={formData.colonyId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Tattoo ID</label>
-                                            <input type="text" name="tattooId" value={formData.tattooId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Ring ID</label>
-                                            <input type="text" name="ringId" value={formData.ringId || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Ear Tag</label>
-                                            <input type="text" name="eartagNumber" value={formData.eartagNumber || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                    </div>
-                                    {/* Additional Identifiers */}
-                                    <div className="mt-4 pt-4 border-t border-gray-200">
-                                        <h4 className="text-sm font-semibold text-gray-600 mb-2">Additional Identifiers</h4>
-                                    {(formData.identifiers || []).filter(Boolean).map((identifier, index) => (
-                                        <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-white border rounded-md">
-                                            <div className="flex-1 grid grid-cols-2 gap-2">
-                                                <input type="text" value={identifier.title} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
-                                                <input type="text" value={identifier.value} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
+                                    </button>
+                                    {!sectionsCollapsed.identificationNumbers && (
+                                        <div className="mt-3 pt-3 border-t space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Breeder Assigned ID</label>
+                                                <input type="text" name="breederAssignedId" value={formData.breederAssignedId || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
-                                            <button type="button" onClick={() => removeIdentifier(index)} className="p-1 text-red-500 hover:text-red-700">
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    ))}
-                                    <div className="flex items-center gap-2 p-2 bg-white border border-dashed rounded-md">
-                                            <div className="flex-1 grid grid-cols-2 gap-2">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Identifier Title (e.g., DNA ID)"
-                                                    value={newIdentifier.title}
-                                                    onChange={(e) => setNewIdentifier({ ...newIdentifier, title: e.target.value })}
-                                                    className="text-sm p-1 border-gray-300 rounded"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Identifier Value"
-                                                    value={newIdentifier.value}
-                                                    onChange={(e) => setNewIdentifier({ ...newIdentifier, value: e.target.value })}
-                                                    className="text-sm p-1 border-gray-300 rounded"
-                                                />
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Microchip Number</label>
+                                                <input type="text" name="microchipNumber" value={formData.microchipNumber || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
-                                            <button type="button" onClick={addIdentifier} className="p-1 text-green-600 hover:text-green-700">
-                                                <PlusCircle size={20} />
-                                            </button>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Pedigree Registration ID</label>
+                                                <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Colony ID</label>
+                                                <input type="text" name="colonyId" value={formData.colonyId || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Tattoo ID</label>
+                                                <input type="text" name="tattooId" value={formData.tattooId || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Ring ID</label>
+                                                <input type="text" name="ringId" value={formData.ringId || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Ear Tag</label>
+                                                <input type="text" name="eartagNumber" value={formData.eartagNumber || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
                                         </div>
-                                    </div>
+                                        {/* Additional Identifiers */}
+                                        <div className="mt-4 pt-4 border-t border-gray-200">
+                                            <h4 className="text-sm font-semibold text-gray-600 mb-2">Additional Identifiers</h4>
+                                            {(formData.identifiers || []).filter(Boolean).map((identifier, index) => (
+                                                <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-white border rounded-md">
+                                                    <div className="flex-1 grid grid-cols-2 gap-2">
+                                                        <input type="text" value={identifier.title} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
+                                                        <input type="text" value={identifier.value} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
+                                                    </div>
+                                                    <button type="button" onClick={() => removeIdentifier(index)} className="p-1 text-red-500 hover:text-red-700">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <div className="flex items-center gap-2 p-2 bg-white border border-dashed rounded-md">
+                                                <div className="flex-1 grid grid-cols-2 gap-2">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Identifier Title (e.g., DNA ID)"
+                                                        value={newIdentifier.title}
+                                                        onChange={(e) => setNewIdentifier({ ...newIdentifier, title: e.target.value })}
+                                                        className="text-sm p-1 border-gray-300 rounded"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Identifier Value"
+                                                        value={newIdentifier.value}
+                                                        onChange={(e) => setNewIdentifier({ ...newIdentifier, value: e.target.value })}
+                                                        className="text-sm p-1 border-gray-300 rounded"
+                                                    />
+                                                </div>
+                                                <button type="button" onClick={addIdentifier} className="p-1 text-green-600 hover:text-green-700">
+                                                    <PlusCircle size={20} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Classification */}
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
-                                    <h3 className="text-base font-semibold text-gray-700 border-b pb-2"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Species</label>
-                                            <input type="text" value={formData.species} disabled
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600" />
-                                            <p className="text-xs text-gray-500 mt-1">Cannot be changed after creation</p>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    <button type="button" onClick={() => toggleSection('classification')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
+                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><FolderOpen size={16} className="flex-shrink-0" /> Classification</h3>
+                                        <div className="text-gray-700 flex-shrink-0">
+                                            {sectionsCollapsed.classification ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Breed</label>
-                                            <input type="text" name="breed" value={formData.breed || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </button>
+                                    {!sectionsCollapsed.classification && (
+                                        <div className="mt-3 pt-3 border-t space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Species</label>
+                                                <input type="text" value={formData.species} disabled
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600" />
+                                                <p className="text-xs text-gray-500 mt-1">Cannot be changed after creation</p>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Breed</label>
+                                                <input type="text" name="breed" value={formData.breed || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-xs font-medium text-gray-700">Strain</label>
+                                                <input type="text" name="strain" value={formData.strain || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                    placeholder="e.g., C57BL/6, Wistar, Syrian" />
+                                            </div>
                                         </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Strain</label>
-                                            <input type="text" name="strain" value={formData.strain || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                placeholder="e.g., C57BL/6, Wistar, Syrian" />
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
 
                                 {/* Origin */}
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-3">
-                                    <h3 className="text-base font-semibold text-gray-700 border-b pb-2 mb-2"><Globe size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Origin</h3>
-                                    <label className="block text-xs font-medium text-gray-700">Origin</label>
-                                    <select name="origin" value={formData.origin || ''} onChange={handleChange}
-                                        className="block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value="">Select Origin</option>
-                                        <option value="Captive-bred">Captive-bred</option>
-                                        <option value="Wild-caught">Wild-caught</option>
-                                        <option value="Rescue">Rescue</option>
-                                    </select>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    <button type="button" onClick={() => toggleSection('origin')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
+                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><Globe size={16} className="flex-shrink-0" /> Origin</h3>
+                                        <div className="text-gray-700 flex-shrink-0">
+                                            {sectionsCollapsed.origin ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                        </div>
+                                    </button>
+                                    {!sectionsCollapsed.origin && (
+                                        <div className="mt-3 pt-3 border-t space-y-3">
+                                            <label className="block text-xs font-medium text-gray-700">Origin</label>
+                                            <select name="origin" value={formData.origin || ''} onChange={handleChange}
+                                                className="block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                <option value="">Select Origin</option>
+                                                <option value="Captive-bred">Captive-bred</option>
+                                                <option value="Wild-caught">Wild-caught</option>
+                                                <option value="Rescue">Rescue</option>
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Tags */}
                                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                    <h3 className="text-base font-semibold text-gray-700 border-b pb-2 mb-2"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Tags</h3>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Tags (Lines, Enclosures, etc)</label>
-                                    <input type="text" placeholder="Type and press Enter or comma to add tags" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } } else if (e.key === 'Backspace' && !tagInput && formData.tags.length > 0) { setFormData({ ...formData, tags: formData.tags.slice(0, -1) }); } }} onBlur={() => { const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } }} className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                    {formData.tags.length > 0 && (
-                                        <div className="mt-2 flex flex-wrap gap-2">
-                                            {formData.tags.map((tag, idx) => (
-                                                <span key={idx} className="inline-flex items-center bg-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
-                                                    {tag}
-                                                    <button type="button" onClick={() => { const newTags = formData.tags.filter((_, i) => i !== idx); setFormData({ ...formData, tags: newTags }); }} className="ml-2 text-black hover:text-gray-600"><Trash2 size={12} /></button>
-                                                </span>
-                                            ))}
+                                    <button type="button" onClick={() => toggleSection('tags')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
+                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><Tag size={16} className="flex-shrink-0" /> Tags</h3>
+                                        <div className="text-gray-700 flex-shrink-0">
+                                            {sectionsCollapsed.tags ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                        </div>
+                                    </button>
+                                    {!sectionsCollapsed.tags && (
+                                        <div className="mt-3 pt-3 border-t space-y-3">
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Tags (Lines, Enclosures, etc)</label>
+                                            <input type="text" placeholder="Type and press Enter or comma to add tags" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } } else if (e.key === 'Backspace' && !tagInput && formData.tags.length > 0) { setFormData({ ...formData, tags: formData.tags.slice(0, -1) }); } }} onBlur={() => { const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } }} className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            {formData.tags.length > 0 && (
+                                                <div className="mt-2 flex flex-wrap gap-2">
+                                                    {formData.tags.map((tag, idx) => (
+                                                        <span key={idx} className="inline-flex items-center bg-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
+                                                            {tag}
+                                                            <button type="button" onClick={() => { const newTags = formData.tags.filter((_, i) => i !== idx); setFormData({ ...formData, tags: newTags }); }} className="ml-2 text-black hover:text-gray-600"><Trash2 size={12} /></button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -5311,6 +5351,7 @@ const AnimalFormTestModal = ({
                         )}
                     </div>
                 </div>
+            </form>
 
                 {parentSearchModalOpen && (
                     <ParentSearchModal
@@ -5374,7 +5415,6 @@ const AnimalFormTestModal = ({
                         </button>
                     </div>
                 </div>
-            </form>
         </div>
     );
 };
