@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Save, X, User, Loader2, Search } from 'lucide-react';
-import { UserSearchModal } from '../AnimalForm';
+import { UserSearchModal } from '../Modals/SearchModals';
 
 const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile }) => {
     const { contactId } = useParams();

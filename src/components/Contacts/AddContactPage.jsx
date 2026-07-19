@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Save, X, UserPlus, Loader2, User, Search } from 'lucide-react';
-// NOTE: You may need to adjust this path depending on where UserSearchModal is located.
-import { UserSearchModal } from '../AnimalForm';
+import { UserSearchModal } from '../Modals/SearchModals';
 
 
 const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile }) => {
