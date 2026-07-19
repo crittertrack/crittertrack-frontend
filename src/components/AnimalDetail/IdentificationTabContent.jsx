@@ -19,7 +19,7 @@ export const IdentificationTabContent = ({ animal, breedingLineDefs = [], animal
     return (
         <div className="space-y-6">
             <InfoCard title="Identification Numbers" icon={<Hash size={18} className="text-gray-400" />}>
-                    <dl className="space-y-4">
+                    <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="CritterTrack ID" value={animal.id_public} />
                         {animal.breederAssignedId && <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />}
                         {animal.microchipNumber && <InfoItem label="Microchip Number" value={animal.microchipNumber} />}
@@ -34,14 +34,14 @@ export const IdentificationTabContent = ({ animal, breedingLineDefs = [], animal
                     </dl>
             </InfoCard>
             <InfoCard title="Classification" icon={<FolderOpen size={18} className="text-gray-400" />}>
-                    <dl className="space-y-4">
+                    <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="Species" value={animal.species} />
                         {animal.breed && <InfoItem label="Breed" value={animal.breed} />}
                         {animal.strain && <InfoItem label="Strain" value={animal.strain} />}
                     </dl>
             </InfoCard>
             <InfoCard title="Origin" icon={<Globe size={18} className="text-gray-400" />}>
-                    <dl>
+                    <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="Origin" value={animal.origin} />
                     </dl>
             </InfoCard>

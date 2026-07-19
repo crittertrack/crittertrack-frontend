@@ -17,37 +17,16 @@ const parseJsonArrayField = (data) => {
 };
 
 export const AppearanceTabContent = ({ animal }) => {
-    const tags = parseJsonArrayField(animal.tags);
-
     return (
         <div className="space-y-6">
-                {/* Classification */}
-                {(animal.breed || animal.strain || animal.origin) && (
-                    <InfoCard title="Classification" icon={<Palette size={18} />}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {animal.breed && <InfoItem label="Breed" value={animal.breed} />}
-                            {animal.strain && <InfoItem label="Strain" value={animal.strain} />}
-                            {animal.origin && <InfoItem label="Origin" value={animal.origin} />}
-                        </div>
-                    </InfoCard>
-                )}
-                {/* Tags */}
-                {tags.length > 0 && (
-                    <InfoCard title="Tags" icon={<Palette size={18} />}>
-                        <div className="flex flex-wrap gap-2">
-                            {tags.map((tag, idx) => (
-                                <span key={idx} className="px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
-                                    {typeof tag === 'string' ? tag : tag.name}
-                                </span>
-                            ))}
-                        </div>
-                    </InfoCard>
-                )}
                 <InfoCard title="Appearance" icon={<Palette size={18} />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.color && <InfoItem label="Color" value={animal.color} />}
                         {animal.coatPattern && <InfoItem label="Pattern" value={animal.coatPattern} />}
                         {animal.coat && <InfoItem label="Coat" value={animal.coat} />}
+                        {animal.earset && <InfoItem label="Earset" value={animal.earset} />}
+                        {animal.phenotype && <InfoItem label="Phenotype" value={animal.phenotype} />}
+                        {animal.morph && <InfoItem label="Morph" value={animal.morph} />}
                         {animal.markings && <InfoItem label="Markings" value={animal.markings} />}
                         {animal.eyeColor && <InfoItem label="Eye Color" value={animal.eyeColor} />}
                         {animal.nailColor && <InfoItem label="Nail Color" value={animal.nailColor} />}
@@ -55,29 +34,6 @@ export const AppearanceTabContent = ({ animal }) => {
                         {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
                     </div>
                 </InfoCard>
-                {/* Phenotype & Morph */}
-                {(animal.phenotype || animal.morph || animal.earset) && (
-                    <InfoCard title="Phenotype & Genetics" icon={<Dna size={18} className="text-gray-400" />}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {animal.phenotype && <InfoItem label="Phenotype" value={animal.phenotype} />}
-                            {animal.morph && <InfoItem label="Morph" value={animal.morph} />}
-                            {animal.earset && <InfoItem label="Earset" value={animal.earset} />}
-                        </div>
-                    </InfoCard>
-                )}
-                {/* Body Measurements */}
-                {(animal.bodyWeight || animal.bodyLength || animal.heightAtWithers || animal.bodyConditionScore || animal.chestGirth || animal.adultWeight) && (
-                    <InfoCard title="Body Measurements" icon={<Ruler size={18} className="text-gray-400" />}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {animal.bodyWeight && <InfoItem label="Current Weight" value={animal.bodyWeight} />}
-                            {animal.bodyLength && <InfoItem label="Body Length" value={animal.bodyLength} />}
-                            {animal.heightAtWithers && <InfoItem label="Height at Withers" value={animal.heightAtWithers} />}
-                            {animal.bodyConditionScore && <InfoItem label="Body Condition Score" value={animal.bodyConditionScore} />}
-                            {animal.chestGirth && <InfoItem label="Chest Girth" value={animal.chestGirth} />}
-                            {animal.adultWeight && <InfoItem label="Expected Adult Weight" value={animal.adultWeight} />}
-                        </div>
-                    </InfoCard>
-                )}
                 <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400" />}>
                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
                 </InfoCard>

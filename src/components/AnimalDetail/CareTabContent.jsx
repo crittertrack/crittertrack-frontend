@@ -40,7 +40,6 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
     const hasHousing = animal.housingType || animal.bedding || animal.enrichment;
     const hasEnvironment = animal.temperatureRange || animal.humidity || animal.lighting || animal.noise || animal.lastBulbChange;
     const hasGrooming = animal.groomingNeeds || animal.sheddingLevel;
-    const hasTraining = animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained;
 
     return (
         <div className="space-y-6">
@@ -158,18 +157,6 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
                         {animal.specialCareNeeds && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Special Care Needs"><p className="whitespace-pre-wrap text-sm">{animal.specialCareNeeds}</p></InfoItem></div>}
                         {animal.healthMonitoringNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Health Monitoring Notes"><p className="whitespace-pre-wrap text-sm">{animal.healthMonitoringNotes}</p></InfoItem></div>}
                         {animal.additionalSpecialRequirements && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Additional Special Requirements"><p className="whitespace-pre-wrap text-sm">{animal.additionalSpecialRequirements}</p></InfoItem></div>}
-                    </div>
-                </InfoCard>
-            )}
-
-            {/* Training Status */}
-            {hasTraining && (
-                <InfoCard title="Training Status" icon={<CheckSquare size={18} className="text-gray-400" />}>
-                    <div className="flex flex-wrap gap-2">
-                        {animal.crateTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('crateTrained', 'Crate Trained')}</span>}
-                        {animal.litterTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('litterTrained', 'Litter Trained')}</span>}
-                        {animal.leashTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('leashTrained', 'Leash Trained')}</span>}
-                        {animal.freeFlightTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
                     </div>
                 </InfoCard>
             )}
