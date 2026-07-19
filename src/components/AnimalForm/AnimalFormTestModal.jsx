@@ -1141,6 +1141,8 @@ const AnimalFormTestModal = ({
         humidityRange: { min: '', max: '' },
         description: ''
     });
+
+    const addMeasurement = () => {
         if (!newMeasurement.date || !newMeasurement.weight) {
             showModalMessage('Missing Data', 'Please enter at least a date and weight.');
             return;
@@ -5353,5 +5355,6 @@ const AnimalFormTestModal = ({
             </form>
         </div>
     );
+};
 
 export default AnimalFormTestModal;
