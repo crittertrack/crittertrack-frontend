@@ -17,6 +17,7 @@ const getEventIcon = (type) => {
     const icons = {
         'health': <Stethoscope size={14} className="text-blue-500" />,
         'breeding': <Heart size={14} className="text-red-500" />,
+        'ownership': <User size={14} className="text-slate-500" />,
         'keeper': <User size={14} className="text-slate-500" />,
         'show': <Trophy size={14} className="text-amber-500" />,
         'milestones': <Target size={14} className="text-purple-500" />,
@@ -296,12 +297,12 @@ export const TimelineTabContent = ({ animal }) => {
             }
         });
 
-        // Keeper events
+        // Ownership events
         (animal.ownershipHistory || []).forEach((ownership, idx) => {
             if (ownership?.startDate) {
                 events.push({
-                    id: `keeper-${ownership.startDate}-${idx}`,
-                    type: 'keeper',
+                    id: `ownership-${ownership.startDate}-${idx}`,
+                    type: 'ownership',
                     date: ownership.startDate,
                     title: 'Keeper Changed',
                     description: `New keeper: ${ownership.ownerName || 'Unknown'}`
@@ -312,7 +313,7 @@ export const TimelineTabContent = ({ animal }) => {
         if (animal.purchaseDate) {
             events.push({
                 id: 'purchase-' + animal.purchaseDate,
-                type: 'keeper',
+                type: 'ownership',
                 date: animal.purchaseDate,
                 title: 'Animal Purchased',
                 description: `Purchased for: ${animal.purchasePrice ? `$${animal.purchasePrice}` : 'Unknown price'}`
@@ -322,7 +323,7 @@ export const TimelineTabContent = ({ animal }) => {
         if (animal.saleDate) {
             events.push({
                 id: 'sale-' + animal.saleDate,
-                type: 'keeper',
+                type: 'ownership',
                 date: animal.saleDate,
                 title: 'Animal Sold',
                 description: `Sold for: ${animal.salePrice ? `$${animal.salePrice}` : 'Unknown price'}`

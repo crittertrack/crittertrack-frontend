@@ -84,30 +84,36 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                         </div>
                     </InfoCard>
                 )}
-                <InfoCard title="Sire/Male Information" icon={<Mars size={18} className="text-gray-400" />}>
-                    {hasSireInfo ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {animal.fertilityStatus && <InfoItem label="Fertility Status" value={animal.fertilityStatus} />}
-                            {animal.successfulMatings && <InfoItem label="Successful Matings" value={animal.successfulMatings} />}
-                            {animal.fertilityNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Notes"><p className="whitespace-pre-wrap text-sm">{animal.fertilityNotes}</p></InfoItem></div>}
-                            {animal.reproductiveClearances && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem></div>}
-                            {animal.reproductiveComplications && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem></div>}
-                        </div>
-                    ) : <p className="text-sm text-gray-400">No sire-specific fertility information recorded.</p>}
-                </InfoCard>
-                <InfoCard title="Dam/Female Information" icon={<Venus size={18} className="text-gray-400" />}>
-                    {hasDamInfo ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {animal.fertilityStatus && <InfoItem label="Fertility Status" value={animal.fertilityStatus} />}
-                            {animal.lastDeliveryDate && <InfoItem label="Last Delivery Date" value={formatDate(animal.lastDeliveryDate)} />}
-                            {animal.deliveryMethod && <InfoItem label={getLabel('deliveryMethod', 'Delivery Method')} value={animal.deliveryMethod} />}
-                            {animal.lastReproductiveInterventionDate && <InfoItem label="Last Reproductive Intervention" value={formatDate(animal.lastReproductiveInterventionDate)} />}
-                            {animal.reproductiveHealthNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Health Notes"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveHealthNotes}</p></InfoItem></div>}
-                            {animal.reproductiveClearances && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem></div>}
-                            {animal.reproductiveComplications && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem></div>}
-                        </div>
-                    ) : <p className="text-sm text-gray-400">No dam-specific fertility information recorded.</p>}
-                </InfoCard>
+                {/* Sire/Male Information - Only show for Male or Intersex/Unknown */}
+                {isMale && (
+                    <InfoCard title="Sire/Male Information" icon={<Mars size={18} className="text-gray-400" />}>
+                        {hasSireInfo ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {animal.fertilityStatus && <InfoItem label="Fertility Status" value={animal.fertilityStatus} />}
+                                {animal.successfulMatings && <InfoItem label="Successful Matings" value={animal.successfulMatings} />}
+                                {animal.fertilityNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Notes"><p className="whitespace-pre-wrap text-sm">{animal.fertilityNotes}</p></InfoItem></div>}
+                                {animal.reproductiveClearances && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem></div>}
+                                {animal.reproductiveComplications && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem></div>}
+                            </div>
+                        ) : <p className="text-sm text-gray-400">No sire-specific fertility information recorded.</p>}
+                    </InfoCard>
+                )}
+                {/* Dam/Female Information - Only show for Female or Intersex/Unknown */}
+                {isFemale && (
+                    <InfoCard title="Dam/Female Information" icon={<Venus size={18} className="text-gray-400" />}>
+                        {hasDamInfo ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {animal.fertilityStatus && <InfoItem label="Fertility Status" value={animal.fertilityStatus} />}
+                                {animal.lastDeliveryDate && <InfoItem label="Last Delivery Date" value={formatDate(animal.lastDeliveryDate)} />}
+                                {animal.deliveryMethod && <InfoItem label={getLabel('deliveryMethod', 'Delivery Method')} value={animal.deliveryMethod} />}
+                                {animal.lastReproductiveInterventionDate && <InfoItem label="Last Reproductive Intervention" value={formatDate(animal.lastReproductiveInterventionDate)} />}
+                                {animal.reproductiveHealthNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Health Notes"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveHealthNotes}</p></InfoItem></div>}
+                                {animal.reproductiveClearances && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem></div>}
+                                {animal.reproductiveComplications && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem></div>}
+                            </div>
+                        ) : <p className="text-sm text-gray-400">No dam-specific fertility information recorded.</p>}
+                    </InfoCard>
+                )}
                 {/* Offspring & Litter Information */}
                 {(animal.litterCount || animal.litterSizeBorn || animal.litterSizeWeaned || animal.totalOffspringProduced || animal.viableOffspringCount || animal.offspringCount) && (
                     <InfoCard title="Offspring & Litter Information" icon={<Leaf size={18} className="text-gray-400" />}>
