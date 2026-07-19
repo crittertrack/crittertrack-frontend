@@ -1756,7 +1756,7 @@ const AnimalFormTestModal = ({
             name: animalToEdit.name || '',
             gender: animalToEdit.gender || 'Unknown',
             birthDate: animalToEdit.birthDate ? new Date(animalToEdit.birthDate).toISOString().substring(0, 10) : '',
-            deceasedDate: getDateValue(animalToEdit, 'dateOfDeath', 'deceasedDate'),
+            deceasedDate: getDateValue(animalToEdit, 'deceasedDate', 'dateOfDeath'),
             status: animalToEdit.status || 'Pet',
             color: animalToEdit.color || '',
             coat: animalToEdit.coat || '',
@@ -1877,7 +1877,7 @@ const AnimalFormTestModal = ({
             activityCycle: animalToEdit.activityCycle || '',
             lifeStage: animalToEdit.lifeStage || '',
             causeOfDeath: animalToEdit.causeOfDeath || '',
-            dateOfDeath: animalToEdit.dateOfDeath ? new Date(animalToEdit.dateOfDeath).toISOString().substring(0, 10) : '',
+            deceasedDate: animalToEdit.deceasedDate ? new Date(animalToEdit.deceasedDate).toISOString().substring(0, 10) : '',
             necropsyResults: animalToEdit.necropsyResults || '',
             insurance: animalToEdit.insurance || '',
             legalStatus: animalToEdit.legalStatus || '',
@@ -2070,7 +2070,7 @@ const AnimalFormTestModal = ({
             activityCycle: '',
             lifeStage: '',
             causeOfDeath: '',
-            dateOfDeath: '',
+            deceasedDate: '',
             necropsyResults: '',
             insurance: '',
             legalStatus: '',
@@ -2987,8 +2987,8 @@ const AnimalFormTestModal = ({
                                                     </div>
                                                     {formData.status === 'Deceased' && (
                                                         <div>
-                                                            <label className="block text-xs font-medium text-gray-700">Date of Death</label>
-                                                            <input type="date" name="dateOfDeath" value={formData.dateOfDeath} onChange={handleChange}
+                                                            <label className="block text-xs font-medium text-gray-700">Deceased Date</label>
+                                                            <input type="date" name="deceasedDate" value={formData.deceasedDate} onChange={handleChange}
                                                                 className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                                         </div>
                                                     )}
@@ -4102,7 +4102,7 @@ const AnimalFormTestModal = ({
                                 <FormSection title="End of Life" icon={<Scale size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Date of Death</label>
+                                            <label className="block text-xs font-medium text-gray-700">Deceased Date</label>
                                             <DatePicker name="deceasedDate" value={formData.deceasedDate} onChange={handleChange} maxDate={new Date()} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                         </div>
                                         <div>
