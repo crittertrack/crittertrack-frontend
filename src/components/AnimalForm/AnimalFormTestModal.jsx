@@ -1120,11 +1120,11 @@ const AnimalFormTestModal = ({
     const [loadingSupplementSupplies, setLoadingSupplementSupplies] = useState(false);
 
     // Health status override states
-    const [healthStatusOverride, setHealthStatusOverride] = useState(formData.healthStatusOverride || null);
-    const [healthStatusOverrideNotes, setHealthStatusOverrideNotes] = useState(formData.healthStatusOverrideNotes || '');
+    const [healthStatusOverride, setHealthStatusOverride] = useState(animalToEdit?.healthStatusOverride || null);
+    const [healthStatusOverrideNotes, setHealthStatusOverrideNotes] = useState(animalToEdit?.healthStatusOverrideNotes || '');
 
     // Enclosure assignment states
-    const [selectedEnclosure, setSelectedEnclosure] = useState(formData.enclosureId || null);
+    const [selectedEnclosure, setSelectedEnclosure] = useState(animalToEdit?.enclosureId || null);
     const [manualEnclosureName, setManualEnclosureName] = useState('');
     const [showEnclosureModal, setShowEnclosureModal] = useState(false);
     const [availableEnclosures, setAvailableEnclosures] = useState([]);
