@@ -9,7 +9,7 @@ import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
     Bean, Bell, Bird, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff,
-    Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin, Network,    
+    Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart,    
     Package, Plus, PlusCircle, RefreshCw, Save, Search, ShoppingBag, SlidersHorizontal,
     Sparkles, Trash2, Turtle, Utensils, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
@@ -1832,13 +1832,13 @@ useEffect(() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
                             if (animal.isPregnant) {
-                                state = { label: 'Pregnant', color: 'bg-red-100 text-red-800', icon: '🤰' };
+                                state = { label: 'Pregnant', color: 'bg-red-100 text-red-800', icon: <ScanHeart size={14} className="fill-current" /> };
                             } else if (animal.isNursing) {
-                                state = { label: 'Nursing', color: 'bg-green-100 text-green-800', icon: '🍼' };
+                                state = { label: 'Nursing', color: 'bg-green-100 text-green-800', icon: <Droplet size={14} className="fill-current" /> };
                             } else if (animal.isInMating) {
-                                state = { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: '💑' };
+                                state = { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: <Zap size={14} className="fill-current" /> };
                             } else if (animal.isPlannedMating) {
-                                state = { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: '📅' };
+                                state = { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: <Calendar size={14} /> };
                             }
                             return state ? (
                                 <span className={`text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>

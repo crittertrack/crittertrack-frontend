@@ -3,9 +3,9 @@ import axios from 'axios';
 import {
     Baby, Bean, Bell, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
     ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList,
-    Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff, Hourglass,
-    Images, Link, Loader2, Mars, Milk, PawPrint, Plus, RefreshCw, Search, Star,
-    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X
+    Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
+    Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, Search, Star,
+    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, Zap, ScanHeart
 } from 'lucide-react';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';
@@ -3792,18 +3792,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
                                                     title="Mark dam as pregnant"
-                                                    className="text-[11px] font-semibold text-pink-700 bg-pink-50 border border-pink-200 rounded-lg px-2 py-1 hover:bg-pink-100 transition"
+                                                    className="text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg px-2 py-1 hover:bg-red-100 transition flex items-center gap-1"
                                                   >
-                                                    🤰 Assign Pregnant
+                                                    <ScanHeart size={12} className="fill-current" /> Assign Pregnant
                                                   </button>
                                                 : isPregnant
                                                 ? <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
                                                     title="Mark litter as born today"
-                                                    className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg px-2 py-1 hover:bg-green-100 transition"
+                                                    className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg px-2 py-1 hover:bg-green-100 transition flex items-center gap-1"
                                                   >
-                                                    👶 Born today
+                                                    <Droplet size={12} className="fill-current" /> Born today
                                                   </button>
                                                 : <div className="flex items-center gap-1.5">
                                                     <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
@@ -3851,16 +3851,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
                                                     className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
-                                                    <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                    <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     <span>Mated Today</span>
                                                 </button>
                                             )}
                                             {isMated && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
-                                                    className="flex items-center gap-1 bg-pink-500 hover:bg-pink-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
-                                                    <span>🤰</span>
+                                                    <ScanHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
                                                     <span>Assign Pregnant</span>
                                                 </button>
                                             )}
@@ -3869,7 +3869,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
                                                     className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
-                                                    <span>👶</span>
+                                                    <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
                                                     <span>Born Today</span>
                                                 </button>
                                             )}

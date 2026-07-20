@@ -4,7 +4,7 @@ import {
     Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList, Hourglass,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info, Network, Star,
-    Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital,
+    Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital, Droplet, Zap, ScanHeart,
 } from 'lucide-react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
@@ -54,12 +54,12 @@ const StatusIndicator = ({ status, icon }) => {
 const getReproductionState = (animal) => {
     // Females can be pregnant or nursing
     if (animal.gender === 'Female') {
-        if (animal.isPregnant) return { label: 'Pregnant', color: 'bg-red-100 text-red-800', icon: '🤰' };
-        if (animal.isNursing) return { label: 'Nursing', color: 'bg-green-100 text-green-800', icon: '🍼' };
+        if (animal.isPregnant) return { label: 'Pregnant', color: 'bg-red-100 text-red-800', icon: <ScanHeart size={14} className="fill-current" /> };
+        if (animal.isNursing) return { label: 'Nursing', color: 'bg-green-100 text-green-800', icon: <Droplet size={14} className="fill-current" /> };
     }
     // Both genders can be in mating or have planned mating
-    if (animal.isInMating) return { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: '💑' };
-    if (animal.isPlannedMating) return { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: '📅' };
+    if (animal.isInMating) return { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: <Zap size={14} className="fill-current" /> };
+    if (animal.isPlannedMating) return { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: <Calendar size={14} /> };
     return null;
 };
 
