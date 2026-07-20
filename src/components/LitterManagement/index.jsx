@@ -4933,7 +4933,35 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <p className="text-gray-600">No litters yet. Create your first litter above!</p>
                     </div>
                 ) : (
-                    filteredLitters.map(litter => {
+                    filteredLitters.sort((a, b) => {
+                        // Determine state priority for each litter
+                        const getStatePriority = (litter) => {
+                            const hasBirthDate = !!litter.birthDate;
+                            const hasPregnancyDate = !!litter.pregnancyDate;
+                            const hasMatingDate = !!litter.matingDate;
+                            const isMatingDatePassed = hasMatingDate && new Date(litter.matingDate) <= new Date();
+                            
+                            const isBorn = hasBirthDate;
+                            const isPregnant = hasPregnancyDate && !hasBirthDate;
+                            const isMated = (hasMatingDate && !hasPregnancyDate && !hasBirthDate) || (litter.isPlanned && hasMatingDate && isMatingDatePassed && !hasPregnancyDate && !hasBirthDate);
+                            
+                            // Priority order: Pregnant (0) → Mated (1) → Planned (2) → Born (3)
+                            if (isPregnant) return 0;
+                            if (isMated) return 1;
+                            if (!isBorn) return 2; // Planned
+                            return 3; // Born
+                        };
+                        
+                        const priorityA = getStatePriority(a);
+                        const priorityB = getStatePriority(b);
+                        
+                        if (priorityA !== priorityB) return priorityA - priorityB;
+                        
+                        // Within same state, sort by date (most recent first)
+                        const dateA = a.birthDate || a.pregnancyDate || a.matingDate || a.pairingDate || new Date(8640000000000000);
+                        const dateB = b.birthDate || b.pregnancyDate || b.matingDate || b.pairingDate || new Date(8640000000000000);
+                        return new Date(dateB) - new Date(dateA);
+                    }).map(litter => {
                         // Use parent data from litter object (includes transferred/hidden animals)
                         const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
                         const dam = litter.dam || myAnimals.find(a => a.id_public === litter.damId_public);
