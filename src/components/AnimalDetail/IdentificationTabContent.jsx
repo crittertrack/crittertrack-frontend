@@ -86,7 +86,7 @@ export const IdentificationTabContent = ({
                     return (
                         <div>
                             <div className="flex items-center justify-end flex-wrap gap-2 -mt-2 -mr-1 mb-3">
-                                {uninheritedParentLines.length > 0 && setAnimalBreedingLinesDirect && (
+                                {uninheritedParentLines.length > 0 && setAnimalBreedingLinesDirect && toggleAnimalBreedingLine && (
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -106,16 +106,19 @@ export const IdentificationTabContent = ({
                             <div className="flex flex-wrap gap-2">
                                 {namedLines.map(l => {
                                     const assigned = assignedIds.includes(l.id);
+                                    const isEditable = toggleAnimalBreedingLine !== null && toggleAnimalBreedingLine !== undefined;
                                     return (
                                         <button 
                                             key={l.id} 
                                             type="button"
+                                            disabled={!isEditable}
                                             onClick={() => toggleAnimalBreedingLine && toggleAnimalBreedingLine(animal.id_public, l.id)}
                                             style={{ 
                                                 borderColor: l.color, 
                                                 color: assigned ? '#fff' : l.color, 
                                                 backgroundColor: assigned ? l.color : 'transparent',
-                                                cursor: 'pointer'
+                                                cursor: isEditable ? 'pointer' : 'default',
+                                                opacity: isEditable ? 1 : 0.6
                                             }}
                                             className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition hover:opacity-80"
                                         >

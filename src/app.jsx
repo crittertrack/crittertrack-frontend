@@ -2366,6 +2366,8 @@ const App = () => {
                             handleRejectTransfer={transferWorkflow.handleRejectTransfer}
                             breedingLineDefs={breedingLinesState.breedingLineDefs}
                             animalBreedingLines={breedingLinesState.animalBreedingLines}
+                            toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                            setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
                             setShowImageModal={setShowImageModal}
                             setEnlargedImageUrl={setEnlargedImageUrl}
                         />
@@ -2383,7 +2385,7 @@ const App = () => {
                                 onViewAnimal={handleViewAnimal}
                                 breedingLineDefs={breedingLineDefs}
                                 animalBreedingLines={animalBreedingLines}
-                                toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                                toggleAnimalBreedingLine={null}
                             />
                     );
                 }
