@@ -591,10 +591,7 @@ const AnimalTestModal = ({
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
-                            <div className="relative bg-white rounded-lg border border-gray-200 shadow-sm h-full">
-                                <div className="absolute right-4 top-4 z-10 text-xs">
-                                    {loadingCOI ? <span className="text-gray-400">COI: Calculating...</span> : animalCOI != null && <span className="font-semibold">COI: {animalCOI.toFixed(2)}%</span>}
-                                </div>
+                            <div className="bg-white rounded-lg border border-gray-200 shadow-sm h-full">
                                 <ViewOnlyParentCard parentId={animal.fatherId_public || animal.sireId_public} parentType="Sire" API_BASE_URL={API_BASE_URL} onViewAnimal={onViewAnimal} authToken={authToken} />
                             </div>
                             {/* Dam Card */}
@@ -828,6 +825,15 @@ const AnimalTestModal = ({
                             </div>
                             
                             </div>
+                            {(animalCOI != null || loadingCOI) && (
+                                <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                    <div className="border-b border-gray-200 pb-2 mb-2">
+                                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Coefficient of Inbreeding (COI)</h3>
+                                    </div>
+                                    {animalCOI != null && <p className="text-sm text-gray-700"><span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%</p>}
+                                    {loadingCOI && <p className="text-xs text-gray-400">Calculating COI...</p>}
+                                </div>
+                            )}
                             <div className="bg-blue-50 rounded-lg border border-blue-200">
                                 <button
                                     type="button"
