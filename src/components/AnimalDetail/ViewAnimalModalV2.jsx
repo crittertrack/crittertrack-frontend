@@ -37,7 +37,7 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data : [];
 };
 
-const StatusIndicator = ({ status }) => {
+const StatusIndicator = ({ status, icon }) => {
     const statusStyles = {
         'Excellent': 'bg-emerald-100 text-emerald-800',
         'Good': 'bg-green-100 text-green-800',
@@ -50,7 +50,7 @@ const StatusIndicator = ({ status }) => {
         'Unknown': 'bg-gray-100 text-gray-800',
     };
     const style = statusStyles[status] || statusStyles['Unknown'];
-    return <span className={`px-2 py-1 text-xs font-bold rounded-full ${style}`}>{status}</span>;
+    return <span className={`px-2 py-1 text-xs font-bold rounded-full flex items-center gap-1.5 ${style}`}>{icon}{status}</span>;
 };
 
 const getReproductionState = (animal) => {
@@ -385,7 +385,7 @@ const ViewAnimalModalV2 = ({
                                                 </span>
                                                 {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
                                                 {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
-                                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><HeartPulse size={12} /><StatusIndicator status={animal.healthStatus || 'Excellent'} /></span>
+                                                <StatusIndicator status={animal.healthStatus || 'Excellent'} icon={<HeartPulse size={12} />} />
                                                 {(() => {
                                                     const reproState = getReproductionState(animal);
                                                     return reproState ? <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${reproState.color}`}>{reproState.icon} {reproState.label}</span> : null;
