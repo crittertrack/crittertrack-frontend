@@ -2336,7 +2336,7 @@ const App = () => {
 
             {/* Animal detail overlay - renders on top of whatever route is active */}
             {animalToView && (() => {
-                const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public && !animalToView.isViewOnly;
+                const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public && animalToView.isViewOnly !== true;
                 if (iCurrentlyOwn) {
                     return (
                         <AnimalModalV2
