@@ -88,6 +88,7 @@ const ViewAnimalModalV2 = ({
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [mainImage, setMainImage] = useState(animal?.imageUrl || animal?.photoUrl);
     const [showQR, setShowQR] = useState(false);
+    const [isFavorited, setIsFavorited] = useState(false);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [commonAncestorCount, setCommonAncestorCount] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
@@ -399,18 +400,23 @@ const ViewAnimalModalV2 = ({
                                     {/* Favorite Button (if logged in) */}
                                     {authToken && (
                                         <button 
-                                            className="px-4 py-2 bg-pink-400 hover:bg-pink-500 text-white rounded-full font-semibold transition flex items-center gap-2"
-                                            title="Add to favorites"
+                                            onClick={() => setIsFavorited(!isFavorited)}
+                                            className={`px-4 py-2 rounded-full font-semibold transition flex items-center gap-2 text-white ${
+                                                isFavorited 
+                                                    ? 'bg-accent hover:bg-red-500' 
+                                                    : 'bg-accent/60 hover:bg-accent'
+                                            }`}
+                                            title={isFavorited ? "Remove from favorites" : "Add to favorites"}
                                         >
-                                            <Heart size={18} fill="currentColor" />
-                                            Favorite
+                                            <Heart size={18} fill={isFavorited ? "currentColor" : "none"} />
+                                            {isFavorited ? "Favorited" : "Favorite"}
                                         </button>
                                     )}
                                     
                                     {/* Share Button */}
                                     <button 
                                         onClick={() => setShowQR(true)}
-                                        className="px-4 py-2 bg-cyan-300 hover:bg-cyan-400 text-gray-800 rounded-full font-semibold transition flex items-center gap-2"
+                                        className="px-4 py-2 bg-primary hover:bg-primary-dark text-gray-800 rounded-full font-semibold transition flex items-center gap-2"
                                         title="Share animal link"
                                     >
                                         <Share size={18} />

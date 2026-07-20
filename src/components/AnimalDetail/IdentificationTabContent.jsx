@@ -63,13 +63,9 @@ export const IdentificationTabContent = ({
                         <p className="text-sm text-gray-400">No tags recorded.</p>
                     )}
             </InfoCard>
+            {isEditable && (
             <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400" />}>
                 {(() => {
-                    // Only show breeding lines in editable mode
-                    if (!isEditable || !breedingLineDefs || breedingLineDefs.length === 0) {
-                        return null;
-                    }
-                    
                     const namedLines = breedingLineDefs.filter(l => l.name);
                     if (namedLines.length === 0) {
                         return <p className="text-sm text-gray-400">No breeding lines available.</p>;
@@ -112,19 +108,16 @@ export const IdentificationTabContent = ({
                             <div className="flex flex-wrap gap-2">
                                 {namedLines.map(l => {
                                     const assigned = assignedIds.includes(l.id);
-                                    const isEditable = toggleAnimalBreedingLine !== null && toggleAnimalBreedingLine !== undefined;
                                     return (
                                         <button 
                                             key={l.id} 
                                             type="button"
-                                            disabled={!isEditable}
-                                            onClick={() => toggleAnimalBreedingLine && toggleAnimalBreedingLine(animal.id_public, l.id)}
+                                            onClick={() => toggleAnimalBreedingLine(animal.id_public, l.id)}
                                             style={{ 
                                                 borderColor: l.color, 
                                                 color: assigned ? '#fff' : l.color, 
                                                 backgroundColor: assigned ? l.color : 'transparent',
-                                                cursor: isEditable ? 'pointer' : 'default',
-                                                opacity: isEditable ? 1 : 0.6
+                                                cursor: 'pointer'
                                             }}
                                             className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition hover:opacity-80"
                                         >
@@ -140,6 +133,7 @@ export const IdentificationTabContent = ({
                     );
                 })()}
             </InfoCard>
+            )}
         </div>
     );
 };
