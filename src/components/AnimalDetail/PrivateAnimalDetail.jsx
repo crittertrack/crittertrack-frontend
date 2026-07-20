@@ -62,6 +62,7 @@ const PrivateAnimalDetail = ({
     const [showQR, setShowQR] = useState(false);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
     const [animalCOI, setAnimalCOI] = useState(null);
+    const [commonAncestorCount, setCommonAncestorCount] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
@@ -407,10 +408,12 @@ const PrivateAnimalDetail = ({
                     );
                     if (response.data && response.data.inbreedingCoefficient != null) {
                         setAnimalCOI(response.data.inbreedingCoefficient);
+                        setCommonAncestorCount(response.data.commonAncestorCount || null);
                     }
                 } catch (error) {
                     console.error('Failed to fetch COI:', error);
                     setAnimalCOI(null);
+                    setCommonAncestorCount(null);
                 } finally {
                     setLoadingCOI(false);
                 }
@@ -966,7 +969,12 @@ const PrivateAnimalDetail = ({
                                 </div>
                                 {(animalCOI != null || loadingCOI) && (
                                     <div className="border-t border-gray-200 pt-2">
-                                        {animalCOI != null && <p className="text-sm text-gray-700"><span className="font-medium">Coefficient of Inbreeding (COI):</span> {animalCOI.toFixed(2)}%</p>}
+                                        {animalCOI != null && (
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-medium">Coefficient of Inbreeding (COI):</span> {animalCOI.toFixed(2)}%
+                                                {commonAncestorCount != null && <span className="text-gray-600"> (calculated on {commonAncestorCount} common ancestor{commonAncestorCount !== 1 ? 's' : ''})</span>}
+                                            </p>
+                                        )}
                                         {loadingCOI && <p className="text-xs text-gray-400">Calculating COI...</p>}
                                     </div>
                                 )}
