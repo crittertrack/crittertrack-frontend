@@ -55,7 +55,6 @@ import CommunityPage from './components/Community/CommunityPage';
 
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
 import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
-import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
 import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
 import { OffspringSection } from './components/AnimalDetail/utils';
 import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Import the new modal
@@ -1342,6 +1341,7 @@ const App = () => {
                     {viewingPublicAnimal && (
                         <ViewOnlyAnimalDetail 
                             animal={viewingPublicAnimal}
+                            mode="public"
                             onClose={handleBackFromPublicAnimal}
                             onCloseAll={handleCloseAllPublicAnimals}
                             API_BASE_URL={API_BASE_URL}
@@ -1487,6 +1487,7 @@ const App = () => {
                     {viewingPublicAnimal && (
                         <ViewOnlyAnimalDetail 
                             animal={viewingPublicAnimal}
+                            mode="public"
                             onClose={handleBackFromPublicAnimal}
                             onCloseAll={handleCloseAllPublicAnimals}
                             API_BASE_URL={API_BASE_URL}
@@ -1551,6 +1552,7 @@ const App = () => {
                 {viewingPublicAnimal && (
                     <ViewOnlyAnimalDetail 
                         animal={viewingPublicAnimal}
+                        mode="public"
                         onClose={handleBackFromPublicAnimal}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
@@ -1737,6 +1739,7 @@ const App = () => {
             {viewingPublicAnimal && (
                 <ViewOnlyAnimalDetail 
                     animal={viewingPublicAnimal}
+                    mode="public"
                     onClose={handleBackFromPublicAnimal}
                     onCloseAll={handleCloseAllPublicAnimals}
                     API_BASE_URL={API_BASE_URL}
@@ -2370,8 +2373,9 @@ const App = () => {
                     );
                 } else {
                     return (
-                        <ViewOnlyPrivateAnimalDetail
+                        <ViewOnlyAnimalDetail
                                 animal={animalToView}
+                                mode="private"
                                 initialTab={privateAnimalInitialTab}
                                 initialBetaView={privateBetaView}
                                 onClose={handleBackFromAnimal}
