@@ -17,7 +17,7 @@ import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
-import PrivateAnimalDetail from '../AnimalDetail/PrivateAnimalDetail';
+
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 
 const API_BASE_URL = '/api';

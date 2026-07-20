@@ -53,7 +53,6 @@ import DonationView from './components/Donation/DonationView';
 import CommunityPage from './components/Community/CommunityPage';
 // import ThemeToggle from './components/ThemeToggle';
 
-import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
 import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
 import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
