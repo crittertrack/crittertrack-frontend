@@ -55,7 +55,7 @@ import CommunityPage from './components/Community/CommunityPage';
 
 import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
-import AnimalFormTestModal from './components/AnimalForm/AnimalFormTestModal';
+import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
 import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
 import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
 import { OffspringSection } from './components/AnimalDetail/utils';
@@ -2398,7 +2398,7 @@ const App = () => {
                     return (
                         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
                             {iCurrentlyOwn ? (
-                                <AnimalFormTestModal
+                                <AnimalFormModalV2
                                     formTitle={`Edit ${animalToEdit.name}`}
                                     animalToEdit={animalToEdit}
                                     species={animalToEdit.species}

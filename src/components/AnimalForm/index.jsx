@@ -34,7 +34,7 @@ import DatePicker from '../DatePicker';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
 import LoadingSpinner from '../shared/LoadingSpinner';
-import AnimalFormTestModal from './AnimalFormTestModal';
+import AnimalFormModalV2 from './AnimalFormModalV2';
 
 const getPedigreeCacheKey = (rootId, authToken) => {
     if (!rootId) return null;
@@ -1776,7 +1776,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 });
 
 const AnimalForm = (props) => {
-    return <AnimalFormTestModal {...props} />;
+    return <AnimalFormModalV2 {...props} />;
 };
 
 export default AnimalForm;

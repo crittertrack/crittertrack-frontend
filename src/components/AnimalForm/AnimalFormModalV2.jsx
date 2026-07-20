@@ -1126,7 +1126,7 @@ const FormSection = ({ title, icon, children, initiallyOpen = false }) => {
     );
 };
 
-const AnimalFormTestModal = ({
+const AnimalFormModalV2 = ({
     formTitle = "Create New Animal",
     animalToEdit,
     species,
@@ -6114,4 +6114,4 @@ const AnimalFormTestModal = ({
     );
 };
 
-export default AnimalFormTestModal;
+export default AnimalFormModalV2;
