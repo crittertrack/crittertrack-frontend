@@ -1351,10 +1351,6 @@ const ViewAnimalModalV2 = ({
                     {activeTab === 'identification' && (
                         <IdentificationTabContent
                             animal={animal}
-                            breedingLineDefs={breedingLineDefs}
-                            animalBreedingLines={animalBreedingLines}
-                            toggleAnimalBreedingLine={null}
-                            setAnimalBreedingLinesDirect={null}
                         />
                     )}
                     {activeTab === 'appearance' && (

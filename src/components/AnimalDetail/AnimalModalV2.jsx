@@ -1381,8 +1381,8 @@ const AnimalModalV2 = ({
                             animal={animal}
                             breedingLineDefs={breedingLineDefs}
                             animalBreedingLines={animalBreedingLines}
-                            toggleAnimalBreedingLine={toggleAnimalBreedingLine}
-                            setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
+                            toggleAnimalBreedingLine={null}
+                            setAnimalBreedingLinesDirect={null}
                         />
                     )}
                     {activeTab === 'appearance' && (
@@ -1451,30 +1451,6 @@ const AnimalModalV2 = ({
                             <p className="text-gray-500">Content for the {activeTab} tab goes here.</p>
                         </div>
                     )}
-
-                    {/* Breeding Lines - Always visible for owned animals */}
-                    {(() => {
-                        const namedLines = breedingLineDefs.filter(l => l.name);
-                        if (namedLines.length === 0 || !toggleAnimalBreedingLine) return null;
-                        const assignedIds = animalBreedingLines[animal.id_public] || [];
-                        return (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3 mt-6">
-                                <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><span>👥</span> Breeding Lines</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {namedLines.map(l => {
-                                        const assigned = assignedIds.includes(l.id);
-                                        return (
-                                            <button key={l.id} type="button"
-                                                onClick={() => toggleAnimalBreedingLine(animal.id_public, l.id)}
-                                                style={{ borderColor: l.color, color: assigned ? '#fff' : l.color, backgroundColor: assigned ? l.color : 'transparent' }}
-                                                className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition"
-                                            ><span>&#x25C6;</span> {l.name}</button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        );
-                    })()}
                 </div>
             </div>
         </div>

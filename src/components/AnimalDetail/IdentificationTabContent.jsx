@@ -64,6 +64,11 @@ export const IdentificationTabContent = ({
             </InfoCard>
             <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400" />}>
                 {(() => {
+                    // Only show breeding lines if props were passed (editable mode)
+                    if (!breedingLineDefs || breedingLineDefs.length === 0) {
+                        return null;
+                    }
+                    
                     const namedLines = breedingLineDefs.filter(l => l.name);
                     if (namedLines.length === 0) {
                         return <p className="text-sm text-gray-400">No breeding lines available.</p>;
