@@ -401,10 +401,10 @@ const ViewAnimalModalV2 = ({
                                     {authToken && (
                                         <button 
                                             onClick={() => setIsFavorited(!isFavorited)}
-                                            className={`px-4 py-2 rounded-full font-semibold transition flex items-center gap-2 text-white ${
+                                            className={`px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 ${
                                                 isFavorited 
-                                                    ? 'bg-accent hover:bg-red-500' 
-                                                    : 'bg-accent/60 hover:bg-accent'
+                                                    ? 'bg-purple-100 hover:bg-purple-200 text-purple-700'
+                                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                             }`}
                                             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
                                         >
@@ -416,7 +416,7 @@ const ViewAnimalModalV2 = ({
                                     {/* Share Button */}
                                     <button 
                                         onClick={() => setShowQR(true)}
-                                        className="px-4 py-2 bg-primary hover:bg-primary-dark text-gray-800 rounded-full font-semibold transition flex items-center gap-2"
+                                        className="px-4 py-2 bg-primary hover:bg-primary-dark text-gray-800 rounded-lg font-semibold transition flex items-center gap-2"
                                         title="Share animal link"
                                     >
                                         <Share size={18} />
