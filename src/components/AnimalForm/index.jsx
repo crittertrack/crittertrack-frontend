@@ -27,6 +27,12 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data : [];
 };
 
+// Module-level cache and constants for pedigree tree operations
+const pedigreeTreeCache = new Map();
+const pedigreePrefetchInFlight = new Map();
+const MAX_PEDIGREE_FETCH_NODES = 100;
+const MAX_PEDIGREE_FETCH_DEPTH = 5;
+
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
