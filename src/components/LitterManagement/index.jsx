@@ -2147,7 +2147,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const today = new Date();
             const hasBirth = !!litter.birthDate;
             const isMated = litter.matingDate && new Date(litter.matingDate) <= today && !hasBirth;
-            const isPlannedOnly = litter.isPlanned && !litter.matingDate && !hasBirth;
+            const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasBirth;
             const isBorn = hasBirth;
             if (litterStatusFilter === 'planned' && !isPlannedOnly) return false;
             if (litterStatusFilter === 'mated'   && !isMated)       return false;
@@ -3655,7 +3655,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         // Mating state helpers
                         const hasBirth = !!litter.birthDate;
                         const isMated = litter.matingDate && new Date(litter.matingDate) <= new Date() && !hasBirth;
-                        const isPlannedOnly = litter.isPlanned && !litter.matingDate && !hasBirth;
+                        const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > new Date()) && !hasBirth;
                         
                         return (
                             <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
