@@ -1209,6 +1209,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_dismissed' }));
             } catch {}
             await fetchLitters();
+            // Small delay to allow React to process state updates
+            await new Promise(resolve => setTimeout(resolve, 100));
         } catch (err) {
             showModalMessage('Error', 'Failed to mark as mated');
         }
@@ -1221,17 +1223,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
         const today = new Date().toISOString().split('T')[0];
         try {
-            // Set pregnancyDate on litter and mark dam as pregnant
+            // Set pregnancyDate on litter and mark dam as pregnant (clear isInMating)
             await Promise.all([
                 axios.put(`${API_BASE_URL}/litters/${litter._id}`, { pregnancyDate: today }, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 }),
-                axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isPregnant: true }, {
+                axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isPregnant: true, isInMating: false }, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 })
             ]);
             await Promise.all([fetchLitters(), fetchMyAnimals()]);
-            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: litter.damId_public, isPregnant: true } }));
+            // Small delay to allow React to process state updates before dispatching event
+            await new Promise(resolve => setTimeout(resolve, 100));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: litter.damId_public, isPregnant: true, isInMating: false } }));
         } catch (err) {
             showModalMessage('Error', 'Failed to mark dam as pregnant');
         }
@@ -1246,6 +1250,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Sync dam to nursing state
             await syncDamPostBirth(litter.damId_public);
             await fetchLitters();
+            // Small delay to allow React to process state updates
+            await new Promise(resolve => setTimeout(resolve, 100));
         } catch (err) {
             showModalMessage('Error', 'Failed to mark as born');
         }
@@ -1261,6 +1267,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             await fetchMyAnimals();
+            // Small delay to allow React to process state updates
+            await new Promise(resolve => setTimeout(resolve, 100));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: damId_public, isPregnant: false, isNursing: true } }));
         } catch (err) {
             console.warn('Failed to sync dam nursing state after birth:', err?.response?.data?.message || err?.message);
