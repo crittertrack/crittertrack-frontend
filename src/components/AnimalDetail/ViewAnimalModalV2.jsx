@@ -1351,6 +1351,7 @@ const ViewAnimalModalV2 = ({
                     {activeTab === 'identification' && (
                         <IdentificationTabContent
                             animal={animal}
+                            isEditable={false}
                         />
                     )}
                     {activeTab === 'appearance' && (

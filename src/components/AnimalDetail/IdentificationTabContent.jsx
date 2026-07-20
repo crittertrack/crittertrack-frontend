@@ -20,7 +20,8 @@ export const IdentificationTabContent = ({
     breedingLineDefs = [], 
     animalBreedingLines = {},
     toggleAnimalBreedingLine,
-    setAnimalBreedingLinesDirect
+    setAnimalBreedingLinesDirect,
+    isEditable = true
 }) => {
     return (
         <div className="space-y-6">
@@ -64,8 +65,8 @@ export const IdentificationTabContent = ({
             </InfoCard>
             <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400" />}>
                 {(() => {
-                    // Only show breeding lines if props were passed (editable mode)
-                    if (!breedingLineDefs || breedingLineDefs.length === 0) {
+                    // Only show breeding lines in editable mode
+                    if (!isEditable || !breedingLineDefs || breedingLineDefs.length === 0) {
                         return null;
                     }
                     
