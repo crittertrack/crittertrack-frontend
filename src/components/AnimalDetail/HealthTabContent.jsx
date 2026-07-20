@@ -63,12 +63,30 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
     const hasActiveCriticalCondition = medicalConditions.some(c => c.status === 'active' && c.severity === 'critical');
     const isUnderTreatment = hasActiveMedication || hasActiveCriticalCondition;
 
+    // Calculate health status based on active medical records
+    // Excellent/Good/Fair/Poor/Critical is the base health status
+    // Quarantine/Treatment are separate indicators shown as additional pills
+    const calculateHealthStatus = () => {
+        // No active records = Excellent
+        if (!hasActiveRecords) return 'Excellent';
+        
+        // Has active records - determine severity
+        const hasHighSeverity = medicalConditions.some(c => c.severity === 'critical' || c.severity === 'high');
+        const hasModerate = medicalConditions.length > 0;
+        
+        if (hasHighSeverity) return 'Critical';
+        if (hasModerate || medications.length > 0 || allergies.length > 0) return 'Fair';
+        
+        return 'Good';
+    };
+    const calculatedHealthStatus = animal.healthStatusOverride || calculateHealthStatus();
+
     return (
         <div className="space-y-6">
                 <InfoCard title="Health Status & Preventive Care" icon={<Shield size={18} className="text-gray-400" />}>
                     <div className="pb-3 border-b border-gray-200 space-y-3">
                         <InfoItem label="Overall Health Status">
-                            <StatusIndicator status={animal.healthStatus || 'Unknown'} />
+                            <StatusIndicator status={calculatedHealthStatus} />
                         </InfoItem>
                         {animal.healthStatusOverride && (
                             <div className="p-2 bg-purple-50 border-l-4 border-purple-400">

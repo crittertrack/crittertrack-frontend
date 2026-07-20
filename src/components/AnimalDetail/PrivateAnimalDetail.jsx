@@ -945,12 +945,10 @@ const PrivateAnimalDetail = ({
                             </div>
                             {/* Parents */}
                             <div className="bg-white rounded-lg p-3 border border-gray-200">
-                                <div className="flex items-center justify-between mb-2">
+                                <div className="mb-2">
                                     <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Parents</h3>
-                                    {animalCOI != null && <span className="text-sm text-gray-700"><span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%</span>}
-                                    {loadingCOI && <span className="text-xs text-gray-400">Calculating COI...</span>}
                                 </div>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-2 gap-3 mb-3">
                                     <ViewOnlyParentCard
                                         parentId={animal.fatherId_public || animal.sireId_public}
                                         parentType="Sire"
@@ -966,6 +964,12 @@ const PrivateAnimalDetail = ({
                                         authToken={authToken}
                                     />
                                 </div>
+                                {(animalCOI != null || loadingCOI) && (
+                                    <div className="border-t border-gray-200 pt-2">
+                                        {animalCOI != null && <p className="text-sm text-gray-700"><span className="font-medium">Coefficient of Inbreeding (COI):</span> {animalCOI.toFixed(2)}%</p>}
+                                        {loadingCOI && <p className="text-xs text-gray-400">Calculating COI...</p>}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
