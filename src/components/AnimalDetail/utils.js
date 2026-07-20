@@ -119,11 +119,14 @@ export const computeRelationships = (animal, collection = []) => {
 };
 
 // View-Only Parent Card Component
-export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, authToken }) => {
+export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, authToken, mode = "private" }) => {
     const [parentData, setParentData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [notFound, setNotFound] = useState(false);
     const [foundViaOwned, setFoundViaOwned] = useState(false);
+
+    // Validate mode
+    const isPublicMode = mode === "public";
 
     useEffect(() => {
         if (!parentId) {
@@ -145,7 +148,15 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         if (ownedResponse.data) {
-                            // Found in user's own animals – always show, even if private
+                            // Found in user's own animals
+                            // In public mode, hide private ancestors
+                            if (isPublicMode && !ownedResponse.data.isDisplay) {
+                                setNotFound(true);
+                                setParentData(null);
+                                setLoading(false);
+                                return;
+                            }
+                            // In private mode or parent is public, show it
                             setParentData(ownedResponse.data);
                             setFoundViaOwned(true);
                             setLoading(false);
@@ -158,7 +169,14 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                                 headers: { Authorization: `Bearer ${authToken}` }
                             });
                             if (anyResponse.data) {
-                                // Found via related (not owned) – respect isPrivate flag
+                                // Found via related (not owned)
+                                // In public mode, only show if public
+                                if (isPublicMode && !anyResponse.data.isDisplay) {
+                                    setNotFound(true);
+                                    setParentData(null);
+                                    setLoading(false);
+                                    return;
+                                }
                                 setParentData(anyResponse.data);
                                 setLoading(false);
                                 return;
@@ -169,7 +187,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                     }
                 }
 
-                // Try fetching from global public animals database
+                // Try fetching from global public animals database (only available in public mode anyway)
                 const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
                 if (publicResponse.data && publicResponse.data.length > 0) {
                     setParentData(publicResponse.data[0]);
@@ -187,7 +205,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
         };
 
         fetchParent();
-    }, [parentId, parentType, API_BASE_URL, authToken]);
+    }, [parentId, parentType, API_BASE_URL, authToken, isPublicMode]);
 
     if (!parentId) {
         return (
@@ -205,7 +223,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
         );
     }
 
-    if (notFound || (!foundViaOwned && !parentData?.showOnPublicProfile)) {
+    if (notFound || !parentData?.isDisplay) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                 <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
