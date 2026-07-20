@@ -716,7 +716,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
-    const [litterStatusFilter, setLitterStatusFilter] = useState('all'); // 'all' | 'planned' | 'mated' | 'born'
+    const [litterStatusFilter, setLitterStatusFilter] = useState('all'); // 'all' | 'planned' | 'mated' | 'pregnant' | 'born'
     // COI calculation state
     const [predictedCOI, setPredictedCOI] = useState(null);
     const [calculatingCOI, setCalculatingCOI] = useState(false);
@@ -1219,14 +1219,35 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             showModalMessage('Error', 'This litter has no dam assigned.');
             return;
         }
+        const today = new Date().toISOString().split('T')[0];
         try {
-            await axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isPregnant: true }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            // Set pregnancyDate on litter and mark dam as pregnant
+            await Promise.all([
+                axios.put(`${API_BASE_URL}/litters/${litter._id}`, { pregnancyDate: today }, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                }),
+                axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isPregnant: true }, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                })
+            ]);
             await Promise.all([fetchLitters(), fetchMyAnimals()]);
-            window.dispatchEvent(new Event('animals-changed'));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: litter.damId_public, isPregnant: true } }));
         } catch (err) {
             showModalMessage('Error', 'Failed to mark dam as pregnant');
+        }
+    };
+
+    const handleBornToday = async (litter) => {
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { birthDate: today }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            // Sync dam to nursing state
+            await syncDamPostBirth(litter.damId_public);
+            await fetchLitters();
+        } catch (err) {
+            showModalMessage('Error', 'Failed to mark as born');
         }
     };
 
@@ -1240,7 +1261,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             await fetchMyAnimals();
-            window.dispatchEvent(new Event('animals-changed'));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: damId_public, isPregnant: false, isNursing: true } }));
         } catch (err) {
             console.warn('Failed to sync dam nursing state after birth:', err?.response?.data?.message || err?.message);
         }
@@ -2146,11 +2167,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         if (litterStatusFilter !== 'all') {
             const today = new Date();
             const hasBirth = !!litter.birthDate;
-            const isMated = litter.matingDate && new Date(litter.matingDate) <= today && !hasBirth;
-            const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasBirth;
+            const hasPregnancy = !!litter.pregnancyDate;
+            const isMated = litter.matingDate && new Date(litter.matingDate) <= today && !hasPregnancy && !hasBirth;
+            const isPregnant = hasPregnancy && !hasBirth;
+            const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasPregnancy && !hasBirth;
             const isBorn = hasBirth;
             if (litterStatusFilter === 'planned' && !isPlannedOnly) return false;
             if (litterStatusFilter === 'mated'   && !isMated)       return false;
+            if (litterStatusFilter === 'pregnant' && !isPregnant)   return false;
             if (litterStatusFilter === 'born'    && !isBorn)        return false;
         }
 
@@ -2191,17 +2215,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         
         return false;
     }).sort((a, b) => {
-        // Sort order: Mated (isPlanned + past matingDate, no birth yet) ? Planned-only ? Born (newest first)
+        // Sort order: Planned → Mated → Pregnant → Born (newest first)
         const today = new Date();
         const aHasBirth = !!a.birthDate;
         const bHasBirth = !!b.birthDate;
-        const aIsMated = a.isPlanned && a.matingDate && new Date(a.matingDate) <= today && !aHasBirth;
-        const bIsMated = b.isPlanned && b.matingDate && new Date(b.matingDate) <= today && !bHasBirth;
-        const aIsPlannedOnly = a.isPlanned && !aIsMated && !aHasBirth;
-        const bIsPlannedOnly = b.isPlanned && !bIsMated && !bHasBirth;
-        const rank = (l, isMated, isPlannedOnly) => isMated ? 0 : isPlannedOnly ? 1 : 2;
-        const aRank = rank(a, aIsMated, aIsPlannedOnly);
-        const bRank = rank(b, bIsMated, bIsPlannedOnly);
+        const aHasPregnancy = !!a.pregnancyDate;
+        const bHasPregnancy = !!b.pregnancyDate;
+        const aIsPlannedOnly = a.isPlanned && (!a.matingDate || new Date(a.matingDate) > today) && !aHasPregnancy && !aHasBirth;
+        const bIsPlannedOnly = b.isPlanned && (!b.matingDate || new Date(b.matingDate) > today) && !bHasPregnancy && !bHasBirth;
+        const aIsMated = a.matingDate && new Date(a.matingDate) <= today && !aHasPregnancy && !aHasBirth;
+        const bIsMated = b.matingDate && new Date(b.matingDate) <= today && !bHasPregnancy && !bHasBirth;
+        const aIsPregnant = aHasPregnancy && !aHasBirth;
+        const bIsPregnant = bHasPregnancy && !bHasBirth;
+        const rank = (l, isPlannedOnly, isMated, isPregnant) => isPregnant ? 0 : isMated ? 1 : isPlannedOnly ? 2 : 3;
+        const aRank = rank(a, aIsPlannedOnly, aIsMated, aIsPregnant);
+        const bRank = rank(b, bIsPlannedOnly, bIsMated, bIsPregnant);
         if (aRank !== bRank) return aRank - bRank;
         // Within same group: newest date first
         const aDate = (a.birthDate || a.matingDate) ? new Date(a.birthDate || a.matingDate).getTime() : null;
@@ -3561,7 +3589,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         {/* Status filter */}
                         <div className="flex flex-wrap gap-1.5 items-center">
                             <span className="text-xs font-medium text-gray-500 mr-0.5">Show:</span>
-                            {[['all','All'],['planned','Planned'],['mated','Mated'],['born','Born']].map(([val, label]) => (
+                            {[['all','All'],['pregnant','Pregnant'],['mated','Mated'],['planned','Planned'],['born','Born']].map(([val, label]) => (
                                 <button
                                     key={val}
                                     type="button"
@@ -3570,6 +3598,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         litterStatusFilter === val
                                             ? val === 'planned' ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
                                             : val === 'mated'   ? 'bg-purple-100 border-purple-300 text-purple-700'
+                                            : val === 'pregnant' ? 'bg-red-100 border-red-300 text-red-700'
                                             : val === 'born'    ? 'bg-green-100 border-green-300 text-green-700'
                                             : 'bg-primary border-primary/50 text-black'
                                             : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
@@ -3654,11 +3683,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const offspringLoading = isExpanded && litterOffspringMap[litter._id] === undefined;
                         // Mating state helpers
                         const hasBirth = !!litter.birthDate;
-                        const isMated = litter.matingDate && new Date(litter.matingDate) <= new Date() && !hasBirth;
-                        const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > new Date()) && !hasBirth;
+                        const hasPregnancy = !!litter.pregnancyDate;
+                        const isMated = litter.matingDate && new Date(litter.matingDate) <= new Date() && !hasPregnancy && !hasBirth;
+                        const isPregnant = hasPregnancy && !hasBirth;
+                        const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > new Date()) && !hasPregnancy && !hasBirth;
                         
                         return (
-                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
+                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : isPregnant ? 'border-dashed border-red-300 bg-red-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
@@ -3719,7 +3750,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPlannedOnly
                                                 ? <span className="text-xs font-semibold text-indigo-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
                                                 : isMated
-                                                ? <span className="text-xs font-semibold text-purple-600"><Heart size={12} className="inline-block align-middle mr-0.5" /> Mated {formatDate(litter.matingDate)}</span>
+                                                ? <span className="text-xs font-semibold text-purple-600"><Heart size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
+                                                : isPregnant
+                                                ? <span className="text-xs font-semibold text-red-600"><Heart size={12} className="inline-block align-middle mr-0.5 fill-red-600" /> Awaiting birth</span>
                                                 : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
@@ -3747,16 +3780,23 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPlannedOnly
                                                 ? <span className="text-xs font-semibold text-indigo-500">Awaiting mating</span>
                                                 : isMated
-                                                ? (dam?.isPregnant
-                                                    ? <span className="text-xs font-semibold text-pink-600">🤰 Pregnant</span>
-                                                    : <button
-                                                        type="button"
-                                                        onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
-                                                        title="Mark dam as pregnant"
-                                                        className="text-[11px] font-semibold text-pink-700 bg-pink-50 border border-pink-200 rounded-lg px-2 py-1 hover:bg-pink-100 transition"
-                                                      >
-                                                        🤰 Assign Pregnant
-                                                      </button>)
+                                                ? <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
+                                                    title="Mark dam as pregnant"
+                                                    className="text-[11px] font-semibold text-pink-700 bg-pink-50 border border-pink-200 rounded-lg px-2 py-1 hover:bg-pink-100 transition"
+                                                  >
+                                                    🤰 Assign Pregnant
+                                                  </button>
+                                                : isPregnant
+                                                ? <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
+                                                    title="Mark litter as born today"
+                                                    className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg px-2 py-1 hover:bg-green-100 transition"
+                                                  >
+                                                    👶 Born today
+                                                  </button>
                                                 : <div className="flex items-center gap-1.5">
                                                     <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                                     {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
@@ -3807,13 +3847,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     <span>Mated Today</span>
                                                 </button>
                                             )}
-                                            {isMated && !dam?.isPregnant && (
+                                            {isMated && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
                                                     className="flex items-center gap-1 bg-pink-500 hover:bg-pink-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
                                                     <span>🤰</span>
                                                     <span>Assign Pregnant</span>
+                                                </button>
+                                            )}
+                                            {isPregnant && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
+                                                    className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                >
+                                                    <span>👶</span>
+                                                    <span>Born Today</span>
                                                 </button>
                                             )}
                                             <button
