@@ -286,6 +286,11 @@ const AnimalList = ({
             return localStorage.getItem('animalList_statusFilterMating') === 'true';
         } catch { return false; }
     });
+    const [statusFilterReproductive, setStatusFilterReproductive] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_statusFilterReproductive') || 'none';
+        } catch { return 'none'; }
+    });
     const [blFilter, setBlFilter] = useState(() => {
         try {
             const saved = localStorage.getItem('animalList_blFilter');
@@ -717,6 +722,12 @@ useEffect(() => {
     }, [statusFilterMating]);
     
     useEffect(() => {
+        try {
+            localStorage.setItem('animalList_statusFilterReproductive', statusFilterReproductive);
+        } catch (e) { console.warn('Failed to save statusFilterReproductive', e); }
+    }, [statusFilterReproductive]);
+    
+    useEffect(() => {
         try { localStorage.setItem('animalList_ownedFilterMode', ownedFilterMode); }
         catch (e) { console.warn('Failed to save ownedFilterMode', e); }
     }, [ownedFilterMode]);
@@ -1116,6 +1127,23 @@ useEffect(() => {
         if (statusFilterPregnant) source = source.filter(a => a.isPregnant === true);
         if (statusFilterNursing) source = source.filter(a => a.isNursing === true);
         if (statusFilterMating) source = source.filter(a => a.isInMating === true);
+        if (statusFilterReproductive !== 'none') {
+            // Reproductive status filter - only for CTU2
+            const isCTU2 = userProfile?.id_public === 'CTU2' || userProfile?.creatorId_public === 'CTU2';
+            if (isCTU2) {
+                if (statusFilterReproductive === 'all') {
+                    source = source.filter(a => a.isPlannedMating || a.isInMating || a.isPregnant || a.isNursing);
+                } else if (statusFilterReproductive === 'planned') {
+                    source = source.filter(a => a.isPlannedMating === true);
+                } else if (statusFilterReproductive === 'mating') {
+                    source = source.filter(a => a.isInMating === true);
+                } else if (statusFilterReproductive === 'pregnant') {
+                    source = source.filter(a => a.isPregnant === true);
+                } else if (statusFilterReproductive === 'nursing') {
+                    source = source.filter(a => a.isNursing === true);
+                }
+            }
+        }
 
         // Public/private filter
         if (publicFilter === 'public') {
@@ -1172,7 +1200,7 @@ useEffect(() => {
             groups[species].push(animal);
             return groups;
         }, {});
-    }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig]);
+    }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, statusFilterReproductive, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig, userProfile]);
 
     const displayedAnimalsForList = useMemo(() => {
         let source = animals;
@@ -1227,7 +1255,7 @@ useEffect(() => {
             });
         }
         return sortedSource;
-    }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig]);
+    }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, statusFilterReproductive, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig, userProfile]);
 
     const displayedAnimalCount = useMemo(() => {
         return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
@@ -1373,10 +1401,10 @@ useEffect(() => {
 
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
     const handleSearchInputChange = (e) => setSearchInput(e.target.value);
-    const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); setStatusFilterMating(false); };
-    const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); };
-    const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); };
-    
+    const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); setStatusFilterMating(false); setStatusFilterReproductive('none'); };
+    const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); setStatusFilterReproductive('none'); };
+    const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); setStatusFilterReproductive('none'); };
+
     // Check if any filters are active (different from defaults) ? uses appliedFilters for panel filters
     const hasActiveFilters = (
         statusFilter !== '' ||
@@ -1387,6 +1415,7 @@ useEffect(() => {
         statusFilterPregnant ||
         statusFilterNursing ||
         statusFilterMating ||
+        statusFilterReproductive !== 'none' ||
         publicFilter !== '' ||
         blFilter.length > 0
     );
@@ -1401,6 +1430,7 @@ useEffect(() => {
         setStatusFilterPregnant(false);
         setStatusFilterNursing(false);
         setStatusFilterMating(false);
+        setStatusFilterReproductive('none');
         setOwnedFilterMode('owned'); // Reset to default 'owned'
         setPublicFilter('');
         setBlFilter([]);
@@ -4643,6 +4673,20 @@ useEffect(() => {
                                 <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender}</option>
                             ))}
                         </select>
+                        {(userProfile?.id_public === 'CTU2' || userProfile?.creatorId_public === 'CTU2') && (
+                            <select
+                                value={statusFilterReproductive}
+                                onChange={(e) => { setStatusFilterReproductive(e.target.value); setStatusFilterPregnant(false); setStatusFilterNursing(false); setStatusFilterMating(false); }}
+                                className="p-2 text-sm border border-gray-300 rounded-lg"
+                            >
+                                <option value="none">Reproductive Status</option>
+                                <option value="all">All (Planned/Mating/Pregnant/Nursing)</option>
+                                <option value="planned">Planned Mating</option>
+                                <option value="mating">In Mating</option>
+                                <option value="pregnant">Pregnant</option>
+                                <option value="nursing">Nursing</option>
+                            </select>
+                        )}
                         {breedingLineDefs && breedingLineDefs.length > 0 && (
                             <select
                                 value={blFilter.length > 0 ? blFilter[0] : ''}
