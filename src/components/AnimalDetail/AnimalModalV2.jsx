@@ -1381,8 +1381,8 @@ const AnimalModalV2 = ({
                             animal={animal}
                             breedingLineDefs={breedingLineDefs}
                             animalBreedingLines={animalBreedingLines}
-                            toggleAnimalBreedingLine={null}
-                            setAnimalBreedingLinesDirect={null}
+                            toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                            setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
                         />
                     )}
                     {activeTab === 'appearance' && (
