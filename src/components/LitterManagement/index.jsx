@@ -4941,12 +4941,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         // Use endpoint-fetched offspring (includes transferred animals) with fallback to myAnimals
                         const offspringList = litterOffspringMap[litter._id] ?? [];
                         const offspringLoading = isExpanded && litterOffspringMap[litter._id] === undefined;
-                        // Mating state helpers
-                        const isMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= new Date();
-                        const isPlannedOnly = litter.isPlanned && !isMated;
+                        
+                        // Robust state detection that works with both old and new backends
+                        // Priority: birthDate → pregnancyDate → matingDate → isPlanned
+                        const hasBirthDate = !!litter.birthDate;
+                        const hasPregnancyDate = !!litter.pregnancyDate;
+                        const hasMatingDate = !!litter.matingDate;
+                        const isMatingDatePassed = hasMatingDate && new Date(litter.matingDate) <= new Date();
+                        
+                        const isBorn = hasBirthDate;
+                        const isPregnant = hasPregnancyDate && !hasBirthDate;
+                        const isMated = (hasMatingDate && !hasPregnancyDate && !hasBirthDate) || (litter.isPlanned && hasMatingDate && isMatingDatePassed && !hasPregnancyDate && !hasBirthDate);
+                        const isPlannedOnly = (!hasMatingDate && !hasPregnancyDate && !hasBirthDate) || (litter.isPlanned && !hasMatingDate);
                         
                         return (
-                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
+                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : isPregnant ? 'border-dashed border-red-300 bg-red-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
@@ -4968,12 +4977,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <p className="font-bold text-gray-800 text-sm">
                                                     {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-2">Planned</span>}
                                                     {isMated && <span className="text-[10px] font-semibold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
+                                                    {isPregnant && <span className="text-[10px] font-semibold bg-red-100 text-red-700 px-1.5 py-0.5 rounded mr-2">Pregnant</span>}
                                                     {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
                                                     {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
                                                 </p>
                                             </div>
-                                            <span className="text-xs font-semibold text-gray-700 ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
+                                            <span className="text-xs font-semibold text-gray-700 ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : isPregnant ? 'Pregnant' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
                                         </div>
                                         <div className="flex gap-3 text-xs text-gray-600">
                                             <span><span className="font-medium">S:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}</span>
@@ -5008,6 +5018,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 ? <span className="text-xs font-semibold text-indigo-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
                                                 : isMated
                                                 ? <span className="text-xs font-semibold text-purple-600"><Heart size={12} className="inline-block align-middle mr-0.5" /> Mated {formatDate(litter.matingDate)}</span>
+                                                : isPregnant
+                                                ? <span className="text-xs font-semibold text-red-600">🤰 Pregnant</span>
                                                 : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
