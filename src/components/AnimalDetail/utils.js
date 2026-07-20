@@ -205,7 +205,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
         );
     }
 
-    if (notFound || (!foundViaOwned && !parentData?.showOnPublicProfile)) {
+    if (notFound || (!foundViaOwned && !parentData?.isDisplay)) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                 <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
