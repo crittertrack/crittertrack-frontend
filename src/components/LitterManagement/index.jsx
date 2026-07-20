@@ -1197,7 +1197,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleMarkAsMated = async (litter) => {
         const today = new Date().toISOString().split('T')[0];
         try {
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { matingDate: today }, {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { matingDate: today, isPlanned: false }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             // Auto-dismiss the "mating due today" urgency notification for this litter
