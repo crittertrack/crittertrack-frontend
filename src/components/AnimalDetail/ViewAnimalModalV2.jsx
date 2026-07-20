@@ -4,8 +4,9 @@ import {
     Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
     Activity, AlertTriangle, Medal, Target, Key, Ban, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList, Hourglass,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, Share, Info, Network, Star,
-    Scale, Eye, EyeOff, TableOfContents, Users, HeartOff, Hospital,
+    Scale, Eye, EyeOff, TableOfContents, Users, HeartOff, Hospital, CheckCircle, Link
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import axios from 'axios';
@@ -86,6 +87,7 @@ const ViewAnimalModalV2 = ({
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [mainImage, setMainImage] = useState(animal?.imageUrl || animal?.photoUrl);
+    const [showQR, setShowQR] = useState(false);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [commonAncestorCount, setCommonAncestorCount] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
@@ -394,22 +396,43 @@ const ViewAnimalModalV2 = ({
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-800"><X size={20} /></button>
+                                    {/* Favorite Button (if logged in) */}
+                                    {authToken && (
+                                        <button 
+                                            className="px-4 py-2 bg-pink-400 hover:bg-pink-500 text-white rounded-full font-semibold transition flex items-center gap-2"
+                                            title="Add to favorites"
+                                        >
+                                            <Heart size={18} fill="currentColor" />
+                                            Favorite
+                                        </button>
+                                    )}
+                                    
+                                    {/* Share Button */}
+                                    <button 
+                                        onClick={() => setShowQR(true)}
+                                        className="px-4 py-2 bg-cyan-300 hover:bg-cyan-400 text-gray-800 rounded-full font-semibold transition flex items-center gap-2"
+                                        title="Share animal link"
+                                    >
+                                        <Share size={18} />
+                                        Share
+                                    </button>
+                                    
+                                    {/* Report Button */}
+                                    <div className="inline-block">
+                                        <ReportButton
+                                            contentType="animal"
+                                            contentId={animal.id_public}
+                                            contentcreatorId={animal.creatorId_public}
+                                            API_BASE_URL={API_BASE_URL}
+                                            authToken={authToken}
+                                            tooltipText="Report this animal"
+                                        />
+                                    </div>
+                                    
+                                    {/* Close Button */}
+                                    <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600"><X size={24} /></button>
                                 </div>
                             </div>
-
-                            {/* Public Mode Action Buttons */}
-                            {isPublic && (
-                                <div className="flex gap-2 flex-wrap">
-                                    <ReportButton
-                                        animalId={animal.id_public}
-                                        animalName={animal.name}
-                                        creatorId={animal.creatorId_public}
-                                        API_BASE_URL={API_BASE_URL}
-                                        authToken={authToken}
-                                    />
-                                </div>
-                            )}
 
                             {!isHeaderCollapsed && (
                                 <>
@@ -1401,31 +1424,43 @@ const ViewAnimalModalV2 = ({
                     )}
 
                     {/* Breeding Lines - Private only */}
-                    {isPrivate && (() => {
-                        const namedLines = breedingLineDefs.filter(l => l.name);
-                        if (namedLines.length === 0 || !toggleAnimalBreedingLine) return null;
-                        const assignedIds = animalBreedingLines[animal.id_public] || [];
-                        return (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3 mt-6">
-                                <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {namedLines.map(l => {
-                                        const assigned = assignedIds.includes(l.id);
-                                        return (
-                                            <button key={l.id} type="button"
-                                                onClick={() => toggleAnimalBreedingLine(animal.id_public, l.id)}
-                                                style={{ borderColor: l.color, color: assigned ? '#fff' : l.color, backgroundColor: assigned ? l.color : 'transparent' }}
-                                                className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition"
-                                            ><span>&#x25C6;</span> {l.name}</button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        );
-                    })()}
+                    {/* Removed: breeding lines are shown in IdentificationTabContent when that tab is active */}
                 </div>
             </div>
         </div>
+            )}
+
+            {/* QR Code Share Modal */}
+            {showQR && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={() => setShowQR(false)}>
+                    <div className="bg-white rounded-2xl shadow-2xl p-6 flex flex-col items-center gap-4 w-72" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between w-full">
+                            <h3 className="font-semibold text-gray-800 text-sm truncate pr-2">{animal.name || 'Share'}</h3>
+                            <button onClick={() => setShowQR(false)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+                        </div>
+                        <div className="p-3 bg-white border border-gray-200 rounded-xl">
+                            <QRCodeSVG 
+                                value={`${window.location.origin}/animal/${animal.id_public}`} 
+                                size={196} 
+                                bgColor="#ffffff" 
+                                fgColor="#111827" 
+                                level="M" 
+                            />
+                        </div>
+                        <p className="text-xs text-gray-400 break-all text-center leading-relaxed">
+                            {`${window.location.origin}/animal/${animal.id_public}`}
+                        </p>
+                        <button
+                            onClick={() => {
+                                navigator.clipboard.writeText(`${window.location.origin}/animal/${animal.id_public}`);
+                                alert('Link copied to clipboard!');
+                            }}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg text-sm transition"
+                        >
+                            <Link size={14} /> Copy Link
+                        </button>
+                    </div>
+                </div>
             )}
         </>
     );
