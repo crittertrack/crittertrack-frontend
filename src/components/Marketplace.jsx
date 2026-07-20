@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, X, Filter, ChevronLeft, ChevronRight, DollarSign, Heart, Mail, MapPin, Loader2, ShoppingBag, Tag, MessageSquare, Send } from 'lucide-react';
 import axios from 'axios';
 import 'flag-icons/css/flag-icons.min.css';
-import ViewOnlyAnimalDetail from './AnimalDetail/ViewOnlyAnimalDetail';
+import ViewAnimalModalV2 from './AnimalDetail/ViewAnimalModalV2';
 import { getCountryFlag, getCountryName, US_STATES, getStateName } from '../utils/locationUtils';
 
 const API_BASE_URL = '/api';
@@ -692,10 +692,10 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
 
             {/* Animal Detail Modal Overlay */}
             {selectedAnimalForModal && (
-                <ViewOnlyAnimalDetail 
+                <ViewAnimalModalV2 
                     animal={selectedAnimalForModal}
+                    mode="public"
                     onClose={() => setSelectedAnimalForModal(null)}
-                    onCloseAll={() => setSelectedAnimalForModal(null)}
                     API_BASE_URL={API_BASE_URL}
                     onViewProfile={onViewProfile}
                     onViewAnimal={onViewAnimal}

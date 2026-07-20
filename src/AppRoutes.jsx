@@ -21,7 +21,7 @@ const SuppliesPage = lazy(() => import('./components/SuppliesPage'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
 const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
 const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
-const ViewOnlyAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyAnimalDetail'));
+
 
 // New Contact pages for refactor
 const ContactsListPage = lazy(() => import('./components/Contacts/ContactsListPage'));

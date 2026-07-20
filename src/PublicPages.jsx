@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, XCircle, Download, X, Lock } from 'lucide-react';
 import CustomAppLogo from './components/shared/CustomAppLogo';
-import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
+import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 const API_BASE_URL = '/api';
@@ -169,15 +169,14 @@ const PublicAnimalPage = () => {
                     Home
                 </button>
             </header>
-            <ViewOnlyAnimalDetail
+            <ViewAnimalModalV2
                 animal={animal}
+                mode="public"
                 onClose={handleGoBack}
-                onCloseAll={handleGoBack}
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
                 onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
                 onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
-                setModCurrentContext={setModCurrentContext}
                 setShowImageModal={setShowImageModal}
                 setEnlargedImageUrl={setEnlargedImageUrl}
             />

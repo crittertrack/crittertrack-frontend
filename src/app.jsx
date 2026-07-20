@@ -55,7 +55,7 @@ import CommunityPage from './components/Community/CommunityPage';
 
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
 import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
-import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
+import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import { OffspringSection } from './components/AnimalDetail/utils';
 import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Import the new modal
 
@@ -1339,17 +1339,14 @@ const App = () => {
                 <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     {viewingPublicAnimal && (
-                        <ViewOnlyAnimalDetail 
+                        <ViewAnimalModalV2 
                             animal={viewingPublicAnimal}
                             mode="public"
                             onClose={handleBackFromPublicAnimal}
-                            onCloseAll={handleCloseAllPublicAnimals}
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
                             onViewAnimal={handleViewPublicAnimal}
-                            setModCurrentContext={setModCurrentContext}
-                            initialTab={publicAnimalInitialTab}
                         />
                     )}
 
@@ -1485,19 +1482,16 @@ const App = () => {
                     )}
                     
                     {viewingPublicAnimal && (
-                        <ViewOnlyAnimalDetail 
+                        <ViewAnimalModalV2 
                             animal={viewingPublicAnimal}
                             mode="public"
                             onClose={handleBackFromPublicAnimal}
-                            onCloseAll={handleCloseAllPublicAnimals}
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
                             onViewAnimal={handleViewPublicAnimal}
-                            setModCurrentContext={setModCurrentContext}
                             setShowImageModal={setShowImageModal}
                             setEnlargedImageUrl={setEnlargedImageUrl}
-                            initialTab={publicAnimalInitialTab}
                         />
                     )}
                     
@@ -1550,13 +1544,12 @@ const App = () => {
                 )}
                 
                 {viewingPublicAnimal && (
-                    <ViewOnlyAnimalDetail 
+                    <ViewAnimalModalV2 
                         animal={viewingPublicAnimal}
                         mode="public"
                         onClose={handleBackFromPublicAnimal}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
-                        setModCurrentContext={setModCurrentContext}
                         onViewProfile={(user) => setViewingPublicProfile(user)}
                         onViewAnimal={handleViewPublicAnimal}
                         setShowImageModal={setShowImageModal}
@@ -1737,14 +1730,12 @@ const App = () => {
                 />
             )}
             {viewingPublicAnimal && (
-                <ViewOnlyAnimalDetail 
+                <ViewAnimalModalV2 
                     animal={viewingPublicAnimal}
                     mode="public"
                     onClose={handleBackFromPublicAnimal}
-                    onCloseAll={handleCloseAllPublicAnimals}
                     API_BASE_URL={API_BASE_URL}
                     authToken={authToken}
-                    setModCurrentContext={setModCurrentContext}
                     onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
                     onViewAnimal={handleViewPublicAnimal}
                     setShowImageModal={setShowImageModal}
@@ -2373,18 +2364,14 @@ const App = () => {
                     );
                 } else {
                     return (
-                        <ViewOnlyAnimalDetail
+                        <ViewAnimalModalV2
                                 animal={animalToView}
                                 mode="private"
-                                initialTab={privateAnimalInitialTab}
-                                initialBetaView={privateBetaView}
                                 onClose={handleBackFromAnimal}
-                                onCloseAll={handleCloseAllAnimals}
                                 API_BASE_URL={API_BASE_URL}
                                 authToken={authToken}
                                 setShowImageModal={setShowImageModal}
                                 setEnlargedImageUrl={setEnlargedImageUrl}
-                                showModalMessage={showModalMessage}
                                 onViewAnimal={handleViewAnimal}
                                 breedingLineDefs={breedingLineDefs}
                                 animalBreedingLines={animalBreedingLines}
