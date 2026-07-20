@@ -12,14 +12,14 @@ import axios from 'axios';
 import { ViewOnlyParentCard, computeRelationships } from './utils';
 import { CareTabContent } from './CareTabContent';
 import { PedigreeTabContent } from './PedigreeTabContent';
-import { HealthTabContent } from './HealthTabContent'; // This component is used in AnimalTestModal.jsx
+import { HealthTabContent } from './HealthTabContent'; // This component is used in AnimalModalV2.jsx
 import { GalleryTabContent } from './GalleryTabContent';
 import { IdentificationTabContent } from './IdentificationTabContent';
 import { AppearanceTabContent } from './AppearanceTabContent';
 import { TimelineTabContent } from './TimelineTabContent';
-import { BehaviorTabContent } from './BehaviorTabContent'; // This component is used in AnimalTestModal.jsx
+import { BehaviorTabContent } from './BehaviorTabContent'; // This component is used in AnimalModalV2.jsx
 import { BreedingTabContent } from './BreedingTabContent';
-import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents'; // This component is used in AnimalTestModal.jsx
+import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents'; // This component is used in AnimalModalV2.jsx
 import { RecordsTabContent } from './RecordsTabContent';
 
 const parseJsonArrayField = (data) => {
@@ -60,7 +60,7 @@ const getReproductionState = (animal) => {
     return null;
 };
 
-const AnimalTestModal = ({
+const AnimalModalV2 = ({
     animal,
     onClose,
     onEdit,
@@ -1457,4 +1457,4 @@ const AnimalTestModal = ({
     );
 };
 
-export default AnimalTestModal;
+export default AnimalModalV2;

@@ -18,7 +18,7 @@ import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } fr
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
 import PrivateAnimalDetail from '../AnimalDetail/PrivateAnimalDetail';
-import AnimalTestModal from '../AnimalDetail/AnimalTestModal';
+import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;

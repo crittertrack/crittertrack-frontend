@@ -54,7 +54,7 @@ import CommunityPage from './components/Community/CommunityPage';
 // import ThemeToggle from './components/ThemeToggle';
 
 import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
-import AnimalTestModal from './components/AnimalDetail/AnimalTestModal';
+import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
 import AnimalFormTestModal from './components/AnimalForm/AnimalFormTestModal';
 import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
 import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
@@ -2346,7 +2346,7 @@ const App = () => {
                 const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public;
                 if (iCurrentlyOwn) {
                     return (
-                        <AnimalTestModal
+                        <AnimalModalV2
                             animal={animalToView}
                             onClose={handleBackFromAnimal}
                             onEdit={handleEditAnimal}
