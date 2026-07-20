@@ -52,11 +52,14 @@ const StatusIndicator = ({ status, icon }) => {
 };
 
 const getReproductionState = (animal) => {
-    if (animal.gender === 'Male') return null;
-    if (animal.isPregnant) return { label: 'Pregnant', color: 'bg-pink-100 text-pink-800', icon: '🤰' };
-    if (animal.isNursing) return { label: 'Nursing', color: 'bg-orange-100 text-orange-800', icon: '🍼' };
+    // Females can be pregnant or nursing
+    if (animal.gender === 'Female') {
+        if (animal.isPregnant) return { label: 'Pregnant', color: 'bg-red-100 text-red-800', icon: '🤰' };
+        if (animal.isNursing) return { label: 'Nursing', color: 'bg-green-100 text-green-800', icon: '🍼' };
+    }
+    // Both genders can be in mating or have planned mating
     if (animal.isInMating) return { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: '💑' };
-    if (animal.isPlannedMating) return { label: 'Planned Mating', color: 'bg-purple-100 text-purple-800', icon: '📅' };
+    if (animal.isPlannedMating) return { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: '📅' };
     return null;
 };
 

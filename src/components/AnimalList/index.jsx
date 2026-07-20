@@ -1826,11 +1826,26 @@ useEffect(() => {
                         )}
                     </div>
                     
-                    {/* Icon row */}
-                    <div className="w-full flex justify-center items-center space-x-1 sm:space-x-2 py-0.5 sm:py-1">
-                        {animal.isInMating && <Hourglass className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
-                        {animal.isPregnant && <Bean className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
-                        {animal.isNursing && <Milk className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
+                    {/* Reproductive State Pill */}
+                    <div className="w-full flex justify-center items-center py-1 sm:py-1.5 px-1">
+                        {(() => {
+                            // Determine reproductive state to display (prioritized)
+                            let state = null;
+                            if (animal.isPregnant) {
+                                state = { label: 'Pregnant', color: 'bg-red-100 text-red-800', icon: '🤰' };
+                            } else if (animal.isNursing) {
+                                state = { label: 'Nursing', color: 'bg-green-100 text-green-800', icon: '🍼' };
+                            } else if (animal.isInMating) {
+                                state = { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: '💑' };
+                            } else if (animal.isPlannedMating) {
+                                state = { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: '📅' };
+                            }
+                            return state ? (
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
+                                    {state.icon} {state.label}
+                                </span>
+                            ) : null;
+                        })()}
                     </div>
                     
                     {/* Prefix / Name under image */}

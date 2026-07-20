@@ -10,7 +10,7 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
     const isFemale = animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown';
     const isMale = animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown';
 
-    const hasReproStatus = animal.isNeutered || animal.isInfertile || animal.isInMating || (isFemale && (animal.isPregnant || animal.isNursing));
+    const hasReproStatus = animal.isNeutered || animal.isInfertile || animal.isInMating || animal.isPlannedMating || (isFemale && (animal.isPregnant || animal.isNursing));
     const hasCycleInfo = isFemale && !animal.isNeutered && (animal.heatStatus || animal.lastHeatDate || animal.ovulationDate || animal.estrusCycleLength);
     const hasSireInfo = isMale && !animal.isNeutered && !animal.isInfertile && (animal.fertilityStatus || animal.fertilityNotes || animal.reproductiveClearances || animal.reproductiveComplications);
     const hasDamInfo = isFemale && !animal.isNeutered && !animal.isInfertile && (animal.fertilityStatus || animal.gestationLength || animal.deliveryMethod || animal.lastDeliveryDate || animal.reproductiveHealthNotes || animal.reproductiveClearances || animal.reproductiveComplications);
@@ -34,6 +34,7 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                             <InfoItem label="Neutered/Spayed" value={animal.isNeutered ? 'Yes' : 'No'} />
                             <InfoItem label="Infertile" value={animal.isInfertile ? 'Yes' : 'No'} />
                             {!animal.isNeutered && !animal.isInfertile && <InfoItem label="In Mating" value={animal.isInMating ? 'Yes' : 'No'} />}
+                            {!animal.isNeutered && !animal.isInfertile && <InfoItem label="Planned Mating" value={animal.isPlannedMating ? 'Yes' : 'No'} />}
                             {isFemale && !animal.isNeutered && <InfoItem label={getLabel('isPregnant', 'Pregnant')} value={animal.isPregnant ? 'Yes' : 'No'} />}
                             {isFemale && !animal.isNeutered && <InfoItem label={getLabel('isNursing', 'Nursing')} value={animal.isNursing ? 'Yes' : 'No'} />}
                             {animal.reproductiveStateOverride && (
