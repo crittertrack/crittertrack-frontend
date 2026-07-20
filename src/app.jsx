@@ -352,6 +352,25 @@ const App = () => {
         }
     }, []);
     
+    // Listen for service worker updates - force reload for users with site already open
+    React.useEffect(() => {
+        if (!navigator.serviceWorker) return;
+        
+        const handleControllerChange = () => {
+            console.log('[App] New service worker activated - forcing reload for cache update');
+            // Give a tiny delay to ensure new cache is fully ready
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 500);
+        };
+        
+        navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+        
+        return () => {
+            navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+        };
+    }, []);
+    
     // Sync species favorites between localStorage and backend
     useEffect(() => {
         const syncSpeciesFavorites = async () => {
