@@ -90,6 +90,7 @@ const AnimalTestModal = ({
     const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
     const [mainImage, setMainImage] = useState(animal.imageUrl || animal.photoUrl);
     const [animalCOI, setAnimalCOI] = useState(null);
+    const [commonAncestorCount, setCommonAncestorCount] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownedAnimals, setOwnedAnimals] = useState([]); // Placeholder for owned animals
@@ -159,9 +160,11 @@ const AnimalTestModal = ({
                     const response = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, { headers: { Authorization: `Bearer ${authToken}` } });
                     if (response.data && response.data.inbreedingCoefficient != null) {
                         setAnimalCOI(response.data.inbreedingCoefficient);
+                        setCommonAncestorCount(response.data.commonAncestorCount || null);
                     }
                 } catch (error) {
                     setAnimalCOI(null);
+                    setCommonAncestorCount(null);
                 } finally {
                     setLoadingCOI(false);
                 }
@@ -830,7 +833,12 @@ const AnimalTestModal = ({
                                     <div className="border-b border-gray-200 pb-2 mb-2">
                                         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Coefficient of Inbreeding (COI)</h3>
                                     </div>
-                                    {animalCOI != null && <p className="text-sm text-gray-700"><span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%</p>}
+                                    {animalCOI != null && (
+                                        <p className="text-sm text-gray-700">
+                                            <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
+                                            {commonAncestorCount != null && <span className="text-gray-600"> (calculated on {commonAncestorCount} common ancestor{commonAncestorCount !== 1 ? 's' : ''})</span>}
+                                        </p>
+                                    )}
                                     {loadingCOI && <p className="text-xs text-gray-400">Calculating COI...</p>}
                                 </div>
                             )}
