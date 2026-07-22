@@ -405,59 +405,58 @@ const AnimalModalV2 = ({
                                         axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay, showOnPublicProfile: newIsDisplay }, { headers: { Authorization: `Bearer ${authToken}` } }).catch(() => onUpdateAnimal({ ...animal, isDisplay: !newIsDisplay, showOnPublicProfile: !newIsDisplay }));
                                     }} className={`p-2 rounded-lg transition ${animal.isDisplay ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}`} title={animal.isDisplay ? 'Make Private' : 'Make Public'}>{animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}</button>}
                                     {onEdit && <button onClick={() => onEdit(animal)} className="p-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition"><Edit size={16} /></button>}
-                                    {onTransfer && (() => {
-                                        const iWasTransferredThisAnimal = animal.originalCreatorId && animal.creatorId_public === userProfile?.id_public;
-                                        if (iWasTransferredThisAnimal && handleReturnTransferredAnimal) { // Changed from creatorId_public to creatorId_public
+                                    {(() => {
+                                        // Determine transfer state for this animal
+                                        const currentUserId = userProfile?._id;
+
+                                        // CASE 1: Animal has been transferred (soldStatus === 'sold') and current user was the original creator
+                                        // => Show NOTHING (view-only for the original sender)
+                                        const isOriginalCreator = animal.originalCreatorId &&
+                                            currentUserId &&
+                                            animal.originalCreatorId === currentUserId;
+                                        const isCurrentOwner = currentUserId && animal.creatorId_public === userProfile?.id_public;
+                                        const isTransferredAway = animal.soldStatus === 'sold' && isOriginalCreator;
+
+                                        if (isTransferredAway) {
+                                            return null; // View-only, no transfer buttons
+                                        }
+
+                                        // CASE 2: Animal was transferred TO current user (they are the new owner, have originalCreatorId set)
+                                        // => Show amber RotateCw button to return to original breeder
+                                        const isNewOwner = animal.originalCreatorId && !isOriginalCreator && isCurrentOwner;
+                                        if (isNewOwner && handleReturnTransferredAnimal) {
                                             return (
                                                 <button
-                                                    onClick={() => handleReturnTransferredAnimal()}
-                                                    className="p-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition"
-                                                    title="Return to breeder"
+                                                    onClick={() => handleReturnTransferredAnimal(animal.id_public)}
+                                                    className="p-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition"
+                                                    title="Return to original breeder"
                                                 >
                                                     <RotateCcw size={16} />
                                                 </button>
                                             );
                                         }
 
-                                        if (animal.pendingTransfer) {
-                                            if (animal.pendingTransfer.fromUserId === userProfile?._id && handleWithdrawTransfer) {
-                                                return (
-                                                    <button
-                                                        onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
-                                                        className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
-                                                        title="Withdraw transfer request"
-                                                    >
-                                                        <X size={16} />
-                                                    </button>
-                                                );
-                                            }
-                                            if (animal.pendingTransfer.toUserId === userProfile?._id && handleAcceptTransfer && handleRejectTransfer) {
-                                                return (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleAcceptTransfer(animal.pendingTransfer._id)}
-                                                            className="p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition"
-                                                            title="Accept transfer"
-                                                        >
-                                                            <Check size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleRejectTransfer(animal.pendingTransfer._id)}
-                                                            className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
-                                                            title="Reject transfer"
-                                                        >
-                                                            <X size={16} />
-                                                        </button>
-                                                    </>
-                                                );
-                                            }
+                                        // CASE 3: There's a pending transfer ID on this animal
+                                        if (animal.pendingTransferId && handleWithdrawTransfer) {
+                                            // The current user is the sender => show withdraw button (RotateCcw)
+                                            return (
+                                                <button
+                                                    onClick={() => handleWithdrawTransfer(animal.pendingTransferId)}
+                                                    className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+                                                    title="Withdraw pending transfer"
+                                                >
+                                                    <RotateCcw size={16} />
+                                                </button>
+                                            );
                                         }
+                                        // Note: Accept/Reject buttons are shown via notifications panel, not the animal modal header
 
-                                        return (
+                                        // CASE 4: Default - show transfer button
+                                        return onTransfer ? (
                                             <button onClick={() => onTransfer(animal)} className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" title="Transfer Animal">
                                                 <ArrowLeftRight size={16} />
                                             </button>
-                                        );
+                                        ) : null;
                                     })()}
                                     {onAddSibling && <button onClick={() => onAddSibling(animal)} className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"><Users size={16} /></button>}
                                     {onArchive && <button onClick={() => onArchive(animal)} className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"><Archive size={16} /></button>}

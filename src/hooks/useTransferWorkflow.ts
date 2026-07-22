@@ -57,7 +57,11 @@ export function useTransferWorkflow(
     const [transferSelectedUser, setTransferSelectedUser] = useState<User | null>(null);
     const [transferSearching, setTransferSearching] = useState(false);
     const [transferSearchPerformed, setTransferSearchPerformed] = useState(false);
-    const [abortController, setAbortController] = useState<AbortController | null>(null);
+const [abortController, setAbortController] = useState<AbortController | null>(null);
+
+    // ========== TRANSFER ACTION STATES (for modal buttons) ==========
+    const [transferViewingAnimal, setTransferViewingAnimal] = useState<Animal | null>(null);
+    const [returningAnimal, setReturningAnimal] = useState(false);
 
     // ========== TRANSACTION DETAILS ==========
     const [transferPrice, setTransferPrice] = useState('');
@@ -237,6 +241,114 @@ showModalMessage('Request Sent', messageText);
         setShowTransferModal(true);
     }, []); // No dependencies needed here, as it creates a new controller each time
 
+    // ========== TRANSFER ACTION HANDLERS (for AnimalModalV2 buttons) ==========
+
+    /**
+     * Withdraw a pending transfer request (sender only)
+     * Called from the animal modal when the sender clicks withdraw
+     */
+    const handleWithdrawTransfer = useCallback(async (transferId: string) => {
+        if (!transferId) return;
+
+        if (!window.confirm('Are you sure you want to withdraw this transfer request?')) {
+            return;
+        }
+
+        try {
+            await axios.post(`${API_BASE_URL}/transfers/${transferId}/withdraw`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Transfer request has been withdrawn.');
+            window.dispatchEvent(new Event('animals-changed'));
+        } catch (err: unknown) {
+            console.error('Failed to withdraw transfer:', err);
+            const message = axios.isAxiosError(err) && err.response?.data?.message
+                ? err.response.data.message
+                : (err as Error).message;
+            showModalMessage('Error', `Failed to withdraw transfer: ${message}`);
+        }
+    }, [API_BASE_URL, authToken, showModalMessage]);
+
+    /**
+     * Accept a pending transfer request (recipient only)
+     */
+    const handleAcceptTransfer = useCallback(async (transferId: string) => {
+        if (!transferId) return;
+
+        if (!window.confirm('Accept this transfer and take ownership of this animal?')) {
+            return;
+        }
+
+        try {
+            await axios.post(`${API_BASE_URL}/transfers/${transferId}/accept`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Transfer accepted. You are now the owner of this animal.');
+            window.dispatchEvent(new Event('animals-changed'));
+        } catch (err: unknown) {
+            console.error('Failed to accept transfer:', err);
+            const message = axios.isAxiosError(err) && err.response?.data?.message
+                ? err.response.data.message
+                : (err as Error).message;
+            showModalMessage('Error', `Failed to accept transfer: ${message}`);
+        }
+    }, [API_BASE_URL, authToken, showModalMessage]);
+
+    /**
+     * Reject/decline a pending transfer request (recipient only)
+     */
+    const handleRejectTransfer = useCallback(async (transferId: string) => {
+        if (!transferId) return;
+
+        if (!window.confirm('Decline this transfer request?')) {
+            return;
+        }
+
+        try {
+            await axios.post(`${API_BASE_URL}/transfers/${transferId}/decline`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Transfer request declined.');
+            window.dispatchEvent(new Event('animals-changed'));
+        } catch (err: unknown) {
+            console.error('Failed to decline transfer:', err);
+            const message = axios.isAxiosError(err) && err.response?.data?.message
+                ? err.response.data.message
+                : (err as Error).message;
+            showModalMessage('Error', `Failed to decline transfer: ${message}`);
+        }
+    }, [API_BASE_URL, authToken, showModalMessage]);
+
+    /**
+     * Return a transferred animal to its original breeder/creator
+     * Called from the animal modal when the new owner clicks return
+     */
+    const handleReturnTransferredAnimal = useCallback(async (animalId_public?: string) => {
+        const id = animalId_public || transferViewingAnimal?.id_public;
+        if (!id || returningAnimal) return;
+
+        if (!window.confirm('Return this animal to the original breeder? This will transfer ownership back.')) {
+            return;
+        }
+
+        setReturningAnimal(true);
+        try {
+            await axios.post(`${API_BASE_URL}/transfers/return`, { animalId_public: id }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Return request sent to the original breeder.');
+            window.dispatchEvent(new Event('animals-changed'));
+        } catch (err: unknown) {
+            console.error('Failed to return animal:', err);
+            const message = axios.isAxiosError(err) && err.response?.data?.message
+                ? err.response.data.message
+                : (err as Error).message;
+            showModalMessage('Error', `Failed to return animal: ${message}`);
+        } finally {
+            setReturningAnimal(false);
+        }
+    }, [API_BASE_URL, authToken, showModalMessage, transferViewingAnimal, returningAnimal]);
+
     // Cleanup AbortController on unmount of the component using this hook
     useEffect(() => {
         return () => {
@@ -278,6 +390,11 @@ showModalMessage('Request Sent', messageText);
         transferNotes,
         setTransferNotes,
 
+        // Transfer Action States
+        transferViewingAnimal,
+        setTransferViewingAnimal,
+        returningAnimal,
+
         // Handlers
         handleSearchTransferUser,
         handleSelectTransferUser,
@@ -285,5 +402,9 @@ showModalMessage('Request Sent', messageText);
         handleCloseTransferWorkflow,
         handleOpenTransferWithAnimal,
         handleOpenAnimalSaleModal,
+        handleWithdrawTransfer,
+        handleAcceptTransfer,
+        handleRejectTransfer,
+        handleReturnTransferredAnimal,
     };
 }
