@@ -1880,6 +1880,10 @@ const App = () => {
                             </button>
                             {showProfileMenu && (
                                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
+                                    <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <MessageSquare size={15} /> Report an Issue
+                                    </button>
                                     <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <User size={15} /> Profile
@@ -1976,6 +1980,10 @@ const App = () => {
                                 </button>
                                 {showProfileMenu && (
                                     <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
+                                        <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
+                                            <MessageSquare size={15} /> Report an Issue
+                                        </button>
                                         <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <User size={15} /> Profile

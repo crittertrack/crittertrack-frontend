@@ -21,6 +21,7 @@ const SuppliesPage = lazy(() => import('./components/SuppliesPage'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
 const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
 const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
+const ReportPage = lazy(() => import('./components/ReportPage'));
 
 
 // New Contact pages for refactor
@@ -456,6 +457,15 @@ export function AppRoutes({
           myAnimals={myAnimalsForCalculator}
           userProfile={userProfile}
           onViewAnimal={handleViewAnimal}
+        />
+      } />
+
+      {/* Report Page */}
+      <Route path="/report" element={
+        <ReportPage
+          authToken={authToken}
+          userProfile={userProfile}
+          showModalMessage={showModalMessage}
         />
       } />
 
