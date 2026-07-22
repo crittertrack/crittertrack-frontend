@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { X, Loader2, MessageSquare, User, ArrowLeft, Ban, Flag, Trash2 } from 'lucide-react';
+import { X, Loader2, MessageSquare, User, ArrowLeft, Ban, Flag, Trash2, ImagePlus } from 'lucide-react';
 import { DonationBadge, getDonationBadge } from '../../utils/donationUtils';
 
 // ==================== MESSAGES VIEW ====================
@@ -10,9 +10,13 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
+    const [selectedImages, setSelectedImages] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
+    const [uploading, setUploading] = useState(false);
     const messagesEndRef = useRef(null);
     const prevMessageCountRef = useRef(0);
     const prevConversationRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         fetchConversations();
@@ -78,19 +82,95 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
         }
     };
 
+    const handleImageSelect = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        // Validate file types and size
+        const validFiles = files.filter(file => {
+            const isValidType = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type);
+            const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
+            if (!isValidType) showModalMessage && showModalMessage('Error', `${file.name}: Only PNG, JPEG, and WebP images are allowed`);
+            if (!isValidSize) showModalMessage && showModalMessage('Error', `${file.name}: Image must be less than 5MB`);
+            return isValidType && isValidSize;
+        });
+
+        if (validFiles.length === 0) return;
+
+        // Create previews
+        const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+        setImagePreviews(prev => [...prev, ...newPreviews]);
+        setSelectedImages(prev => [...prev, ...validFiles]);
+    };
+
+    const removeImage = (index) => {
+        URL.revokeObjectURL(imagePreviews[index]);
+        setImagePreviews(prev => prev.filter((_, i) => i !== index));
+        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const uploadImages = async () => {
+        if (selectedImages.length === 0) return [];
+        
+        setUploading(true);
+        const uploadedUrls = [];
+        
+        try {
+            for (const file of selectedImages) {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                
+                if (response.data?.url) {
+                    uploadedUrls.push(response.data.url);
+                }
+            }
+        } catch (error) {
+            console.error('Error uploading images:', error);
+            showModalMessage && showModalMessage('Error', 'Failed to upload images');
+            return null;
+        } finally {
+            setUploading(false);
+        }
+        
+        return uploadedUrls;
+    };
+
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !selectedConversation) return;
+        if ((!newMessage.trim() && selectedImages.length === 0) || !selectedConversation) return;
 
         setSending(true);
         try {
+            let imageUrls = [];
+            if (selectedImages.length > 0) {
+                const urls = await uploadImages();
+                if (urls === null) {
+                    // Upload failed, abort
+                    setSending(false);
+                    return;
+                }
+                imageUrls = urls;
+            }
+
             await axios.post(`${API_BASE_URL}/messages/send`, {
                 receiverId: selectedConversation.otherUserId,
-                message: newMessage.trim()
+                message: newMessage.trim(),
+                images: imageUrls
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             setNewMessage('');
+            // Clear images
+            imagePreviews.forEach(url => URL.revokeObjectURL(url));
+            setSelectedImages([]);
+            setImagePreviews([]);
             await fetchMessages(selectedConversation.otherUserId);
             await fetchConversations();
         } catch (error) {
@@ -216,6 +296,36 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
         }
     };
 
+    const renderMessageContent = (msg) => {
+        return (
+            <>
+                {msg.message && (
+                    <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+                )}
+                {msg.images && msg.images.length > 0 && (
+                    <div className={`flex flex-wrap gap-1 mt-1 ${msg.message ? 'mt-2' : ''}`}>
+                        {msg.images.map((imgUrl, idx) => (
+                            <a
+                                key={idx}
+                                href={imgUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                            >
+                                <img
+                                    src={imgUrl}
+                                    alt="Message image"
+                                    className="max-w-[200px] max-h-[200px] rounded-lg object-cover cursor-pointer hover:opacity-90 transition"
+                                    loading="lazy"
+                                />
+                            </a>
+                        ))}
+                    </div>
+                )}
+            </>
+        );
+    };
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] sm:h-[600px] flex flex-col">
@@ -273,7 +383,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-gray-500 truncate">{conv.lastMessage}</p>
+                                            <p className="text-xs text-gray-500 truncate">{conv.lastMessage || '[Image]'}</p>
                                             <p className="text-xs text-gray-400">{formatTime(conv.lastMessageDate)}</p>
                                         </div>
                                     </div>
@@ -362,10 +472,13 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                             ? 'bg-blue-500 text-white' 
                                                             : 'bg-gray-200 text-gray-800'
                                                     }`}>
-                                                        <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+                                                        {renderMessageContent(msg)}
                                                         <div className="flex items-center justify-between gap-2 mt-1">
                                                             <p className={`text-xs ${isSentByMe ? 'text-blue-100' : 'text-gray-500'}`}>
                                                                 {formatTime(msg.createdAt)}
+                                                                {msg.images && msg.images.length > 0 && !msg.message && (
+                                                                    <span className="ml-1">📷</span>
+                                                                )}
                                                             </p>
                                                             {isSentByMe ? (
                                                                 <button
@@ -393,6 +506,29 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                     <div ref={messagesEndRef} />
                                 </div>
 
+                                {/* Image Previews */}
+                                {imagePreviews.length > 0 && (
+                                    <div className="px-4 py-2 bg-gray-50 border-t">
+                                        <div className="flex flex-wrap gap-2">
+                                            {imagePreviews.map((preview, idx) => (
+                                                <div key={idx} className="relative group">
+                                                    <img
+                                                        src={preview}
+                                                        alt={`Preview ${idx + 1}`}
+                                                        className="w-16 h-16 object-cover rounded-lg"
+                                                    />
+                                                    <button
+                                                        onClick={() => removeImage(idx)}
+                                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                                                    >
+                                                        <X size={12} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Send Message Form */}
                                 <form onSubmit={handleSendMessage} className="p-4 border-t bg-gray-50">
                                     {userProfile?.allowMessages === false ? (
@@ -409,19 +545,36 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                 type="text"
                                                 value={newMessage}
                                                 onChange={(e) => setNewMessage(e.target.value)}
-                                                placeholder="Type a message..."
+                                                placeholder={uploading ? 'Uploading images...' : 'Type a message...'}
                                                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                disabled={sending}
+                                                disabled={sending || uploading}
+                                            />
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                onChange={handleImageSelect}
+                                                accept="image/png,image/jpeg,image/jpg,image/webp"
+                                                multiple
+                                                className="hidden"
                                             />
                                             <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                disabled={sending || uploading}
+                                                className="bg-gray-200 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Attach images"
+                                            >
+                                                <ImagePlus size={20} />
+                                            </button>
+                                            <button
                                                 type="submit"
-                                                disabled={sending || !newMessage.trim()}
+                                                disabled={sending || uploading || (!newMessage.trim() && selectedImages.length === 0)}
                                                 className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                             >
-                                                {sending ? (
+                                                {sending || uploading ? (
                                                     <>
                                                         <Loader2 className="animate-spin" size={16} />
-                                                        Sending...
+                                                        {uploading ? 'Uploading...' : 'Sending...'}
                                                     </>
                                                 ) : (
                                                     'Send'
@@ -440,3 +593,4 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 };
 
 export { MessagesView };
+
