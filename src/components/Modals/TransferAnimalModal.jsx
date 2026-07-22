@@ -207,7 +207,7 @@ const TransferAnimalModal = ({
                         type="button"
                         onClick={() => {
                             if (animal && selectedUser) {
-                                const transferType = parseFloat(price) > 0 ? 'sale' : 'gift';
+
                                 onSubmit({
                                     animal: animal,
                                     recipient: selectedUser,
