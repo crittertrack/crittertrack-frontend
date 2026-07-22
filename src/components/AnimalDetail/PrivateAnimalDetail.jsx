@@ -501,11 +501,29 @@ const PrivateAnimalDetail = ({
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                    const iWasTransferredThisAnimal = animal.creatorId_public === userProfile?.id_public && // Current user is the current owner
-                                        animal.originalCreatorId && // An original creator exists
-                                        animal.originalCreatorId.$oid !== animal.creatorId.$oid; // Original creator is different from current creator
+                                // Safely compare creator IDs: animal.originalCreatorId may be a string (id_public), 
+                                // a MongoDB ObjectId (string or {$oid: ...}), or null/undefined.
+                                const origCreatorStr = (() => {
+                                    if (!animal.originalCreatorId) return null;
+                                    if (typeof animal.originalCreatorId === 'string') return animal.originalCreatorId;
+                                    if (animal.originalCreatorId.$oid) return animal.originalCreatorId.$oid;
+                                    if (animal.originalCreatorId._id) return animal.originalCreatorId._id;
+                                    return null;
+                                })();
+                                const currCreatorStr = (() => {
+                                    if (!animal.creatorId) return userProfile?.id_public || null;
+                                    if (typeof animal.creatorId === 'string') return animal.creatorId;
+                                    if (animal.creatorId.$oid) return animal.creatorId.$oid;
+                                    if (animal.creatorId._id) return animal.creatorId._id;
+                                    if (animal.creatorId_public) return animal.creatorId_public;
+                                    return null;
+                                })();
+                                const isOriginalCreator = origCreatorStr && currCreatorStr && origCreatorStr !== currCreatorStr;
 
-                                // Recipient owns it
+                                // iWasTransferredThisAnimal = current user owns it AND originalCreatorId is set to someone else
+                                const iWasTransferredThisAnimal = animal.creatorId_public === userProfile?.id_public && !!origCreatorStr && isOriginalCreator;
+
+                                // Recipient owns it → show Return button
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
@@ -520,13 +538,18 @@ const PrivateAnimalDetail = ({
                                     );
                                 }
 
-                                // Transfer request exists
-                                if (animal.pendingTransfer) {
+                                // Transfer request exists (animal.pendingTransferId or animal.pendingTransfer)
+                                const pendingTransfer = animal.pendingTransfer || (animal.pendingTransferId ? { _id: animal.pendingTransferId } : null);
+                                if (pendingTransfer) {
+                                    const senderId = pendingTransfer.fromUserId;
+                                    const recipientId = pendingTransfer.toUserId;
+                                    const currentUserId = userProfile?._id;
+
                                     // If current user is the SENDER → show Withdraw
-                                    if (animal.pendingTransfer.fromUserId === userProfile?._id) {
+                                    if (senderId === currentUserId) {
                                         return (
                                             <button
-                                                onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
+                                                onClick={() => handleWithdrawTransfer(pendingTransfer._id)}
                                                 className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                                                 title="Withdraw transfer request"
                                             >
@@ -536,12 +559,12 @@ const PrivateAnimalDetail = ({
                                         );
                                     }
 
-                                    // If current user is the RECIPIENT -> show Accept/Reject
-                                    if (animal.pendingTransfer.toUserId === userProfile?._id) {
+                                    // If current user is the RECIPIENT → show Accept/Reject
+                                    if (recipientId === currentUserId) {
                                         return (
                                             <div className="flex gap-1.5">
                                                 <button
-                                                    onClick={() => handleAcceptTransfer(animal.pendingTransfer._id)}
+                                                    onClick={() => handleAcceptTransfer(pendingTransfer._id)}
                                                     className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                                                     title="Accept transfer"
                                                 >
@@ -549,7 +572,7 @@ const PrivateAnimalDetail = ({
                                                     Accept
                                                 </button>
                                                 <button
-                                                    onClick={() => handleRejectTransfer(animal.pendingTransfer._id)}
+                                                    onClick={() => handleRejectTransfer(pendingTransfer._id)}
                                                     className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                                                     title="Reject transfer"
                                                 >
@@ -561,7 +584,7 @@ const PrivateAnimalDetail = ({
                                     }
                                 }
 
-                                // Original owner (no transfer)
+                                // Default: show Transfer button
                                 return (
                                     <button
                                         onClick={() => onTransfer(animal)}
@@ -629,7 +652,25 @@ const PrivateAnimalDetail = ({
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                    const iWasTransferredThisAnimal = animal.originalCreatorId && animal.creatorId_public === userProfile?.id_public;
+                                // Safely compare creator IDs
+                                const origCreatorStr = (() => {
+                                    if (!animal.originalCreatorId) return null;
+                                    if (typeof animal.originalCreatorId === 'string') return animal.originalCreatorId;
+                                    if (animal.originalCreatorId.$oid) return animal.originalCreatorId.$oid;
+                                    if (animal.originalCreatorId._id) return animal.originalCreatorId._id;
+                                    return null;
+                                })();
+                                const currCreatorStr = (() => {
+                                    if (!animal.creatorId) return userProfile?.id_public || null;
+                                    if (typeof animal.creatorId === 'string') return animal.creatorId;
+                                    if (animal.creatorId.$oid) return animal.creatorId.$oid;
+                                    if (animal.creatorId._id) return animal.creatorId._id;
+                                    if (animal.creatorId_public) return animal.creatorId_public;
+                                    return null;
+                                })();
+                                const isOriginalCreator = origCreatorStr && currCreatorStr && origCreatorStr !== currCreatorStr;
+                                const iWasTransferredThisAnimal = animal.creatorId_public === userProfile?.id_public && !!origCreatorStr && isOriginalCreator;
+
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
@@ -645,12 +686,17 @@ const PrivateAnimalDetail = ({
                                 }
 
                                 // Transfer request exists
-                                if (animal.pendingTransfer) {
+                                const pendingTransfer = animal.pendingTransfer || (animal.pendingTransferId ? { _id: animal.pendingTransferId } : null);
+                                if (pendingTransfer) {
+                                    const senderId = pendingTransfer.fromUserId;
+                                    const recipientId = pendingTransfer.toUserId;
+                                    const currentUserId = userProfile?._id;
+
                                     // If current user is the SENDER → show Withdraw
-                                    if (animal.pendingTransfer.fromUserId === userProfile?._id) {
+                                    if (senderId === currentUserId) {
                                         return (
                                             <button
-                                                onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
+                                                onClick={() => handleWithdrawTransfer(pendingTransfer._id)}
                                                 className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-2"
                                                 title="Withdraw transfer request"
                                             >
@@ -661,11 +707,11 @@ const PrivateAnimalDetail = ({
                                     }
 
                                     // If current user is the RECIPIENT -> show Accept/Reject
-                                    if (animal.pendingTransfer.toUserId === userProfile?._id) {
+                                    if (recipientId === currentUserId) {
                                         return (
                                             <div className="flex gap-2">
                                                 <button
-                                                    onClick={() => handleAcceptTransfer(animal.pendingTransfer._id)}
+                                                    onClick={() => handleAcceptTransfer(pendingTransfer._id)}
                                                     className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 font-semibold rounded-lg transition flex items-center gap-2"
                                                     title="Accept transfer"
                                                 >
@@ -673,7 +719,7 @@ const PrivateAnimalDetail = ({
                                                     Accept
                                                 </button>
                                                 <button
-                                                    onClick={() => handleRejectTransfer(animal.pendingTransfer._id)}
+                                                    onClick={() => handleRejectTransfer(pendingTransfer._id)}
                                                     className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-2"
                                                     title="Reject transfer"
                                                 >
@@ -685,14 +731,14 @@ const PrivateAnimalDetail = ({
                                     }
                                 }
 
-                                // Original owner (no transfer)
+                                // Default: show Transfer button
                                 return (
                                     <button
                                         onClick={() => onTransfer(animal)}
                                         className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                                         title="Transfer this animal"
                                     >
-                                        <ArrowLeftRight size={16} />
+                                        <ArrowLeftRight size={14} />
                                         Transfer
                                     </button>
                                 );

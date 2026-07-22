@@ -300,7 +300,7 @@ const App = () => {
     // Map hook states to legacy variable names for backward compatibility
     const { viewingPublicAnimal, setViewingPublicAnimal, publicAnimalViewHistory, setPublicAnimalViewHistory, publicAnimalInitialTab, setPublicAnimalInitialTab, handleViewPublicAnimal, handleBackFromPublicAnimal, handleCloseAllPublicAnimals } = publicAnimalNav;
     const { animalToView, setAnimalToView, animalToEdit, setAnimalToEdit, animalViewHistory, privateAnimalInitialTab, setPrivateAnimalInitialTab, privateBetaView, setPrivateBetaView, speciesToAdd, setSpeciesToAdd, editReturnPathRef, viewReturnPathRef, handleViewAnimal, handleEditAnimal, handleCancelEditAnimal, handleBackFromAnimal, handleCloseAllAnimals, handleSaveAnimal, handleArchiveAnimal, handleDeleteAnimal, toggleAnimalOwned, handleRestoreViewOnlyAnimal } = privateAnimalNav;
-    const { showTransferModal, setShowTransferModal, budgetModalOpen, setBudgetModalOpen, transferAnimal, setTransferAnimal, preSelectedTransferAnimal, preSelectedTransactionType, setPreSelectedTransferAnimal, setPreSelectedTransactionType, transferUserQuery, setTransferUserQuery, transferUserResults, setTransferUserResults, transferSelectedUser, setTransferSelectedUser, transferSearching, setTransferSearching, transferSearchPerformed, setTransferSearchPerformed, transferPrice, setTransferPrice, transferNotes, setTransferNotes, handleSearchTransferUser, handleSelectTransferUser, handleSubmitTransfer, handleCloseTransferWorkflow, handleOpenTransferWithAnimal } = transferWorkflow;
+    const { showTransferModal, setShowTransferModal, budgetModalOpen, setBudgetModalOpen, transferAnimal, setTransferAnimal, preSelectedTransferAnimal, preSelectedTransactionType, setPreSelectedTransferAnimal, setPreSelectedTransactionType, transferUserQuery, setTransferUserQuery, transferUserResults, setTransferUserResults, transferSelectedUser, setTransferSelectedUser, transferSearching, setTransferSearching, transferSearchPerformed, setTransferSearchPerformed, transferPrice, setTransferPrice, transferNotes, setTransferNotes, handleSearchTransferUser, handleSelectTransferUser, handleSubmitTransfer, handleCloseTransferWorkflow, handleOpenTransferWithAnimal, returningAnimal, handleReturnTransferredAnimal, handleWithdrawTransfer, handleAcceptTransfer, handleRejectTransfer } = transferWorkflow;
     const { breedingLineDefs, setBreedingLineDefs, animalBreedingLines, setAnimalBreedingLines, BL_PRESETS_APP, saveBreedingLineDefs, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect } = breedingLinesState;
     const { inModeratorMode, setInModeratorMode, showAdminPanel, setShowAdminPanel, showModReportQueue, setShowModReportQueue, showModerationAuthModal, setShowModerationAuthModal, modCurrentContext, setModCurrentContext, handleToggleModerationMode, handleModerationAuth, handleModQuickFlag } = modMode;
     const { setAnimalViewHistory } = privateAnimalNav;
@@ -2414,6 +2414,15 @@ const App = () => {
                                 toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                                 setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
                                 onAddSibling={handleAddSibling}
+                                returningAnimal={returningAnimal}
+                                handleReturnTransferredAnimal={() => {
+                                    if (animalToView?.id_public) {
+                                        handleReturnTransferredAnimal(animalToView.id_public);
+                                    }
+                                }}
+                                handleWithdrawTransfer={handleWithdrawTransfer}
+                                handleAcceptTransfer={handleAcceptTransfer}
+                                handleRejectTransfer={handleRejectTransfer}
                             />
                     );
                 } else {

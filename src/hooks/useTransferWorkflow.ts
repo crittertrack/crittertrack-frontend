@@ -62,6 +62,7 @@ export function useTransferWorkflow(
     // ========== TRANSACTION DETAILS ==========
     const [transferPrice, setTransferPrice] = useState('');
     const [transferNotes, setTransferNotes] = useState('');
+    const [returningAnimal, setReturningAnimal] = useState(false);
 
     // ========== HANDLER FUNCTIONS ==========
 
@@ -237,6 +238,130 @@ showModalMessage('Request Sent', messageText);
         setShowTransferModal(true);
     }, []); // No dependencies needed here, as it creates a new controller each time
 
+    /**
+     * Return an animal to the original creator/breeder.
+     * Called from animal detail when current owner wants to return a transferred animal.
+     */
+    const handleReturnTransferredAnimal = useCallback(async (animalId: string) => {
+        if (!animalId) {
+            showModalMessage('Error', 'Animal ID is required.');
+            return;
+        }
+        setReturningAnimal(true);
+        try {
+            const response = await withRetry(async () => {
+                return await axios.post(
+                    `${API_BASE_URL}/transfers/return`,
+                    { animalId_public: animalId },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+            }, { maxRetries: 2, delayMs: 500 });
+            showModalMessage('Return Request Sent', 'The original breeder has been notified and must accept the return.');
+            window.dispatchEvent(new Event('animals-changed'));
+            return response.data;
+        } catch (error: unknown) {
+            console.error('[TRANSFER] Return failed:', error);
+            let errorMessage = 'Failed to return animal. Please try again.';
+            if (axios.isAxiosError(error) && error.response) {
+                errorMessage = error.response.data?.message || errorMessage;
+            }
+            showModalMessage('Return Failed', errorMessage);
+            throw error;
+        } finally {
+            setReturningAnimal(false);
+        }
+    }, [authToken, API_BASE_URL, showModalMessage]);
+
+    /**
+     * Withdraw a pending transfer request (sender only).
+     */
+    const handleWithdrawTransfer = useCallback(async (transferId: string) => {
+        if (!transferId) {
+            showModalMessage('Error', 'Transfer ID is required.');
+            return;
+        }
+        try {
+            const response = await withRetry(async () => {
+                return await axios.post(
+                    `${API_BASE_URL}/transfers/${transferId}/withdraw`,
+                    {},
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+            }, { maxRetries: 2, delayMs: 500 });
+            showModalMessage('Transfer Withdrawn', 'The transfer request has been cancelled.');
+            window.dispatchEvent(new Event('animals-changed'));
+            return response.data;
+        } catch (error: unknown) {
+            console.error('[TRANSFER] Withdraw failed:', error);
+            let errorMessage = 'Failed to withdraw transfer. Please try again.';
+            if (axios.isAxiosError(error) && error.response) {
+                errorMessage = error.response.data?.message || errorMessage;
+            }
+            showModalMessage('Withdraw Failed', errorMessage);
+            throw error;
+        }
+    }, [authToken, API_BASE_URL, showModalMessage]);
+
+    /**
+     * Accept a pending transfer request (recipient only).
+     */
+    const handleAcceptTransfer = useCallback(async (transferId: string) => {
+        if (!transferId) {
+            showModalMessage('Error', 'Transfer ID is required.');
+            return;
+        }
+        try {
+            const response = await withRetry(async () => {
+                return await axios.post(
+                    `${API_BASE_URL}/transfers/${transferId}/accept`,
+                    {},
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+            }, { maxRetries: 2, delayMs: 500 });
+            showModalMessage('Transfer Accepted', 'You are now the owner of this animal.');
+            window.dispatchEvent(new Event('animals-changed'));
+            return response.data;
+        } catch (error: unknown) {
+            console.error('[TRANSFER] Accept failed:', error);
+            let errorMessage = 'Failed to accept transfer. Please try again.';
+            if (axios.isAxiosError(error) && error.response) {
+                errorMessage = error.response.data?.message || errorMessage;
+            }
+            showModalMessage('Accept Failed', errorMessage);
+            throw error;
+        }
+    }, [authToken, API_BASE_URL, showModalMessage]);
+
+    /**
+     * Reject/decline a pending transfer request (recipient only).
+     */
+    const handleRejectTransfer = useCallback(async (transferId: string) => {
+        if (!transferId) {
+            showModalMessage('Error', 'Transfer ID is required.');
+            return;
+        }
+        try {
+            const response = await withRetry(async () => {
+                return await axios.post(
+                    `${API_BASE_URL}/transfers/${transferId}/decline`,
+                    {},
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+            }, { maxRetries: 2, delayMs: 500 });
+            showModalMessage('Transfer Declined', 'The transfer request has been declined.');
+            window.dispatchEvent(new Event('animals-changed'));
+            return response.data;
+        } catch (error: unknown) {
+            console.error('[TRANSFER] Decline failed:', error);
+            let errorMessage = 'Failed to decline transfer. Please try again.';
+            if (axios.isAxiosError(error) && error.response) {
+                errorMessage = error.response.data?.message || errorMessage;
+            }
+            showModalMessage('Decline Failed', errorMessage);
+            throw error;
+        }
+    }, [authToken, API_BASE_URL, showModalMessage]);
+
     // Cleanup AbortController on unmount of the component using this hook
     useEffect(() => {
         return () => {
@@ -277,6 +402,8 @@ showModalMessage('Request Sent', messageText);
         setTransferPrice,
         transferNotes,
         setTransferNotes,
+        returningAnimal,
+        setReturningAnimal,
 
         // Handlers
         handleSearchTransferUser,
@@ -285,5 +412,9 @@ showModalMessage('Request Sent', messageText);
         handleCloseTransferWorkflow,
         handleOpenTransferWithAnimal,
         handleOpenAnimalSaleModal,
+        handleReturnTransferredAnimal,
+        handleWithdrawTransfer,
+        handleAcceptTransfer,
+        handleRejectTransfer,
     };
 }
