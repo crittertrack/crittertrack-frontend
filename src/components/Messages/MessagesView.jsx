@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { X, Loader2, MessageSquare, User, ArrowLeft, Ban, Flag, Trash2, Image, Paperclip, Maximize2 } from 'lucide-react';
+import { X, Loader2, MessageSquare, User, ArrowLeft, Ban, Flag, Trash2, ImagePlus, Maximize2 } from 'lucide-react';
 import { DonationBadge, getDonationBadge } from '../../utils/donationUtils';
 import { compressImageFile } from '../../utils/imageCompression';
 
@@ -540,16 +540,6 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                     multiple
                                                     className="hidden"
                                                 />
-                                                {/* Image picker button */}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    disabled={sending || selectedImages.length >= MAX_IMAGES_PER_MESSAGE}
-                                                    className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
-                                                    title="Attach images"
-                                                >
-                                                    <Image size={20} />
-                                                </button>
                                                 <input
                                                     type="text"
                                                     value={newMessage}
@@ -558,6 +548,16 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     disabled={sending}
                                                 />
+                                                {/* Image picker button next to send */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    disabled={sending || selectedImages.length >= MAX_IMAGES_PER_MESSAGE}
+                                                    className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    title="Attach images"
+                                                >
+                                                    <ImagePlus size={20} />
+                                                </button>
                                                 <button
                                                     type="submit"
                                                     disabled={sending || (!newMessage.trim() && selectedImages.length === 0)}
