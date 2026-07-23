@@ -677,7 +677,48 @@ const handleArchive = useCallback(async (animalToArchive) => {
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save enclosure');
         } finally { setEnclosureSaving(false); }
     }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, enclosureSaving, handleCloseEnclosureModal]);
+    
+    const getSpeciesCategory = (species) => {
+        if (!species) return 'Other';
+        const s = species.toLowerCase();
+        if (s.includes('mouse') || s.includes('rat') || s.includes('hamster') || s.includes('guinea pig')) {
+            return 'Mammal';
+        }
+        if (s.includes('snake') || s.includes('lizard') || s.includes('gecko') || s.includes('turtle')) {
+            return 'Reptile';
+        }
+        if (s.includes('parrot') || s.includes('finch') || s.includes('bird')) {
+            return 'Bird';
+        }
+        if (s.includes('frog') || s.includes('salamander') || s.includes('axolotl')) {
+            return 'Amphibian';
+        }
+        if (s.includes('fish')) {
+            return 'Fish';
+        }
+        if (s.includes('tarantula') || s.includes('scorpion') || s.includes('spider') || s.includes('invertebrate')) {
+            return 'Invertebrate';
+        }
+        return 'Other';
+    };
 
+    // Base list for "active" animals (not sold or archived) for dashboard counts.
+    const activeAnimalsForDashboard = useMemo(() => {
+        return allAnimalsRaw.filter(a =>
+            !a.isViewOnly &&
+            !a.archived
+        );
+    }, [allAnimalsRaw]);
+
+    const categoryBreakdown = useMemo(() => {
+        const breakdown = { 'Mammal': 0, 'Reptile': 0, 'Bird': 0, 'Amphibian': 0, 'Fish': 0, 'Invertebrate': 0, 'Other': 0 };
+        activeAnimalsForDashboard.forEach(animal => {
+            const category = getSpeciesCategory(animal.species);
+            breakdown[category]++;
+        });
+
+        const total = activeAnimalsForDashboard.length;
+        if (total === 0) return [];
         return Object.entries(breakdown).map(([name, count]) => ({ name, count, percentage: ((count / total) * 100).toFixed(1) })).filter(cat => cat.count > 0);
     }, [activeAnimalsForDashboard]);
 
@@ -1014,71 +1055,6 @@ useEffect(() => {
         } catch (err) { console.error('[fetchEnclosures]', err); }
     }, [authToken]);
     useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
-
-    const handleSaveEnclosure = useCallback(async () => {
-        console.log('[AnimalList] handleSaveEnclosure called. Saving:', enclosureSaving, 'Form Data:', enclosureFormData);
-        if (enclosureSaving) return;
-        // Defensive check: ensure form data and name exist before proceeding.
-        if (!enclosureFormData || !enclosureFormData.name || !enclosureFormData.name.trim()) {
-            showModalMessageRef.current('Validation Error', 'Enclosure name cannot be empty.');
-            return;
-        }
-        setEnclosureSaving(true);
-
-        try {
-            const payload = {
-                name: enclosureFormData.name.trim(),
-                enclosureType: enclosureFormData.enclosureType.trim(),
-                purpose: enclosureFormData.purpose,
-                location: enclosureFormData.location.trim(),
-                dimensions: {
-                    length: enclosureFormData.length ? Number(enclosureFormData.length) : null,
-                    width: enclosureFormData.width ? Number(enclosureFormData.width) : null,
-                    height: enclosureFormData.height ? Number(enclosureFormData.height) : null,
-                    unit: enclosureFormData.dimensionsUnit
-                },
-                capacity: enclosureFormData.capacity ? Number(enclosureFormData.capacity) : undefined,
-                temperatureRange: {
-                    min: enclosureFormData.tempMin ? Number(enclosureFormData.tempMin) : null,
-                    max: enclosureFormData.tempMax ? Number(enclosureFormData.tempMax) : null,
-                },
-                temperatureUnit: enclosureFormData.temperatureUnit,
-                humidityRange: {
-                    min: enclosureFormData.humidityMin ? Number(enclosureFormData.humidityMin) : null,
-                    max: enclosureFormData.humidityMax ? Number(enclosureFormData.humidityMax) : null,
-                },
-                lightsOnTime: enclosureFormData.lightsOnTime,
-                lightsOffTime: enclosureFormData.lightsOffTime,
-                lightTimeFormat: enclosureFormData.lightTimeFormat,
-                notes: enclosureFormData.notes.trim(),
-                cleaningTasks: enclosureFormData.cleaningTasks,
-                tags: enclosureFormData.tags,
-                speciesLabels: enclosureFormData.speciesLabels,
-                imageUrl: enclosureFormData.imageUrl,
-            };
-
-            if (enclosureImageFile) {
-                const uploadFormData = new FormData();
-                uploadFormData.append('file', enclosureImageFile);
-                const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
-                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
-                });
-                payload.imageUrl = res.data.imageUrl;
-            }
-
-            if (editingEnclosureId) {
-                await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, payload,
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-            } else {
-                await axios.post(`${API_BASE_URL}/enclosures`, payload,
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-            }
-            handleCloseEnclosureModal(); // Close and reset the modal on success
-            fetchEnclosures();
-        } catch (err) {
-            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save enclosure');
-        } finally { setEnclosureSaving(false); }
-    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, enclosureSaving, handleCloseEnclosureModal]);
 
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
