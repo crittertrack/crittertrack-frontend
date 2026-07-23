@@ -1084,13 +1084,12 @@ useEffect(() => {
                 await axios.post(`${API_BASE_URL}/enclosures`, payload,
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
             }
-            // Success: close the modal. The onClose handler will reset the form state.
             setShowEnclosureModal(false); // Close the modal on success
             fetchEnclosures();
         } catch (err) {
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save enclosure');
         } finally { setEnclosureSaving(false); }
-    }, [authToken, API_BASE_URL, enclosureSaving, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, setEnclosureSaving, setShowEnclosureModal]);
+    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, setEnclosureSaving, setShowEnclosureModal]);
 
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
@@ -1163,7 +1162,7 @@ useEffect(() => {
             setEditingEnclosureId(null);
         }
         setShowEnclosureModal(true);
-    }, [setEnclosureFormData, setEnclosureImagePreview, setEnclosureImageFile, setEditingEnclosureId, setShowEnclosureModal]);
+    }, [setShowEnclosureModal]);
 
     const handleEnclosureSpeciesLabelAdd = useCallback(() => {
         if (!newEnclosureSpeciesLabel.trim()) return;
