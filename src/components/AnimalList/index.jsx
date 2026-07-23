@@ -3,7 +3,7 @@ import axios from 'axios';
 import NotificationBar from '../Notifications/NotificationBar';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
-import EnclosureDetailModal from './EnclosureDetailModal';
+import EnclosureDetailModal from '../EnclosureDetailModal';
 import EnclosureModal from '../EnclosureModal';
 import AnimalImage from '../shared/AnimalImage';
 import {
