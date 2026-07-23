@@ -101,7 +101,6 @@ const BreedingLineManagerModal = ({ lines, onClose, onClearLine }) => {
     );
 };
 
-﻿
 // -- Decode JWT payload to get a stable per-user key for localStorage scoping --
 const getUserKey = (token) => {
     try {
