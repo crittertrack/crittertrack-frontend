@@ -1055,16 +1055,6 @@ useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showDuplicatesScreen]);
 
-    const fetchEnclosures = useCallback(async () => {
-        try {
-            const res = await axios.get(`${API_BASE_URL}/enclosures`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            setEnclosures(res.data);
-        } catch (err) { console.error('[fetchEnclosures]', err); }
-    }, [authToken]);
-    useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
-
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
         setSuppliesLoading(true);
