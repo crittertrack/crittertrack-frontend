@@ -616,22 +616,24 @@ const handleArchive = useCallback(async (animalToArchive) => {
     }, [authToken, API_BASE_URL]);
     
     const handleSaveEnclosure = useCallback(async () => {
-        // Snapshot all required state at the beginning of the function call.
-        // This prevents a race condition where the modal's premature `onClose` call
-        // resets the state before the async API call can use it.
-        const dataToSave = { ...enclosureFormData };
+         // Check saving state first to prevent multiple submissions
+        if (enclosureSaving) {
+            console.log('[AnimalList] handleSaveEnclosure: Already saving, returning.');
+            return;
+        }
+
+           // Set saving state immediately
+        setEnclosureSaving(true);
+        console.log('[AnimalList] handleSaveEnclosure called. Saving: true');
+          const dataToSave = { ...enclosureFormData };
         const imageFileToSave = enclosureImageFile;
         const enclosureIdToSave = editingEnclosureId;
-
-        console.log('[AnimalList] handleSaveEnclosure called. Saving:', enclosureSaving, 'Form Data:', dataToSave);
-        if (enclosureSaving) return;
         
         if (!dataToSave || !dataToSave.name || !dataToSave.name.trim()) {
             showModalMessageRef.current('Validation Error', 'Enclosure name cannot be empty.');
+            setEnclosureSaving(false); // Reset saving state if validation fails
             return;
         }
-        setEnclosureSaving(true);
-
         try {
             const payload = {
                 name: dataToSave.name.trim(),
@@ -661,16 +663,22 @@ const handleArchive = useCallback(async (animalToArchive) => {
                 cleaningTasks: dataToSave.cleaningTasks,
                 tags: dataToSave.tags,
                 speciesLabels: dataToSave.speciesLabels,
-                imageUrl: dataToSave.imageUrl,
+                imageUrl: dataToSave.imageUrl, // This will now be correct from handleEnclosureImageChange
             };
 
             if (imageFileToSave) {
+                // Only upload if there's a new file
                 const uploadFormData = new FormData();
                 uploadFormData.append('file', imageFileToSave);
                 const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
                     headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
                 });
                 payload.imageUrl = res.data.imageUrl;
+                console.log('[AnimalList] Image uploaded. New imageUrl:', payload.imageUrl); // Log the uploaded URL
+            } else if (enclosureImagePreview === null && dataToSave.imageUrl !== '') {
+                // If no new file, preview is null, but formData still has an imageUrl,
+                // it means the user removed the image. Clear it.
+                payload.imageUrl = '';
             }
 
             if (enclosureIdToSave) {
@@ -2718,7 +2726,15 @@ useEffect(() => {
         const file = e.target.files[0];
         if (file) {
             setEnclosureImageFile(file);
-            setEnclosureImagePreview(URL.createObjectURL(file));
+            const previewUrl = URL.createObjectURL(file);
+            setEnclosureImagePreview(previewUrl);
+            // Update imageUrl in form data so it's correctly reflected in the payload if no new upload occurs
+            setEnclosureFormData(prev => ({ ...prev, imageUrl: previewUrl }));
+        }
+        else {
+            setEnclosureImageFile(null);
+            setEnclosureImagePreview(null);
+            setEnclosureFormData(prev => ({ ...prev, imageUrl: '' })); // Clear imageUrl in form data
         }
     };
 
