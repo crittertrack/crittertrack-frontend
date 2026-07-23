@@ -120,7 +120,20 @@ const EnclosureModal = ({
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Dimensions</label>
-                                <input type="text" value={enclosureFormData.dimensions} onChange={e => setEnclosureFormData(p => ({ ...p, dimensions: e.target.value }))} placeholder="e.g. 40 gallon, 48x24x24" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                <div className="grid grid-cols-4 gap-2">
+                                    <input type="number" value={enclosureFormData.length} onChange={e => setEnclosureFormData(p => ({ ...p, length: e.target.value }))} placeholder="L" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    <input type="number" value={enclosureFormData.width} onChange={e => setEnclosureFormData(p => ({ ...p, width: e.target.value }))} placeholder="W" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    <input type="number" value={enclosureFormData.height} onChange={e => setEnclosureFormData(p => ({ ...p, height: e.target.value }))} placeholder="H" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    <select
+                                        value={enclosureFormData.dimensionsUnit || 'in'}
+                                        onChange={e => setEnclosureFormData(p => ({ ...p, dimensionsUnit: e.target.value }))}
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface"
+                                    >
+                                        <option value="in">in</option>
+                                        <option value="cm">cm</option>
+                                        <option value="m">m</option>
+                                    </select>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Capacity</label>
@@ -132,14 +145,21 @@ const EnclosureModal = ({
                     <div className="sm:col-span-2 pt-2">
                         <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text border-b pb-1 mb-2">Environment</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="flex gap-2">
-                                <div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="col-span-1">
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Temp Min</label>
                                     <input type="number" value={enclosureFormData.tempMin} onChange={e => setEnclosureFormData(p => ({ ...p, tempMin: e.target.value }))} placeholder="e.g. 22" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
                                 </div>
-                                <div>
+                                <div className="col-span-1">
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Temp Max</label>
                                     <input type="number" value={enclosureFormData.tempMax} onChange={e => setEnclosureFormData(p => ({ ...p, tempMax: e.target.value }))} placeholder="e.g. 28" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                </div>
+                                <div className="col-span-1">
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Unit</label>
+                                    <select value={enclosureFormData.temperatureUnit || 'C'} onChange={e => setEnclosureFormData(p => ({ ...p, temperatureUnit: e.target.value }))} className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
+                                        <option value="C">°C</option>
+                                        <option value="F">°F</option>
+                                    </select>
                                 </div>
                             </div>
                             <div className="flex gap-2">
@@ -153,8 +173,17 @@ const EnclosureModal = ({
                                 </div>
                             </div>
                             <div className="sm:col-span-2">
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Lighting Schedule</label>
-                                <input type="text" value={enclosureFormData.lightingSchedule} onChange={e => setEnclosureFormData(p => ({ ...p, lightingSchedule: e.target.value }))} placeholder="e.g. 12h on / 12h off" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="block text-xs font-medium text-gray-600">Lights On/Off Time</label>
+                                    <div className="flex items-center gap-1 text-xs">
+                                        <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, lightTimeFormat: '12h' }))} className={`px-2 py-0.5 rounded ${enclosureFormData.lightTimeFormat === '12h' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>12h</button>
+                                        <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, lightTimeFormat: '24h' }))} className={`px-2 py-0.5 rounded ${enclosureFormData.lightTimeFormat === '24h' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>24h</button>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <input type="time" value={enclosureFormData.lightsOnTime} onChange={e => setEnclosureFormData(p => ({ ...p, lightsOnTime: e.target.value }))} className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    <input type="time" value={enclosureFormData.lightsOffTime} onChange={e => setEnclosureFormData(p => ({ ...p, lightsOffTime: e.target.value }))} className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -273,11 +273,25 @@ const EnclosureDetailModal = ({
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Dimensions</span>
-                                            <span className="text-gray-800 dark:text-dark-text">{enclosure.dimensions || enclosure.size || '—'}</span>
+                                            <span className="text-gray-800 dark:text-dark-text">
+                                                {(() => {
+                                                    const dims = enclosure.dimensions || enclosure.size;
+                                                    if (typeof dims === 'object' && dims !== null) {
+                                                        return `${dims.length || '?'}x${dims.width || '?'}x${dims.height || '?'} ${dims.unit || ''}`;
+                                                    }
+                                                    return dims || '—';
+                                                })()}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Lighting</span>
-                                            <span className="text-gray-800 dark:text-dark-text">{enclosure.lightingSchedule || enclosure.lighting || '—'}</span>
+                                               <span className="text-gray-800 dark:text-dark-text">
+                                                {enclosure.lightsOnTime && enclosure.lightsOffTime ? (
+                                                    enclosure.lightTimeFormat === '12h'
+                                                        ? `${new Date('1970-01-01T' + enclosure.lightsOnTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${new Date('1970-01-01T' + enclosure.lightsOffTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
+                                                        : `${enclosure.lightsOnTime} - ${enclosure.lightsOffTime}`
+                                                ) : (enclosure.lightingSchedule || enclosure.lighting || '—')}
+                                                </span>
                                         </div>
                                     </div>
                                 </div>
@@ -423,7 +437,9 @@ const EnclosureDetailModal = ({
                                     <Lightbulb size={14} /> Lighting Schedule
                                 </h4>
                                 <p className="text-sm text-gray-700 dark:text-dark-text">
-                                    {enclosure.lightingSchedule || enclosure.lighting || 'Not specified'}
+                                    {enclosure.lightsOnTime && enclosure.lightsOffTime
+                                        ? `On at ${enclosure.lightsOnTime}, Off at ${enclosure.lightsOffTime}`
+                                        : (enclosure.lightingSchedule || enclosure.lighting || 'Not specified')}
                                 </p>
                             </div>
 

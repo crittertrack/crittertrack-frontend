@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import {
-    Home, Search, PlusCircle, X, Loader2, Edit, Trash2, Cat, MapPin,
+    Home, Search, PlusCircle, X, Loader2, Edit, Trash2, Cat, MapPin, LampCeiling,
     Thermometer, Droplets, Calendar, CheckCircle, AlertCircle, RefreshCw,
     ChevronDown, ChevronUp, BarChart2, Users, Wrench, MessageSquare, Clock,
     Settings, Archive, ArrowUpDown, Sparkles
@@ -28,9 +28,9 @@ const EnclosuresPage = ({
     const [showEnclosureModal, setShowEnclosureModal] = useState(false);
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
     const [enclosureFormData, setEnclosureFormData] = useState({
-        name: '', enclosureType: '', location: '', capacity: '', dimensions: '',
-        purpose: 'general', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '',
-        lightingSchedule: '', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+        name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+        purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+        lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
         cleaningTasks: []
     });
     const [enclosureSaving, setEnclosureSaving] = useState(false);
@@ -98,9 +98,9 @@ const EnclosuresPage = ({
     const handleOpenCreate = () => {
         setEditingEnclosureId(null);
         setEnclosureFormData({
-            name: '', enclosureType: '', location: '', capacity: '', dimensions: '',
-            purpose: 'general', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '',
-            lightingSchedule: '', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+            name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+            purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+            lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
             cleaningTasks: []
         });
         setEnclosureImageFile(null);
@@ -111,18 +111,29 @@ const EnclosuresPage = ({
     // Open edit modal
     const handleOpenEdit = (enclosure) => {
         setEditingEnclosureId(enclosure._id || enclosure.id);
+        const dims = enclosure.dimensions || enclosure.size;
+        let length = '', width = '', height = '', dimensionsUnit = 'in';
+        if (typeof dims === 'object' && dims !== null) {
+            length = dims.length || '';
+            width = dims.width || '';
+            height = dims.height || '';
+            dimensionsUnit = dims.unit || 'in';
+        }
         setEnclosureFormData({
             name: enclosure.name || '',
             enclosureType: enclosure.enclosureType || enclosure.roomType || '',
             purpose: enclosure.purpose || 'general',
             location: enclosure.location || '',
             capacity: enclosure.capacity || '',
-            dimensions: enclosure.dimensions || enclosure.size || '',
+            length, width, height, dimensionsUnit,
             tempMin: enclosure.tempMin ?? enclosure.temperatureRange?.min ?? '',
             tempMax: enclosure.tempMax ?? enclosure.temperatureRange?.max ?? '',
+            temperatureUnit: enclosure.temperatureUnit || 'C',
             humidityMin: enclosure.humidityMin ?? enclosure.humidityRange?.min ?? '',
             humidityMax: enclosure.humidityMax ?? enclosure.humidityRange?.max ?? '',
-            lightingSchedule: enclosure.lightingSchedule || enclosure.lighting || '',
+            lightsOnTime: enclosure.lightsOnTime || '',
+            lightsOffTime: enclosure.lightsOffTime || '',
+            lightTimeFormat: enclosure.lightTimeFormat || '24h',
             notes: enclosure.notes || enclosure.description || '',
             imageUrl: enclosure.imageUrl || '',
             tags: enclosure.tags || [],
@@ -147,8 +158,21 @@ const EnclosuresPage = ({
                 enclosureType: enclosureFormData.enclosureType.trim(),
                 purpose: enclosureFormData.purpose,
                 location: enclosureFormData.location.trim(),
-                size: enclosureFormData.dimensions.trim(),
+                dimensions: {
+                    length: enclosureFormData.length ? Number(enclosureFormData.length) : null,
+                    width: enclosureFormData.width ? Number(enclosureFormData.width) : null,
+                    height: enclosureFormData.height ? Number(enclosureFormData.height) : null,
+                    unit: enclosureFormData.dimensionsUnit
+                },
                 capacity: enclosureFormData.capacity ? Number(enclosureFormData.capacity) : undefined,
+                tempMin: enclosureFormData.tempMin ? Number(enclosureFormData.tempMin) : null,
+                tempMax: enclosureFormData.tempMax ? Number(enclosureFormData.tempMax) : null,
+                temperatureUnit: enclosureFormData.temperatureUnit,
+                humidityMin: enclosureFormData.humidityMin ? Number(enclosureFormData.humidityMin) : null,
+                humidityMax: enclosureFormData.humidityMax ? Number(enclosureFormData.humidityMax) : null,
+                lightsOnTime: enclosureFormData.lightsOnTime,
+                lightsOffTime: enclosureFormData.lightsOffTime,
+                lightTimeFormat: enclosureFormData.lightTimeFormat,
                 notes: enclosureFormData.notes.trim(),
                 cleaningTasks: enclosureFormData.cleaningTasks,
                 tags: enclosureFormData.tags,
@@ -403,7 +427,7 @@ const EnclosuresPage = ({
                     {filteredEnclosures.map(enclosure => (
                         <div
                             key={enclosure._id || enclosure.id}
-                            className="bg-white dark:bg-dark-surface rounded-xl shadow-sm border border-gray-100 dark:border-dark-border overflow-hidden hover:shadow-md transition-shadow group"
+                            className="bg-white dark:bg-dark-surface rounded-xl shadow-sm border border-gray-100 dark:border-dark-border overflow-hidden hover:shadow-md transition-shadow group flex flex-col"
                         >
                             {/* Card Image */}
                             <div
@@ -417,26 +441,18 @@ const EnclosuresPage = ({
                                         <Home size={40} className="text-gray-300 dark:text-dark-text-muted" />
                                     </div>
                                 )}
-                                {/* Status Pill */}
-                                <div className={`absolute top-2 right-2 px-2.5 py-0.5 rounded-full text-[11px] font-semibold shadow-sm ${
-                                    enclosure.isOccupied
-                                        ? 'bg-green-100 text-green-800 border border-green-200'
-                                        : 'bg-gray-100 text-gray-600 border border-gray-200'
-                                }`}>
-                                    {enclosure.isOccupied ? 'Occupied' : 'Empty'}
-                                </div>
                                 {/* Quick Actions */}
                                 <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleOpenEdit(enclosure); }}
-                                        className="p-1.5 bg-white/90 rounded-lg hover:bg-white shadow-sm text-gray-700"
+                                        className="p-1.5 bg-white/90 dark:bg-dark-surface/90 rounded-lg hover:bg-white dark:hover:bg-dark-surface shadow-sm text-gray-700 dark:text-dark-text"
                                         title="Edit"
                                     >
                                         <Edit size={14} />
                                     </button>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleMarkCleaned(enclosure); }}
-                                        className="p-1.5 bg-white/90 rounded-lg hover:bg-white shadow-sm text-green-700"
+                                        className="p-1.5 bg-white/90 dark:bg-dark-surface/90 rounded-lg hover:bg-white dark:hover:bg-dark-surface shadow-sm text-green-700 dark:text-green-400"
                                         title="Mark Cleaned"
                                     >
                                         <CheckCircle size={14} />
@@ -444,85 +460,74 @@ const EnclosuresPage = ({
                                 </div>
                             </div>
 
-                            {/* Card Body */}
-                            <div className="p-3 cursor-pointer" onClick={() => handleOpenDetail(enclosure)}>
-                                {/* Name */}
-                                <h3 className="font-semibold text-gray-800 dark:text-dark-text text-sm truncate">{enclosure.name}</h3>
-                                
-                                {/* Type & Location */}
-                                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-dark-text-muted mt-1">
-                                    {enclosure.enclosureType && (
-                                        <span className="flex items-center gap-1">
-                                            <Settings size={12} />
-                                            {enclosure.enclosureType}
-                                        </span>
-                                    )}
+                            <div className="p-3 cursor-pointer flex-grow flex flex-col" onClick={() => handleOpenDetail(enclosure)}>
+                                <div className="flex justify-between items-start mb-1">
+                                    <h3 className="font-semibold text-gray-800 dark:text-dark-text text-sm truncate pr-2">{enclosure.name}</h3>
+                                    <div className={`px-2 py-0.5 rounded-full text-[10px] font-semibold shadow-sm whitespace-nowrap ${
+                                        enclosure.isOccupied
+                                            ? 'bg-green-100 text-green-800 border border-green-200'
+                                            : 'bg-gray-100 text-gray-600 border border-gray-200'
+                                    }`}>
+                                        {enclosure.isOccupied ? 'Occupied' : 'Empty'}
+                                    </div>
+                                </div>
+
+                                <div className="text-xs text-gray-500 dark:text-dark-text-muted space-y-0.5">
+                                    {(() => {
+                                        const dimString = formatDimensions(enclosure.dimensions, enclosure.size);
+                                        return (enclosure.enclosureType || dimString) && (
+                                        <div className="flex items-center gap-2">
+                                            {enclosure.enclosureType && <span className="flex items-center gap-1"><Settings size={12} /> {enclosure.enclosureType}</span>}
+                                            {dimString && <span className="text-gray-400">•</span>}
+                                            {dimString && <span className="flex items-center gap-1">{dimString}</span>}
+                                        </div>
+                                    )})()}
                                     {enclosure.location && (
-                                        <span className="flex items-center gap-1">
-                                            <MapPin size={12} />
-                                            {enclosure.location}
-                                        </span>
+                                        <div className="flex items-center gap-1">
+                                            <MapPin size={12} /> {enclosure.location}
+                                        </div>
                                     )}
                                 </div>
 
-                                {/* Occupancy Bar */}
-                                <div className="mt-2.5">
-                                    <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-gray-500 dark:text-dark-text-muted">
-                                            <Cat size={12} className="inline mr-0.5" />
-                                            {enclosure.currentAnimals}/{enclosure.capacity || '∞'}
-                                        </span>
-                                        <span className={`font-semibold ${
-                                            enclosure.occupancyPct > 90 ? 'text-red-600' :
-                                            enclosure.occupancyPct > 70 ? 'text-yellow-600' :
-                                            'text-green-600'
-                                        }`}>
-                                            {enclosure.occupancyPct}%
-                                        </span>
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 text-xs text-gray-600 dark:text-dark-text-muted">
+                                    <div className="flex items-center gap-1" title="Occupancy">
+                                        <Cat size={14} className="text-gray-400" />
+                                        <span className="font-medium text-gray-800 dark:text-dark-text">{enclosure.currentAnimals} / {enclosure.capacity || '∞'}</span>
                                     </div>
-                                    <div className="w-full h-1.5 bg-gray-100 dark:bg-dark-border rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full transition-all ${
-                                                enclosure.occupancyPct > 90 ? 'bg-red-500' :
-                                                enclosure.occupancyPct > 70 ? 'bg-yellow-500' :
-                                                'bg-green-500'
-                                            }`}
-                                            style={{ width: `${Math.min(enclosure.occupancyPct, 100)}%` }}
-                                        />
+                                    <div className="flex items-center gap-1" title="Occupancy Percentage">
+                                        <BarChart2 size={14} className="text-gray-400" />
+                                        <span className={`font-medium ${enclosure.occupancyPct > 90 ? 'text-red-600' : enclosure.occupancyPct > 70 ? 'text-yellow-600' : 'text-green-600'}`}>{enclosure.occupancyPct}%</span>
                                     </div>
-                                </div>
-
-                                {/* Environment Info */}
-                                <div className="flex items-center gap-3 mt-2.5 text-[11px] text-gray-400 dark:text-dark-text-muted">
                                     {(enclosure.tempMin || enclosure.tempMax) && (
-                                        <span className="flex items-center gap-0.5">
-                                            <Thermometer size={10} />
-                                            {enclosure.tempMin || '?'} - {enclosure.tempMax || '?'}°
-                                        </span>
+                                        <div className="flex items-center gap-1" title="Temperature">
+                                            <Thermometer size={14} className="text-gray-400" />
+                                            <span className="font-medium text-gray-800 dark:text-dark-text">{enclosure.tempMin || '?'} - {enclosure.tempMax || '?'}°{enclosure.temperatureUnit || 'C'}</span>
+                                        </div>
                                     )}
                                     {(enclosure.humidityMin || enclosure.humidityMax) && (
-                                        <span className="flex items-center gap-0.5">
-                                            <Droplets size={10} />
-                                            {enclosure.humidityMin || '?'} - {enclosure.humidityMax || '?'}%
-                                        </span>
+                                        <div className="flex items-center gap-1" title="Humidity">
+                                            <Droplets size={14} className="text-gray-400" />
+                                            <span className="font-medium text-gray-800 dark:text-dark-text">{enclosure.humidityMin || '?'} - {enclosure.humidityMax || '?'}%</span>
+                                        </div>
+                                    )}
+                                    {(enclosure.lightsOnTime || enclosure.lightsOffTime) && (
+                                        <div className="flex items-center gap-1" title="Lighting Schedule">
+                                            <LampCeiling size={14} className="text-gray-400" />
+                                            <span className="font-medium text-gray-800 dark:text-dark-text">
+                                                {enclosure.lightTimeFormat === '12h' ? `${formatTime12h(enclosure.lightsOnTime)} - ${formatTime12h(enclosure.lightsOffTime)}` : `${enclosure.lightsOnTime || '...'} - ${enclosure.lightsOffTime || '...'}`}
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
 
-                                {/* Cleaning Status */}
-                                {enclosure.lastCleaned && (
-                                    <div className="flex items-center gap-1 mt-2 text-[11px] text-gray-400 dark:text-dark-text-muted">
-                                        <Calendar size={10} />
-                                        Last cleaned: {formatDate(enclosure.lastCleaned)}
-                                    </div>
-                                )}
-
-                                {/* Overdue Tasks Warning */}
-                                {enclosure.overdueTasks && enclosure.overdueTasks.length > 0 && (
-                                    <div className="mt-2 flex items-center gap-1 text-[11px] text-red-500 bg-red-50 dark:bg-red-900/20 rounded px-1.5 py-0.5">
-                                        <AlertCircle size={10} />
-                                        {enclosure.overdueTasks.length} maintenance task{enclosure.overdueTasks.length > 1 ? 's' : ''} due
-                                    </div>
-                                )}
+                                <div className="mt-auto pt-3 space-y-1">
+                                    {enclosure.overdueTasks && enclosure.overdueTasks.length > 0 && (
+                                        <div className="flex items-center gap-1.5 text-xs text-red-600 bg-red-50 dark:bg-red-900/20 rounded-md px-2 py-1">
+                                            <AlertCircle size={14} />
+                                            <span className="font-medium">{enclosure.overdueTasks.length} maintenance task{enclosure.overdueTasks.length > 1 ? 's' : ''} due</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

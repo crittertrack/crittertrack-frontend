@@ -539,7 +539,12 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [reproEncFormVisible, setReproEncFormVisible] = useState(false);
     const [healthEncFormVisible, setHealthEncFormVisible] = useState(false);
-    const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'general', imageUrl: '' });
+    const [enclosureFormData, setEnclosureFormData] = useState({
+        name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+        purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+        lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+        cleaningTasks: []
+    });
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
     const [newEnclosureTag, setNewEnclosureTag] = useState('');
     const [newEnclosureSpeciesLabel, setNewEnclosureSpeciesLabel] = useState('');
@@ -1008,29 +1013,58 @@ useEffect(() => {
     const handleSaveEnclosure = useCallback(async () => {
         if (enclosureSaving || !enclosureFormData.name.trim()) return;
         setEnclosureSaving(true);
-        
-        const dataToSave = { ...enclosureFormData };
 
-        try { // Image upload logic
+        try {
+            const payload = {
+                name: enclosureFormData.name.trim(),
+                enclosureType: enclosureFormData.enclosureType.trim(),
+                purpose: enclosureFormData.purpose,
+                location: enclosureFormData.location.trim(),
+                dimensions: {
+                    length: enclosureFormData.length ? Number(enclosureFormData.length) : null,
+                    width: enclosureFormData.width ? Number(enclosureFormData.width) : null,
+                    height: enclosureFormData.height ? Number(enclosureFormData.height) : null,
+                    unit: enclosureFormData.dimensionsUnit
+                },
+                capacity: enclosureFormData.capacity ? Number(enclosureFormData.capacity) : undefined,
+                tempMin: enclosureFormData.tempMin ? Number(enclosureFormData.tempMin) : null,
+                tempMax: enclosureFormData.tempMax ? Number(enclosureFormData.tempMax) : null,
+                temperatureUnit: enclosureFormData.temperatureUnit,
+                humidityMin: enclosureFormData.humidityMin ? Number(enclosureFormData.humidityMin) : null,
+                humidityMax: enclosureFormData.humidityMax ? Number(enclosureFormData.humidityMax) : null,
+                lightsOnTime: enclosureFormData.lightsOnTime,
+                lightsOffTime: enclosureFormData.lightsOffTime,
+                lightTimeFormat: enclosureFormData.lightTimeFormat,
+                notes: enclosureFormData.notes.trim(),
+                cleaningTasks: enclosureFormData.cleaningTasks,
+                tags: enclosureFormData.tags,
+                speciesLabels: enclosureFormData.speciesLabels,
+            };
+
             if (enclosureImageFile) {
                 const uploadFormData = new FormData();
                 uploadFormData.append('file', enclosureImageFile);
                 const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
                     headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
                 });
-                dataToSave.imageUrl = res.data.imageUrl;
+                payload.imageUrl = res.data.imageUrl;
             }
 
             if (editingEnclosureId) {
-                await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, dataToSave,
+                await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, payload,
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
             } else {
-                await axios.post(`${API_BASE_URL}/enclosures`, dataToSave,
+                await axios.post(`${API_BASE_URL}/enclosures`, payload,
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
             }
             setEditingEnclosureId(null);
             setShowEnclosureModal(false); // Close the modal on success
-            setEnclosureFormData({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'general', imageUrl: '' });
+            setEnclosureFormData({
+                name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+                purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+                lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+                cleaningTasks: []
+            });
             setEnclosureImageFile(null);
             setEnclosureImagePreview(null);
             fetchEnclosures();
@@ -1065,23 +1099,34 @@ useEffect(() => {
     const openEnclosureModal = useCallback((enclosure) => {
         if (enclosure) {
             // Edit mode
+            const dims = enclosure.dimensions || enclosure.size;
+            let length = '', width = '', height = '', dimensionsUnit = 'in';
+            if (typeof dims === 'object' && dims !== null) {
+                length = dims.length || '';
+                width = dims.width || '';
+                height = dims.height || '';
+                dimensionsUnit = dims.unit || 'in';
+            }
             setEnclosureFormData({
                 name: enclosure.name || '',
-                enclosureType: enclosure.enclosureType || '',
+                enclosureType: enclosure.enclosureType || enclosure.roomType || '',
+                purpose: enclosure.purpose || 'general',
                 location: enclosure.location || '',
-                dimensions: enclosure.dimensions || enclosure.size || '',
                 capacity: enclosure.capacity || '',
-                tempMin: enclosure.tempMin || '',
-                tempMax: enclosure.tempMax || '',
-                humidityMin: enclosure.humidityMin || '',
-                humidityMax: enclosure.humidityMax || '',
-                lightingSchedule: enclosure.lightingSchedule || '',
-                notes: enclosure.notes || '',
+                length, width, height, dimensionsUnit,
+                tempMin: enclosure.tempMin ?? enclosure.temperatureRange?.min ?? '',
+                tempMax: enclosure.tempMax ?? enclosure.temperatureRange?.max ?? '',
+                temperatureUnit: enclosure.temperatureUnit || 'C',
+                humidityMin: enclosure.humidityMin ?? enclosure.humidityRange?.min ?? '',
+                humidityMax: enclosure.humidityMax ?? enclosure.humidityRange?.max ?? '',
+                lightsOnTime: enclosure.lightsOnTime || '',
+                lightsOffTime: enclosure.lightsOffTime || '',
+                lightTimeFormat: enclosure.lightTimeFormat || '24h',
+                notes: enclosure.notes || enclosure.description || '',
+                imageUrl: enclosure.imageUrl || '',
                 tags: enclosure.tags || [],
                 speciesLabels: enclosure.speciesLabels || [],
                 cleaningTasks: enclosure.cleaningTasks || [],
-                purpose: enclosure.purpose || 'general',
-                imageUrl: enclosure.imageUrl || ''
             });
             setEnclosureImagePreview(enclosure.imageUrl || null);
             setEnclosureImageFile(null);
@@ -1089,10 +1134,10 @@ useEffect(() => {
         } else {
             // Add new mode
             setEnclosureFormData({
-                name: '', enclosureType: '', location: '', dimensions: '', capacity: '',
-                tempMin: '', tempMax: '', humidityMin: '', humidityMax: '',
-                lightingSchedule: '', notes: '', tags: [], speciesLabels: [],
-                cleaningTasks: [], purpose: 'general', imageUrl: ''
+                name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+                purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+                lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+                cleaningTasks: []
             });
             setEnclosureImagePreview(null);
             setEnclosureImageFile(null);
