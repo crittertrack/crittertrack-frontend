@@ -637,29 +637,25 @@ const handleArchive = useCallback(async (animalToArchive) => {
         try {
             const payload = {
                 name: dataToSave.name.trim(),
-                enclosureType: dataToSave.enclosureType.trim(),
+                enclosureType: dataToSave.enclosureType?.trim(),
                 purpose: dataToSave.purpose,
-                location: dataToSave.location.trim(),
+                location: dataToSave.location?.trim(),
                 dimensions: {
                     length: dataToSave.length ? Number(dataToSave.length) : null,
                     width: dataToSave.width ? Number(dataToSave.width) : null,
                     height: dataToSave.height ? Number(dataToSave.height) : null,
-                    unit: dataToSave.dimensionsUnit
+                    unit: dataToSave.dimensionsUnit || 'in'
                 },
                 capacity: dataToSave.capacity ? Number(dataToSave.capacity) : undefined,
-                temperatureRange: {
-                    min: dataToSave.tempMin ? Number(dataToSave.tempMin) : null,
-                    max: dataToSave.tempMax ? Number(dataToSave.tempMax) : null,
-                },
-                temperatureUnit: dataToSave.temperatureUnit,
-                humidityRange: {
-                    min: dataToSave.humidityMin ? Number(dataToSave.humidityMin) : null,
-                    max: dataToSave.humidityMax ? Number(dataToSave.humidityMax) : null,
-                },
+                tempMin: dataToSave.tempMin ? Number(dataToSave.tempMin) : null,
+                tempMax: dataToSave.tempMax ? Number(dataToSave.tempMax) : null,
+                temperatureUnit: dataToSave.temperatureUnit || 'C',
+                humidityMin: dataToSave.humidityMin ? Number(dataToSave.humidityMin) : null,
+                humidityMax: dataToSave.humidityMax ? Number(dataToSave.humidityMax) : null,
                 lightsOnTime: dataToSave.lightsOnTime,
                 lightsOffTime: dataToSave.lightsOffTime,
                 lightTimeFormat: dataToSave.lightTimeFormat,
-                notes: dataToSave.notes.trim(),
+                notes: dataToSave.notes?.trim(),
                 cleaningTasks: dataToSave.cleaningTasks,
                 tags: dataToSave.tags,
                 speciesLabels: dataToSave.speciesLabels,
@@ -670,11 +666,13 @@ const handleArchive = useCallback(async (animalToArchive) => {
                 // Only upload if there's a new file
                 const uploadFormData = new FormData();
                 uploadFormData.append('file', imageFileToSave);
+                uploadFormData.append('type', 'enclosure'); // Add type for backend processing
                 const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
                     headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
                 });
-                payload.imageUrl = res.data.imageUrl;
-                console.log('[AnimalList] Image uploaded. New imageUrl:', payload.imageUrl); // Log the uploaded URL
+                console.log('[AnimalList] Image upload response data:', res.data); // Log the full response data for debugging
+                payload.imageUrl = res.data.url; // Use 'url' to be consistent with other uploads
+                console.log('[AnimalList] Image uploaded. New imageUrl (from response):', payload.imageUrl); // Log the updated URL
             } else if (enclosureImagePreview === null && dataToSave.imageUrl !== '') {
                 // If no new file, preview is null, but formData still has an imageUrl,
                 // it means the user removed the image. Clear it.
