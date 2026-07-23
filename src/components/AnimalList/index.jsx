@@ -2782,62 +2782,84 @@ useEffect(() => {
             const capacity = parseInt(enclosure.capacity, 10);
             const occupancyPercentage = capacity > 0 ? (occupants.length / capacity) * 100 : 0;
 
-            const lastCleaned = (enclosure.cleaningTasks || [])
-                .map(t => t.lastDoneDate)
-                .filter(Boolean)
-                .sort((a, b) => new Date(b) - new Date(a))[0];
-
             const tempRange = (enclosure.tempMin != null && enclosure.tempMax != null)
-                ? `${enclosure.tempMin}° - ${enclosure.tempMax}°`
-                : 'N/A';
+                ? `${enclosure.tempMin}° - ${enclosure.tempMax}°${enclosure.temperatureUnit || 'C'}`
+                : null;
 
             const humidityRange = (enclosure.humidityMin != null && enclosure.humidityMax != null)
                 ? `${enclosure.humidityMin}% - ${enclosure.humidityMax}%`
-                : 'N/A';
+                : null;
+            
+            const lightSchedule = (enclosure.lightsOnTime && enclosure.lightsOffTime)
+                ? `${formatTime12h(enclosure.lightsOnTime)} - ${formatTime12h(enclosure.lightsOffTime)}`
+                : null;
 
+            const dimensions = formatDimensions(enclosure.dimensions, enclosure.size);
 
             const needsCleaning = (enclosure.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
 
             return (
                 <div 
-                    className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+                    className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer flex flex-col"
                     onClick={() => handleOpenDetail(enclosure)}
                 >
-                    {/* Banner Image - Placeholder */}
-                    <div className="h-32 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center">
+                    {/* Banner Image */}
+                    <div className="h-28 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center relative">
                         {enclosure.imageUrl ? (
                             <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" />
                         ) : (
-                            <Home size={48} className="text-gray-400 dark:text-dark-text-muted" />
+                            <Home size={40} className="text-gray-400 dark:text-dark-text-muted" />
                         )}
+                        <span className={`absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-dark-surface-hover dark:text-dark-text-secondary'}`}>
+                            {occupancyStatus}
+                        </span>
                     </div>
-                    <div className="p-4">
-                        <div className="flex justify-between items-start">
-                            <h3 className="font-bold text-lg text-gray-800 dark:text-dark-text">{enclosure.name}</h3>
-                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-dark-surface-hover dark:text-dark-text-secondary'}`} onClick={(e) => { e.stopPropagation(); openEnclosureModal(enclosure); }}>
-                                {occupancyStatus}
-                            </span>
-                        </div>
-                        <p className="text-sm text-gray-500 dark:text-dark-text-secondary">{enclosure.enclosureType || 'N/A'}</p>
+                    
+                    <div className="p-3 flex-grow flex flex-col">
+                        {/* Name */}
+                        <h3 className="font-bold text-base text-gray-800 dark:text-dark-text truncate">{enclosure.name}</h3>
                         
-                        <div className="mt-4 space-y-2 text-xs text-gray-600 dark:text-dark-text-secondary">
-                            <div className="flex justify-between items-center">
-                                <span>Occupancy:</span>
-                                <div className="flex items-center gap-2">
-                                    <span className="font-medium text-gray-800 dark:text-dark-text">{occupants.length}{capacity > 0 ? ` / ${capacity}`: ''}</span>
-                                    {capacity > 0 && (
-                                        <div className="w-12 bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
-                                            <div className="bg-green-600 h-1.5 rounded-full" style={{ width: `${Math.min(occupancyPercentage, 100)}%` }}></div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="flex justify-between"><span>Temperature:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{tempRange}</span></div>
-                            <div className="flex justify-between"><span>Humidity:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{humidityRange}</span></div>
-                            <div className="flex justify-between"><span>Last Cleaned:</span> <span className="font-medium text-gray-800 dark:text-dark-text">{lastCleaned ? formatDateShort(lastCleaned) : 'N/A'}</span></div>
+                        {/* Type, Size, Location */}
+                        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                            {enclosure.enclosureType && <span className="flex items-center gap-1"><Package size={12} /> {enclosure.enclosureType}</span>}
+                            {dimensions && <span className="flex items-center gap-1"><Wrench size={12} /> {dimensions}</span>}
+                            {enclosure.location && <span className="flex items-center gap-1"><MapPin size={12} /> {enclosure.location}</span>}
                         </div>
 
-                        <div className="mt-4 flex flex-wrap gap-2">
+                        {/* Stats Row */}
+                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-border grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
+                            <div className="flex items-center gap-1.5" title="Animals Housed">
+                                <Cat size={14} className="text-gray-400" />
+                                <span className="font-medium text-gray-700 dark:text-dark-text">{occupants.length} {occupants.length === 1 ? 'Animal' : 'Animals'}</span>
+                            </div>
+                            {capacity > 0 && (
+                                <div className="flex items-center gap-1.5" title="Occupancy Percentage">
+                                    <BarChart2 size={14} className="text-gray-400" />
+                                    <span className="font-medium text-gray-700 dark:text-dark-text">{occupancyPercentage.toFixed(0)}% Full</span>
+                                </div>
+                            )}
+                            {tempRange && (
+                                <div className="flex items-center gap-1.5" title="Temperature Range">
+                                    <Thermometer size={14} className="text-gray-400" />
+                                    <span className="font-medium text-gray-700 dark:text-dark-text">{tempRange}</span>
+                                </div>
+                            )}
+                            {humidityRange && (
+                                <div className="flex items-center gap-1.5" title="Humidity Range">
+                                    <Droplet size={14} className="text-gray-400" />
+                                    <span className="font-medium text-gray-700 dark:text-dark-text">{humidityRange}</span>
+                                </div>
+                            )}
+                            {lightSchedule && (
+                                <div className="flex items-center gap-1.5" title="Lighting Schedule">
+                                    <LampCeiling size={14} className="text-gray-400" />
+                                    <span className="font-medium text-gray-700 dark:text-dark-text">{lightSchedule}</span>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Warnings */}
+                        <div className="mt-auto pt-2 flex flex-wrap gap-2">
                             {needsCleaning && (
                                 <span className="flex items-center gap-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-1 rounded-full font-medium">
                                     <Wrench size={12} /> Needs Cleaning
