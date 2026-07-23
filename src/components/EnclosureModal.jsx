@@ -21,6 +21,7 @@ const EnclosureModal = ({
     handleEnclosureTagRemove,
     newEnclosureSpeciesLabel,
     setNewEnclosureSpeciesLabel,
+    allSpecies,
     handleEnclosureSpeciesLabelAdd,
     handleEnclosureSpeciesLabelRemove,
     newCleaningTaskName,
@@ -102,6 +103,18 @@ const EnclosureModal = ({
                                 <input type="text" value={enclosureFormData.enclosureType} onChange={e => setEnclosureFormData(p => ({ ...p, enclosureType: e.target.value }))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
                             </div>
                             <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Purpose</label>
+                                <select
+                                    value={enclosureFormData.purpose || 'general'}
+                                    onChange={e => setEnclosureFormData(p => ({ ...p, purpose: e.target.value }))}
+                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
+                                    <option value="general">General</option>
+                                    <option value="nursery">Nursery / Breeding</option>
+                                    <option value="quarantine">Quarantine</option>
+                                    <option value="isolation">Medical / Isolation</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Location</label>
                                 <input type="text" value={enclosureFormData.location} onChange={e => setEnclosureFormData(p => ({ ...p, location: e.target.value }))} placeholder="e.g. Reptile Room" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
                             </div>
@@ -169,8 +182,16 @@ const EnclosureModal = ({
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Suitable Species</label>
                                 <div className="flex items-center gap-2">
-                                    <input type="text" value={newEnclosureSpeciesLabel} onChange={e => setNewEnclosureSpeciesLabel(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleEnclosureSpeciesLabelAdd()} placeholder="Add species..." className="flex-1 p-2 text-sm border border-gray-300 rounded-lg" />
-                                    <button type="button" onClick={handleEnclosureSpeciesLabelAdd} className="px-3 py-2 text-sm bg-gray-200 rounded-lg">+</button>
+                                    <select
+                                        onChange={(e) => { handleEnclosureSpeciesLabelAdd(e.target.value); e.target.value = ''; }}
+                                        value=""
+                                        className="flex-1 p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface"
+                                    >
+                                        <option value="" disabled>Select a species to add...</option>
+                                        {(allSpecies || []).filter(s => !(enclosureFormData.speciesLabels || []).includes(s)).map(species => (
+                                            <option key={species} value={species}>{species}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="flex flex-wrap gap-1 mt-1.5">
                                     {enclosureFormData.speciesLabels.map(label => <span key={label} className="text-xs bg-gray-200 px-2 py-1 rounded-full flex items-center gap-1">{label} <button type="button" onClick={() => handleEnclosureSpeciesLabelRemove(label)} className="text-red-400 hover:text-red-600">x</button></span>)}

@@ -3,6 +3,7 @@ import axios from 'axios';
 import NotificationBar from '../Notifications/NotificationBar';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
+import EnclosureDetailModal from './EnclosureDetailModal';
 import EnclosureModal from '../EnclosureModal';
 import AnimalImage from '../shared/AnimalImage';
 import {
@@ -558,6 +559,12 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureSearch, setEnclosureSearch] = useState('');
     const [enclosureTypeFilter, setEnclosureTypeFilter] = useState('');
     const [enclosureStatusFilter, setEnclosureStatusFilter] = useState(''); // 'occupied' | 'empty'
+
+    // Enclosure Detail Modal State
+    const [selectedEnclosure, setSelectedEnclosure] = useState(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [enclosureAnimals, setEnclosureAnimals] = useState([]);
+    const [loadingAnimals, setLoadingAnimals] = useState(false);
     
     // Fetch archived + sold/transferred animals from API
     const fetchArchiveData = useCallback(async () => {
@@ -1008,7 +1015,7 @@ useEffect(() => {
         try { // Image upload logic
             if (enclosureImageFile) {
                 const uploadFormData = new FormData();
-                uploadFormData.append('image', enclosureImageFile);
+                uploadFormData.append('file', enclosureImageFile);
                 const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
                     headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
                 });
@@ -1104,6 +1111,25 @@ useEffect(() => {
     const handleEnclosureSpeciesLabelRemove = useCallback((labelToRemove) => {
         setEnclosureFormData(p => ({ ...p, speciesLabels: (p.speciesLabels || []).filter(l => l !== labelToRemove) }));
     }, []);
+
+    const handleOpenDetail = async (enclosure) => {
+        setSelectedEnclosure(enclosure);
+        setShowDetailModal(true);
+        setLoadingAnimals(true);
+        try {
+            const response = await axios.get(`${API_BASE_URL}/animals?enclosureId=${enclosure._id || enclosure.id}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setEnclosureAnimals(response.data || []);
+        } catch (err) {
+            console.error('Failed to fetch enclosure animals:', err);
+            setEnclosureAnimals([]);
+        } finally {
+            setLoadingAnimals(false);
+        }
+    };
+
+
 
     // Fetch user's custom species order on mount
     useEffect(() => {
@@ -2710,7 +2736,10 @@ useEffect(() => {
             const needsCleaning = (enclosure.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
 
             return (
-                <div className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer">
+                <div 
+                    className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+                    onClick={() => handleOpenDetail(enclosure)}
+                >
                     {/* Banner Image - Placeholder */}
                     <div className="h-32 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center">
                         {enclosure.imageUrl ? (
@@ -4926,9 +4955,25 @@ useEffect(() => {
                 enclosureImagePreview={enclosureImagePreview}
                 setEnclosureImagePreview={setEnclosureImagePreview}
                 newEnclosureTag={newEnclosureTag} setNewEnclosureTag={setNewEnclosureTag} handleEnclosureTagAdd={handleEnclosureTagAdd} handleEnclosureTagRemove={handleEnclosureTagRemove}
+                allSpecies={allUserSpecies}
                 newEnclosureSpeciesLabel={newEnclosureSpeciesLabel} setNewEnclosureSpeciesLabel={setNewEnclosureSpeciesLabel} handleEnclosureSpeciesLabelAdd={handleEnclosureSpeciesLabelAdd} handleEnclosureSpeciesLabelRemove={handleEnclosureSpeciesLabelRemove}
                 newCleaningTaskName={newCleaningTaskName} setNewCleaningTaskName={setNewCleaningTaskName} newCleaningTaskFreq={newCleaningTaskFreq} setNewCleaningTaskFreq={setNewCleaningTaskFreq}
             /> {/* This was the missing closing tag for the EnclosureModal component */}
+            {showDetailModal && selectedEnclosure && (
+                <EnclosureDetailModal
+                    isOpen={showDetailModal}
+                    onClose={() => { setShowDetailModal(false); setSelectedEnclosure(null); setEnclosureAnimals([]); }}
+                    enclosure={selectedEnclosure}
+                    animals={enclosureAnimals}
+                    loadingAnimals={loadingAnimals}
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    showModalMessage={showModalMessage}
+                    onRefresh={fetchEnclosures}
+                    onViewAnimal={onViewAnimal}
+                    onEditEnclosure={(enclosureToEdit) => { setShowDetailModal(false); openEnclosureModal(enclosureToEdit); }}
+                />
+            )}
             </div>
         </>
     );

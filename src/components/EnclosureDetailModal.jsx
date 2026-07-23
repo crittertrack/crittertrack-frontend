@@ -264,6 +264,10 @@ const EnclosureDetailModal = ({
                                             <span className="text-gray-800 dark:text-dark-text">{enclosure.enclosureType || '—'}</span>
                                         </div>
                                         <div className="flex justify-between">
+                                            <span className="text-gray-500 dark:text-dark-text-muted">Purpose</span>
+                                            <span className="text-gray-800 dark:text-dark-text capitalize">{enclosure.purpose || 'General'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Location</span>
                                             <span className="text-gray-800 dark:text-dark-text">{enclosure.location || '—'}</span>
                                         </div>
@@ -580,4 +584,3 @@ const EnclosureDetailModal = ({
 };
 
 export default EnclosureDetailModal;
-

@@ -29,7 +29,7 @@ const EnclosuresPage = ({
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
     const [enclosureFormData, setEnclosureFormData] = useState({
         name: '', enclosureType: '', location: '', capacity: '', dimensions: '',
-        tempMin: '', tempMax: '', humidityMin: '', humidityMax: '',
+        purpose: 'general', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '',
         lightingSchedule: '', notes: '', imageUrl: '', tags: [], speciesLabels: [],
         cleaningTasks: []
     });
@@ -46,6 +46,7 @@ const EnclosuresPage = ({
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [enclosureAnimals, setEnclosureAnimals] = useState([]);
     const [loadingAnimals, setLoadingAnimals] = useState(false);
+    const [allSpecies, setAllSpecies] = useState([]);
 
     // Fetch enclosures
     const fetchEnclosures = useCallback(async () => {
@@ -67,12 +68,29 @@ const EnclosuresPage = ({
         fetchEnclosures();
     }, [fetchEnclosures]);
 
+    useEffect(() => {
+        const fetchAllUserSpecies = async () => {
+            if (!authToken) return;
+            try {
+                const response = await axios.get(`${API_BASE_URL}/animals`, {
+                    headers: { Authorization: `Bearer ${authToken}` },
+                    params: { fields: 'species', limit: 5000 } // Get all species
+                });
+                const uniqueSpecies = [...new Set((response.data || []).map(a => a.species).filter(Boolean))].sort();
+                setAllSpecies(uniqueSpecies);
+            } catch (err) {
+                console.error('Failed to fetch user species list:', err);
+            }
+        };
+        fetchAllUserSpecies();
+    }, [authToken, API_BASE_URL]);
+
     // Open create modal
     const handleOpenCreate = () => {
         setEditingEnclosureId(null);
         setEnclosureFormData({
             name: '', enclosureType: '', location: '', capacity: '', dimensions: '',
-            tempMin: '', tempMax: '', humidityMin: '', humidityMax: '',
+            purpose: 'general', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '',
             lightingSchedule: '', notes: '', imageUrl: '', tags: [], speciesLabels: [],
             cleaningTasks: []
         });
@@ -87,6 +105,7 @@ const EnclosuresPage = ({
         setEnclosureFormData({
             name: enclosure.name || '',
             enclosureType: enclosure.enclosureType || enclosure.roomType || '',
+            purpose: enclosure.purpose || 'general',
             location: enclosure.location || '',
             capacity: enclosure.capacity || '',
             dimensions: enclosure.dimensions || enclosure.size || '',
@@ -117,6 +136,7 @@ const EnclosuresPage = ({
             const payload = {
                 name: enclosureFormData.name.trim(),
                 enclosureType: enclosureFormData.enclosureType.trim(),
+                purpose: enclosureFormData.purpose,
                 location: enclosureFormData.location.trim(),
                 size: enclosureFormData.dimensions.trim(),
                 capacity: enclosureFormData.capacity ? Number(enclosureFormData.capacity) : undefined,
@@ -209,10 +229,10 @@ const EnclosuresPage = ({
     const handleEnclosureTagRemove = (tag) => {
         setEnclosureFormData(p => ({ ...p, tags: (p.tags || []).filter(t => t !== tag) }));
     };
-    const handleEnclosureSpeciesLabelAdd = () => {
-        if (!newEnclosureSpeciesLabel.trim()) return;
-        setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), newEnclosureSpeciesLabel.trim()])] }));
-        setNewEnclosureSpeciesLabel('');
+    const handleEnclosureSpeciesLabelAdd = (speciesToAdd) => {
+        if (!speciesToAdd || !speciesToAdd.trim()) return;
+        if (enclosureFormData.speciesLabels.includes(speciesToAdd)) return; // Avoid duplicates
+        setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), speciesToAdd.trim()])] }));
     };
     const handleEnclosureSpeciesLabelRemove = (label) => {
         setEnclosureFormData(p => ({ ...p, speciesLabels: (p.speciesLabels || []).filter(l => l !== label) }));
@@ -521,6 +541,7 @@ const EnclosuresPage = ({
                     handleEnclosureTagRemove={handleEnclosureTagRemove}
                     newEnclosureSpeciesLabel={newEnclosureSpeciesLabel}
                     setNewEnclosureSpeciesLabel={setNewEnclosureSpeciesLabel}
+                    allSpecies={allSpecies}
                     handleEnclosureSpeciesLabelAdd={handleEnclosureSpeciesLabelAdd}
                     handleEnclosureSpeciesLabelRemove={handleEnclosureSpeciesLabelRemove}
                     newCleaningTaskName={newCleaningTaskName}
@@ -551,4 +572,3 @@ const EnclosuresPage = ({
 };
 
 export default EnclosuresPage;
-
