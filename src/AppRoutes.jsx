@@ -33,6 +33,9 @@ const ContactBredAnimals = lazy(() => import('./components/Contacts/BredAnimals'
 const AddContactPage = lazy(() => import('./components/Contacts/AddContactPage'));
 const EditContactPage = lazy(() => import('./components/Contacts/EditContactPage'));
 
+// Enclosures
+const EnclosuresPage = lazy(() => import('./components/EnclosuresPage'));
+
 const PageLoader = () => (
     <div className="w-full flex items-center justify-center py-24">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
@@ -329,6 +332,15 @@ export function AppRoutes({
           preSelectedAnimal={preSelectedTransferAnimal}
           preSelectedType={preSelectedTransactionType}
           onAddModalOpen={() => setBudgetModalOpen(true)}
+        />
+      } />
+
+      {/* Enclosures */}
+      <Route path="/enclosures" element={
+        <EnclosuresPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          showModalMessage={showModalMessage}
         />
       } />
 
