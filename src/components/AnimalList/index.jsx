@@ -3121,17 +3121,7 @@ useEffect(() => {
                             <span className="font-semibold text-gray-800">Enclosures</span>
                             <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{enclosures.length}</span>
                         </div>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); }
-                                else { setEnclosureFormData({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'general', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setEnclosureFormVisible(v => !v); }
-                            }}
-                            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg"
-                        >
-                            <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
-                        </button>
-                    </div>} 
-                    );
+                    </div>}                     
 
                     {(!collapsedMgmtSections['enclosures'] || !!view) && (
                         <div className="p-3 space-y-2">
