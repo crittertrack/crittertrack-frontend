@@ -262,7 +262,10 @@ const EnclosureModal = ({
                             className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
                             Cancel
                         </button>
-                        <button onClick={handleSaveEnclosure} disabled={enclosureSaving || !enclosureFormData.name.trim()}
+                        <button onClick={() => {
+                            console.log('[EnclosureModal] Save Changes button clicked. Form data:', enclosureFormData);
+                            handleSaveEnclosure();
+                        }} disabled={enclosureSaving || !enclosureFormData.name.trim()}
                             className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50">
                             {enclosureSaving ? 'Saving...' : (editingEnclosureId ? 'Save Changes' : 'Create Enclosure')}
                         </button>

@@ -1028,6 +1028,7 @@ useEffect(() => {
     useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
 
     const handleSaveEnclosure = useCallback(async () => {
+        console.log('[AnimalList] handleSaveEnclosure called. Saving:', enclosureSaving, 'Form Data:', enclosureFormData);
         if (enclosureSaving) return;
         // Defensive check: ensure form data and name exist before proceeding.
         if (!enclosureFormData || !enclosureFormData.name || !enclosureFormData.name.trim()) {
@@ -1115,6 +1116,7 @@ useEffect(() => {
     }, []);
 
     const openEnclosureModal = useCallback((enclosure) => {
+        console.log('[AnimalList] openEnclosureModal called. Editing enclosure:', enclosure ? enclosure._id : 'new');
         if (enclosure) {
             // Edit mode
             const dims = enclosure.dimensions || enclosure.size;
@@ -1162,7 +1164,7 @@ useEffect(() => {
             setEditingEnclosureId(null);
         }
         setShowEnclosureModal(true);
-    }, [setShowEnclosureModal]);
+    }, [setEnclosureFormData, setEnclosureImagePreview, setEnclosureImageFile, setEditingEnclosureId, setShowEnclosureModal]);
 
     const handleEnclosureSpeciesLabelAdd = useCallback(() => {
         if (!newEnclosureSpeciesLabel.trim()) return;
@@ -4469,7 +4471,10 @@ useEffect(() => {
                         )}
                         {/* Add Enclosure button */}
                         <button
-                            onClick={() => openEnclosureModal()}
+                            onClick={() => {
+                                console.log('[AnimalList] Create Enclosure button clicked.');
+                                openEnclosureModal();
+                            }}
                             className="hidden sm:flex bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/80 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
                             title="Add New Enclosure"
                         ><Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Enclosure</span></button>
@@ -5022,6 +5027,7 @@ useEffect(() => {
             <EnclosureModal
                 isOpen={showEnclosureModal}
                 onClose={() => {
+                    console.log('[AnimalList] EnclosureModal onClose triggered.');
                     setShowEnclosureModal(false);
                     setEditingEnclosureId(null);
                     setEnclosureFormData({
