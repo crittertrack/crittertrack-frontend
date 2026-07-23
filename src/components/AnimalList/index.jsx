@@ -3,7 +3,6 @@ import axios from 'axios';
 import NotificationBar from '../Notifications/NotificationBar';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
-import EnclosureDetailModal from '../EnclosureDetailModal';
 import EnclosureModal from '../EnclosureModal';
 import AnimalImage from '../shared/AnimalImage';
 import {
@@ -1102,12 +1101,12 @@ useEffect(() => {
         setShowEnclosureModal(true);
     }, []);
 
-     const handleEnclosureSpeciesLabelAdd = useCallback((speciesToAdd) => {
-        if (!speciesToAdd || !speciesToAdd.trim()) return;
-        if ((enclosureFormData.speciesLabels || []).includes(speciesToAdd)) return; // Avoid duplicates
-        setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), speciesToAdd.trim()])] }));
-    }, [enclosureFormData.speciesLabels]);
-    
+    const handleEnclosureSpeciesLabelAdd = useCallback(() => {
+        if (!newEnclosureSpeciesLabel.trim()) return;
+        setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), newEnclosureSpeciesLabel.trim()])] }));
+        setNewEnclosureSpeciesLabel('');
+    }, [newEnclosureSpeciesLabel]);
+
     const handleEnclosureSpeciesLabelRemove = useCallback((labelToRemove) => {
         setEnclosureFormData(p => ({ ...p, speciesLabels: (p.speciesLabels || []).filter(l => l !== labelToRemove) }));
     }, []);
@@ -4631,7 +4630,7 @@ useEffect(() => {
                     </div>
             </div>
             )}
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
+             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm relative">
