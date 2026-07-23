@@ -1090,7 +1090,7 @@ useEffect(() => {
         } catch (err) {
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save enclosure');
         } finally { setEnclosureSaving(false); }
-    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, setEnclosureSaving, setShowEnclosureModal]);
+    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, enclosureSaving]);
 
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
