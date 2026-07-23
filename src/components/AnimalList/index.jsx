@@ -11,7 +11,7 @@ import {
     Bean, Bell, Bird, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart, LampCeiling, BarChart2, Thermometer,
-    Package, Plus, PlusCircle, RefreshCw, Save, Search, ShoppingBag, SlidersHorizontal,
+    Package, Plus, PlusCircle, RefreshCw, Ruler, Save, Search, ShoppingBag, SlidersHorizontal,
     Sparkles, Trash2, Turtle, Utensils, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
@@ -1037,22 +1037,6 @@ useEffect(() => {
                 enclosureType: enclosureFormData.enclosureType.trim(),
                 purpose: enclosureFormData.purpose,
                 location: enclosureFormData.location.trim(),
-                dimensions: {
-                    length: enclosureFormData.length ? Number(enclosureFormData.length) : null,
-                    width: enclosureFormData.width ? Number(enclosureFormData.width) : null,
-                    height: enclosureFormData.height ? Number(enclosureFormData.height) : null,
-                    unit: enclosureFormData.dimensionsUnit
-                },
-                capacity: enclosureFormData.capacity ? Number(enclosureFormData.capacity) : undefined,
-                tempMin: enclosureFormData.tempMin ? Number(enclosureFormData.tempMin) : null,
-                tempMax: enclosureFormData.tempMax ? Number(enclosureFormData.tempMax) : null,
-                temperatureUnit: enclosureFormData.temperatureUnit,
-                humidityMin: enclosureFormData.humidityMin ? Number(enclosureFormData.humidityMin) : null,
-                humidityMax: enclosureFormData.humidityMax ? Number(enclosureFormData.humidityMax) : null,
-                lightsOnTime: enclosureFormData.lightsOnTime,
-                lightsOffTime: enclosureFormData.lightsOffTime,
-                lightTimeFormat: enclosureFormData.lightTimeFormat,
-                  location: enclosureFormData.location.trim(),
                 dimensions: {
                     length: enclosureFormData.length ? Number(enclosureFormData.length) : null,
                     width: enclosureFormData.width ? Number(enclosureFormData.width) : null,
@@ -2836,8 +2820,8 @@ useEffect(() => {
                         
                         {/* Type, Size, Location */}
                         <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
-                            {enclosure.enclosureType && <span className="flex items-center gap-1"><Package size={12} /> {enclosure.enclosureType}</span>}
-                            {dimensions && <span className="flex items-center gap-1"><Wrench size={12} /> {dimensions}</span>}
+                            {enclosure.enclosureType && <span className="flex items-center gap-1"><Home size={12} /> {enclosure.enclosureType}</span>}
+                            {dimensions && <span className="flex items-center gap-1"><Ruler size={12} /> {dimensions}</span>}
                             {enclosure.location && <span className="flex items-center gap-1"><MapPin size={12} /> {enclosure.location}</span>}
                         </div>
 
