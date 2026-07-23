@@ -1028,7 +1028,12 @@ useEffect(() => {
     useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
 
     const handleSaveEnclosure = useCallback(async () => {
-        if (enclosureSaving || !enclosureFormData.name.trim()) return;
+        if (enclosureSaving) return;
+        // Defensive check: ensure form data and name exist before proceeding.
+        if (!enclosureFormData || !enclosureFormData.name || !enclosureFormData.name.trim()) {
+            showModalMessageRef.current('Validation Error', 'Enclosure name cannot be empty.');
+            return;
+        }
         setEnclosureSaving(true);
 
         try {
@@ -1044,11 +1049,15 @@ useEffect(() => {
                     unit: enclosureFormData.dimensionsUnit
                 },
                 capacity: enclosureFormData.capacity ? Number(enclosureFormData.capacity) : undefined,
-                tempMin: enclosureFormData.tempMin ? Number(enclosureFormData.tempMin) : null,
-                tempMax: enclosureFormData.tempMax ? Number(enclosureFormData.tempMax) : null,
+                temperatureRange: {
+                    min: enclosureFormData.tempMin ? Number(enclosureFormData.tempMin) : null,
+                    max: enclosureFormData.tempMax ? Number(enclosureFormData.tempMax) : null,
+                },
                 temperatureUnit: enclosureFormData.temperatureUnit,
-                humidityMin: enclosureFormData.humidityMin ? Number(enclosureFormData.humidityMin) : null,
-                humidityMax: enclosureFormData.humidityMax ? Number(enclosureFormData.humidityMax) : null,
+                humidityRange: {
+                    min: enclosureFormData.humidityMin ? Number(enclosureFormData.humidityMin) : null,
+                    max: enclosureFormData.humidityMax ? Number(enclosureFormData.humidityMax) : null,
+                },
                 lightsOnTime: enclosureFormData.lightsOnTime,
                 lightsOffTime: enclosureFormData.lightsOffTime,
                 lightTimeFormat: enclosureFormData.lightTimeFormat,
@@ -1075,21 +1084,13 @@ useEffect(() => {
                 await axios.post(`${API_BASE_URL}/enclosures`, payload,
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
             }
-            setEditingEnclosureId(null);
+            // Success: close the modal. The onClose handler will reset the form state.
             setShowEnclosureModal(false); // Close the modal on success
-            setEnclosureFormData({
-                name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
-                purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
-                lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-                cleaningTasks: []
-            });
-            setEnclosureImageFile(null);
-            setEnclosureImagePreview(null);
             fetchEnclosures();
         } catch (err) {
-            showModalMessage('Error', err.response?.data?.message || 'Failed to save enclosure');
+            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save enclosure');
         } finally { setEnclosureSaving(false); }
-    }, [authToken, API_BASE_URL, enclosureSaving, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, showModalMessage]);
+    }, [authToken, API_BASE_URL, enclosureSaving, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, setEnclosureSaving, setShowEnclosureModal]);
 
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
@@ -1162,7 +1163,7 @@ useEffect(() => {
             setEditingEnclosureId(null);
         }
         setShowEnclosureModal(true);
-    }, []);
+    }, [setEnclosureFormData, setEnclosureImagePreview, setEnclosureImageFile, setEditingEnclosureId, setShowEnclosureModal]);
 
     const handleEnclosureSpeciesLabelAdd = useCallback(() => {
         if (!newEnclosureSpeciesLabel.trim()) return;
@@ -5024,7 +5025,12 @@ useEffect(() => {
                 onClose={() => {
                     setShowEnclosureModal(false);
                     setEditingEnclosureId(null);
-                    setEnclosureFormData({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'general', imageUrl: '' });
+                    setEnclosureFormData({
+                        name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+                        purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+                        lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+                        cleaningTasks: []
+                    });
                     setEnclosureImageFile(null);
                     setEnclosureImagePreview(null);
                 }}
