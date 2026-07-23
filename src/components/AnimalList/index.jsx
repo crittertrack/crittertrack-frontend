@@ -586,6 +586,16 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureAnimals, setEnclosureAnimals] = useState([]);
     const [loadingAnimals, setLoadingAnimals] = useState(false);
     
+    const fetchEnclosures = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/enclosures`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setEnclosures(res.data);
+        } catch (err) { console.error('[fetchEnclosures]', err); }
+    }, [authToken]);
+    useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
+
     // Fetch archived + sold/transferred animals from API
     const handleCloseEnclosureModal = useCallback(() => {
         console.log('[AnimalList] EnclosureModal onClose triggered.');
