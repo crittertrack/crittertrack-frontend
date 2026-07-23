@@ -8,12 +8,9 @@ import AnimalImage from '../shared/AnimalImage';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
     Bean, Bell, Bird, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
-    ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff,
-    Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart,    
-    Package, Plus, PlusCircle, RefreshCw, Save, Search, ShoppingBag, SlidersHorizontal,
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart, LampCeiling, BarChart2, Thermometer,
-    Package, Plus, PlusCircle, RefreshCw, Save, Search, ShoppingBag, SlidersHorizontal,    
+    Package, Plus, PlusCircle, RefreshCw, Save, Search, ShoppingBag, SlidersHorizontal,
     Sparkles, Trash2, Turtle, Utensils, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
