@@ -588,6 +588,20 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [loadingAnimals, setLoadingAnimals] = useState(false);
     
     // Fetch archived + sold/transferred animals from API
+    const handleCloseEnclosureModal = useCallback(() => {
+        console.log('[AnimalList] EnclosureModal onClose triggered.');
+        setShowEnclosureModal(false);
+        setEditingEnclosureId(null);
+        setEnclosureFormData({
+            name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+            purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+            lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+            cleaningTasks: []
+        });
+        setEnclosureImageFile(null);
+        setEnclosureImagePreview(null);
+    }, []); // State setters are stable, so this function is also stable.
+
     const fetchArchiveData = useCallback(async () => {
         setArchiveLoading(true);
         try {
@@ -1085,12 +1099,12 @@ useEffect(() => {
                 await axios.post(`${API_BASE_URL}/enclosures`, payload,
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
             }
-            setShowEnclosureModal(false); // Close the modal on success
+            handleCloseEnclosureModal(); // Close and reset the modal on success
             fetchEnclosures();
         } catch (err) {
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save enclosure');
         } finally { setEnclosureSaving(false); }
-    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, enclosureSaving]);
+    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, enclosureSaving, handleCloseEnclosureModal]);
 
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
@@ -5026,19 +5040,7 @@ useEffect(() => {
             )}
             <EnclosureModal
                 isOpen={showEnclosureModal}
-                onClose={() => {
-                    console.log('[AnimalList] EnclosureModal onClose triggered.');
-                    setShowEnclosureModal(false);
-                    setEditingEnclosureId(null);
-                    setEnclosureFormData({
-                        name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
-                        purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
-                        lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-                        cleaningTasks: []
-                    });
-                    setEnclosureImageFile(null);
-                    setEnclosureImagePreview(null);
-                }}
+                onClose={handleCloseEnclosureModal}
                 enclosureFormData={enclosureFormData}
                 setEnclosureFormData={setEnclosureFormData}
                 editingEnclosureId={editingEnclosureId}
