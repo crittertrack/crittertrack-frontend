@@ -11,6 +11,9 @@ import {
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart,    
     Package, Plus, PlusCircle, RefreshCw, Save, Search, ShoppingBag, SlidersHorizontal,
+    ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings,
+    Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart, LampCeiling, BarChart2, Thermometer,
+    Package, Plus, PlusCircle, RefreshCw, Save, Search, ShoppingBag, SlidersHorizontal,    
     Sparkles, Trash2, Turtle, Utensils, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
@@ -48,6 +51,22 @@ const getSpeciesDisplayName = (species) => {
         'Guinea Pig': 'Guinea Pigs'
     };
     return displayNames[species] || species;
+};
+
+const formatTime12h = (time24) => {
+    if (!time24) return '...';
+    const [hours, minutes] = time24.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour12 = h % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+};
+
+const formatDimensions = (dim, size) => {
+    if (dim && (dim.length || dim.width || dim.height)) {
+        return `${dim.length || '?'}x${dim.width || '?'}x${dim.height || '?'} ${dim.unit || ''}`;
+    }
+    return size || null;
 };
 
 const formatDateDisplay = (dateStr) => {
