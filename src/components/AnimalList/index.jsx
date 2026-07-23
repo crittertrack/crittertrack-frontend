@@ -1,42 +1,29 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import axios from 'axios';
-import NotificationBar from '../Notifications/NotificationBar';
 import ArchiveScreen from '../ArchiveScreen';
-import NotificationPanel from '../Notifications/NotificationPanel';
-import EnclosureModal from '../EnclosureModal';
-import EnclosureDetailModal from '../EnclosureDetailModal';
-import AnimalImage from '../shared/AnimalImage';
-import {
-    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
-    Bean, Bell, Bird, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
-    ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings,
-    Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart, LampCeiling, BarChart2, Thermometer,
-    Package, Plus, PlusCircle, RefreshCw, Ruler, Save, Search, ShoppingBag, SlidersHorizontal,
-    Sparkles, Trash2, Turtle, Utensils, Venus, VenusAndMars, Wrench, X
-} from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
-import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
-import { getSpeciesLatinName } from '../../utils/speciesUtils';
+import {
+    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight,
+    Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
+    Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
+    Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin,
+    Network, Package, Plus, PlusCircle, RefreshCw, Save, ScrollText,
+    Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
+    Venus, VenusAndMars, Wrench, X
+} from 'lucide-react';
+import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import { prefetchPedigreeTree } from '../AnimalForm';
-
-import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
 
-const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Unknown'];
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
-const normalizeAnimalView = (value) =>
-    ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
+const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown', 'Mixed'];
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const normalizeAnimalView = (value) => (
+    ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'supplies', 'familyTree'].includes(value) ? value : 'list'
+);
 
-const ALERT_CATEGORIES = {
-    feeding: 'Feeding Due',
-    reproduction: 'Reproduction',
-    health: 'Medical / Quarantine',
-    maintenance: 'Maintenance'
-};
-
-const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, health: true, birthdateAge: true, breedingLines: true, tags: true };
+const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, birthdate: true, age: true, status: true, reproduction: true, sireName: true, damName: true };
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -51,20 +38,68 @@ const getSpeciesDisplayName = (species) => {
     return displayNames[species] || species;
 };
 
-const formatTime12h = (time24) => {
-    if (!time24) return '...';
-    const [hours, minutes] = time24.split(':');
-    const h = parseInt(hours, 10);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const hour12 = h % 12 || 12;
-    return `${hour12}:${minutes} ${ampm}`;
+const normalizeSpeciesForFilter = (species) => {
+    const value = (species || '').toString().trim().toLowerCase();
+    if (['rat', 'rats', 'fancy rat', 'fancy rats'].includes(value)) return 'fancy rat';
+    if (['mouse', 'mice', 'fancy mouse', 'fancy mice'].includes(value)) return 'fancy mouse';
+    return value;
 };
 
-const formatDimensions = (dim, size) => {
-    if (dim && (dim.length || dim.width || dim.height)) {
-        return `${dim.length || '?'}x${dim.width || '?'}x${dim.height || '?'} ${dim.unit || ''}`;
-    }
-    return size || null;
+const formatTimeAgo = (dateStr) => {
+    if (!dateStr) return '';
+    const now = new Date();
+    const then = new Date(dateStr);
+    if (isNaN(then.getTime())) return '';
+    const diffMs = now - then;
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return 'just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return diffMin + 'm ago';
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return diffHr + 'h ago';
+    const diffDays = Math.floor(diffHr / 24);
+    if (diffDays < 30) return diffDays + 'd ago';
+    const diffMo = Math.floor(diffDays / 30);
+    if (diffMo < 12) return diffMo + 'mo ago';
+    return Math.floor(diffMo / 12) + 'y ago';
+};
+
+const getActionLabel = (action) => {
+    const labels = {
+        login: 'Logged in', logout: 'Logged out', password_change: 'Changed password',
+        profile_update: 'Updated profile', profile_image_change: 'Changed profile photo',
+        privacy_settings_change: 'Updated privacy settings',
+        animal_create: 'Added a new animal', animal_update: 'Updated animal',
+        animal_delete: 'Deleted animal', animal_image_upload: 'Uploaded animal photo',
+        animal_image_delete: 'Deleted animal photo', animal_visibility_change: 'Changed animal visibility',
+        animal_transfer_initiate: 'Initiated animal transfer', animal_transfer_accept: 'Accepted animal transfer',
+        animal_transfer_reject: 'Rejected animal transfer', litter_create: 'Recorded a new litter',
+        litter_update: 'Updated litter', litter_delete: 'Deleted litter',
+        message_send: 'Sent a message', message_delete: 'Deleted a message',
+        report_submit: 'Submitted a report', transaction_create: 'Added a budget transaction',
+        transaction_delete: 'Deleted a budget transaction',
+    };
+    return labels[action] || (action && action.replace(/_/g, ' ')) || 'Unknown action';
+};
+
+const getActionColor = (action) => {
+    if (!action) return 'bg-gray-300';
+    if (action.startsWith('animal_')) return 'bg-accent';
+    if (action.startsWith('litter_')) return 'bg-purple-400';
+    if (action.startsWith('transaction_')) return 'bg-emerald-400';
+    if (action.startsWith('message_')) return 'bg-blue-400';
+    if (action === 'login' || action === 'logout') return 'bg-gray-400';
+    if (action.startsWith('profile_') || action.startsWith('privacy_')) return 'bg-yellow-400';
+    if (action === 'report_submit') return 'bg-red-400';
+    return 'bg-gray-300';
+};
+
+const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
+    const [imageError, setImageError] = React.useState(false);
+    const [imageSrc, setImageSrc] = React.useState(src);
+    React.useEffect(() => { setImageSrc(src); setImageError(false); }, [src]);
+    if (!imageSrc || imageError) return <Cat size={iconSize} className="text-gray-400" />;
+    return <img src={imageSrc} alt={alt} className={className} onError={() => setImageError(true)} loading="lazy" />;
 };
 
 const formatDateDisplay = (dateStr) => {
@@ -72,35 +107,7 @@ const formatDateDisplay = (dateStr) => {
     try { return formatDateShort(dateStr); } catch(e) { return dateStr; }
 };
 
-const BreedingLineManagerModal = ({ lines, onClose, onClearLine }) => {
-    return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={onClose}>
-            <div className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-4 w-full max-w-md" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center mb-3 pb-3 border-b dark:border-dark-border">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Manage Breeding Lines</h3>
-                    <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface-hover"><X size={20} /></button>
-                </div>
-                <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
-                    {(lines || []).filter(l => l.name).map(line => (
-                        <div key={line.id} className="flex items-center justify-between p-2 border rounded-md hover:bg-gray-50 dark:border-dark-border dark:hover:bg-dark-surface-hover">
-                            <div className="flex items-center gap-3">
-                                <span style={{ backgroundColor: line.color }} className="w-4 h-4 rounded-full border border-gray-300 dark:border-dark-border"></span>
-                                <span className="font-medium text-gray-800 dark:text-dark-text">{line.name}</span>
-                            </div>
-                            <button onClick={() => onClearLine(line.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Clear line name and unassign from all animals">
-                                <Trash2 size={16} />
-                            </button>
-                        </div>
-                    ))}
-                    {(lines || []).filter(l => l.name).length === 0 && (
-                        <p className="text-sm text-gray-500 dark:text-dark-text-secondary text-center py-4">No named breeding lines to manage.</p>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
-
+﻿
 // -- Decode JWT payload to get a stable per-user key for localStorage scoping --
 const getUserKey = (token) => {
     try {
@@ -132,16 +139,6 @@ const AnimalList = ({
     showModalMessage, 
     onEditAnimal, 
     onViewAnimal, 
-    viewingAnimal, // Assuming parent passes this down
-    onClose, // Assuming parent passes this down
-    onAddSibling,
-    onUpdateAnimal,
-    onToggleOwned,
-    userProfile,
-    handleAcceptTransfer,
-    handleRejectTransfer,
-    onTransfer,
-    onCloseAll,
     navigate,
     initialAnimalView = 'list',
     // Archive props
@@ -155,8 +152,7 @@ const AnimalList = ({
     setArchiveLoading,
     // Breeding lines (display-only for cards)
     breedingLineDefs = [],
-    animalBreedingLines = {},
-    onBreedingLinesUpdate
+    animalBreedingLines = {}
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
@@ -164,79 +160,6 @@ const AnimalList = ({
     // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
     // so that switching accounts never leaks one user's collections/prefs into another's.
     const userKey = useMemo(() => getUserKey(authToken), [authToken]);
-    const [returningAnimal, setReturningAnimal] = useState(false);
-
-    const handleReturnTransferredAnimal = useCallback(async () => {
-        if (!viewingAnimal?.id_public || returningAnimal) return;
-
-        const breederName = viewingAnimal.breederName || 'the breeder';
-        if (!window.confirm(`Return ${viewingAnimal.name} to ${breederName}? This will remove the animal from your account.`)) {
-            return;
-        }
-
-        setReturningAnimal(true);
-        try {
-            await axios.post(`${API_BASE_URL}/animals/${viewingAnimal.id_public}/return`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            window.dispatchEvent(new Event('animals-changed'));
-            showModalMessage('Success', `Animal has been returned to ${breederName}.`);
-            (onCloseAll || onClose)?.();
-        } catch (error) {
-            console.error('Failed to return animal:', error);
-            showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
-        } finally {
-            setReturningAnimal(false);
-        }
-    }, [viewingAnimal, returningAnimal, API_BASE_URL, authToken, showModalMessage, onCloseAll, onClose]);
-
-    const handleWithdrawTransfer = useCallback(async (transferId) => {
-        if (!transferId) return;
-
-        if (!window.confirm('Are you sure you want to withdraw this transfer request?')) {
-            return;
-        }
-
-        try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/withdraw`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            showModalMessage('Success', 'Transfer request has been withdrawn.');
-            // Optimistically update the viewing animal to remove the pending transfer state
-            if (onUpdateAnimal) {
-                onUpdateAnimal({ ...viewingAnimal, pendingTransfer: null, pendingTransferId: undefined });
-            }
-        } catch (err) {
-            console.error('Failed to withdraw transfer:', err);
-            showModalMessage('Error', `Failed to withdraw transfer: ${err.response?.data?.message || err.message}`);
-        }
-    }, [API_BASE_URL, authToken, showModalMessage, viewingAnimal, onUpdateAnimal]);
-
-    const [sortConfig, setSortConfig] = useState(() => {
-        try {
-            const saved = localStorage.getItem(`ct_list_sort_config_${userKey}`);
-            return saved ? JSON.parse(saved) : { key: 'name', direction: 'ascending' };
-        } catch {
-            return { key: 'name', direction: 'ascending' };
-        }
-    });
-
-    const requestSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        } else if (sortConfig.key === key && sortConfig.direction === 'descending') {
-            direction = 'ascending';
-        } else if (key === 'birthdate') {
-            direction = 'descending'; // Default for birthdate is oldest first
-        }
-        const newSortConfig = { key, direction };
-        setSortConfig(newSortConfig);
-        try { localStorage.setItem(`ct_list_sort_config_${userKey}`, JSON.stringify(newSortConfig)); } catch {}
-    };
-    const [showNotifications, setShowNotifications] = useState(false);
-    const [showMessages, setShowMessages] = useState(false);
-    const [showCategoryBreakdown, setShowCategoryBreakdown] = useState(false);
     useEffect(() => { showModalMessageRef.current = showModalMessage; });
 
     const [animals, setAnimalsRaw] = useState(() => _alCache || []);
@@ -250,7 +173,6 @@ const AnimalList = ({
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals ? shown in Management > Sold/Transferred section
-    const [showAlertsDropdown, setShowAlertsDropdown] = useState(false);
     const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
     const [loading, setLoading] = useState(() => !_alCache);
     const [allAnimalsFetched, setAllAnimalsFetched] = useState(false); // true once Phase 2 (all animals) fetch completes
@@ -272,19 +194,16 @@ const AnimalList = ({
             return localStorage.getItem('animalList_appliedNameFilter') || '';
         } catch { return ''; }
     });
-    const [genderFilter, setGenderFilter] = useState(() => {
+    const [selectedGenders, setSelectedGenders] = useState(() => {
         try {
-            return localStorage.getItem('animalList_genderFilter') || '';
-        } catch { return ''; }
+            const saved = localStorage.getItem('animalList_selectedGenders_v2');
+            // Default to all genders if not previously saved
+            return saved ? JSON.parse(saved) : ['Male', 'Female', 'Intersex', 'Unknown'];
+        } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; }
     });
     // Always start with all species selected (empty array = show all)
     // Don't persist this filter to prevent newly created animals from being hidden
-     const [speciesFilter, setSpeciesFilter] = useState(() => {
-        try { return localStorage.getItem('animalList_speciesFilter') || ''; } catch { return ''; }
-    });
-    const [categoryFilter, setCategoryFilter] = useState(() => {
-        try { return localStorage.getItem('animalList_categoryFilter') || ''; } catch { return ''; }
-    });
+    const [selectedSpecies, setSelectedSpecies] = useState([]);
     // Master species list ? all species the user has ANY animal for, never filtered
     const [allUserSpecies, setAllUserSpecies] = useState([]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
@@ -302,22 +221,42 @@ const AnimalList = ({
             return localStorage.getItem('animalList_statusFilterMating') === 'true';
         } catch { return false; }
     });
-    const [statusFilterReproductive, setStatusFilterReproductive] = useState(() => {
-        try {
-            return localStorage.getItem('animalList_statusFilterReproductive') || 'none';
-        } catch { return 'none'; }
-    });
     const [blFilter, setBlFilter] = useState(() => {
         try {
             const saved = localStorage.getItem('animalList_blFilter');
             return saved ? JSON.parse(saved) : [];
         } catch { return []; }
     }); // array of line IDs to filter by (empty = no filter)
-    const [ownedFilterMode, setOwnedFilterMode] = useState(() => {
+    const [pendingFilters, setPendingFilters] = useState(false); // true when filters changed but not yet applied
+
+    const filterMountedRef = useRef(false); // tracks initial mount for pending-filters detection
+    // Applied filter snapshot ? groupedAnimals reads from this, only updated on "Apply Filters" click
+    const [appliedFilters, setAppliedFilters] = useState(() => ({
+        statusFilter: (function() { try { return localStorage.getItem('animalList_statusFilter') || ''; } catch { return ''; } })(),
+        selectedGenders: (function() { try { const s = localStorage.getItem('animalList_selectedGenders_v2'); return s ? JSON.parse(s) : ['Male', 'Female', 'Intersex', 'Unknown']; } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; } })(),
+        selectedSpecies: [], // will be filled on first species load
+        statusFilterPregnant: (function() { try { return localStorage.getItem('animalList_statusFilterPregnant') === 'true'; } catch { return false; } })(),
+        statusFilterNursing: (function() { try { return localStorage.getItem('animalList_statusFilterNursing') === 'true'; } catch { return false; } })(),
+        statusFilterMating: (function() { try { return localStorage.getItem('animalList_statusFilterMating') === 'true'; } catch { return false; } })(),
+        publicFilter: (function() { try { return localStorage.getItem('animalList_publicFilter') || ''; } catch { return ''; } })(),
+        blFilter: (function() { try { const s = localStorage.getItem('animalList_blFilter'); return s ? JSON.parse(s) : []; } catch { return []; } })(),
+    }));
+    const [showOwned, setShowOwned] = useState(() => {
         try {
-            return localStorage.getItem('animalList_ownedFilterMode') || 'owned';
-        } catch { return 'owned'; }
+            const saved = localStorage.getItem('animalList_showOwned');
+            return saved !== null ? saved === 'true' : true;
+        } catch { return true; }
     });
+    const [showUnowned, setShowUnowned] = useState(() => {
+        try {
+            const saved = localStorage.getItem('animalList_showUnowned');
+            return saved !== null ? saved === 'true' : false;
+        } catch { return false; }
+    });
+    // Archive section collapse states
+    const [archiveSoldCollapsed, setArchiveSoldCollapsed] = useState(false);
+    const [archiveArchivedCollapsed, setArchiveArchivedCollapsed] = useState(false);
+    
     const [publicFilter, setPublicFilter] = useState(() => {
         try {
             return localStorage.getItem('animalList_publicFilter') || '';
@@ -356,29 +295,191 @@ const AnimalList = ({
         } catch {}
     };
 
-const handleArchive = useCallback(async (animalToArchive) => {
-        if (!animalToArchive) return;
-        const isArchived = !!animalToArchive.archived;
-        const action = isArchived ? 'unarchive' : 'archive';
-        if (!window.confirm(`Are you sure you want to ${action} this animal?`)) return;
+    // ---- For Sale screen & My Animals list view ----
+    const [showForSaleScreen, setShowForSaleScreen] = useState(false);
+    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState('cards'); // populated from user-scoped key below
+    const [listViewColumns, setListViewColumns] = useState(DEFAULT_LIST_COLUMNS); // populated from user-scoped key below
+    const [showListColumnConfig, setShowListColumnConfig] = useState(false);
+    const [externalParentsCache, setExternalParentsCache] = useState({});
+    const [familyTreePrefetchBySpecies, setFamilyTreePrefetchBySpecies] = useState(() => _familyTreePrefetchCacheByUser[userKey] || {});
+    const [familyTreePrefetchLoadingBySpecies, setFamilyTreePrefetchLoadingBySpecies] = useState(() => _familyTreePrefetchLoadingByUser[userKey] || {});
 
-        try {
-            const url = `${API_BASE_URL}/animals/${animalToArchive.id_public}/${action}`;
-            const res = await axios.post(url, {}, { headers: { Authorization: `Bearer ${authToken}` } });
-            
-            window.dispatchEvent(new CustomEvent('animal-updated', { detail: res.data }));
-            window.dispatchEvent(new Event('animals-changed'));
-            
-            showModalMessage('Success', `Animal ${action}d successfully.`);
-            
-            if (viewingAnimal && viewingAnimal.id_public === animalToArchive.id_public) {
-                onClose();
-            }
-        } catch (err) {
-            showModalMessage('Error', err.response?.data?.message || `Failed to ${action} animal.`);
+    useEffect(() => {
+        const onResize = () => {
+            setIsFamilyTreeEnabled(window.innerWidth >= FAMILY_TREE_MIN_WIDTH);
+        };
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    useEffect(() => {
+        if (isFamilyTreeEnabled) return;
+
+        if (animalView === 'familyTree') {
+            setAnimalView('list');
         }
-    }, [API_BASE_URL, authToken, showModalMessage, viewingAnimal, onClose]);
+        if (defaultAnimalView === 'familyTree') {
+            setDefaultAnimalView('list');
+            try { localStorage.setItem('ct_default_animal_view', 'list'); } catch {}
+        }
+    }, [animalView, defaultAnimalView, isFamilyTreeEnabled]);
 
+    const familyTreeAnimals = useMemo(() => (
+        Array.from(
+            new Map(
+                [
+                    ...(animals || []),
+                    ...(soldTransferredRaw || []),
+                    ...(archivedAnimals || []),
+                ]
+                    .filter(a => a?.id_public)
+                    .map(a => [a.id_public, a])
+            ).values()
+        )
+    ), [animals, soldTransferredRaw, archivedAnimals]);
+
+    useEffect(() => {
+        setFamilyTreePrefetchBySpecies(_familyTreePrefetchCacheByUser[userKey] || {});
+        setFamilyTreePrefetchLoadingBySpecies(_familyTreePrefetchLoadingByUser[userKey] || {});
+    }, [userKey]);
+
+    useEffect(() => {
+        _familyTreePrefetchCacheByUser[userKey] = familyTreePrefetchBySpecies;
+    }, [userKey, familyTreePrefetchBySpecies]);
+
+    useEffect(() => {
+        _familyTreePrefetchLoadingByUser[userKey] = familyTreePrefetchLoadingBySpecies;
+    }, [userKey, familyTreePrefetchLoadingBySpecies]);
+
+    const handleFamilyTreeAncestorsResolved = useCallback((species, ancestorsById) => {
+        if (!species || !ancestorsById) return;
+        setFamilyTreePrefetchBySpecies(prev => {
+            if (prev[species]) return prev;
+            return { ...prev, [species]: ancestorsById };
+        });
+        setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
+    }, []);
+
+    // Fetch names for external parent IDs (animals not in the user's own collection)
+    // Runs whenever the animal list or view mode changes
+    useEffect(() => {
+        if (myAnimalsViewMode !== 'list' || !authToken || allAnimalsRaw.length === 0) return;
+        const localIds = new Set([...allAnimalsRaw, ...soldTransferredRaw].map(a => a.id_public).filter(Boolean));
+        const unresolvedIds = [];
+        allAnimalsRaw.forEach(a => {
+            const sireId = a.fatherId_public || a.sireId_public;
+            const damId  = a.motherId_public  || a.damId_public;
+            if (sireId && !localIds.has(sireId) && !externalParentsCache[sireId]) unresolvedIds.push(sireId);
+            if (damId  && !localIds.has(damId)  && !externalParentsCache[damId])  unresolvedIds.push(damId);
+        });
+        const uniqueIds = [...new Set(unresolvedIds)];
+        if (uniqueIds.length === 0) return;
+        axios.post(`${API_BASE_URL}/animals/parents-batch`, { ids: uniqueIds }, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => {
+            const map = {};
+            (res.data || []).forEach(a => { if (a.id_public) map[a.id_public] = a; });
+            setExternalParentsCache(prev => ({ ...prev, ...map }));
+        }).catch(err => console.warn('[parents-batch]', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [myAnimalsViewMode, allAnimalsRaw, authToken]);
+
+    useEffect(() => {
+        if (!authToken || familyTreeAnimals.length === 0) return;
+
+        const species = [...new Set(familyTreeAnimals.map(a => a.species).filter(Boolean))].sort()[0];
+        if (!species) return;
+        if (familyTreePrefetchBySpecies[species] || familyTreePrefetchLoadingBySpecies[species]) return;
+
+        let cancelled = false;
+
+        const prefetchSpeciesAncestors = async () => {
+            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: true }));
+
+            const canonicalId = (id) => String(id || '').trim().toLowerCase();
+            const accountIdKeys = new Set(
+                familyTreeAnimals
+                    .map(a => canonicalId(a?.id_public))
+                    .filter(Boolean)
+            );
+            const speciesAnimals = familyTreeAnimals.filter(a => a.species === species && a.id_public);
+            const existing = new Map(speciesAnimals.map(a => [a.id_public, a]));
+            const fetched = {};
+            const visited = new Set(speciesAnimals.map(a => canonicalId(a.id_public)).filter(Boolean));
+            const queue = [];
+
+            const enqueueParentIfMissing = id => {
+                const key = canonicalId(id);
+                if (!key || visited.has(key)) return;
+                visited.add(key);
+                queue.push(id);
+            };
+
+            speciesAnimals.forEach(a => {
+                enqueueParentIfMissing(a.fatherId_public || a.sireId_public);
+                enqueueParentIfMissing(a.motherId_public || a.damId_public);
+            });
+
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try {
+                    const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    if (r.data) return r.data;
+                } catch {}
+
+                try {
+                    const r = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(id)}`);
+                    return r.data?.[0] || null;
+                } catch {
+                    return null;
+                }
+            };
+
+            let guard = 0;
+            while (queue.length > 0 && guard < 1200) {
+                guard += 1;
+                const id = queue.shift();
+                const node = await fetchOne(id);
+                if (cancelled) return;
+                if (!node) continue;
+
+                const nid = node.id_public || id;
+                const nidKey = canonicalId(nid);
+                const isAlreadyOnAccount = accountIdKeys.has(nidKey);
+                if (!existing.has(nid) && !isAlreadyOnAccount) {
+                    const normalized = { ...node, id_public: nid, isPublicAncestor: true };
+                    existing.set(nid, normalized);
+                    fetched[nid] = normalized;
+                }
+
+                enqueueParentIfMissing(node.fatherId_public || node.sireId_public);
+                enqueueParentIfMissing(node.motherId_public || node.damId_public);
+            }
+
+            if (cancelled) return;
+
+            setFamilyTreePrefetchBySpecies(prev => ({
+                ...prev,
+                [species]: fetched,
+            }));
+            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
+        };
+
+        prefetchSpeciesAncestors().catch(() => {
+            if (cancelled) return;
+            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
+        });
+
+        return () => {
+            cancelled = true;
+            _familyTreePrefetchLoadingByUser[userKey] = {
+                ...(_familyTreePrefetchLoadingByUser[userKey] || {}),
+                [species]: false,
+            };
+        };
+    }, [authToken, familyTreeAnimals, familyTreePrefetchBySpecies, familyTreePrefetchLoadingBySpecies, userKey]);
 
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
@@ -427,22 +528,21 @@ const handleArchive = useCallback(async (animalToArchive) => {
         _saveAnimalCollections({ ...animalCollections, [animalId]: current.filter(cid => cid !== collectionId) });
     };
 
+    // Activity Log state
+    const [activityLogs, setActivityLogs] = useState([]);
+    const [logsLoading, setLogsLoading] = useState(false);
+    const [logsPagination, setLogsPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+    const [logsLoaded, setLogsLoaded] = useState(false);
+    const [showActivityLogScreen, setShowActivityLogScreen] = useState(false);
+    const [logFilterAction, setLogFilterAction] = useState('');
+    const [logFilterSearch, setLogFilterSearch] = useState('');
+    const [logFilterStartDate, setLogFilterStartDate] = useState('');
+    const [logFilterEndDate, setLogFilterEndDate] = useState('');
+    // Supplies & Inventory state
+    const [showSuppliesScreen, setShowSuppliesScreen] = useState(false);
+    const [supplies, setSupplies] = useState([]);
+    const [suppliesLoading, setSuppliesLoading] = useState(false);
     // Duplicates state
-     const [showForSaleScreen, setShowForSaleScreen] = useState(false); const [defaultMyAnimalsViewMode, setDefaultMyAnimalsViewMode] = useState(() => {
-        try { return localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
-    });
-    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(defaultMyAnimalsViewMode);
-    useEffect(() => {
-        try { localStorage.setItem(`ct_default_my_animals_view_mode_${userKey}`, defaultMyAnimalsViewMode); } catch {}
-    }, [defaultMyAnimalsViewMode, userKey]);
-    const [defaultCollectionsViewMode, setDefaultCollectionsViewMode] = useState(() => {
-        try { return localStorage.getItem(`ct_default_collections_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
-    });
-    const [collectionsViewMode, setCollectionsViewMode] = useState(defaultCollectionsViewMode);
-    useEffect(() => {
-        try { localStorage.setItem(`ct_default_collections_view_mode_${userKey}`, defaultCollectionsViewMode); } catch {}
-    }, [defaultCollectionsViewMode, userKey]);
-
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
     const [duplicatesLoading, setDuplicatesLoading] = useState(false);
@@ -450,31 +550,13 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
     const [supplySaving, setSupplySaving] = useState(false);
-    const [supplies, setSupplies] = useState([]);
-    const [suppliesLoading, setSuppliesLoading] = useState(false);
-    const [showBreedingLineManager, setShowBreedingLineManager] = useState(false);
     const [supplyCategoryFilter, setSupplyCategoryFilter] = useState('All');
     const [restockingSupplyId, setRestockingSupplyId] = useState(null);
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
-    const [openActionMenu, setOpenActionMenu] = useState(null); // For list view action dropdown
-    const actionMenuRef = useRef(null);
-    const alertsDropdownRef = useRef(null);
-    const columnsDropdownRef = useRef(null);
-
-    const [showColumnsDropdown, setShowColumnsDropdown] = useState(false);
-    const [listViewColumns, setListViewColumns] = useState(() => {
-        try {
-            const saved = localStorage.getItem(`ct_list_columns_${userKey}`);
-            return saved ? { ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) } : DEFAULT_LIST_COLUMNS;
-        } catch {
-            return DEFAULT_LIST_COLUMNS;
-        }
-    });
 
     // ---- Collections state (user-scoped localStorage + backend sync) ----
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
-    const [listSelectedIds, setListSelectedIds] = useState(new Set());
     const [animalCollections, setAnimalCollections] = useState({}); // populated from user-scoped key below
     const [showCollectionManager, setShowCollectionManager] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
@@ -482,23 +564,6 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [renamingCollectionName, setRenamingCollectionName] = useState('');
     const [collapsedCollections, setCollapsedCollections] = useState({});
     const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
-
-    // Close action menu when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
-                setOpenActionMenu(null);
-            }
-            if (alertsDropdownRef.current && !alertsDropdownRef.current.contains(event.target)) {
-                setShowAlertsDropdown(false);
-            }
-            if (columnsDropdownRef.current && !columnsDropdownRef.current.contains(event.target)) {
-                setShowColumnsDropdown(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [actionMenuRef, alertsDropdownRef, columnsDropdownRef]);
 
     // ---- Re-load user-scoped prefs & collections whenever the logged-in user changes ----
     // This prevents one user's data from leaking into another account after switching.
@@ -513,28 +578,12 @@ const handleArchive = useCallback(async (animalToArchive) => {
         } catch { setUserCollections([]); setAnimalCollections({}); }
         // View mode & column config
         try {
-            const dcvm = localStorage.getItem(`ct_default_collections_view_mode_${userKey}`);
-            if (dcvm) {
-                setDefaultCollectionsViewMode(dcvm);
-                setCollectionsViewMode(dcvm);
-            }
-            const dvm = localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`); if (dvm) {
-                setMyAnimalsViewMode(dvm);
-                setDefaultMyAnimalsViewMode(dvm);
-            }
-            const lvc = localStorage.getItem(`ct_list_columns_${userKey}`);
-            if (lvc) {
-                try { setListViewColumns({ ...DEFAULT_LIST_COLUMNS, ...JSON.parse(lvc) }); }
-                catch {}
-            }
-        } catch {} // Alert settings
+            const vm = localStorage.getItem(`ct_my_animals_view_mode_${userKey}`);
+            if (vm) setMyAnimalsViewMode(vm);
+        } catch {}
         try {
-            const saved = localStorage.getItem(`ct_alert_settings_${userKey}`);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                const defaults = Object.keys(ALERT_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: true }), {});
-                setAlertSettings({ ...defaults, ...parsed });
-            }
+            const saved = localStorage.getItem(`ct_list_view_columns_${userKey}`);
+            if (saved) setListViewColumns({ ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) });
         } catch {}
     }, [userKey]);
 
@@ -555,182 +604,38 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [reproEncFormVisible, setReproEncFormVisible] = useState(false);
     const [healthEncFormVisible, setHealthEncFormVisible] = useState(false);
-    const [enclosureFormData, setEnclosureFormData] = useState({
-        name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
-        purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
-        lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-        cleaningTasks: []
-    });
+    const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' });
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
-    const [newEnclosureTag, setNewEnclosureTag] = useState('');
-    const [newEnclosureSpeciesLabel, setNewEnclosureSpeciesLabel] = useState('');
-
-    const [enclosureImageFile, setEnclosureImageFile] = useState(null);
-    const [enclosureImagePreview, setEnclosureImagePreview] = useState(null);
-
-
     const [enclosureSaving, setEnclosureSaving] = useState(false);
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
     const [newCleaningTaskFreq, setNewCleaningTaskFreq] = useState('');
     
-    const [showEnclosureModal, setShowEnclosureModal] = useState(false); // State for the new modal
-    // New states for Enclosures tab overhaul
-    const [enclosureSearch, setEnclosureSearch] = useState('');
-    const [enclosureTypeFilter, setEnclosureTypeFilter] = useState('');
-    const [enclosureStatusFilter, setEnclosureStatusFilter] = useState(''); // 'occupied' | 'empty'
-
-    // Enclosure Detail Modal State
-    const [selectedEnclosure, setSelectedEnclosure] = useState(null);
-    const [showDetailModal, setShowDetailModal] = useState(false);
-    const [enclosureAnimals, setEnclosureAnimals] = useState([]);
-    const [loadingAnimals, setLoadingAnimals] = useState(false);
-    
-    const fetchEnclosures = useCallback(async () => {
+    // Fetch archived + sold/transferred animals from API
+    const fetchArchiveData = useCallback(async () => {
+        setArchiveLoading(true);
         try {
-            const res = await axios.get(`${API_BASE_URL}/enclosures`, {
+            const res = await axios.get(`${API_BASE_URL}/animals/archived`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            setEnclosures(res.data);
-        } catch (err) { console.error('[fetchEnclosures]', err); }
-    }, [authToken]);
-    useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
-
-    // Fetch archived + sold/transferred animals from API
-    const handleCloseEnclosureModal = useCallback(() => {
-        console.log('[AnimalList] EnclosureModal onClose triggered.');
-        setShowEnclosureModal(false);
-        setEditingEnclosureId(null);
-        setEnclosureFormData({
-            name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
-            purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
-            lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-            cleaningTasks: []
-        });
-        setEnclosureImageFile(null);
-        setEnclosureImagePreview(null);
-    }, []); // State setters are stable, so this function is also stable.
-
-    const fetchArchiveData = useCallback(async () => {
-        // ... (this part is correct, no changes needed)
+            setArchivedAnimals(res.data.archived || []);
+            setSoldTransferredAnimals(res.data.soldTransferred || []);
+        } catch (err) {
+            console.error('Failed to fetch archive data:', err);
+            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to load archive');
+        } finally {
+            setArchiveLoading(false);
+        }
     }, [authToken, API_BASE_URL]);
     
-    const handleSaveEnclosure = useCallback(async () => {
-        // Snapshot all required state at the beginning of the function call.
-        // This prevents a race condition where the modal's premature `onClose` call
-        // resets the state before the async API call can use it.
-        const dataToSave = { ...enclosureFormData };
-        const imageFileToSave = enclosureImageFile;
-        const enclosureIdToSave = editingEnclosureId;
-
-        console.log('[AnimalList] handleSaveEnclosure called. Saving:', enclosureSaving, 'Form Data:', dataToSave);
-        if (enclosureSaving) return;
-        
-        if (!dataToSave || !dataToSave.name || !dataToSave.name.trim()) {
-            showModalMessageRef.current('Validation Error', 'Enclosure name cannot be empty.');
-            return;
+    // Fetch archive data when archive screen is opened
+    React.useEffect(() => {
+        if (showArchiveScreen) {
+            fetchArchiveData();
         }
-        setEnclosureSaving(true);
-
-        try {
-            const payload = {
-                name: dataToSave.name.trim(),
-                enclosureType: dataToSave.enclosureType.trim(),
-                purpose: dataToSave.purpose,
-                location: dataToSave.location.trim(),
-                dimensions: {
-                    length: dataToSave.length ? Number(dataToSave.length) : null,
-                    width: dataToSave.width ? Number(dataToSave.width) : null,
-                    height: dataToSave.height ? Number(dataToSave.height) : null,
-                    unit: dataToSave.dimensionsUnit
-                },
-                capacity: dataToSave.capacity ? Number(dataToSave.capacity) : undefined,
-                temperatureRange: {
-                    min: dataToSave.tempMin ? Number(dataToSave.tempMin) : null,
-                    max: dataToSave.tempMax ? Number(dataToSave.tempMax) : null,
-                },
-                temperatureUnit: dataToSave.temperatureUnit,
-                humidityRange: {
-                    min: dataToSave.humidityMin ? Number(dataToSave.humidityMin) : null,
-                    max: dataToSave.humidityMax ? Number(dataToSave.humidityMax) : null,
-                },
-                lightsOnTime: dataToSave.lightsOnTime,
-                lightsOffTime: dataToSave.lightsOffTime,
-                lightTimeFormat: dataToSave.lightTimeFormat,
-                notes: dataToSave.notes.trim(),
-                cleaningTasks: dataToSave.cleaningTasks,
-                tags: dataToSave.tags,
-                speciesLabels: dataToSave.speciesLabels,
-                imageUrl: dataToSave.imageUrl,
-            };
-
-            if (imageFileToSave) {
-                const uploadFormData = new FormData();
-                uploadFormData.append('file', imageFileToSave);
-                const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
-                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
-                });
-                payload.imageUrl = res.data.imageUrl;
-            }
-
-            if (enclosureIdToSave) {
-                await axios.put(`${API_BASE_URL}/enclosures/${enclosureIdToSave}`, payload,
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-            } else {
-                await axios.post(`${API_BASE_URL}/enclosures`, payload,
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-            }
-            handleCloseEnclosureModal();
-            fetchEnclosures();
-        } catch (err) {
-            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save enclosure');
-        } finally { setEnclosureSaving(false); }
-    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, enclosureSaving, handleCloseEnclosureModal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showArchiveScreen]);
     
-    const getSpeciesCategory = (species) => {
-        if (!species) return 'Other';
-        const s = species.toLowerCase();
-        if (s.includes('mouse') || s.includes('rat') || s.includes('hamster') || s.includes('guinea pig')) {
-            return 'Mammal';
-        }
-        if (s.includes('snake') || s.includes('lizard') || s.includes('gecko') || s.includes('turtle')) {
-            return 'Reptile';
-        }
-        if (s.includes('parrot') || s.includes('finch') || s.includes('bird')) {
-            return 'Bird';
-        }
-        if (s.includes('frog') || s.includes('salamander') || s.includes('axolotl')) {
-            return 'Amphibian';
-        }
-        if (s.includes('fish')) {
-            return 'Fish';
-        }
-        if (s.includes('tarantula') || s.includes('scorpion') || s.includes('spider') || s.includes('invertebrate')) {
-            return 'Invertebrate';
-        }
-        return 'Other';
-    };
-
-    // Base list for "active" animals (not sold or archived) for dashboard counts.
-    const activeAnimalsForDashboard = useMemo(() => {
-        return allAnimalsRaw.filter(a =>
-            !a.isViewOnly &&
-            !a.archived
-        );
-    }, [allAnimalsRaw]);
-
-    const categoryBreakdown = useMemo(() => {
-        const breakdown = { 'Mammal': 0, 'Reptile': 0, 'Bird': 0, 'Amphibian': 0, 'Fish': 0, 'Invertebrate': 0, 'Other': 0 };
-        activeAnimalsForDashboard.forEach(animal => {
-            const category = getSpeciesCategory(animal.species);
-            breakdown[category]++;
-        });
-
-        const total = activeAnimalsForDashboard.length;
-        if (total === 0) return [];
-        return Object.entries(breakdown).map(([name, count]) => ({ name, count, percentage: ((count / total) * 100).toFixed(1) })).filter(cat => cat.count > 0);
-    }, [activeAnimalsForDashboard]);
-
     // Save filters to localStorage whenever they change
     useEffect(() => {
         try {
@@ -751,24 +656,14 @@ const handleArchive = useCallback(async (animalToArchive) => {
     }, [appliedNameFilter]);
     
     useEffect(() => {
-          try { localStorage.setItem('animalList_genderFilter', genderFilter); }
-        catch (e) { console.warn('Failed to save genderFilter', e); }
-    }, [genderFilter]);
-
+        try {
+            localStorage.setItem('animalList_selectedGenders_v2', JSON.stringify(selectedGenders));
+        } catch (e) { console.warn('Failed to save selectedGenders', e); }
+    }, [selectedGenders]);
+    
     // Removed selectedSpecies persistence - always default to showing all species
     // This prevents confusion when users create new animals and they don't appear due to cached filters
     
-useEffect(() => {
-        try { localStorage.setItem('animalList_speciesFilter', speciesFilter); }
-        catch (e) { console.warn('Failed to save speciesFilter', e); }
-    }, [speciesFilter]);
-
-    useEffect(() => {
-        try { localStorage.setItem('animalList_categoryFilter', categoryFilter); }
-        catch (e) { console.warn('Failed to save categoryFilter', e); }
-    }, [categoryFilter]);
-
-
     useEffect(() => {
         try {
             localStorage.setItem('animalList_statusFilterPregnant', statusFilterPregnant.toString());
@@ -789,35 +684,26 @@ useEffect(() => {
     
     useEffect(() => {
         try {
-            localStorage.setItem('animalList_statusFilterReproductive', statusFilterReproductive);
-        } catch (e) { console.warn('Failed to save statusFilterReproductive', e); }
-    }, [statusFilterReproductive]);
+            localStorage.setItem('animalList_showOwned', showOwned.toString());
+        } catch (e) { console.warn('Failed to save showOwned', e); }
+    }, [showOwned]);
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_showUnowned', showUnowned.toString());
+        } catch (e) { console.warn('Failed to save showUnowned', e); }
+    }, [showUnowned]);
     
     useEffect(() => {
-        try { localStorage.setItem('animalList_ownedFilterMode', ownedFilterMode); }
-        catch (e) { console.warn('Failed to save ownedFilterMode', e); }
-    }, [ownedFilterMode]);
-    useEffect(() => { try {
+        try {
             localStorage.setItem('animalList_publicFilter', publicFilter);
         } catch (e) { console.warn('Failed to save publicFilter', e); }
     }, [publicFilter]);
-
-     useEffect(() => {
-        try { localStorage.setItem('animalList_speciesFilter', speciesFilter); }
-        catch (e) { console.warn('Failed to save speciesFilter', e); }
-    }, [speciesFilter]);
 
     useEffect(() => {
         try {
             localStorage.setItem('animalList_blFilter', JSON.stringify(blFilter));
         } catch (e) { console.warn('Failed to save blFilter', e); }
     }, [blFilter]);
-
-    useEffect(() => {
-        try {
-            localStorage.setItem(`ct_list_columns_${userKey}`, JSON.stringify(listViewColumns));
-        } catch (e) { console.warn('Failed to save listViewColumns', e); }
-    }, [listViewColumns, userKey]);
 
     const fetchAnimals = useCallback(async () => {
         // Two-phase fetch: fast owned-only first, then all animals in background
@@ -869,10 +755,20 @@ useEffect(() => {
             showModalMessageRef.current('Error', 'Failed to fetch animal list.');
             setLoading(false);
         } finally {
-            // setPendingFilters(false); // This state was removed, causing a ReferenceError.
+            setPendingFilters(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [authToken]);
+
+    // Apply filters: snapshot current UI filter state into appliedFilters
+    const applyFilters = useCallback(() => {
+        setAppliedFilters({
+            statusFilter, selectedGenders, selectedSpecies,
+            statusFilterPregnant, statusFilterNursing, statusFilterMating,
+            publicFilter, blFilter,
+        });
+        setPendingFilters(false);
+    }, [statusFilter, selectedGenders, selectedSpecies, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
 
     // Species list is now derived from the fetchAnimals result - no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
@@ -888,18 +784,7 @@ useEffect(() => {
                 headers: { Authorization: `Bearer ${authToken}` },
                 params: { slim: 'true' }
             });
-            const archivedRes = await axios.get(`${API_BASE_URL}/animals/archived`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            // Manually add `archived: true` to animals from the archived list,
-            // as the backend doesn't seem to include this flag, which breaks counter logic.
-            const archivedData = (archivedRes.data?.archived || []).map(a => ({ ...a, archived: true }));
-            // Also ensure sold/transferred animals are correctly marked as view-only for the counters.
-            const soldTransferredData = (archivedRes.data?.soldTransferred || []).map(a => ({ ...a, isViewOnly: true }));
-
-            const combinedData = [...(res.data || []), ...archivedData, ...soldTransferredData];
-            const uniqueData = Array.from(new Map(combinedData.map(item => [item.id_public || item._id, item])).values());
-            setAllAnimalsRaw(uniqueData);
+            setAllAnimalsRaw(res.data || []);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
@@ -914,32 +799,6 @@ useEffect(() => {
             setAvailableAnimalsRaw((res.data || []).filter(a => !a.isViewOnly));
         } catch (err) { console.error('[fetchAvailableAnimals]', err); }
     }, [authToken, API_BASE_URL]);
-
-    const handleClearBreedingLine = async (lineId) => {
-        const lineToClear = breedingLineDefs.find(l => l.id === lineId);
-        if (!lineToClear || !lineToClear.name) return;
-
-        if (!window.confirm(`Are you sure you want to clear the "${lineToClear.name}" breeding line? This will also unassign it from all animals.`)) {
-            return;
-        }
-
-        try {
-            // Assumes a backend endpoint that clears the name and unassigns from all animals.
-            await axios.delete(`${API_BASE_URL}/breeding-lines/${lineId}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-
-            showModalMessageRef.current('Success', `Breeding line "${lineToClear.name}" has been cleared.`);
-
-            // Trigger a refetch in the parent component
-            onBreedingLinesUpdate?.();
-            setShowBreedingLineManager(false);
-
-        } catch (error) {
-            console.error('Error clearing breeding line:', error);
-            showModalMessageRef.current('Error', error.response?.data?.message || 'Failed to clear breeding line.');
-        }
-    };
 
     // Fetch view-only/transferred animals ? these are animals the user sold/transferred but retains view-only access to
     const fetchSoldTransferred = useCallback(async () => {
@@ -1042,9 +901,45 @@ useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [authToken]);
 
-    // Reset management-related screens when navigating away from management view
+    // Fetch the current user's activity log (lazy ? only when log screen opens)
+    const fetchActivityLogs = useCallback(async (page = 1, filters = {}) => {
+        if (!authToken) return;
+        setLogsLoading(true);
+        try {
+            const params = new URLSearchParams({ page, limit: 30 });
+            if (filters.targetType) params.set('targetType', filters.targetType);
+            if (filters.action) params.set('action', filters.action);
+            if (filters.search) params.set('search', filters.search);
+            if (filters.startDate) params.set('startDate', filters.startDate);
+            if (filters.endDate) params.set('endDate', filters.endDate);
+            const res = await axios.get(`${API_BASE_URL}/activity-logs?${params}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            if (page === 1) {
+                setActivityLogs(res.data.logs || []);
+            } else {
+                setActivityLogs(prev => [...prev, ...(res.data.logs || [])]);
+            }
+            setLogsPagination(res.data);
+            setLogsLoaded(true);
+        } catch (err) {
+            console.error('[fetchActivityLogs]', err);
+        } finally {
+            setLogsLoading(false);
+        }
+    }, [authToken, API_BASE_URL]);
+
+    // Auto-fetch logs when the activity log screen opens for the first time
     useEffect(() => {
-        if (animalView !== 'management') { setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
+        if (showActivityLogScreen && !logsLoaded && !logsLoading) {
+            fetchActivityLogs(1, { targetType: 'management' });
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showActivityLogScreen]);
+
+    // Reset log screen when navigating away from management view
+    useEffect(() => {
+        if (animalView !== 'management') { setShowActivityLogScreen(false); setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
     }, [animalView]);
     
     // Auto-fetch duplicates when duplicates screen opens for the first time
@@ -1054,6 +949,28 @@ useEffect(() => {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showDuplicatesScreen]);
+
+    // Fire-and-forget management activity logger (called from management handlers)
+    const logManagementActivity = useCallback(async (action, targetId_public, details = {}) => {
+        if (!authToken) return;
+        try {
+            await axios.post(`${API_BASE_URL}/activity-logs`,
+                { action, targetId_public: targetId_public || null, details },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+        } catch (err) {
+            // Non-critical ? don't surface logging failures to the user
+        }
+    }, [authToken, API_BASE_URL]);
+    const fetchEnclosures = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/enclosures`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setEnclosures(res.data);
+        } catch (err) { console.error('[fetchEnclosures]', err); }
+    }, [authToken]);
+    useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
 
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
@@ -1067,96 +984,6 @@ useEffect(() => {
         setSuppliesLoading(false);
     }, [authToken, API_BASE_URL]);
     useEffect(() => { fetchSupplies(); }, [fetchSupplies]);
-
-    const handleEnclosureTagAdd = useCallback(() => {
-        if (!newEnclosureTag.trim()) return;
-        setEnclosureFormData(p => ({ ...p, tags: [...new Set([...(p.tags || []), newEnclosureTag.trim()])] }));
-        setNewEnclosureTag('');
-    }, [newEnclosureTag]);
-
-    const handleEnclosureTagRemove = useCallback((tagToRemove) => {
-        setEnclosureFormData(p => ({ ...p, tags: (p.tags || []).filter(t => t !== tagToRemove) }));
-    }, []);
-
-    const openEnclosureModal = useCallback((enclosure) => {
-        console.log('[AnimalList] openEnclosureModal called. Editing enclosure:', enclosure ? enclosure._id : 'new');
-        if (enclosure) {
-            // Edit mode
-            const dims = enclosure.dimensions || enclosure.size;
-            let length = '', width = '', height = '', dimensionsUnit = 'in';
-            if (typeof dims === 'object' && dims !== null) {
-                length = dims.length || '';
-                width = dims.width || '';
-                height = dims.height || '';
-                dimensionsUnit = dims.unit || 'in';
-            }
-            setEnclosureFormData({
-                name: enclosure.name || '',
-                enclosureType: enclosure.enclosureType || enclosure.roomType || '',
-                purpose: enclosure.purpose || 'general',
-                location: enclosure.location || '',
-                capacity: enclosure.capacity || '',
-                length, width, height, dimensionsUnit,
-                tempMin: enclosure.tempMin ?? enclosure.temperatureRange?.min ?? '',
-                tempMax: enclosure.tempMax ?? enclosure.temperatureRange?.max ?? '',
-                temperatureUnit: enclosure.temperatureUnit || 'C',
-                humidityMin: enclosure.humidityMin ?? enclosure.humidityRange?.min ?? '',
-                humidityMax: enclosure.humidityMax ?? enclosure.humidityRange?.max ?? '',
-                lightsOnTime: enclosure.lightsOnTime || '',
-                lightsOffTime: enclosure.lightsOffTime || '',
-                lightTimeFormat: enclosure.lightTimeFormat || '24h',
-                notes: enclosure.notes || enclosure.description || '',
-                imageUrl: enclosure.imageUrl || '',
-                tags: enclosure.tags || [],
-                speciesLabels: enclosure.speciesLabels || [],
-                cleaningTasks: enclosure.cleaningTasks || [],
-            });
-            setEnclosureImagePreview(enclosure.imageUrl || null);
-            setEnclosureImageFile(null);
-            setEditingEnclosureId(enclosure._id);
-        } else {
-            // Add new mode
-            setEnclosureFormData({
-                name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
-                purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
-                lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-                cleaningTasks: []
-            });
-            setEnclosureImagePreview(null);
-            setEnclosureImageFile(null);
-            setEditingEnclosureId(null);
-        }
-        setShowEnclosureModal(true);
-    }, [setEnclosureFormData, setEnclosureImagePreview, setEnclosureImageFile, setEditingEnclosureId, setShowEnclosureModal]);
-
-    const handleEnclosureSpeciesLabelAdd = useCallback(() => {
-        if (!newEnclosureSpeciesLabel.trim()) return;
-        setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), newEnclosureSpeciesLabel.trim()])] }));
-        setNewEnclosureSpeciesLabel('');
-    }, [newEnclosureSpeciesLabel]);
-
-    const handleEnclosureSpeciesLabelRemove = useCallback((labelToRemove) => {
-        setEnclosureFormData(p => ({ ...p, speciesLabels: (p.speciesLabels || []).filter(l => l !== labelToRemove) }));
-    }, []);
-
-    const handleOpenDetail = async (enclosure) => {
-        setSelectedEnclosure(enclosure);
-        setShowDetailModal(true);
-        setLoadingAnimals(true);
-        try {
-            const response = await axios.get(`${API_BASE_URL}/animals?enclosureId=${enclosure._id || enclosure.id}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            setEnclosureAnimals(response.data || []);
-        } catch (err) {
-            console.error('Failed to fetch enclosure animals:', err);
-            setEnclosureAnimals([]);
-        } finally {
-            setLoadingAnimals(false);
-        }
-    };
-
-
 
     // Fetch user's custom species order on mount
     useEffect(() => {
@@ -1179,14 +1006,12 @@ useEffect(() => {
 
     const groupedAnimals = useMemo(() => {
         let source = animals;
-
-        if (categoryFilter) {
-            source = source.filter(a => getSpeciesCategory(a.species) === categoryFilter);
-        }
+        // --- Applied panel filters (only update on "Apply Filters" click) ---
+        const af = appliedFilters;
 
         // Status filter
-        if (statusFilter) {
-            source = source.filter(a => a.status === statusFilter);
+        if (af.statusFilter) {
+            source = source.filter(a => a.status === af.statusFilter);
         }
 
         // Name search (applied on Search button click)
@@ -1203,88 +1028,50 @@ useEffect(() => {
         }
 
         // Species filter
-         if (speciesFilter) {
-            source = source.filter(a => a.species === speciesFilter);
+        if (af.selectedSpecies.length > 0) {
+            const selectedSpeciesKeys = new Set(af.selectedSpecies.map(normalizeSpeciesForFilter));
+            source = source.filter(a => selectedSpeciesKeys.has(normalizeSpeciesForFilter(a.species)));
         }
 
         // Gender filter
-        if (genderFilter) {
-            source = source.filter(a => a.gender === genderFilter);
+        if (af.selectedGenders.length === 0) {
+            source = [];
+        } else if (af.selectedGenders.length < GENDER_OPTIONS.length) {
+            source = source.filter(a => af.selectedGenders.includes(a.gender));
         }
 
         // Pregnant / Nursing / Mating filters
-        if (statusFilterPregnant || statusFilterNursing) {
+        if (af.statusFilterPregnant || af.statusFilterNursing) {
             source = source.filter(a => (a.gender || '').toLowerCase() !== 'male');
         }
-        if (statusFilterPregnant) source = source.filter(a => a.isPregnant === true);
-        if (statusFilterNursing) source = source.filter(a => a.isNursing === true);
-        if (statusFilterMating) source = source.filter(a => a.isInMating === true);
-        if (statusFilterReproductive !== 'none') {
-            // Reproductive status filter - only for CTU2
-            const isCTU2 = userProfile?.id_public === 'CTU2' || userProfile?.creatorId_public === 'CTU2';
-            if (isCTU2) {
-                if (statusFilterReproductive === 'all') {
-                    source = source.filter(a => a.isPlannedMating || a.isInMating || a.isPregnant || a.isNursing);
-                } else if (statusFilterReproductive === 'planned') {
-                    source = source.filter(a => a.isPlannedMating === true);
-                } else if (statusFilterReproductive === 'mating') {
-                    source = source.filter(a => a.isInMating === true);
-                } else if (statusFilterReproductive === 'pregnant') {
-                    source = source.filter(a => a.isPregnant === true);
-                } else if (statusFilterReproductive === 'nursing') {
-                    source = source.filter(a => a.isNursing === true);
-                }
-            }
-        }
+        if (af.statusFilterPregnant) source = source.filter(a => a.isPregnant === true);
+        if (af.statusFilterNursing) source = source.filter(a => a.isNursing === true);
+        if (af.statusFilterMating) source = source.filter(a => a.isInMating === true);
 
         // Public/private filter
-        if (publicFilter === 'public') {
+        if (af.publicFilter === 'public') {
             source = source.filter(a => a.showOnPublicProfile === true);
-        } else if (publicFilter === 'private') {
+        } else if (af.publicFilter === 'private') {
             source = source.filter(a => !a.showOnPublicProfile);
         }
 
+        // --- Instant filters (no Apply needed) ---
         // Ownership filter
-        if (ownedFilterMode === 'owned') {
-            source = source.filter(a => a.isOwned !== false); // isOwned: true or undefined for owned, false for unowned
+        if (showOwned && !showUnowned) {
+            source = source.filter(a => a.isOwned !== false);
+        } else if (!showOwned && showUnowned) {
+            source = source.filter(a => a.isOwned === false);
+        } else if (!showOwned && !showUnowned) {
+            source = [];
         }
         // Breeding line filter
-        if (blFilter.length > 0) {
+        if (af.blFilter.length > 0) {
             source = source.filter(a => {
                 const assigned = animalBreedingLines[a.id_public] || [];
-                return blFilter.some(lineId => assigned.map(String).includes(String(lineId)));
+                return af.blFilter.some(lineId => assigned.includes(lineId));
             });
         }
-
-        // Create a new array to sort to avoid mutating the original source
-        const sortedSource = [...source];
-
-        // Sorting logic
-        if (sortConfig.key) {
-            sortedSource.sort((a, b) => {
-                const dir = sortConfig.direction === 'ascending' ? 1 : -1;
-                let valA, valB;
-
-                if (sortConfig.key === 'name') {
-                    valA = (a.name || '').toLowerCase();
-                    valB = (b.name || '').toLowerCase();
-                } else if (sortConfig.key === 'birthdate') {
-                    const dateA = a.birthDate ? new Date(a.birthDate) : null;
-                    const dateB = b.birthDate ? new Date(b.birthDate) : null;
-                    if (dateA === dateB) return 0;
-                    if (dateA === null) return 1; // nulls/invalid dates last
-                    if (dateB === null) return -1;
-                    valA = dateA.getTime();
-                    valB = dateB.getTime();
-                }
-
-                if (valA < valB) return -1 * dir;
-                if (valA > valB) return 1 * dir;
-                
-                return 0;
-            });
-        }
-        return sortedSource.reduce((groups, animal) => { // ownedFilterMode is a direct dependency now
+        return source.reduce((groups, animal) => {
             const species = animal.species || 'Unspecified Species';
             if (!groups[species]) {
                 groups[species] = [];
@@ -1292,62 +1079,7 @@ useEffect(() => {
             groups[species].push(animal);
             return groups;
         }, {});
-    }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, statusFilterReproductive, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig, userProfile]);
-
-    const displayedAnimalsForList = useMemo(() => {
-        let source = animals;
-
-        if (categoryFilter) {
-            source = source.filter(a => getSpeciesCategory(a.species) === categoryFilter);
-        }
-        if (statusFilter) source = source.filter(a => a.status === statusFilter);
-        if (appliedNameFilter) {
-            const term = appliedNameFilter.toLowerCase();
-            source = source.filter(a => {
-                const name = (a.name || '').toString().toLowerCase();
-                const registry = (a.breederAssignedId || a.registryCode || '').toString().toLowerCase();
-                const idPublic = (a.id_public || '').toString().toLowerCase();
-                const tags = (a.tags || []).map(t => t.toLowerCase());
-                const tagsMatch = tags.some(tag => tag.includes(term));
-                return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch;
-            });
-        }
-        if (speciesFilter) source = source.filter(a => a.species === speciesFilter);
-        if (genderFilter) source = source.filter(a => a.gender === genderFilter);
-        if (statusFilterPregnant) source = source.filter(a => a.isPregnant === true);
-        if (statusFilterNursing) source = source.filter(a => a.isNursing === true);
-        if (statusFilterMating) source = source.filter(a => a.isInMating === true);
-        if (publicFilter === 'public') {
-            source = source.filter(a => a.showOnPublicProfile === true);
-        } else if (publicFilter === 'private') {
-            source = source.filter(a => !a.showOnPublicProfile);
-        }
-        if (ownedFilterMode === 'owned') source = source.filter(a => a.isOwned !== false);
-        if (blFilter.length > 0) source = source.filter(a => { const assigned = animalBreedingLines[a.id_public] || []; return blFilter.some(lineId => assigned.map(String).includes(String(lineId))); });
-        const sortedSource = [...source];
-        if (sortConfig.key) {
-            sortedSource.sort((a, b) => {
-                const dir = sortConfig.direction === 'ascending' ? 1 : -1;
-                let valA, valB;
-                if (sortConfig.key === 'name') {
-                    valA = (a.name || '').toLowerCase();
-                    valB = (b.name || '').toLowerCase();
-                } else if (sortConfig.key === 'birthdate') {
-                    const dateA = a.birthDate ? new Date(a.birthDate) : null;
-                    const dateB = b.birthDate ? new Date(b.birthDate) : null;
-                    if (dateA === dateB) return 0;
-                    if (dateA === null) return 1;
-                    if (dateB === null) return -1;
-                    valA = dateA.getTime();
-                    valB = dateB.getTime();
-                }
-                if (valA < valB) return -1 * dir;
-                if (valA > valB) return 1 * dir;
-                return 0;
-            });
-        }
-        return sortedSource;
-    }, [animals, statusFilter, genderFilter, speciesFilter, categoryFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, statusFilterReproductive, publicFilter, blFilter, appliedNameFilter, animalBreedingLines, ownedFilterMode, sortConfig, userProfile]);
+    }, [animals, appliedFilters, appliedNameFilter, showOwned, showUnowned, animalBreedingLines]);
 
     const displayedAnimalCount = useMemo(() => {
         return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
@@ -1382,150 +1114,96 @@ useEffect(() => {
         });
     }, [allUserSpecies, userSpeciesOrder]);
 
-    const allSpeciesCategories = useMemo(() => {
-        const categories = new Set(allUserSpecies.map(getSpeciesCategory));
-        return ['All Categories', ...Array.from(categories).sort()];
-    }, [allUserSpecies]);
-
-    const filteredSpeciesNames = useMemo(() => {
-        if (!categoryFilter) {
-            return speciesNames;
+    // Initialize species filter to "All" on first load only
+    // Also add any new species that appear (e.g., after creating a new animal)
+    // Keep selectedSpecies in sync with allUserSpecies (the unfiltered master list)
+    useEffect(() => {
+        if (allUserSpecies.length === 0) return;
+        if (selectedSpecies.length === 0) {
+            // First load: select everything
+            setSelectedSpecies([...allUserSpecies]);
+            setAppliedFilters(prev => ({ ...prev, selectedSpecies: [...allUserSpecies] }));
+        } else {
+            // Add any newly-seen species so they aren't silently hidden
+            const newSpecies = allUserSpecies.filter(s => !selectedSpecies.includes(s));
+            if (newSpecies.length > 0) {
+                setSelectedSpecies(prev => [...prev, ...newSpecies]);
+                setAppliedFilters(prev => ({ ...prev, selectedSpecies: [...prev.selectedSpecies, ...newSpecies] }));
+            }
         }
-        return speciesNames.filter(species => getSpeciesCategory(species) === categoryFilter);
-    }, [speciesNames, categoryFilter]);
-
-    // -- Dashboard & Management Data Calculations --
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const daysSince = (dateStr) => {
-        if (!dateStr) return null;
-        const d = new Date(dateStr);
-        d.setHours(0, 0, 0, 0);
-        return Math.floor((today - d) / 86400000);
-    };
-
-    const isDue = (lastDate, freqDays) => {
-        if (!freqDays) return false;
-        if (!lastDate) return true;
-        const ds = daysSince(lastDate);
-        return ds !== null && ds >= Number(freqDays);
-    };
-
-    // --- Dashboard Counter Calculations ---
-    // Per your instructions, these counters strictly follow these rules:
-    // - Total = All animals excluding sold/archived.
-    // - Owned = All owned animals excluding sold/archived.
-    // - Public = All public animals excluding sold/archived.
-    // - Sold/Archived = All animals that are sold (transferred) or archived.
-    // - DECEASED animals are NOT excluded from any of these counts.
-
-    // Sold/Archived = all transferred (isViewOnly) + Archived.
-    const soldOrArchivedCount = useMemo(() => {
-         return allAnimalsRaw.filter(a => a.archived || a.isViewOnly).length;
-}, [allAnimalsRaw]);
-
-    // Dashboard Counters
-    const totalDashboardAnimalsCount = activeAnimalsForDashboard.length;
-    const ownedDashboardCount = activeAnimalsForDashboard.filter(a => a.isOwned !== false).length;
-    const publicDashboardCount = activeAnimalsForDashboard.filter(a => a.showOnPublicProfile === true).length;
-
-    const availableDashboardList = useMemo(() => {
-        return activeAnimalsForDashboard.filter(a => a.status === 'Available');
-    }, [activeAnimalsForDashboard]);
-
-    const feedDueDashboard = useMemo(() => {
-        return activeAnimalsForDashboard.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
-    }, [activeAnimalsForDashboard]);
-
-    const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
-    const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
-    const inReproEnclosure = a => a.enclosureId && reproEnclosureIds.has(a.enclosureId);
-
-    const supplyReorderDue = supplies.filter(s =>
-        (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
-        (s.nextOrderDate && new Date(s.nextOrderDate) < today)
-    );
-    const healthEnclosures = enclosures.filter(e => e.purpose === 'health');
-    const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
-    const inHealthEnclosure = useCallback(a => a.enclosureId && healthEnclosureIds.has(a.enclosureId), [healthEnclosureIds]);
-
-    const quarantineDashboardList = useMemo(() => {
-        return activeAnimalsForDashboard.filter(a => a.isQuarantine && !inHealthEnclosure(a));
-    }, [activeAnimalsForDashboard, inHealthEnclosure]);
-
-    const treatmentDashboardList = useMemo(() => {
-        return activeAnimalsForDashboard.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
-    }, [activeAnimalsForDashboard, inHealthEnclosure]);
-
-    const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
-
-    // The original 'allAnimals' variable (used for the main list and management views) remains unchanged.
-    const quarantineList = allAnimalsRaw.filter(a => a.isQuarantine && !inHealthEnclosure(a));
-    const treatmentList = allAnimalsRaw.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
-    const allAnimals = allAnimalsRaw.filter(a => !a.isViewOnly);
-
-    // Other lists that might depend on 'allAnimals' for management views
-    const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
-    const matingList = allAnimals.filter(a => a.isInMating && !inReproEnclosure(a));
-    const nursingList = allAnimals.filter(a => a.isNursing && !inReproEnclosure(a));
-    const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
-    const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays)); // This is for the Feeding management view
-    const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
-    const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
-    const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
-    const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
-    const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
-    const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
-    const animalsWithEnclosureCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.maintenanceFrequencyDays));
-    const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
-    const maintMaintenanceDue = allAnimals.filter(a => a.maintenanceFrequencyDays && isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length;
-    const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) + supplyReorderDue.length + enclosureCarTasksDue + maintMaintenanceDue;
-    const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
-    const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
-    const enclosureAnimalMap = {}; // { enclosureId: [animals] }
-    const unassignedAnimals = [];
-    allAnimals.forEach(a => {
-        const key = a.enclosureId || 'unassigned';
-        if (!enclosureAnimalMap[key]) enclosureAnimalMap[key] = [];
-        enclosureAnimalMap[key].push(a);
-    });
+    }, [allUserSpecies]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
     const handleSearchInputChange = (e) => setSearchInput(e.target.value);
-    const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); setStatusFilterMating(false); setStatusFilterReproductive('none'); };
-    const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); setStatusFilterReproductive('none'); };
-    const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); setStatusFilterReproductive('none'); };
-
+    const toggleGender = (gender) => {
+        setSelectedGenders(prev => 
+            prev.includes(gender) 
+                ? prev.filter(g => g !== gender) 
+                : [...prev, gender]
+        );
+    };
+    const toggleSpecies = (species) => {
+        setSelectedSpecies(prev => 
+            prev.includes(species)
+                ? prev.filter(s => s !== species)
+                : [...prev, species]
+        );
+    };
+    const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); setStatusFilterMating(false); };
+    const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); };
+    const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); };
+    
     // Check if any filters are active (different from defaults) ? uses appliedFilters for panel filters
     const hasActiveFilters = (
-        statusFilter !== '' ||
+        appliedFilters.statusFilter !== '' ||
         appliedNameFilter !== '' ||
-        genderFilter !== '' ||
-        speciesFilter !== '' ||
-        categoryFilter !== '' ||
-        statusFilterPregnant ||
-        statusFilterNursing ||
-        statusFilterMating ||
-        statusFilterReproductive !== 'none' ||
-        publicFilter !== '' ||
-        blFilter.length > 0
+        searchInput !== '' ||
+        appliedFilters.selectedGenders.length !== 4 ||
+        (appliedFilters.selectedSpecies.length > 0 && !speciesNames.every(species => appliedFilters.selectedSpecies.includes(species))) ||
+        appliedFilters.statusFilterPregnant ||
+        appliedFilters.statusFilterNursing ||
+        appliedFilters.statusFilterMating ||
+        appliedFilters.publicFilter !== '' ||
+        appliedFilters.blFilter.length > 0
     );
 
+    // Detect if panel UI state differs from applied snapshot (show pulse on Apply button)
+    const panelDirty = (
+        statusFilter !== appliedFilters.statusFilter ||
+        JSON.stringify(selectedGenders) !== JSON.stringify(appliedFilters.selectedGenders) ||
+        JSON.stringify(selectedSpecies) !== JSON.stringify(appliedFilters.selectedSpecies) ||
+        statusFilterPregnant !== appliedFilters.statusFilterPregnant ||
+        statusFilterNursing !== appliedFilters.statusFilterNursing ||
+        statusFilterMating !== appliedFilters.statusFilterMating ||
+        publicFilter !== appliedFilters.publicFilter ||
+        JSON.stringify(blFilter) !== JSON.stringify(appliedFilters.blFilter)
+    );
+    
     const handleClearFilters = () => {
         setStatusFilter('');
         setSearchInput('');
         setAppliedNameFilter('');
-        setGenderFilter('');
-        setSpeciesFilter('');
-        setCategoryFilter('');
+        setSelectedGenders(['Male', 'Female', 'Intersex', 'Unknown']);
+        setSelectedSpecies([...speciesNames]);
         setStatusFilterPregnant(false);
         setStatusFilterNursing(false);
         setStatusFilterMating(false);
-        setStatusFilterReproductive('none');
-        setOwnedFilterMode('owned'); // Reset to default 'owned'
+        setShowOwned(true);
+        setShowUnowned(false);
         setPublicFilter('');
         setBlFilter([]);
+        // Also reset the applied snapshot to defaults
+        setAppliedFilters({
+            statusFilter: '',
+            selectedGenders: ['Male', 'Female', 'Intersex', 'Unknown'],
+            selectedSpecies: [...speciesNames],
+            statusFilterPregnant: false,
+            statusFilterNursing: false,
+            statusFilterMating: false,
+            publicFilter: '',
+            blFilter: [],
+        });
+        setPendingFilters(false);
     };
     
     const handleRefresh = async () => {
@@ -1537,7 +1215,6 @@ useEffect(() => {
 
             // Re-fetch the animal list from the server
             await fetchAnimals();
-            await fetchAllAnimals();
         } catch (error) {
             console.error('Error refreshing:', error);
         } finally {
@@ -1672,6 +1349,34 @@ useEffect(() => {
         }
     };
 
+    const moveSpecies = async (species, direction) => {
+        const currentIndex = speciesNames.indexOf(species);
+        if (currentIndex === -1) return;
+
+        const newOrder = [...speciesNames];
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+        // Check bounds
+        if (newIndex < 0 || newIndex >= newOrder.length) return;
+
+        // Swap
+        [newOrder[newIndex], newOrder[currentIndex]] = [newOrder[currentIndex], newOrder[newIndex]];
+
+        // Update local state immediately
+        setUserSpeciesOrder(newOrder);
+
+        // Save to backend
+        try {
+            await axios.post(`${API_BASE_URL}/users/species-order`, 
+                { speciesOrder: newOrder },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+        } catch (error) {
+            console.error('[SPECIES ORDER] Error saving:', error);
+            showModalMessage('Error', 'Failed to save species order.');
+        }
+    };
+
     const toggleBulkPrivacy = async (species, makePublic) => {
         const speciesAnimals = groupedAnimals[species] || [];
         const animalIds = speciesAnimals.map(animal => animal.id_public);
@@ -1692,11 +1397,6 @@ useEffect(() => {
                 : animal
         );
         setAnimals(updatedAnimals);
-        setAllAnimalsRaw(prev => prev.map(animal =>
-            animalIds.includes(animal.id_public)
-                ? { ...animal, showOnPublicProfile: makePublic, isDisplay: makePublic }
-                : animal
-        ));
 
         // Update database in the background
         let failedUpdates = 0;
@@ -1742,11 +1442,6 @@ useEffect(() => {
             isDisplay: makePublic
         }));
         setAnimals(updatedAnimals);
-        setAllAnimalsRaw(prev => prev.map(animal => ({
-            ...animal,
-            showOnPublicProfile: makePublic,
-            isDisplay: makePublic
-        })));
 
         // Update database in the background
         let failedUpdates = 0;
@@ -1775,26 +1470,6 @@ useEffect(() => {
         }
     };
 
-    const handleListToggle = (animalId) => {
-        setListSelectedIds(prev => {
-            const next = new Set(prev);
-            if (next.has(animalId)) {
-                next.delete(animalId);
-            } else {
-                next.add(animalId);
-            }
-            return next;
-        });
-    };
-
-    const handleListSelectAll = (e) => {
-        if (e.target.checked) {
-            setListSelectedIds(new Set(displayedAnimalsForList.map(a => a.id_public)));
-        } else {
-            setListSelectedIds(new Set());
-        }
-    };
-
     const handleBulkDelete = async (species) => {
         const selectedIds = selectedAnimals[species] || [];
         if (selectedIds.length === 0) {
@@ -1816,7 +1491,6 @@ useEffect(() => {
             setBulkDeleteMode(prev => ({ ...prev, [species]: false }));
             setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
             await fetchAnimals();
-            await fetchAllAnimals();
         } catch (error) {
             console.error('Error deleting animals:', error);
             showModalMessage('Error', 'Failed to delete some animals. Please try again.');
@@ -1846,7 +1520,6 @@ useEffect(() => {
             setBulkArchiveMode(prev => ({ ...prev, [species]: false }));
             setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
             await fetchAnimals();
-            await fetchAllAnimals();
             if (showArchiveScreen) {
                 await fetchArchiveData();
             }
@@ -1874,7 +1547,8 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-border'}`}
+                        className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-border'
+                        }`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -1886,13 +1560,6 @@ useEffect(() => {
                             />
                         </div>
                     )}
-                    {/* Transfer icon top-left */}
-                    {animal.originalCreatorId && !isSelectable && (
-                        <div className="absolute top-1 sm:top-2 left-1 sm:left-2 text-black" title="Received Animal">
-                            <ArrowLeftRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
-                        </div>
-                    )}
-
                     {/* Birthdate center-top - only show if not in selection mode */}
                     {birth && !isSelectable && (
                         <div className="absolute top-1 sm:top-2 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-surface/80 px-1 sm:px-2 py-0.5 rounded">
@@ -1918,26 +1585,11 @@ useEffect(() => {
                         )}
                     </div>
                     
-                    {/* Reproductive State Pill */}
-                    <div className="w-full flex justify-center items-center py-1 sm:py-1.5 px-1">
-                        {(() => {
-                            // Determine reproductive state to display (prioritized)
-                            let state = null;
-                            if (animal.isPregnant) {
-                                state = { label: 'Pregnant', color: 'bg-red-100 text-red-800', icon: <ScanHeart size={14} className="fill-current" /> };
-                            } else if (animal.isNursing) {
-                                state = { label: 'Nursing', color: 'bg-green-100 text-green-800', icon: <Droplet size={14} className="fill-current" /> };
-                            } else if (animal.isInMating) {
-                                state = { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: <Zap size={14} className="fill-current" /> };
-                            } else if (animal.isPlannedMating) {
-                                state = { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: <Calendar size={14} /> };
-                            }
-                            return state ? (
-                                <span className={`text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
-                                    {state.icon} {state.label}
-                                </span>
-                            ) : null;
-                        })()}
+                    {/* Icon row */}
+                    <div className="w-full flex justify-center items-center space-x-1 sm:space-x-2 py-0.5 sm:py-1">
+                        {animal.isInMating && <Hourglass className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
+                        {animal.isPregnant && <Bean className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
+                        {animal.isNursing && <Milk className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
                     </div>
                     
                     {/* Prefix / Name under image */}
@@ -2020,10 +1672,8 @@ useEffect(() => {
                         </div>
                     )}
                     {/* Status bar at bottom */}
-                    <div className="w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto bg-gray-100 dark:bg-dark-surface-hover">
-                        <div className="text-[10px] sm:text-xs font-medium capitalize text-gray-700 dark:text-dark-text-secondary">
-                            {animal.status || 'Unknown'}
-                        </div>
+                    <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto bg-gray-100 dark:bg-dark-surface-hover`}>
+                        <div className={`text-[10px] sm:text-xs font-medium text-gray-700 dark:text-dark-text-secondary`}>{(animal.status || 'Unknown')}</div>
                     </div>
                 </div>
             </div>
@@ -2096,6 +1746,544 @@ useEffect(() => {
         return formatDateDisplay(dateStr);
     };
 
+    // -- Activity Log Screen ------------------------------------------------------
+    const renderActivityLogScreen = () => {
+        const ACTION_OPTIONS = [
+            { value: '', label: 'All Management Actions' },
+            { value: 'enclosure_create', label: 'Created Enclosure' },
+            { value: 'enclosure_update', label: 'Updated Enclosure' },
+            { value: 'enclosure_delete', label: 'Deleted Enclosure' },
+            { value: 'enclosure_assign', label: 'Assigned to Enclosure' },
+            { value: 'enclosure_unassign', label: 'Removed from Enclosure' },
+            { value: 'animal_fed', label: 'Marked as Fed' },
+            { value: 'care_task_done', label: 'Care Task Completed' },
+            { value: 'enclosure_task_done', label: 'Cleaning Task Completed' },
+            { value: 'reproduction_update', label: 'Reproductive Status Updated' },
+        ];
+
+        // targetType: 'management' is always included to scope logs to management panel only
+        const currentFilters = { targetType: 'management', action: logFilterAction, search: logFilterSearch, startDate: logFilterStartDate, endDate: logFilterEndDate };
+
+        const handleApplyFilters = () => {
+            setActivityLogs([]);
+            setLogsLoaded(false);
+            fetchActivityLogs(1, currentFilters);
+        };
+
+        const handleResetFilters = () => {
+            setLogFilterAction('');
+            setLogFilterSearch('');
+            setLogFilterStartDate('');
+            setLogFilterEndDate('');
+            setActivityLogs([]);
+            setLogsLoaded(false);
+            fetchActivityLogs(1, { targetType: 'management' });
+        };
+
+        return (
+            <div className="mt-4 space-y-4">
+                {/* Back + Refresh row */}
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setShowActivityLogScreen(false)}
+                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
+                    >
+                        <ChevronLeft size={16} />
+                        Back to Management
+                    </button>
+                    <button
+                        onClick={() => { setLogsLoaded(false); fetchActivityLogs(1, currentFilters); }}
+                        disabled={logsLoading}
+                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
+                    >
+                        <RefreshCw size={12} />
+                        Refresh
+                    </button>
+                </div>
+
+                {/* Title + total */}
+                <div className="flex items-center gap-2">
+                    <ScrollText size={18} className="text-indigo-600" />
+                    <h3 className="text-lg font-semibold text-gray-800">Activity Log</h3>
+                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">{logsPagination.total || 0} entries</span>
+                </div>
+
+                {/* Filter bar */}
+                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Action Type</label>
+                            <select
+                                value={logFilterAction}
+                                onChange={e => setLogFilterAction(e.target.value)}
+                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
+                            >
+                                {ACTION_OPTIONS.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Search (animal name / ID)</label>
+                            <input
+                                type="text"
+                                value={logFilterSearch}
+                                onChange={e => setLogFilterSearch(e.target.value)}
+                                onKeyPress={e => { if (e.key === 'Enter') handleApplyFilters(); }}
+                                placeholder="e.g. Pixie or CT-00123"
+                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">From Date</label>
+                            <input
+                                type="date"
+                                value={logFilterStartDate}
+                                onChange={e => setLogFilterStartDate(e.target.value)}
+                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">To Date</label>
+                            <input
+                                type="date"
+                                value={logFilterEndDate}
+                                onChange={e => setLogFilterEndDate(e.target.value)}
+                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                        <button
+                            onClick={handleResetFilters}
+                            className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
+                        >
+                            Reset
+                        </button>
+                        <button
+                            onClick={handleApplyFilters}
+                            disabled={logsLoading}
+                            className="text-xs px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                        >
+                            {logsLoading ? 'Loading...' : 'Apply Filters'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Log entries */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    {logsLoading && activityLogs.length === 0 ? (
+                        <div className="flex items-center justify-center py-10 text-gray-400 gap-2">
+                            <Loader2 size={18} className="animate-spin" />
+                            <span className="text-sm">Loading activity log...</span>
+                        </div>
+                    ) : activityLogs.length === 0 ? (
+                        <div className="text-sm text-gray-400 text-center py-10">No activity found for the selected filters.</div>
+                    ) : (
+                        <div className="divide-y divide-gray-100">
+                            {activityLogs.map((log) => (
+                                <div key={log._id} className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50">
+                                    <span className={`mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${getActionColor(log.action)}`} />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm text-gray-800 font-medium">
+                                            {getActionLabel(log.action)}
+                                            {(log.details?.name || log.details?.enclosureName) && <span className="text-gray-500 font-normal"> • <span className="font-medium text-gray-700">{log.details.name || log.details.enclosureName}</span></span>}
+                                            {log.details?.species && !log.details?.name && <span className="text-gray-500 font-normal"> ({log.details.species})</span>}
+                                            {log.details?.status && <span className="text-indigo-500 font-normal text-xs ml-1">({log.details.status})</span>}
+                                        </div>
+                                        {log.targetId_public && (
+                                            <div className="text-xs text-gray-400 mt-0.5">{log.targetId_public}</div>
+                                        )}
+                                        {log.details && Object.keys(log.details).filter(k => !['name', 'species', 'status', 'enclosureName'].includes(k)).length > 0 && (
+                                            <div className="text-xs text-gray-400 mt-0.5">
+                                                {(() => {
+                                                    const entries = Object.entries(log.details)
+                                                        .filter(([k]) => !['name', 'species', 'status', 'enclosureName'].includes(k))
+                                                        .slice(0, 3)
+                                                        .map(([k, v]) => `${k}: ${v}`);
+                                                    const hasDeathField = Object.entries(log.details).some(([k]) => k.toLowerCase().includes('decease') || k.toLowerCase().includes('death'));
+                                                    return entries.join(hasDeathField ? ' † ' : ' • ');
+                                                })()}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-xs text-gray-400 flex-shrink-0 text-right ml-2">
+                                        <div className="font-medium">{formatTimeAgo(log.createdAt)}</div>
+                                        <div className="text-gray-300">{log.createdAt ? new Date(log.createdAt).toLocaleDateString() : ''}</div>
+                                        {log.success === false && <div className="text-red-400 font-medium mt-0.5">failed</div>}
+                                    </div>
+                                </div>
+                            ))}
+                            {logsPagination.page < logsPagination.totalPages && (
+                                <div className="p-3">
+                                    <button
+                                        onClick={() => fetchActivityLogs(logsPagination.page + 1, currentFilters)}
+                                        disabled={logsLoading}
+                                        className="w-full py-2 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition flex items-center justify-center gap-1 disabled:opacity-50"
+                                    >
+                                        {logsLoading ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : `Load more (${activityLogs.length} of ${logsPagination.total})`}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    // -- Supplies & Inventory Screen ---------------------------------------------
+    const renderSuppliesScreen = () => {
+        const CATEGORIES = ['Food', 'Bedding', 'Medication', 'Other'];
+        const CATEGORY_COLORS = {
+            Food: 'bg-green-100 text-green-700',
+            Bedding: 'bg-yellow-100 text-yellow-700',
+            Medication: 'bg-red-100 text-red-700',
+            Other: 'bg-gray-100 text-gray-600',
+        };
+        // Map supply category ? budget expense category
+        const BUDGET_CATEGORY_MAP = { Food: 'food', Bedding: 'housing', Medication: 'medical', Other: 'other' };
+        const isLow = (item) => item.reorderThreshold != null && item.currentStock <= item.reorderThreshold;
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const isOverdue = (item) => item.nextOrderDate && new Date(item.nextOrderDate) < today;
+        const isDueSoon = (item) => { if (!item.nextOrderDate) return false; const d = new Date(item.nextOrderDate); const diff = (d - today) / (1000 * 60 * 60 * 24); return diff >= 0 && diff <= 14; };
+        const needsAttention = (item) => isLow(item) || isOverdue(item);
+        const filtered = supplyCategoryFilter === 'All' ? supplies : supplies.filter(s => s.category === supplyCategoryFilter);
+        const lowStockItems = supplies.filter(isLow);
+        const overdueItems = supplies.filter(isOverdue);
+        const attentionItems = supplies.filter(needsAttention);
+
+        const handleSupplySubmit = async () => {
+            if (!supplyForm.name.trim()) return;
+            setSupplySaving(true);
+            try {
+                if (editingSupplyId) {
+                    const res = await axios.patch(`${API_BASE_URL}/supplies/${editingSupplyId}`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
+                    setSupplies(prev => prev.map(s => s._id === editingSupplyId ? res.data : s));
+                } else {
+                    const res = await axios.post(`${API_BASE_URL}/supplies`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
+                    setSupplies(prev => [...prev, res.data]);
+                }
+                setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
+                setSupplyFormVisible(false);
+                setEditingSupplyId(null);
+            } catch (err) { console.error(err); }
+            setSupplySaving(false);
+        };
+
+        const handleSupplyDelete = async (id) => {
+            if (!window.confirm('Delete this supply item?')) return;
+            try {
+                await axios.delete(`${API_BASE_URL}/supplies/${id}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                setSupplies(prev => prev.filter(s => s._id !== id));
+            } catch (err) { console.error(err); }
+        };
+
+        const handleSupplyEdit = (item) => {
+            setSupplyForm({
+                name: item.name,
+                category: item.category,
+                currentStock: item.currentStock ?? '',
+                unit: item.unit || '',
+                reorderThreshold: item.reorderThreshold ?? '',
+                notes: item.notes || '',
+                isFeederAnimal: item.isFeederAnimal || false,
+                feederType: item.feederType || '',
+                feederSize: item.feederSize || '',
+                costPerUnit: item.costPerUnit ?? '',
+                nextOrderDate: item.nextOrderDate ? new Date(item.nextOrderDate).toISOString().split('T')[0] : '',
+                orderFrequency: item.orderFrequency ?? '',
+                orderFrequencyUnit: item.orderFrequencyUnit || 'months',
+            });
+            setEditingSupplyId(item._id);
+            setSupplyFormVisible(true);
+        };
+
+        const openRestock = (item) => {
+            setRestockingSupplyId(item._id);
+            // Auto-suggest cost from costPerUnit if it's a feeder animal
+            const suggestCost = item.isFeederAnimal && item.costPerUnit ? '' : '';
+            setRestockForm({ qty: '', cost: suggestCost, date: new Date().toISOString().slice(0, 10), notes: '' });
+            setSupplyFormVisible(false);
+            setEditingSupplyId(null);
+        };
+
+                        const handleRestockSubmit = async (item) => {
+            const qty = parseFloat(restockForm.qty);
+            const cost = parseFloat(restockForm.cost);
+            if (!qty || qty <= 0 || !restockForm.cost || cost < 0) return;
+            setRestockSaving(true);
+            try {
+                // 1. Update supply stock (and advance next order date if a schedule is set)
+                const newStock = (item.currentStock || 0) + qty;
+                const stockPatch = { currentStock: newStock };
+                if (item.orderFrequency && item.orderFrequencyUnit) {
+                    const base = new Date();
+                    if (item.orderFrequencyUnit === 'days') base.setDate(base.getDate() + Number(item.orderFrequency));
+                    else if (item.orderFrequencyUnit === 'weeks') base.setDate(base.getDate() + Number(item.orderFrequency) * 7);
+                    else if (item.orderFrequencyUnit === 'months') base.setMonth(base.getMonth() + Number(item.orderFrequency));
+                    stockPatch.nextOrderDate = base.toISOString().split('T')[0];
+                }
+                const supplyRes = await axios.patch(
+                    `${API_BASE_URL}/supplies/${item._id}`,
+                    stockPatch,
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                setSupplies(prev => prev.map(s => s._id === item._id ? supplyRes.data : s));
+
+                // 2. Log budget expense
+                const feederLabel = item.isFeederAnimal && (item.feederType || item.feederSize)
+                    ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}`
+                    : '';
+                await axios.post(
+                    `${API_BASE_URL}/budget/transactions`,
+                    {
+                        type: 'expense',
+                        price: cost,
+                        date: restockForm.date || new Date().toISOString().slice(0, 10),
+                        category: BUDGET_CATEGORY_MAP[item.category] || 'other',
+                        description: `Supplies restock: ${item.name}${feederLabel} ($${qty}${item.unit ? ' ' + item.unit : ''})`,
+
+                        notes: restockForm.notes || null,
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                setRestockingSupplyId(null);
+            } catch (err) { console.error(err); }
+            setRestockSaving(false);
+        };
+
+        return (
+            <div className="mt-4 space-y-4">
+                {/* Refresh */}
+                <div className="flex items-center justify-end">
+                    <button onClick={fetchSupplies} disabled={suppliesLoading}
+                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50">
+                        <RefreshCw size={12} /> Refresh
+                    </button>
+                </div>
+
+                {/* Title + Add button */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Package size={18} className="text-emerald-600" />
+                        <h3 className="text-lg font-semibold text-gray-800">Supplies &amp; Inventory</h3>
+                        <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{supplies.length} item{supplies.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <button
+                        onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(v => !v); }}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium transition"
+                    >
+                        <Plus size={14} /> Add Item
+                    </button>
+                </div>
+
+                {/* Low stock alert */}
+                {attentionItems.length > 0 && (
+                    <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                        <AlertTriangle size={16} className="text-amber-500 mt-0.5 shrink-0" />
+                        <div className="text-sm text-amber-700 space-y-0.5">
+                            {lowStockItems.length > 0 && <div><span className="font-semibold">Low stock:</span> {lowStockItems.map(i => i.name).join(', ')}</div>}
+                            {overdueItems.length > 0 && <div><span className="font-semibold">Order overdue:</span> {overdueItems.map(i => i.name).join(', ')}</div>}
+                        </div>
+                    </div>
+                )}
+
+                {/* Add / Edit form */}
+                {supplyFormVisible && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
+                        <h4 className="text-sm font-semibold text-emerald-800">{editingSupplyId ? 'Edit Item' : 'New Supply Item'}</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Name *</label>
+                                <input type="text" value={supplyForm.name} onChange={e => setSupplyForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Rat blocks" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Category</label>
+                                <select value={supplyForm.category} onChange={e => setSupplyForm(f => ({ ...f, category: e.target.value, isFeederAnimal: e.target.value === 'Food' ? f.isFeederAnimal : false }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400">
+                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Current Stock</label>
+                                <input type="number" min="0" value={supplyForm.currentStock} onChange={e => setSupplyForm(f => ({ ...f, currentStock: e.target.value }))} placeholder="0" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Unit (e.g. bags, kg, boxes)</label>
+                                <input type="text" value={supplyForm.unit} onChange={e => setSupplyForm(f => ({ ...f, unit: e.target.value }))} placeholder="bags" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Cost per unit</label>
+                                <input type="number" min="0" step="0.01" value={supplyForm.costPerUnit} onChange={e => setSupplyForm(f => ({ ...f, costPerUnit: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Reorder when stock reaches</label>
+                                <input type="number" min="0" value={supplyForm.reorderThreshold} onChange={e => setSupplyForm(f => ({ ...f, reorderThreshold: e.target.value }))} placeholder="e.g. 2" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Notes</label>
+                                    <input type="text" value={supplyForm.notes} onChange={e => setSupplyForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                        </div>
+                        {/* Schedule-based reorder */}
+                        <div className="border-t border-emerald-200 pt-3 space-y-2">
+                            <p className="text-xs font-semibold text-gray-600">Reorder Schedule <span className="font-normal text-gray-400">(optional ? for bulk or timed items)</span></p>
+                            <p className="text-[11px] text-gray-400">Set a date &amp; repeat frequency for items ordered on a schedule, regardless of stock count ? e.g. a 650 L bedding pallet every 3 months.</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Next order date</label>
+                                    <input type="date" value={supplyForm.nextOrderDate} onChange={e => setSupplyForm(f => ({ ...f, nextOrderDate: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Repeat every</label>
+                                    <input type="number" min="1" value={supplyForm.orderFrequency} onChange={e => setSupplyForm(f => ({ ...f, orderFrequency: e.target.value }))} placeholder="e.g. 3" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Frequency unit</label>
+                                    <select value={supplyForm.orderFrequencyUnit} onChange={e => setSupplyForm(f => ({ ...f, orderFrequencyUnit: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                                        <option value="days">Days</option>
+                                        <option value="weeks">Weeks</option>
+                                        <option value="months">Months</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        {/* Feeder animal toggle (Food only) */}
+                        {supplyForm.category === 'Food' && (
+                            <div className="col-span-2">
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="checkbox" checked={supplyForm.isFeederAnimal} onChange={e => setSupplyForm(f => ({ ...f, isFeederAnimal: e.target.checked }))} className="w-4 h-4 accent-emerald-600" />
+                                    <span className="text-sm font-medium text-gray-700">This is a feeder animal (mice, rats, crickets, etc.)</span>
+                                </label>
+                            </div>
+                        )}
+                        {supplyForm.category === 'Food' && supplyForm.isFeederAnimal && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Feeder Type</label>
+                                    <input type="text" value={supplyForm.feederType} onChange={e => setSupplyForm(f => ({ ...f, feederType: e.target.value }))} list="feeder-type-list" placeholder="e.g. Mice, Rats" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
+                                    <datalist id="feeder-type-list"><option value="Mice" /><option value="Rats" /><option value="Gerbils" /><option value="Crickets" /><option value="Dubia Roaches" /><option value="Mealworms" /><option value="Superworms" /><option value="Waxworms" /><option value="Hornworms" /><option value="Fish" /></datalist>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Size</label>
+                                    <input type="text" value={supplyForm.feederSize} onChange={e => setSupplyForm(f => ({ ...f, feederSize: e.target.value }))} list="feeder-size-list" placeholder="e.g. Pinky, Adult" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
+                                    <datalist id="feeder-size-list"><option value="Pinky" /><option value="Fuzzy" /><option value="Hopper" /><option value="Weaned" /><option value="Adult" /><option value="Small" /><option value="Medium" /><option value="Large" /><option value="XL" /></datalist>
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex gap-2 justify-end pt-1">
+                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); }} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
+                            <button onClick={handleSupplySubmit} disabled={supplySaving || !supplyForm.name.trim()} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1.5">
+                                {supplySaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                                {editingSupplyId ? 'Save Changes' : 'Add Item'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Category filter pills */}
+                <div className="flex gap-1.5 flex-wrap">
+                    {['All', ...CATEGORIES].map(cat => (
+                        <button key={cat} onClick={() => setSupplyCategoryFilter(cat)}
+                            className={`px-3 py-1 text-xs rounded-full font-medium transition ${supplyCategoryFilter === cat ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >{cat}</button>
+                    ))}
+                </div>
+
+                {/* Items grid */}
+                {suppliesLoading ? (
+                    <div className="flex items-center justify-center py-12 text-gray-400 gap-2"><Loader2 size={20} className="animate-spin" /> Loading...</div>
+                ) : filtered.length === 0 ? (
+                    <div className="text-center py-12 text-gray-400 text-sm">
+                        {supplies.length === 0 ? 'No supplies added yet. Click "Add Item" to get started.' : `No ${supplyCategoryFilter} items.`}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {filtered.map(item => (
+                            <div key={item._id} className={`border rounded-xl p-3 bg-white flex flex-col gap-1.5 shadow-sm ${isLow(item) ? 'border-amber-300' : 'border-gray-200'}`}>
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                                        <span className="font-semibold text-sm text-gray-800 truncate">{item.name}</span>
+                                        {isLow(item) && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Low Stock</span>}
+                                        {isOverdue(item) && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Due</span>}
+                                        {!isOverdue(item) && isDueSoon(item) && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Soon</span>}
+                                    </div>
+                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${CATEGORY_COLORS[item.category] || CATEGORY_COLORS.Other}`}>{item.category}</span>
+                                </div>
+                                <div className="flex items-baseline gap-2">
+                                    <span className={`text-lg font-bold ${isLow(item) ? 'text-amber-600' : 'text-gray-800'}`}>{item.currentStock}</span>
+                                    {item.unit && <span className="text-gray-500 text-xs">{item.unit}</span>}
+                                    {item.reorderThreshold != null && <span className="text-gray-400 text-xs ml-auto">Reorder at {item.reorderThreshold}</span>}
+                                </div>
+                                {item.notes && <p className="text-xs text-gray-400 truncate">{item.notes}</p>}
+                                {(item.isFeederAnimal || item.costPerUnit != null) && (
+                                    <div className="flex flex-wrap gap-1.5 mt-0.5">
+                                        {item.isFeederAnimal && item.feederType && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederType}</span>}
+                                        {item.isFeederAnimal && item.feederSize && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederSize}</span>}
+                                        {item.costPerUnit != null && <span className="text-xs text-gray-400">${Number(item.costPerUnit).toFixed(2)} / {item.unit || 'unit'}</span>}
+                                    </div>
+                                )}
+                                {item.nextOrderDate && (
+                                    <div className={`flex items-center gap-1.5 text-xs rounded-lg px-2 py-1.5 mt-0.5 ${isOverdue(item) ? 'bg-red-50 text-red-600' : isDueSoon(item) ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-500'}`}>
+                                        <Calendar size={11} className="shrink-0" />
+                                        <span>Next order: {new Date(item.nextOrderDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                        {item.orderFrequency && <span className="opacity-60"> <RefreshCw size={12} className="inline-block align-middle mr-0.5" /> every {item.orderFrequency} {item.orderFrequencyUnit}</span>}
+                                    </div>
+                                )}
+
+                                {/* Inline restock form */}
+                                {restockingSupplyId === item._id && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 mt-1 space-y-2">
+                                        <p className="text-xs font-semibold text-blue-700">Restock · logs an expense in Budget{item.isFeederAnimal ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}` : ''}</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Qty received *</label>
+                                                <input type="number" min="0.01" step="any" value={restockForm.qty} onChange={e => {
+                                                    const q = e.target.value;
+                                                    const autoCost = item.costPerUnit && q ? (parseFloat(q) * item.costPerUnit).toFixed(2) : restockForm.cost;
+                                                    setRestockForm(f => ({ ...f, qty: q, cost: autoCost }));
+                                                }} placeholder="e.g. 5" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Cost paid *</label>
+                                                <input type="number" min="0" step="0.01" value={restockForm.cost} onChange={e => setRestockForm(f => ({ ...f, cost: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Date</label>
+                                                <input type="date" value={restockForm.date} onChange={e => setRestockForm(f => ({ ...f, date: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Notes</label>
+                                                <input type="text" value={restockForm.notes} onChange={e => setRestockForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 justify-end">
+                                            <button onClick={() => setRestockingSupplyId(null)} className="px-2.5 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
+                                            <button
+                                                onClick={() => handleRestockSubmit(item)}
+                                                disabled={restockSaving || !restockForm.qty || !restockForm.cost}
+                                                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1"
+                                            >
+                                                {restockSaving ? <Loader2 size={11} className="animate-spin" /> : <ShoppingBag size={11} />}
+                                                Log Restock
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-2 justify-end mt-0.5">
+                                    <button onClick={() => openRestock(item)} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded-lg transition font-medium"><ShoppingBag size={11} /> Restock</button>
+                                    <button onClick={() => handleSupplyEdit(item)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded-lg transition"><Edit size={11} /> Edit</button>
+                                    <button onClick={() => handleSupplyDelete(item._id)} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     // Fetch duplicates from API
     const fetchDuplicates = async () => {
         setDuplicatesLoading(true);
@@ -2154,11 +2342,11 @@ useEffect(() => {
                 // Remove from UI
                 setDuplicateGroups(prev => prev.map(group => ({
                     ...group,
-                    duplicates: (group.duplicates || []).filter(d => 
+                    duplicates: group.duplicates.filter(d => 
                         !((group.primary.id_public === id1 && d.animal.id_public === id2) ||
                           (group.primary.id_public === id2 && d.animal.id_public === id1))
                     )
-                })).filter(group => (group.duplicates || []).length > 0));
+                })).filter(group => group.duplicates.length > 0));
             } catch (err) {
                 showModalMessage('Error', err.response?.data?.message || 'Failed to dismiss duplicate');
             }
@@ -2172,8 +2360,8 @@ useEffect(() => {
                 return;
             }
             
-            const keepAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...((g.duplicates || []).map(d => d.animal))])].find(a => a.id_public === keepId);
-            const deleteAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...((g.duplicates || []).map(d => d.animal))])].find(a => a.id_public === deleteId);
+            const keepAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === keepId);
+            const deleteAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === deleteId);
             
             if (!keepAnimal || !deleteAnimal) {
                 showModalMessage('Error', 'Could not find one or both animals. Please refresh and try again.');
@@ -2193,8 +2381,8 @@ useEffect(() => {
                 // Remove merged pair from UI
                 setDuplicateGroups(prev => prev.map(group => ({
                     ...group,
-                    duplicates: (group.duplicates || []).filter(d => d.animal.id_public !== deleteId)
-                })).filter(group => (group.duplicates || []).length > 0));
+                    duplicates: group.duplicates.filter(d => d.animal.id_public !== deleteId)
+                })).filter(group => group.duplicates.length > 0));
                 // Refresh animal list
                 fetchAnimals();
             } catch (err) {
@@ -2203,8 +2391,7 @@ useEffect(() => {
         };
 
         const formatReasons = (reasons) => {
-            if (!reasons) return 'Unknown reason';
-            return (reasons || []).map(r => {
+            return reasons.map(r => {
                 if (r === 'exact_name') return 'Exact name match';
                 if (r.startsWith('similar_name_')) return `Similar name (${r.split('_')[2]} match)`;
                 if (r === 'same_birthdate_species') return 'Same birthdate & species';
@@ -2253,7 +2440,7 @@ useEffect(() => {
                     <div className="space-y-4">
                         {duplicateGroups.map((group, gIdx) => (
                             <div key={gIdx} className="border border-amber-200 rounded-lg bg-amber-50/30 p-4 space-y-3">
-                                {(group.duplicates || []).map((dup, dIdx) => (
+                                {group.duplicates.map((dup, dIdx) => (
                                     <div key={dIdx} className="bg-white rounded-lg border border-gray-200 shadow-sm">
                                         <div className="p-3 bg-amber-50 border-b border-amber-100 flex items-center justify-between">
                                             <div className="text-xs text-amber-700 font-medium">
@@ -2324,8 +2511,8 @@ useEffect(() => {
             <ArchiveScreen
                 onBack={() => setShowArchiveScreen(false)}
                 archiveLoading={archiveLoading}
-                archivedAnimals={archivedAnimals} // This is correct
-                soldTransferredAnimals={soldTransferredAnimals} // Use the correct prop
+                archivedAnimals={archivedAnimals}
+                soldTransferredAnimals={soldTransferredRaw.filter(a => a.isViewOnly)}
                 soldOwnerFilter={soldOwnerFilter}
                 setSoldOwnerFilter={setSoldOwnerFilter}
                 collapsedMgmtSections={collapsedMgmtSections}
@@ -2406,12 +2593,26 @@ useEffect(() => {
 
     // -- Collections View ----------------------------------------------------------
     const renderCollectionsView = () => {
-        // Use the same filtered list as the main "My Animals" view, but also exclude archived.
-        const allOwnedAnimals = displayedAnimalsForList.filter(a => !a.archived);
-        const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
+        const searchTerm = searchInput.trim().toLowerCase();
+        const allOwnedAnimals = (allAnimalsRaw.length > 0 ? allAnimalsRaw : animals)
+            .filter(a => !a.isViewOnly)
+            .filter(a => !searchTerm || [
+                a.name, a.prefix, a.suffix, a.id_public, a.breederAssignedId
+            ].some(v => v && v.toString().toLowerCase().includes(searchTerm)));
         return (
             <div className="space-y-4">
-                {/* Collections Manager Header - button moved to filter bar */}
+                {/* Collections Manager Header */}
+                <div className="flex items-center gap-2 mb-1">
+                    <button
+                        onClick={() => setShowCollectionManager(prev => !prev)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition ${
+                            showCollectionManager ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' : 'bg-primary hover:bg-primary/90 text-black'
+                        }`}
+                    >
+                        <FolderOpen size={14} />
+                        {showCollectionManager ? 'Close Manager' : 'Manage Collections'}
+                    </button>
+                </div>
 
                 {/* Collection Manager Panel */}
                 {showCollectionManager && (
@@ -2508,7 +2709,7 @@ useEffect(() => {
                                         <div className="p-1.5 sm:p-4">
                                             {colAnimals.length === 0 ? (
                                                 <p className="text-sm text-gray-400 text-center py-4">No animals yet. Assign animals from the Uncategorized section below.</p>
-                                            ) : collectionsViewMode === 'cards' ? (
+                                            ) : (
                                                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
                                                     {colAnimals.map(animal => (
                                                         <div key={animal.id_public} className="relative">
@@ -2522,51 +2723,6 @@ useEffect(() => {
                                                             </button>
                                                         </div>
                                                     ))}
-                                                </div>
-                                            ) : (
-                                                <div className="overflow-x-auto">
-                                                    <table className="min-w-full text-xs divide-y divide-gray-200">
-                                                        <thead className="bg-gray-50 text-gray-500 uppercase text-[10px]">
-                                                            <tr>
-                                                                <th className="px-3 py-2 text-left font-semibold">Animal</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Species</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Variety</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Enclosure</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Life Stage</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Status</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Health</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Birthdate / Age</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Lines</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Tags</th>
-                                                                <th className="px-3 py-2 text-right w-12"></th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="divide-y divide-gray-100">
-                                                            {colAnimals.map(animal => {
-                                                                const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
-                                                                const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                                                const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
-                                                                return (
-                                                                    <tr key={animal.id_public} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
-                                                                        <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 font-mono">{animal.id_public}</div></div></div></td>
-                                                                        <td className="px-3 py-1.5 text-gray-600"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400">{getSpeciesLatinName(animal.species)}</div>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 font-mono">{animal.geneticCode}</div>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.isQuarantine ? <span className="font-medium text-orange-600">Quarantine</span> : animal.isInTreatment ? <span className="font-medium text-red-600">Treatment</span> : animal.status === 'Deceased' ? <span className="text-gray-500">Deceased</span> : <span className="text-green-600">OK</span>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400">{ageStr}</div></td>
-                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-500">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-right">
-                                                                            <button onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }} className="bg-white hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-1 shadow-sm border border-gray-200" title="Remove from this collection"><X size={11} /></button>
-                                                                        </td>
-                                                                    </tr>
-                                                                );
-                                                            })}
-                                                        </tbody>
-                                                    </table>
                                                 </div>
                                             )}
                                         </div>
@@ -2598,280 +2754,48 @@ useEffect(() => {
                                     </div>
                                     {!isUncatCollapsed && (
                                         <div className="p-1.5 sm:p-4">
-                                            {collectionsViewMode === 'cards' ? (
-                                                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
-                                                    {uncategorized.map(animal => (
-                                                        <div key={animal.id_public} className="relative" onClick={e => { if (assigningCollectionAnimalId === animal.id_public) e.stopPropagation(); }}>
-                                                            <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
-                                                            <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
-                                                            <div className="absolute top-2 left-2 z-20">
-                                                                {assigningCollectionAnimalId === animal.id_public && (
-                                                                    <div className="absolute left-0 top-9 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30" onClick={e => e.stopPropagation()}>
-                                                                        <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
-                                                                        {userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded flex items-center gap-1.5 text-gray-700"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}
-                                                                        <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
-                                                                    </div>
-                                                                )}
-                                                                <button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="bg-white/90 hover:bg-amber-50 text-amber-500 hover:text-amber-700 rounded-full p-1 shadow-sm border border-gray-200" title="Add to a collection"><Plus size={16} /></button>
-                                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+                                                {uncategorized.map(animal => (
+                                                    <div key={animal.id_public} className={`relative ${assigningCollectionAnimalId === animal.id_public ? 'z-10' : ''}`} onClick={e => { if (assigningCollectionAnimalId === animal.id_public) e.stopPropagation(); }}>
+                                                        {/* grey overlay */}
+                                                        <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
+                                                        <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
+                                                        <div className="absolute top-2 left-2 z-20">
+                                                            {assigningCollectionAnimalId === animal.id_public && (
+                                                                <div
+                                                                    className="absolute left-0 top-9 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30"
+                                                                    onClick={e => e.stopPropagation()}
+                                                                >
+                                                                    <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
+                                                                    {userCollections.map(col => (
+                                                                        <button
+                                                                            key={col.id}
+                                                                            onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }}
+                                                                            className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded flex items-center gap-1.5 text-gray-700"
+                                                                        >
+                                                                            <FolderOpen size={11} className="text-amber-500" /> {col.name}
+                                                                        </button>
+                                                                    ))}
+                                                                    <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
+                                                                </div>
+                                                            )}
+                                                            <button
+                                                                onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }}
+                                                                className="bg-white/90 hover:bg-amber-50 text-amber-500 hover:text-amber-700 rounded-full p-1 shadow-sm border border-gray-200"
+                                                                title="Add to a collection"
+                                                            >
+                                                                <Plus size={16} />
+                                                            </button>
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div className="overflow-x-auto">
-                                                    <table className="min-w-full text-xs divide-y divide-gray-200">
-                                                        <thead className="bg-gray-50 text-gray-500 uppercase text-[10px]">
-                                                            <tr>
-                                                                <th className="px-3 py-2 text-left font-semibold">Animal</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Species</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Variety</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Enclosure</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Life Stage</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Status</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Health</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Birthdate / Age</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Lines</th>
-                                                                <th className="px-3 py-2 text-left font-semibold">Tags</th>
-                                                                <th className="px-3 py-2 text-right w-12"></th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="divide-y divide-gray-100">
-                                                            {uncategorized.map(animal => {
-                                                                const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
-                                                                const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                                                const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
-                                                                return (
-                                                                    <tr key={animal.id_public} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
-                                                                        <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 font-mono">{animal.id_public}</div></div></div></td>
-                                                                        <td className="px-3 py-1.5 text-gray-600"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400">{getSpeciesLatinName(animal.species)}</div>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 font-mono">{animal.geneticCode}</div>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.isQuarantine ? <span className="font-medium text-orange-600">Quarantine</span> : animal.isInTreatment ? <span className="font-medium text-red-600">Treatment</span> : animal.status === 'Deceased' ? <span className="text-gray-500">Deceased</span> : <span className="text-green-600">OK</span>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400">{ageStr}</div></td>
-                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-500">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-right"><div className="relative inline-block text-left"><button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Plus size={16} /></button>{assigningCollectionAnimalId === animal.id_public && (<div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-30" onClick={e => e.stopPropagation()}><div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"><p className="text-xs font-semibold text-gray-600 px-3 py-1">Add to collection:</p>{userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-3 py-2 hover:bg-gray-100 flex items-center gap-1.5 text-gray-700"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}</div></div>)}</div></td>
-                                                                    </tr>
-                                                                );
-                                                            })}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            )}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
                             );
                         })()}
                     </>
-                )}
-            </div>
-        );
-    };
-
-    const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => (
-        <div
-            className={`relative flex items-center p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
-            onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
-        >
-            {icon}
-            <div className="ml-4">
-                <div className="text-2xl font-bold">{value}</div>
-                <div className="text-sm font-medium opacity-90">{label}</div>
-            </div>
-            {hasDropdown && (
-                <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-2 right-2 p-1 text-inherit opacity-60 hover:opacity-100">
-                    <ChevronDown size={20} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-            )}
-        </div>
-    );
-
-    const renderEnclosureDashboard = () => {
-        const occupiedEnclosuresList = enclosures.filter(enc => (enclosureAnimalMap[enc._id] || []).length > 0);
-        const animalsHousedCount = Object.values(enclosureAnimalMap).flat().filter(a => a.enclosureId).length;
-
-        const maintenanceDueCount = enclosures.reduce((count, enc) => {
-            const hasDueTask = (enc.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
-            return count + (hasDueTask ? 1 : 0);
-        }, 0);
-
-        const needsAttentionCount = 0; // Placeholder for future implementation
-
-        return (
-            <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <StatCard icon={<Home size={32} className="text-blue-800" />} label="Total Enclosures" value={enclosures.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" />
-                    <StatCard icon={<Package size={32} className="text-green-800" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
-                    <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
-                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Needs Attention" value={needsAttentionCount} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" />
-                    <StatCard icon={<Wrench size={32} className="text-red-800" />} label="Maintenance Due" value={maintenanceDueCount} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" />
-                </div>
-            </div>
-        );
-    };
-
-    const handleEnclosureImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setEnclosureImageFile(file);
-            setEnclosureImagePreview(URL.createObjectURL(file));
-        }
-    };
-
-    const renderEnclosuresTab = () => {
-        // --- Filtering ---
-        let filteredEnclosures = [...enclosures];
-        if (enclosureSearch) {
-            filteredEnclosures = filteredEnclosures.filter(e => e.name.toLowerCase().includes(enclosureSearch.toLowerCase()));
-        }
-        if (enclosureTypeFilter) {
-            filteredEnclosures = filteredEnclosures.filter(e => e.enclosureType === enclosureTypeFilter);
-        }
-        if (enclosureStatusFilter) {
-            if (enclosureStatusFilter === 'occupied') {
-                filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length > 0);
-            } else if (enclosureStatusFilter === 'empty') {
-                filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length === 0);
-            }
-        }
-
-        // --- Components ---
-        const EnclosureCard = ({ enclosure }) => {
-            const occupants = enclosureAnimalMap[enclosure._id] || [];
-            const occupancyStatus = occupants.length > 0 ? 'Occupied' : 'Empty';
-            const capacity = parseInt(enclosure.capacity, 10);
-            const occupancyPercentage = capacity > 0 ? (occupants.length / capacity) * 100 : 0;
-
-            const tempRange = (enclosure.tempMin != null && enclosure.tempMax != null)
-                ? `${enclosure.tempMin}° - ${enclosure.tempMax}°${enclosure.temperatureUnit || 'C'}`
-                : null;
-
-            const humidityRange = (enclosure.humidityMin != null && enclosure.humidityMax != null)
-                ? `${enclosure.humidityMin}% - ${enclosure.humidityMax}%`
-                : null;
-            
-            const lightSchedule = (enclosure.lightsOnTime && enclosure.lightsOffTime)
-                ? `${formatTime12h(enclosure.lightsOnTime)} - ${formatTime12h(enclosure.lightsOffTime)}`
-                : null;
-
-            const dimensions = formatDimensions(enclosure.dimensions, enclosure.size);
-
-            const needsCleaning = (enclosure.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
-
-            return (
-                <div 
-                    className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer flex flex-col"
-                    onClick={() => handleOpenDetail(enclosure)}
-                >
-                    {/* Banner Image */}
-                    <div className="h-28 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center relative">
-                        {enclosure.imageUrl ? (
-                            <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" />
-                        ) : (
-                            <Home size={40} className="text-gray-400 dark:text-dark-text-muted" />
-                        )}
-                        <span className={`absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-dark-surface-hover dark:text-dark-text-secondary'}`}>
-                            {occupancyStatus}
-                        </span>
-                    </div>
-                    
-                    <div className="p-3 flex-grow flex flex-col">
-                        {/* Name */}
-                        <h3 className="font-bold text-base text-gray-800 dark:text-dark-text truncate">{enclosure.name}</h3>
-                        
-                        {/* Type, Size, Location */}
-                        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
-                            {enclosure.enclosureType && <span className="flex items-center gap-1"><Home size={12} /> {enclosure.enclosureType}</span>}
-                            {dimensions && <span className="flex items-center gap-1"><Ruler size={12} /> {dimensions}</span>}
-                            {enclosure.location && <span className="flex items-center gap-1"><MapPin size={12} /> {enclosure.location}</span>}
-                        </div>
-
-                        {/* Stats Row */}
-                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-border grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
-                            <div className="flex items-center gap-1.5" title="Animals Housed">
-                                <Cat size={14} className="text-gray-400" />
-                                <span className="font-medium text-gray-700 dark:text-dark-text">{occupants.length} {occupants.length === 1 ? 'Animal' : 'Animals'}</span>
-                            </div>
-                            {capacity > 0 && (
-                                <div className="flex items-center gap-1.5" title="Occupancy Percentage">
-                                    <BarChart2 size={14} className="text-gray-400" />
-                                    <span className="font-medium text-gray-700 dark:text-dark-text">{occupancyPercentage.toFixed(0)}% Full</span>
-                                </div>
-                            )}
-                            {tempRange && (
-                                <div className="flex items-center gap-1.5" title="Temperature Range">
-                                    <Thermometer size={14} className="text-gray-400" />
-                                    <span className="font-medium text-gray-700 dark:text-dark-text">{tempRange}</span>
-                                </div>
-                            )}
-                            {humidityRange && (
-                                <div className="flex items-center gap-1.5" title="Humidity Range">
-                                    <Droplet size={14} className="text-gray-400" />
-                                    <span className="font-medium text-gray-700 dark:text-dark-text">{humidityRange}</span>
-                                </div>
-                            )}
-                            {lightSchedule && (
-                                <div className="flex items-center gap-1.5" title="Lighting Schedule">
-                                    <LampCeiling size={14} className="text-gray-400" />
-                                    <span className="font-medium text-gray-700 dark:text-dark-text">{lightSchedule}</span>
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Warnings */}
-                        <div className="mt-auto pt-2 flex flex-wrap gap-2">
-                            {needsCleaning && (
-                                <span className="flex items-center gap-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-1 rounded-full font-medium">
-                                    <Wrench size={12} /> Needs Cleaning
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        return (
-            <div className="space-y-4">
-                {/* Search/Filter Bar */}
-                <div className="p-2 bg-gray-50 dark:bg-dark-surface rounded-lg flex flex-wrap items-center gap-2">
-                    <div className="relative flex-grow">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input 
-                            type="text"
-                            placeholder="Search enclosures..."
-                            value={enclosureSearch}
-                            onChange={e => setEnclosureSearch(e.target.value)}
-                            className="w-full pl-10 p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
-                        />
-                    </div>
-                    <select
-                        value={enclosureStatusFilter}
-                        onChange={e => setEnclosureStatusFilter(e.target.value)}
-                        className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
-                    >
-                        <option value="">All Statuses</option>
-                        <option value="occupied">Occupied</option>
-                        <option value="empty">Empty</option>
-                    </select>
-                </div>
-
-                {/* Main Content */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {filteredEnclosures.map(enclosure => (
-                        <EnclosureCard key={enclosure._id} enclosure={enclosure} />
-                    ))}
-                </div>
-                 {filteredEnclosures.length === 0 && (
-                    <div className="text-center py-16 text-gray-500 dark:text-dark-text-secondary">
-                        <Home size={48} className="mx-auto text-gray-300 dark:text-dark-border mb-4" />
-                        <h3 className="font-semibold text-lg">No Enclosures Found</h3>
-                        <p className="text-sm mt-1">Try adjusting your filters or add a new enclosure.</p>
-                    </div>
                 )}
             </div>
         );
@@ -2924,6 +2848,23 @@ useEffect(() => {
 
     // -- Management View (view = 'enclosures' | 'reproduction' | 'health' | 'feeding') --
     const renderManagementView = (view = null) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const daysSince = (dateStr) => {
+            if (!dateStr) return null;
+            const d = new Date(dateStr);
+            d.setHours(0, 0, 0, 0);
+            return Math.floor((today - d) / 86400000);
+        };
+
+        const isDue = (lastDate, freqDays) => {
+            if (!freqDays) return false;
+            if (!lastDate) return true;
+            const ds = daysSince(lastDate);
+            return ds !== null && ds >= Number(freqDays);
+        };
+
         const toggleSection = (key) => setCollapsedMgmtSections(prev => ({ ...prev, [key]: !prev[key] }));
         const toggleGroup = (key) => setCollapsedMgmtGroups(prev => ({ ...prev, [key]: !prev[key] }));
 
@@ -2957,12 +2898,38 @@ useEffect(() => {
             );
         };
 
+        // Enclosure CRUD handlers
+        const handleSaveEnclosure = async () => {
+            if (enclosureSaving || !enclosureFormData.name.trim()) return;
+            setEnclosureSaving(true);
+            try {
+                if (editingEnclosureId) {
+                    await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, enclosureFormData,
+                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                    logManagementActivity('enclosure_update', null, { name: enclosureFormData.name.trim() });
+                } else {
+                    await axios.post(`${API_BASE_URL}/enclosures`, enclosureFormData,
+                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                    logManagementActivity('enclosure_create', null, { name: enclosureFormData.name.trim() });
+                }
+                setEnclosureFormVisible(false);
+                setReproEncFormVisible(false);
+                setHealthEncFormVisible(false);
+                setEditingEnclosureId(null);
+                setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' });
+                fetchEnclosures();
+            } catch (err) {
+                showModalMessage('Error', err.response?.data?.message || 'Failed to save enclosure');
+            } finally { setEnclosureSaving(false); }
+        };
+
         const handleDeleteEnclosure = async (encId) => {
             if (!window.confirm('Delete this enclosure? Animals inside will become unassigned.')) return;
             const encToDelete = enclosures.find(e => e._id === encId);
             try {
                 await axios.delete(`${API_BASE_URL}/enclosures/${encId}`,
                     { headers: { 'Authorization': `Bearer ${authToken}` } });
+                logManagementActivity('enclosure_delete', null, { name: encToDelete?.name || encId });
                 fetchEnclosures();
                 fetchAnimals();
             } catch (err) {
@@ -2980,6 +2947,14 @@ useEffect(() => {
             axios.patch(`${API_BASE_URL}/enclosures/assign-animal`,
                 { animalId_public: animalIdPublic, enclosureId: newEnclosureId },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => {
+                    const encName = newEnclosureId ? (enclosures.find(e => e._id === newEnclosureId)?.name || newEnclosureId) : null;
+                    logManagementActivity(
+                        newEnclosureId ? 'enclosure_assign' : 'enclosure_unassign',
+                        animalIdPublic,
+                        newEnclosureId ? { enclosureName: encName } : {}
+                    );
+                })
                 .catch(err => {
                     console.error('Assign enclosure failed:', err);
                     setAllAnimalsRaw(prevRaw);
@@ -3013,6 +2988,11 @@ useEffect(() => {
                 // Update supply stock in state
                 if (res.data.supply) setSupplies(prev => prev.map(s => s._id === res.data.supply._id ? res.data.supply : s));
                 const supplyItem = feedingForm.supplyId ? supplies.find(s => s._id === feedingForm.supplyId) : null;
+                logManagementActivity('animal_fed', animal.id_public, {
+                    name: animal.name,
+                    species: animal.species,
+                    ...(supplyItem ? { food: supplyItem.name, qty: `${feedingForm.qty} ${supplyItem.unit || ''}`.trim() } : {})
+                });
             } catch (err) {
                 console.error('Feeding failed:', err);
                 setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: animal.lastFedDate } : a));
@@ -3029,6 +3009,7 @@ useEffect(() => {
                 await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/feeding`,
                     { skipped: true },
                     { headers: { Authorization: `Bearer ${authToken}` } });
+                logManagementActivity('feeding_skipped', animal.id_public, { name: animal.name, species: animal.species });
             } catch (err) {
                 console.error('Skip feeding failed:', err);
                 setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: animal.lastFedDate } : a));
@@ -3043,6 +3024,7 @@ useEffect(() => {
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
                 { lastMaintenanceDate: now },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: 'General maintenance' }))
                 .catch(err => { console.error('Mark maintenance failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: animal.lastMaintenanceDate } : a)); });
         };
 
@@ -3080,6 +3062,64 @@ useEffect(() => {
             return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         };
 
+        // -- Section data ---------------------------------------------------------
+        // Exclude deceased and view-only (transferred/sold) animals from all management sections
+        const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
+        // 1. Enclosures ? grouped by named enclosure (enclosureId)
+        const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
+        const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
+        const healthEnclosures = enclosures.filter(e => e.purpose === 'health');
+        const enclosureAnimalMap = {}; // { enclosureId: [animals] }
+        const unassignedAnimals = [];
+        allAnimals.forEach(a => {
+            if (a.enclosureId) {
+                if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
+                enclosureAnimalMap[a.enclosureId].push(a);
+            } else {
+                if (a.status !== 'Rehomed') unassignedAnimals.push(a);
+            }
+        });
+
+        // 2. Reproduction
+        // Animals in a repro enclosure are shown inside the enclosure card — exclude from section groups
+        const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
+        const inReproEnclosure = a => a.enclosureId && reproEnclosureIds.has(a.enclosureId);
+        const matingList = allAnimals.filter(a => a.isInMating && !inReproEnclosure(a));
+        const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
+        const nursingList = allAnimals.filter(a => a.isNursing && !inReproEnclosure(a));
+        const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
+
+        // 3. Feeding
+        const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
+        const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
+        const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
+
+        // 4. Maintenance ? enclosure cleaning tasks + supply reorders + housing care tasks per animal
+        const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
+        const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0);
+        const animalsWithEnclosureCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.maintenanceFrequencyDays));
+        const todayMaint = new Date(); todayMaint.setHours(0, 0, 0, 0);
+        const supplyReorderDue = supplies.filter(s =>
+            (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
+            (s.nextOrderDate && new Date(s.nextOrderDate) < todayMaint)
+        );
+        const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+        const maintMaintenanceDue = allAnimals.filter(a => a.maintenanceFrequencyDays && isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length;
+        const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) + supplyReorderDue.length + enclosureCarTasksDue + maintMaintenanceDue;
+        const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+
+        // 5. Medical ? quarantine and treatment
+        const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
+        const inHealthEnclosure = a => a.enclosureId && healthEnclosureIds.has(a.enclosureId);
+        const quarantineList = allAnimals.filter(a => a.isQuarantine && !inHealthEnclosure(a));
+        const treatmentList = allAnimals.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
+
+        // 6. Available for sale/rehoming ? all user-created animals with status=Available (no ownership filter)
+        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
+
+        // 7. Sold / Transferred ? view-only animals (transferred through the system, original owner retains view access)
+        const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
+
         const handleMarkRehomed = (e, animal) => {
             e.stopPropagation();
             if (!window.confirm(`Mark ${animal.name || 'this animal'} as Rehomed? This will change their status to "Rehomed".`)) return;
@@ -3089,6 +3129,7 @@ useEffect(() => {
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed' } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { status: 'Rehomed' },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('status_change', animal.id_public, { name: animal.name, species: animal.species, status: 'Rehomed' }))
                 .catch(err => {
                     console.error('Mark rehomed failed:', err);
                     // Rollback
@@ -3106,6 +3147,7 @@ useEffect(() => {
             axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
                 { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('enclosure_task_done', null, { name: enc.name, taskName: updated[taskIdx]?.taskName || 'Cleaning task' }))
                 .catch(err => { console.error('Mark enclosure task done failed:', err); fetchEnclosures(); });
         };
 
@@ -3119,6 +3161,7 @@ useEffect(() => {
             axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
                 { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('enclosure_task_skipped', null, { name: enc.name, taskName }))
                 .catch(err => { console.error('Skip enclosure task failed:', err); fetchEnclosures(); });
         };
 
@@ -3132,6 +3175,7 @@ useEffect(() => {
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' }))
                 .catch(err => { console.error('Mark animal care task done failed:', err); fetchAllAnimals(); });
         };
 
@@ -3146,6 +3190,7 @@ useEffect(() => {
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('care_task_skipped', animal.id_public, { name: animal.name, taskName }))
                 .catch(err => { console.error('Skip animal care task failed:', err); fetchAllAnimals(); });
         };
 
@@ -3157,6 +3202,7 @@ useEffect(() => {
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, isQuarantine: false } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isQuarantine: false },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('quarantine_released', animal.id_public, { name: animal.name, species: animal.species }))
                 .catch(err => { console.error('Unquarantine failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, isQuarantine: true } : a)); });
         };
 
@@ -3169,6 +3215,7 @@ useEffect(() => {
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('treatment_discharged', animal.id_public, { name: animal.name, species: animal.species }))
                 .catch(err => { console.error('Discharge failed:', err); setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...prev } : a)); });
         };
 
@@ -3179,6 +3226,15 @@ useEffect(() => {
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => {
+                    let reproStatus = 'Status changed';
+                    if (patch.isInMating === false && patch.isPregnant === true) reproStatus = 'Confirmed Pregnant';
+                    else if (patch.isPregnant === false && patch.isNursing === true) reproStatus = 'Started Nursing';
+                    else if (patch.isInMating === false) reproStatus = 'Cleared Mating';
+                    else if (patch.isPregnant === false) reproStatus = 'Cleared Pregnancy';
+                    else if (patch.isNursing === false) reproStatus = 'Cleared Nursing';
+                    logManagementActivity('reproduction_update', animal.id_public, { name: animal.name, species: animal.species, status: reproStatus });
+                })
                 .catch(err => { console.error('Repro status update failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...Object.fromEntries(Object.keys(patch).map(k => [k, animal[k]])) } : a)); });
         };
 
@@ -3199,7 +3255,101 @@ useEffect(() => {
                             <span className="font-semibold text-gray-800">Enclosures</span>
                             <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{enclosures.length}</span>
                         </div>
-                    </div>}                     
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); }
+                                else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' }); setEnclosureFormVisible(v => !v); }
+                            }}
+                            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg"
+                        >
+                            <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
+                        </button>
+                    </div>}
+                    {/* Add button shown standalone when on dedicated tab */}
+                    {view && <div className="flex justify-end px-3 py-2 border-b bg-blue-50/40">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' }); setEnclosureFormVisible(v => !v); } }}
+                            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg"
+                        >
+                            <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add Enclosure'}
+                        </button>
+                    </div>}
+
+                    {/* Inline create / edit form */}
+                    {enclosureFormVisible && (!collapsedMgmtSections['enclosures'] || !!view) && (
+                        <div className="p-3 border-b bg-blue-50/40 space-y-2">
+                            <div className="text-xs font-semibold text-blue-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
+                                    <input type="text" value={enclosureFormData.name}
+                                        onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))}
+                                        placeholder="e.g. Tank 1, Vivarium A, Colony Room 3"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
+                                    <input type="text" value={enclosureFormData.enclosureType}
+                                        onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))}
+                                        placeholder="e.g. Tank, Cage, Vivarium, Pond, Room"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Size</label>
+                                    <input type="text" value={enclosureFormData.size}
+                                        onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))}
+                                        placeholder="e.g. 40 gallon, 48?24?24, 10 sq ft"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+                                    <input type="text" value={enclosureFormData.notes}
+                                        onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))}
+                                        placeholder="Optional notes"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                {/* Cleaning Tasks */}
+                                <div className="col-span-full">
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Cleaning Tasks</label>
+                                    {(enclosureFormData.cleaningTasks || []).length > 0 && (
+                                        <div className="space-y-1 mb-2">
+                                            {(enclosureFormData.cleaningTasks || []).map((task, idx) => (
+                                                <div key={idx} className="flex items-center gap-2 text-xs bg-white rounded border border-gray-200 px-2 py-1.5">
+                                                    <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
+                                                    {task.frequencyDays && <span className="text-gray-400">Every {task.frequencyDays}d</span>}
+                                                    <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, cleaningTasks: (p.cleaningTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-0.5" title="Remove"><Trash2 size={14} /></button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-2">
+                                        <input type="text" value={newCleaningTaskName} onChange={e => setNewCleaningTaskName(e.target.value)}
+                                            placeholder="e.g. Spot clean, Full clean, Bulb change"
+                                            className="flex-1 p-1.5 text-xs border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                        <input type="number" value={newCleaningTaskFreq} onChange={e => setNewCleaningTaskFreq(e.target.value)}
+                                            placeholder="Days" min="1"
+                                            className="w-16 p-1.5 text-xs border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                        <button type="button" onClick={() => {
+                                            if (!newCleaningTaskName.trim()) return;
+                                            setEnclosureFormData(p => ({ ...p, cleaningTasks: [...(p.cleaningTasks || []), { taskName: newCleaningTaskName.trim(), frequencyDays: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, lastDoneDate: null }] }));
+                                            setNewCleaningTaskName(''); setNewCleaningTaskFreq('');
+                                        }} className="px-2 py-1.5 text-xs bg-blue-600 text-white rounded font-medium hover:bg-blue-700 whitespace-nowrap">+ Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <button onClick={() => { setEnclosureFormVisible(false); setEditingEnclosureId(null); }}
+                                    className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                                    Cancel
+                                </button>
+                                <button onClick={handleSaveEnclosure} disabled={enclosureSaving || !enclosureFormData.name.trim()}
+                                    className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50">
+                                    {enclosureSaving ? 'Saving...' : (editingEnclosureId ? 'Save Changes' : 'Create Enclosure')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {(!collapsedMgmtSections['enclosures'] || !!view) && (
                         <div className="p-3 space-y-2">
@@ -3231,23 +3381,7 @@ useEffect(() => {
                                                     <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
                                                         <button
                                                             onClick={() => {
-                                                                setEnclosureFormData({
-                                                                    name: enc.name,
-                                                                    enclosureType: enc.enclosureType || '',
-                                                                    location: enc.location || '',
-                                                                    dimensions: enc.dimensions || enc.size || '',
-                                                                    capacity: enc.capacity || '',
-                                                                    tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
-                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '',
-                                                                    lightingSchedule: enc.lightingSchedule || '',
-                                                                    notes: enc.notes || '',
-                                                                    tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
-                                                                    cleaningTasks: enc.cleaningTasks || [],
-                                                                    purpose: enc.purpose || 'general',
-                                                                    imageUrl: enc.imageUrl || ''
-                                                                });
-                                                                setEnclosureImagePreview(enc.imageUrl || null);
-                                                                setEnclosureImageFile(null);
+                                                                setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'general' });
                                                                 setEditingEnclosureId(enc._id);
                                                                 setEnclosureFormVisible(true);
                                                                 setCollapsedMgmtSections(p => ({...p, enclosures: false}));
@@ -3335,9 +3469,7 @@ useEffect(() => {
                             )}
                         </div>
                     )}
-                </div>
-            )}
-
+                </div>)}
 
                 {/* -- 2. FEEDING -------------------------------------------- */}
                 {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
@@ -3444,12 +3576,24 @@ useEffect(() => {
                                         <span className="text-xs font-semibold text-gray-700">Enclosures</span>
                                         <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{reproEnclosures.length}</span>
                                     </div>
-                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setReproEncFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); } else { setEnclosureFormData({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'reproduction', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setReproEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg">
-                                        <Plus size={11} /> Add
+                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setReproEncFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'reproduction' }); setReproEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg">
+                                        <Plus size={11} /> {reproEncFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
                                     </button>
                                 </div>
                                 {reproEncFormVisible && (
-                                    {/* Repro Enclosure form is now handled by the modal */}
+                                    <div className="p-3 border-b bg-blue-50/40 space-y-2">
+                                        <div className="text-xs font-semibold text-blue-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input type="text" value={enclosureFormData.name} onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))} placeholder="e.g. Breeding Pair Tank A" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label><input type="text" value={enclosureFormData.enclosureType} onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Size</label><input type="text" value={enclosureFormData.size} onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))} placeholder="e.g. 40 gallon" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Notes</label><input type="text" value={enclosureFormData.notes} onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))} placeholder="Optional notes" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
+                                        </div>
+                                        <div className="flex justify-end gap-2">
+                                            <button onClick={() => { setReproEncFormVisible(false); setEditingEnclosureId(null); }} className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
+                                            <button onClick={handleSaveEnclosure} disabled={enclosureSaving || !enclosureFormData.name.trim()} className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50">{enclosureSaving ? 'Saving...' : (editingEnclosureId ? 'Save Changes' : 'Create Enclosure')}</button>
+                                        </div>
+                                    </div>
                                 )}
                                 <div className="p-2 space-y-2">
                                     {reproEnclosures.length === 0
@@ -3469,24 +3613,8 @@ useEffect(() => {
                                                             {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
                                                             <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>                                                            <button onClick={() => {
-                                                                setEnclosureFormData({
-                                                                    name: enc.name,
-                                                                    enclosureType: enc.enclosureType || '',
-                                                                    location: enc.location || '',
-                                                                    dimensions: enc.dimensions || enc.size || '',
-                                                                    capacity: enc.capacity || '',
-                                                                    tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
-                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '',
-                                                                    lightingSchedule: enc.lightingSchedule || '',
-                                                                    notes: enc.notes || '',
-                                                                    tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
-                                                                    cleaningTasks: enc.cleaningTasks || [],
-                                                                    purpose: enc.purpose || 'reproduction',
-                                                                    imageUrl: enc.imageUrl || ''
-                                                                }); setEnclosureImagePreview(enc.imageUrl || null);
-                                                                setEnclosureImageFile(null);
-                                                                setEditingEnclosureId(enc._id); setReproEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit"><Edit size={13} /></button>
+                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                            <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'reproduction' }); setEditingEnclosureId(enc._id); setReproEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit"><Edit size={13} /></button>
                                                             <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={13} /></button>
                                                         </div>
                                                     </div>
@@ -3611,12 +3739,24 @@ useEffect(() => {
                                         <span className="text-xs font-semibold text-gray-700">Enclosures</span>
                                         <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{healthEnclosures.length}</span>
                                     </div>
-                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setHealthEncFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); } else { setEnclosureFormData({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'health', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setHealthEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
-                                        <Plus size={11} /> Add
+                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setHealthEncFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'health' }); setHealthEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
+                                        <Plus size={11} /> {healthEncFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
                                     </button>
                                 </div>
                                 {healthEncFormVisible && (
-                                    {/* Health Enclosure form is now handled by the modal */}
+                                    <div className="p-3 border-b bg-orange-50/40 space-y-2">
+                                        <div className="text-xs font-semibold text-orange-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input type="text" value={enclosureFormData.name} onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))} placeholder="e.g. Quarantine Tank 1" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label><input type="text" value={enclosureFormData.enclosureType} onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Size</label><input type="text" value={enclosureFormData.size} onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))} placeholder="e.g. 40 gallon" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Notes</label><input type="text" value={enclosureFormData.notes} onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))} placeholder="Optional notes" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
+                                        </div>
+                                        <div className="flex justify-end gap-2">
+                                            <button onClick={() => { setHealthEncFormVisible(false); setEditingEnclosureId(null); }} className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
+                                            <button onClick={handleSaveEnclosure} disabled={enclosureSaving || !enclosureFormData.name.trim()} className="text-xs px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium disabled:opacity-50">{enclosureSaving ? 'Saving...' : (editingEnclosureId ? 'Save Changes' : 'Create Enclosure')}</button>
+                                        </div>
+                                    </div>
                                 )}
                                 <div className="p-2 space-y-2">
                                     {healthEnclosures.length === 0
@@ -3639,24 +3779,8 @@ useEffect(() => {
                                                             {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
                                                             <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>                                                            <button onClick={() => {
-                                                                setEnclosureFormData({
-                                                                    name: enc.name,
-                                                                    enclosureType: enc.enclosureType || '',
-                                                                    location: enc.location || '',
-                                                                    dimensions: enc.dimensions || enc.size || '',
-                                                                    capacity: enc.capacity || '',
-                                                                    tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
-                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '',
-                                                                    lightingSchedule: enc.lightingSchedule || '',
-                                                                    notes: enc.notes || '',
-                                                                    tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
-                                                                    cleaningTasks: enc.cleaningTasks || [],
-                                                                    purpose: enc.purpose || 'health',
-                                                                    imageUrl: enc.imageUrl || ''
-                                                                }); setEnclosureImagePreview(enc.imageUrl || null);
-                                                                setEnclosureImageFile(null);
-                                                                setEditingEnclosureId(enc._id); setHealthEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-orange-600 rounded" title="Edit"><Edit size={13} /></button>
+                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                            <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'health' }); setEditingEnclosureId(enc._id); setHealthEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-orange-600 rounded" title="Edit"><Edit size={13} /></button>
                                                             <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={13} /></button>
                                                         </div>
                                                     </div>
@@ -4145,352 +4269,128 @@ useEffect(() => {
         );
     };
 
-    const renderDashboard = () => {
-        const categoryIcons = {
-            'Mammal': <Cat size={16} className="mr-1.5 text-gray-500" />,
-            'Reptile': <Turtle size={16} className="mr-1.5 text-gray-500" />,
-            'Bird': <Bird size={16} className="mr-1.5 text-gray-500" />,
-            'Amphibian': <Circle size={16} className="mr-1.5 text-gray-500" />,
-            'Fish': <Fish size={16} className="mr-1.5 text-gray-500" />,
-            'Invertebrate': <Bug size={16} className="mr-1.5 text-gray-500" />,
-            'Other': <Sparkles size={16} className="mr-1.5 text-gray-500" />
-        };
-
-        return (
-            <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {/* Column 1: Total Animals */}
-                    <div className="flex flex-col gap-2">
-                        <StatCard
-                            icon={<Cat size={32} className="text-blue-800" />}
-                            label="Total Animals"
-                            value={totalDashboardAnimalsCount}
-                            colorClass="bg-blue-100 text-blue-900"
-                            hasDropdown={true}
-                            isDropdownOpen={showCategoryBreakdown}
-                            onDropdownToggle={() => setShowCategoryBreakdown(prev => !prev)}
-                        />
-                        {showCategoryBreakdown && (
-                            <div className="bg-white border border-gray-200 rounded-lg p-3 -mt-1 shadow-sm">
-                                <h4 className="text-sm font-semibold text-gray-700 mb-2">Category Breakdown</h4>
-                                {categoryBreakdown.length > 0 ? (
-                                    <ul className="text-xs space-y-1">
-                                        {categoryBreakdown.map(cat => (
-                                            <li key={cat.name} className="flex justify-between items-center">
-                                                <span className="flex items-center text-gray-600">
-                                                    {categoryIcons[cat.name]}
-                                                    {cat.name}{cat.count !== 1 && cat.name !== 'Fish' ? 's' : ''}
-                                                </span>
-                                                <span className="font-medium text-gray-800">{cat.count} <span className="text-gray-400">({cat.percentage}%)</span></span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-xs text-gray-400 text-center">No animals to categorize.</p>
-                                )}
-                            </div>
-                        )}
-                        <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm w-full" data-tutorial-target="ownership-visibility-filter">
-                            <button
-                                onClick={() => setOwnedFilterMode('owned')}
-                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                                title="Show only animals you own"
-                            >
-                                <Heart size={14} /> Owned
-                            </button>
-                            <button
-                                onClick={() => setOwnedFilterMode('all')}
-                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 border-l border-gray-300 ${ownedFilterMode === 'all' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                                title="Show all animals (owned and unowned)"
-                            >
-                                All
-                            </button>
-                        </div>
-                        <div className="text-center text-[10px] text-gray-400 dark:text-dark-text-muted mt-1">
-                            Applies to all tabs
-                        </div>
-                    </div>
-
-                    {/* Column 2: Owned */}
-                    <div className="flex flex-col gap-2">
-                        <StatCard
-                            icon={<Heart size={32} className="text-red-800" />}
-                            label="Owned"
-                            value={ownedDashboardCount}
-                            colorClass="bg-red-100 text-red-900"
-                        />
-                        <button
-                            onClick={() => toggleAllAnimalsOwned(true)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-red-100 text-red-700 hover:bg-red-200"
-                            title="Mark All Animals as Owned"
-                        >
-                            <Heart size={14} /> Set All Owned
-                        </button>
-                        <button
-                            onClick={() => toggleAllAnimalsOwned(false)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            title="Mark All Animals as Unowned"
-                        >
-                            <HeartOff size={14} /> Set All Unowned
-                        </button>
-                    </div>
-
-                    {/* Column 3: Public */}
-                    <div className="flex flex-col gap-2">
-                        <StatCard
-                            icon={<Eye size={32} className="text-green-800" />}
-                            label="Public"
-                            value={publicDashboardCount}
-                            colorClass="bg-green-100 text-green-900"
-                        />
-                        <button
-                            onClick={() => toggleAllAnimalsPrivacy(true)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-green-100 text-green-700 hover:bg-green-200"
-                            title="Make All Animals Public"
-                        >
-                            <Eye size={14} /> Set All Public
-                        </button>
-                        <button
-                            onClick={() => toggleAllAnimalsPrivacy(false)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            title="Make All Animals Private"
-                        >
-                            <EyeOff size={14} /> Set All Private
-                        </button>
-                    </div>
-
-                    {/* Column 4: Sold/Archived */}
-                    <div className="flex flex-col gap-2">
-                        <StatCard
-                            icon={<Archive size={32} className="text-purple-800" />}
-                            label="Sold / Archived"
-                            value={soldOrArchivedCount}
-                            colorClass="bg-purple-100 text-purple-900"
-                        />
-                        {!showDuplicatesScreen && (
-                            <button
-                                onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); }}
-                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${showArchiveScreen ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
-                                title="Archive"
-                            >
-                                <Archive size={14} className="sm:w-4 sm:h-4" />
-                                <span>Archive</span>
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Column 5: Needs Attention */}
-                    <div className="flex flex-col gap-2">
-                        <StatCard
-                            icon={<AlertCircle size={32} className="text-orange-800" />}
-                            label="Needs Attention"
-                            value={feedDueDashboard.length + healthAttentionDashboardCount}
-                            colorClass="bg-orange-100 text-orange-900"
-                        />
-                        <div className="relative w-full" ref={alertsDropdownRef}>
-                            <button
-                                onClick={() => setShowAlertsDropdown(prev => !prev)}
-                                title="Configure alerts"
-                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${mgmtAlertsEnabled ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                            >
-                                <Bell size={14} className="sm:w-4 sm:h-4" />
-                                <span>Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
-                                <ChevronDown size={14} className={`ml-1 transition-transform ${showAlertsDropdown ? 'rotate-180' : ''}`} />
-                            </button>
-                            {showAlertsDropdown && (
-                                <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl z-10">
-                                    <div className="p-3 border-b">
-                                        <h4 className="font-semibold text-sm text-gray-800">Notification Settings</h4>
-                                        <p className="text-xs text-gray-500">Select which alerts to show.</p>
-                                    </div>
-                                    <div className="p-3 space-y-2">
-                                        {Object.entries(ALERT_CATEGORIES).map(([key, label]) => (
-                                            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!alertSettings[key]}
-                                                    onChange={() => toggleAlertCategory(key)}
-                                                    className="w-4 h-4 rounded text-primary focus:ring-primary"
-                                                />
-                                                {label}
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    const toggleAllAnimalsOwned = async (makeOwned) => {
-        if (animals.length === 0) {
-            showModalMessage('No Animals', 'No animals found.');
-            return;
-        }
-
-        const action = makeOwned ? 'owned' : 'unowned';
-        const confirmChange = window.confirm(`Are you sure you want to mark ALL ${animals.length} animals as ${action}?`);
-        if (!confirmChange) return;
-
-        // Update local state immediately for instant UI feedback
-        const updatedAnimals = animals.map(animal => ({
-            ...animal,
-            isOwned: makeOwned,
-        }));
-        setAnimals(updatedAnimals);
-        setAllAnimalsRaw(prev => prev.map(animal => ({
-            ...animal,
-            isOwned: makeOwned,
-        })));
-
-        // Update database in the background
-        let failedUpdates = 0;
-        for (const animal of animals) {
-            try {
-                await fetch(`${API_BASE_URL}/animals/${animal.id_public}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({
-                        isOwned: makeOwned,
-                    })
-                });
-            } catch (error) {
-                console.error(`Error updating animal ${animal.id_public}:`, error);
-                failedUpdates++;
-            }
-        }
-
-        // Show notification if there were failures
-        if (failedUpdates > 0) {
-            showModalMessage('Partial Success', `Updated locally, but ${failedUpdates} animal(s) failed to sync with the server. They will be updated on next refresh.`);
-        }
-    };
-
-    const handleViewAnimalFromNotification = useCallback((animalId) => {
-        const animal = allAnimalsRaw.find(a => a.id_public === animalId);
-        if (animal) {
-            onViewAnimal(animal);
-        } else {
-            // Fallback for animals not in the current list (e.g., transferred)
-            showModalMessageRef.current('Info', 'Navigating to animal...');
-            navigate(`/animals/${animalId}`);
-        }
-    }, [allAnimalsRaw, onViewAnimal, navigate, showModalMessageRef]);
-
     return (
-        <>
-            {/* Notification banner */}
-            <div className="w-full max-w-7xl mx-auto mb-4">
-                <NotificationBar
-                    authToken={authToken}
-                    API_BASE_URL={API_BASE_URL}
-                    setShowNotifications={setShowNotifications}
-                    setShowMessages={setShowMessages}
-                />
-            </div>
-
-            {/* Animal List section */}
-            <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
-                <div className="flex items-center justify-between w-full gap-2 min-w-0 mb-4">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center justify-between w-full sm:w-auto gap-2 min-w-0">
+                    <div className='flex items-center gap-2 min-w-0 flex-1'>
                         <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text truncate" data-tutorial-target="my-animals-title">
-                            {animalView === 'list' ? `My Animals` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
-                        </h2>
-                        {/* Refresh button */}
-                        <button
-                            onClick={handleRefresh}
-                            disabled={loading}
-                            className="text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs font-medium"
-                            title="Refresh"
-                        >
-                            {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                            <span className="hidden sm:inline">Refresh</span>
-                        </button>
+                        <span className="truncate">
+                            {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
+                        </span>
                         {isListLikeView && hasActiveFilters && (
                             <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
                                 Filtered
                             </span>
                         )}
                     </div>
-                    {/* Right-aligned action buttons */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
-                        {/* Find Duplicates */}
-                        {!showArchiveScreen && (
-                            <button
-                                onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); }}
-                                className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
-                                title="Find Duplicate Animals"
-                            >
-                                <Search size={14} className="sm:w-4 sm:h-4" />
-                                <span className="font-medium hidden sm:inline">Find Duplicates</span>
-                            </button>
-                        )}
-                        {/* Add Enclosure button */}
-                        <button
-                            onClick={() => {
-                                console.log('[AnimalList] Create Enclosure button clicked.');
-                                openEnclosureModal();
-                            }}
-                            className="hidden sm:flex bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/80 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
-                            title="Add New Enclosure"
-                        ><Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Enclosure</span></button>
-                        {/* Mobile Add Enclosure button */}
-                        <button
-                            onClick={() => openEnclosureModal()}
-                            className="sm:hidden bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/80 text-black font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
-                            title="Add Enclosure"
-                        >
-                            <Plus size={14} /> <span className="sm:hidden">Add</span>
-                        </button>
-                        {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
-                        {isListLikeView && !showArchiveScreen && (
-                            <button
-                                onClick={() => navigate('/select-species')}
-                                className="hidden sm:flex bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
-                                data-tutorial-target="add-animal-btn"
-                            >
-                                <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
-                            </button>
-                        )}
-                        {/* Mobile Add Animal button — icon-only on mobile, hidden on sm+ */}
-                        {isListLikeView && !showArchiveScreen && (
+                    {/* Add Animal — icon-only on mobile, hidden on sm+ (desktop has full button in buttons row) */}
+                    {isListLikeView && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
                             className="sm:hidden bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
                             data-tutorial-target="add-animal-btn"
                             title="Add Animal"
                         >
-                            <PlusCircle size={14} /> <span className="sm:hidden">Add</span>
+                            <PlusCircle size={14} /> Add
                         </button>
-                        )}
-                    </div>
+                    )}
                 </div>
+                {/* Universal top-bar action buttons */}
+                <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap" data-tutorial-target="bulk-privacy-controls">
+                    {/* For Sale */}
+                    {!showArchiveScreen && !showDuplicatesScreen && (
+                        <button
+                            onClick={() => { setShowForSaleScreen(v => !v); setShowActivityLogScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showForSaleScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800'}`}
+                            title="For Sale / Available"
+                        >
+                            <ShoppingBag size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium hidden sm:inline">For Sale</span>
+                        </button>
+                    )}
+                    {/* Activity Log */}
+                    {!showArchiveScreen && !showDuplicatesScreen && (
+                        <button
+                            onClick={() => { setShowActivityLogScreen(v => { if (!v) { setActivityLogs([]); setLogsLoaded(false); } return !v; }); setShowForSaleScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showActivityLogScreen ? 'bg-indigo-600 text-white border-indigo-600' : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800'}`}
+                            title="Activity Log"
+                        >
+                            <ScrollText size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium hidden sm:inline">Activity Log</span>
+                        </button>
+                    )}
+                    {/* Archive */}
+                    {!showDuplicatesScreen && (
+                        <button
+                            onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showArchiveScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800'}`}
+                            title="Archive"
+                        >
+                            <Archive size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium hidden sm:inline">Archive</span>
+                        </button>
+                    )}
+                    {/* Find Duplicates */}
+                    {!showArchiveScreen && (
+                        <button
+                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
+                            title="Find Duplicate Animals"
+                        >
+                            <Search size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium hidden sm:inline">Find Duplicates</span>
+                        </button>
+                    )}
+                    {/* Alerts On/Off */}
+                    <button
+                        onClick={toggleMgmtAlerts}
+                        title={mgmtAlertsEnabled ? 'Alerts on — click to disable' : 'Alerts off — click to enable'}
+                        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${mgmtAlertsEnabled ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-800 text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30' : 'bg-white dark:bg-dark-surface border-gray-200 dark:border-dark-border text-gray-400 dark:text-dark-text-muted hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                    >
+                        <Bell size={14} className="sm:w-4 sm:h-4" />
+                        <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
+                    </button>
+                    {/* Refresh */}
+                    <button
+                        onClick={handleRefresh}
+                        disabled={loading}
+                        className="text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs sm:text-sm font-medium"
+                        title="Refresh"
+                    >
+                        {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
+                        <span className="hidden sm:inline">Refresh</span>
+                    </button>
+                    {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
+                    {isListLikeView && !showArchiveScreen && (
+                        <button
+                            onClick={() => navigate('/select-species')}
+                            className="hidden sm:flex bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                            data-tutorial-target="add-animal-btn"
+                        >
+                            <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
+                        </button>
+                    )}
+                    {/* Bulk privacy controls (list view only) */}
+                    {isListLikeView && !showArchiveScreen && !showDuplicatesScreen && (
+                        <></> /* placeholder — privacy buttons moved to filter bar below */
+                    )}
+                </div>
+            </h2>
 
-                {/* Conditional Dashboards */}
-                {animalView === 'enclosures' ? (
-                    renderEnclosureDashboard()
-                ) : !['reproduction', 'health', 'feeding'].includes(animalView) ? (
-                    renderDashboard()
-                ) : null}
-
-                {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
+            {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
             <div className="mb-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="grid grid-cols-3 sm:hidden">
+                <div className="grid grid-cols-4 sm:hidden">
                                 {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
                                     {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
                                     {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
                                     {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
                                     {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                                    {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
-                ].map(tab => (
+                                    {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
+                                    {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
+                                    {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
+                ].filter(tab => isFamilyTreeEnabled || tab.key !== 'familyTree').map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                                                 className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 text-[10px] font-semibold transition ${
@@ -4517,7 +4417,10 @@ useEffect(() => {
                   {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
                   {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
                   {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}].map(tab => (
+                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
+                  {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
+                  {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
+                                ].filter(tab => isFamilyTreeEnabled || tab.key !== 'familyTree').map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                         className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${
@@ -4541,272 +4444,431 @@ useEffect(() => {
             </div>
             )}
 
-            {isListLikeView && !showArchiveScreen && (
-                // Filter bar
-                <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
-                    <div className="flex flex-wrap items-center gap-2 flex-grow">
-                        <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
-                            <button onClick={() => {
-                                if (isCollectionsView) { setCollectionsViewMode('cards'); } else {
-                                    setMyAnimalsViewMode('cards');
-                                }
-                            }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${(isCollectionsView ? collectionsViewMode : myAnimalsViewMode) === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                                title="Card view"
-                            >
-                                <LayoutGrid size={14} />
-                            </button>
-                            <button onClick={() => {
-                                if (isCollectionsView) { setCollectionsViewMode('list'); } else {
-                                    setMyAnimalsViewMode('list');
-                                }
-                            }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${(isCollectionsView ? collectionsViewMode : myAnimalsViewMode) === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                                title="List view"
-                            >
-                                <ClipboardList size={14} />
-                            </button>
-                            <button onClick={(e) => {
-                                e.stopPropagation();
-                                if (isCollectionsView) {
-                                    setDefaultCollectionsViewMode(collectionsViewMode);
-                                } else {
-                                    setDefaultMyAnimalsViewMode(myAnimalsViewMode);
-                                }
-                            }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${
-                                    (isCollectionsView && defaultCollectionsViewMode === collectionsViewMode) ||
-                                    (!isCollectionsView && defaultMyAnimalsViewMode === myAnimalsViewMode)
-                                    ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
-                                title="Pin as default view"
-                            >
-                                <Pin size={14} fill={
-                                    (isCollectionsView && defaultCollectionsViewMode === collectionsViewMode) ||
-                                    (!isCollectionsView && defaultMyAnimalsViewMode === myAnimalsViewMode)
-                                    ? 'currentColor' : 'none'} />
-                            </button>
-                        </div>
-                        {isCollectionsView && (
-                            <button
-                                onClick={() => setShowCollectionManager(prev => !prev)}
-                                className={`p-2 text-xs border rounded-lg flex items-center gap-1 transition ${showCollectionManager ? 'bg-gray-200 border-gray-300 text-gray-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                            >
-                                <Wrench size={14} />
-                                <span>{showCollectionManager ? 'Close Collections' : 'Manage Collections'}</span>
-                            </button>
+            {isCollectionsView && !showArchiveScreen && (
+            <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
+                <div className="flex items-center gap-2 p-2 sm:p-3">
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchInput}
+                        onChange={handleSearchInputChange}
+                        onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
+                        className="flex-grow p-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-0"
+                    />
+                    <button
+                        onClick={triggerSearch}
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 text-sm shrink-0"
+                        title="Search"
+                    >
+                        <Search size={16} />
+                        <span className="hidden sm:inline">Search</span>
+                    </button>
+                    <span className="hidden sm:inline mx-1 text-gray-300">|</span>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(true)}
+                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
+                        title="Make All Animals Public"
+                    >
+                        <Eye size={14} className="sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Set All Public</span>
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(false)}
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
+                        title="Make All Animals Private"
+                    >
+                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Set All Private</span>
+                    </button>
+                </div>
+            </div>
+            )}
+
+            {isListLikeView && !isCollectionsView && !showArchiveScreen && (
+            <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
+                {/* Ownership filter buttons ? always visible, auto-apply */}
+                <div className="flex flex-wrap items-center justify-center gap-2 px-2 sm:px-3 py-2">
+                    <button onClick={() => setShowOwned(prev => !prev)}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                            showOwned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title={showOwned ? 'Click to hide owned animals' : 'Click to show owned animals'}
+                    >
+                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        {showOwned ? 'Showing Owned' : 'Show Owned'}
+                    </button>
+                    <button onClick={() => setShowUnowned(prev => !prev)}
+                        disabled={!allAnimalsFetched}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                            !allAnimalsFetched ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                            showUnowned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title={!allAnimalsFetched ? 'Loading all animals...' : showUnowned ? 'Click to hide unowned animals' : 'Click to show unowned animals'}
+                    >
+                        <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        {!allAnimalsFetched ? 'Loading...' : showUnowned ? 'Showing Unowned' : 'Show Unowned'}
+                    </button>
+                    <span className="hidden sm:inline mx-1 text-gray-300">|</span>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(true)}
+                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm"
+                        title="Make All Animals Public"
+                    >
+                        <Eye size={14} className="sm:w-4 sm:h-4" />
+                        <span>Set All Public</span>
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(false)}
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm"
+                        title="Make All Animals Private"
+                    >
+                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
+                        <span>Set All Private</span>
+                    </button>
+                </div>
+
+                {/* Search + Filters toggle + View mode toggle */}
+                <div className="flex items-center gap-2 p-2 sm:p-3 border-t border-gray-200">
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchInput}
+                        onChange={handleSearchInputChange}
+                        onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
+                        className="flex-grow p-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-0"
+                        disabled={loading}
+                        data-tutorial-target="my-animals-search"
+                    />
+                    <button
+                        onClick={triggerSearch}
+                        disabled={loading}
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 text-sm shrink-0"
+                        title="Search"
+                    >
+                        <Search size={16} />
+                        <span className="hidden sm:inline">Search</span>
+                    </button>
+                    <button
+                        onClick={() => setFiltersExpanded(prev => !prev)}
+                        className={`relative py-2 px-3 rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 text-sm font-semibold shrink-0 ${
+                            filtersExpanded ? 'bg-gray-700 text-white' : hasActiveFilters ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title="Toggle Filters"
+                    >
+                        <SlidersHorizontal size={16} />
+                        <span className="hidden sm:inline">Filters</span>
+                        {hasActiveFilters && !filtersExpanded && (
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full" />
                         )}
-                        <div className="relative flex-shrink-0">
-                            <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                value={searchInput}
-                                onChange={handleSearchInputChange}
-                                onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
-                                className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 rounded-lg"
-                            />
-                        </div>
-                        <select
-                            value={categoryFilter}
-                            onChange={(e) => { setCategoryFilter(e.target.value); setSpeciesFilter(''); }}
-                            className="p-2 text-sm border border-gray-300 rounded-lg"
+                    </button>
+                    {/* Card / List view toggle */}
+                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                        <button
+                            onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'cards'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="Card view"
                         >
-                            {allSpeciesCategories.map(cat => (
-                                <option key={cat} value={cat === 'All Categories' ? '' : cat}>{cat}</option>
-                            ))}
-                        </select>
+                            <LayoutGrid size={14} />
+                        </button>
+                        <button
+                            onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'list'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="List view"
+                        >
+                            <ClipboardList size={14} />
+                        </button>
+                    </div>
+                </div>
+
+            {/* Collapsible filter panel */}
+            {filtersExpanded && (
+            <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2 sm:space-y-3 border-t border-gray-200 dark:border-dark-border pt-2 sm:pt-3">
+                {/* Row 1: Species + Status dropdowns */}
+                <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="species-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Species:</span>
                         <select 
-                            value={speciesFilter}
-                            onChange={(e) => { setSpeciesFilter(e.target.value); }}
-                            className="p-2 text-sm border border-gray-300 rounded-lg"
+                            value={
+                                speciesNames.every(species => selectedSpecies.includes(species)) ? '' : 
+                                (selectedSpecies.find(s => speciesNames.includes(s)) || '')
+                            }
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === '') {
+                                    setSelectedSpecies([...speciesNames]);
+                                } else {
+                                    setSelectedSpecies([value]);
+                                }
+                            }}
+                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 dark:border-dark-border rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:bg-dark-surface dark:text-dark-text transition min-w-[110px] sm:min-w-[160px]"
                         >
-                            <option value="">All Species</option>
-                            {filteredSpeciesNames.map(species => (
+                            <option value="">All</option>
+                            {speciesNames.map(species => (
                                 <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
                             ))}
                         </select>
-                        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); }}
-                            className="p-2 text-sm border border-gray-300 rounded-lg"
+                    </div>
+                    
+                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="status-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Status:</span>
+                        <select value={statusFilter} onChange={handleStatusFilterChange} 
+                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 dark:border-dark-border rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:bg-dark-surface dark:text-dark-text transition min-w-[110px] sm:min-w-[160px]"
                         >
-                            <option value="">All Statuses</option>
-                            {STATUS_OPTIONS.map(status => (
+                            <option value="">All</option>
+                            {STATUS_OPTIONS.filter(s => s !== 'Sold').map(status => (
                                 <option key={status} value={status}>{status}</option>
                             ))}
                         </select>
-                        <select value={genderFilter} onChange={(e) => { setGenderFilter(e.target.value); }}
-                            className="p-2 text-sm border border-gray-300 rounded-lg"
-                        >
-                            {GENDER_OPTIONS.map(gender => (
-                                <option key={gender} value={gender === 'All Genders' ? '' : gender}>{gender}</option>
-                            ))}
-                        </select>
-                        {(userProfile?.id_public === 'CTU2' || userProfile?.creatorId_public === 'CTU2') && (
-                            <select
-                                value={statusFilterReproductive}
-                                onChange={(e) => { setStatusFilterReproductive(e.target.value); setStatusFilterPregnant(false); setStatusFilterNursing(false); setStatusFilterMating(false); }}
-                                className="p-2 text-sm border border-gray-300 rounded-lg"
-                            >
-                                <option value="none">Reproductive Status</option>
-                                <option value="all">All (Planned/Mating/Pregnant/Nursing)</option>
-                                <option value="planned">Planned Mating</option>
-                                <option value="mating">In Mating</option>
-                                <option value="pregnant">Pregnant</option>
-                                <option value="nursing">Nursing</option>
-                            </select>
-                        )}
-                        {breedingLineDefs && breedingLineDefs.length > 0 && (
-                            <select
-                                value={blFilter.length > 0 ? blFilter[0] : ''}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    setBlFilter(value ? [value] : []);
-                                }}
-                                className="p-2 text-sm border border-gray-300 rounded-lg"
-                            >
-                                <option value="">All Lines</option>
-                                {breedingLineDefs.filter(line => line.name).map(line => (
-                                    <option key={line.id} value={line.id}>{line.name}</option>
-                                ))}
-                            </select>
-                        )}
                     </div>
-                    <div className="flex items-center gap-2 ml-auto flex-wrap">
-                        <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                </div>
+
+                {/* Row 2: Gender + Visibility */}
+                <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6">
+                    <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="gender-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Gender:</span>
+                            {GENDER_OPTIONS.map(gender => {
+                                const isSelected = selectedGenders.includes(gender);
+                                let Icon, bgColor;
+                                switch(gender) {
+                                    case 'Male': Icon = Mars; bgColor = isSelected ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400'; break;
+                                    case 'Female': Icon = Venus; bgColor = isSelected ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400'; break;
+                                    case 'Intersex': Icon = VenusAndMars; bgColor = isSelected ? 'bg-purple-400' : 'bg-gray-300 hover:bg-gray-400'; break;
+                                    case 'Unknown': Icon = Circle; bgColor = isSelected ? 'bg-teal-400' : 'bg-gray-300 hover:bg-gray-400'; break;
+                                    default: Icon = Circle; bgColor = 'bg-gray-300 hover:bg-gray-400';
+                                }
+                                return (
+                                    <button key={gender} onClick={() => toggleGender(gender)}
+                                        className={`p-1.5 sm:p-2 rounded-lg transition duration-150 shadow-sm ${bgColor}`}
+                                        title={gender}
+                                    >
+                                        <Icon className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-black" />
+                                    </button>
+                                );
+                            })}
                         </div>
-                        <span className="hidden sm:inline mx-1 text-gray-300">|</span>
-                        <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
-                            A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
+
+                    <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="visibility-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Visibility:</span>
+                            {['All', 'Public', 'Private'].map(option => {
+                                const value = option === 'All' ? '' : option.toLowerCase();
+                                const isSelected = publicFilter === value;
+                                return (
+                                    <button key={option} onClick={() => setPublicFilter(value)}
+                                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                            isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        {option}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                {/* Row 3: Show filters */}
+                <div className="flex flex-wrap justify-center items-center gap-1 sm:gap-2" data-tutorial-target="collection-filters">
+                    <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Show:</span>
+
+                        <button onClick={handleFilterMating}
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                                statusFilterMating ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                            title="Mating"
+                        >
+                            <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Mating</span>
                         </button>
-                        <button onClick={() => requestSort('birthdate')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'birthdate' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
-                            Age {sortConfig.key === 'birthdate' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
+                        <button onClick={handleFilterPregnant}
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                                statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                            title="Pregnant"
+                        >
+                            <Bean className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Pregnant</span>
+                        </button>
+                        <button onClick={handleFilterNursing}
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                                statusFilterNursing ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                            title="Nursing"
+                        >
+                            <Milk className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Nursing</span>
                         </button>
                     </div>
+
+                {/* Row 4: Breeding Line filters */}
+                {breedingLineDefs.some(l => l.name) && (
+                    <div className="flex flex-wrap justify-center items-center gap-2">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap">Breeding Line:</span>
+                            {breedingLineDefs.filter(l => l.name).map(line => {
+                                const isActive = blFilter.includes(line.id);
+                                return (
+                                    <button
+                                        key={line.id}
+                                        onClick={() => setBlFilter(prev => isActive ? prev.filter(id => id !== line.id) : [...prev, line.id])}
+                                        title={line.name}
+                                        className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm border ${
+                                            isActive ? 'text-white border-transparent' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300'
+                                        }`}
+                                        style={isActive ? { backgroundColor: line.color, borderColor: line.color } : {}}
+                                    >
+                                        <span style={{ color: isActive ? 'white' : line.color }} className="text-base leading-none">&#x25C6;</span>
+                                        {line.name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                {/* Apply / Clear row */}
+                <div className="flex justify-center items-center gap-2 pt-2 border-t border-gray-200 dark:border-dark-border">
+                        <button
+                            onClick={() => { applyFilters(); setFiltersExpanded(false); }}
+                            className={`font-semibold py-2 px-5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1.5 text-sm ${
+                                panelDirty
+                                    ? 'bg-accent hover:bg-accent/90 text-white animate-pulse'
+                                    : 'bg-primary hover:bg-primary/90 text-black'
+                            }`}
+                        >
+                            <Check size={16} />
+                            Apply Filters
+                        </button>
+                        {hasActiveFilters && (
+                            <button
+                                onClick={() => { handleClearFilters(); setFiltersExpanded(false); }}
+                                className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm font-medium"
+                            >
+                                <X size={14} />
+                                Clear All
+                            </button>
+                        )}
+                    </div>
+                </div>
+                )}
             </div>
             )}
-             {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
-                <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
-            ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
-                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm relative">
-                    {showColumnsDropdown && (
-                        <div ref={columnsDropdownRef} className="absolute top-10 right-2 bg-white border rounded-lg shadow-lg p-3 z-20 w-48">
-                            <h4 className="text-xs font-bold mb-2">Displayed Columns</h4>
-                            {Object.entries({ animal: 'Animal', species: 'Species', variety: 'Variety', enclosure: 'Enclosure', lifeStage: 'Life Stage', status: 'Status', health: 'Health', birthdateAge: 'Birthdate / Age', breedingLines: 'Lines', tags: 'Tags' }).map(([key, label]) => (
-                                <label key={key} className="flex items-center gap-2 text-sm text-gray-700 p-1 hover:bg-gray-100 rounded">
-                                    <input type="checkbox" checked={!!listViewColumns[key]} onChange={() => setListViewColumns(prev => ({...prev, [key]: !prev[key]}))} className="rounded" />
+
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
+                /* Skeleton grid ? only on very first load before any animals arrive */
+                <div className="space-y-3 sm:space-y-4">
+                    {[0,1,2].map(gi => (
+                        <div key={gi} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm animate-pulse">
+                            <div className="flex items-center justify-between bg-gray-100 px-4 py-3 border-b">
+                                <div className="h-5 w-32 bg-gray-300 rounded" />
+                            </div>
+                            <div className="p-3 sm:p-4">
+                                <div className="flex flex-wrap gap-2">
+                                    {[0,1,2,3,4,6,7,8].map(ci => (
+                                        <div key={ci} className="w-[140px] sm:w-[140px] md:w-[176px] h-44 sm:h-48 md:h-56 bg-gray-100 rounded-xl" />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : displayedAnimalCount === 0 ? (
+                <div className="text-center p-8 bg-gray-50 rounded-lg">
+                    <Cat size={48} className="text-gray-400 mx-auto mb-4" />
+                    <p className="text-xl font-semibold text-gray-600">No animals found.</p>
+                    <p className="text-gray-500">Try adjusting your filters or add a new animal!</p>
+                </div>
+            ) : myAnimalsViewMode === 'list' ? (
+                /* Flat list / table view */
+                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                    {/* Column config panel — above the table */}
+                    {showListColumnConfig && (
+                        <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
+                            <span className="text-xs font-semibold text-gray-600 mr-2">Show columns:</span>
+                            {Object.entries({ genderIcon: 'Gender', ctId: 'CT ID', identification: 'ID', name: 'Name', variety: 'Variety', birthdate: 'Birthdate', age: 'Age', status: 'Status', reproduction: 'Repro', sireName: 'Sire', damName: 'Dam' }).map(([key, label]) => (
+                                <label key={key} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!listViewColumns[key]}
+                                        onChange={() => setListViewColumns(prev => {
+                                            const next = { ...prev, [key]: !prev[key] };
+                                            try { localStorage.setItem(`ct_list_view_columns_${userKey}`, JSON.stringify(next)); } catch {}
+                                            return next;
+                                        })}
+                                        className="rounded"
+                                    />
                                     {label}
                                 </label>
                             ))}
                         </div>
                     )}
-                    <table className="min-w-full text-xs divide-y divide-gray-200">
-                        <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] sticky top-0 z-10">
+                    <table className="min-w-full text-sm">
+                        <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
                             <tr>
-                                <th className="px-4 py-2 text-center">
-                                    <input
-                                        type="checkbox"
-                                        className="w-4 h-4 cursor-pointer rounded"
-                                        onChange={handleListSelectAll}
-                                        checked={displayedAnimalsForList.length > 0 && listSelectedIds.size === displayedAnimalsForList.length}
-                                        ref={el => el && (el.indeterminate = listSelectedIds.size > 0 && listSelectedIds.size < displayedAnimalsForList.length)}
-                                    />
-                                </th>
-                                {listViewColumns.animal && <th className="px-3 py-2 text-left font-semibold">Animal</th>}
-                                {listViewColumns.species && <th className="px-3 py-2 text-left font-semibold">Species</th>}
-                                {listViewColumns.variety && <th className="px-3 py-2 text-left font-semibold">Variety</th>}
-                                {listViewColumns.enclosure && <th className="px-3 py-2 text-left font-semibold">Enclosure</th>}
-                                {listViewColumns.lifeStage && <th className="px-3 py-2 text-left font-semibold">Life Stage</th>}
-                                {listViewColumns.status && <th className="px-3 py-2 text-left font-semibold">Status</th>}
-                                {listViewColumns.health && <th className="px-3 py-2 text-left font-semibold">Health</th>}
-                                {listViewColumns.birthdateAge && <th className="px-3 py-2 text-left font-semibold">Birthdate / Age</th>}
-                                {listViewColumns.breedingLines && <th className="px-3 py-2 text-left font-semibold">Lines</th>}
-                                {listViewColumns.tags && <th className="px-3 py-2 text-left font-semibold">Tags</th>}
-                                <th className="px-3 py-2 text-right w-12">
-                                    <button onClick={() => setShowColumnsDropdown(v => !v)} className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200">
-                                        <SlidersHorizontal size={14} />
+                                {listViewColumns.genderIcon && <th className="px-2 py-2 text-center w-8"></th>}
+                                {listViewColumns.ctId && <th className="px-3 py-2 text-left whitespace-nowrap">CT ID</th>}
+                                {listViewColumns.identification && <th className="px-3 py-2 text-left min-w-[8rem]">ID</th>}
+                                {listViewColumns.name && <th className="px-3 py-2 text-left">Name</th>}
+                                {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
+                                {listViewColumns.birthdate && <th className="px-3 py-2 text-left whitespace-nowrap">Birth Date</th>}
+                                {listViewColumns.age && <th className="px-3 py-2 text-left">Age</th>}
+                                {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
+                                {listViewColumns.reproduction && <th className="px-3 py-2 text-left w-px whitespace-nowrap">Repro</th>}
+                                {listViewColumns.sireName && <th className="px-3 py-2 text-left">Sire</th>}
+                                {listViewColumns.damName && <th className="px-3 py-2 text-left">Dam</th>}
+                                <th className="px-3 py-2 text-right">
+                                    <button
+                                        onClick={() => setShowListColumnConfig(v => !v)}
+                                        className="text-gray-400 hover:text-gray-700 transition"
+                                        title="Configure columns"
+                                    >
+                                        <SlidersHorizontal size={13} />
                                     </button>
                                 </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {(() => {
-                            const enclosureMap = new Map(enclosures.map(e => [e._id, e.name]));
-                                return displayedAnimalsForList.map(animal => {
-                                    const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
-                                    const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                    const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
-                                    const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                    const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
-
-                                    return (
-                                        <tr key={animal.id_public || animal._id} className="hover:bg-gray-50" onClick={() => onViewAnimal(animal)}>
-                                        <td className="px-4 py-1.5 text-center">
-                                            <input
-                                                type="checkbox"
-                                                checked={listSelectedIds.has(animal.id_public)}
-                                                onChange={() => handleListToggle(animal.id_public)}
-                                                className="w-4 h-4 cursor-pointer rounded"
-                                                onClick={e => e.stopPropagation()}
-                                            />
-                                        </td>
-                                        {listViewColumns.animal && (
-                                            <td className="px-3 py-1.5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden cursor-pointer" onClick={(e) => {e.stopPropagation(); onViewAnimal(animal);}}>
-                                                        <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-medium text-gray-800 flex items-center gap-1.5 text-sm">
-                                                            <span className="cursor-pointer hover:underline" onClick={(e) => {e.stopPropagation(); onViewAnimal(animal);}}>
-                                                                {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
-                                                            </span>
-                                                            {animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}
-                                                        </div>
-                                                        <div className="text-xs text-gray-500 font-mono">{animal.id_public}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        )}
-                                        {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400">{getSpeciesLatinName(animal.species)}</div>}</td>}
-                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 font-mono">{animal.geneticCode}</div>}</td>}
-                                        {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
-                                        {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>}
+                                const parentLookup = {};
+                                [...allAnimalsRaw, ...soldTransferredRaw].forEach(a => { if (a.id_public) parentLookup[a.id_public] = a; });
+                                Object.assign(parentLookup, externalParentsCache);
+                                const resolveParent = (id) => {
+                                    if (!id) return '—';
+                                    const a = parentLookup[id];
+                                    if (a) return [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || id;
+                                    return id; // show raw ID as fallback for truly external animals
+                                };
+                                return speciesNames.flatMap(species => (groupedAnimals[species] || []).map(animal => {
+                                const sireId = animal.fatherId_public || animal.sireId_public;
+                                const damId = animal.motherId_public || animal.damId_public;
+                                const sireName = resolveParent(sireId);
+                                const damName = resolveParent(damId);
+                                const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
+                                const ageStr = birthDateObj ? (() => {
+                                    const birth = birthDateObj;
+                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                    let years = endDate.getFullYear() - birth.getFullYear();
+                                    let months = endDate.getMonth() - birth.getMonth();
+                                    let days = endDate.getDate() - birth.getDate();
+                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                    if (months < 0) { years--; months += 12; }
+                                    return years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                })() : '—';
+                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                const reproBadges = [animal.isQuarantine && { label: 'Quarantine', cls: 'bg-red-100 text-red-700' }, animal.isInMating && { label: 'Mating', cls: 'bg-yellow-100 text-yellow-700' }, animal.isPregnant && { label: 'Pregnant', cls: 'bg-pink-100 text-pink-700' }, animal.isNursing && { label: 'Nursing', cls: 'bg-purple-100 text-purple-700' }].filter(Boolean);
+                                return (
+                                    <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                                        {listViewColumns.genderIcon && <td className="px-2 py-1.5 text-center">{animal.gender === 'Male' ? <Mars className="w-4 h-4 mx-auto text-primary dark:text-primary" strokeWidth={2.5} /> : animal.gender === 'Female' ? <Venus className="w-4 h-4 mx-auto text-accent dark:text-accent" strokeWidth={2.5} /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-4 h-4 mx-auto text-purple-500 dark:text-purple-400" strokeWidth={2.5} /> : <Circle className="w-4 h-4 mx-auto text-gray-400 dark:text-gray-500" strokeWidth={2.5} />}</td>}
+                                        {listViewColumns.ctId && <td className="px-3 py-1.5 font-mono text-xs text-gray-500">{animal.id_public || '—'}</td>}
+                                        {listViewColumns.identification && <td className="px-3 py-1.5 text-gray-600 text-xs min-w-[8rem]">{animal.breederAssignedId || '—'}</td>}
+                                        {listViewColumns.name && <td className="px-3 py-1.5 font-medium text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</td>}
+                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{varietyStr}</td>}
+                                        {listViewColumns.birthdate && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</td>}
+                                        {listViewColumns.age && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{ageStr}</td>}
                                         {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
-                                        {listViewColumns.health && <td className="px-3 py-1.5 text-gray-600 text-xs">{
-                                            animal.isQuarantine ? <span className="font-medium text-orange-600">Quarantine</span> :
-                                            animal.isInTreatment ? <span className="font-medium text-red-600">Treatment</span> :
-                                            animal.status === 'Deceased' ? <span className="text-gray-500">Deceased</span> :
-                                            <span className="text-green-600">OK</span>
-                                        }</td>}
-                                        {listViewColumns.birthdateAge && (
-                                            <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">
-                                                <div>{formatLocalDate(animal.birthDate)}</div>
-                                                <div className="text-xs text-gray-400">{ageStr}</div>
-                                            </td>
-                                        )}
-                                        {listViewColumns.breedingLines && (
-                                            <td className="px-3 py-1.5">
-                                                {activeLines.length > 0 ? (
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {activeLines.map(l => (
-                                                            <span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>
-                                                        ))}
-                                                    </div>
-                                                ) : '—'}
-                                            </td>
-                                        )}
-                                        {listViewColumns.tags && (
-                                            <td className="px-3 py-1.5 text-gray-500">
-                                                {(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}
-                                            </td>
-                                        )}
-                                        <td className="px-3 py-1.5 text-right">
-                                            <button className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" onClick={(e) => {e.stopPropagation(); setOpenActionMenu(animal.id_public); }}>
-                                                <MoreVertical size={16} />
-                                            </button>
-                                        </td>
+                                        {listViewColumns.reproduction && <td className="px-3 py-1.5 w-px whitespace-nowrap"><div className="flex gap-1">{reproBadges.length ? reproBadges.map(b => <span key={b.label} className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${b.cls}`}>{b.label}</span>) : <span className="text-gray-400">—</span>}</div></td>}
+                                        {listViewColumns.sireName && <td className="px-3 py-1.5 text-gray-500 text-xs">{sireName}</td>}
+                                        {listViewColumns.damName && <td className="px-3 py-1.5 text-gray-500 text-xs">{damName}</td>}
+                                        <td />
                                     </tr>
-                                    );
-                                });
+                                );
+                            }));
                             })()}
                         </tbody>
                     </table>
@@ -4970,58 +5032,7 @@ useEffect(() => {
                     })}
                 </div>
             )}
-            {showNotifications && (
-                <NotificationPanel
-                    authToken={authToken}
-                    API_BASE_URL={API_BASE_URL}
-                    onClose={() => setShowNotifications(false)}
-                    showModalMessage={showModalMessage}
-                    onNotificationChange={() => window.dispatchEvent(new CustomEvent('notifications-changed'))}
-                    onViewAnimal={handleViewAnimalFromNotification}
-                />
-            )}
-            {showBreedingLineManager && (
-                <BreedingLineManagerModal
-                    lines={breedingLineDefs}
-                    onClose={() => setShowBreedingLineManager(false)}
-                    onClearLine={handleClearBreedingLine}
-                />
-            )}
-            <EnclosureModal
-                isOpen={showEnclosureModal}
-                onClose={handleCloseEnclosureModal}
-                enclosureFormData={enclosureFormData}
-                setEnclosureFormData={setEnclosureFormData}
-                editingEnclosureId={editingEnclosureId}
-                setEditingEnclosureId={setEditingEnclosureId}
-                handleSaveEnclosure={handleSaveEnclosure}
-                enclosureSaving={enclosureSaving}
-                enclosureImageFile={enclosureImageFile}
-                setEnclosureImageFile={setEnclosureImageFile}
-                enclosureImagePreview={enclosureImagePreview}
-                setEnclosureImagePreview={setEnclosureImagePreview}
-                newEnclosureTag={newEnclosureTag} setNewEnclosureTag={setNewEnclosureTag} handleEnclosureTagAdd={handleEnclosureTagAdd} handleEnclosureTagRemove={handleEnclosureTagRemove}
-                allSpecies={allUserSpecies}
-                newEnclosureSpeciesLabel={newEnclosureSpeciesLabel} setNewEnclosureSpeciesLabel={setNewEnclosureSpeciesLabel} handleEnclosureSpeciesLabelAdd={handleEnclosureSpeciesLabelAdd} handleEnclosureSpeciesLabelRemove={handleEnclosureSpeciesLabelRemove}
-                newCleaningTaskName={newCleaningTaskName} setNewCleaningTaskName={setNewCleaningTaskName} newCleaningTaskFreq={newCleaningTaskFreq} setNewCleaningTaskFreq={setNewCleaningTaskFreq}
-            /> {/* This was the missing closing tag for the EnclosureModal component */}
-            {showDetailModal && selectedEnclosure && (
-                <EnclosureDetailModal
-                    isOpen={showDetailModal}
-                    onClose={() => { setShowDetailModal(false); setSelectedEnclosure(null); setEnclosureAnimals([]); }}
-                    enclosure={selectedEnclosure}
-                    animals={enclosureAnimals}
-                    loadingAnimals={loadingAnimals}
-                    authToken={authToken}
-                    API_BASE_URL={API_BASE_URL}
-                    showModalMessage={showModalMessage}
-                    onRefresh={fetchEnclosures}
-                    onViewAnimal={onViewAnimal}
-                    onEditEnclosure={(enclosureToEdit) => { setShowDetailModal(false); openEnclosureModal(enclosureToEdit); }}
-                />
-            )}
-            </div>
-        </>
+        </div>
     );
 };
 
