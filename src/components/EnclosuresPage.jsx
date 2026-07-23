@@ -69,21 +69,30 @@ const EnclosuresPage = ({
     }, [fetchEnclosures]);
 
     useEffect(() => {
-        const fetchAllUserSpecies = async () => {
-            if (!authToken) return;
+        const buildSpeciesList = async () => {
+            if (!authToken || !userProfile) return;
             try {
+                // 1. Fetch species from user's animals
                 const response = await axios.get(`${API_BASE_URL}/animals`, {
                     headers: { Authorization: `Bearer ${authToken}` },
                     params: { fields: 'species', limit: 5000 } // Get all species
                 });
-                const uniqueSpecies = [...new Set((response.data || []).map(a => a.species).filter(Boolean))].sort();
-                setAllSpecies(uniqueSpecies);
+                const animalSpecies = (response.data || []).map(a => a.species).filter(Boolean);
+
+                // 2. Get species from user's favorites
+                const favoriteSpecies = userProfile.favoriteSpecies || [];
+
+                // 3. Get species already used in other enclosures
+                const enclosureSpecies = enclosures.flatMap(e => e.speciesLabels || []);
+
+                const combined = [...new Set([...favoriteSpecies, ...animalSpecies, ...enclosureSpecies])].sort();
+                setAllSpecies(combined);
             } catch (err) {
                 console.error('Failed to fetch user species list:', err);
             }
         };
-        fetchAllUserSpecies();
-    }, [authToken, API_BASE_URL]);
+        buildSpeciesList();
+    }, [authToken, API_BASE_URL, userProfile, enclosures]);
 
     // Open create modal
     const handleOpenCreate = () => {

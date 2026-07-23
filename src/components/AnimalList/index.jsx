@@ -1102,12 +1102,12 @@ useEffect(() => {
         setShowEnclosureModal(true);
     }, []);
 
-    const handleEnclosureSpeciesLabelAdd = useCallback(() => {
-        if (!newEnclosureSpeciesLabel.trim()) return;
-        setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), newEnclosureSpeciesLabel.trim()])] }));
-        setNewEnclosureSpeciesLabel('');
-    }, [newEnclosureSpeciesLabel]);
-
+     const handleEnclosureSpeciesLabelAdd = useCallback((speciesToAdd) => {
+        if (!speciesToAdd || !speciesToAdd.trim()) return;
+        if ((enclosureFormData.speciesLabels || []).includes(speciesToAdd)) return; // Avoid duplicates
+        setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), speciesToAdd.trim()])] }));
+    }, [enclosureFormData.speciesLabels]);
+    
     const handleEnclosureSpeciesLabelRemove = useCallback((labelToRemove) => {
         setEnclosureFormData(p => ({ ...p, speciesLabels: (p.speciesLabels || []).filter(l => l !== labelToRemove) }));
     }, []);
