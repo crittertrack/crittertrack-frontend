@@ -1052,10 +1052,27 @@ useEffect(() => {
                 lightsOnTime: enclosureFormData.lightsOnTime,
                 lightsOffTime: enclosureFormData.lightsOffTime,
                 lightTimeFormat: enclosureFormData.lightTimeFormat,
+                  location: enclosureFormData.location.trim(),
+                dimensions: {
+                    length: enclosureFormData.length ? Number(enclosureFormData.length) : null,
+                    width: enclosureFormData.width ? Number(enclosureFormData.width) : null,
+                    height: enclosureFormData.height ? Number(enclosureFormData.height) : null,
+                    unit: enclosureFormData.dimensionsUnit
+                },
+                capacity: enclosureFormData.capacity ? Number(enclosureFormData.capacity) : undefined,
+                tempMin: enclosureFormData.tempMin ? Number(enclosureFormData.tempMin) : null,
+                tempMax: enclosureFormData.tempMax ? Number(enclosureFormData.tempMax) : null,
+                temperatureUnit: enclosureFormData.temperatureUnit,
+                humidityMin: enclosureFormData.humidityMin ? Number(enclosureFormData.humidityMin) : null,
+                humidityMax: enclosureFormData.humidityMax ? Number(enclosureFormData.humidityMax) : null,
+                lightsOnTime: enclosureFormData.lightsOnTime,
+                lightsOffTime: enclosureFormData.lightsOffTime,
+                lightTimeFormat: enclosureFormData.lightTimeFormat,
                 notes: enclosureFormData.notes.trim(),
                 cleaningTasks: enclosureFormData.cleaningTasks,
                 tags: enclosureFormData.tags,
                 speciesLabels: enclosureFormData.speciesLabels,
+                imageUrl: enclosureFormData.imageUrl,
             };
 
             if (enclosureImageFile) {
