@@ -1056,6 +1056,45 @@ useEffect(() => {
         setEnclosureFormData(p => ({ ...p, tags: (p.tags || []).filter(t => t !== tagToRemove) }));
     }, []);
 
+    const openEnclosureModal = useCallback((enclosure) => {
+        if (enclosure) {
+            // Edit mode
+            setEnclosureFormData({
+                name: enclosure.name || '',
+                enclosureType: enclosure.enclosureType || '',
+                location: enclosure.location || '',
+                dimensions: enclosure.dimensions || enclosure.size || '',
+                capacity: enclosure.capacity || '',
+                tempMin: enclosure.tempMin || '',
+                tempMax: enclosure.tempMax || '',
+                humidityMin: enclosure.humidityMin || '',
+                humidityMax: enclosure.humidityMax || '',
+                lightingSchedule: enclosure.lightingSchedule || '',
+                notes: enclosure.notes || '',
+                tags: enclosure.tags || [],
+                speciesLabels: enclosure.speciesLabels || [],
+                cleaningTasks: enclosure.cleaningTasks || [],
+                purpose: enclosure.purpose || 'general',
+                imageUrl: enclosure.imageUrl || ''
+            });
+            setEnclosureImagePreview(enclosure.imageUrl || null);
+            setEnclosureImageFile(null);
+            setEditingEnclosureId(enclosure._id);
+        } else {
+            // Add new mode
+            setEnclosureFormData({
+                name: '', enclosureType: '', location: '', dimensions: '', capacity: '',
+                tempMin: '', tempMax: '', humidityMin: '', humidityMax: '',
+                lightingSchedule: '', notes: '', tags: [], speciesLabels: [],
+                cleaningTasks: [], purpose: 'general', imageUrl: ''
+            });
+            setEnclosureImagePreview(null);
+            setEnclosureImageFile(null);
+            setEditingEnclosureId(null);
+        }
+        setShowEnclosureModal(true);
+    }, []);
+
     const handleEnclosureSpeciesLabelAdd = useCallback(() => {
         if (!newEnclosureSpeciesLabel.trim()) return;
         setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), newEnclosureSpeciesLabel.trim()])] }));
@@ -4494,9 +4533,17 @@ useEffect(() => {
                         {/* Add Enclosure button */}
                         <button
                             onClick={() => openEnclosureModal()}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                            className="hidden sm:flex bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/80 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
                             title="Add New Enclosure"
-                        ><Plus size={14} className="sm:w-4 sm:h-4" /> <span className="font-medium hidden sm:inline">Add Enclosure</span></button>
+                        ><Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Enclosure</span></button>
+                        {/* Mobile Add Enclosure button */}
+                        <button
+                            onClick={() => openEnclosureModal()}
+                            className="sm:hidden bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/80 text-black font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
+                            title="Add Enclosure"
+                        >
+                            <Plus size={14} /> <span className="sm:hidden">Add</span>
+                        </button>
                         {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
                         {isListLikeView && !showArchiveScreen && (
                             <button
