@@ -248,15 +248,13 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             }
             setAnimalToEdit(null);
 
-            // Special workflow for 'Rehomed' status change
-            const originalStatus = animalToEdit?.status;
-            const newStatus = finalAnimal?.status;
-            if (newStatus === 'Rehomed' && originalStatus !== 'Rehomed' && !finalAnimal.archived) {
-                if (window.confirm("You've marked this animal as Rehomed. Would you also like to archive this animal's record? It will be hidden from main lists but remain in pedigrees.")) {
-                    // Reuse the existing archive handler, but skip its confirmation prompt.
-                    // We pass archived: false to ensure it performs the 'archive' action.
-                    handleArchiveAnimal({ ...finalAnimal, archived: false }, true);
-                }
+            // Special workflow for 'Rehomed' status change with optional archive.
+            // This is triggered by a checkbox in the form, passed as a transient `archiveOnSave` property.
+            const archiveOnSave = !(data instanceof FormData) && (data as any).archiveOnSave;
+            if (archiveOnSave && finalAnimal?.status === 'Rehomed' && !finalAnimal.archived) {
+                // The user checked the "Also archive" box in the form.
+                // We reuse the existing archive handler, but skip its confirmation prompt.
+                handleArchiveAnimal({ ...finalAnimal, archived: false }, true);
             }
 
             return response;

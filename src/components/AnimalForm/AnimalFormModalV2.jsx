@@ -1352,6 +1352,9 @@ const AnimalFormModalV2 = ({
         tags: false,
     });
 
+    // State for the optional archive-on-save checkbox
+    const [archiveOnSave, setArchiveOnSave] = useState(false);
+
     // Persist section collapse state in localStorage to survive re-renders
     useEffect(() => {
         try {
@@ -3134,6 +3137,20 @@ const AnimalFormModalV2 = ({
                                                             className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                                                         </select>
+                                                        {/* Conditional "Also archive" checkbox */}
+                                                        {formData.status === 'Rehomed' && !animalToEdit?.archived && (
+                                                            <div className="mt-2">
+                                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={archiveOnSave}
+                                                                        onChange={e => setArchiveOnSave(e.target.checked)}
+                                                                        className="w-4 h-4 rounded accent-primary"
+                                                                    />
+                                                                    <span className="text-sm text-gray-700">Also archive this animal's record</span>
+                                                                </label>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     {formData.status === 'Deceased' && (
                                                         <div>
