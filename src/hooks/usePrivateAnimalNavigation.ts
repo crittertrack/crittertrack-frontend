@@ -169,33 +169,33 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
     const handleArchiveAnimal = useCallback(async (animal: Animal, skipConfirmation = false) => {
         if (!animal || !authToken) return;
 
-        const action = animal.archived ? 'unarchive' : 'archive';
-        const confirmMsg = animal.archived 
-            ? `Restore ${animal.name} from archive?`
-            : `Archive ${animal.name}? It will be hidden from main lists but remain in pedigrees.`;
+        const isArchiving = !animal.archived;
+        const confirmMsg = isArchiving
+            ? `Archive ${animal.name || 'this animal'}? It will be hidden from main lists but remain in pedigrees.`
+            : `Restore ${animal.name || 'this animal'} from the archive?`;
 
         if (!skipConfirmation && !window.confirm(confirmMsg)) return;
 
         try {
-            await axios.post(
-                `${API_BASE_URL}/animals/${animal.id_public}/${action}`,
-                {},
+            // The API endpoint for archiving has been updated from a command-style POST
+            // to a more RESTful PUT on the animal resource itself.
+            await axios.put(
+                `${API_BASE_URL}/animals/${animal.id_public}`,
+                { archived: isArchiving },
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
 
             // Update viewed animal if currently viewing it
             if (animalToView && animalToView.id_public === animal.id_public) {
-                setAnimalToView({ ...animalToView, archived: !animal.archived });
+                setAnimalToView({ ...animalToView, archived: isArchiving });
             }
 
             // Dispatch event for other components
-            window.dispatchEvent(new CustomEvent('animal-archived', {
-                detail: { id_public: animal.id_public, archived: !animal.archived }
-            }));
+            window.dispatchEvent(new CustomEvent('animal-archived', { detail: { id_public: animal.id_public, archived: isArchiving } }));
             window.dispatchEvent(new Event('animals-changed'));
 
             // Close view if archiving (not unarchiving)
-            if (!animal.archived) {
+            if (isArchiving) {
                 handleBackFromAnimal();
             }
         } catch (error) {
