@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import {
     X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
-    AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, PlusCircle,
+    AlertCircle, Users, Wrench, MessageSquare, Clock, Edit,
     Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2,
     Lightbulb, RefreshCw, Star, Info, Activity
 } from 'lucide-react';
