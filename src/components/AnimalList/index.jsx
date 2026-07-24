@@ -17,7 +17,6 @@ import {
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
-import { useArchive } from '../../hooks/useArchive';
 import { prefetchPedigreeTree } from '../AnimalForm';
 
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
@@ -160,37 +159,6 @@ const AnimalList = ({
     // so that switching accounts never leaks one user's collections/prefs into another's.
     const userKey = useMemo(() => getUserKey(authToken), [authToken]);
     const [returningAnimal, setReturningAnimal] = useState(false);
-
-    const {
-        archivedAnimals,
-        soldTransferredAnimals,
-        archiveLoading,
-        fetchArchiveData,
-    } = useArchive(authToken, API_BASE_URL);
-
-    const handleReturnTransferredAnimal = useCallback(async () => {
-        if (!viewingAnimal?.id_public || returningAnimal) return;
-
-        const breederName = viewingAnimal.breederName || 'the breeder';
-        if (!window.confirm(`Return ${viewingAnimal.name} to ${breederName}? This will remove the animal from your account.`)) {
-            return;
-        }
-
-        setReturningAnimal(true);
-        try {
-            await axios.post(`${API_BASE_URL}/animals/${viewingAnimal.id_public}/return`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            window.dispatchEvent(new Event('animals-changed'));
-            showModalMessage('Success', `Animal has been returned to ${breederName}.`);
-            (onCloseAll || onClose)?.();
-        } catch (error) {
-            console.error('Failed to return animal:', error);
-            showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
-        } finally {
-            setReturningAnimal(false);
-        }
-    }, [viewingAnimal, returningAnimal, API_BASE_URL, authToken, showModalMessage, onCloseAll, onClose]);
 
     const handleWithdrawTransfer = useCallback(async (transferId) => {
         if (!transferId) return;
@@ -984,11 +952,10 @@ useEffect(() => {
             try { fetchAllAnimals(); } catch (e) { /* ignore */ }
             try { fetchAvailableAnimals(); } catch (e) { /* ignore */ }
             try { fetchSoldTransferred(); } catch (e) { /* ignore */ }
-        try{fetchArchiveData();}catch(e){/* ignore */}
         };
         window.addEventListener('animals-changed', handleAnimalsChanged);
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
-    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals, fetchAvailableAnimals, fetchSoldTransferred, fetchArchiveData]);
+    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals, fetchAvailableAnimals, fetchSoldTransferred]);
 
     // Patch a single updated animal in-place without reloading the full list
     useEffect(() => {
@@ -1014,14 +981,11 @@ useEffect(() => {
         const handleAnimalArchived = () => {
             fetchAnimals();
             fetchAllAnimals();
-            if (showArchiveScreen) {
-                fetchArchiveData();
-            }
         };
         window.addEventListener('animal-archived', handleAnimalArchived);
         return () => window.removeEventListener('animal-archived', handleAnimalArchived);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchAnimals, fetchAllAnimals, showArchiveScreen, fetchArchiveData]);
+    }, [fetchAnimals, fetchAllAnimals, showArchiveScreen]);
 
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
@@ -2328,9 +2292,6 @@ useEffect(() => {
         return (
             <ArchiveScreen
                 onBack={() => setShowArchiveScreen(false)}
-                archiveLoading={archiveLoading}
-                archivedAnimals={archivedAnimals} // This is correct
-                soldTransferredAnimals={soldTransferredAnimals} // Use the correct prop
                 soldOwnerFilter={soldOwnerFilter}
                 setSoldOwnerFilter={setSoldOwnerFilter}
                 collapsedMgmtSections={collapsedMgmtSections}
@@ -2339,7 +2300,6 @@ useEffect(() => {
                 authToken={authToken}
                 API_BASE_URL={API_BASE_URL}
                 showModalMessage={showModalMessage}
-                fetchArchiveData={fetchArchiveData}
                 fetchAnimals={fetchAnimals}
                 MgmtAnimalCard={MgmtAnimalCard}
                 SectionHeader={SectionHeader}

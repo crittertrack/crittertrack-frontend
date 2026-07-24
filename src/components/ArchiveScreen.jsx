@@ -1,12 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import { useArchive } from '../hooks/useArchive';
 
 const ArchiveScreen = ({
     onBack,
-    archiveLoading,
-    archivedAnimals,
-    soldTransferredAnimals,
     soldOwnerFilter,
     setSoldOwnerFilter,
     collapsedMgmtSections,
@@ -15,11 +13,19 @@ const ArchiveScreen = ({
     authToken,
     API_BASE_URL,
     showModalMessage,
-    fetchArchiveData,
     fetchAnimals,
     MgmtAnimalCard,
     SectionHeader
 }) => {
+    const {
+        archivedAnimals,
+        soldTransferredAnimals,
+        archiveLoading,
+        fetchArchiveData,
+    } = useArchive(authToken, API_BASE_URL);
+
+    useEffect(() => { fetchArchiveData(); }, [fetchArchiveData]);
+
     const handleUnarchive = async (animal) => {
         try {
             const res = await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/unarchive`, {}, {
