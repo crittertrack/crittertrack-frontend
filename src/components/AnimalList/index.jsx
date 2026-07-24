@@ -533,8 +533,6 @@ const handleArchive = useCallback(async (animalToArchive) => {
     });
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
     const [newEnclosureTag, setNewEnclosureTag] = useState('');
-    const [newEnclosureSpeciesLabel, setNewEnclosureSpeciesLabel] = useState('');
-
     const [enclosureImageFile, setEnclosureImageFile] = useState(null);
     const [enclosureImagePreview, setEnclosureImagePreview] = useState(null);
 
@@ -1108,6 +1106,51 @@ useEffect(() => {
         setEnclosureFormData(p => ({ ...p, speciesLabels: (p.speciesLabels || []).filter(l => l !== labelToRemove) }));
     }, []);
 
+    const handleAssignAnimalInModal = useCallback(async (animalToAssign, enclosureToAssignTo) => {
+        if (!animalToAssign || !enclosureToAssignTo) return;
+        const animalIdPublic = animalToAssign.id_public;
+        const enclosureId = enclosureToAssignTo._id || enclosureToAssignTo.id;
+
+        // Optimistic update
+        setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId } : a));
+        setEnclosureAnimals(prev => [...prev, { ...animalToAssign, enclosureId }]);
+
+        try {
+            await axios.patch(`${API_BASE_URL}/enclosures/assign-animal`,
+                { animalId_public: animalIdPublic, enclosureId: enclosureId },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }
+            );
+            showModalMessageRef.current('Success', `${animalToAssign.name} assigned to ${enclosureToAssignTo.name}.`);
+        } catch (err) {
+            console.error('Assign enclosure failed:', err);
+            showModalMessageRef.current('Error', `Failed to assign animal: ${err.response?.data?.message || err.message}`);
+            // Rollback
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: null } : a));
+            setEnclosureAnimals(prev => prev.filter(a => a.id_public !== animalIdPublic));
+        }
+    }, [API_BASE_URL, authToken]);
+
+    const handleUnassignAnimalInModal = useCallback(async (animalToUnassign) => {
+        if (!animalToUnassign) return;
+        const animalIdPublic = animalToUnassign.id_public;
+        const originalEnclosureId = animalToUnassign.enclosureId;
+
+        // Optimistic update
+        setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: null } : a));
+        setEnclosureAnimals(prev => prev.filter(a => a.id_public !== animalIdPublic));
+
+        try {
+            await axios.patch(`${API_BASE_URL}/enclosures/assign-animal`, { animalId_public: animalIdPublic, enclosureId: null }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+            showModalMessageRef.current('Success', `${animalToUnassign.name} has been unassigned.`);
+        } catch (err) {
+            console.error('Unassign enclosure failed:', err);
+            showModalMessageRef.current('Error', `Failed to unassign animal: ${err.response?.data?.message || err.message}`);
+            // Rollback
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: originalEnclosureId } : a));
+            setEnclosureAnimals(prev => [...prev, animalToUnassign]);
+        }
+    }, [API_BASE_URL, authToken]);
+
     const handleOpenDetail = (enclosure) => {
         setSelectedEnclosure(enclosure);
         setShowDetailModal(true);
@@ -1117,6 +1160,15 @@ useEffect(() => {
         const occupants = allAnimalsRaw.filter(a => a.enclosureId === enclosureId);
         setEnclosureAnimals(occupants);
     };
+
+    const assignableAnimals = useMemo(() => {
+        if (!selectedEnclosure) return [];
+        const suitableSpecies = new Set(selectedEnclosure.speciesLabels || []);
+        return allAnimalsRaw.filter(a => 
+            !a.enclosureId && 
+            (suitableSpecies.size === 0 || suitableSpecies.has(a.species))
+        );
+    }, [allAnimalsRaw, selectedEnclosure]);
 
 
 
@@ -4965,10 +5017,9 @@ useEffect(() => {
                 enclosureImageFile={enclosureImageFile}
                 setEnclosureImageFile={setEnclosureImageFile}
                 enclosureImagePreview={enclosureImagePreview}
-                setEnclosureImagePreview={setEnclosureImagePreview}
-                newEnclosureTag={newEnclosureTag} setNewEnclosureTag={setNewEnclosureTag} handleEnclosureTagAdd={handleEnclosureTagAdd} handleEnclosureTagRemove={handleEnclosureTagRemove}
+                setEnclosureImagePreview={setEnclosureImagePreview} newEnclosureTag={newEnclosureTag} setNewEnclosureTag={setNewEnclosureTag} handleEnclosureTagAdd={handleEnclosureTagAdd} handleEnclosureTagRemove={handleEnclosureTagRemove}
                 allSpecies={allUserSpecies}
-                newEnclosureSpeciesLabel={newEnclosureSpeciesLabel} setNewEnclosureSpeciesLabel={setNewEnclosureSpeciesLabel} handleEnclosureSpeciesLabelAdd={handleEnclosureSpeciesLabelAdd} handleEnclosureSpeciesLabelRemove={handleEnclosureSpeciesLabelRemove}
+                handleEnclosureSpeciesLabelAdd={handleEnclosureSpeciesLabelAdd} handleEnclosureSpeciesLabelRemove={handleEnclosureSpeciesLabelRemove}
                 newCleaningTaskName={newCleaningTaskName} setNewCleaningTaskName={setNewCleaningTaskName} newCleaningTaskFreq={newCleaningTaskFreq} setNewCleaningTaskFreq={setNewCleaningTaskFreq}
             /> {/* This was the missing closing tag for the EnclosureModal component */}
             {showDetailModal && selectedEnclosure && (
@@ -4977,13 +5028,16 @@ useEffect(() => {
                     onClose={() => { setShowDetailModal(false); setSelectedEnclosure(null); setEnclosureAnimals([]); }}
                     enclosure={selectedEnclosure}
                     animals={enclosureAnimals}
+                    assignableAnimals={assignableAnimals}
                     loadingAnimals={loadingAnimals}
                     authToken={authToken}
                     API_BASE_URL={API_BASE_URL}
                     showModalMessage={showModalMessage}
-                    onRefresh={fetchEnclosures}
+                    onRefresh={() => { fetchEnclosures(); fetchAllAnimals(); }}
                     onViewAnimal={onViewAnimal}
                     onEditEnclosure={(enclosureToEdit) => { setShowDetailModal(false); openEnclosureModal(enclosureToEdit); }}
+                    onAssignAnimal={handleAssignAnimalInModal}
+                    onUnassignAnimal={handleUnassignAnimalInModal}
                 />
             )}
             </div>

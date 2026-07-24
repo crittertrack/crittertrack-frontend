@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import {
-    X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle,
+    X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
     AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, PlusCircle,
     Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2,
     Lightbulb, RefreshCw, Star, Info, Activity
@@ -30,6 +30,9 @@ const EnclosureDetailModal = ({
     onRefresh,
     onViewAnimal,
     onEditEnclosure,
+    assignableAnimals,
+    onAssignAnimal,
+    onUnassignAnimal,
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [newNote, setNewNote] = useState('');
@@ -37,6 +40,8 @@ const EnclosureDetailModal = ({
     const [savingNote, setSavingNote] = useState(false);
     const [updatingTask, setUpdatingTask] = useState(null);
     const modalRef = useRef(null);
+    const [showAssignDropdown, setShowAssignDropdown] = useState(false);
+    const assignButtonRef = useRef(null);
 
     useEffect(() => {
         // Load notes from enclosure data
@@ -50,6 +55,18 @@ const EnclosureDetailModal = ({
             }
         };
         if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, onClose]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (assignButtonRef.current && !assignButtonRef.current.contains(event.target)) {
+                setShowAssignDropdown(false);
+            }
+        };
+        if (showAssignDropdown) {
             document.addEventListener('mousedown', handleClickOutside);
         }
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -145,7 +162,7 @@ const EnclosureDetailModal = ({
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="h-48 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center relative rounded-t-xl overflow-hidden">
+                <div className="h-56 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center relative rounded-t-xl overflow-hidden">
                     {enclosure.imageUrl ? (
                         <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" />
                     ) : (
@@ -350,6 +367,36 @@ const EnclosureDetailModal = ({
                                 <h3 className="font-semibold text-gray-800 dark:text-dark-text">
                                     Occupants ({animals.length})
                                 </h3>
+                                <div className="relative" ref={assignButtonRef}>
+                                    <button
+                                        onClick={() => setShowAssignDropdown(prev => !prev)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
+                                    >
+                                        <PlusCircle size={14} />
+                                        Assign Animal
+                                    </button>
+                                    {showAssignDropdown && (
+                                        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-dark-surface-hover rounded-lg shadow-xl border dark:border-dark-border z-10 max-h-60 overflow-y-auto">
+                                            {assignableAnimals.length === 0 ? (
+                                                <p className="p-3 text-xs text-gray-500 dark:text-dark-text-muted">No unassigned animals available (or none match suitable species for this enclosure).</p>
+                                            ) : (
+                                                assignableAnimals.map(animal => (
+                                                    <button
+                                                        key={animal.id_public}
+                                                        onClick={() => {
+                                                            onAssignAnimal(animal, enclosure);
+                                                            setShowAssignDropdown(false);
+                                                        }}
+                                                        className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface"
+                                                    >
+                                                        <p className="font-medium">{animal.name}</p>
+                                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species} • {animal.id_public}</p>
+                                                    </button>
+                                                ))
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             {loadingAnimals ? (
                                 <div className="flex items-center justify-center py-8">
@@ -365,13 +412,12 @@ const EnclosureDetailModal = ({
                                     {animals.map(animal => (
                                         <div
                                             key={animal._id || animal.id_public}
-                                            className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-100 dark:border-dark-border cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
-                                            onClick={() => onViewAnimal?.(animal)}
+                                            className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-100 dark:border-dark-border group"
                                         >
-                                            <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                            <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center cursor-pointer" onClick={() => onViewAnimal?.(animal)}>
                                                 <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
                                             </div>
-                                            <div className="flex-1 min-w-0">
+                                            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onViewAnimal?.(animal)}>
                                                 <p className="text-sm font-medium text-gray-800 dark:text-dark-text truncate">
                                                     {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                 </p>
@@ -380,6 +426,13 @@ const EnclosureDetailModal = ({
                                                 </p>
                                             </div>
                                             <span className="text-[11px] text-gray-400 dark:text-dark-text-muted">{animal.id_public}</span>
+                                            <button
+                                                onClick={() => onUnassignAnimal(animal)}
+                                                className="p-2 rounded-lg text-gray-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Unassign from enclosure"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>

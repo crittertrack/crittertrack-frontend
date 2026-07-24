@@ -19,8 +19,6 @@ const EnclosureModal = ({
     setNewEnclosureTag,
     handleEnclosureTagAdd,
     handleEnclosureTagRemove,
-    newEnclosureSpeciesLabel,
-    setNewEnclosureSpeciesLabel,
     allSpecies,
     handleEnclosureSpeciesLabelAdd,
     handleEnclosureSpeciesLabelRemove,
@@ -212,7 +210,7 @@ const EnclosureModal = ({
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Suitable Species</label>
                                 <div className="flex items-center gap-2">
                                     <select
-                                        onChange={(e) => { handleEnclosureSpeciesLabelAdd(e.target.value); e.target.value = ''; }}
+                                        onChange={(e) => { if (e.target.value) handleEnclosureSpeciesLabelAdd(e.target.value); e.target.value = ''; }}
                                         value=""
                                         className="flex-1 p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface"
                                     >
