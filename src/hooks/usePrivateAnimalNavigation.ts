@@ -1,6 +1,25 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
 
+// Define interfaces for better type safety
+interface Animal {
+    id_public: string;
+    name?: string;
+    archived?: boolean;
+    status?: string;
+    sireId_public?: string;
+    fatherId_public?: string; // Alias for sireId_public
+    damId_public?: string;
+    motherId_public?: string; // Alias for damId_public
+    isOwned?: boolean;
+    creatorId_public?: string;
+    // Add any other properties that are commonly used or expected from the API
+}
+
+interface UserProfile {
+    // Define user profile properties as needed
+}
+
 /**
  * usePrivateAnimalNavigation - Manages private (owned) animal viewing and editing
  * 
@@ -16,21 +35,21 @@ import axios from 'axios';
  * @param API_BASE_URL - API base URL
  * @returns Object with animal viewing states, handlers, and pedigree data
  */
-export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_URL: string) {
+export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_URL: string, showModalMessage: (title: string, message: string) => void) {
     // ========== PRIVATE ANIMAL VIEWING STATES ==========
-    const [animalToView, setAnimalToView] = useState<any>(null);
-    const [animalToEdit, setAnimalToEdit] = useState<any>(null);
-    const [animalViewHistory, setAnimalViewHistory] = useState<any[]>([]);
+    const [animalToView, setAnimalToView] = useState<Animal | null>(null);
+    const [animalToEdit, setAnimalToEdit] = useState<Animal | null>(null);
+    const [animalViewHistory, setAnimalViewHistory] = useState<{ animal: Animal | null, tab: number }[]>([]);
     const [privateAnimalInitialTab, setPrivateAnimalInitialTab] = useState(1);
     const [privateBetaView, setPrivateBetaView] = useState('vertical');
     const [detailViewTab, setDetailViewTab] = useState(1);
-    const [speciesToAdd, setSpeciesToAdd] = useState<any>(null);
-    const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState<any>(null);
+    const [speciesToAdd, setSpeciesToAdd] = useState<string | null>(null);
+    const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState<Animal | null>(null);
 
     // ========== PEDIGREE DATA (ASYNC-FETCHED) ==========
-    const [sireData, setSireData] = useState<any>(null);
-    const [damData, setDamData] = useState<any>(null);
-    const [offspringData, setOffspringData] = useState<any[]>([]);
+    const [sireData, setSireData] = useState<Animal | null>(null);
+    const [damData, setDamData] = useState<Animal | null>(null);
+    const [offspringData, setOffspringData] = useState<Animal[]>([]);
 
     // ========== NAVIGATION REFS (PERSISTENT ACROSS RENDERS) ==========
     // These store the path to return to when closing views - not state, so they don't trigger re-renders
@@ -48,7 +67,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      * Handles fetching latest data and setting up return paths
      */
     const handleViewAnimal = useCallback(
-        (animal: any, targetTab = 1, returnTab = null) => {
+        (animal: Animal, targetTab = 1, returnTab: number | null = null) => {
             if (!animal) return;
 
             // Add current animal to history before viewing new one
@@ -71,7 +90,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
     /**
      * Edit an animal
      */
-    const handleEditAnimal = useCallback((animal: any) => {
+    const handleEditAnimal = useCallback((animal: Animal) => {
         if (!animal) return;
 
         // When editing from a nested detail context (for example offspring cards),
@@ -97,7 +116,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      * without popping the animal history stack.
      */
     const handleCancelEditAnimal = useCallback(() => {
-        if (animalToEdit) {
+        if (animalToEdit) { // If there was an animal being edited
             setAnimalToView((prev: any) => prev || animalToEdit);
         }
         setAnimalToEdit(null);
@@ -114,9 +133,9 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             // Pop from history
             const newHistory = [...animalViewHistory];
             const previousEntry = newHistory.pop();
-            setAnimalViewHistory(newHistory);
-            setAnimalToView(previousEntry?.animal || previousEntry || null);
-            setPrivateAnimalInitialTab(Number.isFinite(previousEntry?.tab) ? Number(previousEntry.tab) : 1);
+            setAnimalViewHistory(newHistory); // Update history state
+            setAnimalToView(previousEntry?.animal || null);
+            setPrivateAnimalInitialTab(previousEntry?.tab ?? 1);
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
@@ -144,80 +163,10 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
     }, []);
 
     /**
-     * Save edited animal
-     * Called after form submission - makes API call and updates view
-     */
-    const handleSaveAnimal = useCallback(async (method: string, url: string, data: any) => {
-        try {
-            console.log('[handleSaveAnimal] Saving animal:', { method, url, authToken: authToken ? 'present' : 'MISSING' });
-            
-            if (!authToken) {
-                throw new Error('Authentication token is missing. Please log in again.');
-            }
-
-            // Add creatorId_public if not present (for new animals)
-            if (!data.creatorId_public) {
-                // Note: userProfile should be passed as parameter or accessed from context
-                // For now, relying on backend to set it from auth token
-            }
-
-            // Optimistic update: if editing (PUT) with plain-object data, reflect changes immediately
-            if (method.toLowerCase() === 'put' && animalToEdit && !(data instanceof FormData)) {
-                const optimistic = { ...animalToEdit, ...data };
-                setAnimalToView(optimistic);
-                try {
-                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: optimistic }));
-                } catch (e) { /* ignore */ }
-            }
-
-            // Make the API request
-            const response = await axios({
-                method,
-                url,
-                data,
-                headers: {
-                    Authorization: `Bearer ${authToken}`
-                    // Don't set Content-Type - let axios handle it automatically for JSON
-                }
-            });
-
-            console.log('[handleSaveAnimal] Save successful:', response.data);
-
-            // TEMPORARY DEBUG VERSION
-// Skip refetch and skip custom events entirely
-
-if (method.toLowerCase() === 'put') {
-    console.log('[handleSaveAnimal] DEBUG: skipping refetch');
-
-    // Use whatever the save endpoint returned
-    const updatedAnimal =
-        response?.data?.animal ||
-        response?.data?.data ||
-        response?.data;
-
-    if (updatedAnimal) {
-        setAnimalToView(updatedAnimal);
-    }
-
-    setAnimalToEdit(null);
-
-    console.log(
-        '[handleSaveAnimal] DEBUG: save complete, no refetch, no events'
-    );
-}
-
-            return response;
-        } catch (error) {
-            console.error('[handleSaveAnimal] Error saving animal:', error);
-            throw error; // Re-throw so AnimalForm can handle the error
-        }
-    }, [authToken, API_BASE_URL, animalToEdit]);
-
-    /**
      * Archive an animal
      * Makes API call then removes from view
      */
-    const handleArchiveAnimal = useCallback(async (animal: any) => {
+    const handleArchiveAnimal = useCallback(async (animal: Animal, skipConfirmation = false) => {
         if (!animal || !authToken) return;
 
         const action = animal.archived ? 'unarchive' : 'archive';
@@ -225,7 +174,7 @@ if (method.toLowerCase() === 'put') {
             ? `Restore ${animal.name} from archive?`
             : `Archive ${animal.name}? It will be hidden from main lists but remain in pedigrees.`;
 
-        if (!window.confirm(confirmMsg)) return;
+        if (!skipConfirmation && !window.confirm(confirmMsg)) return;
 
         try {
             await axios.post(
@@ -240,14 +189,10 @@ if (method.toLowerCase() === 'put') {
             }
 
             // Dispatch event for other components
-            try {
-                window.dispatchEvent(new CustomEvent('animal-archived', {
-                    detail: { id_public: animal.id_public, archived: !animal.archived }
-                }));
-                window.dispatchEvent(new Event('animals-changed'));
-            } catch (e) {
-                console.warn('Failed to dispatch animal-archived event:', e);
-            }
+            window.dispatchEvent(new CustomEvent('animal-archived', {
+                detail: { id_public: animal.id_public, archived: !animal.archived }
+            }));
+            window.dispatchEvent(new Event('animals-changed'));
 
             // Close view if archiving (not unarchiving)
             if (!animal.archived) {
@@ -258,6 +203,68 @@ if (method.toLowerCase() === 'put') {
             throw error;
         }
     }, [authToken, API_BASE_URL, animalToView, handleBackFromAnimal]);
+
+    /**
+     * Save edited animal
+     * Called after form submission - makes API call and updates view
+     */
+    const handleSaveAnimal = useCallback(async (method: string, url: string, data: Animal | FormData) => {
+        try {
+            console.log('[handleSaveAnimal] Saving animal:', { method, url, authToken: authToken ? 'present' : 'MISSING' });
+            
+            if (!authToken) {
+                throw new Error('Authentication token is missing. Please log in again.');
+            }
+
+            // Add creatorId_public if not present (for new animals)
+            if (!(data instanceof FormData) && !data.creatorId_public) {
+                // Note: userProfile should be passed as parameter or accessed from context
+                // For now, relying on backend to set it from auth token
+            }
+
+            // Make the API request
+            const response = await axios({
+                method,
+                url,
+                data,
+                headers: {
+                    Authorization: `Bearer ${authToken}`
+                    // Don't set Content-Type - let axios handle it automatically for JSON
+                }
+            });
+
+            const serverResponse = response?.data?.animal || response?.data?.data || response?.data;
+            const finalAnimal = serverResponse;
+
+            // After a successful save, update the view with the final data from the server.
+            if (finalAnimal) {
+                // If we were editing, close the edit form and show the updated view.
+                if (animalToEdit) {
+                    setAnimalToView(finalAnimal);
+                }
+                // Dispatch events to notify other parts of the app about the change.
+                window.dispatchEvent(new CustomEvent('animal-updated', { detail: finalAnimal }));
+                window.dispatchEvent(new Event('animals-changed'));
+            }
+            setAnimalToEdit(null);
+
+            // Special workflow for 'Rehomed' status change
+            const originalStatus = animalToEdit?.status;
+            const newStatus = finalAnimal?.status;
+            if (newStatus === 'Rehomed' && originalStatus !== 'Rehomed' && !finalAnimal.archived) {
+                if (window.confirm("You've marked this animal as Rehomed. Would you also like to archive this animal's record? It will be hidden from main lists but remain in pedigrees.")) {
+                    // Reuse the existing archive handler, but skip its confirmation prompt.
+                    // We pass archived: false to ensure it performs the 'archive' action.
+                    handleArchiveAnimal({ ...finalAnimal, archived: false }, true);
+                }
+            }
+
+            return response;
+        } catch (error) {
+            console.error('[handleSaveAnimal] Error saving animal:', error); // Keep console.error for debugging
+            throw error; // Re-throw so AnimalForm can handle the error
+        }
+    }, [authToken, API_BASE_URL, animalToEdit, handleArchiveAnimal, showModalMessage]);
 
     /**
      * Delete an animal permanently
@@ -369,7 +376,7 @@ if (method.toLowerCase() === 'put') {
         if (!animalToView?.id_public || !authToken) return;
         // Skip if we already fetched full data for this animal id
         if (lastFetchedIdRef.current === animalToView.id_public) return;
-        lastFetchedIdRef.current = animalToView.id_public;
+        lastFetchedIdRef.current = animalToView.id_public; // Update ref before fetch
         axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
             headers: { Authorization: `Bearer ${authToken}` }
         }).then(res => {
@@ -402,12 +409,12 @@ if (method.toLowerCase() === 'put') {
         const fetchPedigreeData = async () => {
             try {
                 const sireId = animalToView.sireId_public || animalToView.fatherId_public;
-                const damId = animalToView.damId_public || animalToView.motherId_public;
+                const damId = animalToView.damId_public || animalToView.motherId_public; // Corrected variable name
 
                 // Fetch parents using /any/ endpoint to get parents regardless of ownership
                 if (sireId) {
                     try {
-                        const response = await axios.get(`${API_BASE_URL}/animals/any/${sireId}`, {
+                        const response = await axios.get<Animal>(`${API_BASE_URL}/animals/any/${sireId}`, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         setSireData(response.data);
@@ -419,7 +426,7 @@ if (method.toLowerCase() === 'put') {
 
                 if (damId) {
                     try {
-                        const response = await axios.get(`${API_BASE_URL}/animals/any/${damId}`, {
+                        const response = await axios.get<Animal>(`${API_BASE_URL}/animals/any/${damId}`, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         setDamData(response.data);
@@ -437,7 +444,7 @@ if (method.toLowerCase() === 'put') {
                             headers: { Authorization: `Bearer ${authToken}` }
                         }
                     );
-
+                    // Assuming offspringResponse.data is an array of litter objects, each with an offspring array
                     const litters = offspringResponse.data || [];
                     // Flatten offspring from all litters into single array
                     const allOffspring: any[] = [];

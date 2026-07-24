@@ -986,6 +986,7 @@ useEffect(() => {
             try { fetchAllAnimals(); } catch (e) { /* ignore */ }
             try { fetchAvailableAnimals(); } catch (e) { /* ignore */ }
             try { fetchSoldTransferred(); } catch (e) { /* ignore */ }
+        try{fetchArchiveData();}catch(e){/* ignore */}
         };
         window.addEventListener('animals-changed', handleAnimalsChanged);
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
