@@ -13,6 +13,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     const [userProfile, setUserProfile] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showTypeSelection, setShowTypeSelection] = useState(true);
+    const [showAnimalDropdown, setShowAnimalDropdown] = useState(false); // Declare state for dropdown visibility
     const [editingTransaction, setEditingTransaction] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all'); // all, animal-sale, animal-purchase, expense, income
@@ -627,7 +628,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         {/* Transaction Type Selection Screen */}
                         {!editingTransaction && showTypeSelection ? (
                             <div className="space-y-6">
-                                <p className="text-center text-gray-600 mb-8">What type of transaction would you like to add?</p>
+                                <p className="text-center text-gray-600 mb-8">What type of transaction would you like to add? These are only manual entries.</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <button
                                         type="button"
@@ -743,8 +744,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                 <input
                                                     type="text"
                                                     value={animalSearchQuery}
-                                                    onChange={(e) => {
-                                                    }}
+                                                    onChange={(e) => setAnimalSearchQuery(e.target.value)}
                                                     onFocus={() => setShowAnimalDropdown(true)}
                                                     onBlur={() => setTimeout(() => setShowAnimalDropdown(false), 150)}
                                                     placeholder={animalsLoading ? 'Loading animals...' : 'Search by name or ID...'}
