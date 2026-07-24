@@ -1108,21 +1108,14 @@ useEffect(() => {
         setEnclosureFormData(p => ({ ...p, speciesLabels: (p.speciesLabels || []).filter(l => l !== labelToRemove) }));
     }, []);
 
-    const handleOpenDetail = async (enclosure) => {
+    const handleOpenDetail = (enclosure) => {
         setSelectedEnclosure(enclosure);
         setShowDetailModal(true);
-        setLoadingAnimals(true);
-        try {
-            const response = await axios.get(`${API_BASE_URL}/animals?enclosureId=${enclosure._id || enclosure.id}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            setEnclosureAnimals(response.data || []);
-        } catch (err) {
-            console.error('Failed to fetch enclosure animals:', err);
-            setEnclosureAnimals([]);
-        } finally {
-            setLoadingAnimals(false);
-        }
+        setLoadingAnimals(false); // Not loading from API anymore
+
+        const enclosureId = enclosure._id || enclosure.id;
+        const occupants = allAnimalsRaw.filter(a => a.enclosureId === enclosureId);
+        setEnclosureAnimals(occupants);
     };
 
 

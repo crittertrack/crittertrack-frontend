@@ -141,38 +141,35 @@ const EnclosureDetailModal = ({
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={onClose}>
             <div
                 ref={modalRef}
-                className="bg-white dark:bg-dark-surface rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
+                className="bg-white dark:bg-dark-surface rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b dark:border-dark-border">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gray-100 dark:bg-dark-surface-hover rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                            {enclosure.imageUrl ? (
-                                <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" />
-                            ) : (
-                                <Home size={24} className="text-gray-400 dark:text-dark-text-muted" />
-                            )}
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-800 dark:text-dark-text">{enclosure.name}</h2>
-                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">
-                                {enclosure.enclosureType && `${enclosure.enclosureType} • `}
-                                {enclosure.location || 'No location set'}
-                            </p>
-                        </div>
+                <div className="h-48 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center relative rounded-t-xl overflow-hidden">
+                    {enclosure.imageUrl ? (
+                        <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <Home size={64} className="text-gray-400 dark:text-dark-text-muted" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h2 className="text-2xl font-bold text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{enclosure.name}</h2>
+                        <p className="text-sm text-gray-200" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+                            {enclosure.enclosureType && `${enclosure.enclosureType} • `}
+                            {enclosure.location || 'No location set'}
+                        </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/20 p-1 rounded-lg">
                         <button
                             onClick={() => { onEditEnclosure(enclosure); onClose(); }}
-                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-gray-500 dark:text-dark-text-muted"
+                            className="p-2 rounded-md hover:bg-white/20 text-white"
                             title="Edit Enclosure"
                         >
                             <Edit size={18} />
                         </button>
                         <button
                             onClick={onClose}
-                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-gray-500 dark:text-dark-text-muted"
+                            className="p-2 rounded-md hover:bg-white/20 text-white"
                         >
                             <X size={20} />
                         </button>
@@ -180,7 +177,7 @@ const EnclosureDetailModal = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-0.5 px-4 pt-2 pb-0 bg-gray-50 dark:bg-dark-surface border-b dark:border-dark-border overflow-x-auto">
+                <div className="flex-shrink-0 flex gap-0.5 px-4 pt-2 pb-0 bg-gray-50 dark:bg-dark-surface border-b dark:border-dark-border overflow-x-auto">
                     {TABS.map(tab => (
                         <button
                             key={tab.id}
@@ -198,36 +195,36 @@ const EnclosureDetailModal = ({
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-3">
                     {/* ===== DASHBOARD TAB ===== */}
                     {activeTab === 'dashboard' && (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {/* Summary Cards */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-2 border border-gray-100 dark:border-dark-border">
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">Status</p>
-                                    <div className="flex items-center gap-1.5 mt-1">
+                                    <div className="flex items-center gap-1.5 mt-0.5">
                                         <div className={`w-2.5 h-2.5 rounded-full ${currentAnimals > 0 ? 'bg-green-500' : 'bg-gray-400'}`} />
-                                        <span className="font-semibold text-gray-800 dark:text-dark-text">
+                                        <span className="font-semibold text-sm text-gray-800 dark:text-dark-text">
                                             {currentAnimals > 0 ? 'Occupied' : 'Empty'}
                                         </span>
                                     </div>
                                 </div>
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-2 border border-gray-100 dark:border-dark-border">
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">Occupancy</p>
-                                    <p className={`text-lg font-bold mt-0.5 ${
+                                    <p className={`text-base font-bold ${
                                         occupancyPct > 90 ? 'text-red-600' : occupancyPct > 70 ? 'text-yellow-600' : 'text-green-600'
                                     }`}>
                                         {currentAnimals}/{capacity} ({occupancyPct}%)
                                     </p>
                                 </div>
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-2 border border-gray-100 dark:border-dark-border">
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">Temperature</p>
                                     <p className="text-lg font-bold mt-0.5 text-gray-800 dark:text-dark-text">
                                         {enclosure.tempMin ? `${enclosure.tempMin}°` : '?'} - {enclosure.tempMax ? `${enclosure.tempMax}°` : '?'}
                                     </p>
                                 </div>
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-2 border border-gray-100 dark:border-dark-border">
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">Humidity</p>
                                     <p className="text-lg font-bold mt-0.5 text-gray-800 dark:text-dark-text">
                                         {enclosure.humidityMin ? `${enclosure.humidityMin}%` : '?'} - {enclosure.humidityMax ? `${enclosure.humidityMax}%` : '?'}
@@ -236,10 +233,10 @@ const EnclosureDetailModal = ({
                             </div>
 
                             {/* Occupancy Bar */}
-                            <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
-                                <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2">Occupancy</h4>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="text-gray-600 dark:text-dark-text"><Cat size={14} className="inline mr-1" />{currentAnimals} / {capacity} animals</span>
+                            <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Occupancy</h4>
+                                <div className="flex justify-between text-xs mb-1">
+                                    <span className="text-gray-600 dark:text-dark-text"><Cat size={12} className="inline mr-1" />{currentAnimals} / {capacity} animals</span>
                                     <span className={`font-bold ${occupancyPct > 90 ? 'text-red-600' : occupancyPct > 70 ? 'text-yellow-600' : 'text-green-600'}`}>
                                         {occupancyPct}%
                                     </span>
@@ -256,9 +253,9 @@ const EnclosureDetailModal = ({
 
                             {/* General Info */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
-                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2">Details</h4>
-                                    <div className="space-y-2 text-sm">
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Details</h4>
+                                    <div className="space-y-1 text-xs">
                                         <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Type</span>
                                             <span className="text-gray-800 dark:text-dark-text">{enclosure.enclosureType || '—'}</span>
@@ -297,9 +294,9 @@ const EnclosureDetailModal = ({
                                 </div>
 
                                 {/* Cleaning Schedule */}
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
-                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2">Cleaning</h4>
-                                    <div className="space-y-2 text-sm">
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Cleaning</h4>
+                                    <div className="space-y-1 text-xs">
                                         <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Last cleaned</span>
                                             <span className="text-gray-800 dark:text-dark-text">
@@ -324,8 +321,8 @@ const EnclosureDetailModal = ({
 
                             {/* Species */}
                             {speciesLabels.length > 0 && (
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
-                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2">Suitable Species</h4>
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Suitable Species</h4>
                                     <div className="flex flex-wrap gap-1.5">
                                         {speciesLabels.map(label => (
                                             <span key={label} className="text-xs bg-primary/10 text-primary-dark px-2 py-1 rounded-full font-medium">
@@ -338,9 +335,9 @@ const EnclosureDetailModal = ({
 
                             {/* Description */}
                             {enclosure.notes && (
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
-                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2">Description</h4>
-                                    <p className="text-sm text-gray-700 dark:text-dark-text leading-relaxed">{enclosure.notes}</p>
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Description</h4>
+                                    <p className="text-xs text-gray-700 dark:text-dark-text leading-relaxed">{enclosure.notes}</p>
                                 </div>
                             )}
                         </div>
