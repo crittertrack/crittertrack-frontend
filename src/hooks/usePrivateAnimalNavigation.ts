@@ -254,7 +254,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             if (archiveOnSave && finalAnimal?.status === 'Rehomed' && !finalAnimal.archived) {
                 // The user checked the "Also archive" box in the form.
                 // We reuse the existing archive handler, but skip its confirmation prompt.
-                handleArchiveAnimal({ ...finalAnimal, archived: false }, true);
+                await handleArchiveAnimal({ ...finalAnimal, archived: false }, true);
             }
 
             return response;
