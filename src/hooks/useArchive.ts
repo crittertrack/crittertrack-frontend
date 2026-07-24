@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 
 // Define interfaces for better type safety
@@ -43,6 +43,19 @@ export function useArchive(authToken: string | null, API_BASE_URL: string) {
             setArchiveLoading(false);
         }
     }, [authToken, API_BASE_URL]);
+
+    // Add an effect to listen for global animal changes and refetch data automatically.
+    // This ensures the archive list stays in sync when an animal is archived/unarchived elsewhere.
+    useEffect(() => {
+        const handleRefetch = () => {
+            fetchArchiveData();
+        };
+
+        window.addEventListener('animals-changed', handleRefetch);
+
+        // Cleanup listener on unmount
+        return () => window.removeEventListener('animals-changed', handleRefetch);
+    }, [fetchArchiveData]);
 
     return {
         archivedAnimals,
