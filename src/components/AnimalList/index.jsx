@@ -1041,6 +1041,20 @@ useEffect(() => {
         setNewEnclosureTag('');
     }, [newEnclosureTag]);
 
+    const handleEnclosureSpeciesLabelAdd = useCallback((speciesLabel) => {
+        setEnclosureFormData(p => ({
+            ...p,
+            speciesLabels: [...new Set([...(p.speciesLabels || []), speciesLabel])]
+        }));
+    }, []);
+
+    const handleEnclosureSpeciesLabelRemove = useCallback((speciesLabelToRemove) => {
+        setEnclosureFormData(p => ({
+            ...p,
+            speciesLabels: (p.speciesLabels || []).filter(s => s !== speciesLabelToRemove)
+        }));
+    }, []);
+
     const handleEnclosureTagRemove = useCallback((tagToRemove) => {
         setEnclosureFormData(p => ({ ...p, tags: (p.tags || []).filter(t => t !== tagToRemove) }));
     }, []);
