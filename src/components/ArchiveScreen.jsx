@@ -47,10 +47,11 @@ const ArchiveScreen = ({
 
     const handleUnarchive = async (animal) => {
         try {
-            const res = await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/unarchive`, {}, {
+            const res = await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { archived: false }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            window.dispatchEvent(new CustomEvent('animal-updated', { detail: res.data || { id_public: animal.id_public, isArchived: false } }));
+            const updatedAnimal = res.data?.animal || res.data || { ...animal, archived: false };
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: updatedAnimal }));
             window.dispatchEvent(new Event('animals-changed'));
             showModalMessage('Success', 'Animal unarchived');
             fetchArchiveData();
