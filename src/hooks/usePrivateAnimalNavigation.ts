@@ -234,10 +234,17 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             });
 
             const serverResponse = response?.data?.animal || response?.data?.data || response?.data;
-            const finalAnimal = serverResponse;
+            let finalAnimal = serverResponse;
 
             // After a successful save, update the view with the final data from the server.
             if (finalAnimal) {
+                // Merge the comprehensive data we started with (`animalToEdit`)
+                // with the confirmed updates from the server. This prevents the server
+                // from accidentally stripping fields it doesn't return.
+                if (animalToEdit) {
+                    finalAnimal = { ...animalToEdit, ...finalAnimal };
+                }
+
                 // If we were editing, close the edit form and show the updated view.
                 if (animalToEdit) {
                     setAnimalToView(finalAnimal);
@@ -249,12 +256,23 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             setAnimalToEdit(null);
 
             // Special workflow for 'Rehomed' status change with optional archive.
-            // This is triggered by a checkbox in the form, passed as a transient `archiveOnSave` property.
             const archiveOnSave = !(data instanceof FormData) && (data as any).archiveOnSave;
             if (archiveOnSave && finalAnimal?.status === 'Rehomed' && !finalAnimal.archived) {
                 // The user checked the "Also archive" box in the form.
                 // We reuse the existing archive handler, but skip its confirmation prompt.
                 await handleArchiveAnimal({ ...finalAnimal, archived: false }, true);
+            } else {
+                // If not using the archive-on-save shortcut, check for other archival status changes
+                // that should also close the detail view.
+                const originalStatus = animalToEdit?.status;
+                const newStatus = finalAnimal?.status;
+                const archivalStatuses = ['Deceased', 'Sold', 'Rehomed', 'Archived'];
+                const isNowArchival = newStatus && archivalStatuses.includes(newStatus) && !archivalStatuses.includes(originalStatus || '');
+
+                if (isNowArchival) {
+                    showModalMessage('Status Updated', `${finalAnimal.name || 'The animal'}'s record has been moved to your archives.`);
+                    handleBackFromAnimal();
+                }
             }
 
             return response;
