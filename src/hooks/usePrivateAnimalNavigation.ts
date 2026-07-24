@@ -194,10 +194,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             window.dispatchEvent(new CustomEvent('animal-archived', { detail: { id_public: animal.id_public, archived: isArchiving } }));
             window.dispatchEvent(new Event('animals-changed'));
 
-            // Close view if archiving (not unarchiving)
-            if (isArchiving) {
-                handleBackFromAnimal();
-            }
+             // Always close the modal after archiving or unarchiving to provide clear feedback.
+            handleBackFromAnimal();
         } catch (error) {
             console.error('[handleArchiveAnimal] Error:', error);
             throw error;
@@ -255,12 +253,15 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             }
             setAnimalToEdit(null);
 
-            // Special workflow for 'Rehomed' status change with optional archive.
-            const archiveOnSave = !(data instanceof FormData) && (data as any).archiveOnSave;
-            if (archiveOnSave && finalAnimal?.status === 'Rehomed' && !finalAnimal.archived) {
-                // The user checked the "Also archive" box in the form.
-                // We reuse the existing archive handler, but skip its confirmation prompt.
-                await handleArchiveAnimal({ ...finalAnimal, archived: false }, true);
+            // Special workflow for 'Rehomed' status change
+            const originalStatus = animalToEdit?.status;
+            const newStatus = finalAnimal?.status;
+            if (newStatus === 'Rehomed' && originalStatus !== 'Rehomed' && !finalAnimal.archived) {
+                if (window.confirm("You've marked this animal as Rehomed. Would you also like to archive this animal's record? It will be hidden from main lists but remain in pedigrees.")) {
+                    // Reuse the existing archive handler, but skip its confirmation prompt.
+                    // We pass archived: false to ensure it performs the 'archive' action.
+                    await handleArchiveAnimal({ ...finalAnimal, archived: false }, true);
+                }
             }
 
             return response;
