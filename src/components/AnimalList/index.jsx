@@ -17,6 +17,7 @@ import {
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
+import { useArchive } from '../../hooks/useArchive';
 import { prefetchPedigreeTree } from '../AnimalForm';
 
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
@@ -147,12 +148,6 @@ const AnimalList = ({
     // Archive props
     showArchiveScreen,
     setShowArchiveScreen,
-    archivedAnimals,
-    setArchivedAnimals,
-    soldTransferredAnimals,
-    setSoldTransferredAnimals,
-    archiveLoading,
-    setArchiveLoading,
     // Breeding lines (display-only for cards)
     breedingLineDefs = [],
     animalBreedingLines = {},
@@ -165,6 +160,13 @@ const AnimalList = ({
     // so that switching accounts never leaks one user's collections/prefs into another's.
     const userKey = useMemo(() => getUserKey(authToken), [authToken]);
     const [returningAnimal, setReturningAnimal] = useState(false);
+
+    const {
+        archivedAnimals,
+        soldTransferredAnimals,
+        archiveLoading,
+        fetchArchiveData,
+    } = useArchive(authToken, API_BASE_URL);
 
     const handleReturnTransferredAnimal = useCallback(async () => {
         if (!viewingAnimal?.id_public || returningAnimal) return;
@@ -611,10 +613,6 @@ const handleArchive = useCallback(async (animalToArchive) => {
         setEnclosureImagePreview(null);
     }, []); // State setters are stable, so this function is also stable.
 
-    const fetchArchiveData = useCallback(async () => {
-        // ... (this part is correct, no changes needed)
-    }, [authToken, API_BASE_URL]);
-    
     const handleSaveEnclosure = useCallback(async () => {
          // Check saving state first to prevent multiple submissions
         if (enclosureSaving) {
@@ -990,7 +988,7 @@ useEffect(() => {
         };
         window.addEventListener('animals-changed', handleAnimalsChanged);
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
-    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals, fetchAvailableAnimals, fetchSoldTransferred]);
+    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals, fetchAvailableAnimals, fetchSoldTransferred, fetchArchiveData]);
 
     // Patch a single updated animal in-place without reloading the full list
     useEffect(() => {
@@ -1023,7 +1021,7 @@ useEffect(() => {
         window.addEventListener('animal-archived', handleAnimalArchived);
         return () => window.removeEventListener('animal-archived', handleAnimalArchived);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchAnimals, fetchAllAnimals, showArchiveScreen]);
+    }, [fetchAnimals, fetchAllAnimals, showArchiveScreen, fetchArchiveData]);
 
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);

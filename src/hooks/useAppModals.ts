@@ -43,25 +43,8 @@ export function useAppModals() {
     const [notificationCount, setNotificationCount] = useState(0);
 
     // ========== PUBLIC PROFILE & ANIMALS ==========
-    const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
-    const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
-    const [publicAnimalViewHistory, setPublicAnimalViewHistory] = useState([]);
-    const [publicAnimalInitialTab, setPublicAnimalInitialTab] = useState(1);
     const [showUserSearchModal, setShowUserSearchModal] = useState(false);
     const [showQRAnimal, setShowQRAnimal] = useState(false);
-
-    // ========== PRIVATE ANIMAL VIEWING & DETAILS ==========
-    const [animalToView, setAnimalToView] = useState(null);
-    const [animalViewHistory, setAnimalViewHistory] = useState([]);
-    const [privateAnimalInitialTab, setPrivateAnimalInitialTab] = useState(1);
-    const [privateBetaView, setPrivateBetaView] = useState('vertical');
-    const [detailViewTab, setDetailViewTab] = useState(1);
-    const [animalToEdit, setAnimalToEdit] = useState(null);
-    const [speciesToAdd, setSpeciesToAdd] = useState(null);
-    const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
-    const [sireData, setSireData] = useState(null);
-    const [damData, setDamData] = useState(null);
-    const [offspringData, setOffspringData] = useState([]);
 
     // ========== ANIMAL IMAGES & MEDIA ==========
     const [showImageModal, setShowImageModal] = useState(false);
@@ -99,18 +82,11 @@ export function useAppModals() {
 
     // ========== ARCHIVE & HISTORY ==========
     const [showArchiveScreen, setShowArchiveScreen] = useState(false);
-    const [archivedAnimals, setArchivedAnimals] = useState([]);
-    const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);
-    const [archiveLoading, setArchiveLoading] = useState(false);
 
     // ========== ADMIN & MODERATION ==========
     const [showAdminPanel, setShowAdminPanel] = useState(false);
     const [showModReportQueue, setShowModReportQueue] = useState(false);
     const [showModerationAuthModal, setShowModerationAuthModal] = useState(false);
-    const [inModeratorMode, setInModeratorMode] = useState(
-        localStorage.getItem('inModeratorMode') === 'true'
-    );
-    const [modCurrentContext, setModCurrentContext] = useState(null);
     const [showInfoTab, setShowInfoTab] = useState(false);
 
     // ========== SYSTEM & MAINTENANCE ==========
@@ -348,42 +324,10 @@ export function useAppModals() {
         setNotificationCount,
 
         // Public Profile & Animals
-        viewingPublicProfile,
-        setViewingPublicProfile,
-        viewingPublicAnimal,
-        setViewingPublicAnimal,
-        publicAnimalViewHistory,
-        setPublicAnimalViewHistory,
-        publicAnimalInitialTab,
-        setPublicAnimalInitialTab,
         showUserSearchModal,
         setShowUserSearchModal,
         showQRAnimal,
         setShowQRAnimal,
-
-        // Private Animal Viewing
-        animalToView,
-        setAnimalToView,
-        animalViewHistory,
-        setAnimalViewHistory,
-        privateAnimalInitialTab,
-        setPrivateAnimalInitialTab,
-        privateBetaView,
-        setPrivateBetaView,
-        detailViewTab,
-        setDetailViewTab,
-        animalToEdit,
-        setAnimalToEdit,
-        speciesToAdd,
-        setSpeciesToAdd,
-        viewAnimalBreederInfo,
-        setViewAnimalBreederInfo,
-        sireData,
-        setSireData,
-        damData,
-        setDamData,
-        offspringData,
-        setOffspringData,
 
         // Images & Media
         showImageModal,
@@ -442,12 +386,6 @@ export function useAppModals() {
         // Archive & History
         showArchiveScreen,
         setShowArchiveScreen,
-        archivedAnimals,
-        setArchivedAnimals,
-        soldTransferredAnimals,
-        setSoldTransferredAnimals,
-        archiveLoading,
-        setArchiveLoading,
 
         // Admin & Moderation
         showAdminPanel,
@@ -456,10 +394,6 @@ export function useAppModals() {
         setShowModReportQueue,
         showModerationAuthModal,
         setShowModerationAuthModal,
-        inModeratorMode,
-        setInModeratorMode,
-        modCurrentContext,
-        setModCurrentContext,
         showInfoTab,
         setShowInfoTab,
 
