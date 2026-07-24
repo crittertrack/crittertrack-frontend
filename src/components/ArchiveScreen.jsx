@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, Loader2 } from 'lucide-react';
 import axios from 'axios';
-import { useArchive } from '../hooks/useArchive';
 
 const ArchiveScreen = ({
     onBack,
@@ -17,12 +16,32 @@ const ArchiveScreen = ({
     MgmtAnimalCard,
     SectionHeader
 }) => {
-    const {
-        archivedAnimals,
-        soldTransferredAnimals,
-        archiveLoading,
-        fetchArchiveData,
-    } = useArchive(authToken, API_BASE_URL);
+    const [archivedAnimals, setArchivedAnimals] = useState([]);
+    const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);
+    const [archiveLoading, setArchiveLoading] = useState(false);
+
+    const fetchArchiveData = useCallback(async () => {
+        if (!authToken) return;
+        setArchiveLoading(true);
+        try {
+            const response = await axios.get(`${API_BASE_URL}/animals/archived`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            const data = response.data || {};
+
+            const archived = Array.isArray(data.archived) ? data.archived : Object.values(data.archived || {});
+            const soldTransferred = Array.isArray(data.soldTransferred) ? data.soldTransferred : Object.values(data.soldTransferred || {});
+
+            setArchivedAnimals(archived);
+            setSoldTransferredAnimals(soldTransferred);
+        } catch (error) {
+            console.error('Failed to fetch archive data:', error);
+            setArchivedAnimals([]);
+            setSoldTransferredAnimals([]);
+        } finally {
+            setArchiveLoading(false);
+        }
+    }, [authToken, API_BASE_URL]);
 
     useEffect(() => { fetchArchiveData(); }, [fetchArchiveData]);
 
