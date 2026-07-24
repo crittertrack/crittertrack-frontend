@@ -261,18 +261,6 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                 // The user checked the "Also archive" box in the form.
                 // We reuse the existing archive handler, but skip its confirmation prompt.
                 await handleArchiveAnimal({ ...finalAnimal, archived: false }, true);
-            } else {
-                // If not using the archive-on-save shortcut, check for other archival status changes
-                // that should also close the detail view.
-                const originalStatus = animalToEdit?.status;
-                const newStatus = finalAnimal?.status;
-                const archivalStatuses = ['Deceased', 'Sold', 'Rehomed', 'Archived'];
-                const isNowArchival = newStatus && archivalStatuses.includes(newStatus) && !archivalStatuses.includes(originalStatus || '');
-
-                if (isNowArchival) {
-                    showModalMessage('Status Updated', `${finalAnimal.name || 'The animal'}'s record has been moved to your archives.`);
-                    handleBackFromAnimal();
-                }
             }
 
             return response;
