@@ -1096,16 +1096,6 @@ useEffect(() => {
         setShowEnclosureModal(true);
     }, [setEnclosureFormData, setEnclosureImagePreview, setEnclosureImageFile, setEditingEnclosureId, setShowEnclosureModal]);
 
-    const handleEnclosureSpeciesLabelAdd = useCallback(() => {
-        if (!newEnclosureSpeciesLabel.trim()) return;
-        setEnclosureFormData(p => ({ ...p, speciesLabels: [...new Set([...(p.speciesLabels || []), newEnclosureSpeciesLabel.trim()])] }));
-        setNewEnclosureSpeciesLabel('');
-    }, [newEnclosureSpeciesLabel]);
-
-    const handleEnclosureSpeciesLabelRemove = useCallback((labelToRemove) => {
-        setEnclosureFormData(p => ({ ...p, speciesLabels: (p.speciesLabels || []).filter(l => l !== labelToRemove) }));
-    }, []);
-
     const handleAssignAnimalInModal = useCallback(async (animalToAssign, enclosureToAssignTo) => {
         if (!animalToAssign || !enclosureToAssignTo) return;
         const animalIdPublic = animalToAssign.id_public;
