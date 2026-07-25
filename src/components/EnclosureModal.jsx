@@ -129,24 +129,36 @@ const EnclosureModal = ({
                                 <input type="text" value={enclosureFormData.purposeDescription || ''} onChange={e => setEnclosureFormData(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Location</label>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Building</label>
                                 <div className="flex items-center gap-2">
                                     <select
-                                        value={enclosureFormData.locationId || ''}
-                                        onChange={e => setEnclosureFormData(p => ({ ...p, locationId: e.target.value }))}
+                                        value={enclosureFormData.buildingId || ''}
+                                        onChange={e => setEnclosureFormData(p => ({ ...p, buildingId: e.target.value, roomId: '' }))}
                                         className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
-                                        <option value="">No Location</option>
-                                        {locations.filter(l => !l.parentLocationId).map(building => (
-                                            <optgroup key={building._id} label={building.name}>
-                                                <option value={building._id}>-- {building.name} (Building) --</option>
-                                                {locations.filter(r => r.parentLocationId === building._id).map(room => (
-                                                    <option key={room._id} value={room._id}>{room.name}</option>
-                                                ))}
-                                            </optgroup>
+                                        <option value="">No Building</option>
+                                        {locations.filter(l => l.type === 'building').map(building => (
+                                            <option key={building._id} value={building._id}>{building.name}</option>
                                         ))}
                                     </select>
-                                    <button type="button" onClick={onManageLocations} className="p-2 text-sm bg-gray-200 rounded-lg" title="Manage Locations">+</button>
+                                    <button type="button" onClick={onManageLocations} className="p-2 text-sm bg-gray-200 rounded-lg" title="Manage Locations">...</button>
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Room</label>
+                                <select
+                                    value={enclosureFormData.roomId || ''}
+                                    onChange={e => setEnclosureFormData(p => ({ ...p, roomId: e.target.value }))}
+                                    disabled={!enclosureFormData.buildingId}
+                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface disabled:bg-gray-100 dark:disabled:bg-dark-border"
+                                >
+                                    <option value="">No Room</option>
+                                    {enclosureFormData.buildingId && locations
+                                        .filter(l => l.type === 'room' && l.parentLocationId === enclosureFormData.buildingId)
+                                        .map(room => (
+                                            <option key={room._id} value={room._id}>{room.name}</option>
+                                        ))
+                                    }
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Dimensions</label>

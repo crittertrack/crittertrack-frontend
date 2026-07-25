@@ -566,7 +566,8 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [reproEncFormVisible, setReproEncFormVisible] = useState(false);
     const [healthEncFormVisible, setHealthEncFormVisible] = useState(false);
     const [enclosureFormData, setEnclosureFormData] = useState({
-        name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+        name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+        buildingId: '', roomId: '',
         purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
         lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
         cleaningTasks: []
@@ -587,7 +588,8 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureSearch, setEnclosureSearch] = useState('');
     const [enclosureTypeFilter, setEnclosureTypeFilter] = useState('');
     const [enclosureStatusFilter, setEnclosureStatusFilter] = useState(''); // 'occupied' | 'empty'
-    const [enclosureLocationFilter, setEnclosureLocationFilter] = useState('');
+    const [enclosureBuildingFilter, setEnclosureBuildingFilter] = useState('');
+    const [enclosureRoomFilter, setEnclosureRoomFilter] = useState('');
 
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
@@ -622,7 +624,8 @@ const handleArchive = useCallback(async (animalToArchive) => {
         setShowEnclosureModal(false);
         setEditingEnclosureId(null);
         setEnclosureFormData({
-            name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+            name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+            buildingId: '', roomId: '',
             purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
             lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
             cleaningTasks: []
@@ -653,10 +656,10 @@ const handleArchive = useCallback(async (animalToArchive) => {
         try {
             const payload = {
                 name: dataToSave.name.trim(),
-                locationId: dataToSave.locationId || null,
+                buildingId: dataToSave.buildingId || null,
+                roomId: dataToSave.roomId || null,
                 purpose: dataToSave.purpose,
                 purposeDescription: dataToSave.purposeDescription?.trim(),
-                location: dataToSave.location?.trim(),
                 dimensions: {
                     length: dataToSave.length ? Number(dataToSave.length) : null,
                     width: dataToSave.width ? Number(dataToSave.width) : null,
@@ -729,15 +732,16 @@ const handleArchive = useCallback(async (animalToArchive) => {
         }
     }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, handleCloseEnclosureModal]);
 
-    const getLocationPath = useCallback((locationId, allLocations) => {
-        if (!locationId || !allLocations.length) return '';
+    const getLocationPath = useCallback((buildingId, roomId, allLocations) => {
+        if (!buildingId || !allLocations.length) return '';
         const locationMap = new Map(allLocations.map(l => [l._id, l]));
         const path = [];
-        let current = locationMap.get(locationId);
-        while (current) {
-            path.unshift(current.name);
-            current = locationMap.get(current.parentLocationId);
-        }
+        const building = locationMap.get(buildingId);
+        const room = locationMap.get(roomId);
+        
+        if (building) path.push(building.name);
+        if (room) path.push(room.name);
+        
         return path.join(' / ');
     }, []);
 
@@ -1168,10 +1172,10 @@ useEffect(() => {
             setEnclosureFormData({
                 name: enclosure.name || '',
                 enclosureType: enclosure.enclosureType || enclosure.roomType || '',
-                locationId: enclosure.locationId || '',
+                buildingId: enclosure.buildingId || '',
+                roomId: enclosure.roomId || '',
                 purpose: enclosure.purpose || 'general',
                 purposeDescription: enclosure.purposeDescription || '',
-                location: enclosure.location || '',
                 capacity: enclosure.capacity || '',
                 length, width, height, dimensionsUnit,
                 tempMin: enclosure.tempMin ?? enclosure.temperatureRange?.min ?? '',
@@ -1194,7 +1198,7 @@ useEffect(() => {
         } else {
             // Add new mode
             setEnclosureFormData({
-                name: '', enclosureType: '', locationId: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+                name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in', buildingId: '', roomId: '',
                 purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
                 lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
                 cleaningTasks: []
@@ -1255,8 +1259,7 @@ useEffect(() => {
         setLoadingAnimals(false); // Not loading from API anymore
 
         const enclosureId = enclosure._id || enclosure.id;
-        const locationName = locations.find(l => l._id === enclosure.locationId)?.name;
-        const enrichedEnclosure = { ...enclosure, locationName };
+        const enrichedEnclosure = { ...enclosure, locationName: getLocationPath(enclosure.buildingId, enclosure.roomId, locations) };
 
         setSelectedEnclosure(enrichedEnclosure);
 
@@ -2885,8 +2888,14 @@ useEffect(() => {
                 filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length === 0);
             }
         }
-        if (enclosureLocationFilter) {
-            filteredEnclosures = filteredEnclosures.filter(e => e.locationId === enclosureLocationFilter);
+        if (enclosureBuildingFilter) {
+            if (enclosureRoomFilter) {
+                // If a room is selected, filter by room (which is inherently in the building)
+                filteredEnclosures = filteredEnclosures.filter(e => e.roomId === enclosureRoomFilter);
+            } else {
+                // If only a building is selected, filter by building
+                filteredEnclosures = filteredEnclosures.filter(e => e.buildingId === enclosureBuildingFilter);
+            }
         }
 
         // --- Components ---
@@ -2894,7 +2903,7 @@ useEffect(() => {
             const occupants = enclosureAnimalMap[enclosure._id] || [];
             const occupancyStatus = occupants.length > 0 ? 'Occupied' : 'Empty';
             const capacity = parseInt(enclosure.capacity, 10);
-            const locationName = getLocationPath(enclosure.locationId, locations);
+            const locationName = getLocationPath(enclosure.buildingId, enclosure.roomId, locations);
             const occupancyPercentage = capacity > 0 ? (occupants.length / capacity) * 100 : 0;
 
             const tempRange = (enclosure.tempMin != null && enclosure.tempMax != null)
@@ -3010,19 +3019,28 @@ useEffect(() => {
                         <option value="empty">Empty</option>
                     </select>
                     <select
-                        value={enclosureLocationFilter}
-                        onChange={e => setEnclosureLocationFilter(e.target.value)}
+                        value={enclosureBuildingFilter}
+                        onChange={e => { setEnclosureBuildingFilter(e.target.value); setEnclosureRoomFilter(''); }}
                         className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
                     >
-                        <option value="">All Locations</option>
-                        {locations.filter(l => !l.parentLocationId).map(building => (
-                            <optgroup key={building._id} label={building.name}>
-                                <option value={building._id}>-- {building.name} (Building) --</option>
-                                {locations.filter(r => r.parentLocationId === building._id).map(room => (
-                                    <option key={room._id} value={room._id}>{room.name}</option>
-                                ))}
-                            </optgroup>
+                        <option value="">All Buildings</option>
+                        {locations.filter(l => l.type === 'building').map(building => (
+                            <option key={building._id} value={building._id}>{building.name}</option>
                         ))}
+                    </select>
+                    <select
+                        value={enclosureRoomFilter}
+                        onChange={e => setEnclosureRoomFilter(e.target.value)}
+                        disabled={!enclosureBuildingFilter}
+                        className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                        <option value="">All Rooms</option>
+                        {enclosureBuildingFilter && locations
+                            .filter(l => l.type === 'room' && l.parentLocationId === enclosureBuildingFilter)
+                            .map(room => (
+                                <option key={room._id} value={room._id}>{room.name}</option>
+                            ))
+                        }
                     </select>
                     <button onClick={() => setShowLocationManager(true)} className="p-2 text-sm border border-gray-300 rounded-lg flex items-center gap-1.5">
                         <Settings size={14} />
@@ -3408,7 +3426,7 @@ useEffect(() => {
                                                                     dimensions: enc.dimensions || enc.size || '',
                                                                     capacity: enc.capacity || '',
                                                                     tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
-                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '',
+                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '', buildingId: enc.buildingId || '', roomId: enc.roomId || '',
                                                                     lightingSchedule: enc.lightingSchedule || '',
                                                                     notes: enc.notes || '',
                                                                     tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
@@ -3647,7 +3665,7 @@ useEffect(() => {
                                                                     dimensions: enc.dimensions || enc.size || '',
                                                                     capacity: enc.capacity || '',
                                                                     tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
-                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '',
+                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '', buildingId: enc.buildingId || '', roomId: enc.roomId || '',
                                                                     lightingSchedule: enc.lightingSchedule || '',
                                                                     notes: enc.notes || '',
                                                                     tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
@@ -3817,7 +3835,7 @@ useEffect(() => {
                                                                     dimensions: enc.dimensions || enc.size || '',
                                                                     capacity: enc.capacity || '',
                                                                     tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
-                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '',
+                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '', buildingId: enc.buildingId || '', roomId: enc.roomId || '',
                                                                     lightingSchedule: enc.lightingSchedule || '',
                                                                     notes: enc.notes || '',
                                                                     tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
