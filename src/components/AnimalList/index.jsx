@@ -470,6 +470,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
     const [listSelectedIds, setListSelectedIds] = useState(new Set());
     const [animalCollections, setAnimalCollections] = useState({}); // populated from user-scoped key below
+    const [allSystemSpecies, setAllSystemSpecies] = useState([]); // To hold all species from the backend
     const [showCollectionManager, setShowCollectionManager] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
     const [renamingCollectionId, setRenamingCollectionId] = useState(null);
@@ -532,17 +533,36 @@ const handleArchive = useCallback(async (animalToArchive) => {
         } catch {}
     }, [userKey]);
 
+    // Fetch all available species from the backend to ensure custom species are included
+    useEffect(() => {
+        const fetchAllSystemSpecies = async () => {
+            try {
+                // Assuming this endpoint exists and returns all species objects
+                const response = await axios.get(`${API_BASE_URL}/public/species`);
+                if (response.data && Array.isArray(response.data.species)) {
+                    setAllSystemSpecies(response.data.species);
+                } else if (Array.isArray(response.data)) {
+                    setAllSystemSpecies(response.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch all system species, picker may be incomplete:", error);
+            }
+        };
+        fetchAllSystemSpecies();
+    }, [API_BASE_URL]);
+
     const speciesOptionsForEnclosureModal = useMemo(() => {
         const speciesFromAnimals = allUserSpecies || [];
         const favoriteSpecies = userProfile?.favoriteSpecies || [];
-        const combined = [...new Set([...speciesFromAnimals, ...favoriteSpecies])];
+        const systemSpeciesNames = allSystemSpecies.map(s => s.name).filter(Boolean);
+        const combined = [...new Set([...systemSpeciesNames, ...speciesFromAnimals, ...favoriteSpecies])];
         const sorted = combined.sort((a, b) => a.localeCompare(b));
         return sorted.map(speciesName => ({
             name: speciesName,
-            latinName: getSpeciesLatinName(speciesName),
-            category: getSpeciesCategory(speciesName)
+            latinName: allSystemSpecies.find(s => s.name === speciesName)?.latinName || getSpeciesLatinName(speciesName),
+            category: allSystemSpecies.find(s => s.name === speciesName)?.category || getSpeciesCategory(speciesName)
         }));
-    }, [allUserSpecies, userProfile?.favoriteSpecies]);
+    }, [allUserSpecies, userProfile?.favoriteSpecies, allSystemSpecies]);
 
     const isCollectionsView = animalView === 'collections';
     const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);
