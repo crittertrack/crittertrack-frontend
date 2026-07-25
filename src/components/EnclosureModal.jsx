@@ -28,6 +28,7 @@ const EnclosureModal = ({
     setNewCleaningTaskFreq,
     API_BASE_URL,
     authToken,
+    allSpecies, // Pre-fetched species list from parent (avoids duplicate API call)
 }) => {
     const modalRef = useRef(null);
     const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
@@ -312,6 +313,7 @@ const EnclosureModal = ({
                     API_BASE_URL={API_BASE_URL}
                     title="Select Suitable Species"
                     initialSelected={enclosureFormData.speciesLabels || []}
+                    allSpecies={allSpecies}
                 />
             </div>
         </div>

@@ -10,6 +10,7 @@ const SpeciesSelectionModal = ({
     API_BASE_URL,
     title = 'Select Species',
     initialSelected = [],
+    allSpecies: propSpecies, // Optional pre-fetched species list from parent (avoids API call)
 }) => {
     const [allSpecies, setAllSpecies] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,6 +26,18 @@ const SpeciesSelectionModal = ({
     }, [isOpen, initialSelected]);
 
     useEffect(() => {
+        // Prefer propSpecies (pre-fetched by parent) to avoid redundant API calls
+        if (propSpecies && Array.isArray(propSpecies) && propSpecies.length > 0) {
+            setAllSpecies(propSpecies.map(item =>
+                typeof item === 'string'
+                    ? { name: item, category: 'Other' }
+                    : item
+            ));
+            setLoading(false);
+            return;
+        }
+
+        // Fallback: fetch species from API
         const fetchSpecies = async () => {
             if (!isOpen) return;
             setLoading(true);
@@ -71,8 +84,10 @@ const SpeciesSelectionModal = ({
             }
         };
 
-        fetchSpecies();
-    }, [isOpen, authToken, API_BASE_URL]);
+        if (!propSpecies) {
+            fetchSpecies();
+        }
+    }, [isOpen, authToken, API_BASE_URL, propSpecies]);
 
     const toggleSelect = (speciesName) => {
         setSelected(prev =>
