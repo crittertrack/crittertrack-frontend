@@ -174,7 +174,8 @@ const AnimalList = ({
     // Breeding lines (display-only for cards)
     breedingLineDefs = [],
     animalBreedingLines = {},
-    onBreedingLinesUpdate
+    onBreedingLinesUpdate,
+    speciesOptions = []
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
@@ -470,7 +471,6 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
     const [listSelectedIds, setListSelectedIds] = useState(new Set());
     const [animalCollections, setAnimalCollections] = useState({}); // populated from user-scoped key below
-    const [allSystemSpecies, setAllSystemSpecies] = useState([]); // To hold all species from the backend
     const [showCollectionManager, setShowCollectionManager] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
     const [renamingCollectionId, setRenamingCollectionId] = useState(null);
@@ -533,26 +533,9 @@ const handleArchive = useCallback(async (animalToArchive) => {
         } catch {}
     }, [userKey]);
 
-    // Fetch all available species from the backend to ensure custom species are included
-    useEffect(() => {
-        const fetchAllSystemSpecies = async () => {
-            try {
-                // Assuming this endpoint exists and returns all species objects
-                const response = await axios.get(`${API_BASE_URL}/public/species`);
-                if (response.data && Array.isArray(response.data.species)) {
-                    setAllSystemSpecies(response.data.species);
-                } else if (Array.isArray(response.data)) {
-                    setAllSystemSpecies(response.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch all system species, picker may be incomplete:", error);
-            }
-        };
-        fetchAllSystemSpecies();
-    }, [API_BASE_URL]);
-
     const speciesOptionsForEnclosureModal = useMemo(() => {
         const favoriteSpecies = userProfile?.favoriteSpecies || [];
+        const allSystemSpecies = speciesOptions || [];
         const systemSpeciesNames = allSystemSpecies.map(s => s.name).filter(Boolean);
         const combined = [...new Set([...systemSpeciesNames, ...favoriteSpecies])];
         const sorted = combined.sort((a, b) => a.localeCompare(b));
@@ -561,7 +544,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
             latinName: allSystemSpecies.find(s => s.name === speciesName)?.latinName || getSpeciesLatinName(speciesName),
             category: allSystemSpecies.find(s => s.name === speciesName)?.category || getSpeciesCategory(speciesName)
         }));
-    }, [userProfile?.favoriteSpecies, allSystemSpecies]);
+    }, [userProfile?.favoriteSpecies, speciesOptions]);
 
     const isCollectionsView = animalView === 'collections';
     const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);

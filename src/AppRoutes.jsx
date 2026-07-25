@@ -180,6 +180,7 @@ export function AppRoutes({
           setArchiveLoading={setArchiveLoading}
           breedingLineDefs={breedingLineDefs}
           animalBreedingLines={animalBreedingLines}
+          speciesOptions={speciesOptions}
         />
       } />
       
@@ -203,6 +204,7 @@ export function AppRoutes({
           setArchiveLoading={setArchiveLoading}
           breedingLineDefs={breedingLineDefs}
           animalBreedingLines={animalBreedingLines}
+          speciesOptions={speciesOptions}
         />
       } />
 
