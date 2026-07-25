@@ -30,11 +30,10 @@ const EnclosureModal = ({
     API_BASE_URL,
     authToken,
     showModalMessage,
+    speciesOptions = [], // Receive species options from parent
 }) => {
     const modalRef = useRef(null);
     const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
-    const [speciesOptions, setSpeciesOptions] = useState([]);
-    const [speciesLoading, setSpeciesLoading] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -53,32 +52,6 @@ const EnclosureModal = ({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen, onClose]);
-
-    useEffect(() => {
-        if (isOpen && isSpeciesModalOpen && !speciesLoading && speciesOptions.length === 0) {
-            setSpeciesLoading(true);
-            axios.get(`${API_BASE_URL}/public/species`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            })
-                .then(response => {
-                    if (response.data && Array.isArray(response.data.species)) {
-                        setSpeciesOptions(response.data.species);
-                    } else if (Array.isArray(response.data)) {
-                        // Fallback for a direct array response
-                        setSpeciesOptions(response.data);
-                    } else {
-                        console.warn("Species data from /species was not in the expected format:", response.data);
-                        setSpeciesOptions([]);
-                    }
-                })
-                .catch(error => {
-                    console.error("Failed to fetch all species:", error);
-                    showModalMessage('Error', 'Could not load the full species list.');
-                    setSpeciesOptions([]); // Ensure it's an empty array on error
-                })
-                .finally(() => setSpeciesLoading(false));
-        }
-    }, [isOpen, isSpeciesModalOpen, API_BASE_URL, authToken, speciesOptions.length, speciesLoading, showModalMessage]);
 
     if (!isOpen) return null;
 

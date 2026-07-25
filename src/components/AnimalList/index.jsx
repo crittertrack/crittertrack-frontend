@@ -508,11 +508,16 @@ const handleArchive = useCallback(async (animalToArchive) => {
         } catch {}
     }, [userKey]);
 
-        const allSpeciesForEnclosureModal = useMemo(() => {
+    const speciesOptionsForEnclosureModal = useMemo(() => {
         const speciesFromAnimals = allUserSpecies || [];
         const favoriteSpecies = userProfile?.favoriteSpecies || [];
         const combined = [...new Set([...speciesFromAnimals, ...favoriteSpecies])];
-        return combined.sort((a, b) => a.localeCompare(b));
+        const sorted = combined.sort((a, b) => a.localeCompare(b));
+        return sorted.map(speciesName => ({
+            name: speciesName,
+            latinName: getSpeciesLatinName(speciesName),
+            category: getSpeciesCategory(speciesName)
+        }));
     }, [allUserSpecies, userProfile?.favoriteSpecies]);
 
     const isCollectionsView = animalView === 'collections';
@@ -5049,7 +5054,7 @@ useEffect(() => {
                 setEnclosureImageFile={setEnclosureImageFile}
                 enclosureImagePreview={enclosureImagePreview}
                 setEnclosureImagePreview={setEnclosureImagePreview} newEnclosureTag={newEnclosureTag} setNewEnclosureTag={setNewEnclosureTag} handleEnclosureTagAdd={handleEnclosureTagAdd} handleEnclosureTagRemove={handleEnclosureTagRemove}
-                allSpecies={allSpeciesForEnclosureModal}
+                speciesOptions={speciesOptionsForEnclosureModal}
                 handleEnclosureSpeciesLabelAdd={handleEnclosureSpeciesLabelAdd} handleEnclosureSpeciesLabelRemove={handleEnclosureSpeciesLabelRemove}
                 newCleaningTaskName={newCleaningTaskName} setNewCleaningTaskName={setNewCleaningTaskName} newCleaningTaskFreq={newCleaningTaskFreq} setNewCleaningTaskFreq={setNewCleaningTaskFreq}
             /> {/* This was the missing closing tag for the EnclosureModal component */}
