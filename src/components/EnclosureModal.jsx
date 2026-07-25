@@ -57,25 +57,28 @@ const EnclosureModal = ({
     useEffect(() => {
         if (isOpen && isSpeciesModalOpen && !speciesLoading && speciesOptions.length === 0) {
             setSpeciesLoading(true);
-            axios.get(`${API_BASE_URL}/public/marketplace/species`)
+            axios.get(`${API_BASE_URL}/species`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            })
                 .then(response => {
-                    if (Array.isArray(response.data)) {
-                        // SpeciesPickerModal expects an array of objects.
-                        const options = response.data.map(name => ({
-                            name,
-                            category: 'Unknown',
-                            isDefault: false,
-                        }));
-                        setSpeciesOptions(options);
+                    if (response.data && Array.isArray(response.data.species)) {
+                        setSpeciesOptions(response.data.species);
+                    } else if (Array.isArray(response.data)) {
+                        // Fallback for a direct array response
+                        setSpeciesOptions(response.data);
+                    } else {
+                        console.warn("Species data from /species was not in the expected format:", response.data);
+                        setSpeciesOptions([]);
                     }
                 })
                 .catch(error => {
-                    console.error("Failed to fetch species for picker:", error);
-                    showModalMessage('Error', 'Could not load species list.');
+                    console.error("Failed to fetch all species:", error);
+                    showModalMessage('Error', 'Could not load the full species list.');
+                    setSpeciesOptions([]); // Ensure it's an empty array on error
                 })
                 .finally(() => setSpeciesLoading(false));
         }
-    }, [isOpen, isSpeciesModalOpen, API_BASE_URL, speciesOptions.length, speciesLoading, showModalMessage]);
+    }, [isOpen, isSpeciesModalOpen, API_BASE_URL, authToken, speciesOptions.length, speciesLoading, showModalMessage]);
 
     if (!isOpen) return null;
 
