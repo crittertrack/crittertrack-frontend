@@ -20,13 +20,26 @@ const SpeciesSelectionModal = ({
             if (!isOpen) return;
             setLoading(true);
             try {
-                const response = await axios.get(`${API_BASE_URL}/species`, {
+                const response = await axios.get(`${API_BASE_URL}/species/all-names`, { // Reverted to original endpoint from EnclosureModal
                     headers: { Authorization: `Bearer ${authToken}` },
                 });
+                console.log("Species API Response:", response);
+
+                // Check if the response is actually JSON
+                const contentType = response.headers['content-type'];
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.error("Species API did not return JSON. Content-Type:", contentType, "Response data:", response.data);
+                    setAllSpecies([]);
+                    return;
+                }
+
                 if (response.data && Array.isArray(response.data.species)) {
                     setAllSpecies(response.data.species);
                 } else if (response.data && Array.isArray(response.data)) {
-                    setAllSpecies(response.data);
+                    // If the response is a direct array. It could be an array of strings (names) or objects.
+                    // If it's an array of strings, map them to objects with just a 'name' property.
+                    // This ensures the filteredAndGroupedSpecies logic doesn't break.
+                    setAllSpecies(response.data.map(item => typeof item === 'string' ? { name: item, category: 'Other' } : item));
                 } else {
                     console.warn("Species data not found or in unexpected format:", response.data);
                     setAllSpecies([]);
