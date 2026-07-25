@@ -51,6 +51,30 @@ const getSpeciesDisplayName = (species) => {
     return displayNames[species] || species;
 };
 
+const getSpeciesCategory = (species) => {
+    if (!species) return 'Other';
+    const s = species.toLowerCase();
+    if (s.includes('mouse') || s.includes('rat') || s.includes('hamster') || s.includes('guinea pig')) {
+        return 'Mammal';
+    }
+    if (s.includes('snake') || s.includes('lizard') || s.includes('gecko') || s.includes('turtle')) {
+        return 'Reptile';
+    }
+    if (s.includes('parrot') || s.includes('finch') || s.includes('bird')) {
+        return 'Bird';
+    }
+    if (s.includes('frog') || s.includes('salamander') || s.includes('axolotl')) {
+        return 'Amphibian';
+    }
+    if (s.includes('fish')) {
+        return 'Fish';
+    }
+    if (s.includes('tarantula') || s.includes('scorpion') || s.includes('spider') || s.includes('invertebrate')) {
+        return 'Invertebrate';
+    }
+    return 'Other';
+};
+
 const formatTime12h = (time24) => {
     if (!time24) return '...';
     const [hours, minutes] = time24.split(':');
@@ -687,30 +711,6 @@ const handleArchive = useCallback(async (animalToArchive) => {
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to delete enclosure.');
         }
     }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, handleCloseEnclosureModal]);
-
-    const getSpeciesCategory = (species) => {
-        if (!species) return 'Other';
-        const s = species.toLowerCase();
-        if (s.includes('mouse') || s.includes('rat') || s.includes('hamster') || s.includes('guinea pig')) {
-            return 'Mammal';
-        }
-        if (s.includes('snake') || s.includes('lizard') || s.includes('gecko') || s.includes('turtle')) {
-            return 'Reptile';
-        }
-        if (s.includes('parrot') || s.includes('finch') || s.includes('bird')) {
-            return 'Bird';
-        }
-        if (s.includes('frog') || s.includes('salamander') || s.includes('axolotl')) {
-            return 'Amphibian';
-        }
-        if (s.includes('fish')) {
-            return 'Fish';
-        }
-        if (s.includes('tarantula') || s.includes('scorpion') || s.includes('spider') || s.includes('invertebrate')) {
-            return 'Invertebrate';
-        }
-        return 'Other';
-    };
 
     // Base list for "active" animals (not sold or archived) for dashboard counts.
     const activeAnimalsForDashboard = useMemo(() => {
