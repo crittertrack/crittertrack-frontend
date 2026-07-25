@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { X, Home, Cat, Trash2, Save, Loader2 } from 'lucide-react';
-import axios from 'axios';
 import AnimalImage from '../components/shared/AnimalImage';
+import SpeciesSelectionModal from './SpeciesSelectionModal';
 
 const EnclosureModal = ({
     isOpen,
@@ -31,25 +31,7 @@ const EnclosureModal = ({
     authToken,
 }) => {
     const modalRef = useRef(null);
-    const [allSpecies, setAllSpecies] = useState([]);
-
-    useEffect(() => {
-        const fetchAllSpecies = async () => {
-            if (isOpen && authToken) {
-                try {
-                    const response = await axios.get(`${API_BASE_URL}/species/all-names`, {
-                        headers: { Authorization: `Bearer ${authToken}` },
-                    });
-                    if (response.data && Array.isArray(response.data)) {
-                        setAllSpecies(response.data.sort());
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch all species list:", error);
-                }
-            }
-        };
-        fetchAllSpecies();
-    }, [isOpen, authToken, API_BASE_URL]);
+    const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -77,6 +59,11 @@ const EnclosureModal = ({
             setEnclosureImageFile(file);
             setEnclosureImagePreview(URL.createObjectURL(file));
         }
+    };
+
+    const handleSelectSpecies = (speciesName) => {
+        handleEnclosureSpeciesLabelAdd(speciesName);
+        setIsSpeciesModalOpen(false);
     };
 
     return (
@@ -231,16 +218,13 @@ const EnclosureModal = ({
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Suitable Species</label>
                                 <div className="flex items-center gap-2">
-                                    <select
-                                        onChange={(e) => { if (e.target.value) handleEnclosureSpeciesLabelAdd(e.target.value); e.target.value = ''; }}
-                                        value=""
-                                        className="flex-1 p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface"
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsSpeciesModalOpen(true)}
+                                        className="w-full text-left flex-1 p-2 text-sm border border-gray-300 rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-surface hover:bg-gray-50 dark:hover:bg-dark-surface-hover"
                                     >
-                                        <option value="" disabled>Select a species to add...</option>
-                                        {(allSpecies || []).filter(s => !(enclosureFormData.speciesLabels || []).includes(s)).map(species => (
-                                            <option key={species} value={species}>{species}</option>
-                                        ))}
-                                    </select>
+                                        + Add suitable species
+                                    </button>
                                 </div>
                                 <div className="flex flex-wrap gap-1 mt-1.5">
                                     {enclosureFormData.speciesLabels.map(label => <span key={label} className="text-xs bg-gray-200 px-2 py-1 rounded-full flex items-center gap-1">{label} <button type="button" onClick={() => handleEnclosureSpeciesLabelRemove(label)} className="text-red-400 hover:text-red-600">x</button></span>)}
@@ -303,6 +287,15 @@ const EnclosureModal = ({
                         </div>
                     </div>
                 </div>
+
+                <SpeciesSelectionModal
+                    isOpen={isSpeciesModalOpen}
+                    onClose={() => setIsSpeciesModalOpen(false)}
+                    onSelect={handleSelectSpecies}
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    exclude={enclosureFormData.speciesLabels || []}
+                />
             </div>
         </div>
     );
