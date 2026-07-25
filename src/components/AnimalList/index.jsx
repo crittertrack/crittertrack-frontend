@@ -752,7 +752,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
             }
             fetchLocations();
         } catch (err) {
-            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save location.');
+            showModalMessageRef.current('Error', err.response?.data?.message || `Failed to save location: ${err.message}`);
         } finally {
             setLocationSaving(false);
         }
