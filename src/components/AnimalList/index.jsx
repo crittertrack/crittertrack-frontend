@@ -647,6 +647,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
         try {
             const payload = {
                 name: dataToSave.name.trim(),
+                enclosureType: dataToSave.enclosureType,
                 buildingId: dataToSave.buildingId || null,
                 roomId: dataToSave.roomId || null,
                 purpose: dataToSave.purpose,
