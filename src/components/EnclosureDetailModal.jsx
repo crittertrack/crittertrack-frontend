@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
     AlertCircle, Users, Wrench, MessageSquare, Clock, Edit,
-    Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2,
+    Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2, Search,
     Lightbulb, RefreshCw, Star, Info, Activity
 } from 'lucide-react';
 import AnimalImage from './shared/AnimalImage';
@@ -17,6 +17,76 @@ const TABS = [
     { id: 'notes', label: 'Notes', icon: MessageSquare },
     { id: 'history', label: 'History', icon: Clock },
 ];
+
+const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => {
+    const [search, setSearch] = useState('');
+
+    const filteredAnimals = animals.filter(animal => {
+        if (!search) return true;
+        const searchTerm = search.toLowerCase();
+        return (
+            animal.name?.toLowerCase().includes(searchTerm) ||
+            animal.id_public?.toLowerCase().includes(searchTerm) ||
+            animal.species?.toLowerCase().includes(searchTerm)
+        );
+    });
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[350]">
+            <div className="bg-white dark:bg-dark-surface rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+                {/* Header */}
+                <div className="flex justify-between items-center border-b dark:border-dark-border p-4 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">{title || 'Select Animal'}</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800 dark:text-dark-text-muted dark:hover:text-dark-text"><X size={22} /></button>
+                </div>
+
+                {/* Search */}
+                <div className="p-4 border-b dark:border-dark-border flex-shrink-0">
+                    <div className="relative">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search by name, ID, or species..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            autoFocus
+                            className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-sm bg-white dark:bg-dark-surface-hover focus:ring-2 focus:ring-primary focus:border-transparent"
+                        />
+                    </div>
+                </div>
+
+                {/* Animal List */}
+                <div className="flex-grow overflow-y-auto p-2">
+                    {filteredAnimals.length === 0 ? (
+                        <p className="text-center text-gray-500 dark:text-dark-text-muted py-8">No unassigned animals found.</p>
+                    ) : (
+                        <div className="space-y-1">
+                            {filteredAnimals.map(animal => (
+                                <button
+                                    key={animal.id_public}
+                                    onClick={() => onSelect(animal)}
+                                    className="w-full flex items-center gap-3 p-2 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-dark-surface-hover"
+                                >
+                                    <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                        <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-gray-800 dark:text-dark-text truncate">
+                                            {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">
+                                            {animal.species} • {animal.gender} • {animal.id_public}
+                                        </p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const EnclosureDetailModal = ({
     isOpen,
@@ -40,8 +110,7 @@ const EnclosureDetailModal = ({
     const [savingNote, setSavingNote] = useState(false);
     const [updatingTask, setUpdatingTask] = useState(null);
     const modalRef = useRef(null);
-    const [showAssignDropdown, setShowAssignDropdown] = useState(false);
-    const assignButtonRef = useRef(null);
+    const [showAnimalPicker, setShowAnimalPicker] = useState(false);
 
     useEffect(() => {
         // Load notes from enclosure data
@@ -55,18 +124,6 @@ const EnclosureDetailModal = ({
             }
         };
         if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isOpen, onClose]);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (assignButtonRef.current && !assignButtonRef.current.contains(event.target)) {
-                setShowAssignDropdown(false);
-            }
-        };
-        if (showAssignDropdown) {
             document.addEventListener('mousedown', handleClickOutside);
         }
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -367,36 +424,13 @@ const EnclosureDetailModal = ({
                                 <h3 className="font-semibold text-gray-800 dark:text-dark-text">
                                     Occupants ({animals.length})
                                 </h3>
-                                <div className="relative" ref={assignButtonRef}>
-                                    <button
-                                        onClick={() => setShowAssignDropdown(prev => !prev)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
-                                    >
-                                        <PlusCircle size={14} />
-                                        Assign Animal
-                                    </button>
-                                    {showAssignDropdown && (
-                                        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-dark-surface-hover rounded-lg shadow-xl border dark:border-dark-border z-10 max-h-60 overflow-y-auto">
-                                            {assignableAnimals.length === 0 ? (
-                                                <p className="p-3 text-xs text-gray-500 dark:text-dark-text-muted">No unassigned animals available (or none match suitable species for this enclosure).</p>
-                                            ) : (
-                                                assignableAnimals.map(animal => (
-                                                    <button
-                                                        key={animal.id_public}
-                                                        onClick={() => {
-                                                            onAssignAnimal(animal, enclosure);
-                                                            setShowAssignDropdown(false);
-                                                        }}
-                                                        className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface"
-                                                    >
-                                                        <p className="font-medium">{animal.name}</p>
-                                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species} • {animal.id_public}</p>
-                                                    </button>
-                                                ))
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                                <button
+                                    onClick={() => setShowAnimalPicker(true)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
+                                >
+                                    <PlusCircle size={14} />
+                                    Assign Animal
+                                </button>
                             </div>
                             {loadingAnimals ? (
                                 <div className="flex items-center justify-center py-8">
@@ -644,6 +678,20 @@ const EnclosureDetailModal = ({
                         Close
                     </button>
                 </div>
+
+                {showAnimalPicker && (
+                    <AnimalPickerModal
+                        animals={assignableAnimals}
+                        onSelect={(animal) => {
+                            onAssignAnimal(animal, enclosure);
+                            setShowAnimalPicker(false);
+                        }}
+                        onClose={() => setShowAnimalPicker(false)}
+                        title="Assign Animal to Enclosure"
+                        X={X}
+                        Search={Search}
+                    />
+                )}
             </div>
         </div>
     );
