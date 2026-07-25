@@ -552,17 +552,16 @@ const handleArchive = useCallback(async (animalToArchive) => {
     }, [API_BASE_URL]);
 
     const speciesOptionsForEnclosureModal = useMemo(() => {
-        const speciesFromAnimals = allUserSpecies || [];
         const favoriteSpecies = userProfile?.favoriteSpecies || [];
         const systemSpeciesNames = allSystemSpecies.map(s => s.name).filter(Boolean);
-        const combined = [...new Set([...systemSpeciesNames, ...speciesFromAnimals, ...favoriteSpecies])];
+        const combined = [...new Set([...systemSpeciesNames, ...favoriteSpecies])];
         const sorted = combined.sort((a, b) => a.localeCompare(b));
         return sorted.map(speciesName => ({
             name: speciesName,
             latinName: allSystemSpecies.find(s => s.name === speciesName)?.latinName || getSpeciesLatinName(speciesName),
             category: allSystemSpecies.find(s => s.name === speciesName)?.category || getSpeciesCategory(speciesName)
         }));
-    }, [allUserSpecies, userProfile?.favoriteSpecies, allSystemSpecies]);
+    }, [userProfile?.favoriteSpecies, allSystemSpecies]);
 
     const isCollectionsView = animalView === 'collections';
     const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);
