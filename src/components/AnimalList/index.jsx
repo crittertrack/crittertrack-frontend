@@ -1207,7 +1207,6 @@ useEffect(() => {
         // are not deceased/rehomed, and match the enclosure's suitable species (if any).
         return allAnimalsRaw.filter(a => 
             !a.enclosureId && 
-            (suitableSpecies.size === 0 || suitableSpecies.has(a.species))
             !a.isViewOnly &&
             !a.archived &&
             !unassignableStatuses.includes(a.status) &&
