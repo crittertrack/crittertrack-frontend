@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { X, Home, Cat, Trash2, Save, Loader2 } from 'lucide-react';
+import { X, Home, Cat, Trash2, Save, Loader2, Search } from 'lucide-react';
+import axios from 'axios';
 import AnimalImage from '../components/shared/AnimalImage';
-import SpeciesSelectionModal from './SpeciesSelectionModal';
+import { SpeciesPickerModal } from './Modals/SpeciesModals';
 
 const EnclosureModal = ({
     isOpen,
@@ -32,6 +33,8 @@ const EnclosureModal = ({
 }) => {
     const modalRef = useRef(null);
     const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
+    const [speciesOptions, setSpeciesOptions] = useState([]);
+    const [speciesLoading, setSpeciesLoading] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -50,6 +53,29 @@ const EnclosureModal = ({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen, onClose]);
+
+    useEffect(() => {
+        if (isOpen && isSpeciesModalOpen && !speciesLoading && speciesOptions.length === 0) {
+            setSpeciesLoading(true);
+            axios.get(`${API_BASE_URL}/public/marketplace/species`)
+                .then(response => {
+                    if (Array.isArray(response.data)) {
+                        // SpeciesPickerModal expects an array of objects.
+                        const options = response.data.map(name => ({
+                            name,
+                            category: 'Unknown',
+                            isDefault: false,
+                        }));
+                        setSpeciesOptions(options);
+                    }
+                })
+                .catch(error => {
+                    console.error("Failed to fetch species for picker:", error);
+                    // showModalMessage('Error', 'Could not load species list.');
+                })
+                .finally(() => setSpeciesLoading(false));
+        }
+    }, [isOpen, isSpeciesModalOpen, API_BASE_URL, speciesOptions.length, speciesLoading]);
 
     if (!isOpen) return null;
 
@@ -288,14 +314,15 @@ const EnclosureModal = ({
                     </div>
                 </div>
 
-                <SpeciesSelectionModal
-                    isOpen={isSpeciesModalOpen}
-                    onClose={() => setIsSpeciesModalOpen(false)}
+                {isSpeciesModalOpen && (
+                <SpeciesPickerModal
+                    speciesOptions={speciesOptions.filter(s => !(enclosureFormData.speciesLabels || []).includes(s.name))}
                     onSelect={handleSelectSpecies}
-                    authToken={authToken}
-                    API_BASE_URL={API_BASE_URL}
-                    exclude={enclosureFormData.speciesLabels || []}
+                    onClose={() => setIsSpeciesModalOpen(false)}
+                    X={X}
+                    Search={Search}
                 />
+                )}
             </div>
         </div>
     );
