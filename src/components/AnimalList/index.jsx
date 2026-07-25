@@ -5,7 +5,7 @@ import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureModal from '../EnclosureModal';
 import EnclosureDetailModal from '../EnclosureDetailModal';
-import LocationManagerModal from '../LocationManagerModal'; // Import new modal
+import LocationManagerModal from '../Modals/LocationManagerModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
