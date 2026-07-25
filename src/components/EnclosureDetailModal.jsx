@@ -39,7 +39,7 @@ const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => 
     });
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[350]">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[450]">
             <div className="bg-white dark:bg-dark-surface rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-center border-b dark:border-dark-border p-4 flex-shrink-0">
@@ -239,7 +239,7 @@ const EnclosureDetailModal = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={onClose}>
+        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/60" onClick={onClose}>
             <div
                 ref={modalRef}
                 className="bg-white dark:bg-dark-surface rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"

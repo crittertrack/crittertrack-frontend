@@ -1157,7 +1157,6 @@ useEffect(() => {
                 { animalId_public: animalIdPublic, enclosureId: enclosureId },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }
             );
-            showModalMessageRef.current('Success', `${animalToAssign.name} assigned to ${enclosureToAssignTo.name}.`);
         } catch (err) {
             console.error('Assign enclosure failed:', err);
             showModalMessageRef.current('Error', `Failed to assign animal: ${err.response?.data?.message || err.message}`);
@@ -1178,7 +1177,6 @@ useEffect(() => {
 
         try {
             await axios.patch(`${API_BASE_URL}/enclosures/assign-animal`, { animalId_public: animalIdPublic, enclosureId: null }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-            showModalMessageRef.current('Success', `${animalToUnassign.name} has been unassigned.`);
         } catch (err) {
             console.error('Unassign enclosure failed:', err);
             showModalMessageRef.current('Error', `Failed to unassign animal: ${err.response?.data?.message || err.message}`);
