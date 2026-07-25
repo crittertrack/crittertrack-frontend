@@ -1,5 +1,6 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { X, Home, Cat, Trash2, Save, Loader2 } from 'lucide-react';
+import axios from 'axios';
 import AnimalImage from '../components/shared/AnimalImage';
 
 const EnclosureModal = ({
@@ -20,15 +21,35 @@ const EnclosureModal = ({
     setNewEnclosureTag,
     handleEnclosureTagAdd,
     handleEnclosureTagRemove,
-    allSpecies,
     handleEnclosureSpeciesLabelAdd,
     handleEnclosureSpeciesLabelRemove,
     newCleaningTaskName,
     setNewCleaningTaskName,
     newCleaningTaskFreq,
     setNewCleaningTaskFreq,
+    API_BASE_URL,
+    authToken,
 }) => {
     const modalRef = useRef(null);
+    const [allSpecies, setAllSpecies] = useState([]);
+
+    useEffect(() => {
+        const fetchAllSpecies = async () => {
+            if (isOpen && authToken) {
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/species/all-names`, {
+                        headers: { Authorization: `Bearer ${authToken}` },
+                    });
+                    if (response.data && Array.isArray(response.data)) {
+                        setAllSpecies(response.data.sort());
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch all species list:", error);
+                }
+            }
+        };
+        fetchAllSpecies();
+    }, [isOpen, authToken, API_BASE_URL]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
