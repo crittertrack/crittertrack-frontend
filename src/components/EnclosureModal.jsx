@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { X, Home, Cat } from 'lucide-react';
+import { X, Home, Cat, Trash2, Save, Loader2 } from 'lucide-react';
 import AnimalImage from '../components/shared/AnimalImage';
 
 const EnclosureModal = ({
@@ -10,6 +10,7 @@ const EnclosureModal = ({
     editingEnclosureId,
     setEditingEnclosureId,
     handleSaveEnclosure,
+    handleDeleteEnclosure,
     enclosureSaving,
     enclosureImageFile,
     setEnclosureImageFile,
@@ -255,18 +256,30 @@ const EnclosureModal = ({
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-2">
-                        <button onClick={onClose}
-                            className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
-                            Cancel
-                        </button>
-                        <button onClick={() => {
-                            console.log('[EnclosureModal] Save Changes button clicked. Form data:', enclosureFormData);
-                            handleSaveEnclosure();
-                        }} disabled={enclosureSaving || !enclosureFormData.name.trim()}
-                            className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50">
-                            {enclosureSaving ? 'Saving...' : (editingEnclosureId ? 'Save Changes' : 'Create Enclosure')}
-                        </button>
+                    <div className="flex justify-between items-center gap-2 pt-2">
+                        <div>
+                            {editingEnclosureId && (
+                                <button
+                                    type="button"
+                                    onClick={handleDeleteEnclosure}
+                                    className="text-xs px-3 py-1.5 border border-red-300 rounded-lg text-red-600 hover:bg-red-50 flex items-center gap-1.5"
+                                >
+                                    <Trash2 size={14} />
+                                    Delete
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button onClick={onClose}
+                                className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button onClick={handleSaveEnclosure} disabled={enclosureSaving || !enclosureFormData.name.trim()}
+                                className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-1.5">
+                                {enclosureSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                                {editingEnclosureId ? 'Save Changes' : 'Create Enclosure'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

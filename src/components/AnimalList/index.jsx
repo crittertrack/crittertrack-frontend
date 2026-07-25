@@ -664,6 +664,25 @@ const handleArchive = useCallback(async (animalToArchive) => {
         } finally { setEnclosureSaving(false); }
     }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, enclosureSaving, handleCloseEnclosureModal]);
     
+    const handleDeleteEnclosure = useCallback(async () => {
+        if (!editingEnclosureId) return;
+
+        if (!window.confirm('Are you sure you want to permanently delete this enclosure? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            await axios.delete(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessageRef.current('Success', 'Enclosure deleted.');
+            fetchEnclosures();
+            handleCloseEnclosureModal();
+        } catch (err) {
+            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to delete enclosure.');
+        }
+    }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, handleCloseEnclosureModal]);
+
     const getSpeciesCategory = (species) => {
         if (!species) return 'Other';
         const s = species.toLowerCase();
@@ -5024,6 +5043,7 @@ useEffect(() => {
                 editingEnclosureId={editingEnclosureId}
                 setEditingEnclosureId={setEditingEnclosureId}
                 handleSaveEnclosure={handleSaveEnclosure}
+                handleDeleteEnclosure={handleDeleteEnclosure}
                 enclosureSaving={enclosureSaving}
                 enclosureImageFile={enclosureImageFile}
                 setEnclosureImageFile={setEnclosureImageFile}
