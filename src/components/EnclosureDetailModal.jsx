@@ -125,7 +125,6 @@ const EnclosureDetailModal = ({
     loadingAnimals,
     authToken,
     API_BASE_URL,
-    showModalMessage,
     onRefresh,
     onViewAnimal,
     onEditEnclosure,
@@ -214,7 +213,6 @@ const EnclosureDetailModal = ({
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            showModalMessage('Success', 'Task completed!');
             onRefresh?.();
         } catch (err) {
             console.error('Failed to update task:', err);
@@ -712,7 +710,13 @@ const EnclosureDetailModal = ({
                     <AnimalPickerModal
                         animals={assignableAnimals}
                         onSelect={(animal) => {
-                            onAssignAnimal(animal, enclosure);
+                            const willExceedCapacity = capacity > 0 && currentAnimals + 1 > capacity;
+                            const confirmed = !willExceedCapacity || window.confirm(`This enclosure has a capacity of ${capacity}, but will have ${currentAnimals + 1} occupants. Are you sure you want to assign this animal?`);
+
+                            if (confirmed) {
+                                onAssignAnimal(animal, enclosure);
+                            }
+
                             setShowAnimalPicker(false);
                         }}
                         onClose={() => setShowAnimalPicker(false)}
