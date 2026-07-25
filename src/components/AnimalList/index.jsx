@@ -765,7 +765,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
             fetchLocations();
             fetchEnclosures(); // Refetch enclosures as their location might be cleared
         } catch (err) {
-            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to delete location.');
+            showModalMessageRef.current('Error', err.response?.data?.message || `Failed to delete location: ${err.message}`);
         } finally {
             setLocationSaving(false);
         }
