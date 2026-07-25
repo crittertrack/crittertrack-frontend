@@ -20,14 +20,21 @@ const TABS = [
 
 const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => {
     const [search, setSearch] = useState('');
+    const [genderFilter, setGenderFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
 
     const filteredAnimals = animals.filter(animal => {
+        if (genderFilter && animal.gender !== genderFilter) return false;
+        if (statusFilter && animal.status !== statusFilter) return false;
+
         if (!search) return true;
+
         const searchTerm = search.toLowerCase();
         return (
             animal.name?.toLowerCase().includes(searchTerm) ||
             animal.id_public?.toLowerCase().includes(searchTerm) ||
-            animal.species?.toLowerCase().includes(searchTerm)
+            animal.species?.toLowerCase().includes(searchTerm) ||
+            animal.status?.toLowerCase().includes(searchTerm)
         );
     });
 
@@ -40,18 +47,39 @@ const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => 
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800 dark:text-dark-text-muted dark:hover:text-dark-text"><X size={22} /></button>
                 </div>
 
-                {/* Search */}
+                {/* Search & Filters */}
                 <div className="p-4 border-b dark:border-dark-border flex-shrink-0">
-                    <div className="relative">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search by name, ID, or species..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            autoFocus
-                            className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-sm bg-white dark:bg-dark-surface-hover focus:ring-2 focus:ring-primary focus:border-transparent"
-                        />
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <div className="relative flex-grow">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search by name, ID, species, or status..."
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                autoFocus
+                                className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-sm bg-white dark:bg-dark-surface-hover focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
+                        </div>
+                        <div className="flex gap-2">
+                            <select value={genderFilter} onChange={e => setGenderFilter(e.target.value)} className="w-full sm:w-32 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-sm bg-white dark:bg-dark-surface-hover focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">All Genders</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Intersex">Intersex</option>
+                                <option value="Unknown">Unknown</option>
+                            </select>
+                            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full sm:w-32 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-sm bg-white dark:bg-dark-surface-hover focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">All Statuses</option>
+                                <option value="Available">Available</option>
+                                <option value="Pet">Pet</option>
+                                <option value="Growout">Growout</option>
+                                <option value="Breeder">Breeder</option>
+                                <option value="Booked">Booked</option>
+                                <option value="Retired">Retired</option>
+                                <option value="Unknown">Unknown</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
