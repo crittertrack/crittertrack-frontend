@@ -29,7 +29,11 @@ const SpeciesSelectionModal = ({
             if (!isOpen) return;
             setLoading(true);
             try {
-                const response = await axios.get(`${API_BASE_URL}/species`);
+                const config = {};
+                if (authToken) {
+                    config.headers = { Authorization: `Bearer ${authToken}` };
+                }
+                const response = await axios.get(`${API_BASE_URL}/species`, config);
 
                 const contentType = response.headers['content-type'];
                 if (!contentType || !contentType.includes('application/json')) {
@@ -38,16 +42,29 @@ const SpeciesSelectionModal = ({
                     return;
                 }
 
-                if (response.data && Array.isArray(response.data.species)) {
-                    setAllSpecies(response.data.species);
-                } else if (response.data && Array.isArray(response.data)) {
-                    setAllSpecies(response.data.map(item => typeof item === 'string' ? { name: item, category: 'Other' } : item));
+                let speciesData = response.data;
+
+                // Handle { species: [...] } wrapper
+                if (speciesData && typeof speciesData === 'object' && !Array.isArray(speciesData)) {
+                    speciesData = speciesData.species || speciesData.results || speciesData.data || [];
+                }
+
+                if (Array.isArray(speciesData)) {
+                    setAllSpecies(speciesData.map(item =>
+                        typeof item === 'string'
+                            ? { name: item, category: 'Other' }
+                            : item
+                    ));
                 } else {
                     console.warn("Species data not found or in unexpected format:", response.data);
                     setAllSpecies([]);
                 }
             } catch (error) {
                 console.error("Failed to fetch species list:", error);
+                // Log more details for debugging
+                if (error.response) {
+                    console.error("Response status:", error.response.status, "data:", error.response.data);
+                }
                 setAllSpecies([]);
             } finally {
                 setLoading(false);
