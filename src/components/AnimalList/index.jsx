@@ -586,6 +586,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
     const [newCleaningTaskFreq, setNewCleaningTaskFreq] = useState('');
     
+    const isSavingEnclosureRef = useRef(false);
     const [showEnclosureModal, setShowEnclosureModal] = useState(false); // State for the new modal
     // New states for Enclosures tab overhaul
     const [enclosureSearch, setEnclosureSearch] = useState('');
@@ -628,15 +629,11 @@ const handleArchive = useCallback(async (animalToArchive) => {
     }, []); // State setters are stable, so this function is also stable.
 
     const handleSaveEnclosure = useCallback(async () => {
-         // Check saving state first to prevent multiple submissions
-        if (enclosureSaving) {
-            console.log('[AnimalList] handleSaveEnclosure: Already saving, returning.');
-            return;
-        }
+        if (isSavingEnclosureRef.current) return;
+        isSavingEnclosureRef.current = true;
 
            // Set saving state immediately
         setEnclosureSaving(true);
-        console.log('[AnimalList] handleSaveEnclosure called. Saving: true');
           const dataToSave = { ...enclosureFormData };
         const imageFileToSave = enclosureImageFile;
         const enclosureIdToSave = editingEnclosureId;
@@ -644,6 +641,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
         if (!dataToSave || !dataToSave.name || !dataToSave.name.trim()) {
             showModalMessageRef.current('Validation Error', 'Enclosure name cannot be empty.');
             setEnclosureSaving(false); // Reset saving state if validation fails
+            isSavingEnclosureRef.current = false;
             return;
         }
         try {
@@ -703,8 +701,11 @@ const handleArchive = useCallback(async (animalToArchive) => {
             fetchEnclosures();
         } catch (err) {
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save enclosure');
-        } finally { setEnclosureSaving(false); }
-    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, enclosureSaving, handleCloseEnclosureModal]);
+        } finally {
+            setEnclosureSaving(false);
+            isSavingEnclosureRef.current = false;
+        }
+    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, handleCloseEnclosureModal]);
     
     const handleDeleteEnclosure = useCallback(async () => {
         if (!editingEnclosureId) return;

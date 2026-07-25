@@ -136,7 +136,7 @@ const EnclosureModal = ({
                                         onChange={e => setEnclosureFormData(p => ({ ...p, buildingId: e.target.value, roomId: '' }))}
                                         className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
                                         <option value="">No Building</option>
-                                        {locations.filter(l => l.type === 'building').map(building => (
+                                        {Array.isArray(locations) && locations.filter(l => l.type === 'building').map(building => (
                                             <option key={building._id} value={building._id}>{building.name}</option>
                                         ))}
                                     </select>
@@ -152,7 +152,7 @@ const EnclosureModal = ({
                                     className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface disabled:bg-gray-100 dark:disabled:bg-dark-border"
                                 >
                                     <option value="">No Room</option>
-                                    {enclosureFormData.buildingId && locations
+                                    {enclosureFormData.buildingId && Array.isArray(locations) && locations
                                         .filter(l => l.type === 'room' && l.parentLocationId === enclosureFormData.buildingId)
                                         .map(room => (
                                             <option key={room._id} value={room._id}>{room.name}</option>
