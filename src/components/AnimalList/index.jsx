@@ -5,6 +5,7 @@ import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureModal from '../EnclosureModal';
 import EnclosureDetailModal from '../EnclosureDetailModal';
+import LocationManagerModal from '../LocationManagerModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
@@ -179,6 +180,7 @@ const AnimalList = ({
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
+
 
     // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
     // so that switching accounts never leaks one user's collections/prefs into another's.
@@ -565,7 +567,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [healthEncFormVisible, setHealthEncFormVisible] = useState(false);
     const [enclosureFormData, setEnclosureFormData] = useState({
         name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
-        purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+        purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
         lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
         cleaningTasks: []
     });
@@ -585,12 +587,14 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureSearch, setEnclosureSearch] = useState('');
     const [enclosureTypeFilter, setEnclosureTypeFilter] = useState('');
     const [enclosureStatusFilter, setEnclosureStatusFilter] = useState(''); // 'occupied' | 'empty'
+    const [enclosureLocationFilter, setEnclosureLocationFilter] = useState('');
 
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [enclosureAnimals, setEnclosureAnimals] = useState([]);
     const [loadingAnimals, setLoadingAnimals] = useState(false);
+    const [locations, setLocations] = useState([]);
     
     const fetchEnclosures = useCallback(async () => {
         try {
@@ -602,6 +606,16 @@ const handleArchive = useCallback(async (animalToArchive) => {
     }, [authToken]);
     useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
 
+    const fetchLocations = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/locations`, { headers: { Authorization: `Bearer ${authToken}` } });
+            setLocations(res.data || []);
+        } catch (err) { console.error('Failed to fetch locations', err); }
+    }, [authToken, API_BASE_URL]);
+    useEffect(() => { fetchLocations(); }, [fetchLocations]);
+
+
     // Fetch archived + sold/transferred animals from API
     const handleCloseEnclosureModal = useCallback(() => {
         console.log('[AnimalList] EnclosureModal onClose triggered.');
@@ -609,7 +623,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
         setEditingEnclosureId(null);
         setEnclosureFormData({
             name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
-            purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+            purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
             lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
             cleaningTasks: []
         });
@@ -639,8 +653,9 @@ const handleArchive = useCallback(async (animalToArchive) => {
         try {
             const payload = {
                 name: dataToSave.name.trim(),
-                enclosureType: dataToSave.enclosureType?.trim(),
+                locationId: dataToSave.locationId || null,
                 purpose: dataToSave.purpose,
+                purposeDescription: dataToSave.purposeDescription?.trim(),
                 location: dataToSave.location?.trim(),
                 dimensions: {
                     length: dataToSave.length ? Number(dataToSave.length) : null,
@@ -713,6 +728,52 @@ const handleArchive = useCallback(async (animalToArchive) => {
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to delete enclosure.');
         }
     }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, handleCloseEnclosureModal]);
+
+    const getLocationPath = useCallback((locationId, allLocations) => {
+        if (!locationId || !allLocations.length) return '';
+        const locationMap = new Map(allLocations.map(l => [l._id, l]));
+        const path = [];
+        let current = locationMap.get(locationId);
+        while (current) {
+            path.unshift(current.name);
+            current = locationMap.get(current.parentLocationId);
+        }
+        return path.join(' / ');
+    }, []);
+
+    // --- Location Management ---
+    const [showLocationManager, setShowLocationManager] = useState(false);
+    const [locationSaving, setLocationSaving] = useState(false);
+
+    const handleSaveLocation = async (id, data) => {
+        setLocationSaving(true);
+        try {
+            if (id) {
+                // Ensure parentLocationId is null if it's an empty string
+                await axios.put(`${API_BASE_URL}/locations/${id}`, { ...data, parentLocationId: data.parentLocationId || null }, { headers: { Authorization: `Bearer ${authToken}` } });
+            } else {
+                await axios.post(`${API_BASE_URL}/locations`, data, { headers: { Authorization: `Bearer ${authToken}` } });
+            }
+            fetchLocations();
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to save location.');
+        } finally {
+            setLocationSaving(false);
+        }
+    };
+
+    const handleDeleteLocation = async (id) => {
+        setLocationSaving(true);
+        try {
+            await axios.delete(`${API_BASE_URL}/locations/${id}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            fetchLocations();
+            fetchEnclosures(); // Refetch enclosures as their location might be cleared
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to delete location.');
+        } finally {
+            setLocationSaving(false);
+        }
+    };
 
     // Base list for "active" animals (not sold or archived) for dashboard counts.
     const activeAnimalsForDashboard = useMemo(() => {
@@ -1107,7 +1168,9 @@ useEffect(() => {
             setEnclosureFormData({
                 name: enclosure.name || '',
                 enclosureType: enclosure.enclosureType || enclosure.roomType || '',
+                locationId: enclosure.locationId || '',
                 purpose: enclosure.purpose || 'general',
+                purposeDescription: enclosure.purposeDescription || '',
                 location: enclosure.location || '',
                 capacity: enclosure.capacity || '',
                 length, width, height, dimensionsUnit,
@@ -1131,8 +1194,8 @@ useEffect(() => {
         } else {
             // Add new mode
             setEnclosureFormData({
-                name: '', enclosureType: '', location: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
-                purpose: 'general', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+                name: '', enclosureType: '', locationId: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+                purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
                 lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
                 cleaningTasks: []
             });
@@ -1192,24 +1255,48 @@ useEffect(() => {
         setLoadingAnimals(false); // Not loading from API anymore
 
         const enclosureId = enclosure._id || enclosure.id;
-        const occupants = allAnimalsRaw.filter(a => a.enclosureId === enclosureId);
+        const locationName = locations.find(l => l._id === enclosure.locationId)?.name;
+        const enrichedEnclosure = { ...enclosure, locationName };
+
+        setSelectedEnclosure(enrichedEnclosure);
+
+        const occupants = allAnimalsRaw.filter(a => a.enclosureId === enclosureId); // This is correct
         setEnclosureAnimals(occupants);
     };
 
     const assignableAnimals = useMemo(() => {
         if (!selectedEnclosure) return [];
+        
         const suitableSpecies = new Set(selectedEnclosure.speciesLabels || []);
-        const unassignableStatuses = ['Deceased', 'Rehomed', 'Sold']; // 'Sold' is not in options but good to guard against
+        const unassignableStatuses = ['Deceased', 'Rehomed', 'Sold'];
 
-        // Filter for animals that are not already in an enclosure, are not transferred/archived,
-        // are not deceased/rehomed, and match the enclosure's suitable species (if any).
-        return allAnimalsRaw.filter(a => 
+        let filteredAnimals = allAnimalsRaw.filter(a => 
             !a.enclosureId && 
             !a.isViewOnly &&
             !a.archived &&
-            !unassignableStatuses.includes(a.status) &&
-            (suitableSpecies.size === 0 || suitableSpecies.has(a.species)) 
+            !unassignableStatuses.includes(a.status)
         );
+
+        // Purpose-based filtering
+        switch (selectedEnclosure.purpose) {
+            case 'reproduction': // Nursery / Breeding
+                filteredAnimals = filteredAnimals.filter(a => a.isPlannedMating || a.isInMating || a.isPregnant || a.isNursing);
+                break;
+            case 'medical':
+                filteredAnimals = filteredAnimals.filter(a => a.isInTreatment === true || a.isQuarantine === true);
+                break;
+            case 'general':
+            default:
+                // No additional animal state filtering for 'general'
+                break;
+        }
+
+        // Finally, filter by suitable species if specified
+        if (suitableSpecies.size > 0) {
+            filteredAnimals = filteredAnimals.filter(a => suitableSpecies.has(a.species));
+        }
+
+        return filteredAnimals;
     }, [allAnimalsRaw, selectedEnclosure]);
 
 
@@ -2798,12 +2885,16 @@ useEffect(() => {
                 filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length === 0);
             }
         }
+        if (enclosureLocationFilter) {
+            filteredEnclosures = filteredEnclosures.filter(e => e.locationId === enclosureLocationFilter);
+        }
 
         // --- Components ---
         const EnclosureCard = ({ enclosure }) => {
             const occupants = enclosureAnimalMap[enclosure._id] || [];
             const occupancyStatus = occupants.length > 0 ? 'Occupied' : 'Empty';
             const capacity = parseInt(enclosure.capacity, 10);
+            const locationName = getLocationPath(enclosure.locationId, locations);
             const occupancyPercentage = capacity > 0 ? (occupants.length / capacity) * 100 : 0;
 
             const tempRange = (enclosure.tempMin != null && enclosure.tempMax != null)
@@ -2847,7 +2938,7 @@ useEffect(() => {
                         <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
                             {enclosure.enclosureType && <span className="flex items-center gap-1"><Home size={12} /> {enclosure.enclosureType}</span>}
                             {dimensions && <span className="flex items-center gap-1"><Ruler size={12} /> {dimensions}</span>}
-                            {enclosure.location && <span className="flex items-center gap-1"><MapPin size={12} /> {enclosure.location}</span>}
+                            {locationName && <span className="flex items-center gap-1"><MapPin size={12} /> {locationName}</span>}
                         </div>
 
                         {/* Stats Row */}
@@ -2918,6 +3009,25 @@ useEffect(() => {
                         <option value="occupied">Occupied</option>
                         <option value="empty">Empty</option>
                     </select>
+                    <select
+                        value={enclosureLocationFilter}
+                        onChange={e => setEnclosureLocationFilter(e.target.value)}
+                        className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
+                    >
+                        <option value="">All Locations</option>
+                        {locations.filter(l => !l.parentLocationId).map(building => (
+                            <optgroup key={building._id} label={building.name}>
+                                <option value={building._id}>-- {building.name} (Building) --</option>
+                                {locations.filter(r => r.parentLocationId === building._id).map(room => (
+                                    <option key={room._id} value={room._id}>{room.name}</option>
+                                ))}
+                            </optgroup>
+                        ))}
+                    </select>
+                    <button onClick={() => setShowLocationManager(true)} className="p-2 text-sm border border-gray-300 rounded-lg flex items-center gap-1.5">
+                        <Settings size={14} />
+                        Manage Locations
+                    </button>
                 </div>
 
                 {/* Main Content */}
@@ -5063,8 +5173,9 @@ useEffect(() => {
                 setEnclosureImagePreview={setEnclosureImagePreview} newEnclosureTag={newEnclosureTag} setNewEnclosureTag={setNewEnclosureTag} handleEnclosureTagAdd={handleEnclosureTagAdd} handleEnclosureTagRemove={handleEnclosureTagRemove}
                 speciesOptions={speciesOptionsForEnclosureModal}
                 handleEnclosureSpeciesLabelAdd={handleEnclosureSpeciesLabelAdd} handleEnclosureSpeciesLabelRemove={handleEnclosureSpeciesLabelRemove}
+                locations={locations} onManageLocations={() => setShowLocationManager(true)}
                 newCleaningTaskName={newCleaningTaskName} setNewCleaningTaskName={setNewCleaningTaskName} newCleaningTaskFreq={newCleaningTaskFreq} setNewCleaningTaskFreq={setNewCleaningTaskFreq}
-            /> {/* This was the missing closing tag for the EnclosureModal component */}
+            />
             {showDetailModal && selectedEnclosure && (
                 <EnclosureDetailModal
                     isOpen={showDetailModal}
@@ -5081,6 +5192,16 @@ useEffect(() => {
                     onEditEnclosure={(enclosureToEdit) => { setShowDetailModal(false); openEnclosureModal(enclosureToEdit); }}
                     onAssignAnimal={handleAssignAnimalInModal}
                     onUnassignAnimal={handleUnassignAnimalInModal}
+                />
+            )}
+            {showLocationManager && (
+                <LocationManagerModal
+                    isOpen={showLocationManager}
+                    onClose={() => setShowLocationManager(false)}
+                    locations={locations}
+                    onSave={handleSaveLocation}
+                    onDelete={handleDeleteLocation}
+                    saving={locationSaving}
                 />
             )}
             </div>

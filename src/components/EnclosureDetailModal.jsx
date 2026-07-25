@@ -365,10 +365,24 @@ const EnclosureDetailModal = ({
                                             <span className="text-gray-500 dark:text-dark-text-muted">Purpose</span>
                                             <span className="text-gray-800 dark:text-dark-text capitalize">{enclosure.purpose || 'General'}</span>
                                         </div>
+                                        {enclosure.purposeDescription && (
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-gray-500 dark:text-dark-text-muted">Description</span>
+                                                <span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.purposeDescription}</span>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Location</span>
-                                            <span className="text-gray-800 dark:text-dark-text">{enclosure.location || '—'}</span>
+                                            <span className="text-gray-800 dark:text-dark-text">{enclosure.locationName || '—'}</span>
                                         </div>
+                                        {enclosure.location?.address && (
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border">
+                                                <span className="text-gray-500 dark:text-dark-text-muted">Address</span>
+                                                <span className="text-gray-800 dark:text-dark-text text-right ml-2 text-xs">
+                                                    {Object.values(enclosure.location.address).filter(Boolean).join(', ')}
+                                                </span>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Dimensions</span>
                                             <span className="text-gray-800 dark:text-dark-text">

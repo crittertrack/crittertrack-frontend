@@ -29,6 +29,8 @@ const EnclosureModal = ({
     setNewCleaningTaskFreq,
     API_BASE_URL,
     authToken,
+    locations = [],
+    onManageLocations,
     showModalMessage,
     speciesOptions = [], // Receive species options from parent
 }) => {
@@ -118,14 +120,33 @@ const EnclosureModal = ({
                                     onChange={e => setEnclosureFormData(p => ({ ...p, purpose: e.target.value }))}
                                     className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
                                     <option value="general">General</option>
-                                    <option value="nursery">Nursery / Breeding</option>
-                                    <option value="quarantine">Quarantine</option>
-                                    <option value="isolation">Medical / Isolation</option>
+                                    <option value="reproduction">Nursery / Breeding</option>
+                                    <option value="medical">Medical</option>
                                 </select>
                             </div>
                             <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Purpose Description</label>
+                                <input type="text" value={enclosureFormData.purposeDescription || ''} onChange={e => setEnclosureFormData(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                            </div>
+                            <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Location</label>
-                                <input type="text" value={enclosureFormData.location} onChange={e => setEnclosureFormData(p => ({ ...p, location: e.target.value }))} placeholder="e.g. Reptile Room" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                <div className="flex items-center gap-2">
+                                    <select
+                                        value={enclosureFormData.locationId || ''}
+                                        onChange={e => setEnclosureFormData(p => ({ ...p, locationId: e.target.value }))}
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
+                                        <option value="">No Location</option>
+                                        {locations.filter(l => !l.parentLocationId).map(building => (
+                                            <optgroup key={building._id} label={building.name}>
+                                                <option value={building._id}>-- {building.name} (Building) --</option>
+                                                {locations.filter(r => r.parentLocationId === building._id).map(room => (
+                                                    <option key={room._id} value={room._id}>{room.name}</option>
+                                                ))}
+                                            </optgroup>
+                                        ))}
+                                    </select>
+                                    <button type="button" onClick={onManageLocations} className="p-2 text-sm bg-gray-200 rounded-lg" title="Manage Locations">+</button>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Dimensions</label>
