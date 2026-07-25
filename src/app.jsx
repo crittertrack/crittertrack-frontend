@@ -2537,6 +2537,8 @@ const App = () => {
                   setSpeciesSearchTerm={setSpeciesSearchTerm}
                   speciesCategoryFilter={speciesCategoryFilter}
                   setSpeciesCategoryFilter={setSpeciesCategoryFilter}
+                  locations={locations}
+                  fetchLocations={fetchLocations}
                   setShowImageModal={setShowImageModal}
                   setEnlargedImageUrl={setEnlargedImageUrl}
                   showTransferModal={showTransferModal}

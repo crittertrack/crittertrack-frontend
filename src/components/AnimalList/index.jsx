@@ -176,7 +176,9 @@ const AnimalList = ({
     breedingLineDefs = [],
     animalBreedingLines = {},
     onBreedingLinesUpdate,
-    speciesOptions = []
+    speciesOptions = [],
+    locations,
+    fetchLocations
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
@@ -596,7 +598,6 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [enclosureAnimals, setEnclosureAnimals] = useState([]);
     const [loadingAnimals, setLoadingAnimals] = useState(false);
-    const [locations, setLocations] = useState([]);
     
     const fetchEnclosures = useCallback(async () => {
         try {
@@ -607,15 +608,6 @@ const handleArchive = useCallback(async (animalToArchive) => {
         } catch (err) { console.error('[fetchEnclosures]', err); }
     }, [authToken]);
     useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
-
-    const fetchLocations = useCallback(async () => {
-        if (!authToken) return;
-        try {
-            const res = await axios.get(`${API_BASE_URL}/locations`, { headers: { Authorization: `Bearer ${authToken}` } });
-            setLocations(res.data || []);
-        } catch (err) { console.error('Failed to fetch locations', err); }
-    }, [authToken, API_BASE_URL]);
-    useEffect(() => { fetchLocations(); }, [fetchLocations]);
 
 
     // Fetch archived + sold/transferred animals from API
@@ -749,7 +741,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [showLocationManager, setShowLocationManager] = useState(false);
     const [locationSaving, setLocationSaving] = useState(false);
 
-    const handleSaveLocation = async (id, data) => {
+    const handleSaveLocation = useCallback(async (id, data) => {
         setLocationSaving(true);
         try {
             if (id) {
@@ -760,24 +752,24 @@ const handleArchive = useCallback(async (animalToArchive) => {
             }
             fetchLocations();
         } catch (err) {
-            showModalMessage('Error', err.response?.data?.message || 'Failed to save location.');
+            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to save location.');
         } finally {
             setLocationSaving(false);
         }
-    };
+    }, [authToken, API_BASE_URL, fetchLocations]);
 
-    const handleDeleteLocation = async (id) => {
+    const handleDeleteLocation = useCallback(async (id) => {
         setLocationSaving(true);
         try {
             await axios.delete(`${API_BASE_URL}/locations/${id}`, { headers: { Authorization: `Bearer ${authToken}` } });
             fetchLocations();
             fetchEnclosures(); // Refetch enclosures as their location might be cleared
         } catch (err) {
-            showModalMessage('Error', err.response?.data?.message || 'Failed to delete location.');
+            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to delete location.');
         } finally {
             setLocationSaving(false);
         }
-    };
+    }, [authToken, API_BASE_URL, fetchLocations, fetchEnclosures]);
 
     // Base list for "active" animals (not sold or archived) for dashboard counts.
     const activeAnimalsForDashboard = useMemo(() => {
