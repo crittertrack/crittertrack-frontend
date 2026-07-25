@@ -29,6 +29,7 @@ const EnclosureModal = ({
     setNewCleaningTaskFreq,
     API_BASE_URL,
     authToken,
+    showModalMessage,
 }) => {
     const modalRef = useRef(null);
     const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
