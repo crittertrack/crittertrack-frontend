@@ -13,6 +13,7 @@ interface Animal {
     motherId_public?: string; // Alias for damId_public
     isOwned?: boolean;
     creatorId_public?: string;
+    vetVisits?: any;
     // Add any other properties that are commonly used or expected from the API
 }
 
@@ -218,6 +219,11 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             if (!(data instanceof FormData) && !data.creatorId_public) {
                 // Note: userProfile should be passed as parameter or accessed from context
                 // For now, relying on backend to set it from auth token
+            }
+
+            // Fix for validation error where empty string is sent for array fields
+            if (!(data instanceof FormData) && data.vetVisits === '') {
+                data.vetVisits = [];
             }
 
             // Make the API request
