@@ -408,6 +408,9 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                                 <option value="">Any Gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
+                                <option value="Intersex">Intersex</option>
+                                <option value="Mixed">Mixed</option>
+                                <option value="Unknown">Unknown</option>
                             </select>
                         </div>
                         <div>

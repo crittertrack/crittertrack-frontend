@@ -4970,7 +4970,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Male', 'Intersex', 'Unknown']}
+                    requiredGender={['Male', 'Intersex', 'Mixed', 'Unknown']}
                     species={formData.species || undefined}
                 />
             )}
@@ -4988,7 +4988,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Female', 'Intersex', 'Unknown']}
+                    requiredGender={['Female', 'Intersex', 'Mixed', 'Unknown']}
                     species={formData.species || undefined}
                 />
             )}
@@ -5023,7 +5023,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Male', 'Intersex', 'Unknown']}
+                    requiredGender={['Male', 'Intersex', 'Mixed', 'Unknown']}
                     species={matingData.species || undefined}
                 />
             )}
@@ -5041,7 +5041,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Female', 'Intersex', 'Unknown']}
+                    requiredGender={['Female', 'Intersex', 'Mixed', 'Unknown']}
                     species={matingData.species || undefined}
                 />
             )}

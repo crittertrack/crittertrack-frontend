@@ -2774,9 +2774,11 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 <div className="space-y-2">
                   {myAnimals
                     .filter(animal => {
-                      // Filter by gender
-                      if (selectingForParent === 'parent1' && animal.gender !== 'Male') return false;
-                      if (selectingForParent === 'parent2' && animal.gender !== 'Female') return false;
+                      // Filter by gender, allowing for intersex, mixed, and unknown
+                      const sireGenders = ['Male', 'Intersex', 'Mixed', 'Unknown'];
+                      const damGenders = ['Female', 'Intersex', 'Mixed', 'Unknown'];
+                      if (selectingForParent === 'parent1' && !sireGenders.includes(animal.gender)) return false;
+                      if (selectingForParent === 'parent2' && !damGenders.includes(animal.gender)) return false;
                       
                       // Filter by selected species
                       if (animal.species !== selectedSpecies) return false;

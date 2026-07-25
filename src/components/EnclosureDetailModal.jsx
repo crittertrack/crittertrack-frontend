@@ -67,6 +67,7 @@ const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => 
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                                 <option value="Intersex">Intersex</option>
+                                <option value="Mixed">Mixed</option>
                                 <option value="Unknown">Unknown</option>
                             </select>
                             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full sm:w-32 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-sm bg-white dark:bg-dark-surface-hover focus:ring-2 focus:ring-primary focus:border-transparent">

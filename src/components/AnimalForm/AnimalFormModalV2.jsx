@@ -1139,7 +1139,7 @@ const AnimalFormModalV2 = ({
     showModalMessage,
     userProfile,
     speciesConfigs,
-    GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'],
+    GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'],
     STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
