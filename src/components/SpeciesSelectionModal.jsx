@@ -46,7 +46,7 @@ const SpeciesSelectionModal = ({
                 if (authToken) {
                     config.headers = { Authorization: `Bearer ${authToken}` };
                 }
-                const response = await axios.get(`${API_BASE_URL}/species`, config);
+                const response = await axios.get(`${API_BASE_URL}/public/marketplace/species`, config);
 
                 const contentType = response.headers['content-type'];
                 if (!contentType || !contentType.includes('application/json')) {
@@ -245,4 +245,3 @@ const SpeciesSelectionModal = ({
 };
 
 export default SpeciesSelectionModal;
-
