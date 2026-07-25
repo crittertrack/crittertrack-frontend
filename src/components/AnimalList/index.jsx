@@ -1201,9 +1201,17 @@ useEffect(() => {
     const assignableAnimals = useMemo(() => {
         if (!selectedEnclosure) return [];
         const suitableSpecies = new Set(selectedEnclosure.speciesLabels || []);
+        const unassignableStatuses = ['Deceased', 'Rehomed', 'Sold']; // 'Sold' is not in options but good to guard against
+
+        // Filter for animals that are not already in an enclosure, are not transferred/archived,
+        // are not deceased/rehomed, and match the enclosure's suitable species (if any).
         return allAnimalsRaw.filter(a => 
             !a.enclosureId && 
             (suitableSpecies.size === 0 || suitableSpecies.has(a.species))
+            !a.isViewOnly &&
+            !a.archived &&
+            !unassignableStatuses.includes(a.status) &&
+            (suitableSpecies.size === 0 || suitableSpecies.has(a.species)) 
         );
     }, [allAnimalsRaw, selectedEnclosure]);
 
