@@ -57,7 +57,7 @@ const EnclosureModal = ({
     useEffect(() => {
         if (isOpen && isSpeciesModalOpen && !speciesLoading && speciesOptions.length === 0) {
             setSpeciesLoading(true);
-            axios.get(`${API_BASE_URL}/species`, {
+            axios.get(`${API_BASE_URL}/public/species`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             })
                 .then(response => {

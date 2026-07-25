@@ -1687,7 +1687,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         .map(([locus, alleles]) => `${locus}: ${alleles}`)
         .join(', ');
 
-      const response = await fetch(`${API_BASE_URL}/api/genetics-feedback`, {
+      const response = await fetch(`${API_BASE_URL}/genetics-feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
