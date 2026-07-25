@@ -3,13 +3,11 @@ import axios from 'axios';
 import NotificationBar from '../Notifications/NotificationBar';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
-import EnclosureModal from '../EnclosureModal';
-import EnclosureDetailModal from '../EnclosureDetailModal';
-import LocationManagerModal from './LocationManagerModal'; // Import new modal
+import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
-    Bean, Bell, Bird, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
+    Bean, Bell, Bird, Building, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart, LampCeiling, BarChart2, Thermometer,
     Package, Plus, PlusCircle, RefreshCw, Ruler, Save, Search, ShoppingBag, SlidersHorizontal,
@@ -17,6 +15,9 @@ import {
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
+import EnclosureModal from '../EnclosureModal';
+import LocationManagerModal from './LocationManagerModal';
+
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
 
