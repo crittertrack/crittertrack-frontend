@@ -300,6 +300,24 @@ const App = () => {
     const [speciesConfigs, setSpeciesConfigs] = useState({});
     const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
     const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('All');
+    const [locations, setLocations] = useState([]);
+
+    const fetchLocations = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/locations`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setLocations(res.data || []);
+        } catch (err) {
+            console.error('[fetchLocations]', err);
+            setLocations([]);
+        }
+    }, [authToken, API_BASE_URL]);
+
+    useEffect(() => {
+        if (authToken) fetchLocations();
+    }, [authToken, fetchLocations]);
     
     // Detect mobile/app environment
     React.useEffect(() => {
