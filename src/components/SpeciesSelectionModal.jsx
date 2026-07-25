@@ -23,7 +23,9 @@ const SpeciesSelectionModal = ({
                 const response = await axios.get(`${API_BASE_URL}/species/all`, {
                     headers: { Authorization: `Bearer ${authToken}` },
                 });
-                setAllSpecies(response.data || []);
+                if (response.data && Array.isArray(response.data)) {
+                    setAllSpecies(response.data);
+                }
             } catch (error) {
                 console.error("Failed to fetch species list:", error);
                 setAllSpecies([]);
