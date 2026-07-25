@@ -1,8 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { X, Home, Cat, Trash2, Save, Loader2, Search } from 'lucide-react';
-import axios from 'axios';
-import AnimalImage from '../components/shared/AnimalImage';
-import { SpeciesPickerModal } from './Modals/SpeciesModals';
+import { X, Home, Trash2, Save, Loader2 } from 'lucide-react';
+import SpeciesSelectionModal from './SpeciesSelectionModal';
 
 const EnclosureModal = ({
     isOpen,
@@ -33,8 +31,6 @@ const EnclosureModal = ({
 }) => {
     const modalRef = useRef(null);
     const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
-    const [speciesOptions, setSpeciesOptions] = useState([]);
-    const [speciesLoading, setSpeciesLoading] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -54,29 +50,6 @@ const EnclosureModal = ({
         };
     }, [isOpen, onClose]);
 
-    useEffect(() => {
-        if (isOpen && isSpeciesModalOpen && !speciesLoading && speciesOptions.length === 0) {
-            setSpeciesLoading(true);
-            axios.get(`${API_BASE_URL}/public/marketplace/species`)
-                .then(response => {
-                    if (Array.isArray(response.data)) {
-                        // SpeciesPickerModal expects an array of objects.
-                        const options = response.data.map(name => ({
-                            name,
-                            category: 'Unknown',
-                            isDefault: false,
-                        }));
-                        setSpeciesOptions(options);
-                    }
-                })
-                .catch(error => {
-                    console.error("Failed to fetch species for picker:", error);
-                    // showModalMessage('Error', 'Could not load species list.');
-                })
-                .finally(() => setSpeciesLoading(false));
-        }
-    }, [isOpen, isSpeciesModalOpen, API_BASE_URL, speciesOptions.length, speciesLoading]);
-
     if (!isOpen) return null;
 
     const handleImageChange = (e) => {
@@ -87,9 +60,19 @@ const EnclosureModal = ({
         }
     };
 
-    const handleSelectSpecies = (speciesName) => {
-        handleEnclosureSpeciesLabelAdd(speciesName);
-        setIsSpeciesModalOpen(false);
+    const handleAssignSpecies = (selectedSpecies) => {
+        // Replace the entire speciesLabels array with the selection from the modal
+        setEnclosureFormData(prev => ({ ...prev, speciesLabels: selectedSpecies }));
+    };
+
+    const handleRemoveSpeciesLabel = (label) => {
+        setEnclosureFormData(prev => ({
+            ...prev,
+            speciesLabels: (prev.speciesLabels || []).filter(s => s !== label),
+        }));
+        if (handleEnclosureSpeciesLabelRemove) {
+            handleEnclosureSpeciesLabelRemove(label);
+        }
     };
 
     return (
@@ -249,11 +232,18 @@ const EnclosureModal = ({
                                         onClick={() => setIsSpeciesModalOpen(true)}
                                         className="w-full text-left flex-1 p-2 text-sm border border-gray-300 rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-surface hover:bg-gray-50 dark:hover:bg-dark-surface-hover"
                                     >
-                                        + Add suitable species
+                                        {enclosureFormData.speciesLabels && enclosureFormData.speciesLabels.length > 0
+                                            ? `Edit species (${enclosureFormData.speciesLabels.length} selected)`
+                                            : '+ Add suitable species'}
                                     </button>
                                 </div>
                                 <div className="flex flex-wrap gap-1 mt-1.5">
-                                    {enclosureFormData.speciesLabels.map(label => <span key={label} className="text-xs bg-gray-200 px-2 py-1 rounded-full flex items-center gap-1">{label} <button type="button" onClick={() => handleEnclosureSpeciesLabelRemove(label)} className="text-red-400 hover:text-red-600">x</button></span>)}
+                                    {enclosureFormData.speciesLabels && enclosureFormData.speciesLabels.map(label => (
+                                        <span key={label} className="text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2 py-1 rounded-full flex items-center gap-1 border border-green-300 dark:border-green-700">
+                                            {label}
+                                            <button type="button" onClick={() => handleRemoveSpeciesLabel(label)} className="text-green-500 hover:text-red-500 transition">x</button>
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                             {/* Cleaning Tasks */}
@@ -314,15 +304,15 @@ const EnclosureModal = ({
                     </div>
                 </div>
 
-                {isSpeciesModalOpen && (
-                <SpeciesPickerModal
-                    speciesOptions={speciesOptions.filter(s => !(enclosureFormData.speciesLabels || []).includes(s.name))}
-                    onSelect={handleSelectSpecies}
+                <SpeciesSelectionModal
+                    isOpen={isSpeciesModalOpen}
                     onClose={() => setIsSpeciesModalOpen(false)}
-                    X={X}
-                    Search={Search}
+                    onAssign={handleAssignSpecies}
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    title="Select Suitable Species"
+                    initialSelected={enclosureFormData.speciesLabels || []}
                 />
-                )}
             </div>
         </div>
     );
@@ -330,3 +320,4 @@ const EnclosureModal = ({
 
 
 export default EnclosureModal;
+
