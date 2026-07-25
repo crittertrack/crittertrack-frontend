@@ -20,11 +20,16 @@ const SpeciesSelectionModal = ({
             if (!isOpen) return;
             setLoading(true);
             try {
-                const response = await axios.get(`${API_BASE_URL}/species/all`, {
+                const response = await axios.get(`${API_BASE_URL}/species`, {
                     headers: { Authorization: `Bearer ${authToken}` },
                 });
-                if (response.data && Array.isArray(response.data)) {
+                if (response.data && Array.isArray(response.data.species)) {
+                    setAllSpecies(response.data.species);
+                } else if (response.data && Array.isArray(response.data)) {
                     setAllSpecies(response.data);
+                } else {
+                    console.warn("Species data not found or in unexpected format:", response.data);
+                    setAllSpecies([]);
                 }
             } catch (error) {
                 console.error("Failed to fetch species list:", error);
@@ -42,7 +47,7 @@ const SpeciesSelectionModal = ({
         const filtered = allSpecies.filter(species =>
             !exclude.includes(species.name) &&
             (species.name.toLowerCase().includes(lowerCaseSearch) ||
-             species.scientificName?.toLowerCase().includes(lowerCaseSearch))
+             species.latinName?.toLowerCase().includes(lowerCaseSearch))
         );
 
         return filtered.reduce((acc, species) => {
@@ -98,7 +103,7 @@ const SpeciesSelectionModal = ({
                                         {filteredAndGroupedSpecies[category].map(species => (
                                             <button key={species._id} onClick={() => onSelect(species.name)} className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-dark-surface-hover hover:bg-primary/10 hover:text-primary-dark dark:hover:bg-primary/20 transition border border-gray-200 dark:border-dark-border">
                                                 <span className="font-medium text-sm text-gray-800 dark:text-dark-text">{species.name}</span>
-                                                {species.scientificName && <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">{species.scientificName}</p>}
+                                                {species.latinName && <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">{species.latinName}</p>}
                                             </button>
                                         ))}
                                     </div>
