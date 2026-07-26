@@ -752,6 +752,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const handleCloseEnclosureModal = useCallback(() => {
         console.log('[AnimalList] EnclosureModal onClose triggered.');
         setShowEnclosureModal(false);
+        setOriginalEnclosureForEdit(null);
         setEditingEnclosureId(null);
         setEnclosureFormData({
             name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
@@ -762,7 +763,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
         });
         setEnclosureImageFile(null);
         setEnclosureImagePreview(null);
-    }, []); // State setters are stable, so this function is also stable.
+    }, [setEnclosureFormData, setEnclosureImageFile, setEnclosureImagePreview, setEditingEnclosureId, setShowEnclosureModal]);
 
     const handleSaveEnclosure = useCallback(async () => {
         if (isSavingEnclosureRef.current) return;
@@ -781,15 +782,16 @@ const handleArchive = useCallback(async (animalToArchive) => {
             ];
         
             fieldsToCompare.forEach(field => {
-                const oldValue = oldEnc[field] || '';
-                const newValue = newEncData[field] || '';
-                if (String(oldValue).trim() !== String(newValue).trim()) {
+                const oldVal = (oldEnc[field] == null) ? '' : String(oldEnc[field]).trim();
+                const newVal = (newEncData[field] == null) ? '' : String(newEncData[field]).trim();
+
+                if (oldVal !== newVal) {
                     history.push({
                         timestamp,
                         userId,
                         userName,
                         action: 'update',
-                        details: { field, oldValue: String(oldValue).trim(), newValue: String(newValue).trim() }
+                        details: { field, oldValue: oldVal, newValue: newVal }
                     });
                 }
             });
