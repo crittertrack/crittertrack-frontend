@@ -4827,7 +4827,7 @@ useEffect(() => {
                     {/* Column 5: Needs Attention */}
                     <div className="flex flex-col gap-2">
                         {(() => {
-                            const totalAttention = feedDueDashboard.length + healthAttentionDashboardCount + totalDueEnclosureTasks;
+                            const totalAttention = feedDueDashboard.length + healthAttentionDashboardCount + reproTotal + enclosureMaintenanceDueCount;
                             return (
                                 <>
                                     <StatCard
@@ -4844,26 +4844,33 @@ useEffect(() => {
                                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Needs Attention Breakdown</h4>
                                             <ul className="text-sm space-y-1">
                                                 {feedDueDashboard.length > 0 && (
-                                                    <li className="flex justify-between items-center"><span className="flex items-center gap-1.5 text-red-700"><Utensils size={14} /> Feeding Due</span><span className="font-medium">{feedDueDashboard.length}</span></li>
+                                                    <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('feeding')}><span className="flex items-center gap-1.5 text-red-700"><Utensils size={14} /> Feeding & Care</span><span className="font-medium">{feedDueDashboard.length}</span></li>
                                                 )}
                                                 {healthAttentionDashboardCount > 0 && (
-                                                    <li className="flex justify-between items-center"><span className="flex items-center gap-1.5 text-orange-700"><Activity size={14} /> Health Attention</span><span className="font-medium">{healthAttentionDashboardCount}</span></li>
+                                                    <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('health')}><span className="flex items-center gap-1.5 text-orange-700"><Activity size={14} /> Health</span><span className="font-medium">{healthAttentionDashboardCount}</span></li>
                                                 )}
-                                                {dueEnclosureTasksByType.map(({ type, count }) => {
-                                                    const style = TASK_TYPE_STYLES[type] || TASK_TYPE_STYLES['Other'];
-                                                    const Icon = {
-                                                        Cleaning: <Wrench size={14} />,
-                                                        Maintenance: <Settings size={14} />,
-                                                        Feeding: <Utensils size={14} />,
-                                                        Other: <Info size={14} />
-                                                    }[type] || <Info size={14} />;
-                                                    return (
-                                                        <li key={type} className="flex justify-between items-center">
-                                                            <span className={`flex items-center gap-1.5 ${style.color}`}>{Icon} {type} Tasks Due</span>
-                                                            <span className="font-medium">{count}</span>
+                                                {reproTotal > 0 && (
+                                                    <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('reproduction')}>
+                                                        <span className="flex items-center gap-1.5 text-pink-700"><Bean size={14} /> Reproduction</span>
+                                                        <span className="font-medium">{reproTotal}</span>
+                                                    </li>
+                                                )}
+                                                {enclosureMaintenanceDueCount > 0 && (
+                                                    <>
+                                                        <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('enclosures')}>
+                                                            <span className="flex items-center gap-1.5 text-blue-700"><Home size={14} /> Enclosures</span>
+                                                            <span className="font-medium">{enclosureMaintenanceDueCount}</span>
                                                         </li>
-                                                    );
-                                                })}
+                                                        <ul className="pl-6 space-y-1 text-xs">
+                                                            {enclosuresNeedingAttention.map(enc => (
+                                                                <li key={enc._id} className="flex justify-between items-center text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => setAnimalView('enclosures')}>
+                                                                    <span>{enc.name}</span>
+                                                                    <span className="font-medium">{enc.dueTasks.length} task(s)</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </>
+                                                )}
                                             </ul>
                                         </div>
                                     )}
