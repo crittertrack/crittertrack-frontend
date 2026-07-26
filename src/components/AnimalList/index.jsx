@@ -356,6 +356,115 @@ const AnimalList = ({
         } catch {}
     };
 
+    const fetchAnimals = useCallback(async () => {
+        // Two-phase fetch: fast owned-only first, then all animals in background
+        try {
+            // Phase 1: fetch owned animals quickly to get content on screen
+            const ownedRes = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers: { Authorization: `Bearer ${authToken}` } });
+            let ownedData = (ownedRes.data || []).filter(a => !a.isViewOnly);
+
+            // Cache-bust images ONLY once per session startup
+            if (!fetchAnimals._cacheBusted) {
+                fetchAnimals._cacheBusted = true;
+                const bustImages = (data) => data.map(a => {
+                    const img = a.imageUrl || a.photoUrl || null;
+                    if (img) {
+                        const busted = img.includes('?') ? `${img}&t=${Date.now()}` : `${img}?t=${Date.now()}`;
+                        return { ...a, imageUrl: busted, photoUrl: busted };
+                    }
+                    return a;
+                });
+                ownedData = bustImages(ownedData);
+            }
+
+            setAnimals(ownedData);
+            const speciesList = [...new Set(ownedData.map(a => a.species).filter(Boolean))];
+            if (speciesList.length > 0) setAllUserSpecies(speciesList);
+            setLoading(false);
+
+            // Phase 2: background-fetch ALL animals so unowned toggle works instantly
+            // slim=true strips heavy fields (breedingRecords, health, etc.) — list cards don't need them
+            try {
+                const allRes = await axios.get(`${API_BASE_URL}/animals?slim=true`, { headers: { Authorization: `Bearer ${authToken}` } });
+                let allData = (allRes.data || []).filter(a => !a.isViewOnly);
+                // Preserve cache-busted image URLs from phase 1
+                const ownedMap = new Map(ownedData.map(a => [a.id_public || a._id, a]));
+                allData = allData.map(a => {
+                    const key = a.id_public || a._id;
+                    return ownedMap.has(key) ? ownedMap.get(key) : a;
+                });
+                setAnimals(allData);
+                const allSpecies = [...new Set(allData.map(a => a.species).filter(Boolean))];
+                if (allSpecies.length > 0) setAllUserSpecies(allSpecies);
+            } catch (err) {
+                console.warn('[fetchAnimals] Background all-animals fetch failed, owned-only still shown:', err);
+            } finally {
+                setAllAnimalsFetched(true);
+            }
+        } catch (error) {
+            console.error('Fetch animals error:', error);
+            showModalMessageRef.current('Error', 'Failed to fetch animal list.');
+            setLoading(false);
+        } finally {
+            // setPendingFilters(false); // This state was removed, causing a ReferenceError.
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authToken]);
+
+    // Species list is now derived from the fetchAnimals result - no separate API call needed
+    const fetchAllSpecies = useCallback(async () => {
+        // No-op: species are populated as a side-effect of fetchAnimals()
+        // Kept for compatibility with the animals-changed event handler
+    }, []);
+
+    // Fetch ALL user animals (no client-side filters) ? used by Management View and Collections
+    const fetchAllAnimals = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` },
+                params: { slim: 'true' }
+            });
+            const archivedRes = await axios.get(`${API_BASE_URL}/animals/archived`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            // Manually add `archived: true` to animals from the archived list,
+            // as the backend doesn't seem to include this flag, which breaks counter logic.
+            const archivedData = (archivedRes.data?.archived || []).map(a => ({ ...a, archived: true }));
+            // Also ensure sold/transferred animals are correctly marked as view-only for the counters.
+            const soldTransferredData = (archivedRes.data?.soldTransferred || []).map(a => ({ ...a, isViewOnly: true }));
+
+            const combinedData = [...(res.data || []), ...archivedData, ...soldTransferredData];
+            const uniqueData = Array.from(new Map(combinedData.map(item => [item.id_public || item._id, item])).values());
+            setAllAnimalsRaw(uniqueData);
+        } catch (err) { console.error('[fetchAllAnimals]', err); }
+    }, [authToken, API_BASE_URL]);
+
+    // Fetch ALL animals created by this user with status=Available (ignores ownership filter)
+    const fetchAvailableAnimals = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` },
+                params: { status: 'Available' }
+            });
+            setAvailableAnimalsRaw((res.data || []).filter(a => !a.isViewOnly));
+        } catch (err) { console.error('[fetchAvailableAnimals]', err); }
+    }, [authToken, API_BASE_URL]);
+
+    // Fetch view-only/transferred animals ? these are animals the user sold/transferred but retains view-only access to
+    const fetchSoldTransferred = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            // Fetch without isOwned filter so the backend returns both owned + view-only animals
+            const res = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            // Only keep view-only entries (creatorId !== current user)
+            setSoldTransferredRaw((res.data || []).filter(a => a.isViewOnly));
+        } catch (err) { console.error('[fetchSoldTransferred]', err); }
+    }, [authToken, API_BASE_URL]);
+
 const handleArchive = useCallback(async (animalToArchive) => {
         if (!animalToArchive) return;
         const isArchived = !!animalToArchive.archived;
@@ -880,11 +989,6 @@ useEffect(() => {
         } catch (e) { console.warn('Failed to save publicFilter', e); }
     }, [publicFilter]);
 
-     useEffect(() => {
-        try { localStorage.setItem('animalList_speciesFilter', speciesFilter); }
-        catch (e) { console.warn('Failed to save speciesFilter', e); }
-    }, [speciesFilter]);
-
     useEffect(() => {
         try {
             localStorage.setItem('animalList_blFilter', JSON.stringify(blFilter));
@@ -896,102 +1000,6 @@ useEffect(() => {
             localStorage.setItem(`ct_list_columns_${userKey}`, JSON.stringify(listViewColumns));
         } catch (e) { console.warn('Failed to save listViewColumns', e); }
     }, [listViewColumns, userKey]);
-
-    const fetchAnimals = useCallback(async () => {
-        // Two-phase fetch: fast owned-only first, then all animals in background
-        try {
-            // Phase 1: fetch owned animals quickly to get content on screen
-            const ownedRes = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers: { Authorization: `Bearer ${authToken}` } });
-            let ownedData = (ownedRes.data || []).filter(a => !a.isViewOnly);
-
-            // Cache-bust images ONLY once per session startup
-            if (!fetchAnimals._cacheBusted) {
-                fetchAnimals._cacheBusted = true;
-                const bustImages = (data) => data.map(a => {
-                    const img = a.imageUrl || a.photoUrl || null;
-                    if (img) {
-                        const busted = img.includes('?') ? `${img}&t=${Date.now()}` : `${img}?t=${Date.now()}`;
-                        return { ...a, imageUrl: busted, photoUrl: busted };
-                    }
-                    return a;
-                });
-                ownedData = bustImages(ownedData);
-            }
-
-            setAnimals(ownedData);
-            const speciesList = [...new Set(ownedData.map(a => a.species).filter(Boolean))];
-            if (speciesList.length > 0) setAllUserSpecies(speciesList);
-            setLoading(false);
-
-            // Phase 2: background-fetch ALL animals so unowned toggle works instantly
-            // slim=true strips heavy fields (breedingRecords, health, etc.) — list cards don't need them
-            try {
-                const allRes = await axios.get(`${API_BASE_URL}/animals?slim=true`, { headers: { Authorization: `Bearer ${authToken}` } });
-                let allData = (allRes.data || []).filter(a => !a.isViewOnly);
-                // Preserve cache-busted image URLs from phase 1
-                const ownedMap = new Map(ownedData.map(a => [a.id_public || a._id, a]));
-                allData = allData.map(a => {
-                    const key = a.id_public || a._id;
-                    return ownedMap.has(key) ? ownedMap.get(key) : a;
-                });
-                setAnimals(allData);
-                const allSpecies = [...new Set(allData.map(a => a.species).filter(Boolean))];
-                if (allSpecies.length > 0) setAllUserSpecies(allSpecies);
-            } catch (err) {
-                console.warn('[fetchAnimals] Background all-animals fetch failed, owned-only still shown:', err);
-            } finally {
-                setAllAnimalsFetched(true);
-            }
-        } catch (error) {
-            console.error('Fetch animals error:', error);
-            showModalMessageRef.current('Error', 'Failed to fetch animal list.');
-            setLoading(false);
-        } finally {
-            // setPendingFilters(false); // This state was removed, causing a ReferenceError.
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [authToken]);
-
-    // Species list is now derived from the fetchAnimals result - no separate API call needed
-    const fetchAllSpecies = useCallback(async () => {
-        // No-op: species are populated as a side-effect of fetchAnimals()
-        // Kept for compatibility with the animals-changed event handler
-    }, []);
-
-    // Fetch ALL user animals (no client-side filters) ? used by Management View and Collections
-    const fetchAllAnimals = useCallback(async () => {
-        if (!authToken) return;
-        try {
-            const res = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` },
-                params: { slim: 'true' }
-            });
-            const archivedRes = await axios.get(`${API_BASE_URL}/animals/archived`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            // Manually add `archived: true` to animals from the archived list,
-            // as the backend doesn't seem to include this flag, which breaks counter logic.
-            const archivedData = (archivedRes.data?.archived || []).map(a => ({ ...a, archived: true }));
-            // Also ensure sold/transferred animals are correctly marked as view-only for the counters.
-            const soldTransferredData = (archivedRes.data?.soldTransferred || []).map(a => ({ ...a, isViewOnly: true }));
-
-            const combinedData = [...(res.data || []), ...archivedData, ...soldTransferredData];
-            const uniqueData = Array.from(new Map(combinedData.map(item => [item.id_public || item._id, item])).values());
-            setAllAnimalsRaw(uniqueData);
-        } catch (err) { console.error('[fetchAllAnimals]', err); }
-    }, [authToken, API_BASE_URL]);
-
-    // Fetch ALL animals created by this user with status=Available (ignores ownership filter)
-    const fetchAvailableAnimals = useCallback(async () => {
-        if (!authToken) return;
-        try {
-            const res = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` },
-                params: { status: 'Available' }
-            });
-            setAvailableAnimalsRaw((res.data || []).filter(a => !a.isViewOnly));
-        } catch (err) { console.error('[fetchAvailableAnimals]', err); }
-    }, [authToken, API_BASE_URL]);
 
     const handleClearBreedingLine = async (lineId) => {
         const lineToClear = breedingLineDefs.find(l => l.id === lineId);
@@ -1018,19 +1026,6 @@ useEffect(() => {
             showModalMessageRef.current('Error', error.response?.data?.message || 'Failed to clear breeding line.');
         }
     };
-
-    // Fetch view-only/transferred animals ? these are animals the user sold/transferred but retains view-only access to
-    const fetchSoldTransferred = useCallback(async () => {
-        if (!authToken) return;
-        try {
-            // Fetch without isOwned filter so the backend returns both owned + view-only animals
-            const res = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            // Only keep view-only entries (creatorId !== current user)
-            setSoldTransferredRaw((res.data || []).filter(a => a.isViewOnly));
-        } catch (err) { console.error('[fetchSoldTransferred]', err); }
-    }, [authToken, API_BASE_URL]);
 
     useEffect(() => {
         // Skip fetch if we have a cache (e.g. returning from edit/view)
