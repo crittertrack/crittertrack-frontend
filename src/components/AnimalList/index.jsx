@@ -718,6 +718,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [originalEnclosureForEdit, setOriginalEnclosureForEdit] = useState(null);
     const [enclosureAnimals, setEnclosureAnimals] = useState([]);
     const [loadingAnimals, setLoadingAnimals] = useState(false);
 
@@ -766,6 +767,62 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const handleSaveEnclosure = useCallback(async () => {
         if (isSavingEnclosureRef.current) return;
         isSavingEnclosureRef.current = true;
+
+        const generateHistoryDiff = (oldEnc, newEncData, user) => {
+            const history = [];
+            const timestamp = new Date().toISOString();
+            const userName = user.personalName || user.breederName;
+            const userId = user._id;
+        
+            const fieldsToCompare = [
+                'name', 'enclosureType', 'purpose', 'purposeDescription', 'capacity', 
+                'tempMin', 'tempMax', 'humidityMin', 'humidityMax', 
+                'lightsOnTime', 'lightsOffTime', 'notes'
+            ];
+        
+            fieldsToCompare.forEach(field => {
+                const oldValue = oldEnc[field] || '';
+                const newValue = newEncData[field] || '';
+                if (String(oldValue).trim() !== String(newValue).trim()) {
+                    history.push({
+                        timestamp,
+                        userId,
+                        userName,
+                        action: 'update',
+                        details: { field, oldValue: String(oldValue).trim(), newValue: String(newValue).trim() }
+                    });
+                }
+            });
+        
+            const oldDims = oldEnc.dimensions || {};
+            const newDims = {
+                length: newEncData.length,
+                width: newEncData.width,
+                height: newEncData.height,
+                unit: newEncData.dimensionsUnit
+            };
+            if (JSON.stringify(oldDims) !== JSON.stringify(newDims)) {
+                 history.push({ timestamp, userId, userName, action: 'update', details: { field: 'dimensions', oldValue: `${oldDims.length || '?'}x${oldDims.width || '?'}x${oldDims.height || '?'} ${oldDims.unit || ''}`.trim(), newValue: `${newDims.length || '?'}x${newDims.width || '?'}x${newDims.height || '?'} ${newDims.unit || ''}`.trim() } });
+            }
+        
+            const oldLocation = getLocationPath(oldEnc.buildingId, oldEnc.roomId, locations);
+            const newLocation = getLocationPath(newEncData.buildingId, newEncData.roomId, locations);
+            if (oldLocation !== newLocation) {
+                history.push({ timestamp, userId, userName, action: 'update', details: { field: 'location', oldValue: oldLocation, newValue: newLocation } });
+            }
+        
+            const oldTasks = oldEnc.cleaningTasks || [];
+            const newTasks = newEncData.cleaningTasks || [];
+            if (oldTasks.length > newTasks.length) {
+                const removedTasks = oldTasks.filter(ot => !newTasks.find(nt => nt.taskName === ot.taskName && nt.frequency === ot.frequency));
+                removedTasks.forEach(task => history.push({ timestamp, userId, userName, action: 'task_removed', details: { taskName: task.taskName } }));
+            } else if (newTasks.length > oldTasks.length) {
+                const addedTasks = newTasks.filter(nt => !oldTasks.find(ot => ot.taskName === nt.taskName && nt.frequency === ot.frequency));
+                addedTasks.forEach(task => history.push({ timestamp, userId, userName, action: 'task_added', details: { taskName: task.taskName } }));
+            }
+        
+            return history;
+        };
 
            // Set saving state immediately
         setEnclosureSaving(true);
@@ -824,6 +881,14 @@ const handleArchive = useCallback(async (animalToArchive) => {
                 // If no new file, preview is null, but formData still has an imageUrl,
                 // it means the user removed the image. Clear it.
                 payload.imageUrl = '';
+            }
+
+            if (enclosureIdToSave && originalEnclosureForEdit) {
+                const newHistory = generateHistoryDiff(originalEnclosureForEdit, dataToSave, userProfile);
+                if (newHistory.length > 0) {
+                    const existingHistory = originalEnclosureForEdit.history || [];
+                    payload.history = [...existingHistory, ...newHistory];
+                }
             }
 
             if (enclosureIdToSave) {
@@ -1210,6 +1275,7 @@ useEffect(() => {
     const openEnclosureModal = useCallback((enclosure) => {
         console.log('[AnimalList] openEnclosureModal called. Editing enclosure:', enclosure ? enclosure._id : 'new');
         if (enclosure) {
+            setOriginalEnclosureForEdit(enclosure);
             // Edit mode
             const dims = enclosure.dimensions || enclosure.size;
             let length = '', width = '', height = '', dimensionsUnit = 'in';
@@ -1247,6 +1313,7 @@ useEffect(() => {
             setEditingEnclosureId(enclosure._id);
         } else {
             // Add new mode
+            setOriginalEnclosureForEdit(null);
             setEnclosureFormData({
                 name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in', buildingId: '', roomId: '',
                 purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
@@ -1259,6 +1326,30 @@ useEffect(() => {
         }
         setShowEnclosureModal(true);
     }, [setEnclosureFormData, setEnclosureImagePreview, setEnclosureImageFile, setEditingEnclosureId, setShowEnclosureModal]);
+
+    const logEnclosureHistory = useCallback(async (enclosureId, action, details) => {
+        if (!userProfile) return;
+        try {
+            const { data: enclosure } = await axios.get(`${API_BASE_URL}/enclosures/${enclosureId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            
+            const newHistoryEntry = {
+                timestamp: new Date().toISOString(),
+                userId: userProfile._id,
+                userName: userProfile.personalName || userProfile.breederName,
+                action,
+                details
+            };
+    
+            const updatedHistory = [...(enclosure.history || []), newHistoryEntry];
+    
+            await axios.put(`${API_BASE_URL}/enclosures/${enclosureId}`, { history: updatedHistory }, { headers: { Authorization: `Bearer ${authToken}` } });
+    
+            fetchEnclosures();
+    
+        } catch (error) {
+            console.error('Failed to log enclosure history:', error);
+        }
+    }, [authToken, API_BASE_URL, userProfile, fetchEnclosures]);
 
     const handleAssignAnimalInModal = useCallback(async (animalToAssign, enclosureToAssignTo) => {
         if (!animalToAssign || !enclosureToAssignTo) return;
@@ -1274,6 +1365,7 @@ useEffect(() => {
                 { animalId_public: animalIdPublic, enclosureId: enclosureId },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }
             );
+            logEnclosureHistory(enclosureId, 'assign_animal', { animalId: animalIdPublic, animalName: animalToAssign.name });
         } catch (err) {
             console.error('Assign enclosure failed:', err);
             showModalMessageRef.current('Error', `Failed to assign animal: ${err.response?.data?.message || err.message}`);
@@ -1294,6 +1386,7 @@ useEffect(() => {
 
         try {
             await axios.patch(`${API_BASE_URL}/enclosures/assign-animal`, { animalId_public: animalIdPublic, enclosureId: null }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+            logEnclosureHistory(originalEnclosureId, 'unassign_animal', { animalId: animalIdPublic, animalName: animalToUnassign.name });
         } catch (err) {
             console.error('Unassign enclosure failed:', err);
             showModalMessageRef.current('Error', `Failed to unassign animal: ${err.response?.data?.message || err.message}`);
@@ -5512,6 +5605,7 @@ useEffect(() => {
                     onViewAnimal={onViewAnimal}
                     onEditEnclosure={(enclosureToEdit) => { setShowDetailModal(false); openEnclosureModal(enclosureToEdit); }}
                     onAssignAnimal={handleAssignAnimalInModal}
+                    onLogEnclosureHistory={logEnclosureHistory}
                     onUnassignAnimal={handleUnassignAnimalInModal}
                 />
             )}

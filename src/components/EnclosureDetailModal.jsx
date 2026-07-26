@@ -132,6 +132,7 @@ const EnclosureDetailModal = ({
     onAssignAnimal,
     onUnassignAnimal,
     showModalMessage,
+    onLogEnclosureHistory,
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [newNote, setNewNote] = useState('');
@@ -146,6 +147,64 @@ const EnclosureDetailModal = ({
         Maintenance: { icon: <Settings size={12} className="text-orange-700" />, color: 'text-orange-700' },
         Feeding: { icon: <Utensils size={12} className="text-red-700" />, color: 'text-red-700' },
         Other: { icon: <Info size={12} className="text-gray-600" />, color: 'text-gray-600' },
+    };
+
+    const HistoryItem = ({ item }) => {
+        const { action, details, userName, timestamp, text } = item;
+    
+        const ICONS = {
+            update: <Edit size={14} className="text-blue-500" />,
+            assign_animal: <Plus size={14} className="text-green-500" />,
+            unassign_animal: <Trash2 size={14} className="text-red-500" />,
+            task_complete: <CheckCircle size={14} className="text-teal-500" />,
+            task_added: <Plus size={14} className="text-green-500" />,
+            task_removed: <Trash2 size={14} className="text-red-500" />,
+            note: <MessageSquare size={14} className="text-gray-500" />,
+            default: <Info size={14} className="text-gray-500" />
+        };
+    
+        let content;
+        let icon;
+    
+        if (item.type === 'note') {
+            icon = ICONS.note;
+            content = (
+                <div className="flex-1">
+                    <p className="text-sm text-gray-700 dark:text-dark-text">{text}</p>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">
+                        Note added by <span className="font-medium">{userName || 'You'}</span>
+                    </p>
+                </div>
+            );
+        } else {
+            icon = ICONS[action] || ICONS.default;
+            let actionText;
+            switch (action) {
+                case 'update':
+                    actionText = <>updated <strong>{details.field}</strong> from "{details.oldValue || 'empty'}" to "{details.newValue || 'empty'}"</>;
+                    break;
+                case 'assign_animal':
+                    actionText = <>assigned animal <strong>{details.animalName}</strong> ({details.animalId})</>;
+                    break;
+                case 'unassign_animal':
+                    actionText = <>unassigned animal <strong>{details.animalName}</strong> ({details.animalId})</>;
+                    break;
+                case 'task_complete':
+                    actionText = <>completed task: <strong>{details.taskName}</strong></>;
+                    break;
+                case 'task_added':
+                    actionText = <>added task: <strong>{details.taskName}</strong></>;
+                    break;
+                case 'task_removed':
+                    actionText = <>removed task: <strong>{details.taskName}</strong></>;
+                    break;
+                default:
+                    actionText = <>{action.replace(/_/g, ' ')}</>;
+            }
+            content = ( <div className="flex-1"> <p className="text-sm text-gray-700 dark:text-dark-text"> <span className="font-medium">{userName || 'System'}</span> {actionText} </p> </div> );
+        }
+    
+        return ( <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-100 dark:border-dark-border"> <div className="mt-1">{icon}</div> {content} <div className="text-xs text-gray-400 dark:text-dark-text-muted flex-shrink-0 mt-1">{formatDate(timestamp)}</div> </div> );
     };
 
     const sortedCleaningTasks = useMemo(() => {
@@ -170,6 +229,13 @@ const EnclosureDetailModal = ({
 
         return [...tasks].sort((a, b) => getDaysUntilDue(a) - getDaysUntilDue(b));
     }, [enclosure.cleaningTasks]);
+
+    const combinedHistory = useMemo(() => {
+        const activity = (enclosure.history || []).map(h => ({ ...h, type: 'activity' }));
+        const notes = (enclosure.notesHistory || []).map(n => ({ ...n, type: 'note' }));
+        
+        return [...activity, ...notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    }, [enclosure.history, enclosure.notesHistory]);
 
     useEffect(() => {
         // Load notes from enclosure data
@@ -242,6 +308,7 @@ const EnclosureDetailModal = ({
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            onLogEnclosureHistory?.(enclosure._id, 'task_complete', { taskName: task.taskName });
             onRefresh?.();
         } catch (err) {
             console.error('Failed to update task:', err);
@@ -781,11 +848,16 @@ const EnclosureDetailModal = ({
                     {activeTab === 'history' && (
                         <div className="space-y-3">
                             <h3 className="font-semibold text-gray-800 dark:text-dark-text">Activity Log</h3>
-                            <div className="text-center py-12 text-gray-500 dark:text-dark-text-muted">
-                                <Clock size={40} className="mx-auto mb-3 opacity-50" />
-                                <p>History tracking is coming soon.</p>
-                                <p className="text-xs mt-1">Future updates will log all changes, cleaning events, and animal assignments here.</p>
-                            </div>
+                            {combinedHistory.length === 0 ? (
+                                <div className="text-center py-12 text-gray-500 dark:text-dark-text-muted">
+                                    <Clock size={40} className="mx-auto mb-3 opacity-50" />
+                                    <p>No activity has been logged for this enclosure yet.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {combinedHistory.map(item => <HistoryItem key={item.id || item.timestamp} item={item} />)}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
