@@ -813,35 +813,12 @@ const handleArchive = useCallback(async (animalToArchive) => {
         
             const oldTasks = oldEnc.cleaningTasks || [];
             const newTasks = newEncData.cleaningTasks || [];
-              const oldTasksMap = new Map((oldTasks).map(t => [t.taskName, t]));
-            const newTasksMap = new Map((newTasks).map(t => [t.taskName, t]));
-    
-            // Check for removed and modified tasks
-            for (const [taskName, oldTask] of oldTasksMap.entries()) {
-                const newTask = newTasksMap.get(taskName);
-                if (!newTask) {
-                    history.push({ timestamp, userId, userName, action: 'task_removed', details: { taskName: oldTask.taskName } });
-                } else {
-                    // Check for modifications in existing tasks
-                    const oldFreq = `${oldTask.frequency || ''} ${oldTask.frequencyUnit || ''}`.trim();
-                    const newFreq = `${newTask.frequency || ''} ${newTask.frequencyUnit || ''}`.trim();
-                    if (oldFreq !== newFreq) {
-                        history.push({ timestamp, userId, userName, action: 'task_updated', details: { taskName, field: 'frequency', oldValue: oldFreq, newValue: newFreq } });
-                    }
-                    if ((oldTask.notes || '') !== (newTask.notes || '')) {
-                        history.push({ timestamp, userId, userName, action: 'task_updated', details: { taskName, field: 'notes', oldValue: oldTask.notes || '', newValue: newTask.notes || '' } });
-                    }
-                    if ((oldTask.type || 'Other') !== (newTask.type || 'Other')) {
-                        history.push({ timestamp, userId, userName, action: 'task_updated', details: { taskName, field: 'type', oldValue: oldTask.type || 'Other', newValue: newTask.type || 'Other' } });
-                    }
-                }
-            }
-    
-            // Check for added tasks
-            for (const [taskName, newTask] of newTasksMap.entries()) {
-                if (!oldTasksMap.has(taskName)) {
-                    history.push({ timestamp, userId, userName, action: 'task_added', details: { taskName: newTask.taskName, type: newTask.type } });
-                }
+            if (oldTasks.length > newTasks.length) {
+                const removedTasks = oldTasks.filter(ot => !newTasks.find(nt => nt.taskName === ot.taskName && nt.frequency === ot.frequency));
+                removedTasks.forEach(task => history.push({ timestamp, userId, userName, action: 'task_removed', details: { taskName: task.taskName } }));
+            } else if (newTasks.length > oldTasks.length) {
+                const addedTasks = newTasks.filter(nt => !oldTasks.find(ot => ot.taskName === nt.taskName && nt.frequency === ot.frequency));
+                addedTasks.forEach(task => history.push({ timestamp, userId, userName, action: 'task_added', details: { taskName: task.taskName } }));
             }
         
             return history;
