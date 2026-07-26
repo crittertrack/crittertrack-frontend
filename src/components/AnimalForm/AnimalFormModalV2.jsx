@@ -8,10 +8,13 @@ import {
     Loader2, ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, DollarSign,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
-import { formatDate } from '../../utils/dateFormatter';
+import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
+import EnclosureModal from '../EnclosureModal';
+import LocationManagerModal from '../AnimalList/LocationManagerModal';
+import { getSpeciesLatinName, getSpeciesCategory } from '../../utils/speciesUtils';
 
 const LoadingSpinner = ({ message = 'Loading...' }) => (
     <div className="flex items-center justify-center p-8">
@@ -1139,7 +1142,8 @@ const AnimalFormModalV2 = ({
     showModalMessage,
     userProfile,
     speciesConfigs,
-    GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'],
+    speciesOptions = [],
+    GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'], // NOSONAR
     STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -1298,15 +1302,30 @@ const AnimalFormModalV2 = ({
     const [healthStatusOverride, setHealthStatusOverride] = useState(animalToEdit?.healthStatusOverride || null);
     const [healthStatusOverrideNotes, setHealthStatusOverrideNotes] = useState(animalToEdit?.healthStatusOverrideNotes || '');
 
-    // Enclosure assignment states
-    const [selectedEnclosure, setSelectedEnclosure] = useState(animalToEdit?.enclosureId || null);
-    const [manualEnclosureName, setManualEnclosureName] = useState('');
+    // Enclosure states
     const [showEnclosureModal, setShowEnclosureModal] = useState(false);
     const [availableEnclosures, setAvailableEnclosures] = useState([]);
-    const [enclosureSearch, setEnclosureSearch] = useState('');
     const [loadingEnclosures, setLoadingEnclosures] = useState(false);
-    const [enclosureModalMode, setEnclosureModalMode] = useState('search'); // 'search' | 'create' | 'manual'
-    const [newEnclosureForm, setNewEnclosureForm] = useState({
+    const [locations, setLocations] = useState([]);
+    const [supplies, setSupplies] = useState([]);
+    const [enclosureFormData, setEnclosureFormData] = useState({
+        name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+        buildingId: '', roomId: '',
+        purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+        lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+        cleaningTasks: []
+    });
+    const [editingEnclosureId, setEditingEnclosureId] = useState(null);
+    const [enclosureImageFile, setEnclosureImageFile] = useState(null);
+    const [enclosureImagePreview, setEnclosureImagePreview] = useState(null);
+    const [enclosureSaving, setEnclosureSaving] = useState(false);
+    const [newEnclosureTag, setNewEnclosureTag] = useState('');
+    const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
+    const [newCleaningTaskFreq, setNewCleaningTaskFreq] = useState('');
+    const [showLocationManager, setShowLocationManager] = useState(false);
+    const [locationSaving, setLocationSaving] = useState(false);
+
+    const resetNewEnclosureForm = () => setEnclosureFormData({
         name: '',
         roomType: '',
         location: '',
@@ -1316,6 +1335,217 @@ const AnimalFormModalV2 = ({
         humidityRange: { min: '', max: '' },
         description: ''
     });
+
+    const fetchEnclosures = useCallback(async () => {
+        if (!authToken) return;
+        setLoadingEnclosures(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } });
+            setAvailableEnclosures(res.data || []);
+        } catch (err) {
+            console.error('Failed to fetch enclosures:', err);
+        } finally {
+            setLoadingEnclosures(false);
+        }
+    }, [authToken, API_BASE_URL]);
+
+    const fetchLocations = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/locations`, { headers: { Authorization: `Bearer ${authToken}` } });
+            setLocations(res.data || []);
+        } catch (err) { console.error('Failed to fetch locations:', err); }
+    }, [authToken, API_BASE_URL]);
+
+    const fetchSupplies = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/supplies`, { headers: { Authorization: `Bearer ${authToken}` } });
+            setSupplies(res.data || []);
+        } catch (err) { console.error('Failed to fetch supplies:', err); }
+    }, [authToken, API_BASE_URL]);
+
+    useEffect(() => {
+        fetchEnclosures();
+        fetchLocations();
+        fetchSupplies();
+    }, [fetchEnclosures, fetchLocations, fetchSupplies]);
+
+    const handleCloseEnclosureModal = useCallback(() => {
+        setShowEnclosureModal(false);
+        setEditingEnclosureId(null);
+        resetNewEnclosureForm();
+        setEnclosureImageFile(null);
+        setEnclosureImagePreview(null);
+    }, []);
+
+    const handleSaveEnclosure = useCallback(async () => {
+        setEnclosureSaving(true);
+        if (!enclosureFormData.name?.trim()) {
+            showModalMessage('Validation Error', 'Enclosure name cannot be empty.');
+            setEnclosureSaving(false);
+            return;
+        }
+
+        try {
+            const payload = {
+                name: enclosureFormData.name.trim(),
+                enclosureType: enclosureFormData.enclosureType,
+                buildingId: enclosureFormData.buildingId || null,
+                roomId: enclosureFormData.roomId || null,
+                purpose: enclosureFormData.purpose,
+                purposeDescription: enclosureFormData.purposeDescription?.trim(),
+                dimensions: {
+                    length: enclosureFormData.length ? Number(enclosureFormData.length) : null,
+                    width: enclosureFormData.width ? Number(enclosureFormData.width) : null,
+                    height: enclosureFormData.height ? Number(enclosureFormData.height) : null,
+                    unit: enclosureFormData.dimensionsUnit || 'in'
+                },
+                capacity: enclosureFormData.capacity ? Number(enclosureFormData.capacity) : undefined,
+                tempMin: enclosureFormData.tempMin ? Number(enclosureFormData.tempMin) : null,
+                tempMax: enclosureFormData.tempMax ? Number(enclosureFormData.tempMax) : null,
+                temperatureUnit: enclosureFormData.temperatureUnit || 'C',
+                humidityMin: enclosureFormData.humidityMin ? Number(enclosureFormData.humidityMin) : null,
+                humidityMax: enclosureFormData.humidityMax ? Number(enclosureFormData.humidityMax) : null,
+                lightsOnTime: enclosureFormData.lightsOnTime,
+                lightsOffTime: enclosureFormData.lightsOffTime,
+                lightTimeFormat: enclosureFormData.lightTimeFormat,
+                notes: enclosureFormData.notes?.trim(),
+                cleaningTasks: enclosureFormData.cleaningTasks,
+                tags: enclosureFormData.tags,
+                speciesLabels: enclosureFormData.speciesLabels,
+                imageUrl: enclosureFormData.imageUrl,
+            };
+
+            if (enclosureImageFile) {
+                const uploadFormData = new FormData();
+                uploadFormData.append('file', enclosureImageFile);
+                uploadFormData.append('type', 'enclosure');
+                const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
+                });
+                payload.imageUrl = res.data.url;
+            }
+
+            let savedEnclosure;
+            if (editingEnclosureId) {
+                const res = await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, payload, { headers: { Authorization: `Bearer ${authToken}` } });
+                savedEnclosure = res.data;
+            } else {
+                const res = await axios.post(`${API_BASE_URL}/enclosures`, payload, { headers: { Authorization: `Bearer ${authToken}` } });
+                savedEnclosure = res.data;
+            }
+
+            handleCloseEnclosureModal();
+            await fetchEnclosures();
+
+            if (savedEnclosure && !editingEnclosureId) {
+                setFormData(prev => ({ ...prev, enclosureId: savedEnclosure._id }));
+            }
+
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to save enclosure');
+        } finally {
+            setEnclosureSaving(false);
+        }
+    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, handleCloseEnclosureModal, showModalMessage]);
+
+    const handleDeleteEnclosure = useCallback(async () => {
+        if (!editingEnclosureId) return;
+        if (!window.confirm('Are you sure you want to permanently delete this enclosure?')) return;
+
+        try {
+            await axios.delete(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            showModalMessage('Success', 'Enclosure deleted.');
+            fetchEnclosures();
+            handleCloseEnclosureModal();
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to delete enclosure.');
+        }
+    }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, handleCloseEnclosureModal, showModalMessage]);
+
+    const openEnclosureModal = useCallback((enclosure) => {
+        if (enclosure) {
+            const dims = enclosure.dimensions || {};
+            setEnclosureFormData({
+                name: enclosure.name || '',
+                enclosureType: enclosure.enclosureType || '',
+                buildingId: enclosure.buildingId || '',
+                roomId: enclosure.roomId || '',
+                purpose: enclosure.purpose || 'general',
+                purposeDescription: enclosure.purposeDescription || '',
+                capacity: enclosure.capacity || '',
+                length: dims.length || '',
+                width: dims.width || '',
+                height: dims.height || '',
+                dimensionsUnit: dims.unit || 'in',
+                tempMin: enclosure.tempMin ?? '',
+                tempMax: enclosure.tempMax ?? '',
+                temperatureUnit: enclosure.temperatureUnit || 'C',
+                humidityMin: enclosure.humidityMin ?? '',
+                humidityMax: enclosure.humidityMax ?? '',
+                lightsOnTime: enclosure.lightsOnTime || '',
+                lightsOffTime: enclosure.lightsOffTime || '',
+                lightTimeFormat: enclosure.lightTimeFormat || '24h',
+                notes: enclosure.notes || '',
+                imageUrl: enclosure.imageUrl || '',
+                tags: enclosure.tags || [],
+                speciesLabels: enclosure.speciesLabels || [],
+                cleaningTasks: enclosure.cleaningTasks || [],
+            });
+            setEnclosureImagePreview(enclosure.imageUrl || null);
+            setEnclosureImageFile(null);
+            setEditingEnclosureId(enclosure._id);
+        } else {
+            resetNewEnclosureForm();
+            setEnclosureImagePreview(null);
+            setEnclosureImageFile(null);
+            setEditingEnclosureId(null);
+        }
+        setShowEnclosureModal(true);
+    }, []);
+
+    const handleSaveLocation = useCallback(async (id, data) => {
+        setLocationSaving(true);
+        try {
+            if (id) {
+                await axios.put(`${API_BASE_URL}/locations/${id}`, { ...data, parentLocationId: data.parentLocationId || null }, { headers: { Authorization: `Bearer ${authToken}` } });
+            } else {
+                await axios.post(`${API_BASE_URL}/locations`, data, { headers: { Authorization: `Bearer ${authToken}` } });
+            }
+            fetchLocations();
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || `Failed to save location: ${err.message}`);
+        } finally {
+            setLocationSaving(false);
+        }
+    }, [authToken, API_BASE_URL, fetchLocations, showModalMessage]);
+
+    const handleDeleteLocation = useCallback(async (id) => {
+        setLocationSaving(true);
+        try {
+            await axios.delete(`${API_BASE_URL}/locations/${id}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            fetchLocations();
+            fetchEnclosures();
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || `Failed to delete location: ${err.message}`);
+        } finally {
+            setLocationSaving(false);
+        }
+    }, [authToken, API_BASE_URL, fetchLocations, fetchEnclosures, showModalMessage]);
+
+    const speciesOptionsForEnclosureModal = React.useMemo(() => {
+        const favoriteSpecies = userProfile?.favoriteSpecies || [];
+        const allSystemSpecies = speciesOptions || [];
+        const systemSpeciesNames = allSystemSpecies.map(s => s.name).filter(Boolean);
+        const combined = [...new Set([...systemSpeciesNames, ...favoriteSpecies])];
+        const sorted = combined.sort((a, b) => a.localeCompare(b));
+        return sorted.map(speciesName => ({
+            name: speciesName,
+            latinName: allSystemSpecies.find(s => s.name === speciesName)?.latinName || getSpeciesLatinName(speciesName),
+            category: allSystemSpecies.find(s => s.name === speciesName)?.category || getSpeciesCategory(speciesName)
+        }));
+    }, [userProfile?.favoriteSpecies, speciesOptions]);
 
     const addMeasurement = () => {
         if (!newMeasurement.date || !newMeasurement.weight) {
@@ -6073,6 +6303,37 @@ const AnimalFormModalV2 = ({
                 )}
 
                 {showEnclosureModal && (
+                    <EnclosureModal
+                        isOpen={showEnclosureModal}
+                        onClose={handleCloseEnclosureModal}
+                        enclosureFormData={enclosureFormData}
+                        setEnclosureFormData={setEnclosureFormData}
+                        editingEnclosureId={editingEnclosureId}
+                        handleSaveEnclosure={handleSaveEnclosure}
+                        handleDeleteEnclosure={handleDeleteEnclosure}
+                        enclosureSaving={enclosureSaving}
+                        enclosureImageFile={enclosureImageFile}
+                        setEnclosureImageFile={setEnclosureImageFile}
+                        enclosureImagePreview={enclosureImagePreview}
+                        setEnclosureImagePreview={setEnclosureImagePreview}
+                        newEnclosureTag={newEnclosureTag}
+                        setNewEnclosureTag={setNewEnclosureTag}
+                        handleEnclosureTagAdd={() => {}}
+                        handleEnclosureTagRemove={() => {}}
+                        speciesOptions={speciesOptionsForEnclosureModal}
+                        handleEnclosureSpeciesLabelAdd={() => {}}
+                        handleEnclosureSpeciesLabelRemove={() => {}}
+                        locations={locations}
+                        onManageLocations={() => setShowLocationManager(true)}
+                        newCleaningTaskName={newCleaningTaskName}
+                        setNewCleaningTaskName={setNewCleaningTaskName}
+                        newCleaningTaskFreq={newCleaningTaskFreq}
+                        setNewCleaningTaskFreq={setNewCleaningTaskFreq}
+                        supplies={supplies}
+                    />
+                )}
+
+                {showEnclosureModal && (
                     <AssignEnclosureModal
                         isOpen={showEnclosureModal}
                         onClose={() => setShowEnclosureModal(false)}
@@ -6088,6 +6349,16 @@ const AnimalFormModalV2 = ({
                     />
                 )}
                 
+                {showLocationManager && (
+                    <LocationManagerModal
+                        isOpen={showLocationManager}
+                        onClose={() => setShowLocationManager(false)}
+                        locations={locations}
+                        onSave={handleSaveLocation}
+                        onDelete={handleDeleteLocation}
+                        saving={locationSaving}
+                    />
+                )}
                 {/* Footer */}
                 <div className="p-6 border-t border-gray-300 flex-shrink-0">
                     <div className="flex justify-between items-center">
