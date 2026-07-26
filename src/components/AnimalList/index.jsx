@@ -719,13 +719,14 @@ const handleArchive = useCallback(async (animalToArchive) => {
             await axios.delete(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            showModalMessageRef.current('Success', 'Enclosure deleted.');
+            showModalMessageRef.current('Success', 'Enclosure deleted. Any animals assigned to it have been unassigned.');
             fetchEnclosures();
+            fetchAllAnimals(); // Refresh animal list so UI shows animals as unassigned
             handleCloseEnclosureModal();
         } catch (err) {
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to delete enclosure.');
         }
-    }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, handleCloseEnclosureModal]);
+    }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, fetchAllAnimals, handleCloseEnclosureModal]);
 
     const getLocationPath = useCallback((buildingId, roomId, allLocations) => {
         if (!buildingId || !allLocations.length) return '';
