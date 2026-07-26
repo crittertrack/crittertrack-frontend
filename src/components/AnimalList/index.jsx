@@ -1645,7 +1645,7 @@ useEffect(() => {
         return activeAnimalsForDashboard.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
     }, [activeAnimalsForDashboard, inHealthEnclosure]);
 
-    const isDue = useCallback((task) => {
+    const isTaskDue = useCallback((task) => {
         const freq = task.frequencyDays || task.frequency;
         if (!freq) return false;
         if (!task.lastDoneDate) return true;
@@ -1677,10 +1677,10 @@ useEffect(() => {
 
     const enclosureMaintenanceDueCount = useMemo(() => {
         return enclosures.reduce((count, enc) => {
-            const hasDueTask = (enc.cleaningTasks || []).some(isDue);
+            const hasDueTask = (enc.cleaningTasks || []).some(isTaskDue);
             return count + (hasDueTask ? 1 : 0);
         }, 0);
-    }, [enclosures, isDue]);
+    }, [enclosures, isTaskDue]);
 
     const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
 
@@ -1696,15 +1696,15 @@ useEffect(() => {
     const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
     const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays)); // This is for the Feeding management view
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
-    const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+    const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(isTaskDue).length, 0);
     const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
     const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
     const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
     const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
     const animalsWithEnclosureCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.maintenanceFrequencyDays));
-    const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+    const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(isTaskDue).length, 0);
     const maintMaintenanceDue = allAnimals.filter(a => a.maintenanceFrequencyDays && isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length;
-    const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) + supplyReorderDue.length + enclosureCarTasksDue + maintMaintenanceDue;
+    const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(isTaskDue).length, 0) + supplyReorderDue.length + enclosureCarTasksDue + maintMaintenanceDue;
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
     const enclosureAnimalMap = {}; // { enclosureId: [animals] }
@@ -3075,7 +3075,7 @@ useEffect(() => {
 
             const dimensions = formatDimensions(enclosure.dimensions, enclosure.size);
 
-            const needsCleaning = (enclosure.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
+            const needsCleaning = (enclosure.cleaningTasks || []).some(isTaskDue);
 
             return (
                 <div 
@@ -4302,7 +4302,7 @@ useEffect(() => {
                                                     )}
                                                     {/* Per-task enclosure care tasks */}
                                                     {tasks.map((task, idx) => {
-                                                        const due = isDue(task.lastDoneDate, task.frequencyDays);
+                                                        const due = isTaskDue(task);
                                                         const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
                                                         const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
                                                         const soon = !due && daysLeft !== null && daysLeft <= 2;
@@ -4361,7 +4361,7 @@ useEffect(() => {
                                             {!isGrpCollapsed && (
                                                 <div className="px-4 py-2 space-y-2">
                                                     {enc.cleaningTasks.map((task, idx) => {
-                                                        const due = isDue(task.lastDoneDate, task.frequencyDays);
+                                                        const due = isTaskDue(task);
                                                         const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
                                                         const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
                                                         const soon = !due && daysLeft !== null && daysLeft <= 2;
