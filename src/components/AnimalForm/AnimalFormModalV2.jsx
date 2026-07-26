@@ -6357,22 +6357,6 @@ const AnimalFormModalV2 = ({
                     />
                 )}
 
-                {showEnclosureModal && (
-                    <AssignEnclosureModal
-                        isOpen={showEnclosureModal}
-                        onClose={() => setShowEnclosureModal(false)}
-                        onSelect={(enclosure) => {
-                            setSelectedEnclosure(enclosure);
-                            setFormData(prev => ({ ...prev, enclosureId: enclosure.id || enclosure.name }));
-                        }}
-                        availableEnclosures={availableEnclosures}
-                        loadingEnclosures={loadingEnclosures}
-                        API_BASE_URL={API_BASE_URL}
-                        authToken={authToken}
-                        showModalMessage={showModalMessage}
-                    />
-                )}
-                
                 {showLocationManager && (
                     <LocationManagerModal
                         isOpen={showLocationManager}
