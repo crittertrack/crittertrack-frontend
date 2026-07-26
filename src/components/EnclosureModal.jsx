@@ -290,30 +290,77 @@ const EnclosureModal = ({
                             </div>
                             {/* Cleaning Tasks */}
                             <div className="sm:col-span-2">
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Cleaning Tasks</label>
-                                {(enclosureFormData.cleaningTasks || []).length > 0 && (
-                                    <div className="space-y-1 mb-2">
-                                        {(enclosureFormData.cleaningTasks || []).map((task, idx) => (
-                                            <div key={idx} className="flex items-center gap-2 text-xs bg-white rounded border border-gray-200 px-2 py-1.5">
-                                                <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
-                                                {task.frequencyDays && <span className="text-gray-400">Every {task.frequencyDays}d</span>}
-                                                <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, cleaningTasks: (p.cleaningTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-0.5" title="Remove"><X size={14} /></button>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Tasks</label>
+                                <div className="space-y-2">
+                                    {(enclosureFormData.cleaningTasks || []).map((task, idx) => (
+                                        <div key={idx} className="bg-white dark:bg-dark-surface-hover p-2 rounded-lg border border-gray-200 dark:border-dark-border">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="font-medium text-sm text-gray-800 dark:text-dark-text">{task.taskName}</p>
+                                                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">
+                                                        {(task.frequencyDays || task.frequency) && (
+                                                            <span>Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}</span>
+                                                        )}
+                                                        {task.notes && <p className="italic">"{task.notes}"</p>}
+                                                    </div>
+                                                </div>
+                                                <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, cleaningTasks: (p.cleaningTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-1" title="Remove"><Trash2 size={14} /></button>
                                             </div>
-                                        ))}
+                                            {task.assignedSupplies && task.assignedSupplies.length > 0 && (
+                                                <div className="mt-2 pt-2 border-t border-gray-100 dark:border-dark-border">
+                                                    <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary">Supplies:</p>
+                                                    <ul className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1 space-y-0.5">
+                                                        {task.assignedSupplies.map(s => (
+                                                            <li key={s.supplyId} className="flex items-center gap-1">
+                                                                <Package size={12} />
+                                                                <span>{s.quantity} x {s.supplyName}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="bg-gray-100 dark:bg-dark-surface-hover p-3 mt-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                    <h5 className="text-xs font-bold text-gray-700 dark:text-dark-text">Add New Task</h5>
+                                    <input type="text" value={newCleaningTaskName} onChange={e => setNewCleaningTaskName(e.target.value)} placeholder="Task name (e.g. Full substrate change)" className="w-full p-1.5 text-xs border border-gray-300 rounded-lg" />
+                                    <div className="flex gap-2">
+                                        <input type="number" value={newCleaningTaskFreq} onChange={e => setNewCleaningTaskFreq(e.target.value)} placeholder="Frequency" min="1" className="w-20 p-1.5 text-xs border border-gray-300 rounded-lg" />
+                                        <select value={newCleaningTaskFreqUnit} onChange={e => setNewCleaningTaskFreqUnit(e.target.value)} className="flex-1 p-1.5 text-xs border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
+                                            <option value="days">Days</option>
+                                            <option value="weeks">Weeks</option>
+                                            <option value="months">Months</option>
+                                        </select>
                                     </div>
-                                )}
-                                <div className="flex items-center gap-2">
-                                    <input type="text" value={newCleaningTaskName} onChange={e => setNewCleaningTaskName(e.target.value)}
-                                        placeholder="e.g. Spot clean, Full clean, Bulb change"
-                                        className="flex-1 p-1.5 text-xs border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
-                                    <input type="number" value={newCleaningTaskFreq} onChange={e => setNewCleaningTaskFreq(e.target.value)}
-                                        placeholder="Days" min="1"
-                                        className="w-16 p-1.5 text-xs border border-gray-300 rounded-lg focus:ring-blue-400 focus:border-blue-400" />
+                                    <input type="text" value={newCleaningTaskNotes} onChange={e => setNewCleaningTaskNotes(e.target.value)} placeholder="Optional notes for this task" className="w-full p-1.5 text-xs border border-gray-300 rounded-lg" />
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">Supplies Used</label>
+                                        {newCleaningTaskSupplies.length > 0 && (
+                                            <div className="space-y-1 mb-1">
+                                                {newCleaningTaskSupplies.map(supply => (
+                                                    <div key={supply.supplyId} className="flex items-center gap-2 text-xs bg-white p-1 rounded border">
+                                                        <span className="flex-1">{supply.supplyName}</span>
+                                                        <input type="number" value={supply.quantity} onChange={e => handleSupplyQuantityChange(supply.supplyId, e.target.value)} className="w-12 p-1 border rounded" min="1" />
+                                                        <button type="button" onClick={() => handleRemoveSupplyFromTask(supply.supplyId)} className="text-red-500"><Trash2 size={12} /></button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <select onChange={e => { const supply = supplies.find(s => s._id === e.target.value); if (supply) handleAddSupplyToTask(supply); e.target.value = ''; }} className="w-full p-1.5 text-xs border border-gray-300 rounded-lg bg-white">
+                                            <option value="">+ Add a supply...</option>
+                                            {supplies.filter(s => !newCleaningTaskSupplies.find(nts => nts.supplyId === s._id)).map(supply => (
+                                                <option key={supply._id} value={supply._id}>{supply.name} ({supply.currentStock} {supply.unit})</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                     <button type="button" onClick={() => {
                                         if (!newCleaningTaskName.trim()) return;
-                                        setEnclosureFormData(p => ({ ...p, cleaningTasks: [...(p.cleaningTasks || []), { taskName: newCleaningTaskName.trim(), frequencyDays: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, lastDoneDate: null }] }));
-                                        setNewCleaningTaskName(''); setNewCleaningTaskFreq('');
-                                    }} className="px-2 py-1.5 text-xs bg-blue-600 text-white rounded font-medium hover:bg-blue-700 whitespace-nowrap">+ Add</button>
+                                        const newTask = { taskName: newCleaningTaskName.trim(), frequency: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, frequencyUnit: newCleaningTaskFreq ? newCleaningTaskFreqUnit : null, notes: newCleaningTaskNotes.trim() || null, assignedSupplies: newCleaningTaskSupplies, lastDoneDate: null };
+                                        setEnclosureFormData(p => ({ ...p, cleaningTasks: [...(p.cleaningTasks || []), newTask] }));
+                                        setNewCleaningTaskName(''); setNewCleaningTaskFreq(''); setNewCleaningTaskFreqUnit('days'); setNewCleaningTaskNotes(''); setNewCleaningTaskSupplies([]);
+                                    }} className="w-full px-2 py-1.5 text-xs bg-blue-600 text-white rounded font-medium hover:bg-blue-700">+ Add Task</button>
                                 </div>
                             </div>
                         </div>
