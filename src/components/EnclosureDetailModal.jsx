@@ -323,6 +323,21 @@ const EnclosureDetailModal = ({
     const cleaningTasks = enclosure.cleaningTasks || [];
     const speciesLabels = enclosure.speciesLabels || [];
 
+    // Handle delete a single note from notesHistory via PATCH $pull
+    const handleDeleteNote = async (noteId) => {
+        if (!window.confirm('Delete this note?')) return;
+        try {
+            await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id || enclosure.id}`, {
+                $pull: { notesHistory: { id: noteId } }
+            }, {
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` }
+            });
+            setNotes(notes.filter(n => n.id !== noteId));
+        } catch (err) {
+            console.error('Failed to delete note:', err);
+        }
+    };
+
 // Handle add note — uses PATCH $push to append to notesHistory
     const handleAddNote = async () => {
         if (!newNote.trim()) return;
@@ -343,7 +358,6 @@ const EnclosureDetailModal = ({
             });
             setNotes([...notes, noteEntry]);
             setNewNote('');
-            showModalMessage('Success', 'Note added.');
             onRefresh?.();
         } catch (err) {
             console.error('Failed to add note:', err);
@@ -901,16 +915,27 @@ const EnclosureDetailModal = ({
                                     {[...notes].reverse().map((note, idx) => (
                                         <div
                                             key={note.id || idx}
-                                            className="p-3 bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-100 dark:border-dark-border"
+                                            className="p-3 bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-100 dark:border-dark-border group"
                                         >
                                             <div className="flex justify-between items-start mb-1">
                                                 <span className="text-[11px] font-medium text-gray-500 dark:text-dark-text-muted bg-gray-200 dark:bg-dark-border px-1.5 py-0.5 rounded">
                                                     {note.category || 'General'}
                                                 </span>
-                                                <span className="text-[11px] text-gray-400">
-                                                    {note.timestamp ? formatDate(note.timestamp) : ''}
-                                                    {note.pending && ' (pending save)'}
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[11px] text-gray-400">
+                                                        {note.timestamp ? formatDate(note.timestamp) : ''}
+                                                        {note.pending && ' (pending save)'}
+                                                    </span>
+                                                    {!note.pending && (
+                                                        <button
+                                                            onClick={() => handleDeleteNote(note.id)}
+                                                            className="p-1 rounded text-gray-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            title="Delete note"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                             <p className="text-sm text-gray-700 dark:text-dark-text">{note.text}</p>
                                         </div>
