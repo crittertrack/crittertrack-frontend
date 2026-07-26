@@ -235,7 +235,6 @@ const EnclosureDetailModal = ({
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            showModalMessage?.('Success', `Task "${task.taskName}" completed.`);
             onRefresh?.();
         } catch (err) {
             console.error('Failed to update task:', err);

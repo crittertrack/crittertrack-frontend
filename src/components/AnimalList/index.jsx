@@ -2916,6 +2916,7 @@ useEffect(() => {
         
         const needsAttentionCount = enclosures.reduce((count, enc) => {
             const hasDueTask = (enc.cleaningTasks || []).some(isDue);
+            const hasDueTask = (enc.cleaningTasks || []).some(isTaskDue);
             return count + (hasDueTask ? 1 : 0);
         }, 0);
 
@@ -4205,6 +4206,7 @@ useEffect(() => {
                                             <div className="px-4 py-2 space-y-1">
                                                 {tasks.map((task, idx) => {
                                                     const due = isDue(task.lastDoneDate, task.frequencyDays);
+                                                    const due = isTaskDue(task);
                                                     const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
                                                     const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
                                                     const soon = !due && daysLeft !== null && daysLeft <= 2;
