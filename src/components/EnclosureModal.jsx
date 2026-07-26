@@ -49,24 +49,6 @@ const EnclosureModal = ({
         Other: { icon: <Info size={11} />, color: 'text-gray-600' },
     };
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (modalRef.current && !modalRef.current.contains(event.target)) {
-                onClose();
-            }
-        };
-
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        } else {
-            document.removeEventListener('mousedown', handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isOpen, onClose]);
-
     if (!isOpen) return null;
 
     const handleImageChange = (e) => {
@@ -96,7 +78,7 @@ const EnclosureModal = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={onClose}>
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60">
             <div ref={modalRef} className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-4 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-3 pb-3 border-b dark:border-dark-border">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">{editingEnclosureId ? 'Edit Enclosure' : 'Add New Enclosure'}</h3>
