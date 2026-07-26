@@ -580,10 +580,6 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureImageFile, setEnclosureImageFile] = useState(null);
     const [enclosureImagePreview, setEnclosureImagePreview] = useState(null);
 
-    const [supplies, setSupplies] = useState([]);
-    const [suppliesLoading, setSuppliesLoading] = useState(false);
-
-
     const [enclosureSaving, setEnclosureSaving] = useState(false);
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
@@ -1133,19 +1129,6 @@ useEffect(() => {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showDuplicatesScreen]);
-
-    const fetchSupplies = useCallback(async () => {
-        if (!authToken) return;
-        setSuppliesLoading(true);
-        try {
-            const res = await axios.get(`${API_BASE_URL}/supplies`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            setSupplies(res.data || []);
-        } catch (err) { console.error('[fetchSupplies]', err); }
-        setSuppliesLoading(false);
-    }, [authToken, API_BASE_URL]);
-    useEffect(() => { fetchSupplies(); }, [fetchSupplies]);
 
     const handleEnclosureTagAdd = useCallback(() => {
         if (!newEnclosureTag.trim()) return;
