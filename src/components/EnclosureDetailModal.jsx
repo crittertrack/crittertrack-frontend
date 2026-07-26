@@ -192,7 +192,24 @@ const EnclosureDetailModal = ({
                     actionText = <>Enclosure created</>;
                     break;
                 case 'update':
-                    actionText = <>Updated <strong>{details.field}</strong> from "{details.oldValue || 'empty'}" to "{details.newValue || 'empty'}"</>;
+                    if (details.changes && Array.isArray(details.changes) && details.changes.length > 0) {
+                        actionText = (
+                            <div className="flex-1 space-y-1">
+                                <p className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Updated enclosure</p>
+                                {details.changes.slice(0, 3).map((change, idx) => (
+                                    <p key={idx} className="text-sm text-gray-700 dark:text-dark-text">
+                                        <span className="font-medium">{change.label || change.field}:</span>{' '}
+                                        from "{change.oldValue || 'empty'}" to "{change.newValue || 'empty'}"
+                                    </p>
+                                ))}
+                                {details.changes.length > 3 && (
+                                    <p className="text-xs text-gray-400">...and {details.changes.length - 3} more change{details.changes.length - 3 > 1 ? 's' : ''}</p>
+                                )}
+                            </div>
+                        );
+                    } else {
+                        actionText = <>Updated enclosure</>;
+                    }
                     break;
                 case 'assign_animal':
                     const assignedAnimalName = [details.prefix, details.animalName, details.suffix].filter(Boolean).join(' ');
