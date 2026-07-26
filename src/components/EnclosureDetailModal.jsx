@@ -323,7 +323,7 @@ const EnclosureDetailModal = ({
     const cleaningTasks = enclosure.cleaningTasks || [];
     const speciesLabels = enclosure.speciesLabels || [];
 
-    // Handle add note
+// Handle add note — uses PATCH $push to append to notesHistory
     const handleAddNote = async () => {
         if (!newNote.trim()) return;
         const noteEntry = {
@@ -334,14 +334,14 @@ const EnclosureDetailModal = ({
         };
         setSavingNote(true);
         try {
-            // Update enclosure with new note
-            const updatedNotes = [...notes, noteEntry];
-            await axios.put(`${API_BASE_URL}/enclosures/${enclosure._id || enclosure.id}`, {
-                notesHistory: updatedNotes,
+            // Use PATCH with $push so only the notesHistory array is updated
+            // (PUT would replace all fields and miss notesHistory entirely)
+            await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id || enclosure.id}`, {
+                $push: { notesHistory: noteEntry }
             }, {
-                headers: { Authorization: `Bearer ${authToken}` }
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` }
             });
-            setNotes(updatedNotes);
+            setNotes([...notes, noteEntry]);
             setNewNote('');
             showModalMessage('Success', 'Note added.');
             onRefresh?.();
