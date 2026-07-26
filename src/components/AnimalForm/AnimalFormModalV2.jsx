@@ -1351,13 +1351,11 @@ const AnimalFormModalV2 = ({
 
     const resetNewEnclosureForm = () => setEnclosureFormData({
         name: '',
-        roomType: '',
-        location: '',
-        capacity: '',
-        dimensions: { length: '', width: '', height: '', unit: 'cm' },
-        temperatureRange: { min: '', max: '', unit: 'C' },
-        humidityRange: { min: '', max: '' },
-        description: ''
+        enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+        buildingId: '', roomId: '',
+        purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+        lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+        cleaningTasks: []
     });
 
     const fetchEnclosures = useCallback(async () => {
@@ -6323,6 +6321,37 @@ const AnimalFormModalV2 = ({
                             setImageEditorOpen(false);
                             setImagesToEdit([]);
                         }}
+                    />
+                )}
+
+                {showEnclosureModal && (
+                    <EnclosureModal
+                        isOpen={showEnclosureModal}
+                        onClose={handleCloseEnclosureModal}
+                        enclosureFormData={enclosureFormData}
+                        setEnclosureFormData={setEnclosureFormData}
+                        editingEnclosureId={editingEnclosureId}
+                        handleSaveEnclosure={handleSaveEnclosure}
+                        handleDeleteEnclosure={handleDeleteEnclosure}
+                        enclosureSaving={enclosureSaving}
+                        enclosureImageFile={enclosureImageFile}
+                        setEnclosureImageFile={setEnclosureImageFile}
+                        enclosureImagePreview={enclosureImagePreview}
+                        setEnclosureImagePreview={setEnclosureImagePreview}
+                        newEnclosureTag={newEnclosureTag}
+                        setNewEnclosureTag={setNewEnclosureTag}
+                        handleEnclosureTagAdd={() => {}}
+                        handleEnclosureTagRemove={() => {}}
+                        speciesOptions={speciesOptionsForEnclosureModal}
+                        handleEnclosureSpeciesLabelAdd={() => {}}
+                        handleEnclosureSpeciesLabelRemove={() => {}}
+                        locations={locations}
+                        onManageLocations={() => setShowLocationManager(true)}
+                        newCleaningTaskName={newCleaningTaskName}
+                        setNewCleaningTaskName={setNewCleaningTaskName}
+                        newCleaningTaskFreq={newCleaningTaskFreq}
+                        setNewCleaningTaskFreq={setNewCleaningTaskFreq}
+                        supplies={supplies}
                     />
                 )}
 
