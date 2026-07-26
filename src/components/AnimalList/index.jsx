@@ -3655,6 +3655,7 @@ useEffect(() => {
                 userId: userProfile._id,
                 userName: userProfile.personalName || userProfile.breederName,
                 action: 'task_done',
+                action: 'task_complete',
                 details: { taskName: task.taskName, taskType: task.type || 'Other' }
             };
 
@@ -5622,6 +5623,7 @@ useEffect(() => {
                     onAssignAnimal={handleAssignAnimalInModal}
                     onLogEnclosureHistory={logEnclosureHistory}
                     onUnassignAnimal={handleUnassignAnimalInModal}
+                    userProfile={userProfile}
                 />
             )}
             {showLocationManager && (

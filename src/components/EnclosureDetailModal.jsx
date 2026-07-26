@@ -133,6 +133,7 @@ const EnclosureDetailModal = ({
     onUnassignAnimal,
     showModalMessage,
     onLogEnclosureHistory,
+    userProfile,
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [newNote, setNewNote] = useState('');
@@ -297,18 +298,34 @@ const EnclosureDetailModal = ({
 
     // Handle cleaning task completion
     const handleCompleteTask = async (task) => {
-        if (!task || !task._id) return;
+        if (!task || !task._id || !userProfile) return;
         setUpdatingTask(task._id);
         try {
-            // Temporarily disabled supply deduction on task completion until partial quantities are supported.
-            // const supplyUsage = task.assignedSupplies?.map(s => ({ supplyId: s.supplyId, quantityUsed: s.quantity })) || [];
+            const taskIndex = enclosure.cleaningTasks.findIndex(t => t._id === task._id);
+            if (taskIndex === -1) {
+                showModalMessage?.('Error', 'Task not found.');
+                setUpdatingTask(null);
+                return;
+            }
 
-            await axios.post(`${API_BASE_URL}/enclosures/${enclosure._id}/tasks/${task._id}/complete`, {
-                // supplyUsage
+            const updatedTasks = [...enclosure.cleaningTasks];
+            updatedTasks[taskIndex] = { ...updatedTasks[taskIndex], lastDoneDate: new Date().toISOString() };
+
+            const historyEntry = {
+                timestamp: new Date().toISOString(),
+                userId: userProfile._id,
+                userName: userProfile.personalName || userProfile.breederName,
+                action: 'task_complete',
+                details: { taskName: task.taskName, taskType: task.type || 'Other' }
+            };
+
+            // Use PATCH (now supported on backend) for partial updates
+            await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id}`, {
+                cleaningTasks: updatedTasks,
+                $push: { history: historyEntry }
             }, {
-                headers: { Authorization: `Bearer ${authToken}` }
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` }
             });
-            onLogEnclosureHistory?.(enclosure._id, 'task_complete', { taskName: task.taskName });
             onRefresh?.();
         } catch (err) {
             console.error('Failed to update task:', err);
