@@ -150,6 +150,18 @@ const EnclosureDetailModal = ({
         Other: { icon: <Info size={12} className="text-gray-600" />, color: 'text-gray-600' },
     };
 
+    const formatValue = (val) => {
+        if (val === null || val === undefined || val === '') return 'empty';
+        if (Array.isArray(val)) {
+            if (val.length === 0) return 'empty';
+            return val.join(', ');
+        }
+        if (typeof val === 'object') {
+            try { return JSON.stringify(val); } catch { return 'empty'; }
+        }
+        return String(val);
+    };
+
     const HistoryItem = ({ item }) => {
         const { action, details, userName, timestamp, text } = item;
     
@@ -194,7 +206,7 @@ const EnclosureDetailModal = ({
                 case 'update':
                     if (item._singleChange) {
                         const change = item._singleChange;
-                        actionText = <>Updated <span className="font-medium">{change.label || change.field}</span> from "{change.oldValue || 'empty'}" to "{change.newValue || 'empty'}"</>;
+                        actionText = <>Updated <span className="font-medium">{change.label || change.field}</span> from "{formatValue(change.oldValue)}" to "{formatValue(change.newValue)}"</>;
                     } else {
                         actionText = <>Updated enclosure</>;
                     }
