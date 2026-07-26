@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import {
     X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
-    AlertCircle, Users, Wrench, MessageSquare, Clock, Edit,
     AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, Package,
     Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2, Search,
     Lightbulb, RefreshCw, Star, Info, Activity
@@ -201,20 +200,10 @@ const EnclosureDetailModal = ({
     };
 
     // Handle cleaning task completion
-    const handleCompleteTask = async (taskIdx) => {
-        setUpdatingTask(taskIdx);
-        const task = cleaningTasks[taskIdx];
+    const handleCompleteTask = async (task) => {
+        if (!task || !task._id) return;
         setUpdatingTask(task._id);
         try {
-            const updatedTasks = cleaningTasks.map((task, idx) => {
-                if (idx === taskIdx) {
-                    return { ...task, lastDoneDate: new Date().toISOString() };
-                }
-                return task;
-            });
-            await axios.put(`${API_BASE_URL}/enclosures/${enclosure._id || enclosure.id}`, {
-                cleaningTasks: updatedTasks,
-            // For now, assume assigned supplies are used. A modal could be added here to confirm.
             const supplyUsage = task.assignedSupplies?.map(s => ({ supplyId: s.supplyId, quantityUsed: s.quantity })) || [];
 
             await axios.post(`${API_BASE_URL}/enclosures/${enclosure._id}/tasks/${task._id}/complete`, {
@@ -222,35 +211,30 @@ const EnclosureDetailModal = ({
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            showModalMessage?.('Success', `Task "${task.taskName}" completed.`);
             onRefresh?.();
         } catch (err) {
             console.error('Failed to update task:', err);
-            showModalMessage('Error', 'Failed to update task.');
             showModalMessage?.('Error', 'Failed to update task.');
         } finally {
             setUpdatingTask(null);
         }
     };
 
-    // Get task status
+    // Get task status - assumes frequency is in days for now
     const getTaskStatus = (task) => {
-        if (!task.frequencyDays) return { color: 'text-gray-400', label: 'No schedule', overdue: false };
-        if (!task.lastDoneDate) return { color: 'text-blue-600', label: 'Due now', overdue: false };
-        if (!task.frequency) return { color: 'text-gray-400', label: 'No schedule', overdue: false };
-        if (!task.lastDoneDate) return { color: 'text-blue-600', label: 'Due now', overdue: true };
+        if (!task.frequencyDays && !task.frequency) return { color: 'text-gray-400', label: 'No schedule', overdue: false };
+        if (!task.lastDoneDate) return { color: 'text-red-600', label: 'Due now', overdue: true };
+
         const lastDone = new Date(task.lastDoneDate);
         const nextDue = new Date(lastDone);
-        nextDue.setDate(nextDue.getDate() + task.frequencyDays);
-
-        switch(task.frequencyUnit) {
-            case 'days': nextDue.setDate(nextDue.getDate() + task.frequency); break;
-            case 'weeks': nextDue.setDate(nextDue.getDate() + task.frequency * 7); break;
-            case 'months': nextDue.setMonth(nextDue.getMonth() + task.frequency); break;
-            case 'years': nextDue.setFullYear(nextDue.getFullYear() + task.frequency); break;
-            default: break;
-        }
+        const frequencyInDays = task.frequencyDays || (task.frequencyUnit === 'weeks' ? task.frequency * 7 : task.frequencyUnit === 'months' ? task.frequency * 30 : task.frequency);
+        nextDue.setDate(nextDue.getDate() + frequencyInDays);
 
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        nextDue.setHours(0, 0, 0, 0);
+
         if (nextDue < today) {
             const daysOver = Math.floor((today - nextDue) / (1000 * 60 * 60 * 24));
             return { color: 'text-red-600', label: `${daysOver}d overdue`, overdue: true };
@@ -258,6 +242,7 @@ const EnclosureDetailModal = ({
         const daysLeft = Math.ceil((nextDue - today) / (1000 * 60 * 60 * 24));
         return { color: 'text-green-600', label: `${daysLeft}d remaining`, overdue: false };
     };
+
 
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/60" onClick={onClose}>
@@ -614,37 +599,16 @@ const EnclosureDetailModal = ({
                                     {cleaningTasks.map((task, idx) => {
                                         const status = getTaskStatus(task);
                                         return (
-                                            <div
-                                                key={idx}
+                                            <div key={task._id || idx}
                                                 className={`flex items-center gap-3 p-3 rounded-lg border ${
                                                     status.overdue
                                                         ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                                                         : 'bg-gray-50 dark:bg-dark-surface-hover border-gray-100 dark:border-dark-border'
                                                 }`}
                                             >
-                                                <button
-                                                    onClick={() => handleCompleteTask(idx)}
-                                                    disabled={updatingTask === idx}
-                                                    className={`p-1.5 rounded-full transition-colors ${
-                                                        status.overdue
-                                                            ? 'text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40'
-                                                            : 'text-green-500 hover:bg-green-100 dark:hover:bg-green-900/40'
-                                                    }`}
-                                                    title="Mark as done"
-                                                >
-                                                    {updatingTask === idx
-                                                        ? <Loader2 size={16} className="animate-spin" />
-                                                        : <CheckCircle size={16} />
-                                                    }
-                                                </button>
-                                                <div className="flex-1">
-                                                    <p className="text-sm font-medium text-gray-800 dark:text-dark-text">{task.taskName}</p>
-                                                    {task.frequencyDays && (
-                                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">Every {task.frequencyDays} days</p>
-                                                    )}
                                                 <div className="flex items-center gap-3">
                                                     <button
-                                                        onClick={() => handleCompleteTask(idx)}
+                                                        onClick={() => handleCompleteTask(task)}
                                                         disabled={updatingTask === task._id}
                                                         className={`p-1.5 rounded-full transition-colors ${
                                                             status.overdue
@@ -661,8 +625,8 @@ const EnclosureDetailModal = ({
                                                     <div className="flex-1">
                                                         <p className="text-sm font-medium text-gray-800 dark:text-dark-text">{task.taskName}</p>
                                                         <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-2 flex-wrap">
-                                                            {task.frequency && (
-                                                                <span>Every {task.frequency} {task.frequencyUnit}</span>
+                                                            {(task.frequencyDays || task.frequency) && (
+                                                                <span>Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}</span>
                                                             )}
                                                             {task.assignedSupplies && task.assignedSupplies.length > 0 && (
                                                                 <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity} x ${s.supplyName}`).join(', ')}>
