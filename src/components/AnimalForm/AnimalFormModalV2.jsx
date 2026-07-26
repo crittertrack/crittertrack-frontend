@@ -14,7 +14,31 @@ import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from '../AnimalList/LocationManagerModal';
-import { getSpeciesLatinName, getSpeciesCategory } from '../../utils/speciesUtils';
+import { getSpeciesLatinName } from '../../utils/speciesUtils';
+
+const getSpeciesCategory = (species) => {
+    if (!species) return 'Other';
+    const s = species.toLowerCase();
+    if (s.includes('mouse') || s.includes('rat') || s.includes('hamster') || s.includes('guinea pig')) {
+        return 'Mammal';
+    }
+    if (s.includes('snake') || s.includes('lizard') || s.includes('gecko') || s.includes('turtle')) {
+        return 'Reptile';
+    }
+    if (s.includes('parrot') || s.includes('finch') || s.includes('bird')) {
+        return 'Bird';
+    }
+    if (s.includes('frog') || s.includes('salamander') || s.includes('axolotl')) {
+        return 'Amphibian';
+    }
+    if (s.includes('fish')) {
+        return 'Fish';
+    }
+    if (s.includes('tarantula') || s.includes('scorpion') || s.includes('spider') || s.includes('invertebrate')) {
+        return 'Invertebrate';
+    }
+    return 'Other';
+};
 
 const LoadingSpinner = ({ message = 'Loading...' }) => (
     <div className="flex items-center justify-center p-8">
