@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { X, Home, Trash2, Save, Loader2, Search, Package, RefreshCw } from 'lucide-react';
+import { X, Home, Trash2, Save, Loader2, Search, Package, RefreshCw, Wrench, Settings, Utensils, Info } from 'lucide-react';
 import axios from 'axios';
 import { SpeciesPickerModal } from './Modals/SpeciesModals';
 
@@ -41,6 +41,13 @@ const EnclosureModal = ({
     const [newCleaningTaskType, setNewCleaningTaskType] = useState('Cleaning');
     const [newCleaningTaskNotes, setNewCleaningTaskNotes] = useState('');
     const [newCleaningTaskSupplies, setNewCleaningTaskSupplies] = useState([]); // [{ supplyId, quantity }]
+
+    const TASK_TYPE_STYLES = {
+        Cleaning: { icon: <Wrench size={11} />, color: 'text-amber-700' },
+        Maintenance: { icon: <Settings size={11} />, color: 'text-orange-700' },
+        Feeding: { icon: <Utensils size={11} />, color: 'text-red-700' },
+        Other: { icon: <Info size={11} />, color: 'text-gray-600' },
+    };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -298,8 +305,17 @@ const EnclosureModal = ({
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <p className="font-medium text-sm text-gray-800 dark:text-dark-text">{task.taskName}</p>
-                                                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-dark-text-muted mt-0.5 flex-wrap">
-                                                        {task.type && <span className="font-semibold bg-gray-200 dark:bg-dark-border px-1.5 py-0.5 rounded">{task.type}</span>}
+                                                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-dark-text-muted mt-0.5 flex-wrap">
+                                                        {task.type && (() => {
+                                                            const type = task.type || 'Other';
+                                                            const Icon = TASK_TYPE_STYLES[type]?.icon;
+                                                            return (
+                                                                <span className="flex items-center gap-1 font-semibold bg-gray-200 dark:bg-dark-border px-1.5 py-0.5 rounded">
+                                                                    {Icon}
+                                                                    {type}
+                                                                </span>
+                                                            );
+                                                        })()}
                                                         {(task.frequencyDays || task.frequency) && (
                                                             <span className="flex items-center gap-1">
                                                                 <RefreshCw size={11} /> Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}

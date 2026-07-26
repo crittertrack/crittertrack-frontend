@@ -6,7 +6,7 @@ import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
 import {
-    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
+    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban, Info,
     Bean, Bell, Bird, Building, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings, Users, PawPrint,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart, LampCeiling, BarChart2, Thermometer,
@@ -183,6 +183,13 @@ const AnimalList = ({
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
+
+    const TASK_TYPE_STYLES = {
+        Cleaning: { icon: <Wrench size={12} />, color: 'text-amber-700' },
+        Maintenance: { icon: <Settings size={12} />, color: 'text-orange-700' },
+        Feeding: { icon: <Utensils size={12} />, color: 'text-red-700' },
+        Other: { icon: <Info size={12} />, color: 'text-gray-600' },
+    };
 
 
     // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
@@ -1697,6 +1704,21 @@ useEffect(() => {
         return enclosuresNeedingAttention.reduce((sum, enc) => sum + enc.dueTasks.length, 0);
     }, [enclosuresNeedingAttention]);
 
+    const dueEnclosureTasksByType = useMemo(() => {
+        const taskCounts = {};
+
+        enclosuresNeedingAttention.forEach(enc => {
+            enc.dueTasks.forEach(task => {
+                const type = task.type || 'Other';
+                taskCounts[type] = (taskCounts[type] || 0) + 1;
+            });
+        });
+
+        return Object.entries(taskCounts)
+            .map(([type, count]) => ({ type, count }))
+            .filter(item => item.count > 0);
+    }, [enclosuresNeedingAttention]);
+
     const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
 
     // The original 'allAnimals' variable (used for the main list and management views) remains unchanged.
@@ -3023,12 +3045,20 @@ useEffect(() => {
                                 </h4>
                                 <div className="space-y-2 pr-2">
                                     {enclosuresNeedingAttention.map(enc => (
-                                        <div key={enc._id}>
+                                        <div key={enc._id} className="cursor-pointer" onClick={() => handleOpenDetail(enc)}>
                                             <p className="font-semibold text-xs text-gray-800 dark:text-dark-text">{enc.name}</p>
-                                            <ul className="pl-3 text-xs text-gray-600 dark:text-dark-text-secondary list-disc list-inside">
-                                                {enc.dueTasks.map((task, idx) => (
-                                                    <li key={idx}>{task.taskName}</li>
-                                                ))}
+                                            <ul className="pl-2 text-xs text-gray-600 dark:text-dark-text-secondary space-y-0.5">
+                                                {enc.dueTasks.map((task, idx) => {
+                                                    const type = task.type || 'Other';
+                                                    const Icon = TASK_TYPE_STYLES[type]?.icon || TASK_TYPE_STYLES['Other'].icon;
+                                                    const color = TASK_TYPE_STYLES[type]?.color || TASK_TYPE_STYLES['Other'].color;
+                                                    return (
+                                                        <li key={idx} className={`flex items-center gap-1.5 ${color}`}>
+                                                            {Icon}
+                                                            <span>{task.taskName}</span>
+                                                        </li>
+                                                    );
+                                                })}
                                             </ul>
                                         </div>
                                     ))}
@@ -3116,7 +3146,9 @@ useEffect(() => {
 
             const dimensions = formatDimensions(enclosure.dimensions, enclosure.size);
 
-            const needsCleaning = (enclosure.cleaningTasks || []).some(isTaskDue);
+            const dueTasks = (enclosure.cleaningTasks || []).filter(isTaskDue);
+            const needsAttention = dueTasks.length > 0;
+            const dueTypes = needsAttention ? [...new Set(dueTasks.map(t => t.type || 'Other'))] : [];
 
             return (
                 <div 
@@ -3180,11 +3212,37 @@ useEffect(() => {
                         
                         {/* Warnings */}
                         <div className="mt-auto pt-2 flex flex-wrap gap-2">
-                            {needsCleaning && (
-                                <span className="flex items-center gap-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-1 rounded-full font-medium">
-                                    <Wrench size={12} /> Needs Cleaning
-                                </span>
-                            )}
+                            {needsAttention && dueTypes.map(type => {
+                                let label = 'Task Due';
+                                let colorClass = 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                                let icon = <Wrench size={12} />;
+
+                                switch(type) {
+                                    case 'Cleaning':
+                                        label = 'Needs Cleaning';
+                                        colorClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
+                                        icon = <Wrench size={12} />;
+                                        break;
+                                    case 'Maintenance':
+                                        label = 'Needs Maintenance';
+                                        colorClass = 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
+                                        icon = <Settings size={12} />;
+                                        break;
+                                    case 'Feeding':
+                                        label = 'Feeding Due';
+                                        colorClass = 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+                                        icon = <Utensils size={12} />;
+                                        break;
+                                    default:
+                                        label = `${type} Due`;
+                                        break;
+                                }
+                                return (
+                                    <span key={type} className={`flex items-center gap-1 text-xs ${colorClass} px-2 py-1 rounded-full font-medium`}>
+                                        {icon} {label}
+                                    </span>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
@@ -4676,7 +4734,7 @@ useEffect(() => {
                     {/* Column 5: Needs Attention */}
                     <div className="flex flex-col gap-2">
                         {(() => {
-                            const totalAttention = feedDueDashboard.length + healthAttentionDashboardCount + enclosureMaintenanceDueCount;
+                            const totalAttention = feedDueDashboard.length + healthAttentionDashboardCount + totalDueEnclosureTasks;
                             return (
                                 <>
                                     <StatCard
@@ -4690,17 +4748,29 @@ useEffect(() => {
                                     />
                                     {showMainAlertsBreakdown && totalAttention > 0 && (
                                         <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
-                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Attention Breakdown</h4>
-                                            <ul className="text-xs space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Needs Attention Breakdown</h4>
+                                            <ul className="text-sm space-y-1">
                                                 {feedDueDashboard.length > 0 && (
-                                                    <li className="flex justify-between"><span>Feeding Due</span><span className="font-medium">{feedDueDashboard.length}</span></li>
+                                                    <li className="flex justify-between items-center"><span className="flex items-center gap-1.5 text-red-700"><Utensils size={14} /> Feeding Due</span><span className="font-medium">{feedDueDashboard.length}</span></li>
                                                 )}
                                                 {healthAttentionDashboardCount > 0 && (
-                                                    <li className="flex justify-between"><span>Health Attention</span><span className="font-medium">{healthAttentionDashboardCount}</span></li>
+                                                    <li className="flex justify-between items-center"><span className="flex items-center gap-1.5 text-orange-700"><Activity size={14} /> Health Attention</span><span className="font-medium">{healthAttentionDashboardCount}</span></li>
                                                 )}
-                                                {enclosureMaintenanceDueCount > 0 && (
-                                                    <li className="flex justify-between"><span>Enclosure Maintenance</span><span className="font-medium">{enclosureMaintenanceDueCount}</span></li>
-                                                )}
+                                                {dueEnclosureTasksByType.map(({ type, count }) => {
+                                                    const style = TASK_TYPE_STYLES[type] || TASK_TYPE_STYLES['Other'];
+                                                    const Icon = {
+                                                        Cleaning: <Wrench size={14} />,
+                                                        Maintenance: <Settings size={14} />,
+                                                        Feeding: <Utensils size={14} />,
+                                                        Other: <Info size={14} />
+                                                    }[type] || <Info size={14} />;
+                                                    return (
+                                                        <li key={type} className="flex justify-between items-center">
+                                                            <span className={`flex items-center gap-1.5 ${style.color}`}>{Icon} {type} Tasks Due</span>
+                                                            <span className="font-medium">{count}</span>
+                                                        </li>
+                                                    );
+                                                })}
                                             </ul>
                                         </div>
                                     )}

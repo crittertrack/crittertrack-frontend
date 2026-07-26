@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import {
     X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
-    AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, Package, ClipboardList,
+    AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, Package, ClipboardList, Utensils,
     Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2, Search,
     Lightbulb, RefreshCw, Star, Info, Activity
 } from 'lucide-react';
@@ -140,6 +140,13 @@ const EnclosureDetailModal = ({
     const [updatingTask, setUpdatingTask] = useState(null);
     const modalRef = useRef(null);
     const [showAnimalPicker, setShowAnimalPicker] = useState(false);
+
+    const TASK_TYPE_STYLES = {
+        Cleaning: { icon: <Wrench size={12} className="text-amber-700" />, color: 'text-amber-700' },
+        Maintenance: { icon: <Settings size={12} className="text-orange-700" />, color: 'text-orange-700' },
+        Feeding: { icon: <Utensils size={12} className="text-red-700" />, color: 'text-red-700' },
+        Other: { icon: <Info size={12} className="text-gray-600" />, color: 'text-gray-600' },
+    };
 
     const sortedCleaningTasks = useMemo(() => {
         const tasks = enclosure.cleaningTasks || [];
@@ -449,8 +456,16 @@ const EnclosureDetailModal = ({
                                                         <p className="text-sm font-medium text-gray-800 dark:text-dark-text">{task.taskName}</p>
                                                         <p className={`text-xs font-semibold ${status.color}`}>{status.label}</p>
                                                     </div>
-                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-3 flex-wrap mt-0.5">
-                                                        {task.type && <span className="font-semibold bg-gray-200 dark:bg-dark-border px-1.5 py-0.5 rounded">{task.type}</span>}
+                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-3 flex-wrap mt-0.5">                                                        {task.type && (() => {
+                                                            const type = task.type || 'Other';
+                                                            const Icon = TASK_TYPE_STYLES[type]?.icon || TASK_TYPE_STYLES['Other'].icon;
+                                                            return (
+                                                                <span className={`flex items-center gap-1 font-semibold ${TASK_TYPE_STYLES[type]?.color || TASK_TYPE_STYLES['Other'].color}`}>
+                                                                    {Icon}
+                                                                    {type}
+                                                                </span>
+                                                            );
+                                                        })()}
                                                         {(task.frequencyDays || task.frequency) && (
                                                             <span className="flex items-center gap-1">
                                                                 <RefreshCw size={11} /> Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}
@@ -651,8 +666,16 @@ const EnclosureDetailModal = ({
                                             >
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-gray-800 dark:text-dark-text">{task.taskName}</p>
-                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-3 flex-wrap mt-1">
-                                                        {task.type && <span className="font-semibold bg-gray-200 dark:bg-dark-border px-1.5 py-0.5 rounded">{task.type}</span>}
+                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-3 flex-wrap mt-1">                                                        {task.type && (() => {
+                                                            const type = task.type || 'Other';
+                                                            const Icon = TASK_TYPE_STYLES[type]?.icon || TASK_TYPE_STYLES['Other'].icon;
+                                                            return (
+                                                                <span className={`flex items-center gap-1 font-semibold ${TASK_TYPE_STYLES[type]?.color || TASK_TYPE_STYLES['Other'].color}`}>
+                                                                    {Icon}
+                                                                    {type}
+                                                                </span>
+                                                            );
+                                                        })()}
                                                         {(task.frequencyDays || task.frequency) && (
                                                             <span className="flex items-center gap-1">
                                                                 <RefreshCw size={11} /> Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}
