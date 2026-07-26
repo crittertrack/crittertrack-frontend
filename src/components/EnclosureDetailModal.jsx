@@ -192,21 +192,9 @@ const EnclosureDetailModal = ({
                     actionText = <>Enclosure created</>;
                     break;
                 case 'update':
-                    if (details.changes && Array.isArray(details.changes) && details.changes.length > 0) {
-                        actionText = (
-                            <div className="flex-1 space-y-1">
-                                <p className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Updated enclosure</p>
-                                {details.changes.slice(0, 3).map((change, idx) => (
-                                    <p key={idx} className="text-sm text-gray-700 dark:text-dark-text">
-                                        <span className="font-medium">{change.label || change.field}:</span>{' '}
-                                        from "{change.oldValue || 'empty'}" to "{change.newValue || 'empty'}"
-                                    </p>
-                                ))}
-                                {details.changes.length > 3 && (
-                                    <p className="text-xs text-gray-400">...and {details.changes.length - 3} more change{details.changes.length - 3 > 1 ? 's' : ''}</p>
-                                )}
-                            </div>
-                        );
+                    if (item._singleChange) {
+                        const change = item._singleChange;
+                        actionText = <>Updated <span className="font-medium">{change.label || change.field}</span> from "{change.oldValue || 'empty'}" to "{change.newValue || 'empty'}"</>;
                     } else {
                         actionText = <>Updated enclosure</>;
                     }
@@ -280,9 +268,18 @@ const EnclosureDetailModal = ({
             'enclosure_task_done',
             'note_removed',
         ];
-        const activity = (enclosure.history || [])
-            .filter(h => ALLOWED_ENCLOSURE_ACTIONS.includes(h.action))
-            .map(h => ({ ...h, type: 'activity' }));
+        const activity = (enclosure.history || []).flatMap(h => {
+            if (!ALLOWED_ENCLOSURE_ACTIONS.includes(h.action)) return [];
+            // Expand update entries: create one entry per field change
+            if ((h.action === 'update' || h.action === 'enclosure_update') && h.details?.changes?.length > 0) {
+                return h.details.changes.map(change => ({
+                    ...h,
+                    type: 'activity',
+                    _singleChange: change,
+                }));
+            }
+            return [{ ...h, type: 'activity' }];
+        });
         const notes = (enclosure.notesHistory || []).map(n => ({ ...n, type: 'note' }));
         
         return [...activity, ...notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
