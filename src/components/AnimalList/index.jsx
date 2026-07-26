@@ -813,12 +813,35 @@ const handleArchive = useCallback(async (animalToArchive) => {
         
             const oldTasks = oldEnc.cleaningTasks || [];
             const newTasks = newEncData.cleaningTasks || [];
-            if (oldTasks.length > newTasks.length) {
-                const removedTasks = oldTasks.filter(ot => !newTasks.find(nt => nt.taskName === ot.taskName && nt.frequency === ot.frequency));
-                removedTasks.forEach(task => history.push({ timestamp, userId, userName, action: 'task_removed', details: { taskName: task.taskName } }));
-            } else if (newTasks.length > oldTasks.length) {
-                const addedTasks = newTasks.filter(nt => !oldTasks.find(ot => ot.taskName === nt.taskName && nt.frequency === ot.frequency));
-                addedTasks.forEach(task => history.push({ timestamp, userId, userName, action: 'task_added', details: { taskName: task.taskName } }));
+              const oldTasksMap = new Map((oldTasks).map(t => [t.taskName, t]));
+            const newTasksMap = new Map((newTasks).map(t => [t.taskName, t]));
+    
+            // Check for removed and modified tasks
+            for (const [taskName, oldTask] of oldTasksMap.entries()) {
+                const newTask = newTasksMap.get(taskName);
+                if (!newTask) {
+                    history.push({ timestamp, userId, userName, action: 'task_removed', details: { taskName: oldTask.taskName } });
+                } else {
+                    // Check for modifications in existing tasks
+                    const oldFreq = `${oldTask.frequency || ''} ${oldTask.frequencyUnit || ''}`.trim();
+                    const newFreq = `${newTask.frequency || ''} ${newTask.frequencyUnit || ''}`.trim();
+                    if (oldFreq !== newFreq) {
+                        history.push({ timestamp, userId, userName, action: 'task_updated', details: { taskName, field: 'frequency', oldValue: oldFreq, newValue: newFreq } });
+                    }
+                    if ((oldTask.notes || '') !== (newTask.notes || '')) {
+                        history.push({ timestamp, userId, userName, action: 'task_updated', details: { taskName, field: 'notes', oldValue: oldTask.notes || '', newValue: newTask.notes || '' } });
+                    }
+                    if ((oldTask.type || 'Other') !== (newTask.type || 'Other')) {
+                        history.push({ timestamp, userId, userName, action: 'task_updated', details: { taskName, field: 'type', oldValue: oldTask.type || 'Other', newValue: newTask.type || 'Other' } });
+                    }
+                }
+            }
+    
+            // Check for added tasks
+            for (const [taskName, newTask] of newTasksMap.entries()) {
+                if (!oldTasksMap.has(taskName)) {
+                    history.push({ timestamp, userId, userName, action: 'task_added', details: { taskName: newTask.taskName, type: newTask.type } });
+                }
             }
         
             return history;
@@ -1330,8 +1353,6 @@ useEffect(() => {
     const logEnclosureHistory = useCallback(async (enclosureId, action, details) => {
         if (!userProfile) return;
         try {
-            const { data: enclosure } = await axios.get(`${API_BASE_URL}/enclosures/${enclosureId}`, { headers: { Authorization: `Bearer ${authToken}` } });
-            
             const newHistoryEntry = {
                 timestamp: new Date().toISOString(),
                 userId: userProfile._id,
@@ -1340,12 +1361,11 @@ useEffect(() => {
                 details
             };
     
-            const updatedHistory = [...(enclosure.history || []), newHistoryEntry];
-    
-            await axios.put(`${API_BASE_URL}/enclosures/${enclosureId}`, { history: updatedHistory }, { headers: { Authorization: `Bearer ${authToken}` } });
+            // Use a PATCH request with MongoDB's $push operator to safely append to the history array.
+            // This is more efficient and avoids race conditions from a GET-then-PUT approach.
+            await axios.patch(`${API_BASE_URL}/enclosures/${enclosureId}`, { '$push': { history: newHistoryEntry } }, { headers: { Authorization: `Bearer ${authToken}` } });
     
             fetchEnclosures();
-    
         } catch (error) {
             console.error('Failed to log enclosure history:', error);
         }
@@ -3644,14 +3664,25 @@ useEffect(() => {
 
         const handleMarkEnclosureTaskDone = async (e, enc, taskIdx) => {
             e.stopPropagation();
+            const task = enc.cleaningTasks?.[taskIdx];
+            if (!task) return;
+
             const updated = [...(enc.cleaningTasks || [])];
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
             // Optimistic update
             setEnclosures(prev => prev.map(ex => ex._id === enc._id ? { ...ex, cleaningTasks: updated } : ex));
-            axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
-                { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .catch(err => { console.error('Mark enclosure task done failed:', err); fetchEnclosures(); });
+
+            // Create a history entry for this action
+            const historyEntry = {
+                timestamp: new Date().toISOString(),
+                userId: userProfile._id,
+                userName: userProfile.personalName || userProfile.breederName,
+                action: 'task_done',
+                details: { taskName: task.taskName, taskType: task.type || 'Other' }
+            };
+
+            // Atomically update the task's date and push to the history array
+            axios.patch(`${API_BASE_URL}/enclosures/${enc._id}`, { cleaningTasks: updated, '$push': { history: historyEntry } }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }).catch(err => { console.error('Mark enclosure task done failed:', err); fetchEnclosures(); });
         };
 
         const handleSkipEnclosureTask = async (e, enc, taskIdx) => {
