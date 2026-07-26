@@ -153,7 +153,8 @@ const EnclosureDetailModal = ({
     const HistoryItem = ({ item }) => {
         const { action, details, userName, timestamp, text } = item;
     
-        const ICONS = {
+        const ICONS = { // NOSONAR
+            create: <Plus size={14} className="text-green-500" />,
             update: <Edit size={14} className="text-blue-500" />,
             assign_animal: <Plus size={14} className="text-green-500" />,
             unassign_animal: <Trash2 size={14} className="text-red-500" />,
@@ -161,6 +162,7 @@ const EnclosureDetailModal = ({
             task_added: <Plus size={14} className="text-green-500" />,
             task_removed: <Trash2 size={14} className="text-red-500" />,
             note: <MessageSquare size={14} className="text-gray-500" />,
+            note_removed: <Trash2 size={14} className="text-red-500" />,
             default: <Info size={14} className="text-gray-500" />
         };
     
@@ -171,38 +173,52 @@ const EnclosureDetailModal = ({
             icon = ICONS.note;
             content = (
                 <div className="flex-1">
-                    <p className="text-sm text-gray-700 dark:text-dark-text">{text}</p>
-                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">
-                        Note added by <span className="font-medium">{userName || 'You'}</span>
-                    </p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Note Added</p>
+                    <p className="text-sm text-gray-700 dark:text-dark-text mt-1">{text}</p>
                 </div>
             );
         } else {
-            icon = ICONS[action] || ICONS.default;
+            let normalizedAction = action;
+            if (action === 'enclosure_create') normalizedAction = 'create';
+            else if (action === 'enclosure_update') normalizedAction = 'update';
+            else if (action === 'enclosure_assign') normalizedAction = 'assign_animal';
+            else if (action === 'enclosure_unassign') normalizedAction = 'unassign_animal';
+            else if (action === 'enclosure_task_done') normalizedAction = 'task_complete';
+ 
+            icon = ICONS[normalizedAction] || ICONS.default;
             let actionText;
-            switch (action) {
+            switch (normalizedAction) {
+                case 'create':
+                    actionText = <>Enclosure created</>;
+                    break;
                 case 'update':
-                    actionText = <>updated <strong>{details.field}</strong> from "{details.oldValue || 'empty'}" to "{details.newValue || 'empty'}"</>;
+                    actionText = <>Updated <strong>{details.field}</strong> from "{details.oldValue || 'empty'}" to "{details.newValue || 'empty'}"</>;
                     break;
                 case 'assign_animal':
-                    actionText = <>assigned animal <strong>{details.animalName}</strong> ({details.animalId})</>;
+                    const assignedAnimalName = [details.prefix, details.animalName, details.suffix].filter(Boolean).join(' ');
+                    actionText = <>Assigned animal <strong>{assignedAnimalName}</strong> ({details.animalId})</>;
                     break;
                 case 'unassign_animal':
-                    actionText = <>unassigned animal <strong>{details.animalName}</strong> ({details.animalId})</>;
+                    const unassignedAnimalName = [details.prefix, details.animalName, details.suffix].filter(Boolean).join(' ');
+                    actionText = <>Unassigned animal <strong>{unassignedAnimalName}</strong> ({details.animalId})</>;
                     break;
                 case 'task_complete':
-                    actionText = <>completed task: <strong>{details.taskName}</strong></>;
+                    actionText = <>Completed task: <strong>{details.taskName}</strong></>;
                     break;
                 case 'task_added':
-                    actionText = <>added task: <strong>{details.taskName}</strong></>;
+                    actionText = <>Added task: <strong>{details.taskName}</strong></>;
                     break;
                 case 'task_removed':
-                    actionText = <>removed task: <strong>{details.taskName}</strong></>;
+                    actionText = <>Removed task: <strong>{details.taskName}</strong></>;
+                    break;
+                case 'note_removed':
+                    actionText = <>Note removed</>;
                     break;
                 default:
-                    actionText = <>{action.replace(/_/g, ' ')}</>;
+                    const formattedAction = action.replace(/_/g, ' ');
+                    actionText = <>{formattedAction.charAt(0).toUpperCase() + formattedAction.slice(1)}</>;
             }
-            content = ( <div className="flex-1"> <p className="text-sm text-gray-700 dark:text-dark-text"> <span className="font-medium">{userName || 'System'}</span> {actionText} </p> </div> );
+            content = ( <div className="flex-1"> <p className="text-sm text-gray-700 dark:text-dark-text">{actionText}</p> </div> );
         }
     
         return ( <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-100 dark:border-dark-border"> <div className="mt-1">{icon}</div> {content} <div className="text-xs text-gray-400 dark:text-dark-text-muted flex-shrink-0 mt-1">{formatDate(timestamp)}</div> </div> );
@@ -232,7 +248,24 @@ const EnclosureDetailModal = ({
     }, [enclosure.cleaningTasks]);
 
     const combinedHistory = useMemo(() => {
-        const activity = (enclosure.history || []).map(h => ({ ...h, type: 'activity' }));
+        const ALLOWED_ENCLOSURE_ACTIONS = [
+            'create',
+            'enclosure_create',
+            'update',
+            'enclosure_update',
+            'assign_animal',
+            'enclosure_assign',
+            'unassign_animal',
+            'enclosure_unassign',
+            'task_added',
+            'task_removed',
+            'task_complete',
+            'enclosure_task_done',
+            'note_removed',
+        ];
+        const activity = (enclosure.history || [])
+            .filter(h => ALLOWED_ENCLOSURE_ACTIONS.includes(h.action))
+            .map(h => ({ ...h, type: 'activity' }));
         const notes = (enclosure.notesHistory || []).map(n => ({ ...n, type: 'note' }));
         
         return [...activity, ...notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));

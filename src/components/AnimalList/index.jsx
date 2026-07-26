@@ -1362,7 +1362,12 @@ useEffect(() => {
                 { animalId_public: animalIdPublic, enclosureId: enclosureId },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }
             );
-            logEnclosureHistory(enclosureId, 'assign_animal', { animalId: animalIdPublic, animalName: animalToAssign.name });
+            logEnclosureHistory(enclosureId, 'assign_animal', {
+                animalId: animalIdPublic,
+                animalName: animalToAssign.name,
+                prefix: animalToAssign.prefix,
+                suffix: animalToAssign.suffix
+            });
         } catch (err) {
             console.error('Assign enclosure failed:', err);
             showModalMessageRef.current('Error', `Failed to assign animal: ${err.response?.data?.message || err.message}`);
@@ -1370,7 +1375,7 @@ useEffect(() => {
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: null } : a));
             setEnclosureAnimals(prev => prev.filter(a => a.id_public !== animalIdPublic));
         }
-    }, [API_BASE_URL, authToken]);
+    }, [API_BASE_URL, authToken, logEnclosureHistory]);
 
     const handleUnassignAnimalInModal = useCallback(async (animalToUnassign) => {
         if (!animalToUnassign) return;
@@ -1383,7 +1388,12 @@ useEffect(() => {
 
         try {
             await axios.patch(`${API_BASE_URL}/enclosures/assign-animal`, { animalId_public: animalIdPublic, enclosureId: null }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-            logEnclosureHistory(originalEnclosureId, 'unassign_animal', { animalId: animalIdPublic, animalName: animalToUnassign.name });
+            logEnclosureHistory(originalEnclosureId, 'unassign_animal', {
+                animalId: animalIdPublic,
+                animalName: animalToUnassign.name,
+                prefix: animalToUnassign.prefix,
+                suffix: animalToUnassign.suffix
+            });
         } catch (err) {
             console.error('Unassign enclosure failed:', err);
             showModalMessageRef.current('Error', `Failed to unassign animal: ${err.response?.data?.message || err.message}`);
@@ -1391,7 +1401,7 @@ useEffect(() => {
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: originalEnclosureId } : a));
             setEnclosureAnimals(prev => [...prev, animalToUnassign]);
         }
-    }, [API_BASE_URL, authToken]);
+    }, [API_BASE_URL, authToken, logEnclosureHistory]);
 
     const handleOpenDetail = (enclosure) => {
         setSelectedEnclosure(enclosure);
