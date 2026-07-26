@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { X, Home, Trash2, Save, Loader2, Search } from 'lucide-react';
+import { X, Home, Trash2, Save, Loader2, Search, Package } from 'lucide-react';
 import axios from 'axios';
 import { SpeciesPickerModal } from './Modals/SpeciesModals';
 
@@ -32,10 +32,14 @@ const EnclosureModal = ({
     locations = [],
     onManageLocations,
     showModalMessage,
-    speciesOptions = [], // Receive species options from parent
+    speciesOptions = [],
+    supplies = [],
 }) => {
     const modalRef = useRef(null);
     const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
+    const [newCleaningTaskFreqUnit, setNewCleaningTaskFreqUnit] = useState('days');
+    const [newCleaningTaskNotes, setNewCleaningTaskNotes] = useState('');
+    const [newCleaningTaskSupplies, setNewCleaningTaskSupplies] = useState([]); // [{ supplyId, quantity }]
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -68,6 +72,19 @@ const EnclosureModal = ({
     const handleSelectSpecies = (speciesName) => {
         handleEnclosureSpeciesLabelAdd(speciesName);
         setIsSpeciesModalOpen(false);
+    };
+
+    const handleAddSupplyToTask = (supply) => {
+        if (!newCleaningTaskSupplies.find(s => s.supplyId === supply._id)) {
+            setNewCleaningTaskSupplies([...newCleaningTaskSupplies, { supplyId: supply._id, supplyName: supply.name, quantity: 1 }]);
+        }
+    };
+
+    const handleRemoveSupplyFromTask = (supplyId) => {
+        setNewCleaningTaskSupplies(newCleaningTaskSupplies.filter(s => s.supplyId !== supplyId));
+    };
+    const handleSupplyQuantityChange = (supplyId, quantity) => {
+        setNewCleaningTaskSupplies(newCleaningTaskSupplies.map(s => s.supplyId === supplyId ? { ...s, quantity: Math.max(1, Number(quantity)) } : s));
     };
 
     return (
