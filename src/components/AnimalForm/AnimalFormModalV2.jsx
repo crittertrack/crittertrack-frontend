@@ -6324,37 +6324,6 @@ const AnimalFormModalV2 = ({
                     />
                 )}
 
-                {showEnclosureModal && (
-                    <EnclosureModal
-                        isOpen={showEnclosureModal}
-                        onClose={handleCloseEnclosureModal}
-                        enclosureFormData={enclosureFormData}
-                        setEnclosureFormData={setEnclosureFormData}
-                        editingEnclosureId={editingEnclosureId}
-                        handleSaveEnclosure={handleSaveEnclosure}
-                        handleDeleteEnclosure={handleDeleteEnclosure}
-                        enclosureSaving={enclosureSaving}
-                        enclosureImageFile={enclosureImageFile}
-                        setEnclosureImageFile={setEnclosureImageFile}
-                        enclosureImagePreview={enclosureImagePreview}
-                        setEnclosureImagePreview={setEnclosureImagePreview}
-                        newEnclosureTag={newEnclosureTag}
-                        setNewEnclosureTag={setNewEnclosureTag}
-                        handleEnclosureTagAdd={() => {}}
-                        handleEnclosureTagRemove={() => {}}
-                        speciesOptions={speciesOptionsForEnclosureModal}
-                        handleEnclosureSpeciesLabelAdd={() => {}}
-                        handleEnclosureSpeciesLabelRemove={() => {}}
-                        locations={locations}
-                        onManageLocations={() => setShowLocationManager(true)}
-                        newCleaningTaskName={newCleaningTaskName}
-                        setNewCleaningTaskName={setNewCleaningTaskName}
-                        newCleaningTaskFreq={newCleaningTaskFreq}
-                        setNewCleaningTaskFreq={setNewCleaningTaskFreq}
-                        supplies={supplies}
-                    />
-                )}
-
                 {showLocationManager && (
                     <LocationManagerModal
                         isOpen={showLocationManager}
