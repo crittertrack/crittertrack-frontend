@@ -9,8 +9,10 @@ import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
     Bean, Bell, Bird, Building, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings, Users,
+    ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings, Users, PawPrint,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart, LampCeiling, BarChart2, Thermometer,
     Package, Plus, PlusCircle, RefreshCw, Ruler, Save, Search, ShoppingBag, SlidersHorizontal, Utensils,
+    Package, Plus, PlusCircle, RefreshCw, Ruler, Save, Search, ShoppingBag, SlidersHorizontal,
     Sparkles, Trash2, Turtle, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
@@ -701,9 +703,11 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureTypeFilter, setEnclosureTypeFilter] = useState('');
     const [enclosureStatusFilter, setEnclosureStatusFilter] = useState(''); // 'occupied' | 'empty'
     const [enclosureBuildingFilter, setEnclosureBuildingFilter] = useState('');
+    const [enclosureSpeciesFilter, setEnclosureSpeciesFilter] = useState('');
     const [enclosureRoomFilter, setEnclosureRoomFilter] = useState('');
 
     const [showEnclosureBreakdown, setShowEnclosureBreakdown] = useState(false);
+    const [showCapacityBreakdown, setShowCapacityBreakdown] = useState(false);
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -918,6 +922,21 @@ const handleArchive = useCallback(async (animalToArchive) => {
         if (total === 0) return [];
         return Object.entries(breakdown).map(([name, count]) => ({ name, count, percentage: ((count / total) * 100).toFixed(1) })).filter(cat => cat.count > 0);
     }, [activeAnimalsForDashboard]);
+
+    const enclosureSpeciesCapacityBreakdown = useMemo(() => {
+        const breakdown = {};
+        enclosures.forEach(enc => {
+            const capacity = Number(enc.capacity) || 0;
+            if (capacity > 0) {
+                (enc.speciesLabels || []).forEach(species => {
+                    breakdown[species] = (breakdown[species] || 0) + capacity;
+                });
+            }
+        });
+        return Object.entries(breakdown)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count);
+    }, [enclosures]);
 
     const enclosureBreakdown = useMemo(() => {
         if (!locations.length) return [];
@@ -1628,12 +1647,42 @@ useEffect(() => {
         return activeAnimalsForDashboard.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
     }, [activeAnimalsForDashboard, inHealthEnclosure]);
 
+    const isDue = useCallback((task) => {
+        const freq = task.frequencyDays || task.frequency;
+        if (!freq) return false;
+        if (!task.lastDoneDate) return true;
+
+        const lastDone = new Date(task.lastDoneDate);
+        const nextDue = new Date(lastDone);
+        
+        let frequencyInDays = task.frequencyDays;
+        if (!frequencyInDays && task.frequency) {
+            if (task.frequencyUnit === 'weeks') {
+                frequencyInDays = task.frequency * 7;
+            } else if (task.frequencyUnit === 'months') {
+                frequencyInDays = task.frequency * 30;
+            } else { // Assumes 'days'
+                frequencyInDays = task.frequency;
+            }
+        }
+
+        if (!frequencyInDays) return false;
+
+        nextDue.setDate(nextDue.getDate() + Number(frequencyInDays));
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        nextDue.setHours(0, 0, 0, 0);
+
+        return nextDue <= today;
+    }, []);
+
     const enclosureMaintenanceDueCount = useMemo(() => {
         return enclosures.reduce((count, enc) => {
-            const hasDueTask = (enc.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
+            const hasDueTask = (enc.cleaningTasks || []).some(isDue);
             return count + (hasDueTask ? 1 : 0);
         }, 0);
-    }, [enclosures]);
+    }, [enclosures, isDue]);
 
     const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
 
@@ -2868,7 +2917,7 @@ useEffect(() => {
         const animalsHousedCount = Object.values(enclosureAnimalMap).flat().filter(a => a.enclosureId).length;
         
         const needsAttentionCount = enclosures.reduce((count, enc) => {
-            const hasDueTask = (enc.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
+            const hasDueTask = (enc.cleaningTasks || []).some(isDue);
             return count + (hasDueTask ? 1 : 0);
         }, 0);
 
@@ -2917,14 +2966,49 @@ useEffect(() => {
                             </div>
                         )}
                     </div>
-                    <StatCard icon={<Users size={32} className="text-purple-800" />} label="Total Capacity" value={totalCapacity} colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200" />
                     <StatCard icon={<Package size={32} className="text-green-800" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
+                    <div className="flex flex-col gap-2">
+                        <StatCard
+                            icon={<Users size={32} className="text-purple-800" />}
+                            label="Total Capacity"
+                            value={totalCapacity}
+                            colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200"
+                            hasDropdown={true}
+                            isDropdownOpen={showCapacityBreakdown}
+                            onDropdownToggle={() => setShowCapacityBreakdown(prev => !prev)}
+                        />
+                        {showCapacityBreakdown && (
+                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Capacity by Species</h4>
+                                {enclosureSpeciesCapacityBreakdown.length > 0 ? (
+                                    <ul className="text-xs space-y-1">
+                                        {enclosureSpeciesCapacityBreakdown.map(species => (
+                                            <li key={species.name} className="flex justify-between items-center text-gray-600 dark:text-dark-text-secondary">
+                                                <span className="flex items-center gap-1.5"><PawPrint size={12} /> {species.name}</span>
+                                                <span>{species.count}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-xs text-gray-400 text-center">No enclosures with capacity and suitable species assigned.</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
                     <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
                     <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Needs Attention" value={needsAttentionCount} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" />
                 </div>
             </div>
         );
     };
+
+    const enclosureSpeciesLabels = useMemo(() => {
+        const allLabels = new Set();
+        enclosures.forEach(enc => {
+            (enc.speciesLabels || []).forEach(label => allLabels.add(label));
+        });
+        return Array.from(allLabels).sort();
+    }, [enclosures]);
 
     const handleEnclosureImageChange = (e) => {
         const file = e.target.files[0];
@@ -2966,6 +3050,9 @@ useEffect(() => {
                 // If only a building is selected, filter by building
                 filteredEnclosures = filteredEnclosures.filter(e => e.buildingId === enclosureBuildingFilter);
             }
+        }
+        if (enclosureSpeciesFilter) {
+            filteredEnclosures = filteredEnclosures.filter(e => (e.speciesLabels || []).includes(enclosureSpeciesFilter));
         }
 
         // --- Components ---
@@ -3111,6 +3198,16 @@ useEffect(() => {
                                 <option key={room._id} value={room._id}>{room.name}</option>
                             ))
                         }
+                    </select>
+                    <select
+                        value={enclosureSpeciesFilter}
+                        onChange={e => setEnclosureSpeciesFilter(e.target.value)}
+                        className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
+                    >
+                        <option value="">All Suitable Species</option>
+                        {enclosureSpeciesLabels.map(species => (
+                            <option key={species} value={species}>{species}</option>
+                        ))}
                     </select>
                     <button onClick={() => setShowLocationManager(true)} className="p-2 text-sm border border-gray-300 rounded-lg flex items-center gap-1.5">
                         <Settings size={14} />

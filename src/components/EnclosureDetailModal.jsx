@@ -439,19 +439,40 @@ const EnclosureDetailModal = ({
                                 </div>
 
                                 {/* Cleaning Schedule */}
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border col-span-1 sm:col-span-2">
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border col-span-1 sm:col-span-1">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2">Upcoming Tasks</h4>
-                                    <div className="space-y-2 text-xs">
+                                    <div className="space-y-3">
                                         {sortedCleaningTasks.length > 0 ? sortedCleaningTasks.slice(0, 3).map((task, idx) => {
                                             const status = getTaskStatus(task);
                                             return (
-                                                <div key={task._id || idx} className="flex justify-between items-center">
-                                                    <span className="text-gray-700 dark:text-dark-text truncate pr-2">{task.taskName}</span>
-                                                    <span className={`font-semibold whitespace-nowrap ${status.color}`}>{status.label}</span>
+                                                <div key={task._id || idx}>
+                                                    <div className="flex justify-between items-center">
+                                                        <p className="text-sm font-medium text-gray-800 dark:text-dark-text">{task.taskName}</p>
+                                                        <p className={`text-xs font-semibold ${status.color}`}>{status.label}</p>
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-2 flex-wrap mt-0.5">
+                                                        {(task.frequencyDays || task.frequency) && (
+                                                            <span>Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}</span>
+                                                        )}
+                                                        {task.assignedSupplies && task.assignedSupplies.length > 0 && (
+                                                            <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity} x ${s.supplyName}`).join(', ')}>
+                                                                <Package size={12} />
+                                                                {task.assignedSupplies.length === 1
+                                                                    ? `${task.assignedSupplies[0].quantity} x ${task.assignedSupplies[0].supplyName}`
+                                                                    : `${task.assignedSupplies.length} supplies`
+                                                                }
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {task.lastDoneDate && (
+                                                        <p className="text-[10px] text-gray-400 mt-0.5">
+                                                            Last: {formatDate(task.lastDoneDate)}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             );
                                         }) : (
-                                            <div className="text-center text-gray-400 py-2">
+                                            <div className="text-center text-gray-400 py-2 text-xs">
                                                 No scheduled tasks.
                                             </div>
                                         )}
