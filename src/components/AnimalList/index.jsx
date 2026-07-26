@@ -706,6 +706,8 @@ const handleArchive = useCallback(async (animalToArchive) => {
 
     const [showEnclosureBreakdown, setShowEnclosureBreakdown] = useState(false);
     const [showCapacityBreakdown, setShowCapacityBreakdown] = useState(false);
+    const [showNeedsAttentionBreakdown, setShowNeedsAttentionBreakdown] = useState(false);
+    const [showMainAlertsBreakdown, setShowMainAlertsBreakdown] = useState(false);
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -1681,6 +1683,19 @@ useEffect(() => {
             return count + (hasDueTask ? 1 : 0);
         }, 0);
     }, [enclosures, isTaskDue]);
+
+    const enclosuresNeedingAttention = useMemo(() => {
+        return enclosures
+            .map(enc => ({
+                ...enc,
+                dueTasks: (enc.cleaningTasks || []).filter(isTaskDue)
+            }))
+            .filter(enc => enc.dueTasks.length > 0);
+    }, [enclosures, isTaskDue]);
+
+    const totalDueEnclosureTasks = useMemo(() => {
+        return enclosuresNeedingAttention.reduce((sum, enc) => sum + enc.dueTasks.length, 0);
+    }, [enclosuresNeedingAttention]);
 
     const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
 
@@ -2914,10 +2929,7 @@ useEffect(() => {
         const occupiedEnclosuresList = enclosures.filter(enc => (enclosureAnimalMap[enc._id] || []).length > 0);
         const animalsHousedCount = Object.values(enclosureAnimalMap).flat().filter(a => a.enclosureId).length;
         
-        const needsAttentionCount = enclosures.reduce((count, enc) => {
-            const hasDueTask = (enc.cleaningTasks || []).some(isTaskDue);
-            return count + (hasDueTask ? 1 : 0);
-        }, 0);
+        const needsAttentionCount = enclosuresNeedingAttention.length;
 
         const totalCapacity = enclosures.reduce((sum, enc) => sum + (Number(enc.capacity) || 0), 0);
 
@@ -2976,7 +2988,7 @@ useEffect(() => {
                             onDropdownToggle={() => setShowCapacityBreakdown(prev => !prev)}
                         />
                         {showCapacityBreakdown && (
-                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
+                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto pr-2">
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Capacity by Species</h4>
                                 {enclosureSpeciesCapacityBreakdown.length > 0 ? (
                                     <ul className="text-xs space-y-1">
@@ -2994,7 +3006,36 @@ useEffect(() => {
                         )}
                     </div>
                     <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
-                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Needs Attention" value={needsAttentionCount} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" />
+                    <div className="flex flex-col gap-2">
+                        <StatCard
+                            icon={<AlertTriangle size={32} className="text-orange-800" />}
+                            label="Needs Attention"
+                            value={needsAttentionCount}
+                            colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                            hasDropdown={enclosuresNeedingAttention.length > 0}
+                            isDropdownOpen={showNeedsAttentionBreakdown}
+                            onDropdownToggle={() => setShowNeedsAttentionBreakdown(prev => !prev)}
+                        />
+                        {showNeedsAttentionBreakdown && enclosuresNeedingAttention.length > 0 && (
+                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">
+                                    Due Tasks ({totalDueEnclosureTasks} total)
+                                </h4>
+                                <div className="space-y-2 pr-2">
+                                    {enclosuresNeedingAttention.map(enc => (
+                                        <div key={enc._id}>
+                                            <p className="font-semibold text-xs text-gray-800 dark:text-dark-text">{enc.name}</p>
+                                            <ul className="pl-3 text-xs text-gray-600 dark:text-dark-text-secondary list-disc list-inside">
+                                                {enc.dueTasks.map((task, idx) => (
+                                                    <li key={idx}>{task.taskName}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -4634,12 +4675,38 @@ useEffect(() => {
 
                     {/* Column 5: Needs Attention */}
                     <div className="flex flex-col gap-2">
-                        <StatCard
-                            icon={<AlertCircle size={32} className="text-orange-800" />}
-                            label="Needs Attention"
-                            value={feedDueDashboard.length + healthAttentionDashboardCount + enclosureMaintenanceDueCount}
-                            colorClass="bg-orange-100 text-orange-900"
-                        />
+                        {(() => {
+                            const totalAttention = feedDueDashboard.length + healthAttentionDashboardCount + enclosureMaintenanceDueCount;
+                            return (
+                                <>
+                                    <StatCard
+                                        icon={<AlertTriangle size={32} className="text-orange-800" />}
+                                        label="Needs Attention"
+                                        value={totalAttention}
+                                        colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                                        hasDropdown={totalAttention > 0}
+                                        isDropdownOpen={showMainAlertsBreakdown}
+                                        onDropdownToggle={() => setShowMainAlertsBreakdown(prev => !prev)}
+                                    />
+                                    {showMainAlertsBreakdown && totalAttention > 0 && (
+                                        <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Attention Breakdown</h4>
+                                            <ul className="text-xs space-y-1">
+                                                {feedDueDashboard.length > 0 && (
+                                                    <li className="flex justify-between"><span>Feeding Due</span><span className="font-medium">{feedDueDashboard.length}</span></li>
+                                                )}
+                                                {healthAttentionDashboardCount > 0 && (
+                                                    <li className="flex justify-between"><span>Health Attention</span><span className="font-medium">{healthAttentionDashboardCount}</span></li>
+                                                )}
+                                                {enclosureMaintenanceDueCount > 0 && (
+                                                    <li className="flex justify-between"><span>Enclosure Maintenance</span><span className="font-medium">{enclosureMaintenanceDueCount}</span></li>
+                                                )}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
                         <div className="relative w-full" ref={alertsDropdownRef}>
                             <button
                                 onClick={() => setShowAlertsDropdown(prev => !prev)}

@@ -38,6 +38,7 @@ const EnclosureModal = ({
     const modalRef = useRef(null);
     const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
     const [newCleaningTaskFreqUnit, setNewCleaningTaskFreqUnit] = useState('days');
+    const [newCleaningTaskType, setNewCleaningTaskType] = useState('Cleaning');
     const [newCleaningTaskNotes, setNewCleaningTaskNotes] = useState('');
     const [newCleaningTaskSupplies, setNewCleaningTaskSupplies] = useState([]); // [{ supplyId, quantity }]
 
@@ -297,9 +298,12 @@ const EnclosureModal = ({
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <p className="font-medium text-sm text-gray-800 dark:text-dark-text">{task.taskName}</p>
-                                                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">
+                                                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-dark-text-muted mt-0.5 flex-wrap">
+                                                        {task.type && <span className="font-semibold bg-gray-200 dark:bg-dark-border px-1.5 py-0.5 rounded">{task.type}</span>}
                                                         {(task.frequencyDays || task.frequency) && (
-                                                            <span>Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}</span>
+                                                            <span className="flex items-center gap-1">
+                                                                <RefreshCw size={11} /> Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}
+                                                            </span>
                                                         )}
                                                         {task.notes && <p className="italic">"{task.notes}"</p>}
                                                     </div>
@@ -325,6 +329,12 @@ const EnclosureModal = ({
 
                                 <div className="bg-gray-100 dark:bg-dark-surface-hover p-3 mt-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                     <h5 className="text-xs font-bold text-gray-700 dark:text-dark-text">Add New Task</h5>
+                                    <select value={newCleaningTaskType} onChange={e => setNewCleaningTaskType(e.target.value)} className="w-full p-1.5 text-xs border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
+                                        <option value="Cleaning">Cleaning</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                        <option value="Feeding">Feeding</option>
+                                        <option value="Other">Other</option>
+                                    </select>
                                     <input type="text" value={newCleaningTaskName} onChange={e => setNewCleaningTaskName(e.target.value)} placeholder="Task name (e.g. Full substrate change)" className="w-full p-1.5 text-xs border border-gray-300 rounded-lg" />
                                     <div className="flex gap-2">
                                         <input type="number" value={newCleaningTaskFreq} onChange={e => setNewCleaningTaskFreq(e.target.value)} placeholder="Frequency" min="1" className="w-20 p-1.5 text-xs border border-gray-300 rounded-lg" />
@@ -357,9 +367,9 @@ const EnclosureModal = ({
                                     </div>
                                     <button type="button" onClick={() => {
                                         if (!newCleaningTaskName.trim()) return;
-                                        const newTask = { taskName: newCleaningTaskName.trim(), frequency: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, frequencyUnit: newCleaningTaskFreq ? newCleaningTaskFreqUnit : null, notes: newCleaningTaskNotes.trim() || null, assignedSupplies: newCleaningTaskSupplies, lastDoneDate: null };
+                                        const newTask = { taskName: newCleaningTaskName.trim(), type: newCleaningTaskType, frequency: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, frequencyUnit: newCleaningTaskFreq ? newCleaningTaskFreqUnit : null, notes: newCleaningTaskNotes.trim() || null, assignedSupplies: newCleaningTaskSupplies, lastDoneDate: null };
                                         setEnclosureFormData(p => ({ ...p, cleaningTasks: [...(p.cleaningTasks || []), newTask] }));
-                                        setNewCleaningTaskName(''); setNewCleaningTaskFreq(''); setNewCleaningTaskFreqUnit('days'); setNewCleaningTaskNotes(''); setNewCleaningTaskSupplies([]);
+                                        setNewCleaningTaskName(''); setNewCleaningTaskFreq(''); setNewCleaningTaskFreqUnit('days'); setNewCleaningTaskNotes(''); setNewCleaningTaskSupplies([]); setNewCleaningTaskType('Cleaning');
                                     }} className="w-full px-2 py-1.5 text-xs bg-blue-600 text-white rounded font-medium hover:bg-blue-700">+ Add Task</button>
                                 </div>
                             </div>

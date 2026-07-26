@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import {
     X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
-    AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, Package,
+    AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, Package, ClipboardList,
     Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2, Search,
     Lightbulb, RefreshCw, Star, Info, Activity
 } from 'lucide-react';
@@ -13,7 +13,7 @@ const TABS = [
     { id: 'dashboard', label: 'Dashboard', icon: Info },
     { id: 'animals', label: 'Animals', icon: Users },
     { id: 'environment', label: 'Environment', icon: Thermometer },
-    { id: 'maintenance', label: 'Maintenance', icon: Wrench },
+    { id: 'tasks', label: 'Tasks', icon: ClipboardList },
     { id: 'notes', label: 'Notes', icon: MessageSquare },
     { id: 'history', label: 'History', icon: Clock },
 ];
@@ -449,9 +449,12 @@ const EnclosureDetailModal = ({
                                                         <p className="text-sm font-medium text-gray-800 dark:text-dark-text">{task.taskName}</p>
                                                         <p className={`text-xs font-semibold ${status.color}`}>{status.label}</p>
                                                     </div>
-                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-2 flex-wrap mt-0.5">
+                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-3 flex-wrap mt-0.5">
+                                                        {task.type && <span className="font-semibold bg-gray-200 dark:bg-dark-border px-1.5 py-0.5 rounded">{task.type}</span>}
                                                         {(task.frequencyDays || task.frequency) && (
-                                                            <span>Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}</span>
+                                                            <span className="flex items-center gap-1">
+                                                                <RefreshCw size={11} /> Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}
+                                                            </span>
                                                         )}
                                                         {task.assignedSupplies && task.assignedSupplies.length > 0 && (
                                                             <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity} x ${s.supplyName}`).join(', ')}>
@@ -623,10 +626,10 @@ const EnclosureDetailModal = ({
                         </div>
                     )}
 
-                    {/* ===== MAINTENANCE TAB ===== */}
-                    {activeTab === 'maintenance' && (
+                    {/* ===== TASKS TAB ===== */}
+                    {activeTab === 'tasks' && (
                         <div className="space-y-3">
-                            <h3 className="font-semibold text-gray-800 dark:text-dark-text">Cleaning & Maintenance Tasks</h3>
+                            <h3 className="font-semibold text-gray-800 dark:text-dark-text">Tasks</h3>
                             {cleaningTasks.length === 0 ? (
                                 <div className="text-center py-8 text-gray-500 dark:text-dark-text-muted">
                                     <Wrench size={32} className="mx-auto mb-2 opacity-50" />
@@ -648,9 +651,12 @@ const EnclosureDetailModal = ({
                                             >
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-gray-800 dark:text-dark-text">{task.taskName}</p>
-                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-2 flex-wrap">
+                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-3 flex-wrap mt-1">
+                                                        {task.type && <span className="font-semibold bg-gray-200 dark:bg-dark-border px-1.5 py-0.5 rounded">{task.type}</span>}
                                                         {(task.frequencyDays || task.frequency) && (
-                                                            <span>Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}</span>
+                                                            <span className="flex items-center gap-1">
+                                                                <RefreshCw size={11} /> Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}
+                                                            </span>
                                                         )}
                                                         {task.assignedSupplies && task.assignedSupplies.length > 0 && (
                                                             <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity} x ${s.supplyName}`).join(', ')}>
