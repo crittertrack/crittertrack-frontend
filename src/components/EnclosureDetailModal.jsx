@@ -4,7 +4,7 @@ import {
     X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
     AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, Package, ClipboardList, Utensils,
     Trash2, Loader2, ChevronDown, ChevronUp, Settings, BarChart2, Search,
-    Lightbulb, RefreshCw, Star, Info, Activity
+    Lightbulb, RefreshCw, Star, Info, Activity, Plus
 } from 'lucide-react';
 import AnimalImage from './shared/AnimalImage';
 import { formatDate } from '../utils/dateFormatter';
