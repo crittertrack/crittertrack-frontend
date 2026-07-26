@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import {
     X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
@@ -141,6 +141,29 @@ const EnclosureDetailModal = ({
     const modalRef = useRef(null);
     const [showAnimalPicker, setShowAnimalPicker] = useState(false);
 
+    const sortedCleaningTasks = useMemo(() => {
+        const tasks = enclosure.cleaningTasks || [];
+        if (tasks.length === 0) return [];
+
+        const getDaysUntilDue = (task) => {
+            if (!task.frequencyDays && !task.frequency) return Infinity; // No schedule, sort last
+            if (!task.lastDoneDate) return -Infinity; // Never done, due now, sort first
+
+            const lastDone = new Date(task.lastDoneDate);
+            const nextDue = new Date(lastDone);
+            const frequencyInDays = task.frequencyDays || (task.frequencyUnit === 'weeks' ? task.frequency * 7 : task.frequencyUnit === 'months' ? task.frequency * 30 : task.frequency);
+            nextDue.setDate(nextDue.getDate() + frequencyInDays);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            nextDue.setHours(0, 0, 0, 0);
+
+            return (nextDue - today) / (1000 * 60 * 60 * 24);
+        };
+
+        return [...tasks].sort((a, b) => getDaysUntilDue(a) - getDaysUntilDue(b));
+    }, [enclosure.cleaningTasks]);
+
     useEffect(() => {
         // Load notes from enclosure data
         setNotes(enclosure.notesHistory || []);
@@ -204,10 +227,11 @@ const EnclosureDetailModal = ({
         if (!task || !task._id) return;
         setUpdatingTask(task._id);
         try {
-            const supplyUsage = task.assignedSupplies?.map(s => ({ supplyId: s.supplyId, quantityUsed: s.quantity })) || [];
+            // Temporarily disabled supply deduction on task completion until partial quantities are supported.
+            // const supplyUsage = task.assignedSupplies?.map(s => ({ supplyId: s.supplyId, quantityUsed: s.quantity })) || [];
 
             await axios.post(`${API_BASE_URL}/enclosures/${enclosure._id}/tasks/${task._id}/complete`, {
-                supplyUsage
+                // supplyUsage
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -415,25 +439,20 @@ const EnclosureDetailModal = ({
                                 </div>
 
                                 {/* Cleaning Schedule */}
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
-                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Cleaning</h4>
-                                    <div className="space-y-1 text-xs">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-500 dark:text-dark-text-muted">Last cleaned</span>
-                                            <span className="text-gray-800 dark:text-dark-text">
-                                                {enclosure.lastCleaned ? formatDate(enclosure.lastCleaned) : 'Never'}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-500 dark:text-dark-text-muted">Next cleaning</span>
-                                            <span className="text-gray-800 dark:text-dark-text">
-                                                {enclosure.nextCleaning ? formatDate(enclosure.nextCleaning) : 'Not scheduled'}
-                                            </span>
-                                        </div>
-                                        {cleaningTasks.length > 0 && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500 dark:text-dark-text-muted">Tasks</span>
-                                                <span className="text-gray-800 dark:text-dark-text">{cleaningTasks.length} defined</span>
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border col-span-1 sm:col-span-2">
+                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2">Upcoming Tasks</h4>
+                                    <div className="space-y-2 text-xs">
+                                        {sortedCleaningTasks.length > 0 ? sortedCleaningTasks.slice(0, 3).map((task, idx) => {
+                                            const status = getTaskStatus(task);
+                                            return (
+                                                <div key={task._id || idx} className="flex justify-between items-center">
+                                                    <span className="text-gray-700 dark:text-dark-text truncate pr-2">{task.taskName}</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${status.color}`}>{status.label}</span>
+                                                </div>
+                                            );
+                                        }) : (
+                                            <div className="text-center text-gray-400 py-2">
+                                                No scheduled tasks.
                                             </div>
                                         )}
                                     </div>
@@ -599,45 +618,33 @@ const EnclosureDetailModal = ({
                                     {cleaningTasks.map((task, idx) => {
                                         const status = getTaskStatus(task);
                                         return (
-                                            <div key={task._id || idx}
+                                            <div
+                                                key={task._id || idx}
                                                 className={`flex items-center gap-3 p-3 rounded-lg border ${
                                                     status.overdue
                                                         ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                                                         : 'bg-gray-50 dark:bg-dark-surface-hover border-gray-100 dark:border-dark-border'
                                                 }`}
                                             >
-                                                <div className="flex items-center gap-3">
-                                                    <button
-                                                        onClick={() => handleCompleteTask(task)}
-                                                        disabled={updatingTask === task._id}
-                                                        className={`p-1.5 rounded-full transition-colors ${
-                                                            status.overdue
-                                                                ? 'text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40'
-                                                                : 'text-green-500 hover:bg-green-100 dark:hover:bg-green-900/40'
-                                                        }`}
-                                                        title="Mark as done"
-                                                    >
-                                                        {updatingTask === task._id
-                                                            ? <Loader2 size={16} className="animate-spin" />
-                                                            : <CheckCircle size={16} />
-                                                        }
-                                                    </button>
-                                                    <div className="flex-1">
-                                                        <p className="text-sm font-medium text-gray-800 dark:text-dark-text">{task.taskName}</p>
-                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-2 flex-wrap">
-                                                            {(task.frequencyDays || task.frequency) && (
-                                                                <span>Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}</span>
-                                                            )}
-                                                            {task.assignedSupplies && task.assignedSupplies.length > 0 && (
-                                                                <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity} x ${s.supplyName}`).join(', ')}>
-                                                                    <Package size={12} /> {task.assignedSupplies.length} supplies
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        {task.notes && <p className="text-xs text-gray-400 italic mt-1">{task.notes}</p>}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-800 dark:text-dark-text">{task.taskName}</p>
+                                                    <div className="text-xs text-gray-500 dark:text-dark-text-muted flex items-center gap-2 flex-wrap">
+                                                        {(task.frequencyDays || task.frequency) && (
+                                                            <span>Every {task.frequencyDays || task.frequency} {task.frequencyUnit || 'days'}</span>
+                                                        )}
+                                                        {task.assignedSupplies && task.assignedSupplies.length > 0 && (
+                                                            <span className="flex items-center gap-1" title={task.assignedSupplies.map(s => `${s.quantity} x ${s.supplyName}`).join(', ')}>
+                                                                <Package size={12} />
+                                                                {task.assignedSupplies.length === 1
+                                                                    ? `${task.assignedSupplies[0].quantity} x ${task.assignedSupplies[0].supplyName}`
+                                                                    : `${task.assignedSupplies.length} supplies`
+                                                                }
+                                                            </span>
+                                                        )}
                                                     </div>
+                                                    {task.notes && <p className="text-xs text-gray-400 italic mt-1">{task.notes}</p>}
                                                 </div>
-                                                <div className="text-right">
+                                                <div className="text-right flex-shrink-0">
                                                     <p className={`text-xs font-semibold ${status.color}`}>{status.label}</p>
                                                     {task.lastDoneDate && (
                                                         <p className="text-[10px] text-gray-400">
@@ -645,6 +652,22 @@ const EnclosureDetailModal = ({
                                                         </p>
                                                     )}
                                                 </div>
+                                                <button
+                                                    onClick={() => handleCompleteTask(task)}
+                                                    disabled={updatingTask === task._id}
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                                                        status.overdue
+                                                            ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50'
+                                                            : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50'
+                                                    }`}
+                                                    title="Mark as done"
+                                                >
+                                                    {updatingTask === task._id
+                                                        ? <Loader2 size={14} className="animate-spin" />
+                                                        : <CheckCircle size={14} />
+                                                    }
+                                                    Done
+                                                </button>
                                             </div>
                                         );
                                     })}

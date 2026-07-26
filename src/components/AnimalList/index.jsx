@@ -8,10 +8,10 @@ import AnimalImage from '../shared/AnimalImage';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban,
     Bean, Bell, Bird, Building, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
-    ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings,
+    ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings, Users,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart, LampCeiling, BarChart2, Thermometer,
-    Package, Plus, PlusCircle, RefreshCw, Ruler, Save, Search, ShoppingBag, SlidersHorizontal,
-    Sparkles, Trash2, Turtle, Utensils, Venus, VenusAndMars, Wrench, X
+    Package, Plus, PlusCircle, RefreshCw, Ruler, Save, Search, ShoppingBag, SlidersHorizontal, Utensils,
+    Sparkles, Trash2, Turtle, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
@@ -703,6 +703,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureBuildingFilter, setEnclosureBuildingFilter] = useState('');
     const [enclosureRoomFilter, setEnclosureRoomFilter] = useState('');
 
+    const [showEnclosureBreakdown, setShowEnclosureBreakdown] = useState(false);
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -917,6 +918,37 @@ const handleArchive = useCallback(async (animalToArchive) => {
         if (total === 0) return [];
         return Object.entries(breakdown).map(([name, count]) => ({ name, count, percentage: ((count / total) * 100).toFixed(1) })).filter(cat => cat.count > 0);
     }, [activeAnimalsForDashboard]);
+
+    const enclosureBreakdown = useMemo(() => {
+        if (!locations.length) return [];
+
+        const buildings = locations.filter(l => l.type === 'building');
+        const rooms = locations.filter(l => l.type === 'room');
+
+        const breakdown = buildings.map(building => {
+            const buildingRooms = rooms.filter(r => r.parentLocationId === building._id);
+            const roomCounts = buildingRooms.map(room => ({
+                name: room.name,
+                count: enclosures.filter(e => e.roomId === room._id).length
+            }));
+            const enclosuresDirectlyInBuilding = enclosures.filter(e => e.buildingId === building._id && !e.roomId).length;
+            
+            const totalInBuilding = roomCounts.reduce((sum, room) => sum + room.count, 0) + enclosuresDirectlyInBuilding;
+
+            return {
+                name: building.name,
+                count: totalInBuilding,
+                rooms: roomCounts.filter(r => r.count > 0)
+            };
+        });
+
+        const unassignedBuildingEnclosures = enclosures.filter(e => !e.buildingId);
+        if (unassignedBuildingEnclosures.length > 0) {
+            breakdown.push({ name: 'Unassigned to Building', count: unassignedBuildingEnclosures.length, rooms: [] });
+        }
+
+        return breakdown.filter(b => b.count > 0).sort((a, b) => a.name.localeCompare(b.name));
+    }, [enclosures, locations]);
 
     // Save filters to localStorage whenever they change
     useEffect(() => {
@@ -1595,6 +1627,13 @@ useEffect(() => {
     const treatmentDashboardList = useMemo(() => {
         return activeAnimalsForDashboard.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
     }, [activeAnimalsForDashboard, inHealthEnclosure]);
+
+    const enclosureMaintenanceDueCount = useMemo(() => {
+        return enclosures.reduce((count, enc) => {
+            const hasDueTask = (enc.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
+            return count + (hasDueTask ? 1 : 0);
+        }, 0);
+    }, [enclosures]);
 
     const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
 
@@ -2827,22 +2866,61 @@ useEffect(() => {
     const renderEnclosureDashboard = () => {
         const occupiedEnclosuresList = enclosures.filter(enc => (enclosureAnimalMap[enc._id] || []).length > 0);
         const animalsHousedCount = Object.values(enclosureAnimalMap).flat().filter(a => a.enclosureId).length;
-
-        const maintenanceDueCount = enclosures.reduce((count, enc) => {
+        
+        const needsAttentionCount = enclosures.reduce((count, enc) => {
             const hasDueTask = (enc.cleaningTasks || []).some(task => isDue(task.lastDoneDate, task.frequencyDays));
             return count + (hasDueTask ? 1 : 0);
         }, 0);
 
-        const needsAttentionCount = 0; // Placeholder for future implementation
+        const totalCapacity = enclosures.reduce((sum, enc) => sum + (Number(enc.capacity) || 0), 0);
 
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <StatCard icon={<Home size={32} className="text-blue-800" />} label="Total Enclosures" value={enclosures.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" />
+                    <div className="flex flex-col gap-2">
+                        <StatCard
+                            icon={<Home size={32} className="text-blue-800" />}
+                            label="Total Enclosures"
+                            value={enclosures.length}
+                            colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
+                            hasDropdown={true}
+                            isDropdownOpen={showEnclosureBreakdown}
+                            onDropdownToggle={() => setShowEnclosureBreakdown(prev => !prev)}
+                        />
+                        {showEnclosureBreakdown && (
+                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Enclosure Breakdown</h4>
+                                {enclosureBreakdown.length > 0 ? (
+                                    <ul className="text-xs space-y-2">
+                                        {enclosureBreakdown.map(building => (
+                                            <li key={building.name}>
+                                                <div className="flex justify-between items-center font-medium text-gray-800 dark:text-dark-text">
+                                                    <span className="flex items-center gap-1.5"><Building size={14} /> {building.name}</span>
+                                                    <span>{building.count}</span>
+                                                </div>
+                                                {building.rooms.length > 0 && (
+                                                    <ul className="pl-6 mt-1 space-y-1">
+                                                        {building.rooms.map(room => (
+                                                            <li key={room.name} className="flex justify-between items-center text-gray-600 dark:text-dark-text-secondary">
+                                                                <span className="flex items-center gap-1.5"><Home size={12} /> {room.name}</span>
+                                                                <span>{room.count}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-xs text-gray-400 text-center">No enclosures to categorize by location.</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <StatCard icon={<Users size={32} className="text-purple-800" />} label="Total Capacity" value={totalCapacity} colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200" />
                     <StatCard icon={<Package size={32} className="text-green-800" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
                     <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
                     <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Needs Attention" value={needsAttentionCount} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" />
-                    <StatCard icon={<Wrench size={32} className="text-red-800" />} label="Maintenance Due" value={maintenanceDueCount} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" />
                 </div>
             </div>
         );
@@ -4464,7 +4542,7 @@ useEffect(() => {
                         <StatCard
                             icon={<AlertCircle size={32} className="text-orange-800" />}
                             label="Needs Attention"
-                            value={feedDueDashboard.length + healthAttentionDashboardCount}
+                            value={feedDueDashboard.length + healthAttentionDashboardCount + enclosureMaintenanceDueCount}
                             colorClass="bg-orange-100 text-orange-900"
                         />
                         <div className="relative w-full" ref={alertsDropdownRef}>
