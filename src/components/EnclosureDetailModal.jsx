@@ -576,19 +576,19 @@ const EnclosureDetailModal = ({
                                                 </span>
                                             </div>
                                         )}
-                                        <div className="flex justify-between">
+                                        <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-border">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Dimensions</span>
                                             <span className="text-gray-800 dark:text-dark-text">
                                                 {(() => {
                                                     const dims = enclosure.dimensions || enclosure.size;
                                                     if (typeof dims === 'object' && dims !== null) {
-                                                        return `${dims.length || '?'}x${dims.width || '?'}x${dims.height || '?'} ${dims.unit || ''}`;
+                                                        return `${dims.length || '?'}x${dims.width || '?'}x${dims.height || '?'} ${dims.unit || 'in'}`;
                                                     }
                                                     return dims || '—';
                                                 })()}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between">
+                                        <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-border">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Lighting</span>
                                                <span className="text-gray-800 dark:text-dark-text">
                                                 {enclosure.lightsOnTime && enclosure.lightsOffTime ? (
