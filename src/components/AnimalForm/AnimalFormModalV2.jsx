@@ -152,7 +152,6 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [manualName, setManualName] = useState('');
     const [contacts, setContacts] = useState([]);
     const [loadingContacts, setLoadingContacts] = useState(false);
 

@@ -22,9 +22,12 @@
 - [x] Remove the manual text input, keep only the "Search & Assign Enclosure" button
 
 ### 7. Verify changes
-- [ ] Ensure no references to removed variables remain
+- [x] Ensure no references to removed variables remain
 
 ## Pending Steps
 
 ## Notes
+- Fixed `ReferenceError: manualEnclosureName is not defined` error
+- Also removed leftover `manualName` state and JSX from AssignEnclosureModal
+- Removed duplicate `onClick` on the Search & Assign Enclosure button
 
