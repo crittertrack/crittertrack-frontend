@@ -973,20 +973,36 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             {!loadingEnclosures && filteredEnclosures.length === 0 && <p className="text-center text-gray-500 py-4">No enclosures found</p>}
                             <div className="space-y-2">
                                 {filteredEnclosures.map(enclosure => (
-                                    <div key={enclosure.id}
+                                    <div key={enclosure._id}
                                         className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                                         onClick={() => { onSelect(enclosure); onClose(); }}>
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <p className="font-semibold text-gray-800">{enclosure.name}</p>
-                                                <p className="text-xs text-gray-500">{enclosure.location} • {enclosure.roomType || 'N/A'}</p>
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                                <AnimalImage src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" iconSize={32} />
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-xs font-semibold text-gray-700">{enclosure.currentAnimals || 0}/{enclosure.capacity || '?'}</p>
-                                                <p className="text-[11px] text-gray-500">Animals</p>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold text-gray-800 truncate">{enclosure.name}</p>
+                                                <p className="text-xs text-gray-500">{enclosure.location} • {enclosure.roomType || 'N/A'}</p>
+                                                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
+                                                    <div className="flex items-center gap-1">
+                                                        <Users size={12} />
+                                                        <span>{enclosure.currentAnimals || 0} / {enclosure.capacity || '?'}</span>
+                                                    </div>
+                                                    {enclosure.dimensions && (enclosure.dimensions.length || enclosure.dimensions.width) && (
+                                                        <div className="flex items-center gap-1">
+                                                            <Ruler size={12} />
+                                                            <span>{`${enclosure.dimensions.length || '?'} x ${enclosure.dimensions.width || '?'} ${enclosure.dimensions.unit}`}</span>
+                                                        </div>
+                                                    )}
+                                                    {enclosure.speciesLabels && enclosure.speciesLabels.length > 0 && (
+                                                        <div className="flex items-center gap-1">
+                                                            <Cat size={12} />
+                                                            <span className="truncate">{enclosure.speciesLabels.join(', ')}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                        {enclosure.description && <p className="text-xs text-gray-600 mt-1">{enclosure.description}</p>}
                                     </div>
                                 ))}
                             </div>
@@ -4965,20 +4981,47 @@ const AnimalFormModalV2 = ({
                                     <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 space-y-2 mb-4">
                                         <label className="block text-xs font-semibold text-gray-700">Enclosure Assignment</label>
                                         {selectedEnclosure ? (
-                                            <div className="flex items-center justify-between p-2 bg-white border border-blue-300 rounded-md">
-                                                <span className="text-sm font-medium text-gray-800">
-                                                    {typeof selectedEnclosure === 'string' ? selectedEnclosure : selectedEnclosure.name}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setSelectedEnclosure(null);
-                                                        setFormData(prev => ({ ...prev, enclosureId: null }));
-                                                    }}
-                                                    className="text-red-500 hover:text-red-700"
-                                                >
-                                                    <X size={16} />
-                                                </button>
+                                            <div className="p-3 bg-white border border-blue-300 rounded-lg">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                                        <AnimalImage src={selectedEnclosure.imageUrl} alt={selectedEnclosure.name} className="w-full h-full object-cover" iconSize={40} />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex justify-between items-start">
+                                                            <p className="font-semibold text-lg text-gray-800 truncate">{selectedEnclosure.name}</p>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setSelectedEnclosure(null);
+                                                                    setFormData(prev => ({ ...prev, enclosureId: null }));
+                                                                }}
+                                                                className="text-red-500 hover:text-red-700"
+                                                                title="Unassign Enclosure"
+                                                            >
+                                                                <Unlink size={16} />
+                                                            </button>
+                                                        </div>
+                                                        <p className="text-sm text-gray-500">{selectedEnclosure.location} • {selectedEnclosure.roomType || 'N/A'}</p>
+                                                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
+                                                            <div className="flex items-center gap-1">
+                                                                <Users size={14} />
+                                                                <span>{selectedEnclosure.currentAnimals || 0} / {selectedEnclosure.capacity || '?'}</span>
+                                                            </div>
+                                                            {selectedEnclosure.dimensions && (selectedEnclosure.dimensions.length || selectedEnclosure.dimensions.width) && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <Ruler size={14} />
+                                                                    <span>{`${selectedEnclosure.dimensions.length || '?'} x ${selectedEnclosure.dimensions.width || '?'} ${selectedEnclosure.dimensions.unit}`}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        {selectedEnclosure.speciesLabels && selectedEnclosure.speciesLabels.length > 0 && (
+                                                            <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+                                                                <Cat size={12} />
+                                                                <span className="truncate">Suitable for: {selectedEnclosure.speciesLabels.join(', ')}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         ) : (
                                             <div>
