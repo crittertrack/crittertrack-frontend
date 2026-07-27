@@ -4986,11 +4986,6 @@ const AnimalFormModalV2 = ({
                                         )}
                                     </div>
 
-                                    {/* Other housing fields */}
-                                    <div><label className="block text-xs font-medium text-gray-700">Housing Type</label><input type="text" name="housingType" value={formData.housingType} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Bedding/Substrate</label><input type="text" name="bedding" value={formData.bedding} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Temperature Range</label><input type="text" name="temperatureRange" value={formData.temperatureRange} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Humidity</label><input type="text" name="humidity" value={formData.humidity} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
                                 </FormSection>
 
                                 {/* Environment Setup */}

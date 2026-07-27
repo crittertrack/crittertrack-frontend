@@ -689,7 +689,8 @@ const handleArchive = useCallback(async (animalToArchive) => {
         buildingId: '', roomId: '',
         purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
         lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-        cleaningTasks: []
+        cleaningTasks: [],
+        bedding: '', lightingType: '', enrichment: ''
     });
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
     const [newEnclosureTag, setNewEnclosureTag] = useState('');
@@ -759,7 +760,8 @@ const handleArchive = useCallback(async (animalToArchive) => {
             buildingId: '', roomId: '',
             purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
             lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-            cleaningTasks: []
+            cleaningTasks: [],
+            bedding: '', lightingType: '', enrichment: ''
         });
         setEnclosureImageFile(null);
         setEnclosureImagePreview(null);
@@ -865,6 +867,9 @@ const handleArchive = useCallback(async (animalToArchive) => {
                 cleaningTasks: dataToSave.cleaningTasks,
                 tags: dataToSave.tags,
                 speciesLabels: dataToSave.speciesLabels,
+                bedding: dataToSave.bedding,
+                lightingType: dataToSave.lightingType,
+                enrichment: dataToSave.enrichment,
                 imageUrl: dataToSave.imageUrl, // This will now be correct from handleEnclosureImageChange
             };
 
@@ -1306,6 +1311,9 @@ useEffect(() => {
                 lightTimeFormat: enclosure.lightTimeFormat || '24h',
                 notes: enclosure.notes || enclosure.description || '',
                 imageUrl: enclosure.imageUrl || '',
+                bedding: enclosure.bedding || '',
+                lightingType: enclosure.lightingType || '',
+                enrichment: enclosure.enrichment || '',
                 tags: enclosure.tags || [],
                 speciesLabels: enclosure.speciesLabels || [],
                 cleaningTasks: enclosure.cleaningTasks || [],
@@ -1320,7 +1328,8 @@ useEffect(() => {
                 name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in', buildingId: '', roomId: '',
                 purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
                 lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
-                cleaningTasks: []
+                cleaningTasks: [],
+                bedding: '', lightingType: '', enrichment: ''
             });
             setEnclosureImagePreview(null);
             setEnclosureImageFile(null);

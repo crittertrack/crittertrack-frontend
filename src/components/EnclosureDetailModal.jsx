@@ -779,20 +779,36 @@ const EnclosureDetailModal = ({
                             {/* Lighting */}
                             <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
                                 <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                                    <Lightbulb size={14} /> Lighting Schedule
+                                    <Lightbulb size={14} /> Lighting
                                 </h4>
-                                <p className="text-sm text-gray-700 dark:text-dark-text">
-                                    {enclosure.lightsOnTime && enclosure.lightsOffTime
-                                        ? `On at ${enclosure.lightsOnTime}, Off at ${enclosure.lightsOffTime}`
-                                        : (enclosure.lightingSchedule || enclosure.lighting || 'Not specified')}
-                                </p>
+                                <div className="space-y-1 text-sm">
+                                    <p className="text-gray-700 dark:text-dark-text">
+                                        <span className="font-semibold">Schedule: </span>
+                                        {enclosure.lightsOnTime && enclosure.lightsOffTime
+                                            ? `On at ${enclosure.lightsOnTime}, Off at ${enclosure.lightsOffTime}`
+                                            : (enclosure.lightingSchedule || enclosure.lighting || 'Not specified')}
+                                    </p>
+                                    {enclosure.lightingType && (
+                                        <p className="text-gray-700 dark:text-dark-text">
+                                            <span className="font-semibold">Type: </span>{enclosure.lightingType}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Bedding / Substrate */}
                             {enclosure.bedding && (
                                 <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
-                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2">Bedding / Substrate</h4>
+                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5"><Package size={14} /> Bedding / Substrate</h4>
                                     <p className="text-sm text-gray-700 dark:text-dark-text">{enclosure.bedding}</p>
+                                </div>
+                            )}
+
+                            {/* Enrichment */}
+                            {enclosure.enrichment && (
+                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
+                                    <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5"><Activity size={14} /> Enrichment</h4>
+                                    <p className="text-sm text-gray-700 dark:text-dark-text">{enclosure.enrichment}</p>
                                 </div>
                             )}
                         </div>

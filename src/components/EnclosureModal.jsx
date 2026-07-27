@@ -234,6 +234,38 @@ const EnclosureModal = ({
                                     <input type="time" value={enclosureFormData.lightsOffTime} onChange={e => setEnclosureFormData(p => ({ ...p, lightsOffTime: e.target.value }))} className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
                                 </div>
                             </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Lighting Type(s)</label>
+                                <input
+                                    type="text"
+                                    value={enclosureFormData.lightingType || ''}
+                                    onChange={e => setEnclosureFormData(p => ({ ...p, lightingType: e.target.value }))}
+                                    placeholder="e.g. LED, UVB, Infrared"
+                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Bedding / Substrate</label>
+                                <input
+                                    type="text"
+                                    list="bedding-supplies"
+                                    value={enclosureFormData.bedding || ''}
+                                    onChange={e => setEnclosureFormData(p => ({ ...p, bedding: e.target.value }))}
+                                    placeholder="e.g. Aspen shavings, Coco fiber"
+                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg"
+                                />
+                                <datalist id="bedding-supplies">
+                                    {supplies.filter(s => s.category === 'Bedding').map(s => (
+                                        <option key={s._id} value={s.name} />
+                                    ))}
+                                </datalist>
+                            </div>
+                            <div className="sm:col-span-2">
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Enrichment</label>
+                                <textarea value={enclosureFormData.enrichment || ''} onChange={e => setEnclosureFormData(p => ({ ...p, enrichment: e.target.value }))}
+                                    placeholder="e.g. Wheels, hides, climbing branches" rows="2"
+                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                            </div>
                         </div>
                     </div>
 
