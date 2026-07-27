@@ -881,7 +881,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
 const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, loadingEnclosures, API_BASE_URL, authToken, showModalMessage, locations = [], supplies = [], speciesOptions = [] }) => {
     if (!isOpen) return null;
 
-    const [mode, setMode] = useState('search'); // 'search' | 'create' | 'manual'
+    const [mode, setMode] = useState('search'); // 'search' | 'create'
     const [searchTerm, setSearchTerm] = useState('');
     const [newEnclosureForm, setNewEnclosureForm] = useState({
         name: '',
@@ -897,7 +897,6 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
         purpose: 'general',
         purposeDescription: ''
     });
-    const [manualName, setManualName] = useState('');
     const [creatingEnclosure, setCreatingEnclosure] = useState(false);
 
     const handleCreateEnclosure = async () => {
@@ -962,10 +961,6 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                     <button type="button" onClick={() => { setMode('create'); setNewEnclosureForm({ name: '', enclosureType: '', location: '', capacity: '', dimensions: { length: '', width: '', height: '', unit: 'cm' }, temperatureRange: { min: '', max: '', unit: 'C' }, humidityRange: { min: '', max: '' }, description: '', buildingId: '', roomId: '', purpose: 'general', purposeDescription: '' }); }}
                         className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                         Create New
-                    </button>
-                    <button type="button" onClick={() => { setMode('manual'); setManualName(''); }}
-                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                        Manual Entry
                     </button>
                 </div>
 
