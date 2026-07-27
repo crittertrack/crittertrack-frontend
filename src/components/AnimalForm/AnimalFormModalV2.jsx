@@ -1362,6 +1362,15 @@ const AnimalFormModalV2 = ({
         description: ''
     });
 
+    useEffect(() => {
+        if (formData.enclosureId && availableEnclosures.length > 0 && !selectedEnclosure) {
+            const enc = availableEnclosures.find(e => e._id === formData.enclosureId);
+            if (enc) {
+                setSelectedEnclosure(enc);
+            }
+        }
+    });
+
     const fetchEnclosures = useCallback(async () => {
         if (!authToken) return;
         setLoadingEnclosures(true);
@@ -3045,6 +3054,157 @@ const AnimalFormModalV2 = ({
             setNewMedication({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
         }
     }, [medicationMode]);
+
+    const getLocationPath = useCallback((buildingId, roomId, allLocations) => {
+        if (!buildingId || !allLocations.length) return '';
+        const locationMap = new Map(allLocations.map(l => [l._id, l]));
+        const path = [];
+        const building = locationMap.get(buildingId);
+        const room = locationMap.get(roomId);
+        
+        if (building) path.push(building.name);
+        if (room) path.push(room.name);
+        
+        return path.join(' / ');
+    }, []);
+
+    const handleCloseEnclosureModal = useCallback(() => {
+        setShowEnclosureModal(false);
+        setEditingEnclosureId(null);
+        setEnclosureFormData({
+            name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
+            buildingId: '', roomId: '',
+            purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
+            lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
+            cleaningTasks: []
+        });
+        setEnclosureImageFile(null);
+        setEnclosureImagePreview(null);
+    }, []);
+
+    const handleSaveEnclosure = useCallback(async () => {
+        if (isSavingEnclosureRef.current) return;
+        isSavingEnclosureRef.current = true;
+        setEnclosureSaving(true);
+
+        const generateHistoryDiff = (oldEnc, newEncData, user) => {
+            // This is a simplified version. A full implementation would be more robust.
+            return []; 
+        };
+
+        try {
+            const dataToSave = { ...enclosureFormData };
+            if (!dataToSave.name?.trim()) {
+                showModalMessage('Validation Error', 'Enclosure name cannot be empty.');
+                setEnclosureSaving(false);
+                isSavingEnclosureRef.current = false;
+                return;
+            }
+
+            const payload = {
+                name: dataToSave.name.trim(),
+                enclosureType: dataToSave.enclosureType,
+                buildingId: dataToSave.buildingId || null,
+                roomId: dataToSave.roomId || null,
+                purpose: dataToSave.purpose,
+                purposeDescription: dataToSave.purposeDescription?.trim(),
+                dimensions: {
+                    length: dataToSave.length ? Number(dataToSave.length) : null,
+                    width: dataToSave.width ? Number(dataToSave.width) : null,
+                    height: dataToSave.height ? Number(dataToSave.height) : null,
+                    unit: dataToSave.dimensionsUnit || 'in'
+                },
+                capacity: dataToSave.capacity ? Number(dataToSave.capacity) : undefined,
+                tempMin: dataToSave.tempMin ? Number(dataToSave.tempMin) : null,
+                tempMax: dataToSave.tempMax ? Number(dataToSave.tempMax) : null,
+                temperatureUnit: dataToSave.temperatureUnit || 'C',
+                humidityMin: dataToSave.humidityMin ? Number(dataToSave.humidityMin) : null,
+                humidityMax: dataToSave.humidityMax ? Number(dataToSave.humidityMax) : null,
+                lightsOnTime: dataToSave.lightsOnTime,
+                lightsOffTime: dataToSave.lightsOffTime,
+                lightTimeFormat: dataToSave.lightTimeFormat,
+                notes: dataToSave.notes?.trim(),
+                cleaningTasks: dataToSave.cleaningTasks,
+                tags: dataToSave.tags,
+                speciesLabels: dataToSave.speciesLabels,
+                imageUrl: dataToSave.imageUrl,
+            };
+
+            if (enclosureImageFile) {
+                const uploadFormData = new FormData();
+                uploadFormData.append('file', enclosureImageFile);
+                uploadFormData.append('type', 'enclosure');
+                const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
+                });
+                payload.imageUrl = res.data.url;
+            }
+
+            if (editingEnclosureId) {
+                await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, payload, { headers: { Authorization: `Bearer ${authToken}` } });
+            } else {
+                await axios.post(`${API_BASE_URL}/enclosures`, payload, { headers: { Authorization: `Bearer ${authToken}` } });
+            }
+            
+            handleCloseEnclosureModal();
+            fetchEnclosures();
+
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to save enclosure');
+        } finally {
+            setEnclosureSaving(false);
+            isSavingEnclosureRef.current = false;
+        }
+    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, handleCloseEnclosureModal, showModalMessage, userProfile]);
+
+    const handleDeleteEnclosure = useCallback(async () => {
+        if (!editingEnclosureId) return;
+        if (!window.confirm('Are you sure you want to permanently delete this enclosure?')) return;
+
+        try {
+            await axios.delete(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            showModalMessage('Success', 'Enclosure deleted.');
+            fetchEnclosures();
+            handleCloseEnclosureModal();
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to delete enclosure.');
+        }
+    }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, handleCloseEnclosureModal, showModalMessage]);
+
+    const openEnclosureModal = useCallback((enclosure) => {
+        if (enclosure) {
+            setOriginalEnclosureForEdit(enclosure);
+            const dims = enclosure.dimensions || {};
+            setEnclosureFormData({
+                name: enclosure.name || '',
+                enclosureType: enclosure.enclosureType || '',
+                buildingId: enclosure.buildingId || '',
+                roomId: enclosure.roomId || '',
+                purpose: enclosure.purpose || 'general',
+                purposeDescription: enclosure.purposeDescription || '',
+                capacity: enclosure.capacity || '',
+                length: dims.length || '', width: dims.width || '', height: dims.height || '', dimensionsUnit: dims.unit || 'in',
+                tempMin: enclosure.tempMin ?? '', tempMax: enclosure.tempMax ?? '',
+                temperatureUnit: enclosure.temperatureUnit || 'C',
+                humidityMin: enclosure.humidityMin ?? '', humidityMax: enclosure.humidityMax ?? '',
+                lightsOnTime: enclosure.lightsOnTime || '', lightsOffTime: enclosure.lightsOffTime || '',
+                lightTimeFormat: enclosure.lightTimeFormat || '24h',
+                notes: enclosure.notes || '', imageUrl: enclosure.imageUrl || '',
+                tags: enclosure.tags || [], speciesLabels: enclosure.speciesLabels || [],
+                cleaningTasks: enclosure.cleaningTasks || [],
+            });
+            setEnclosureImagePreview(enclosure.imageUrl || null);
+            setEnclosureImageFile(null);
+            setEditingEnclosureId(enclosure._id);
+        } else {
+            setOriginalEnclosureForEdit(null);
+            resetNewEnclosureForm();
+            setEnclosureImagePreview(null);
+            setEnclosureImageFile(null);
+            setEditingEnclosureId(null);
+        }
+        setShowEnclosureModal(true);
+    }, [resetNewEnclosureForm]);
 
     // Fetch diet supplies when switching to supply mode
     useEffect(() => {
@@ -5012,20 +5172,6 @@ const AnimalFormModalV2 = ({
                                             <div><label className="block text-xs font-medium text-gray-700">Enrichment Schedule/Frequency</label><input type="text" name="enrichmentFrequency" value={formData.enrichmentFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily rotation, Weekly new items, Continuous availability" /></div>
                                         </div>
 
-                                        {/* Cleaning & Maintenance */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Cleaning & Maintenance Routines</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Spot Cleaning Frequency</label><input type="text" name="spotCleaningFrequency" value={formData.spotCleaningFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily, Every 2-3 days" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Deep Cleaning Frequency</label><input type="text" name="deepCleaningFrequency" value={formData.deepCleaningFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Weekly, Bi-weekly, Monthly" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Cleaning Checklist & Notes</label><textarea name="cleaningChecklist" value={formData.cleaningChecklist || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Remove soiled bedding, Wipe surfaces, Replace water, Check equipment function" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Maintenance Tasks Due</label><textarea name="maintenanceTasksDue" value={formData.maintenanceTasksDue || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Inspect lighting (monthly), Deep clean substrate change (quarterly), Equipment maintenance (annually)" /></div>
-                                        </div>
-
-                                        {/* Environment Notes */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Additional Environment Notes</h4>
-                                            <textarea name="environmentNotes" value={formData.environmentNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any other environmental considerations, sensitivities, or special requirements" />
-                                        </div>
                                     </div>
                                 </FormSection>
 
@@ -6417,6 +6563,51 @@ const AnimalFormModalV2 = ({
                     </div>
                 </div>
             </form>
+            {showAssignEnclosureModal && (
+                <AssignEnclosureModal
+                    isOpen={showAssignEnclosureModal}
+                    onClose={() => setShowAssignEnclosureModal(false)}
+                    onSelect={(enclosure) => {
+                        setSelectedEnclosure(enclosure);
+                        setFormData(prev => ({ ...prev, enclosureId: enclosure._id }));
+                        setShowAssignEnclosureModal(false);
+                    }}
+                    availableEnclosures={availableEnclosures}
+                    loadingEnclosures={loadingEnclosures}
+                    onCreateNew={() => {
+                        setShowAssignEnclosureModal(false);
+                        openEnclosureModal(null);
+                    }}
+                />
+            )}
+            <EnclosureModal
+                isOpen={showEnclosureModal}
+                onClose={handleCloseEnclosureModal}
+                enclosureFormData={enclosureFormData}
+                setEnclosureFormData={setEnclosureFormData}
+                editingEnclosureId={editingEnclosureId}
+                handleSaveEnclosure={handleSaveEnclosure}
+                handleDeleteEnclosure={handleDeleteEnclosure}
+                enclosureSaving={enclosureSaving}
+                enclosureImageFile={enclosureImageFile}
+                setEnclosureImageFile={setEnclosureImageFile}
+                enclosureImagePreview={enclosureImagePreview}
+                setEnclosureImagePreview={setEnclosureImagePreview}
+                locations={locations}
+                onManageLocations={() => setShowLocationManager(true)}
+                supplies={supplies}
+                speciesOptions={speciesOptions}
+            />
+            {showLocationManager && (
+                <LocationManagerModal
+                    isOpen={showLocationManager}
+                    onClose={() => setShowLocationManager(false)}
+                    locations={locations}
+                    onSave={handleSaveLocation}
+                    onDelete={handleDeleteLocation}
+                    saving={locationSaving}
+                />
+            )}
         </div>
     );
 };
