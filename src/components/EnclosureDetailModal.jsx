@@ -598,6 +598,21 @@ const EnclosureDetailModal = ({
                                                 ) : (enclosure.lightingSchedule || enclosure.lighting || '—')}
                                                 </span>
                                         </div>
+                                        {enclosure.lightingType && (
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border">
+                                                <span className="text-gray-500 dark:text-dark-text-muted">Lighting Type</span>
+                                                <span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.lightingType}</span>
+                                            </div>
+                                        )}
+                                        {enclosure.bedding && (
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border">
+                                                <span className="text-gray-500 dark:text-dark-text-muted">Bedding</span>
+                                                <span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.bedding}</span>
+                                            </div>
+                                        )}
+                                        {enclosure.enrichment && (
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border"><span className="text-gray-500 dark:text-dark-text-muted">Enrichment</span><span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.enrichment}</span></div>
+                                        )}
                                     </div>
                                 </div>
 

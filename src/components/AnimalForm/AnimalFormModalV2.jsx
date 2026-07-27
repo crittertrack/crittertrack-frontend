@@ -1069,12 +1069,10 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                     <option value="other">Other</option>
                                 </select>
                             </div>
-                            {newEnclosureForm.purpose === 'other' && (
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Purpose Description</label>
-                                    <input type="text" value={newEnclosureForm.purposeDescription} onChange={(e) => setNewEnclosureForm(p => ({ ...p, purposeDescription: e.target.value }))} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                </div>
-                            )}
+                            <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Purpose Description</label>
+                                <input type="text" value={enclosureFormData.purposeDescription || ''} onChange={e => setEnclosureFormData(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                            </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Dimensions (L x W x H)</label>
                                 <div className="grid grid-cols-4 gap-2 items-end">
