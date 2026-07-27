@@ -878,20 +878,24 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
     );
 };
 
-const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, loadingEnclosures, API_BASE_URL, authToken, showModalMessage }) => {
+const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, loadingEnclosures, API_BASE_URL, authToken, showModalMessage, locations = [], supplies = [], speciesOptions = [] }) => {
     if (!isOpen) return null;
 
     const [mode, setMode] = useState('search'); // 'search' | 'create' | 'manual'
     const [searchTerm, setSearchTerm] = useState('');
     const [newEnclosureForm, setNewEnclosureForm] = useState({
         name: '',
-        roomType: '',
+        enclosureType: '',
         location: '',
         capacity: '',
         dimensions: { length: '', width: '', height: '', unit: 'cm' },
         temperatureRange: { min: '', max: '', unit: 'C' },
         humidityRange: { min: '', max: '' },
-        description: ''
+        description: '',
+        buildingId: '',
+        roomId: '',
+        purpose: 'general',
+        purposeDescription: ''
     });
     const [manualName, setManualName] = useState('');
     const [creatingEnclosure, setCreatingEnclosure] = useState(false);
@@ -904,7 +908,25 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
 
         setCreatingEnclosure(true);
         try {
-            const response = await axios.post(`${API_BASE_URL}/enclosures`, newEnclosureForm, {
+            const payload = {
+                ...newEnclosureForm,
+                dimensions: {
+                    length: newEnclosureForm.dimensions.length ? Number(newEnclosureForm.dimensions.length) : null,
+                    width: newEnclosureForm.dimensions.width ? Number(newEnclosureForm.dimensions.width) : null,
+                    height: newEnclosureForm.dimensions.height ? Number(newEnclosureForm.dimensions.height) : null,
+                    unit: newEnclosureForm.dimensions.unit || 'in'
+                },
+                capacity: newEnclosureForm.capacity ? Number(newEnclosureForm.capacity) : undefined,
+                tempMin: newEnclosureForm.temperatureRange.min ? Number(newEnclosureForm.temperatureRange.min) : null,
+                tempMax: newEnclosureForm.temperatureRange.max ? Number(newEnclosureForm.temperatureRange.max) : null,
+                temperatureUnit: newEnclosureForm.temperatureRange.unit || 'C',
+                humidityMin: newEnclosureForm.humidityRange.min ? Number(newEnclosureForm.humidityRange.min) : null,
+                humidityMax: newEnclosureForm.humidityRange.max ? Number(newEnclosureForm.humidityRange.max) : null,
+                notes: newEnclosureForm.description
+            };
+            delete payload.description;
+
+            const response = await axios.post(`${API_BASE_URL}/enclosures`, payload, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             if (response.data) {
@@ -919,7 +941,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
         }
     };
 
-    const filteredEnclosures = availableEnclosures.filter(e => 
+    const filteredEnclosures = availableEnclosures.filter(e =>
         e.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         e.location?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -933,25 +955,16 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                 </div>
 
                 <div className="flex gap-2 p-4 border-b">
-                    <button
-                        type="button"
-                        onClick={() => { setMode('search'); setSearchTerm(''); }}
-                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'search' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                    >
+                    <button type="button" onClick={() => { setMode('search'); setSearchTerm(''); }}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'search' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                         Search Existing
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => { setMode('create'); setNewEnclosureForm({ name: '', roomType: '', location: '', capacity: '', dimensions: { length: '', width: '', height: '', unit: 'cm' }, temperatureRange: { min: '', max: '', unit: 'C' }, humidityRange: { min: '', max: '' }, description: '' }); }}
-                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                    >
+                    <button type="button" onClick={() => { setMode('create'); setNewEnclosureForm({ name: '', enclosureType: '', location: '', capacity: '', dimensions: { length: '', width: '', height: '', unit: 'cm' }, temperatureRange: { min: '', max: '', unit: 'C' }, humidityRange: { min: '', max: '' }, description: '', buildingId: '', roomId: '', purpose: 'general', purposeDescription: '' }); }}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                         Create New
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => { setMode('manual'); setManualName(''); }}
-                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                    >
+                    <button type="button" onClick={() => { setMode('manual'); setManualName(''); }}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                         Manual Entry
                     </button>
                 </div>
@@ -959,25 +972,16 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     {mode === 'search' && (
                         <>
-                            <input
-                                type="text"
-                                placeholder="Search by name or location..."
-                                value={searchTerm}
+                            <input type="text" placeholder="Search by name or location..." value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full py-2 px-3 text-sm border border-gray-300 rounded-md"
-                            />
+                                className="w-full py-2 px-3 text-sm border border-gray-300 rounded-md" />
                             {loadingEnclosures && <p className="text-center text-gray-500 py-4">Loading enclosures...</p>}
                             {!loadingEnclosures && filteredEnclosures.length === 0 && <p className="text-center text-gray-500 py-4">No enclosures found</p>}
                             <div className="space-y-2">
                                 {filteredEnclosures.map(enclosure => (
-                                    <div
-                                        key={enclosure.id}
+                                    <div key={enclosure.id}
                                         className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                                        onClick={() => {
-                                            onSelect(enclosure);
-                                            onClose();
-                                        }}
-                                    >
+                                        onClick={() => { onSelect(enclosure); onClose(); }}>
                                         <div className="flex justify-between items-start">
                                             <div className="flex-1">
                                                 <p className="font-semibold text-gray-800">{enclosure.name}</p>
@@ -999,89 +1003,126 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                         <div className="space-y-3">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Enclosure Name *</label>
-                                <input
-                                    type="text"
-                                    value={newEnclosureForm.name}
-                                    onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, name: e.target.value })}
-                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                    placeholder="e.g., Aquatic Habitat A"
-                                />
+                                <input type="text" value={newEnclosureForm.name}
+                                    onChange={(e) => setNewEnclosureForm(p => ({ ...p, name: e.target.value }))}
+                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Aquatic Habitat A" />
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Room/Type</label>
-                                    <input
-                                        type="text"
-                                        value={newEnclosureForm.roomType}
-                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, roomType: e.target.value })}
-                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                        placeholder="e.g., Tank, Cage, Vivarium"
-                                    />
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Enclosure Type</label>
+                                    <input type="text" value={newEnclosureForm.enclosureType}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, enclosureType: e.target.value }))}
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Tank, Cage, Vivarium" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Location</label>
-                                    <input
-                                        type="text"
-                                        value={newEnclosureForm.location}
-                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, location: e.target.value })}
-                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                        placeholder="e.g., Room 2, Shelf 1"
-                                    />
+                                    <input type="text" value={newEnclosureForm.location}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, location: e.target.value }))}
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Room 2, Shelf 1" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Building</label>
+                                    <select value={newEnclosureForm.buildingId} onChange={(e) => setNewEnclosureForm(p => ({ ...p, buildingId: e.target.value, roomId: '' }))} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                        <option value="">Select Building</option>
+                                        {(locations || []).filter(l => l.type === 'building').map(l => <option key={l._id} value={l._id}>{l.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Room</label>
+                                    <select value={newEnclosureForm.roomId} onChange={(e) => setNewEnclosureForm(p => ({ ...p, roomId: e.target.value }))} disabled={!newEnclosureForm.buildingId} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md disabled:bg-gray-100">
+                                        <option value="">Select Room</option>
+                                        {(locations || []).filter(l => l.type === 'room' && l.parentLocationId === newEnclosureForm.buildingId).map(l => <option key={l._id} value={l._id}>{l.name}</option>)}
+                                    </select>
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Capacity</label>
-                                <input
-                                    type="number"
-                                    value={newEnclosureForm.capacity}
-                                    onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, capacity: e.target.value })}
-                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                    placeholder="Max animals"
-                                />
+                                <input type="number" value={newEnclosureForm.capacity}
+                                    onChange={(e) => setNewEnclosureForm(p => ({ ...p, capacity: e.target.value }))}
+                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Max animals" />
                             </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">Purpose</label>
+                                <select value={newEnclosureForm.purpose} onChange={(e) => setNewEnclosureForm(p => ({ ...p, purpose: e.target.value }))} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                    <option value="general">General</option>
+                                    <option value="reproduction">Reproduction</option>
+                                    <option value="medical">Medical</option>
+                                    <option value="quarantine">Quarantine</option>
+                                    <option value="sale">For Sale</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            {newEnclosureForm.purpose === 'other' && (
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Purpose Description</label>
+                                    <input type="text" value={newEnclosureForm.purposeDescription} onChange={(e) => setNewEnclosureForm(p => ({ ...p, purposeDescription: e.target.value }))} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Dimensions (L x W x H)</label>
                                 <div className="grid grid-cols-4 gap-2 items-end">
-                                    <input
-                                        type="number"
-                                        value={newEnclosureForm.dimensions.length}
-                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, dimensions: { ...newEnclosureForm.dimensions, length: e.target.value } })}
-                                        placeholder="Length"
-                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                    />
-                                    <input
-                                        type="number"
-                                        value={newEnclosureForm.dimensions.width}
-                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, dimensions: { ...newEnclosureForm.dimensions, width: e.target.value } })}
-                                        placeholder="Width"
-                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                    />
-                                    <input
-                                        type="number"
-                                        value={newEnclosureForm.dimensions.height}
-                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, dimensions: { ...newEnclosureForm.dimensions, height: e.target.value } })}
-                                        placeholder="Height"
-                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                    />
-                                    <select
-                                        value={newEnclosureForm.dimensions.unit}
-                                        onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, dimensions: { ...newEnclosureForm.dimensions, unit: e.target.value } })}
-                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                    >
+                                    <input type="number" value={newEnclosureForm.dimensions.length}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, dimensions: { ...p.dimensions, length: e.target.value } }))}
+                                        placeholder="Length" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    <input type="number" value={newEnclosureForm.dimensions.width}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, dimensions: { ...p.dimensions, width: e.target.value } }))}
+                                        placeholder="Width" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    <input type="number" value={newEnclosureForm.dimensions.height}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, dimensions: { ...p.dimensions, height: e.target.value } }))}
+                                        placeholder="Height" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    <select value={newEnclosureForm.dimensions.unit}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, dimensions: { ...p.dimensions, unit: e.target.value } }))}
+                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
                                         <option value="cm">cm</option>
                                         <option value="in">in</option>
                                     </select>
                                 </div>
                             </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Temp Min</label>
+                                    <input type="number" value={newEnclosureForm.temperatureRange.min}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, temperatureRange: { ...p.temperatureRange, min: e.target.value } }))}
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Temp Max</label>
+                                    <input type="number" value={newEnclosureForm.temperatureRange.max}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, temperatureRange: { ...p.temperatureRange, max: e.target.value } }))}
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Unit</label>
+                                    <select value={newEnclosureForm.temperatureRange.unit}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, temperatureRange: { ...p.temperatureRange, unit: e.target.value } }))}
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                        <option value="C">°C</option>
+                                        <option value="F">°F</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Humidity Min (%)</label>
+                                    <input type="number" value={newEnclosureForm.humidityRange.min}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, humidityRange: { ...p.humidityRange, min: e.target.value } }))}
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Humidity Max (%)</label>
+                                    <input type="number" value={newEnclosureForm.humidityRange.max}
+                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, humidityRange: { ...p.humidityRange, max: e.target.value } }))}
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                </div>
+                            </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-700 mb-1">Description</label>
-                                <textarea
-                                    value={newEnclosureForm.description}
-                                    onChange={(e) => setNewEnclosureForm({ ...newEnclosureForm, description: e.target.value })}
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">Notes</label>
+                                <textarea value={newEnclosureForm.description}
+                                    onChange={(e) => setNewEnclosureForm(p => ({ ...p, description: e.target.value }))}
                                     className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none"
-                                    rows="2"
-                                    placeholder="Any notes about this enclosure..."
-                                />
+                                    rows="2" placeholder="Any notes about this enclosure..." />
                             </div>
                         </div>
                     )}
@@ -1089,27 +1130,19 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                     {mode === 'manual' && (
                         <div className="space-y-3">
                             <p className="text-sm text-gray-600">Enter a custom enclosure name (will be stored locally):</p>
-                            <input
-                                type="text"
-                                value={manualName}
-                                onChange={(e) => setManualName(e.target.value)}
+                            <input type="text" value={manualName} onChange={(e) => setManualName(e.target.value)}
                                 className="w-full py-2 px-3 text-sm border border-gray-300 rounded-md"
-                                placeholder="e.g., Outdoor Pen, Temporary Setup"
-                            />
+                                placeholder="e.g., Outdoor Pen, Temporary Setup" />
                         </div>
                     )}
                 </div>
 
                 <div className="p-4 border-t flex gap-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
-                    >
+                    <button type="button" onClick={onClose}
+                        className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
                         Cancel
                     </button>
-                    <button
-                        type="button"
+                    <button type="button"
                         onClick={() => {
                             if (mode === 'create') {
                                 handleCreateEnclosure();
@@ -1123,13 +1156,9 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             }
                         }}
                         disabled={creatingEnclosure || (mode === 'manual' && !manualName.trim())}
-                        className="flex-1 px-3 py-2 text-sm font-medium bg-primary text-black rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
+                        className="flex-1 px-3 py-2 text-sm font-medium bg-primary text-black rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         {creatingEnclosure ? (
-                            <>
-                                <Loader2 size={16} className="inline animate-spin mr-1" />
-                                Creating...
-                            </>
+                            <><Loader2 size={16} className="inline animate-spin mr-1" /> Creating...</>
                         ) : (
                             'Confirm'
                         )}
@@ -4999,8 +5028,8 @@ const AnimalFormModalV2 = ({
 
                                 </FormSection>
 
-                                {/* Environment Setup */}
-                                <FormSection title="Environment Setup" icon={<Leaf size={16} />}>
+                                {/* Environment Needs */}
+                                <FormSection title="Environment Needs" icon={<Leaf size={16} />}>
                                     <div className="space-y-3">
                                         {/* Lighting */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
@@ -6367,6 +6396,10 @@ const AnimalFormModalV2 = ({
                         setShowAssignEnclosureModal(false);
                         openEnclosureModal(null);
                     }}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                    showModalMessage={showModalMessage}
+                    locations={locations}
                 />
             )}
             <EnclosureModal
