@@ -450,7 +450,7 @@ const EnclosureDetailModal = ({
                         <h2 className="text-2xl font-bold text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{enclosure.name}</h2>
                         <p className="text-sm text-gray-200" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
                             {enclosure.enclosureType && `${enclosure.enclosureType} • `}
-                            {enclosure.location || 'No location set'}
+                            {enclosure.locationName || enclosure.location || 'No location set'}
                         </p>
                     </div>
                     <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/20 p-1 rounded-lg">

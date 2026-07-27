@@ -987,7 +987,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-semibold text-gray-800 truncate">{enclosure.name}</p>
-                                                <p className="text-xs text-gray-500">{enclosure.location} • {enclosure.roomType || 'N/A'}</p>
+                                                <p className="text-xs text-gray-500">{enclosure.locationName || enclosure.location || 'No Location'}</p>
                                                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
                                                     <div className="flex items-center gap-1">
                                                         <Users size={12} />
