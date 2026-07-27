@@ -549,24 +549,24 @@ const EnclosureDetailModal = ({
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Details</h4>
-                                    <div className="space-y-1 text-xs">
+                                      <div className="text-xs">
                                         <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Type</span>
                                             <span className="text-gray-800 dark:text-dark-text">{enclosure.enclosureType || '—'}</span>
                                         </div>
-                                        <div className="flex justify-between">
+                                         <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-border">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Purpose</span>
                                             <span className="text-gray-800 dark:text-dark-text capitalize">{enclosure.purpose || 'General'}</span>
                                         </div>
                                         {enclosure.purposeDescription && (
-                                            <div className="flex justify-between items-start">
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border">
                                                 <span className="text-gray-500 dark:text-dark-text-muted">Description</span>
                                                 <span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.purposeDescription}</span>
                                             </div>
                                         )}
-                                        <div className="flex justify-between">
+                                         <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-border">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Location</span>
-                                            <span className="text-gray-800 dark:text-dark-text">{enclosure.locationName || '—'}</span>
+                                              <span className="text-gray-800 dark:text-dark-text">{enclosure.locationName || enclosure.location || '—'}</span>
                                         </div>
                                         {enclosure.location?.address && (
                                             <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border">
