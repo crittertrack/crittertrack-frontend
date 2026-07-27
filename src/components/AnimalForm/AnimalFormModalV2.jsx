@@ -1350,6 +1350,7 @@ const AnimalFormModalV2 = ({
     const [manualEnclosureName, setManualEnclosureName] = useState('');
     const [showLocationManager, setShowLocationManager] = useState(false);
     const [locationSaving, setLocationSaving] = useState(false);
+    const [showAssignEnclosureModal, setShowAssignEnclosureModal] = useState(false);
 
     const resetNewEnclosureForm = () => setEnclosureFormData({
         name: '',
@@ -4987,6 +4988,7 @@ const AnimalFormModalV2 = ({
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowEnclosureModal(true)}
+                                                    onClick={() => setShowAssignEnclosureModal(true)}
                                                     className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium hover:bg-primary/90 transition-colors"
                                                 >
                                                     Search & Assign Enclosure
