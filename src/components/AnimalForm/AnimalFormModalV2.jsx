@@ -907,7 +907,13 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
         setCreatingEnclosure(true);
         try {
             const payload = {
-                ...newEnclosureForm,
+                name: newEnclosureForm.name,
+                enclosureType: newEnclosureForm.enclosureType,
+                location: newEnclosureForm.location,
+                buildingId: newEnclosureForm.buildingId,
+                roomId: newEnclosureForm.roomId,
+                purpose: newEnclosureForm.purpose,
+                purposeDescription: newEnclosureForm.purposeDescription,
                 dimensions: {
                     length: newEnclosureForm.dimensions.length ? Number(newEnclosureForm.dimensions.length) : null,
                     width: newEnclosureForm.dimensions.width ? Number(newEnclosureForm.dimensions.width) : null,
@@ -922,7 +928,6 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                 humidityMax: newEnclosureForm.humidityRange.max ? Number(newEnclosureForm.humidityRange.max) : null,
                 notes: newEnclosureForm.description
             };
-            delete payload.description;
 
             const response = await axios.post(`${API_BASE_URL}/enclosures`, payload, {
                 headers: { Authorization: `Bearer ${authToken}` }
@@ -1374,16 +1379,32 @@ const AnimalFormModalV2 = ({
     const [showLocationManager, setShowLocationManager] = useState(false);
     const [locationSaving, setLocationSaving] = useState(false);
     const [showAssignEnclosureModal, setShowAssignEnclosureModal] = useState(false);
-
+ 
     const resetNewEnclosureForm = () => setEnclosureFormData({
         name: '',
-        roomType: '',
-        location: '',
+        enclosureType: '',
         capacity: '',
-        dimensions: { length: '', width: '', height: '', unit: 'cm' },
-        temperatureRange: { min: '', max: '', unit: 'C' },
-        humidityRange: { min: '', max: '' },
-        description: ''
+        length: '',
+        width: '',
+        height: '',
+        dimensionsUnit: 'in',
+        buildingId: '',
+        roomId: '',
+        purpose: 'general',
+        purposeDescription: '',
+        tempMin: '',
+        tempMax: '',
+        temperatureUnit: 'C',
+        humidityMin: '',
+        humidityMax: '',
+        lightsOnTime: '',
+        lightsOffTime: '',
+        lightTimeFormat: '24h',
+        notes: '',
+        imageUrl: '',
+        tags: [],
+        speciesLabels: [],
+        cleaningTasks: [],
     });
 
     useEffect(() => {

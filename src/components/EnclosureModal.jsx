@@ -129,12 +129,17 @@ const EnclosureModal = ({
                                     <option value="general">General</option>
                                     <option value="reproduction">Nursery / Breeding</option>
                                     <option value="medical">Medical</option>
+                                    <option value="quarantine">Quarantine</option>
+                                    <option value="sale">For Sale</option>
+                                    <option value="other">Other</option>
                                 </select>
                             </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Purpose Description</label>
-                                <input type="text" value={enclosureFormData.purposeDescription || ''} onChange={e => setEnclosureFormData(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
-                            </div>
+                            {(enclosureFormData.purpose === 'other') && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Purpose Description</label>
+                                    <input type="text" value={enclosureFormData.purposeDescription || ''} onChange={e => setEnclosureFormData(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Building</label>
                                 <div className="flex items-center gap-2">
