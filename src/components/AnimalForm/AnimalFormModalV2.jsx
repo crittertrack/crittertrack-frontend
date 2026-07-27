@@ -1371,7 +1371,6 @@ const AnimalFormModalV2 = ({
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
     const [newCleaningTaskFreq, setNewCleaningTaskFreq] = useState('');
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
-    const [manualEnclosureName, setManualEnclosureName] = useState('');
     const [showLocationManager, setShowLocationManager] = useState(false);
     const [locationSaving, setLocationSaving] = useState(false);
     const [showAssignEnclosureModal, setShowAssignEnclosureModal] = useState(false);
