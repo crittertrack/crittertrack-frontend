@@ -1121,14 +1121,6 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                         </div>
                     )}
 
-                    {mode === 'manual' && (
-                        <div className="space-y-3">
-                            <p className="text-sm text-gray-600">Enter a custom enclosure name (will be stored locally):</p>
-                            <input type="text" value={manualName} onChange={(e) => setManualName(e.target.value)}
-                                className="w-full py-2 px-3 text-sm border border-gray-300 rounded-md"
-                                placeholder="e.g., Outdoor Pen, Temporary Setup" />
-                        </div>
-                    )}
                 </div>
 
                 <div className="p-4 border-t flex gap-2">
@@ -1140,16 +1132,9 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                         onClick={() => {
                             if (mode === 'create') {
                                 handleCreateEnclosure();
-                            } else if (mode === 'manual') {
-                                if (!manualName.trim()) {
-                                    showModalMessage('Validation Error', 'Please enter an enclosure name.');
-                                    return;
-                                }
-                                onSelect({ name: manualName, isManual: true });
-                                onClose();
                             }
                         }}
-                        disabled={creatingEnclosure || (mode === 'manual' && !manualName.trim())}
+                        disabled={creatingEnclosure}
                         className="flex-1 px-3 py-2 text-sm font-medium bg-primary text-black rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         {creatingEnclosure ? (
                             <><Loader2 size={16} className="inline animate-spin mr-1" /> Creating...</>
@@ -4996,20 +4981,9 @@ const AnimalFormModalV2 = ({
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div className="space-y-2">
-                                                <input
-                                                    type="text"
-                                                    value={manualEnclosureName}
-                                                    onChange={(e) => {
-                                                        setManualEnclosureName(e.target.value);
-                                                        setFormData(prev => ({ ...prev, enclosureId: e.target.value || null }));
-                                                    }}
-                                                    placeholder="Enter enclosure name manually..."
-                                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                />
+                                            <div>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setShowEnclosureModal(true)}
                                                     onClick={() => setShowAssignEnclosureModal(true)}
                                                     className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium hover:bg-primary/90 transition-colors"
                                                 >
@@ -5018,7 +4992,6 @@ const AnimalFormModalV2 = ({
                                             </div>
                                         )}
                                     </div>
-
                                 </FormSection>
 
                                 {/* Environment Needs */}
