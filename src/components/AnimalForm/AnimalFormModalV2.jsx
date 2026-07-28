@@ -1005,7 +1005,6 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-semibold text-gray-800 truncate">{enclosure.name}</p>
-                                                <p className="text-xs text-gray-500">{enclosure.locationName || enclosure.location || 'No Location'}</p>
                                                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
                                                     <div className="flex items-center gap-1">
                                                         <Users size={12} />
@@ -1021,6 +1020,52 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                                         <div className="flex items-center gap-1">
                                                             <Cat size={12} />
                                                             <span className="truncate">{enclosure.speciesLabels.join(', ')}</span>
+                                                        </div>
+                                                    )}
+                                                    {enclosure.purpose && enclosure.purpose !== 'general' && (
+                                                        <div className="flex items-center gap-1" title={`Purpose: ${enclosure.purpose}`}>
+                                                            <Target size={12} />
+                                                            <span className="capitalize">{enclosure.purpose}</span>
+                                                        </div>
+                                                    )}
+                                                    {enclosure.enclosureType && (
+                                                        <div className="flex items-center gap-1" title={`Type: ${enclosure.enclosureType}`}>
+                                                            <Home size={12} />
+                                                            <span>{enclosure.enclosureType}</span>
+                                                        </div>
+                                                    )}
+                                                    {(enclosure.tempMin || enclosure.tempMax) && (
+                                                        <div className="flex items-center gap-1" title="Temperature">
+                                                            <Thermometer size={12} />
+                                                            <span>{enclosure.tempMin || '?'} - {enclosure.tempMax || '?'}°</span>
+                                                        </div>
+                                                    )}
+                                                    {(enclosure.humidityMin || enclosure.humidityMax) && (
+                                                        <div className="flex items-center gap-1" title="Humidity">
+                                                            <Droplets size={12} />
+                                                            <span>{enclosure.humidityMin || '?'} - {enclosure.humidityMax || '?'}%</span>
+                                                        </div>
+                                                    )}
+                                                    {(enclosure.lightingType || (enclosure.lightsOnTime && enclosure.lightsOffTime)) && (
+                                                        <div className="flex items-center gap-1" title="Lighting">
+                                                            <Leaf size={12} />
+                                                            <span className="truncate">
+                                                                {enclosure.lightingType}
+                                                                {enclosure.lightingType && (enclosure.lightsOnTime && enclosure.lightsOffTime) ? ' • ' : ''}
+                                                                {enclosure.lightsOnTime && enclosure.lightsOffTime ? `${enclosure.lightsOnTime}-${enclosure.lightsOffTime}` : ''}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {enclosure.bedding && (
+                                                        <div className="flex items-center gap-1" title={`Bedding: ${enclosure.bedding}`}>
+                                                            <Package size={12} />
+                                                            <span className="truncate">{enclosure.bedding}</span>
+                                                        </div>
+                                                    )}
+                                                    {enclosure.enrichment && (
+                                                        <div className="flex items-center gap-1" title={`Enrichment: ${enclosure.enrichment}`}>
+                                                            <Sparkles size={12} />
+                                                            <span className="truncate">{enclosure.enrichment}</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -5038,7 +5083,6 @@ const AnimalFormModalV2 = ({
                                                                 <Unlink size={16} />
                                                             </button>
                                                         </div>
-                                                        <p className="text-sm text-gray-500">{selectedEnclosure.location} • {selectedEnclosure.roomType || 'N/A'}</p>
                                                         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
                                                             <div className="flex items-center gap-1">
                                                                 <Users size={14} />
@@ -5048,6 +5092,52 @@ const AnimalFormModalV2 = ({
                                                                 <div className="flex items-center gap-1">
                                                                     <Ruler size={14} />
                                                                     <span>{`${selectedEnclosure.dimensions.length || '?'} x ${selectedEnclosure.dimensions.width || '?'} ${selectedEnclosure.dimensions.unit}`}</span>
+                                                                </div>
+                                                            )}
+                                                            {selectedEnclosure.purpose && selectedEnclosure.purpose !== 'general' && (
+                                                                <div className="flex items-center gap-1" title={`Purpose: ${selectedEnclosure.purpose}`}>
+                                                                    <Target size={14} />
+                                                                    <span className="capitalize">{selectedEnclosure.purpose}</span>
+                                                                </div>
+                                                            )}
+                                                            {selectedEnclosure.enclosureType && (
+                                                                <div className="flex items-center gap-1" title={`Type: ${selectedEnclosure.enclosureType}`}>
+                                                                    <Home size={14} />
+                                                                    <span>{selectedEnclosure.enclosureType}</span>
+                                                                </div>
+                                                            )}
+                                                            {(selectedEnclosure.tempMin || selectedEnclosure.tempMax) && (
+                                                                <div className="flex items-center gap-1" title="Temperature">
+                                                                    <Thermometer size={14} />
+                                                                    <span>{selectedEnclosure.tempMin || '?'} - {selectedEnclosure.tempMax || '?'}°</span>
+                                                                </div>
+                                                            )}
+                                                            {(selectedEnclosure.humidityMin || selectedEnclosure.humidityMax) && (
+                                                                <div className="flex items-center gap-1" title="Humidity">
+                                                                    <Droplets size={14} />
+                                                                    <span>{selectedEnclosure.humidityMin || '?'} - {selectedEnclosure.humidityMax || '?'}%</span>
+                                                                </div>
+                                                            )}
+                                                            {(selectedEnclosure.lightingType || (selectedEnclosure.lightsOnTime && selectedEnclosure.lightsOffTime)) && (
+                                                                <div className="flex items-center gap-1" title="Lighting">
+                                                                    <Leaf size={14} />
+                                                                    <span className="truncate">
+                                                                        {selectedEnclosure.lightingType}
+                                                                        {selectedEnclosure.lightingType && (selectedEnclosure.lightsOnTime && selectedEnclosure.lightsOffTime) ? ' • ' : ''}
+                                                                        {selectedEnclosure.lightsOnTime && selectedEnclosure.lightsOffTime ? `${selectedEnclosure.lightsOnTime}-${selectedEnclosure.lightsOffTime}` : ''}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            {selectedEnclosure.bedding && (
+                                                                <div className="flex items-center gap-1" title={`Bedding: ${selectedEnclosure.bedding}`}>
+                                                                    <Package size={14} />
+                                                                    <span className="truncate">{selectedEnclosure.bedding}</span>
+                                                                </div>
+                                                            )}
+                                                            {selectedEnclosure.enrichment && (
+                                                                <div className="flex items-center gap-1" title={`Enrichment: ${selectedEnclosure.enrichment}`}>
+                                                                    <Sparkles size={14} />
+                                                                    <span className="truncate">{selectedEnclosure.enrichment}</span>
                                                                 </div>
                                                             )}
                                                         </div>
