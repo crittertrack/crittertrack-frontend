@@ -684,7 +684,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [reproEncFormVisible, setReproEncFormVisible] = useState(false);
     const [healthEncFormVisible, setHealthEncFormVisible] = useState(false);
-    const [enclosureFormData, setEnclosureFormData] = useState({
+    const [enclosureFormData, setNewEnclosureForm] = useState({
         name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
         buildingId: '', roomId: '',
         purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
@@ -755,7 +755,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
         setShowEnclosureModal(false);
         setOriginalEnclosureForEdit(null);
         setEditingEnclosureId(null);
-        setEnclosureFormData({
+        setNewEnclosureForm({
             name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
             buildingId: '', roomId: '',
             purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
@@ -765,7 +765,7 @@ const handleArchive = useCallback(async (animalToArchive) => {
         });
         setEnclosureImageFile(null);
         setEnclosureImagePreview(null);
-    }, [setEnclosureFormData, setEnclosureImageFile, setEnclosureImagePreview, setEditingEnclosureId, setShowEnclosureModal]);
+    }, [setNewEnclosureForm, setEnclosureImageFile, setEnclosureImagePreview, setEditingEnclosureId, setShowEnclosureModal]);
 
     const handleSaveEnclosure = useCallback(async () => {
         if (isSavingEnclosureRef.current) return;
@@ -1257,26 +1257,26 @@ useEffect(() => {
 
     const handleEnclosureTagAdd = useCallback(() => {
         if (!newEnclosureTag.trim()) return;
-        setEnclosureFormData(p => ({ ...p, tags: [...new Set([...(p.tags || []), newEnclosureTag.trim()])] }));
+        setNewEnclosureForm(p => ({ ...p, tags: [...new Set([...(p.tags || []), newEnclosureTag.trim()])] }));
         setNewEnclosureTag('');
     }, [newEnclosureTag]);
 
     const handleEnclosureSpeciesLabelAdd = useCallback((speciesLabel) => {
-        setEnclosureFormData(p => ({
+        setNewEnclosureForm(p => ({
             ...p,
             speciesLabels: [...new Set([...(p.speciesLabels || []), speciesLabel])]
         }));
     }, []);
 
     const handleEnclosureSpeciesLabelRemove = useCallback((speciesLabelToRemove) => {
-        setEnclosureFormData(p => ({
+        setNewEnclosureForm(p => ({
             ...p,
             speciesLabels: (p.speciesLabels || []).filter(s => s !== speciesLabelToRemove)
         }));
     }, []);
 
     const handleEnclosureTagRemove = useCallback((tagToRemove) => {
-        setEnclosureFormData(p => ({ ...p, tags: (p.tags || []).filter(t => t !== tagToRemove) }));
+        setNewEnclosureForm(p => ({ ...p, tags: (p.tags || []).filter(t => t !== tagToRemove) }));
     }, []);
 
     const openEnclosureModal = useCallback((enclosure) => {
@@ -1292,7 +1292,7 @@ useEffect(() => {
                 height = dims.height || '';
                 dimensionsUnit = dims.unit || 'in';
             }
-            setEnclosureFormData({
+            setNewEnclosureForm({
                 name: enclosure.name || '',
                 enclosureType: enclosure.enclosureType || enclosure.roomType || '',
                 buildingId: enclosure.buildingId || '',
@@ -1324,7 +1324,7 @@ useEffect(() => {
         } else {
             // Add new mode
             setOriginalEnclosureForEdit(null);
-            setEnclosureFormData({
+            setNewEnclosureForm({
                 name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in', buildingId: '', roomId: '',
                 purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
                 lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
@@ -1336,7 +1336,7 @@ useEffect(() => {
             setEditingEnclosureId(null);
         }
         setShowEnclosureModal(true);
-    }, [setEnclosureFormData, setEnclosureImagePreview, setEnclosureImageFile, setEditingEnclosureId, setShowEnclosureModal]);
+    }, [setNewEnclosureForm, setEnclosureImagePreview, setEnclosureImageFile, setEditingEnclosureId, setShowEnclosureModal]);
 
     const logEnclosureHistory = useCallback(async (enclosureId, action, details) => {
         if (!userProfile) return;
@@ -3197,12 +3197,12 @@ useEffect(() => {
             const previewUrl = URL.createObjectURL(file);
             setEnclosureImagePreview(previewUrl);
             // Update imageUrl in form data so it's correctly reflected in the payload if no new upload occurs
-            setEnclosureFormData(prev => ({ ...prev, imageUrl: previewUrl }));
+            setNewEnclosureForm(prev => ({ ...prev, imageUrl: previewUrl }));
         }
         else {
             setEnclosureImageFile(null);
             setEnclosureImagePreview(null);
-            setEnclosureFormData(prev => ({ ...prev, imageUrl: '' })); // Clear imageUrl in form data
+            setNewEnclosureForm(prev => ({ ...prev, imageUrl: '' })); // Clear imageUrl in form data
         }
     };
 
@@ -3806,7 +3806,7 @@ useEffect(() => {
                                                     <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
                                                         <button
                                                             onClick={() => {
-                                                                setEnclosureFormData({
+                                                                setNewEnclosureForm({
                                                                     name: enc.name,
                                                                     enclosureType: enc.enclosureType || '',
                                                                     location: enc.location || '',
@@ -4019,7 +4019,7 @@ useEffect(() => {
                                         <span className="text-xs font-semibold text-gray-700">Enclosures</span>
                                         <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{reproEnclosures.length}</span>
                                     </div>
-                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setReproEncFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); } else { setEnclosureFormData({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'reproduction', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setReproEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg">
+                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setReproEncFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); } else { setNewEnclosureForm({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'reproduction', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setReproEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> Add
                                     </button>
                                 </div>
@@ -4045,7 +4045,7 @@ useEffect(() => {
                                                             <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
                                                         </div>
                                                         <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>                                                            <button onClick={() => {
-                                                                setEnclosureFormData({
+                                                                setNewEnclosureForm({
                                                                     name: enc.name,
                                                                     enclosureType: enc.enclosureType || '',
                                                                     location: enc.location || '',
@@ -4186,7 +4186,7 @@ useEffect(() => {
                                         <span className="text-xs font-semibold text-gray-700">Enclosures</span>
                                         <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{healthEnclosures.length}</span>
                                     </div>
-                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setHealthEncFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); } else { setEnclosureFormData({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'health', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setHealthEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
+                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setHealthEncFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); } else { setNewEnclosureForm({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'health', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setHealthEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> Add
                                     </button>
                                 </div>
@@ -4215,7 +4215,7 @@ useEffect(() => {
                                                             <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
                                                         </div>
                                                         <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>                                                            <button onClick={() => {
-                                                                setEnclosureFormData({
+                                                                setNewEnclosureForm({
                                                                     name: enc.name,
                                                                     enclosureType: enc.enclosureType || '',
                                                                     location: enc.location || '',
@@ -5611,7 +5611,7 @@ useEffect(() => {
                 isOpen={showEnclosureModal}
                 onClose={handleCloseEnclosureModal}
                 enclosureFormData={enclosureFormData}
-                setEnclosureFormData={setEnclosureFormData}
+                setNewEnclosureForm={setNewEnclosureForm}
                 editingEnclosureId={editingEnclosureId}
                 setEditingEnclosureId={setEditingEnclosureId}
                 handleSaveEnclosure={handleSaveEnclosure}

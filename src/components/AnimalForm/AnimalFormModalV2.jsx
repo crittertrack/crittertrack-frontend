@@ -1089,7 +1089,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Purpose Description</label>
-                                <input type="text" value={enclosureFormData.purposeDescription || ''} onChange={e => setEnclosureFormData(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                <input type="text" value={newEnclosureForm.purposeDescription || ''} onChange={e => setNewEnclosureForm(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Dimensions (L x W x H)</label>
@@ -1377,7 +1377,7 @@ const AnimalFormModalV2 = ({
     const [loadingEnclosures, setLoadingEnclosures] = useState(false);
     const [locations, setLocations] = useState([]);
     const [supplies, setSupplies] = useState([]);
-    const [enclosureFormData, setEnclosureFormData] = useState({
+    const [enclosureFormData, setNewEnclosureForm] = useState({
         name: '', enclosureType: '', capacity: '', length: '', width: '', height: '', dimensionsUnit: 'in',
         buildingId: '', roomId: '',
         purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
@@ -1396,7 +1396,7 @@ const AnimalFormModalV2 = ({
     const [locationSaving, setLocationSaving] = useState(false);
     const [showAssignEnclosureModal, setShowAssignEnclosureModal] = useState(false);
  
-    const resetNewEnclosureForm = () => setEnclosureFormData({
+    const resetNewEnclosureForm = () => setNewEnclosureForm({
         name: '',
         enclosureType: '',
         capacity: '',
@@ -1490,7 +1490,7 @@ const AnimalFormModalV2 = ({
                 buildingId: enclosureFormData.buildingId || null,
                 roomId: enclosureFormData.roomId || null,
                 purpose: enclosureFormData.purpose,
-                purposeDescription: enclosureFormData.purposeDescription?.trim(),
+                purposeDescription: newEnclosureForm.purposeDescription?.trim(),
                 dimensions: {
                     length: enclosureFormData.length ? Number(enclosureFormData.length) : null,
                     width: enclosureFormData.width ? Number(enclosureFormData.width) : null,
@@ -1563,7 +1563,7 @@ const AnimalFormModalV2 = ({
     const openEnclosureModal = useCallback((enclosure) => {
         if (enclosure) {
             const dims = enclosure.dimensions || {};
-            setEnclosureFormData({
+            setNewEnclosureForm({
                 name: enclosure.name || '',
                 enclosureType: enclosure.enclosureType || '',
                 buildingId: enclosure.buildingId || '',
@@ -6452,7 +6452,7 @@ const AnimalFormModalV2 = ({
                 isOpen={showEnclosureModal}
                 onClose={handleCloseEnclosureModal}
                 enclosureFormData={enclosureFormData}
-                setEnclosureFormData={setEnclosureFormData}
+                setNewEnclosureForm={setNewEnclosureForm}
                 editingEnclosureId={editingEnclosureId}
                 handleSaveEnclosure={handleSaveEnclosure}
                 handleDeleteEnclosure={handleDeleteEnclosure}
