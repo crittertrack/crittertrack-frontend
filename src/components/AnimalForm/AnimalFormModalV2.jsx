@@ -880,8 +880,8 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
 const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, loadingEnclosures, API_BASE_URL, authToken, showModalMessage, locations = [], supplies = [], speciesOptions = [] }) => {
     if (!isOpen) return null;
 
-    // Resolve enclosure location display name from buildingId/roomId references
     const getEnclosureLocationName = useCallback((enclosure) => {
+        // Resolve enclosure location display name from buildingId/roomId references
         if (!locations || locations.length === 0) {
             return enclosure.location || null;
         }
@@ -900,7 +900,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
 
     const [mode, setMode] = useState('search'); // 'search' | 'create'
     const [searchTerm, setSearchTerm] = useState('');
-    const [setNewEnclosureForm, setNewEnclosureForm] = useState({
+    const [newEnclosureData, setNewEnclosureData] = useState({
         name: '',
         enclosureType: '',
         location: '',
@@ -917,7 +917,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
     const [creatingEnclosure, setCreatingEnclosure] = useState(false);
 
     const handleCreateEnclosure = async () => {
-        if (!setNewEnclosureForm.name.trim()) {
+        if (!newEnclosureData.name.trim()) {
             showModalMessage('Validation Error', 'Enclosure name is required.');
             return;
         }
@@ -925,26 +925,26 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
         setCreatingEnclosure(true);
         try {
             const payload = {
-                name: setNewEnclosureForm.name,
-                enclosureType: setNewEnclosureForm.enclosureType,
-                location: setNewEnclosureForm.location,
-                buildingId: setNewEnclosureForm.buildingId,
-                roomId: setNewEnclosureForm.roomId,
-                purpose: setNewEnclosureForm.purpose,
-                purposeDescription: setNewEnclosureForm.purposeDescription,
+                name: newEnclosureData.name,
+                enclosureType: newEnclosureData.enclosureType,
+                location: newEnclosureData.location,
+                buildingId: newEnclosureData.buildingId,
+                roomId: newEnclosureData.roomId,
+                purpose: newEnclosureData.purpose,
+                purposeDescription: newEnclosureData.purposeDescription,
                 dimensions: {
-                    length: setNewEnclosureForm.dimensions.length ? Number(setNewEnclosureForm.dimensions.length) : null,
-                    width: setNewEnclosureForm.dimensions.width ? Number(setNewEnclosureForm.dimensions.width) : null,
-                    height: setNewEnclosureForm.dimensions.height ? Number(setNewEnclosureForm.dimensions.height) : null,
-                    unit: setNewEnclosureForm.dimensions.unit || 'in'
+                    length: newEnclosureData.dimensions.length ? Number(newEnclosureData.dimensions.length) : null,
+                    width: newEnclosureData.dimensions.width ? Number(newEnclosureData.dimensions.width) : null,
+                    height: newEnclosureData.dimensions.height ? Number(newEnclosureData.dimensions.height) : null,
+                    unit: newEnclosureData.dimensions.unit || 'in'
                 },
-                capacity: setNewEnclosureForm.capacity ? Number(setNewEnclosureForm.capacity) : undefined,
-                tempMin: setNewEnclosureForm.temperatureRange.min ? Number(setNewEnclosureForm.temperatureRange.min) : null,
-                tempMax: setNewEnclosureForm.temperatureRange.max ? Number(setNewEnclosureForm.temperatureRange.max) : null,
-                temperatureUnit: setNewEnclosureForm.temperatureRange.unit || 'C',
-                humidityMin: setNewEnclosureForm.humidityRange.min ? Number(setNewEnclosureForm.humidityRange.min) : null,
-                humidityMax: setNewEnclosureForm.humidityRange.max ? Number(setNewEnclosureForm.humidityRange.max) : null,
-                notes: setNewEnclosureForm.description
+                capacity: newEnclosureData.capacity ? Number(newEnclosureData.capacity) : undefined,
+                tempMin: newEnclosureData.temperatureRange.min ? Number(newEnclosureData.temperatureRange.min) : null,
+                tempMax: newEnclosureData.temperatureRange.max ? Number(newEnclosureData.temperatureRange.max) : null,
+                temperatureUnit: newEnclosureData.temperatureRange.unit || 'C',
+                humidityMin: newEnclosureData.humidityRange.min ? Number(newEnclosureData.humidityRange.min) : null,
+                humidityMax: newEnclosureData.humidityRange.max ? Number(newEnclosureData.humidityRange.max) : null,
+                notes: newEnclosureData.description
             };
 
             const response = await axios.post(`${API_BASE_URL}/enclosures`, payload, {
@@ -988,7 +988,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
 
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     {mode === 'search' && (
-                        <>
+                        <> 
                             <input type="text" placeholder="Search by name or location..." value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full py-2 px-3 text-sm border border-gray-300 rounded-md" />
@@ -1080,50 +1080,50 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                     {mode === 'create' && (
                         <div className="space-y-3">
                             <div>
-                                <label className="block text-xs font-semibold text-gray-700 mb-1">Enclosure Name *</label>
-                                <input type="text" value={setNewEnclosureForm.name}
-                                    onChange={(e) => setNewEnclosureForm(p => ({ ...p, name: e.target.value }))}
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">Enclosure Name *</label> 
+                                <input type="text" value={newEnclosureData.name}
+                                    onChange={(e) => setNewEnclosureData(p => ({ ...p, name: e.target.value }))}
                                     className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Aquatic Habitat A" />
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Enclosure Type</label>
-                                    <input type="text" value={setNewEnclosureForm.enclosureType}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, enclosureType: e.target.value }))}
+                                    <input type="text" value={newEnclosureData.enclosureType}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, enclosureType: e.target.value }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Tank, Cage, Vivarium" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Location</label>
-                                    <input type="text" value={setNewEnclosureForm.location}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, location: e.target.value }))}
+                                    <input type="text" value={newEnclosureData.location}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, location: e.target.value }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Room 2, Shelf 1" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Building</label>
-                                    <select value={setNewEnclosureForm.buildingId} onChange={(e) => setNewEnclosureForm(p => ({ ...p, buildingId: e.target.value, roomId: '' }))} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                    <select value={newEnclosureData.buildingId} onChange={(e) => setNewEnclosureData(p => ({ ...p, buildingId: e.target.value, roomId: '' }))} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
                                         <option value="">Select Building</option>
                                         {(locations || []).filter(l => l.type === 'building').map(l => <option key={l._id} value={l._id}>{l.name}</option>)}
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Room</label>
-                                    <select value={setNewEnclosureForm.roomId} onChange={(e) => setNewEnclosureForm(p => ({ ...p, roomId: e.target.value }))} disabled={!setNewEnclosureForm.buildingId} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md disabled:bg-gray-100">
+                                    <select value={newEnclosureData.roomId} onChange={(e) => setNewEnclosureData(p => ({ ...p, roomId: e.target.value }))} disabled={!newEnclosureData.buildingId} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md disabled:bg-gray-100">
                                         <option value="">Select Room</option>
-                                        {(locations || []).filter(l => l.type === 'room' && l.parentLocationId === setNewEnclosureForm.buildingId).map(l => <option key={l._id} value={l._id}>{l.name}</option>)}
+                                        {(locations || []).filter(l => l.type === 'room' && l.parentLocationId === newEnclosureData.buildingId).map(l => <option key={l._id} value={l._id}>{l.name}</option>)}
                                     </select>
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Capacity</label>
-                                <input type="number" value={setNewEnclosureForm.capacity}
-                                    onChange={(e) => setNewEnclosureForm(p => ({ ...p, capacity: e.target.value }))}
+                                <input type="number" value={newEnclosureData.capacity}
+                                    onChange={(e) => setNewEnclosureData(p => ({ ...p, capacity: e.target.value }))}
                                     className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Max animals" />
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Purpose</label>
-                                <select value={setNewEnclosureForm.purpose} onChange={(e) => setNewEnclosureForm(p => ({ ...p, purpose: e.target.value }))} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                <select value={newEnclosureData.purpose} onChange={(e) => setNewEnclosureData(p => ({ ...p, purpose: e.target.value }))} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
                                     <option value="general">General</option>
                                     <option value="reproduction">Reproduction</option>
                                     <option value="medical">Medical</option>
@@ -1134,22 +1134,22 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Purpose Description</label>
-                                <input type="text" value={setNewEnclosureForm.purposeDescription || ''} onChange={e => setNewEnclosureForm(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                <input type="text" value={newEnclosureData.purposeDescription || ''} onChange={e => setNewEnclosureData(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Dimensions (L x W x H)</label>
                                 <div className="grid grid-cols-4 gap-2 items-end">
-                                    <input type="number" value={setNewEnclosureForm.dimensions.length}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, dimensions: { ...p.dimensions, length: e.target.value } }))}
+                                    <input type="number" value={newEnclosureData.dimensions.length}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, dimensions: { ...p.dimensions, length: e.target.value } }))}
                                         placeholder="Length" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                    <input type="number" value={setNewEnclosureForm.dimensions.width}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, dimensions: { ...p.dimensions, width: e.target.value } }))}
+                                    <input type="number" value={newEnclosureData.dimensions.width}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, dimensions: { ...p.dimensions, width: e.target.value } }))}
                                         placeholder="Width" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                    <input type="number" value={setNewEnclosureForm.dimensions.height}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, dimensions: { ...p.dimensions, height: e.target.value } }))}
+                                    <input type="number" value={newEnclosureData.dimensions.height}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, dimensions: { ...p.dimensions, height: e.target.value } }))}
                                         placeholder="Height" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                    <select value={setNewEnclosureForm.dimensions.unit}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, dimensions: { ...p.dimensions, unit: e.target.value } }))}
+                                    <select value={newEnclosureData.dimensions.unit}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, dimensions: { ...p.dimensions, unit: e.target.value } }))}
                                         className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
                                         <option value="cm">cm</option>
                                         <option value="in">in</option>
@@ -1159,20 +1159,20 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             <div className="grid grid-cols-3 gap-2">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Temp Min</label>
-                                    <input type="number" value={setNewEnclosureForm.temperatureRange.min}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, temperatureRange: { ...p.temperatureRange, min: e.target.value } }))}
+                                    <input type="number" value={newEnclosureData.temperatureRange.min}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, temperatureRange: { ...p.temperatureRange, min: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Temp Max</label>
-                                    <input type="number" value={setNewEnclosureForm.temperatureRange.max}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, temperatureRange: { ...p.temperatureRange, max: e.target.value } }))}
+                                    <input type="number" value={newEnclosureData.temperatureRange.max}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, temperatureRange: { ...p.temperatureRange, max: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Unit</label>
-                                    <select value={setNewEnclosureForm.temperatureRange.unit}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, temperatureRange: { ...p.temperatureRange, unit: e.target.value } }))}
+                                    <select value={newEnclosureData.temperatureRange.unit}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, temperatureRange: { ...p.temperatureRange, unit: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
                                         <option value="C">°C</option>
                                         <option value="F">°F</option>
@@ -1182,21 +1182,21 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Humidity Min (%)</label>
-                                    <input type="number" value={setNewEnclosureForm.humidityRange.min}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, humidityRange: { ...p.humidityRange, min: e.target.value } }))}
+                                    <input type="number" value={newEnclosureData.humidityRange.min}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, humidityRange: { ...p.humidityRange, min: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Humidity Max (%)</label>
-                                    <input type="number" value={setNewEnclosureForm.humidityRange.max}
-                                        onChange={(e) => setNewEnclosureForm(p => ({ ...p, humidityRange: { ...p.humidityRange, max: e.target.value } }))}
+                                    <input type="number" value={newEnclosureData.humidityRange.max}
+                                        onChange={(e) => setNewEnclosureData(p => ({ ...p, humidityRange: { ...p.humidityRange, max: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Notes</label>
-                                <textarea value={setNewEnclosureForm.description}
-                                    onChange={(e) => setNewEnclosureForm(p => ({ ...p, description: e.target.value }))}
+                                <textarea value={newEnclosureData.description}
+                                    onChange={(e) => setNewEnclosureData(p => ({ ...p, description: e.target.value }))}
                                     className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none"
                                     rows="2" placeholder="Any notes about this enclosure..." />
                             </div>
@@ -1440,8 +1440,8 @@ const AnimalFormModalV2 = ({
     const [showLocationManager, setShowLocationManager] = useState(false);
     const [locationSaving, setLocationSaving] = useState(false);
     const [showAssignEnclosureModal, setShowAssignEnclosureModal] = useState(false);
- 
-    const resetsetNewEnclosureForm = () => setNewEnclosureForm({
+  
+    const resetNewEnclosureForm = () => setNewEnclosureForm({
         name: '',
         enclosureType: '',
         capacity: '',
@@ -1515,7 +1515,7 @@ const AnimalFormModalV2 = ({
     const handleCloseEnclosureModal = useCallback(() => {
         setShowEnclosureModal(false);
         setEditingEnclosureId(null);
-        resetsetNewEnclosureForm();
+        resetNewEnclosureForm();
         setEnclosureImageFile(null);
         setEnclosureImagePreview(null);
     }, []);
@@ -1638,7 +1638,7 @@ const AnimalFormModalV2 = ({
             setEnclosureImageFile(null);
             setEditingEnclosureId(enclosure._id);
         } else {
-            resetsetNewEnclosureForm();
+            resetNewEnclosureForm();
             setEnclosureImagePreview(null);
             setEnclosureImageFile(null);
             setEditingEnclosureId(null);
