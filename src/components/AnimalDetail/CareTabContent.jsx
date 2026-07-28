@@ -94,8 +94,8 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
                 </InfoCard>
             )}
 
-            {/* Housing & Environment */}
-            <InfoCard title="Housing & Environment" icon={<Home size={18} className="text-gray-400" />}>
+            {/* Enclosure */}
+            <InfoCard title="Enclosure" icon={<Home size={18} className="text-gray-400" />}>
                 {hasHousing || hasEnvironment ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.housingType && <InfoItem label={getLabel('housingType', 'Housing Type')} value={animal.housingType} />}

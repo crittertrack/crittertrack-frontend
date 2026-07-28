@@ -880,6 +880,24 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
 const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, loadingEnclosures, API_BASE_URL, authToken, showModalMessage, locations = [], supplies = [], speciesOptions = [] }) => {
     if (!isOpen) return null;
 
+    // Resolve enclosure location display name from buildingId/roomId references
+    const getEnclosureLocationName = useCallback((enclosure) => {
+        if (!locations || locations.length === 0) {
+            return enclosure.location || null;
+        }
+        const building = enclosure.buildingId
+            ? locations.find(l => l._id === enclosure.buildingId || l._id?.toString() === enclosure.buildingId?.toString())
+            : null;
+        const room = enclosure.roomId
+            ? locations.find(l => l._id === enclosure.roomId || l._id?.toString() === enclosure.roomId?.toString())
+            : null;
+        const parts = [];
+        if (building) parts.push(building.name);
+        if (room) parts.push(room.name);
+        if (parts.length > 0) return parts.join(' > ');
+        return enclosure.location || null;
+    }, [locations]);
+
     const [mode, setMode] = useState('search'); // 'search' | 'create'
     const [searchTerm, setSearchTerm] = useState('');
     const [newEnclosureForm, setNewEnclosureForm] = useState({
@@ -4995,7 +5013,7 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                 </FormSection>
-                                <FormSection title="Housing & Environment" icon={<Home size={16} />}>
+                                <FormSection title="Enclosure" icon={<Home size={16} />}>
                                     {/* Enclosure Assignment */}
                                     <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 space-y-2 mb-4">
                                         <label className="block text-xs font-semibold text-gray-700">Enclosure Assignment</label>
