@@ -21,6 +21,7 @@ import { TimelineTabContent } from './TimelineTabContent';
 import { BehaviorTabContent } from './BehaviorTabContent';
 import { BreedingTabContent } from './BreedingTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents';
+import { EnclosureCard } from './EnclosureCard';
 import { RecordsTabContent } from './RecordsTabContent';
 import ReportButton from '../ReportButton';
 

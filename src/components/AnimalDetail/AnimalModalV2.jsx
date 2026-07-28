@@ -20,6 +20,7 @@ import { TimelineTabContent } from './TimelineTabContent';
 import { BehaviorTabContent } from './BehaviorTabContent'; // This component is used in AnimalModalV2.jsx
 import { BreedingTabContent } from './BreedingTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents'; // This component is used in AnimalModalV2.jsx
+import { EnclosureCard } from './EnclosureCard';
 import { RecordsTabContent } from './RecordsTabContent';
 
 const parseJsonArrayField = (data) => {

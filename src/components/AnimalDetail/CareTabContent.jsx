@@ -3,6 +3,7 @@ import { UtensilsCrossed, Home, Droplets, Thermometer, Scissors, CheckSquare, Su
 import { formatDate } from '../../utils/dateFormatter';
 import { useDetailFieldTemplate, DetailJsonList, parseJsonField } from './utils';
 import { InfoCard, InfoItem } from './DashboardComponents';
+import { EnclosureCard } from './EnclosureCard';
 
 // Helper to render tasks
 const TaskList = ({ tasks, label }) => {
@@ -25,7 +26,7 @@ const TaskList = ({ tasks, label }) => {
     );
 };
 
-export const CareTabContent = ({ animal, API_BASE_URL }) => {
+export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
     const careTasks = parseJsonField(animal.careTasks);
@@ -40,7 +41,7 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
     const nutritionSchedule = animal.nutritionSchedule ? (typeof animal.nutritionSchedule === 'string' ? JSON.parse(animal.nutritionSchedule) : animal.nutritionSchedule) : null;
 
     const hasNutrition = animal.dietType || animal.feedingSchedule || animal.supplements || dietSupplies.length > 0 || supplementSupplies.length > 0 || nutritionSchedule;
-    const hasHousing = animal.housingType || animal.bedding || animal.enrichment;
+    const hasLegacyHousing = animal.housingType || animal.bedding || animal.enrichment;
     const hasEnvironment = animal.temperatureRange || animal.humidity || animal.lighting || animal.noise || animal.lastBulbChange;
     const hasGrooming = animal.groomingNeeds || animal.sheddingLevel;
 
@@ -95,17 +96,20 @@ export const CareTabContent = ({ animal, API_BASE_URL }) => {
             )}
 
             {/* Enclosure */}
-            <InfoCard title="Enclosure" icon={<Home size={18} className="text-gray-400" />}>
-                {hasHousing || hasEnvironment ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {animal.housingType && <InfoItem label={getLabel('housingType', 'Housing Type')} value={animal.housingType} />}
-                        {animal.bedding && <InfoItem label={getLabel('bedding', 'Bedding')} value={animal.bedding} />}
-                        {animal.enclosureId && <InfoItem label="Enclosure ID" value={animal.enclosureId} />}
-                        {animal.temperatureRange && <InfoItem label="Temperature Range" value={animal.temperatureRange} icon={<Thermometer size={14} />} />}
-                        {animal.humidity && <InfoItem label={getLabel('humidity', 'Humidity')} value={animal.humidity} icon={<Wind size={14} />} />}
-                    </div>
-                ) : <p className="text-sm text-gray-400">No housing or environment details.</p>}
-            </InfoCard>
+            {enclosureInfo ? (
+                <EnclosureCard enclosureInfo={enclosureInfo} />
+            ) : (
+                <InfoCard title="Enclosure" icon={<Home size={18} className="text-gray-400" />}>
+                    {hasLegacyHousing || hasEnvironment ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {animal.housingType && <InfoItem label={getLabel('housingType', 'Housing Type')} value={animal.housingType} />}
+                            {animal.bedding && <InfoItem label={getLabel('bedding', 'Bedding')} value={animal.bedding} />}
+                            {animal.temperatureRange && <InfoItem label="Temperature Range" value={animal.temperatureRange} icon={<Thermometer size={14} />} />}
+                            {animal.humidity && <InfoItem label={getLabel('humidity', 'Humidity')} value={animal.humidity} icon={<Wind size={14} />} />}
+                        </div>
+                    ) : <p className="text-sm text-gray-400">No enclosure assigned. Housing details can be found on the animal record.</p>}
+                </InfoCard>
+            )}
 
             {/* Lighting & Environmental Controls */}
             {(animal.lightingType || animal.lightingSchedule) && (
