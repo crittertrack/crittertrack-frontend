@@ -877,7 +877,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
     );
 };
 
-const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, loadingEnclosures, API_BASE_URL, authToken, showModalMessage, locations = [], supplies = [], speciesOptions = [] }) => {
+const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, loadingEnclosures, API_BASE_URL, authToken, showModalMessage, locations = [], supplies = [], speciesOptions = [], onManageLocations }) => {
     if (!isOpen) return null;
 
     const getEnclosureLocationName = useCallback((enclosure) => {
@@ -6588,6 +6588,7 @@ const AnimalFormModalV2 = ({
                     authToken={authToken}
                     showModalMessage={showModalMessage}
                     locations={locations}
+                    onManageLocations={() => setShowLocationManager(true)}
                 />
             )}
             <EnclosureModal
