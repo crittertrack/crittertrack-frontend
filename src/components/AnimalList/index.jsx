@@ -2035,11 +2035,6 @@ useEffect(() => {
     const animalsWithEnclosureCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.maintenanceFrequencyDays));
     const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(isTaskDue).length, 0);
     const maintMaintenanceDue = allAnimals.filter(a => a.maintenanceFrequencyDays && isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length;
-
-    const plannedMatingList = useMemo(() => allReproductiveAnimals.filter(a => a.isPlannedMating && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
-    const matingList = useMemo(() => allReproductiveAnimals.filter(a => a.isInMating && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
-    const pregnantList = useMemo(() => allReproductiveAnimals.filter(a => a.isPregnant && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
-    const nursingList = useMemo(() => allReproductiveAnimals.filter(a => a.isNursing && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
     const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(isTaskDue).length, 0) + supplyReorderDue.length + enclosureCarTasksDue + maintMaintenanceDue;
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
