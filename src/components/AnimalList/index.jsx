@@ -3720,7 +3720,7 @@ useEffect(() => {
 
                 {/* -- 1. ENCLOSURES ------------------------------------------ */}
                 {(!view || view === 'enclosures') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {/* Section header ? collapse on click, Add button on right */}
+                    {/* Section header - collapse on click, Add button on right */}
                     {!view && <div className="relative flex items-center justify-between bg-blue-50 px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer" onClick={() => toggleSection('enclosures')}>
                         <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                             {collapsedMgmtSections['enclosures']
@@ -3735,7 +3735,7 @@ useEffect(() => {
                     </div>}                     
 
                     {(!collapsedMgmtSections['enclosures'] || !!view) && (
-                        <div className="p-3 space-y-2">
+                        <div className="p-3 space-y-2">{renderEnclosuresTab()}
                             {generalEnclosures.length === 0 && unassignedAnimals.length === 0 ? (
                                 <div className="text-sm text-gray-400 text-center py-4">No enclosures yet. Click Add to create your first enclosure.</div>
                             ) : (
