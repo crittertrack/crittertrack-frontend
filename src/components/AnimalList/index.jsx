@@ -3293,6 +3293,65 @@ useEffect(() => {
         }
     };
 
+    const ReproductiveAnimalBar = ({ animal, onViewAnimal, onEditAnimal, onTransfer, handleReproStatusUpdate }) => {
+        const matingDate = animal.matingDate ? formatDateShort(animal.matingDate) : '—';
+        const dueDate = animal.dueDate ? formatDateShort(animal.dueDate) : '—';
+        const birthDate = animal.birthDate ? formatDateShort(animal.birthDate) : '—';
+        const weaningDate = animal.weaningDate ? formatDateShort(animal.weaningDate) : '—';
+
+        let statusLabel = 'Unknown';
+        let statusColor = 'bg-gray-100 text-gray-800';
+        if (animal.isPlannedMating) {
+            statusLabel = 'Planned';
+            statusColor = 'bg-indigo-100 text-indigo-800';
+        } else if (animal.isInMating) {
+            statusLabel = 'Mating';
+            statusColor = 'bg-purple-100 text-purple-800';
+        } else if (animal.isPregnant) {
+            statusLabel = 'Pregnant';
+            statusColor = 'bg-pink-100 text-pink-800';
+        } else if (animal.isNursing) {
+            statusLabel = 'Nursing';
+            statusColor = 'bg-blue-100 text-blue-800';
+        }
+
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200">
+                {/* Animal Info (col-span-2 on sm+) */}
+                <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                    <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
+                    <div className="min-w-0">
+                        <div className="font-semibold text-sm text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
+                        <div className="text-xs text-gray-500 truncate">{animal.species}</div>
+                    </div>
+                </div>
+
+                {/* Mating Date */}
+                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Mating: </span>{matingDate}</div>
+
+                {/* Due/Birth Date */}
+                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Due/Born: </span>{animal.isPregnant ? dueDate : birthDate}</div>
+
+                {/* Weaning Date */}
+                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Weaning: </span>{weaningDate}</div>
+
+                {/* Status */}
+                <div className="text-center">
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColor}`}>{statusLabel}</span>
+                </div>
+
+                {/* Actions */}
+                <div className="sm:text-right flex items-center gap-1 justify-end">
+                    {animal.isPlannedMating && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200">Start Mating</button> )}
+                    {animal.isInMating && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true })} className="text-xs px-2 py-1 rounded bg-pink-100 text-pink-700 hover:bg-pink-200">Mark Pregnant</button> )}
+                    {animal.isPregnant && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true })} className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200">Mark Nursing</button> )}
+                    {animal.isNursing && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false })} className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200">Weaned</button> )}
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
+                </div>
+            </div>
+        );
+    };
+
     // -- For Sale Screen ----------------------------------------------------------
     const renderForSaleScreen = () => {
         const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
