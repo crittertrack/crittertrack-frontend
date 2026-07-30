@@ -1131,6 +1131,92 @@ useEffect(() => {
         } catch (e) { console.warn('Failed to save listViewColumns', e); }
     }, [listViewColumns, userKey]);
 
+     const EnclosureCard = ({ enclosure }) => {
+        const occupants = enclosureAnimalMap[enclosure._id] || [];
+        const occupancyStatus = occupants.length > 0 ? 'Occupied' : 'Empty';
+        const capacity = parseInt(enclosure.capacity, 10);
+        const locationName = getLocationPath(enclosure.buildingId, enclosure.roomId, locations);
+        const occupancyPercentage = capacity > 0 ? (occupants.length / capacity) * 100 : 0;
+
+        const tempRange = (enclosure.tempMin != null && enclosure.tempMax != null)
+            ? `${enclosure.tempMin}° - ${enclosure.tempMax}°${enclosure.temperatureUnit || 'C'}`
+            : null;
+
+        const humidityRange = (enclosure.humidityMin != null && enclosure.humidityMax != null)
+            ? `${enclosure.humidityMin}% - ${enclosure.humidityMax}%`
+            : null;
+        
+        const lightSchedule = (enclosure.lightsOnTime && enclosure.lightsOffTime)
+            ? `${formatTime12h(enclosure.lightsOnTime)} - ${formatTime12h(enclosure.lightsOffTime)}`
+            : null;
+
+        const dimensions = formatDimensions(enclosure.dimensions, enclosure.size);
+
+        const dueTasks = (enclosure.cleaningTasks || []).filter(isTaskDue);
+        const needsAttention = dueTasks.length > 0;
+        const dueTypes = needsAttention ? [...new Set(dueTasks.map(t => t.type || 'Other'))] : [];
+
+        return (
+            <div 
+                className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer flex flex-col"
+                onClick={() => handleOpenDetail(enclosure)}
+            >
+                {/* Banner Image */}
+                <div className="h-28 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center relative">
+                    {enclosure.imageUrl ? (
+                        <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <Home size={40} className="text-gray-400 dark:text-dark-text-muted" />
+                    )}
+                    <span className={`absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-dark-surface-hover dark:text-dark-text-secondary'}`}>
+                        {occupancyStatus}
+                    </span>
+                </div>
+                
+                <div className="p-3 flex-grow flex flex-col">
+                    {/* Name */}
+                    <h3 className="font-bold text-base text-gray-800 dark:text-dark-text truncate">{enclosure.name}</h3>
+                    
+                    {/* Type, Size, Location */}
+                    <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                        {enclosure.enclosureType && <span className="flex items-center gap-1"><Home size={12} /> {enclosure.enclosureType}</span>}
+                        {dimensions && <span className="flex items-center gap-1"><Ruler size={12} /> {dimensions}</span>}
+                        {locationName && <span className="flex items-center gap-1"><MapPin size={12} /> {locationName}</span>}
+                    </div>
+
+                    {/* Stats Row */}
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-border grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
+                        <div className="flex items-center gap-1.5" title="Animals Housed">
+                            <Cat size={14} className="text-gray-400" />
+                            <span className="font-medium text-gray-700 dark:text-dark-text">{occupants.length} {occupants.length === 1 ? 'Animal' : 'Animals'}</span>
+                        </div>
+                        {capacity > 0 && ( <div className="flex items-center gap-1.5" title="Occupancy Percentage"><BarChart2 size={14} className="text-gray-400" /><span className="font-medium text-gray-700 dark:text-dark-text">{occupancyPercentage.toFixed(0)}% Full</span></div> )}
+                        {tempRange && ( <div className="flex items-center gap-1.5" title="Temperature Range"><Thermometer size={14} className="text-gray-400" /><span className="font-medium text-gray-700 dark:text-dark-text">{tempRange}</span></div> )}
+                        {humidityRange && ( <div className="flex items-center gap-1.5" title="Humidity Range"><Droplet size={14} className="text-gray-400" /><span className="font-medium text-gray-700 dark:text-dark-text">{humidityRange}</span></div> )}
+                        {lightSchedule && ( <div className="flex items-center gap-1.5" title="Lighting Schedule"><LampCeiling size={14} className="text-gray-400" /><span className="font-medium text-gray-700 dark:text-dark-text">{lightSchedule}</span></div> )}
+                    </div>
+                    
+                    {/* Warnings */}
+                    <div className="mt-auto pt-2 flex flex-wrap gap-2">
+                        {needsAttention && dueTypes.map(type => {
+                            let label = 'Task Due';
+                            let colorClass = 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                            let icon = <Wrench size={12} />;
+
+                            switch(type) {
+                                case 'Cleaning': label = 'Needs Cleaning'; colorClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'; icon = <Wrench size={12} />; break;
+                                case 'Maintenance': label = 'Needs Maintenance'; colorClass = 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'; icon = <Settings size={12} />; break;
+                                case 'Feeding': label = 'Feeding Due'; colorClass = 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'; icon = <Utensils size={12} />; break;
+                                default: label = `${type} Due`; break;
+                            }
+                            return ( <span key={type} className={`flex items-center gap-1 text-xs ${colorClass} px-2 py-1 rounded-full font-medium`}>{icon} {label}</span> );
+                        })}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const handleClearBreedingLine = async (lineId) => {
         const lineToClear = breedingLineDefs.find(l => l.id === lineId);
         if (!lineToClear || !lineToClear.name) return;
@@ -1279,11 +1365,10 @@ useEffect(() => {
         setNewEnclosureForm(p => ({ ...p, tags: (p.tags || []).filter(t => t !== tagToRemove) }));
     }, []);
 
-    const openEnclosureModal = useCallback((enclosure) => {
+      const openEnclosureModal = useCallback((enclosure, defaultValues = {}) => {
         console.log('[AnimalList] openEnclosureModal called. Editing enclosure:', enclosure ? enclosure._id : 'new');
         if (enclosure) {
-            setOriginalEnclosureForEdit(enclosure);
-            // Edit mode
+              setOriginalEnclosureForEdit(enclosure); // Edit mode
             const dims = enclosure.dimensions || enclosure.size;
             let length = '', width = '', height = '', dimensionsUnit = 'in';
             if (typeof dims === 'object' && dims !== null) {
@@ -1329,7 +1414,8 @@ useEffect(() => {
                 purpose: 'general', purposeDescription: '', tempMin: '', tempMax: '', temperatureUnit: 'C', humidityMin: '', humidityMax: '',
                 lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h', notes: '', imageUrl: '', tags: [], speciesLabels: [],
                 cleaningTasks: [],
-                bedding: '', lightingType: '', enrichment: ''
+                bedding: '', lightingType: '', enrichment: '',
+                ...defaultValues
             });
             setEnclosureImagePreview(null);
             setEnclosureImageFile(null);
@@ -1337,7 +1423,7 @@ useEffect(() => {
         }
         setShowEnclosureModal(true);
     }, [setNewEnclosureForm, setEnclosureImagePreview, setEnclosureImageFile, setEditingEnclosureId, setShowEnclosureModal]);
-
+    
     const logEnclosureHistory = useCallback(async (enclosureId, action, details) => {
         if (!userProfile) return;
         try {
@@ -3206,160 +3292,14 @@ useEffect(() => {
         }
     };
 
-    const renderEnclosuresTab = () => {
-        // --- Filtering ---
+           const renderEnclosuresTab = () => { // --- Filtering ---
         let filteredEnclosures = [...enclosures];
-        if (enclosureSearch) {
-            filteredEnclosures = filteredEnclosures.filter(e => e.name.toLowerCase().includes(enclosureSearch.toLowerCase()));
-        }
-        if (enclosureTypeFilter) {
-            filteredEnclosures = filteredEnclosures.filter(e => e.enclosureType === enclosureTypeFilter);
-        }
-        if (enclosureStatusFilter) {
-            if (enclosureStatusFilter === 'occupied') {
-                filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length > 0);
-            } else if (enclosureStatusFilter === 'empty') {
-                filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length === 0);
-            }
-        }
-        if (enclosureBuildingFilter) {
-            if (enclosureRoomFilter) {
-                // If a room is selected, filter by room (which is inherently in the building)
-                filteredEnclosures = filteredEnclosures.filter(e => e.roomId === enclosureRoomFilter);
-            } else {
-                // If only a building is selected, filter by building
-                filteredEnclosures = filteredEnclosures.filter(e => e.buildingId === enclosureBuildingFilter);
-            }
-        }
-        if (enclosureSpeciesFilter) {
-            filteredEnclosures = filteredEnclosures.filter(e => (e.speciesLabels || []).includes(enclosureSpeciesFilter));
-        }
-
-        // --- Components ---
-        const EnclosureCard = ({ enclosure }) => {
-            const occupants = enclosureAnimalMap[enclosure._id] || [];
-            const occupancyStatus = occupants.length > 0 ? 'Occupied' : 'Empty';
-            const capacity = parseInt(enclosure.capacity, 10);
-            const locationName = getLocationPath(enclosure.buildingId, enclosure.roomId, locations);
-            const occupancyPercentage = capacity > 0 ? (occupants.length / capacity) * 100 : 0;
-
-            const tempRange = (enclosure.tempMin != null && enclosure.tempMax != null)
-                ? `${enclosure.tempMin}° - ${enclosure.tempMax}°${enclosure.temperatureUnit || 'C'}`
-                : null;
-
-            const humidityRange = (enclosure.humidityMin != null && enclosure.humidityMax != null)
-                ? `${enclosure.humidityMin}% - ${enclosure.humidityMax}%`
-                : null;
-            
-            const lightSchedule = (enclosure.lightsOnTime && enclosure.lightsOffTime)
-                ? `${formatTime12h(enclosure.lightsOnTime)} - ${formatTime12h(enclosure.lightsOffTime)}`
-                : null;
-
-            const dimensions = formatDimensions(enclosure.dimensions, enclosure.size);
-
-            const dueTasks = (enclosure.cleaningTasks || []).filter(isTaskDue);
-            const needsAttention = dueTasks.length > 0;
-            const dueTypes = needsAttention ? [...new Set(dueTasks.map(t => t.type || 'Other'))] : [];
-
-            return (
-                <div 
-                    className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer flex flex-col"
-                    onClick={() => handleOpenDetail(enclosure)}
-                >
-                    {/* Banner Image */}
-                    <div className="h-28 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center relative">
-                        {enclosure.imageUrl ? (
-                            <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" />
-                        ) : (
-                            <Home size={40} className="text-gray-400 dark:text-dark-text-muted" />
-                        )}
-                        <span className={`absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-dark-surface-hover dark:text-dark-text-secondary'}`}>
-                            {occupancyStatus}
-                        </span>
-                    </div>
-                    
-                    <div className="p-3 flex-grow flex flex-col">
-                        {/* Name */}
-                        <h3 className="font-bold text-base text-gray-800 dark:text-dark-text truncate">{enclosure.name}</h3>
-                        
-                        {/* Type, Size, Location */}
-                        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
-                            {enclosure.enclosureType && <span className="flex items-center gap-1"><Home size={12} /> {enclosure.enclosureType}</span>}
-                            {dimensions && <span className="flex items-center gap-1"><Ruler size={12} /> {dimensions}</span>}
-                            {locationName && <span className="flex items-center gap-1"><MapPin size={12} /> {locationName}</span>}
-                        </div>
-
-                        {/* Stats Row */}
-                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-border grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
-                            <div className="flex items-center gap-1.5" title="Animals Housed">
-                                <Cat size={14} className="text-gray-400" />
-                                <span className="font-medium text-gray-700 dark:text-dark-text">{occupants.length} {occupants.length === 1 ? 'Animal' : 'Animals'}</span>
-                            </div>
-                            {capacity > 0 && (
-                                <div className="flex items-center gap-1.5" title="Occupancy Percentage">
-                                    <BarChart2 size={14} className="text-gray-400" />
-                                    <span className="font-medium text-gray-700 dark:text-dark-text">{occupancyPercentage.toFixed(0)}% Full</span>
-                                </div>
-                            )}
-                            {tempRange && (
-                                <div className="flex items-center gap-1.5" title="Temperature Range">
-                                    <Thermometer size={14} className="text-gray-400" />
-                                    <span className="font-medium text-gray-700 dark:text-dark-text">{tempRange}</span>
-                                </div>
-                            )}
-                            {humidityRange && (
-                                <div className="flex items-center gap-1.5" title="Humidity Range">
-                                    <Droplet size={14} className="text-gray-400" />
-                                    <span className="font-medium text-gray-700 dark:text-dark-text">{humidityRange}</span>
-                                </div>
-                            )}
-                            {lightSchedule && (
-                                <div className="flex items-center gap-1.5" title="Lighting Schedule">
-                                    <LampCeiling size={14} className="text-gray-400" />
-                                    <span className="font-medium text-gray-700 dark:text-dark-text">{lightSchedule}</span>
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Warnings */}
-                        <div className="mt-auto pt-2 flex flex-wrap gap-2">
-                            {needsAttention && dueTypes.map(type => {
-                                let label = 'Task Due';
-                                let colorClass = 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-                                let icon = <Wrench size={12} />;
-
-                                switch(type) {
-                                    case 'Cleaning':
-                                        label = 'Needs Cleaning';
-                                        colorClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
-                                        icon = <Wrench size={12} />;
-                                        break;
-                                    case 'Maintenance':
-                                        label = 'Needs Maintenance';
-                                        colorClass = 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
-                                        icon = <Settings size={12} />;
-                                        break;
-                                    case 'Feeding':
-                                        label = 'Feeding Due';
-                                        colorClass = 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
-                                        icon = <Utensils size={12} />;
-                                        break;
-                                    default:
-                                        label = `${type} Due`;
-                                        break;
-                                }
-                                return (
-                                    <span key={type} className={`flex items-center gap-1 text-xs ${colorClass} px-2 py-1 rounded-full font-medium`}>
-                                        {icon} {label}
-                                    </span>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
+        if (enclosureSearch) { filteredEnclosures = filteredEnclosures.filter(e => e.name.toLowerCase().includes(enclosureSearch.toLowerCase())); }
+        if (enclosureTypeFilter) { filteredEnclosures = filteredEnclosures.filter(e => e.enclosureType === enclosureTypeFilter); }
+        if (enclosureStatusFilter) { if (enclosureStatusFilter === 'occupied') { filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length > 0); } else if (enclosureStatusFilter === 'empty') { filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length === 0); } }
+        if (enclosureBuildingFilter) { if (enclosureRoomFilter) { filteredEnclosures = filteredEnclosures.filter(e => e.roomId === enclosureRoomFilter); } else { filteredEnclosures = filteredEnclosures.filter(e => e.buildingId === enclosureBuildingFilter); } }
+        if (enclosureSpeciesFilter) { filteredEnclosures = filteredEnclosures.filter(e => (e.speciesLabels || []).includes(enclosureSpeciesFilter)); }
+        
         return (
             <div className="space-y-4">
                 {/* Search/Filter Bar */}
@@ -4011,109 +3951,23 @@ useEffect(() => {
                         title="Reproduction" count={reproTotal} bgClass="bg-pink-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['reproduction'] || !!view) && (
                         <div className="p-3 space-y-4">
-                            {/* Enclosures sub-panel */}
-                            <div className="border border-blue-200 rounded-lg overflow-hidden">
-                                <div className="flex items-center justify-between px-3 py-2 bg-blue-50/60">
+                            <div className="border border-pink-200 rounded-lg overflow-hidden">
+                                <div className="flex items-center justify-between px-3 py-2 bg-pink-50/60">
                                     <div className="flex items-center gap-2">
-                                        <Home size={13} className="text-blue-600" />
-                                        <span className="text-xs font-semibold text-gray-700">Enclosures</span>
+                                        <Home size={13} className="text-pink-600" />
+                                        <span className="text-xs font-semibold text-gray-700">Breeding/Nursery Enclosures</span>
                                         <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{reproEnclosures.length}</span>
                                     </div>
-                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setReproEncFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); } else { setNewEnclosureForm({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'reproduction', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setReproEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg">
+                                    <button onClick={() => openEnclosureModal(null, { purpose: 'reproduction' })} className="flex items-center gap-1 text-xs font-medium text-pink-600 hover:text-pink-800 bg-white border border-pink-200 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> Add
                                     </button>
                                 </div>
-                                {reproEncFormVisible && (
-                                    {/* Repro Enclosure form is now handled by the modal */}
-                                )}
-                                <div className="p-2 space-y-2">
+                                <div className="p-3">
                                     {reproEnclosures.length === 0
-                                        ? <div className="text-xs text-gray-400 text-center py-2">No enclosures yet. Click Add to create one.</div>
-                                        : reproEnclosures.map(enc => {
-                                            const occupants = enclosureAnimalMap[enc._id] || [];
-                                            const isGrpCollapsed = collapsedMgmtGroups[`enc_${enc._id}`] || false;
-                                            return (
-                                                <div key={enc._id} className="border border-gray-200 rounded-lg overflow-hidden">
-                                                    <div className="relative flex items-center bg-blue-50/60 px-3 py-2 cursor-pointer" onClick={() => toggleGroup(`enc_${enc._id}`)}>
-                                                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
-                                                            {isGrpCollapsed ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" /> : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
-                                                        </div>
-                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                            <span className="font-semibold text-sm text-gray-800 truncate">{enc.name}</span>
-                                                            {enc.enclosureType && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0 hidden sm:inline">{enc.enclosureType}</span>}
-                                                            {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
-                                                            <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>                                                            <button onClick={() => {
-                                                                setNewEnclosureForm({
-                                                                    name: enc.name,
-                                                                    enclosureType: enc.enclosureType || '',
-                                                                    location: enc.location || '',
-                                                                    dimensions: enc.dimensions || enc.size || '',
-                                                                    capacity: enc.capacity || '',
-                                                                    tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
-                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '', buildingId: enc.buildingId || '', roomId: enc.roomId || '',
-                                                                    lightingSchedule: enc.lightingSchedule || '',
-                                                                    notes: enc.notes || '',
-                                                                    tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
-                                                                    cleaningTasks: enc.cleaningTasks || [],
-                                                                    purpose: enc.purpose || 'reproduction',
-                                                                    imageUrl: enc.imageUrl || ''
-                                                                }); setEnclosureImagePreview(enc.imageUrl || null);
-                                                                setEnclosureImageFile(null);
-                                                                setEditingEnclosureId(enc._id); setReproEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit"><Edit size={13} /></button>
-                                                            <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={13} /></button>
-                                                        </div>
-                                                    </div>
-                                                    {!isGrpCollapsed && enc.notes && (
-                                                        <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 border-b border-gray-100">{enc.notes}</div>
-                                                    )}
-                                                    {!isGrpCollapsed && (
-                                                        <div>
-                                                            {occupants.length === 0
-                                                                ? <div className="text-xs text-gray-400 text-center py-2">No animals assigned yet</div>
-                                                                : (
-                                                                    <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                                        {occupants.map(a => (
-                                                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                                                hideControls hideBreedingLines
-                                                                                cardActions={<>
-                                                                                    {/* State badge */}
-                                                                                    {(a.isInMating || a.isPregnant || a.isNursing) && (
-                                                                                        <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${a.isNursing ? 'bg-blue-100 text-blue-700' : a.isPregnant ? 'bg-pink-100 text-pink-700' : 'bg-purple-100 text-purple-700'}`}>
-                                                                                            {a.isNursing ? 'Nursing' : a.isPregnant ? 'Pregnant' : 'Mating'}
-                                                                                        </div>
-                                                                                    )}
-                                                                                    {/* Advance state */}
-                                                                                    {a.isInMating && !a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
-                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
-                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Set as Pregnant</button>
-                                                                                    )}
-                                                                                    {a.isInMating && !a.isPregnant && !a.isNursing && a.gender === 'Male' && (
-                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
-                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
-                                                                                    )}
-                                                                                    {a.isPregnant && !a.isNursing && (
-                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
-                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Set to Nursing</button>
-                                                                                    )}
-                                                                                    {a.isNursing && (
-                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
-                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
-                                                                                    )}
-                                                                                    <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
-                                                                                        className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">Remove from enclosure</button>
-                                                                                </>}
-                                                                            />
-                                                                        ))}
-                                                                    </div>
-                                                                )
-                                                            }
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })
+                                        ? <div className="text-xs text-gray-400 text-center py-4">No breeding/nursery enclosures.</div>
+                                        : ( <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                                {reproEnclosures.map(enclosure => ( <EnclosureCard key={enclosure._id} enclosure={enclosure} /> ))}
+                                            </div> )
                                     }
                                 </div>
                             </div>
@@ -4187,112 +4041,21 @@ useEffect(() => {
                                         <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{healthEnclosures.length}</span>
                                     </div>
                                     <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setHealthEncFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); } else { setNewEnclosureForm({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'health', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setHealthEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
-                                        <Plus size={11} /> Add
+                                        <button onClick={() => openEnclosureModal(null, { purpose: 'health' })} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
+                                            <Plus size={11} /> Add
+                                        </button>
                                     </button>
                                 </div>
-                                {healthEncFormVisible && (
-                                    {/* Health Enclosure form is now handled by the modal */}
-                                )}
-                                <div className="p-2 space-y-2">
+                                <div className="p-3">
                                     {healthEnclosures.length === 0
-                                        ? <div className="text-xs text-gray-400 text-center py-2">No enclosures yet. Click Add to create one.</div>
-                                        : healthEnclosures.map(enc => {
-                                            const occupants = (enclosureAnimalMap[enc._id] || []).filter(a => {
-                                                const isTreatment = a.isInTreatment && !a.isQuarantine;
-                                                return a.isQuarantine || isTreatment;
-                                            });
-                                            const isGrpCollapsed = collapsedMgmtGroups[`enc_${enc._id}`] || false;
-                                            return (
-                                                <div key={enc._id} className="border border-gray-200 rounded-lg overflow-hidden">
-                                                    <div className="relative flex items-center bg-orange-50/60 px-3 py-2 cursor-pointer" onClick={() => toggleGroup(`enc_${enc._id}`)}>
-                                                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
-                                                            {isGrpCollapsed ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" /> : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
-                                                        </div>
-                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                            <span className="font-semibold text-sm text-gray-800 truncate">{enc.name}</span>
-                                                            {enc.enclosureType && <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0 hidden sm:inline">{enc.enclosureType}</span>}
-                                                            {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
-                                                            <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>                                                            <button onClick={() => {
-                                                                setNewEnclosureForm({
-                                                                    name: enc.name,
-                                                                    enclosureType: enc.enclosureType || '',
-                                                                    location: enc.location || '',
-                                                                    dimensions: enc.dimensions || enc.size || '',
-                                                                    capacity: enc.capacity || '',
-                                                                    tempMin: enc.tempMin || '', tempMax: enc.tempMax || '',
-                                                                    humidityMin: enc.humidityMin || '', humidityMax: enc.humidityMax || '', buildingId: enc.buildingId || '', roomId: enc.roomId || '',
-                                                                    lightingSchedule: enc.lightingSchedule || '',
-                                                                    notes: enc.notes || '',
-                                                                    tags: enc.tags || [], speciesLabels: enc.speciesLabels || [],
-                                                                    cleaningTasks: enc.cleaningTasks || [],
-                                                                    purpose: enc.purpose || 'health',
-                                                                    imageUrl: enc.imageUrl || ''
-                                                                }); setEnclosureImagePreview(enc.imageUrl || null);
-                                                                setEnclosureImageFile(null);
-                                                                setEditingEnclosureId(enc._id); setHealthEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-orange-600 rounded" title="Edit"><Edit size={13} /></button>
-                                                            <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={13} /></button>
-                                                        </div>
-                                                    </div>
-                                                    {!isGrpCollapsed && enc.notes && (
-                                                        <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 border-b border-gray-100">{enc.notes}</div>
-                                                    )}
-                                                    {!isGrpCollapsed && (
-                                                        <div>
-                                                            {occupants.length === 0
-                                                                ? <div className="text-xs text-gray-400 text-center py-2">No animals assigned yet</div>
-                                                                : (
-                                                                    <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                                        {occupants.map(a => {
-                                                                            const conds = parseArrayField(a.medicalConditions);
-                                                                            const meds = parseArrayField(a.medications);
-                                                                            const isTreatment = a.isInTreatment && !a.isQuarantine;
-                                                                            const hasHealthState = a.isQuarantine || isTreatment;
-                                                                            return (
-                                                                                <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                                                    hideControls hideBreedingLines
-                                                                                    cardActions={<>
-                                                                                        {/* State badge */}
-                                                                                        {hasHealthState ? (
-                                                                                            <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                                                                {isTreatment ? 'Treatment' : 'Quarantine'}
-                                                                                            </div>
-                                                                                        ) : (
-                                                                                            <div className="text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full bg-gray-100 text-gray-500">
-                                                                                                No health status
-                                                                                            </div>
-                                                                                        )}
-                                                                                        {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                                                        {isTreatment && meds.length > 0 && meds.slice(0, 2).map((m, i) => {
-                                                                                            const next = calcNextDose(m);
-                                                                                            const nextLabel = next ? formatNextDose(next) : null;
-                                                                                            const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
-                                                                                            return (
-                                                                                                <div key={i} className="text-[10px] text-blue-600 w-full text-center leading-tight">
-                                                                                                    <span className="font-medium truncate block">{m.name || m}</span>
-                                                                                                    <span className="text-blue-400">{[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
-                                                                                                </div>
-                                                                                            );
-                                                                                        })}
-                                                                                        {a.isQuarantine
-                                                                                            ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
-                                                                                            : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>
-                                                                                        }
-                                                                                        <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
-                                                                                            className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">Remove from enclosure</button>
-                                                                                    </>}
-                                                                                />
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                )
-                                                            }
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })
+                                        ? <div className="text-xs text-gray-400 text-center py-4">No medical/quarantine enclosures.</div>
+                                        : (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                                {healthEnclosures.map(enclosure => (
+                                                    <EnclosureCard key={enclosure._id} enclosure={enclosure} />
+                                                ))}
+                                            </div>
+                                        )
                                     }
                                 </div>
                             </div>
@@ -4716,6 +4479,55 @@ useEffect(() => {
                     </div>
                 )}
 
+            </div>
+        );
+    };
+
+    const renderEnclosuresTab = () => { // --- Filtering ---
+        let filteredEnclosures = [...enclosures];
+        if (enclosureSearch) { filteredEnclosures = filteredEnclosures.filter(e => e.name.toLowerCase().includes(enclosureSearch.toLowerCase())); }
+        if (enclosureTypeFilter) { filteredEnclosures = filteredEnclosures.filter(e => e.enclosureType === enclosureTypeFilter); }
+        if (enclosureStatusFilter) { if (enclosureStatusFilter === 'occupied') { filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length > 0); } else if (enclosureStatusFilter === 'empty') { filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length === 0); } }
+        if (enclosureBuildingFilter) { if (enclosureRoomFilter) { filteredEnclosures = filteredEnclosures.filter(e => e.roomId === enclosureRoomFilter); } else { filteredEnclosures = filteredEnclosures.filter(e => e.buildingId === enclosureBuildingFilter); } }
+        if (enclosureSpeciesFilter) { filteredEnclosures = filteredEnclosures.filter(e => (e.speciesLabels || []).includes(enclosureSpeciesFilter)); }
+        return (
+            <div className="space-y-4">
+                {/* Search/Filter Bar */}
+                <div className="p-2 bg-gray-50 dark:bg-dark-surface rounded-lg flex flex-wrap items-center gap-2">
+                    <div className="relative flex-grow">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input 
+                            type="text"
+                            placeholder="Search enclosures..."
+                            value={enclosureSearch}
+                            onChange={e => setEnclosureSearch(e.target.value)}
+                            className="w-full pl-10 p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
+                        />
+                    </div>
+                    <select value={enclosureStatusFilter} onChange={e => setEnclosureStatusFilter(e.target.value)} className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary">
+                        <option value="">All Statuses</option>
+                        <option value="occupied">Occupied</option>
+                        <option value="empty">Empty</option>
+                    </select>
+                    <select value={enclosureBuildingFilter} onChange={e => { setEnclosureBuildingFilter(e.target.value); setEnclosureRoomFilter(''); }} className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary">
+                        <option value="">All Buildings</option>
+                        {locations.filter(l => l.type === 'building').map(building => ( <option key={building._id} value={building._id}>{building.name}</option> ))}
+                    </select>
+                    <select value={enclosureRoomFilter} onChange={e => setEnclosureRoomFilter(e.target.value)} disabled={!enclosureBuildingFilter} className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed">
+                        <option value="">All Rooms</option>
+                        {enclosureBuildingFilter && locations .filter(l => l.type === 'room' && l.parentLocationId === enclosureBuildingFilter) .map(room => ( <option key={room._id} value={room._id}>{room.name}</option> )) }
+                    </select>
+                    <select value={enclosureSpeciesFilter} onChange={e => setEnclosureSpeciesFilter(e.target.value)} className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary">
+                        <option value="">All Suitable Species</option>
+                        {enclosureSpeciesLabels.map(species => ( <option key={species} value={species}>{species}</option> ))}
+                    </select>
+                    <button onClick={() => setShowLocationManager(true)} className="p-2 text-sm border border-gray-300 rounded-lg flex items-center gap-1.5"> <Settings size={14} /> Manage Locations </button>
+                </div>
+                {/* Main Content */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredEnclosures.map(enclosure => ( <EnclosureCard key={enclosure._id} enclosure={enclosure} /> ))}
+                </div>
+                 {filteredEnclosures.length === 0 && ( <div className="text-center py-16 text-gray-500 dark:text-dark-text-secondary"> <Home size={48} className="mx-auto text-gray-300 dark:text-dark-border mb-4" /> <h3 className="font-semibold text-lg">No Enclosures Found</h3> <p className="text-sm mt-1">Try adjusting your filters or add a new enclosure.</p> </div> )}
             </div>
         );
     };
