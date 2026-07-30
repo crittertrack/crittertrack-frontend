@@ -5,7 +5,7 @@ import {
     ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList,
     Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
     Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, Search, Star,
-    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, Zap, ScanHeart
+    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, Zap, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
 } from 'lucide-react';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';

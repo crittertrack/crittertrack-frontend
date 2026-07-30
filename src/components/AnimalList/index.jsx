@@ -3343,9 +3343,9 @@ useEffect(() => {
                 {/* Actions */}
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     {animal.isPlannedMating && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200">Start Mating</button> )}
-                    {animal.isInMating && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true })} className="text-xs px-2 py-1 rounded bg-pink-100 text-pink-700 hover:bg-pink-200">Mark Pregnant</button> )}
-                    {animal.isPregnant && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true })} className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200">Mark Nursing</button> )}
-                    {animal.isNursing && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false })} className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200">Weaned</button> )}
+                    {animal.isInMating && animal.gender !== 'Male' && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true })} className="text-xs px-2 py-1 rounded bg-pink-100 text-pink-700 hover:bg-pink-200">Mark Pregnant</button> )}
+                    {animal.isPregnant && animal.gender !== 'Male' && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true })} className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200">Mark Nursing</button> )}
+                    {animal.isNursing && animal.gender !== 'Male' && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false })} className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200">Weaned</button> )}
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
                 </div>
             </div>
@@ -3944,11 +3944,11 @@ useEffect(() => {
                                 </div>
                             </div>
                             {(() => {
-                                const reproSections = [
-                                    { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={13} className="text-indigo-600" /> },
-                                    { key: 'mating', title: 'Currently Mating', list: matingList, icon: <Heart size={13} className="text-purple-600" /> },
-                                    { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={13} className="text-pink-600" /> },
-                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Baby size={13} className="text-blue-600" /> }
+                                 const reproSections = [
+                                    { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700" />, headerClass: 'bg-indigo-50 border-b border-indigo-100' },
+                                    { key: 'mating', title: 'Currently Mating', list: matingList, icon: <Heart size={16} className="text-purple-700" />, headerClass: 'bg-purple-50 border-b border-purple-100' },
+                                    { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={16} className="text-pink-700" />, headerClass: 'bg-pink-50 border-b border-pink-100' },
+                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Baby size={16} className="text-blue-700" />, headerClass: 'bg-blue-50 border-b border-blue-100' }
                                 ];
 
                                 if (reproSections.every(s => s.list.length === 0)) return null;
@@ -3956,24 +3956,30 @@ useEffect(() => {
                                 return (
                                     <div className="space-y-4">
                                         {reproSections.map(section => section.list.length > 0 && (
-                                            <div key={section.key}>
-                                                <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup(`repro_${section.key}`)}>
-                                                    {collapsedMgmtGroups[`repro_${section.key}`] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
-                                                    {section.icon}
-                                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{section.title} ({section.list.length})</span>
+                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`repro_${section.key}`)}>
+                                                    <div className="flex items-center gap-3">
+                                                        {section.icon}
+                                                        <span className="font-semibold text-gray-800 text-base">{section.title}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{section.list.length}</span>
+                                                        {collapsedMgmtGroups[`repro_${section.key}`] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
+                                                    </div>
                                                 </div>
+
                                                 {!collapsedMgmtGroups[`repro_${section.key}`] && (
-                                                    <div className="space-y-2">
-                                                        <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 text-xs font-semibold text-gray-500 uppercase">
+                                                    <div className="p-2 space-y-1 bg-white">
+                                                        <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
                                                             <div className="col-span-2">Animal</div>
                                                             <div>Mating Date</div>
-                                                                <div>Due Date / Birth Date</div>
+                                                            <div>Due Date / Birth Date</div>
                                                             <div>Weaning Date</div>
                                                             <div className="text-center">Status</div>
                                                             <div className="text-right pr-2">Action</div>
                                                         </div>
                                                         {section.list.map(a => (
-                                                                <ReproductiveAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} onTransfer={onTransfer} handleReproStatusUpdate={handleReproStatusUpdate} />
+                                                            <ReproductiveAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} onTransfer={onTransfer} handleReproStatusUpdate={handleReproStatusUpdate} />
                                                         ))}
                                                     </div>
                                                 )}
