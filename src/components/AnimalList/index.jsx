@@ -3337,7 +3337,7 @@ useEffect(() => {
             </div>
         );
     };
-
+    
     // -- Management View (view = 'enclosures' | 'reproduction' | 'health' | 'feeding') --
     const renderManagementView = (view = null) => {
         const toggleSection = (key) => setCollapsedMgmtSections(prev => ({ ...prev, [key]: !prev[key] }));
