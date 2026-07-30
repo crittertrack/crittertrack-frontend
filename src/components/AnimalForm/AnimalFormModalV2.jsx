@@ -1175,7 +1175,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                 <input type="number" value={newEnclosureData.capacity} onChange={e => setNewEnclosureData(p => ({ ...p, capacity: e.target.value }))} placeholder="Max animals" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
                             </div>
                             </div>
-                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text border-b pb-1 mb-2">Environment</h4>
+                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text border-b pb-1 mb-2 mt-4">Environment</h4>
                             <div className="grid grid-cols-3 gap-2">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Temp Min</label>
