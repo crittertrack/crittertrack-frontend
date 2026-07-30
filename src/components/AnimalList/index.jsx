@@ -7,7 +7,7 @@ import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban, Info,
-    Bean, Bell, Bird, Building, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight,
+    Bell, Bug, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, Baby,
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings, Users, PawPrint,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, Zap, ScanHeart, LampCeiling, BarChart2, Thermometer,
     Package, Plus, PlusCircle, RefreshCw, Ruler, Save, Search, ShoppingBag, SlidersHorizontal, Utensils,
@@ -3859,7 +3859,7 @@ useEffect(() => {
                 {/* -- 3. REPRODUCTION ---------------------------------------- */}
                 {(!view || view === 'reproduction') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="reproduction"
-                        icon={<Bean size={18} className="text-pink-600" />}
+                        icon={<Heart size={18} className="text-pink-600" />}
                         title="Reproduction" count={reproTotal} bgClass="bg-pink-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['reproduction'] || !!view) && (
                         <div className="p-3 space-y-4">
@@ -3884,52 +3884,41 @@ useEffect(() => {
                                 </div>
                             </div>
                             {(() => {
-                                const unassignedReproAnimals = [...matingList, ...pregnantList, ...nursingList];
-                                return unassignedReproAnimals.length === 0 ? null : (
-                                    <div>
-                                        <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('repro_unassigned')}>
-                                            {collapsedMgmtGroups['repro_unassigned'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
-                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Unassigned ({unassignedReproAnimals.length})</span>
-                                        </div>
-                                        {!collapsedMgmtGroups['repro_unassigned'] && (
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {unassignedReproAnimals.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={<>
-                                                            {/* State badge */}
-                                                            <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${a.isNursing ? 'bg-blue-100 text-blue-700' : a.isPregnant ? 'bg-pink-100 text-pink-700' : 'bg-purple-100 text-purple-700'}`}>
-                                                                {a.isNursing ? 'Nursing' : a.isPregnant ? 'Pregnant' : 'Mating'}
-                                                            </div>
-                                                            {/* Advance state */}
-                                                            {a.isInMating && !a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
-                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
-                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Set as Pregnant</button>
-                                                            )}
-                                                            {a.isInMating && !a.isPregnant && !a.isNursing && a.gender === 'Male' && (
-                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
-                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
-                                                            )}
-                                                            {a.isPregnant && !a.isNursing && (
-                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
-                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Set to Nursing</button>
-                                                            )}
-                                                            {a.isNursing && (
-                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
-                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
-                                                            )}
-                                                            {assigningAnimalId === a.id_public
-                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full">
-                                                                    <option value="" disabled>{reproEnclosures.length === 0 ? 'No enclosures yet' : 'Select enclosure...'}</option>
-                                                                    {reproEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
-                                                                  </select>
-                                                                : <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">Assign enclosure</button>
-                                                            }
-                                                        </>}
-                                                    />
-                                                ))}
+                                const reproSections = [
+                                    { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={13} className="text-indigo-600" /> },
+                                    { key: 'mating', title: 'Currently Mating', list: matingList, icon: <Heart size={13} className="text-purple-600" /> },
+                                    { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={13} className="text-pink-600" /> },
+                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Baby size={13} className="text-blue-600" /> }
+                                ];
+
+                                if (reproSections.every(s => s.list.length === 0)) return null;
+
+                                return (
+                                    <div className="space-y-4">
+                                        {reproSections.map(section => section.list.length > 0 && (
+                                            <div key={section.key}>
+                                                <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup(`repro_${section.key}`)}>
+                                                    {collapsedMgmtGroups[`repro_${section.key}`] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
+                                                    {section.icon}
+                                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{section.title} ({section.list.length})</span>
+                                                </div>
+                                                {!collapsedMgmtGroups[`repro_${section.key}`] && (
+                                                    <div className="space-y-2">
+                                                        <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 text-xs font-semibold text-gray-500 uppercase">
+                                                            <div className="col-span-2">Animal</div>
+                                                            <div>Mating Date</div>
+                                                            <div>Due Date / Birthdate</div>
+                                                            <div>Weaning Date</div>
+                                                            <div className="text-center">Status</div>
+                                                            <div className="text-right pr-2">Action</div>
+                                                        </div>
+                                                        {section.list.map(a => (
+                                                            <ReproductiveAnimalBar key={a.id_public} animal={a} />
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
+                                        ))}
                                     </div>
                                 );
                             })()}
@@ -4857,11 +4846,7 @@ useEffect(() => {
                 </div>
                 <div className="hidden sm:flex">
                 {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
-                  {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
-                  {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
-                  {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
-                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}].map(tab => (
+                  {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'}, {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'}, {key:'reproduction', icon:<Heart size={14} className="shrink-0" />, label:'Reproduction'}, {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'}, {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                         className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import {
-    Baby, Bean, Bell, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
+    Baby, Bell, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
     ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList,
     Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
     Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, Search, Star,
@@ -4233,9 +4233,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 ) : (
                                                                     <EyeOff size={12} className="text-black" />
                                                                 )}
-                                                                {animal.isInMating && <Hourglass size={12} className="text-black" />}
-                                                                {animal.isPregnant && <Bean size={12} className="text-black" />}
-                                                                {animal.isNursing && <Milk size={12} className="text-black" />}
+                                                                {animal.isInMating && <Heart size={12} className="text-black" title="Mating" />}
+                                                                {animal.isPregnant && <ScanHeart size={12} className="text-black" title="Pregnant" />}
+                                                                {animal.isNursing && <Baby size={12} className="text-black" title="Nursing" />}
                                                             </div>
                                                             
                                                             {/* Name */}

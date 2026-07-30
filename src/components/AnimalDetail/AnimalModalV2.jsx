@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     X, Cat, Mars, Venus, Edit, Archive, Users, Heart, Tag, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Sprout,
-    Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
+    Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather, Baby,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList, Hourglass,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info, Network, Star,
     Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital, Droplet, Zap, ScanHeart,
@@ -56,7 +56,7 @@ const getReproductionState = (animal) => {
     // Females can be pregnant or nursing
     if (animal.gender === 'Female') {
         if (animal.isPregnant) return { label: 'Pregnant', color: 'bg-red-100 text-red-800', icon: <ScanHeart size={14} className="fill-current" /> };
-        if (animal.isNursing) return { label: 'Nursing', color: 'bg-green-100 text-green-800', icon: <Droplet size={14} className="fill-current" /> };
+        if (animal.isNursing) return { label: 'Nursing', color: 'bg-blue-100 text-blue-800', icon: <Baby size={14} /> };
     }
     // Both genders can be in mating or have planned mating
     if (animal.isInMating) return { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: <Zap size={14} className="fill-current" /> };
