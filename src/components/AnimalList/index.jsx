@@ -3908,13 +3908,13 @@ useEffect(() => {
                                                         <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 text-xs font-semibold text-gray-500 uppercase">
                                                             <div className="col-span-2">Animal</div>
                                                             <div>Mating Date</div>
-                                                            <div>Due Date / Birthdate</div>
+                                                                <div>Due Date / Birth Date</div>
                                                             <div>Weaning Date</div>
                                                             <div className="text-center">Status</div>
                                                             <div className="text-right pr-2">Action</div>
                                                         </div>
                                                         {section.list.map(a => (
-                                                            <ReproductiveAnimalBar key={a.id_public} animal={a} />
+                                                                <ReproductiveAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} onTransfer={onTransfer} handleReproStatusUpdate={handleReproStatusUpdate} />
                                                         ))}
                                                     </div>
                                                 )}
