@@ -13,13 +13,14 @@ The first phase focuses on improving the clarity and consistency of the enclosur
     -   ✅ Ensured the "Add" button functionality is consistent, using the main `EnclosureModal`.
 
 ## Phase 2: Redesign Animal Display
-
 The second phase involves a complete redesign of how reproductive animals are displayed to make the information more scannable and actionable.
 
--   **Objective:** Replace the current animal cards with a more informative horizontal bar layout.
+-   **Objective:** Replace the current animal cards with a more informative horizontal bar layout, organized by reproductive status.
 -   **Action:**
-    -   ✅ Created a new `ReproductiveAnimalBar` component.
-    -   ✅ Each bar now displays the following information in columns:
+    -   Create a new `ReproductiveAnimalBar` component.
+    -   ✅ Replaced "Unassigned" section with sections for "Planned", "Mating", "Pregnant", and "Nursing".
+    -   ✅ Ensured icon consistency for statuses and actions with other parts of the app.
+    -   Each bar will display the following information in columns:
         1.  **Animal Details:** Image, Prefix/Name/Suffix.
         2.  **Mating Date:** (Placeholder)
         3.  **Due Date / Birthdate:** (Placeholder)
@@ -31,5 +32,5 @@ The second phase involves a complete redesign of how reproductive animals are di
 
 Displaying the key reproductive dates (Mating, Due, Weaning) requires data that is not currently fetched by the `AnimalList` component. The implementation will proceed in two steps:
 
-1.  ✅ **Layout First:** Built the new `ReproductiveAnimalBar` component with placeholder data for the date fields.
+1.  **Layout First:** Build the new `ReproductiveAnimalBar` component with placeholder data for the date fields.
 2.  **Data Integration:** Modify the data fetching logic to include associated `Litter` or `BreedingRecord` information and populate the date fields with live data.
