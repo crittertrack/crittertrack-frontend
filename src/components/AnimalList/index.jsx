@@ -1924,9 +1924,10 @@ useEffect(() => {
     const allAnimals = allAnimalsRaw.filter(a => !a.isViewOnly);
 
     // Other lists that might depend on 'allAnimals' for management views
-    const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
-    const matingList = allAnimals.filter(a => a.isInMating && !inReproEnclosure(a));
-    const nursingList = allAnimals.filter(a => a.isNursing && !inReproEnclosure(a));
+    const matingList = useMemo(() => allAnimals.filter(a => a.isInMating && !inReproEnclosure(a)), [allAnimals, inReproEnclosure]);
+    const pregnantList = useMemo(() => allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a)), [allAnimals, inReproEnclosure]);
+    const nursingList = useMemo(() => allAnimals.filter(a => a.isNursing && !inReproEnclosure(a)), [allAnimals, inReproEnclosure]);
+    const plannedMatingList = useMemo(() => allAnimals.filter(a => a.isPlannedMating && !inReproEnclosure(a)), [allAnimals, inReproEnclosure]);
     const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
     const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays)); // This is for the Feeding management view
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
