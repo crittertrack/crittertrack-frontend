@@ -1952,9 +1952,6 @@ useEffect(() => {
     const treatmentList = allAnimalsRaw.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
     const allAnimals = allAnimalsRaw.filter(a => !a.isViewOnly);
 
-    // Other lists that might depend on 'allAnimals' for management views
-    const matingList = useMemo(() => allAnimals.filter(a => a.isInMating && !inReproEnclosure(a)), [allAnimals, inReproEnclosure]);
-    const pregnantList = useMemo(() => allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a)), [allAnimals, inReproEnclosure]);
     const activeReproEventsByAnimal = useMemo(() => {
         const map = new Map();
         if (!litters || litters.length === 0) return map;
