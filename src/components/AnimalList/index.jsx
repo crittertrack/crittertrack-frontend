@@ -1955,30 +1955,75 @@ useEffect(() => {
     // Other lists that might depend on 'allAnimals' for management views
     const matingList = useMemo(() => allAnimals.filter(a => a.isInMating && !inReproEnclosure(a)), [allAnimals, inReproEnclosure]);
     const pregnantList = useMemo(() => allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a)), [allAnimals, inReproEnclosure]);
-    const nursingList = useMemo(() => allAnimals.filter(a => a.isNursing && !inReproEnclosure(a)), [allAnimals, inReproEnclosure]);
-    const plannedMatingList = useMemo(() => {
-        const today = new Date();
-        const plannedLitterParentMap = new Map();
-        (litters || []).forEach(litter => {
+    const activeReproEventsByAnimal = useMemo(() => {
+        const map = new Map();
+        if (!litters || litters.length === 0) return map;
+
+        const sortedLitters = [...litters].sort((a, b) => {
+            const dateA = new Date(a.birthDate || a.pregnancyDate || a.matingDate || a.pairingDate || a.createdAt).getTime() || 0;
+            const dateB = new Date(b.birthDate || b.pregnancyDate || b.matingDate || b.pairingDate || b.createdAt).getTime() || 0;
+            return dateB - dateA;
+        });
+
+        sortedLitters.forEach(litter => {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
             const hasBirth = !!litter.birthDate;
             const hasPregnancy = !!litter.pregnancyDate;
             const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasPregnancy && !hasBirth;
+            const isNursing = hasBirth;
+            const isPregnant = hasPregnancy && !hasBirth;
+            const isMated = litter.matingDate && new Date(litter.matingDate) <= today && !hasPregnancy && !hasBirth;
+            const isPlanned = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasPregnancy && !hasBirth;
 
-            if (isPlannedOnly) {
-                if (litter.sireId_public) plannedLitterParentMap.set(litter.sireId_public, litter);
-                if (litter.damId_public) plannedLitterParentMap.set(litter.damId_public, litter);
+            let status = null;
+            if (isNursing) status = 'nursing';
+            else if (isPregnant) status = 'pregnant';
+            else if (isMated) status = 'mating';
+            else if (isPlanned) status = 'planned';
+
+            if (status) {
+                const litterInfo = {
+                    status,
+                    _litterId: litter._id,
+                    matingDate: litter.matingDate || litter.pairingDate,
+                    dueDate: litter.expectedDueDate,
+                    birthDate: litter.birthDate,
+                    weaningDate: litter.weaningDate,
+                };
+
+                if (litter.sireId_public && !map.has(litter.sireId_public)) {
+                    map.set(litter.sireId_public, litterInfo);
+                }
+                if (litter.damId_public && !map.has(litter.damId_public)) {
+                    map.set(litter.damId_public, litterInfo);
+                }
             }
         });
+        return map;
+    }, [litters]);
 
-        return allAnimals
-            .filter(a => plannedLitterParentMap.has(a.id_public) && !inReproEnclosure(a))
-            .map(a => {
-                const litter = plannedLitterParentMap.get(a.id_public);
-                return {
-                    ...a, isPlannedMating: true, _litterId: litter._id, matingDate: litter.matingDate || litter.pairingDate, dueDate: litter.expectedDueDate, weaningDate: litter.weaningDate,
-                };
-            });
-    }, [allAnimals, litters, inReproEnclosure]);
+     const allReproductiveAnimals = useMemo(() => allAnimals
+        .filter(a => activeReproEventsByAnimal.has(a.id_public))
+        .map(a => {
+            const litterInfo = activeReproEventsByAnimal.get(a.id_public);
+            return {
+                ...a,
+                isPlannedMating: litterInfo.status === 'planned',
+                isInMating: litterInfo.status === 'mating',
+                isPregnant: litterInfo.status === 'pregnant',
+                isNursing: litterInfo.status === 'nursing',
+                matingDate: litterInfo.matingDate,
+                dueDate: litterInfo.dueDate,
+                birthDate: litterInfo.birthDate,
+                weaningDate: litterInfo.weaningDate,
+                _litterId: litterInfo._litterId,
+            };
+        }), [allAnimals, activeReproEventsByAnimal]);
+
+    const plannedMatingList = useMemo(() => allReproductiveAnimals.filter(a => a.isPlannedMating && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
+    const matingList = useMemo(() => allReproductiveAnimals.filter(a => a.isInMating && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
+    const pregnantList = useMemo(() => allReproductiveAnimals.filter(a => a.isPregnant && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
+    const nursingList = useMemo(() => allReproductiveAnimals.filter(a => a.isNursing && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
     const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
     const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays)); // This is for the Feeding management view
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
@@ -1990,6 +2035,11 @@ useEffect(() => {
     const animalsWithEnclosureCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.maintenanceFrequencyDays));
     const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(isTaskDue).length, 0);
     const maintMaintenanceDue = allAnimals.filter(a => a.maintenanceFrequencyDays && isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length;
+
+    const plannedMatingList = useMemo(() => allReproductiveAnimals.filter(a => a.isPlannedMating && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
+    const matingList = useMemo(() => allReproductiveAnimals.filter(a => a.isInMating && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
+    const pregnantList = useMemo(() => allReproductiveAnimals.filter(a => a.isPregnant && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
+    const nursingList = useMemo(() => allReproductiveAnimals.filter(a => a.isNursing && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
     const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(isTaskDue).length, 0) + supplyReorderDue.length + enclosureCarTasksDue + maintMaintenanceDue;
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
@@ -2001,11 +2051,6 @@ useEffect(() => {
         enclosureAnimalMap[key].push(a);
     });
 
-    const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
-    const handleSearchInputChange = (e) => setSearchInput(e.target.value);
-    const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); setStatusFilterMating(false); setStatusFilterReproductive('none'); };
-    const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); setStatusFilterReproductive('none'); };
-    const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); setStatusFilterReproductive('none'); };
 
     // Check if any filters are active (different from defaults) ? uses appliedFilters for panel filters
     const hasActiveFilters = (
@@ -3350,6 +3395,13 @@ useEffect(() => {
         const birthDate = animal.birthDate ? formatDateShort(animal.birthDate) : '—';
         const weaningDate = animal.weaningDate ? formatDateShort(animal.weaningDate) : '—';
 
+        let dueOrBornDate = '—';
+        if (animal.isPlannedMating || animal.isPregnant) {
+            dueOrBornDate = dueDate;
+        } else if (animal.isNursing) {
+            dueOrBornDate = birthDate;
+        }
+
         let statusLabel = 'Unknown';
         let statusColor = 'bg-gray-100 text-gray-800';
         if (animal.isPlannedMating) {
@@ -3393,11 +3445,7 @@ useEffect(() => {
 
                 {/* Actions */}
                 <div className="sm:text-right flex items-center gap-1 justify-end">
-                    {animal.isPlannedMating && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200"><Heart size={12} /> Mated today</button> )}
-                    {animal.isInMating && animal.gender !== 'Male' && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-pink-100 text-pink-700 hover:bg-pink-200"><ScanHeart size={12} /> Assign Pregnant</button> )}
-                    {animal.isInMating && animal.gender === 'Male' && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200"><X size={12} /> Clear</button> )}
-                    {animal.isPregnant && animal.gender !== 'Male' && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"><Droplet size={12} /> Born today</button> )}
-                    {animal.isNursing && animal.gender !== 'Male' && ( <button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><Check size={12} /> Mark Weaned</button> )}
+                    {animal.isPlannedMating && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200"><Heart size={12} /> Mated today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )} {animal.isInMating && ( <> {animal.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-pink-100 text-pink-700 hover:bg-pink-200"><ScanHeart size={12} /> Assign Pregnant</button>} <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button> </>)} {animal.isPregnant && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"><Droplet size={12} /> Born today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isInMating: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )} {animal.isNursing && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><Check size={12} /> Mark Weaned</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, isPregnant: false, isInMating: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )}
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
                 </div>
             </div>
@@ -3717,7 +3765,9 @@ useEffect(() => {
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             let litterPatch = null;
-            if (animal.isPlannedMating && patch.isInMating) {
+            if (animal.isPlannedMating && patch.isPlannedMating === false && !patch.isInMating) {
+                litterPatch = { isPlanned: false };
+            } else if (animal.isPlannedMating && patch.isInMating) {
                 litterPatch = { isPlanned: false, matingDate: patch.matingDate };
             } else if (animal.isInMating && patch.isPregnant) {
                 litterPatch = { pregnancyDate: patch.pregnancyDate };
@@ -4042,6 +4092,7 @@ useEffect(() => {
                                                     <div className="p-2 space-y-1 bg-white">
                                                         <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
                                                             <div className="col-span-2">Animal</div>
+                                                            <div>Planned / Mating Date</div>
                                                             <div>Mating Date</div>
                                                             <div>Due Date / Birth Date</div>
                                                             <div>Weaning Date</div>
