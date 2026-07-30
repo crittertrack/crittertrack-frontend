@@ -3293,12 +3293,30 @@ useEffect(() => {
     };
 
            const renderEnclosuresTab = () => { // --- Filtering ---
-        let filteredEnclosures = [...enclosures];
-        if (enclosureSearch) { filteredEnclosures = filteredEnclosures.filter(e => e.name.toLowerCase().includes(enclosureSearch.toLowerCase())); }
-        if (enclosureTypeFilter) { filteredEnclosures = filteredEnclosures.filter(e => e.enclosureType === enclosureTypeFilter); }
-        if (enclosureStatusFilter) { if (enclosureStatusFilter === 'occupied') { filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length > 0); } else if (enclosureStatusFilter === 'empty') { filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length === 0); } }
-        if (enclosureBuildingFilter) { if (enclosureRoomFilter) { filteredEnclosures = filteredEnclosures.filter(e => e.roomId === enclosureRoomFilter); } else { filteredEnclosures = filteredEnclosures.filter(e => e.buildingId === enclosureBuildingFilter); } }
-        if (enclosureSpeciesFilter) { filteredEnclosures = filteredEnclosures.filter(e => (e.speciesLabels || []).includes(enclosureSpeciesFilter)); }
+        const filteredEnclosures = enclosures.filter(e => {
+            if (enclosureSearch && !e.name.toLowerCase().includes(enclosureSearch.toLowerCase())) {
+                return false;
+            }
+            if (enclosureTypeFilter && e.enclosureType !== enclosureTypeFilter) {
+                return false;
+            }
+            if (enclosureStatusFilter) {
+                const occupantCount = (enclosureAnimalMap[e._id] || []).length;
+                if (enclosureStatusFilter === 'occupied' && occupantCount === 0) return false;
+                if (enclosureStatusFilter === 'empty' && occupantCount > 0) return false;
+            }
+            if (enclosureBuildingFilter) {
+                if (enclosureRoomFilter) {
+                    if (e.roomId !== enclosureRoomFilter) return false;
+                } else {
+                    if (e.buildingId !== enclosureBuildingFilter) return false;
+                }
+            }
+            if (enclosureSpeciesFilter && !(e.speciesLabels || []).includes(enclosureSpeciesFilter)) {
+                return false;
+            }
+            return true;
+        });
         
         return (
             <div className="space-y-4">
