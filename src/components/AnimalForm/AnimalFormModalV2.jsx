@@ -912,7 +912,13 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
         buildingId: '',
         roomId: '',
         purpose: 'general',
-        purposeDescription: ''
+        purposeDescription: '',
+        lightingType: '',
+        bedding: '',
+        enrichment: '',
+        lightsOnTime: '',
+        lightsOffTime: '',
+        lightTimeFormat: '24h',
     });
     const [creatingEnclosure, setCreatingEnclosure] = useState(false);
 
@@ -944,7 +950,13 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                 temperatureUnit: newEnclosureData.temperatureRange.unit || 'C',
                 humidityMin: newEnclosureData.humidityRange.min ? Number(newEnclosureData.humidityRange.min) : null,
                 humidityMax: newEnclosureData.humidityRange.max ? Number(newEnclosureData.humidityRange.max) : null,
-                notes: newEnclosureData.description
+                notes: newEnclosureData.description,
+                lightsOnTime: newEnclosureData.lightsOnTime,
+                lightsOffTime: newEnclosureData.lightsOffTime,
+                lightTimeFormat: newEnclosureData.lightTimeFormat,
+                lightingType: newEnclosureData.lightingType,
+                bedding: newEnclosureData.bedding,
+                enrichment: newEnclosureData.enrichment,
             };
 
             const response = await axios.post(`${API_BASE_URL}/enclosures`, payload, {
@@ -979,7 +991,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                     <button type="button" onClick={() => { setMode('search'); setSearchTerm(''); }}
                         className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'search' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                         Search Existing
-                    </button><button type="button" onClick={() => { setMode('create'); setNewEnclosureData({ name: '', enclosureType: '', location: '', capacity: '', dimensions: { length: '', width: '', height: '', unit: 'cm' }, temperatureRange: { min: '', max: '', unit: 'C' }, humidityRange: { min: '', max: '' }, description: '', buildingId: '', roomId: '', purpose: 'general', purposeDescription: '' }); }}
+                    </button><button type="button" onClick={() => { setMode('create'); setNewEnclosureData({ name: '', enclosureType: '', location: '', capacity: '', dimensions: { length: '', width: '', height: '', unit: 'cm' }, temperatureRange: { min: '', max: '', unit: 'C' }, humidityRange: { min: '', max: '' }, description: '', buildingId: '', roomId: '', purpose: 'general', purposeDescription: '', lightingType: '', bedding: '', enrichment: '', lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h' }); }}
                         className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                         Create New
                     </button>
@@ -1139,7 +1151,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-700 mb-1">Dimensions (L x W x H)</label>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Dimensions (L x W x H)</label>
                                 <div className="grid grid-cols-4 gap-2 items-end">
                                     <input type="number" value={newEnclosureData.dimensions.length}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, dimensions: { ...p.dimensions, length: e.target.value } }))}
@@ -1166,19 +1178,19 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text border-b pb-1 mb-2">Environment</h4>
                             <div className="grid grid-cols-3 gap-2">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Temp Min</label>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Temp Min</label>
                                     <input type="number" value={newEnclosureData.temperatureRange.min}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, temperatureRange: { ...p.temperatureRange, min: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Temp Max</label>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Temp Max</label>
                                     <input type="number" value={newEnclosureData.temperatureRange.max}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, temperatureRange: { ...p.temperatureRange, max: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Unit</label>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Unit</label>
                                     <select value={newEnclosureData.temperatureRange.unit}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, temperatureRange: { ...p.temperatureRange, unit: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
@@ -1189,13 +1201,13 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Humidity Min (%)</label>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Humidity Min (%)</label>
                                     <input type="number" value={newEnclosureData.humidityRange.min}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, humidityRange: { ...p.humidityRange, min: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Humidity Max (%)</label>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Humidity Max (%)</label>
                                     <input type="number" value={newEnclosureData.humidityRange.max}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, humidityRange: { ...p.humidityRange, max: e.target.value } }))}
                                         className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
@@ -1246,7 +1258,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                     className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-700 mb-1">Description</label>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
                                 <textarea value={newEnclosureData.description}
                                     onChange={(e) => setNewEnclosureData(p => ({ ...p, description: e.target.value }))}
                                     className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none"
