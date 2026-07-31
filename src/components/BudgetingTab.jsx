@@ -13,7 +13,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     const [userProfile, setUserProfile] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showTypeSelection, setShowTypeSelection] = useState(true);
-    const [showAnimalDropdown, setShowAnimalDropdown] = useState(false); // Declare state for dropdown visibility
     const [editingTransaction, setEditingTransaction] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all'); // all, animal-sale, animal-purchase, expense, income
@@ -46,6 +45,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
         { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
         { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint' },
+        { code: 'PLN', symbol: 'zł', name: 'Polish Zloty' },
+        { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah' },
     ];
 
     const getCurrencySymbol = () => {
@@ -629,7 +630,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         {/* Transaction Type Selection Screen */}
                         {!editingTransaction && showTypeSelection ? (
                             <div className="space-y-6">
-                                <p className="text-center text-gray-600 mb-8">What type of transaction would you like to add? These are only manual entries.</p>
+                                <p className="text-center text-gray-600 mb-8">What type of transaction would you like to add?</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <button
                                         type="button"
@@ -745,7 +746,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                 <input
                                                     type="text"
                                                     value={animalSearchQuery}
-                                                    onChange={(e) => setAnimalSearchQuery(e.target.value)}
+                                                    onChange={(e) => {
+                                                    }}
                                                     onFocus={() => setShowAnimalDropdown(true)}
                                                     onBlur={() => setTimeout(() => setShowAnimalDropdown(false), 150)}
                                                     placeholder={animalsLoading ? 'Loading animals...' : 'Search by name or ID...'}
