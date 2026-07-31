@@ -2075,6 +2075,10 @@ useEffect(() => {
         setBlFilter([]);
     };
     
+    const handleSearchInputChange = (e) => {
+        setSearchInput(e.target.value);
+    };
+
     const handleRefresh = async () => {
         try {
             setLoading(true);
