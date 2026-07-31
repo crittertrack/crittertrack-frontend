@@ -23,7 +23,7 @@ const getCountryFlag = (countryCode) => {
 const getCountryName = (countryCode) => {
     const countryNames = {
         'US': 'United States', 'CA': 'Canada', 'GB': 'United Kingdom', 'AU': 'Australia',
-        'NZ': 'New Zealand', 'DE': 'Germany', 'FR': 'France', 'IT': 'Italy',
+        'NZ': 'New Zealand', 'DE': 'Germany', 'FR': 'France', 'IT': 'Italy', 'HU': 'Hungary',
         'ES': 'Spain', 'NL': 'Netherlands', 'SE': 'Sweden', 'NO': 'Norway',
         'DK': 'Denmark', 'CH': 'Switzerland', 'BE': 'Belgium', 'AT': 'Austria',
         'PL': 'Poland', 'CZ': 'Czech Republic', 'IE': 'Ireland', 'PT': 'Portugal',
@@ -925,6 +925,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         <option value="DE">Germany</option>
                         <option value="FR">France</option>
                         <option value="IT">Italy</option>
+                        <option value="HU">Hungary</option>
                         <option value="ES">Spain</option>
                         <option value="NL">Netherlands</option>
                         <option value="SE">Sweden</option>

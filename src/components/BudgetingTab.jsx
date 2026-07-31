@@ -43,7 +43,10 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
         { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
         { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
-        { code: 'ZAR', symbol: 'R', name: 'South African Rand' }
+        { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+        { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint' },
+        { code: 'PLN', symbol: 'zł', name: 'Polish Zloty' },
+        { code: 'DKK', symbol: 'kr', name: 'Danish Krone' }
     ];
 
     const getCurrencySymbol = () => {
