@@ -1999,16 +1999,14 @@ useEffect(() => {
         return map;
     }, [litters]);
 
-     const allReproductiveAnimals = useMemo(() => allAnimals
-        .filter(a => activeReproEventsByAnimal.has(a.id_public))
+    const allReproductiveAnimals = useMemo(() => allAnimals
+        .filter(a => a.isPlannedMating || a.isInMating || a.isPregnant || a.isNursing)
         .map(a => {
             const litterInfo = activeReproEventsByAnimal.get(a.id_public);
             return {
                 ...a,
-                isPlannedMating: litterInfo.status === 'planned',
-                isInMating: litterInfo.status === 'mating',
-                isPregnant: litterInfo.status === 'pregnant',
-                isNursing: litterInfo.status === 'nursing',
+                // The animal's own flags (isNursing, etc.) are now the source of truth.
+                // We just add litter dates for display context if available.
                 matingDate: litterInfo.matingDate,
                 dueDate: litterInfo.dueDate,
                 birthDate: litterInfo.birthDate,
