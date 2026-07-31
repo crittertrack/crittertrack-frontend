@@ -4062,7 +4062,7 @@ useEffect(() => {
                             {(() => {
                                  const reproSections = [
                                     { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700" />, headerClass: 'bg-indigo-50 border-b border-indigo-100' },
-                                    { key: 'mating', title: 'Currently Mating', list: matingList, icon: <Heart size={16} className="text-purple-700" />, headerClass: 'bg-purple-50 border-b border-purple-100' },
+                                    { key: 'mating', title: 'Currently In Mating', list: matingList, icon: <Heart size={16} className="text-purple-700" />, headerClass: 'bg-purple-50 border-b border-purple-100' },
                                     { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={16} className="text-pink-700" />, headerClass: 'bg-pink-50 border-b border-pink-100' },
                                     { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Baby size={16} className="text-blue-700" />, headerClass: 'bg-blue-50 border-b border-blue-100' }
                                 ];
@@ -4089,7 +4089,6 @@ useEffect(() => {
                                                         <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
                                                             <div className="col-span-2">Animal</div>
                                                             <div>Planned / Mating Date</div>
-                                                            <div>Mating Date</div>
                                                             <div>Due Date / Birth Date</div>
                                                             <div>Weaning Date</div>
                                                             <div className="text-center">Status</div>

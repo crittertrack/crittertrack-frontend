@@ -198,7 +198,7 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
                     <div className="flex items-center space-x-2 mt-1">
                         {parentData.isOwned ? <Heart size={12} className="text-black" title="Owned" /> : <HeartOff size={12} className="text-black" title="Not Owned" />}
                         {parentData.showOnPublicProfile ? <Eye size={12} className="text-black" title="Public" /> : <EyeOff size={12} className="text-black" title="Private" />}
-                        {parentData.isInMating && <Heart size={12} className="text-black" title="Mating" />}
+                        {parentData.isInMating && <Heart size={12} className="text-black" title="In Mating" />}
                         {parentData.isPregnant && <ScanHeart size={12} className="text-black" title="Pregnant" />}
                         {parentData.isNursing && <Baby size={12} className="text-black" title="Nursing" />}
                     </div>

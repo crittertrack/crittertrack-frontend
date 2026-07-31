@@ -1246,7 +1246,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
 
                                         {!selectedAnimal.isNeutered && !selectedAnimal.isInfertile && (
                                             <div className="animal-detail-section">
-                                                <h4>Mating</h4>
+                                                <h4>In Mating</h4>
                                                 <div className="detail-grid">
                                                     <div><strong>Mating Date:</strong> {selectedAnimal.matingDates ? formatDate(selectedAnimal.matingDates) : '-'}</div>
                                                     <div><strong>Expected Due Date:</strong> {selectedAnimal.expectedDueDate ? formatDate(selectedAnimal.expectedDueDate) : '-'}</div>
