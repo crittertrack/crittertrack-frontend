@@ -2002,7 +2002,7 @@ useEffect(() => {
     const allReproductiveAnimals = useMemo(() => allAnimals
         .filter(a => a.isPlannedMating || a.isInMating || a.isPregnant || a.isNursing)
         .map(a => {
-            const litterInfo = activeReproEventsByAnimal.get(a.id_public);
+            const litterInfo = activeReproEventsByAnimal.get(a.id_public) || {}; // Provide a default empty object if no litter info
             return {
                 ...a,
                 // The animal's own flags (isNursing, etc.) are now the source of truth.
