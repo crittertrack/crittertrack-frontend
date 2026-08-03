@@ -1965,12 +1965,15 @@ useEffect(() => {
         sortedLitters.forEach(litter => {
             const today = new Date(); today.setHours(0, 0, 0, 0);
             const hasBirth = !!litter.birthDate;
+            const hasWeaning = !!litter.weaningDate;
             const hasPregnancy = !!litter.pregnancyDate;
-            const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasPregnancy && !hasBirth;
-            const isNursing = hasBirth;
-            const isPregnant = hasPregnancy && !hasBirth;
-            const isMated = litter.matingDate && new Date(litter.matingDate) <= today && !hasPregnancy && !hasBirth;
-            const isPlanned = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasPregnancy && !hasBirth;
+            // A litter that has both a birth and a weaning date has completed its cycle —
+            // it should no longer flag the dam as nursing (or anything else).
+            const isClosed = litter.pregnancyLost || (hasBirth && hasWeaning);
+            const isNursing = hasBirth && !hasWeaning && !isClosed;
+            const isPregnant = hasPregnancy && !hasBirth && !isClosed;
+            const isMated = litter.matingDate && new Date(litter.matingDate) <= today && !hasPregnancy && !hasBirth && !isClosed;
+            const isPlanned = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasPregnancy && !hasBirth && !isClosed;
 
             let status = null;
             if (isNursing) status = 'nursing';
@@ -2003,6 +2006,7 @@ useEffect(() => {
         const litterInfo = activeReproEventsByAnimal.get(animal.id_public) || {};
         return {
             ...animal,
+            reproStatus: litterInfo.status,
             matingDate: litterInfo.matingDate,
             dueDate: litterInfo.dueDate,
             birthDate: litterInfo.birthDate,
@@ -2013,8 +2017,21 @@ useEffect(() => {
 
     const plannedMatingList = useMemo(() => allAnimals.filter(a => a.isPlannedMating && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
     const matingList = useMemo(() => allAnimals.filter(a => a.isInMating && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
-    const pregnantList = useMemo(() => allAnimals.filter(a => a.isPregnant && a.gender !== 'Male' && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
-    const nursingList = useMemo(() => allAnimals.filter(a => a.isNursing && a.gender !== 'Male' && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
+    const pregnantList = useMemo(() => allAnimals
+        .filter(a => {
+            if (a.gender === 'Male' || inReproEnclosure(a)) return false;
+            const litterStatus = activeReproEventsByAnimal.get(a.id_public)?.status;
+            if (litterStatus === 'nursing') return false;
+            return litterStatus === 'pregnant' || (!!a.isPregnant && litterStatus !== 'nursing');
+        })
+        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, activeReproEventsByAnimal]);
+    const nursingList = useMemo(() => allAnimals
+        .filter(a => {
+            if (a.gender === 'Male' || inReproEnclosure(a)) return false;
+            const litterStatus = activeReproEventsByAnimal.get(a.id_public)?.status;
+            return litterStatus === 'nursing' || !!a.isNursing;
+        })
+        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, activeReproEventsByAnimal]);
     const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
     const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays)); // This is for the Feeding management view
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
