@@ -649,6 +649,13 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
         if (!dismissed[key]) urgentItems.push({ key, type: 'supplies', label: 'Supplies', icon: '\uD83D\uDCE6', description: `${suppliesDue.length} item${suppliesDue.length !== 1 ? 's' : ''} need restocking` });
     }
 
+    // Poor/Critical health status (derived server-side, see utils/medicalStatus.js)
+    const poorHealthAnimals = animals.filter(a => ['Poor', 'Critical'].includes(a.healthStatusOverride || a.healthStatus));
+    if (poorHealthAnimals.length > 0) {
+        const key = 'mgmt-health';
+        if (!dismissed[key]) urgentItems.push({ key, type: 'health', label: 'Health', icon: '\u2695\uFE0F', description: `${poorHealthAnimals.length} animal${poorHealthAnimals.length !== 1 ? 's' : ''} with Poor/Critical health status` });
+    }
+
     if (urgentItems.length === 0) return null;
 
     const typeBg = {
@@ -656,6 +663,7 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
         care:        'bg-purple-100 text-purple-700',
         maintenance: 'bg-yellow-100 text-yellow-800',
         supplies:    'bg-emerald-100 text-emerald-700',
+        health:      'bg-red-100 text-red-700',
     };
 
     return (

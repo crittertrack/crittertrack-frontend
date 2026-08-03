@@ -57,7 +57,6 @@ export function calculateHealthStatus(animal) {
     const conditions = parseArrayField(animal.medicalConditions);
     const allergies = parseArrayField(animal.allergies);
     const quarantine = animal.quarantineDetails || {};
-    const treatment = animal.treatmentDetails || {};
 
     let score = 5; // Start at excellent
     const factors = [];
@@ -78,10 +77,13 @@ export function calculateHealthStatus(animal) {
     }
 
     // Treatment assessment - isInTreatment is derived from active medications/critical
-    // conditions (not the treatmentDetails period itself), so check that directly.
+    // conditions, so check that directly rather than any separate treatment period.
     if (computeIsInTreatment({ medications: animal.medications, medicalConditions: animal.medicalConditions })) {
         score -= 1.5;
-        factors.push(treatment.type ? `Under treatment: ${treatment.type}` : 'Currently under treatment');
+        const activeMedication = medications.find(m =>
+            (!m.status || m.status === 'active') && (!m.stopDate || new Date(m.stopDate) >= new Date())
+        );
+        factors.push(activeMedication ? `Under treatment: ${activeMedication.reason || activeMedication.name}` : 'Currently under treatment');
     }
 
     // Medications count

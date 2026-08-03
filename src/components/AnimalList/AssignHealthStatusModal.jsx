@@ -17,7 +17,7 @@ const defaultDetails = (type) => ({
     type: '', reason: '', startDate: todayStr(), endDate: '',
 });
 
-const defaultMedication = () => ({ name: '', dose: '', notes: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
+const defaultMedication = () => ({ name: '', dose: '', reason: '', notes: '', startDate: todayStr(), stopDate: '', intervalValue: '', intervalUnit: 'hours' });
 
 // Bulk-assigns a quarantine/isolation or treatment period to one or more animals at once,
 // mirroring the per-animal fields/logic in AnimalFormModalV2's Health tab.
@@ -81,12 +81,13 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
         onClose();
     };
 
-    const canSubmit = selectedIds.size > 0 && !!details.startDate && !saving;
+    const canSubmit = selectedIds.size > 0 && !saving &&
+        (statusType === 'quarantine' ? !!details.startDate : (medication.name.trim() && !!medication.startDate));
 
     const handleSubmit = async () => {
         if (!canSubmit) return;
-        const medicationToSubmit = statusType === 'treatment' && medication.name.trim() ? medication : null;
-        await onSubmit([...selectedIds], statusType, details, medicationToSubmit);
+        const medicationToSubmit = statusType === 'treatment' ? medication : null;
+        await onSubmit([...selectedIds], statusType, statusType === 'quarantine' ? details : null, medicationToSubmit);
         resetState();
     };
 
@@ -118,89 +119,86 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                         </button>
                     </div>
 
-                    <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-200 dark:border-dark-border p-3 space-y-3">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Status</label>
-                                {statusType === 'quarantine' ? (
+                    {statusType === 'quarantine' ? (
+                        <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-200 dark:border-dark-border p-3 space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Status</label>
                                     <select name="status" value={details.status} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
                                         <option value="Quarantine">Quarantine</option>
                                         <option value="Isolation">Isolation</option>
                                     </select>
-                                ) : (
-                                    <select name="status" value={details.status} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
-                                        <option value="Treatment">Treatment</option>
-                                    </select>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Type/Reason</label>
-                                {statusType === 'quarantine' ? (
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Type/Reason</label>
                                     <select name="type" value={details.type} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
                                         <option value="">Select type...</option>
                                         {QUARANTINE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                                     </select>
-                                ) : (
-                                    <input type="text" name="type" value={details.type} onChange={handleDetailChange} placeholder="e.g., Post-surgical recovery, illness, injury" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                )}
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Additional Notes</label>
-                                <input type="text" name="reason" value={details.reason} onChange={handleDetailChange} placeholder="e.g., Specific illness, concerns, observations" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Start Date <span className="text-red-500">*</span></label>
-                                <DatePicker name="startDate" value={details.startDate} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">End Date (Optional)</label>
-                                <DatePicker name="endDate" value={details.endDate} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Additional Notes</label>
+                                    <input type="text" name="reason" value={details.reason} onChange={handleDetailChange} placeholder="e.g., Specific illness, concerns, observations" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Start Date <span className="text-red-500">*</span></label>
+                                    <DatePicker name="startDate" value={details.startDate} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">End Date (Optional)</label>
+                                    <DatePicker name="endDate" value={details.endDate} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                </div>
                             </div>
                         </div>
-
-                        {statusType === 'treatment' && (
-                            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-dark-border">
-                                <label className="block text-xs font-semibold text-gray-700 dark:text-dark-text-secondary mb-2">Medication (optional)</label>
-                                <div className="flex items-start gap-1.5 mb-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
-                                    <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
-                                    <span>"In Treatment" status is now automatic — it's only shown while an animal has an active medication or an active critical condition. Assigning Treatment without a medication here (and with no existing active critical condition) will NOT mark the animal as in treatment.</span>
+                    ) : (
+                        <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-200 dark:border-dark-border p-3 space-y-3">
+                            <div className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
+                                <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
+                                <span>Treatment is defined by an active medication — it's what marks the animal as "In Treatment" and factors into its health status.</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Name</label>
+                                    <input type="text" name="name" value={medication.name} onChange={handleMedicationChange} placeholder="e.g., Amoxicillin" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Name</label>
-                                        <input type="text" name="name" value={medication.name} onChange={handleMedicationChange} placeholder="e.g., Amoxicillin" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dose</label>
+                                    <input type="text" name="dose" value={medication.dose} onChange={handleMedicationChange} placeholder="e.g., 50mg" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reason</label>
+                                    <input type="text" name="reason" value={medication.reason} onChange={handleMedicationChange} placeholder="e.g., Post-surgical recovery, illness, injury" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Start Date <span className="text-red-500">*</span></label>
+                                    <DatePicker name="startDate" value={medication.startDate} onChange={handleMedicationChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Stop Date</label>
+                                    <DatePicker name="stopDate" value={medication.stopDate} onChange={handleMedicationChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dose Interval</label>
+                                        <input type="number" min="0" name="intervalValue" value={medication.intervalValue} onChange={handleMedicationChange} placeholder="e.g., 12" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dose</label>
-                                        <input type="text" name="dose" value={medication.dose} onChange={handleMedicationChange} placeholder="e.g., 50mg" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Unit</label>
+                                        <select name="intervalUnit" value={medication.intervalUnit} onChange={handleMedicationChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                            <option value="hours">Hours</option>
+                                            <option value="days">Days</option>
+                                            <option value="weeks">Weeks</option>
+                                            <option value="months">Months</option>
+                                        </select>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <div className="flex-1">
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dose Interval</label>
-                                            <input type="number" min="0" name="intervalValue" value={medication.intervalValue} onChange={handleMedicationChange} placeholder="e.g., 12" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Unit</label>
-                                            <select name="intervalUnit" value={medication.intervalUnit} onChange={handleMedicationChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
-                                                <option value="hours">Hours</option>
-                                                <option value="days">Days</option>
-                                                <option value="weeks">Weeks</option>
-                                                <option value="months">Months</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Stop Date</label>
-                                        <DatePicker name="stopDate" value={medication.stopDate} onChange={handleMedicationChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Medication Notes</label>
-                                        <input type="text" name="notes" value={medication.notes} onChange={handleMedicationChange} placeholder="e.g., Give with food" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                    </div>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Medication Notes</label>
+                                    <input type="text" name="notes" value={medication.notes} onChange={handleMedicationChange} placeholder="e.g., Give with food" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                 </div>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     <div>
                         <div className="flex items-center justify-between gap-2 mb-2">

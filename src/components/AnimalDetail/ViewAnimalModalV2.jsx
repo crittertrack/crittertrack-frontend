@@ -641,14 +641,16 @@ const ViewAnimalModalV2 = ({
                                             });
                                         }
 
-                                        if (animal.treatmentDetails?.startDate) {
-                                            timelineEvents.push({
-                                                date: new Date(animal.treatmentDetails.startDate),
-                                                icon: <Stethoscope size={14} className="text-orange-500" />,
-                                                title: 'Treatment Started',
-                                                displayDate: animal.treatmentDetails.startDate
-                                            });
-                                        }
+                                        (parseJsonArrayField(animal.medications) || []).forEach(med => {
+                                            if (med?.startDate) {
+                                                timelineEvents.push({
+                                                    date: new Date(med.startDate),
+                                                    icon: <Stethoscope size={14} className="text-orange-500" />,
+                                                    title: `Medication Started: ${med.name || 'Medication'}`,
+                                                    displayDate: med.startDate
+                                                });
+                                            }
+                                        });
 
                                         (parseJsonArrayField(animal.medications) || []).forEach((med, idx) => {
                                             (med?.administrations || []).forEach((adminEntry, aIdx) => {

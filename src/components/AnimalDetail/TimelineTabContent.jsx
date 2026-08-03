@@ -133,47 +133,8 @@ export const TimelineTabContent = ({ animal }) => {
             }
         });
 
-        if (animal.treatmentDetails?.startDate) {
-            events.push({
-                id: 'treatment-start-' + animal.treatmentDetails.startDate,
-                type: 'health',
-                date: animal.treatmentDetails.startDate,
-                title: 'Treatment Started',
-                description: animal.treatmentDetails.reason || animal.treatmentDetails.type || 'Treatment'
-            });
-        }
-
-        if (animal.treatmentDetails?.endDate && animal.treatmentDetails.status === 'None') {
-            events.push({
-                id: 'treatment-end-' + animal.treatmentDetails.endDate,
-                type: 'health',
-                date: animal.treatmentDetails.endDate,
-                title: 'Treatment Ended',
-                description: animal.treatmentDetails.reason || animal.treatmentDetails.type || 'Treatment'
-            });
-        }
-
-        (parseJsonArrayField(animal.treatmentHistory) || []).forEach((period, idx) => {
-            if (period?.startDate) {
-                events.push({
-                    id: `treatment-hist-start-${period.startDate}-${idx}`,
-                    type: 'health',
-                    date: period.startDate,
-                    title: 'Treatment Started',
-                    description: period.reason || period.type || 'Treatment'
-                });
-            }
-            if (period?.endDate) {
-                events.push({
-                    id: `treatment-hist-end-${period.endDate}-${idx}`,
-                    type: 'health',
-                    date: period.endDate,
-                    title: 'Treatment Ended',
-                    description: period.reason || period.type || 'Treatment'
-                });
-            }
-        });
-
+        // Treatment periods are now defined entirely by medications (see below) rather than a
+        // separate treatmentDetails period.
         (parseJsonArrayField(animal.medications) || []).forEach((med, idx) => {
             if (!med) return;
             if (med.startDate) {
@@ -182,7 +143,7 @@ export const TimelineTabContent = ({ animal }) => {
                     type: 'health',
                     date: med.startDate,
                     title: `Medication Started: ${med.name || 'Medication'}`,
-                    description: med.dose ? `Dose: ${med.dose}` : 'Medication started'
+                    description: [med.reason, med.dose ? `Dose: ${med.dose}` : null].filter(Boolean).join(' — ') || 'Medication started'
                 });
             }
             (med.administrations || []).forEach((admin, aIdx) => {
@@ -202,7 +163,7 @@ export const TimelineTabContent = ({ animal }) => {
                     type: 'health',
                     date: med.stopDate,
                     title: `Medication Finished: ${med.name || 'Medication'}`,
-                    description: 'Medication course ended'
+                    description: med.reason || 'Medication course ended'
                 });
             }
         });

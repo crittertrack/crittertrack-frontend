@@ -2015,6 +2015,9 @@ useEffect(() => {
             .map(() => ({ animal, reason: 'Medication dose due' }))
         ).filter((item, idx, arr) => arr.findIndex(o => o.animal.id_public === item.animal.id_public) === idx),
         ...quarantineList.filter(a => a.quarantineDetails?.endDate && daysSince(a.quarantineDetails.endDate) >= 0).map(animal => ({ animal, reason: 'Quarantine end date reached' })),
+        // A Poor/Critical derived health status is itself an actionable alert, regardless of quarantine/treatment state.
+        ...allAnimals.filter(a => ['Poor', 'Critical'].includes(a.healthStatusOverride || a.healthStatus))
+            .map(animal => ({ animal, reason: `Health status: ${animal.healthStatusOverride || animal.healthStatus}` })),
     ];
 
     const activeReproEventsByAnimal = useMemo(() => {
@@ -2195,43 +2198,45 @@ useEffect(() => {
     const handleAssignHealthStatus = async (selectedIds, statusType, details, medication) => {
         setAssigningHealthStatus(true);
         const isQuarantineType = statusType === 'quarantine';
-        const historyField = isQuarantineType ? 'quarantineHistory' : 'treatmentHistory';
-        const detailsField = isQuarantineType ? 'quarantineDetails' : 'treatmentDetails';
 
         const results = await Promise.allSettled(selectedIds.map(async (id_public) => {
             const animal = allAnimalsRaw.find(a => a.id_public === id_public);
             if (!animal) return;
 
-            const prevDetails = animal[detailsField] || { status: 'None', type: '', reason: '', startDate: '', endDate: '' };
-            let history = animal[historyField] || [];
-            if (prevDetails.startDate && prevDetails.startDate !== details.startDate) {
-                history = [...history, prevDetails];
-            }
-            const newDetails = { status: details.status, type: details.type, reason: details.reason, startDate: details.startDate, endDate: details.endDate };
-            const patch = { [detailsField]: newDetails, [historyField]: history };
-
+            const patch = {};
             let updatedMedications = null;
-            if (!isQuarantineType && medication?.name?.trim()) {
-                const medicationRecord = {
-                    id: Date.now().toString() + '-' + id_public,
-                    name: medication.name.trim(),
-                    dose: medication.dose || '',
-                    notes: medication.notes || '',
-                    startDate: details.startDate || null,
-                    stopDate: medication.stopDate || null,
-                    intervalValue: medication.intervalValue ? Number(medication.intervalValue) : null,
-                    intervalUnit: medication.intervalUnit || 'hours',
-                    source: 'manual'
-                };
-                updatedMedications = [...parseArrayField(animal.medications), medicationRecord];
-                patch.medications = updatedMedications;
-            }
 
             if (isQuarantineType) {
+                const prevDetails = animal.quarantineDetails || { status: 'None', type: '', reason: '', startDate: '', endDate: '' };
+                let history = animal.quarantineHistory || [];
+                if (prevDetails.startDate && prevDetails.startDate !== details.startDate) {
+                    history = [...history, prevDetails];
+                }
+                const newDetails = { status: details.status, type: details.type, reason: details.reason, startDate: details.startDate, endDate: details.endDate };
+                patch.quarantineDetails = newDetails;
+                patch.quarantineHistory = history;
                 patch.isQuarantine = isStatusPeriodActive(newDetails);
             } else {
-                // isInTreatment is derived from active medications/critical conditions, not from
-                // treatmentDetails' period \u2014 recompute using the (possibly just-added) medication.
+                // Treatment is defined entirely by the medication record (name, dose, reason,
+                // start/stop date, interval, notes) \u2014 there's no separate treatmentDetails period.
+                if (medication?.name?.trim()) {
+                    const medicationRecord = {
+                        id: Date.now().toString() + '-' + id_public,
+                        name: medication.name.trim(),
+                        dose: medication.dose || '',
+                        reason: medication.reason || '',
+                        notes: medication.notes || '',
+                        startDate: medication.startDate || null,
+                        stopDate: medication.stopDate || null,
+                        intervalValue: medication.intervalValue ? Number(medication.intervalValue) : null,
+                        intervalUnit: medication.intervalUnit || 'hours',
+                        source: 'manual'
+                    };
+                    updatedMedications = [...parseArrayField(animal.medications), medicationRecord];
+                    patch.medications = updatedMedications;
+                }
+                // isInTreatment is derived from active medications/critical conditions \u2014
+                // recompute using the (possibly just-added) medication.
                 patch.isInTreatment = computeIsInTreatment({
                     medications: updatedMedications !== null ? updatedMedications : animal.medications,
                     medicalConditions: animal.medicalConditions,
@@ -3581,7 +3586,7 @@ useEffect(() => {
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Now</h4>
                                 <ul className="text-xs space-y-1.5">
                                     {healthNeedsAttentionList.map(({ animal, reason }) => (
-                                        <li key={animal.id_public} className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
+                                        <li key={`${animal.id_public}-${reason}`} className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
                                             <span className="text-gray-700 dark:text-dark-text-secondary">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
                                             <span className="font-medium text-orange-700">{reason}</span>
                                         </li>
@@ -4027,8 +4032,8 @@ useEffect(() => {
             if (newIsInTreatment) {
                 window.alert(`${animal.name || 'This animal'} still has an active critical medical condition, so it will continue to show as "in treatment" until that condition is resolved.`);
             }
-            const patch = { isInTreatment: newIsInTreatment, medications: updatedMeds, treatmentDetails: { ...(animal.treatmentDetails || {}), status: 'None', endDate: today } };
-            const prev = { isInTreatment: animal.isInTreatment, medications: animal.medications, treatmentDetails: animal.treatmentDetails };
+            const patch = { isInTreatment: newIsInTreatment, medications: updatedMeds };
+            const prev = { isInTreatment: animal.isInTreatment, medications: animal.medications };
             setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
