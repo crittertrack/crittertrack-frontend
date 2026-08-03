@@ -2022,12 +2022,13 @@ useEffect(() => {
         sortedLitters.forEach(litter => {
             const today = new Date(); today.setHours(0, 0, 0, 0);
             const hasBirth = !!litter.birthDate;
-            const hasWeaning = !!litter.weaningDate;
+            // A future-dated weaningDate shouldn't close the litter early — only once it arrives.
+            const isWeaned = !!litter.weaningDate && new Date(litter.weaningDate) <= today;
             const hasPregnancy = !!litter.pregnancyDate;
-            // A litter that has both a birth and a weaning date has completed its cycle —
+            // A litter that has both a birth and an arrived weaning date has completed its cycle —
             // it should no longer flag the dam as nursing (or anything else).
-            const isClosed = litter.pregnancyLost || (hasBirth && hasWeaning);
-            const isNursing = hasBirth && !hasWeaning && !isClosed;
+            const isClosed = litter.pregnancyLost || (hasBirth && isWeaned);
+            const isNursing = hasBirth && !isWeaned && !isClosed;
             const isPregnant = hasPregnancy && !hasBirth && !isClosed;
             const isMated = litter.matingDate && new Date(litter.matingDate) <= today && !hasPregnancy && !hasBirth && !isClosed;
             const isPlanned = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasPregnancy && !hasBirth && !isClosed;
@@ -2088,12 +2089,28 @@ useEffect(() => {
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
     const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(isTaskDue).length, 0);
     const reproTotal = matingList.length + pregnantList.length + nursingList.length;
-    // Entries whose planned mating / due / weaning date lands on today — these are the ones that need action now.
-    const reproNeedsAttentionList = [
-        ...plannedMatingList.filter(a => a.matingDate && daysSince(a.matingDate) === 0).map(animal => ({ animal, reason: 'Planned mating date is today', view: 'planned' })),
-        ...pregnantList.filter(a => a.dueDate && daysSince(a.dueDate) === 0).map(animal => ({ animal, reason: 'Due date is today', view: 'pregnant' })),
-        ...nursingList.filter(a => a.weaningDate && daysSince(a.weaningDate) === 0).map(animal => ({ animal, reason: 'Weaning date is today', view: 'nursing' })),
-    ];
+    // Entries whose planned mating / due / weaning date lands on today. Checked directly against the
+    // litter records rather than the derived isPlannedMating/isPregnant/isNursing flags, because those
+    // flags auto-advance to the next stage (mating/closed) as soon as that same date is reached — which
+    // would otherwise make the animal disappear from plannedMatingList/nursingList before this alert fires.
+    const reproNeedsAttentionList = useMemo(() => {
+        const items = [];
+        (litters || []).forEach(litter => {
+            const dam = litter.damId_public ? allAnimals.find(a => a.id_public === litter.damId_public) : null;
+            const sire = litter.sireId_public ? allAnimals.find(a => a.id_public === litter.sireId_public) : null;
+
+            if (litter.isPlanned && !litter.pregnancyDate && !litter.birthDate && litter.matingDate && daysSince(litter.matingDate) === 0) {
+                [dam, sire].filter(Boolean).forEach(animal => items.push({ animal, reason: 'Planned mating date is today', view: 'planned' }));
+            }
+            if (litter.pregnancyDate && !litter.birthDate && litter.expectedDueDate && daysSince(litter.expectedDueDate) === 0 && dam) {
+                items.push({ animal: dam, reason: 'Due date is today', view: 'pregnant' });
+            }
+            if (litter.birthDate && litter.weaningDate && daysSince(litter.weaningDate) === 0 && dam) {
+                items.push({ animal: dam, reason: 'Weaning date is today', view: 'nursing' });
+            }
+        });
+        return items;
+    }, [litters, allAnimals]);
     const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
     const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
     const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
