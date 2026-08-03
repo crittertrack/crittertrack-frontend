@@ -1949,8 +1949,11 @@ useEffect(() => {
     const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
 
     // The original 'allAnimals' variable (used for the main list and management views) remains unchanged.
-    const quarantineList = allAnimalsRaw.filter(a => a.isQuarantine && !inHealthEnclosure(a));
-    const treatmentList = allAnimalsRaw.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
+    // Must exclude view-only animals (e.g. transferred away, kept only for pedigree/history access) —
+    // otherwise a transferred animal with stale isQuarantine/isInTreatment flags keeps showing up here
+    // for the previous owner even though it's no longer theirs to manage.
+    const quarantineList = allAnimalsRaw.filter(a => a.isQuarantine && !a.isViewOnly && !inHealthEnclosure(a));
+    const treatmentList = allAnimalsRaw.filter(a => a.isInTreatment && !a.isQuarantine && !a.isViewOnly && !inHealthEnclosure(a));
     const allAnimals = allAnimalsRaw.filter(a => !a.isViewOnly);
 
     const activeReproEventsByAnimal = useMemo(() => {
