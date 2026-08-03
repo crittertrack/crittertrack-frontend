@@ -3421,7 +3421,7 @@ useEffect(() => {
 
         return (
             <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<Home size={32} className="text-blue-800" />}
@@ -3538,7 +3538,7 @@ useEffect(() => {
     const renderReproductionDashboard = () => {
         return (
             <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
                     <StatCard icon={<Calendar size={32} className="text-indigo-800" />} label="Animals in Planned Mating" value={plannedMatingList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
                     <StatCard icon={<Hourglass size={32} className="text-purple-800" />} label="Animals In Mating" value={matingList.length} colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200" onClick={() => setAnimalView('reproduction')} />
                     <StatCard icon={<ScanHeart size={32} className="text-pink-800" />} label="Animals Pregnant" value={pregnantList.length} colorClass="bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
@@ -3575,7 +3575,7 @@ useEffect(() => {
     const renderHealthDashboard = () => {
         return (
             <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
                     <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Total in Health Program" value={quarantineList.length + treatmentList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('health')} />
                     <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Quarantine" value={quarantineList.length} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" onClick={() => setAnimalView('health')} />
                     <StatCard icon={<Activity size={32} className="text-red-800" />} label="In Treatment" value={treatmentList.length} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" onClick={() => setAnimalView('health')} />
@@ -5229,7 +5229,7 @@ useEffect(() => {
 
         return (
             <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
                     {/* Column 1: Total Animals */}
                     <div className="flex flex-col gap-2">
                         <StatCard
