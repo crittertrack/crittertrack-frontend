@@ -4070,7 +4070,7 @@ useEffect(() => {
                                 return (
                                     <div className="space-y-4">
                                         {reproSections.map(section => (
-                                            section.list.length > 0 && <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
+                                            (section.list.length > 0 || (section.key === 'planned' && view === 'reproduction')) && <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
                                                 <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`repro_${section.key}`)}>
                                                     <div className="flex items-center gap-3">
                                                         {section.icon}
@@ -4084,17 +4084,25 @@ useEffect(() => {
 
                                                 {!collapsedMgmtGroups[`repro_${section.key}`] && (
                                                     <div className="p-2 space-y-1 bg-white">
-                                                        <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
-                                                            <div className="col-span-2">Animal</div>
-                                                            <div>Planned / Mating Date</div>
-                                                            <div>Due Date / Birth Date</div>
-                                                            <div>Weaning Date</div>
-                                                            <div className="text-center">Status</div>
-                                                            <div className="text-right pr-2">Action</div>
-                                                        </div>
-                                                        {section.list.map(a => (
-                                                            <ReproductiveAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} onTransfer={onTransfer} handleReproStatusUpdate={handleReproStatusUpdate} />
-                                                        ))}
+                                                        {section.list.length === 0 ? (
+                                                            <div className="text-center text-sm text-gray-400 py-4">
+                                                                No planned matings yet.
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                                                    <div className="col-span-2">Animal</div>
+                                                                    <div>Planned / Mating Date</div>
+                                                                    <div>Due Date / Birth Date</div>
+                                                                    <div>Weaning Date</div>
+                                                                    <div className="text-center">Status</div>
+                                                                    <div className="text-right pr-2">Action</div>
+                                                                </div>
+                                                                {section.list.map(a => (
+                                                                    <ReproductiveAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} onTransfer={onTransfer} handleReproStatusUpdate={handleReproStatusUpdate} />
+                                                                ))}
+                                                            </>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
