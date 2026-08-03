@@ -3395,13 +3395,13 @@ useEffect(() => {
 
     const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => (
         <div
-            className={`relative flex items-center min-h-[88px] p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
+            className={`relative flex items-center h-[104px] p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
             onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
         >
             {icon}
             <div className="ml-4">
                 <div className="text-2xl font-bold">{value}</div>
-                <div className="text-sm font-medium opacity-90">{label}</div>
+                <div className="text-sm font-medium opacity-90 line-clamp-2">{label}</div>
             </div>
             {hasDropdown && (
                 <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-2 right-2 p-1 text-inherit opacity-60 hover:opacity-100">
