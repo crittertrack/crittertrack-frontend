@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
-    DollarSign, Flame, Gem, Globe, Heart, Key, Link, Loader2,
+    DollarSign, Flame, Gem, Globe, Heart, Hourglass, Key, Link, Loader2,
     Mail, Mars, MessageSquare, Moon, QrCode, Search, Share2, Sparkles, Sprout,
     Star, User, Venus, VenusAndMars, X, Settings
 } from 'lucide-react';
@@ -1299,7 +1299,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {mated.length > 0 && (
                             <div>
                                 <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Heart size={16} className="text-purple-500" /> Mated Pairings <span className="text-sm font-normal text-gray-400">({mated.length})</span>
+                                    <Hourglass size={16} className="text-purple-500" /> Mated Pairings <span className="text-sm font-normal text-gray-400">({mated.length})</span>
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {mated.map(l => <LitterPublicCard key={l._id} l={l} isMated={true} />)}

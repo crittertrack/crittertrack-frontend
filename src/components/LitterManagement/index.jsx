@@ -5,7 +5,7 @@ import {
     ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList,
     Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
     Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, Search, Star,
-    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, Zap, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
+    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
 } from 'lucide-react';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';
@@ -1275,6 +1275,29 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    // Explicit "Wean Today" action — weaningConfirmed is only ever set here, so recording/
+    // correcting a plain weaningDate elsewhere never ends nursing on its own.
+    const handleMarkAsWeaned = async (litter) => {
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { weaningDate: today, weaningConfirmed: true }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            if (litter.damId_public) {
+                await axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isNursing: false }, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            }
+            await Promise.all([fetchLitters(), fetchMyAnimals()]);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            if (litter.damId_public) {
+                window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: litter.damId_public, isNursing: false } }));
+            }
+        } catch (err) {
+            showModalMessage('Error', 'Failed to mark as weaned');
+        }
+    };
+
     // -- Litter form save-time reconciliation ---------------------------------
     // Returns { correctedCounts, warnings[] } based on form values + linked animals.
     // Rule 1: gender sum > total ? bump total (silent)
@@ -2173,12 +2196,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         // Status filter
         if (litterStatusFilter !== 'all') {
-            const today = new Date();
             const hasBirth = !!litter.birthDate;
             const hasPregnancy = !!litter.pregnancyDate;
-            const isMated = litter.matingDate && new Date(litter.matingDate) <= today && !hasPregnancy && !hasBirth;
+            const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth;
             const isPregnant = hasPregnancy && !hasBirth;
-            const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > today) && !hasPregnancy && !hasBirth;
+            const isPlannedOnly = litter.isPlanned && !hasPregnancy && !hasBirth;
             const isBorn = hasBirth;
             if (litterStatusFilter === 'planned' && !isPlannedOnly) return false;
             if (litterStatusFilter === 'mated'   && !isMated)       return false;
@@ -2224,15 +2246,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         return false;
     }).sort((a, b) => {
         // Sort order: Planned → Mated → Pregnant → Born (newest first)
-        const today = new Date();
         const aHasBirth = !!a.birthDate;
         const bHasBirth = !!b.birthDate;
         const aHasPregnancy = !!a.pregnancyDate;
         const bHasPregnancy = !!b.pregnancyDate;
-        const aIsPlannedOnly = a.isPlanned && (!a.matingDate || new Date(a.matingDate) > today) && !aHasPregnancy && !aHasBirth;
-        const bIsPlannedOnly = b.isPlanned && (!b.matingDate || new Date(b.matingDate) > today) && !bHasPregnancy && !bHasBirth;
-        const aIsMated = a.matingDate && new Date(a.matingDate) <= today && !aHasPregnancy && !aHasBirth;
-        const bIsMated = b.matingDate && new Date(b.matingDate) <= today && !bHasPregnancy && !bHasBirth;
+        const aIsPlannedOnly = a.isPlanned && !aHasPregnancy && !aHasBirth;
+        const bIsPlannedOnly = b.isPlanned && !bHasPregnancy && !bHasBirth;
+        const aIsMated = !a.isPlanned && !!a.matingDate && !aHasPregnancy && !aHasBirth;
+        const bIsMated = !b.isPlanned && !!b.matingDate && !bHasPregnancy && !bHasBirth;
         const aIsPregnant = aHasPregnancy && !aHasBirth;
         const bIsPregnant = bHasPregnancy && !bHasBirth;
         const rank = (l, isPlannedOnly, isMated, isPregnant) => isPregnant ? 0 : isMated ? 1 : isPlannedOnly ? 2 : 3;
@@ -3606,7 +3627,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         litterStatusFilter === val
                                             ? val === 'planned' ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
                                             : val === 'mated'   ? 'bg-purple-100 border-purple-300 text-purple-700'
-                                            : val === 'pregnant' ? 'bg-red-100 border-red-300 text-red-700'
+                                            : val === 'pregnant' ? 'bg-pink-100 border-pink-300 text-pink-700'
                                             : val === 'born'    ? 'bg-green-100 border-green-300 text-green-700'
                                             : 'bg-primary border-primary/50 text-black'
                                             : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
@@ -3692,12 +3713,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         // Mating state helpers
                         const hasBirth = !!litter.birthDate;
                         const hasPregnancy = !!litter.pregnancyDate;
-                        const isMated = litter.matingDate && new Date(litter.matingDate) <= new Date() && !hasPregnancy && !hasBirth;
+                        const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth;
                         const isPregnant = hasPregnancy && !hasBirth;
-                        const isPlannedOnly = litter.isPlanned && (!litter.matingDate || new Date(litter.matingDate) > new Date()) && !hasPregnancy && !hasBirth;
+                        const isPlannedOnly = litter.isPlanned && !hasPregnancy && !hasBirth;
+                        // Mirror the Reproduction tab: rely on the dam's isNursing flag, which the backend
+                        // already recomputes using each species' maxNursingDays safety-net cutoff — not just
+                        // weaningConfirmed — so a litter past that window stops showing as nursing here too.
+                        const isNursing = hasBirth && (dam ? !!dam.isNursing : !litter.weaningConfirmed);
                         
                         return (
-                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : isPregnant ? 'border-dashed border-red-300 bg-red-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
+                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : isPregnant ? 'border-dashed border-pink-300 bg-pink-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
@@ -3756,11 +3781,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block mb-0.5 w-fit">{litter.litter_id_public}</span>
                                                 : <span className="text-xs text-gray-400">?</span>}
                                             {isPlannedOnly
-                                                ? <span className="text-xs font-semibold text-indigo-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
+                                                ? <span className="text-xs font-semibold text-indigo-600"><Calendar size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
                                                 : isMated
-                                                ? <span className="text-xs font-semibold text-purple-600"><Heart size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
+                                                ? <span className="text-xs font-semibold text-purple-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
                                                 : isPregnant
-                                                ? <span className="text-xs font-semibold text-red-600"><Heart size={12} className="inline-block align-middle mr-0.5 fill-red-600" /> Awaiting birth</span>
+                                                ? <span className="text-xs font-semibold text-pink-600"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
                                                 : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
@@ -3792,7 +3817,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
                                                     title="Mark dam as pregnant"
-                                                    className="text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg px-2 py-1 hover:bg-red-100 transition flex items-center gap-1"
+                                                    className="text-[11px] font-semibold text-pink-700 bg-pink-50 border border-pink-200 rounded-lg px-2 py-1 hover:bg-pink-100 transition flex items-center gap-1"
                                                   >
                                                     <ScanHeart size={12} className="fill-current" /> Assign Pregnant
                                                   </button>
@@ -3827,7 +3852,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             title="Mark as mated today"
                                             className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition"
                                         >
-                                            <Heart size={11} /> Mated today
+                                            <Hourglass size={11} /> Mated today
+                                        </button>
+                                    )}
+                                    {isNursing && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); handleMarkAsWeaned(litter); }}
+                                            title="Mark as weaned today"
+                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition"
+                                        >
+                                            <Baby size={11} /> Wean today
                                         </button>
                                     )}
                                     {(litter.images?.length > 0) && (
@@ -3851,14 +3886,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
                                                     className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
-                                                    <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                    <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     <span>Mated Today</span>
                                                 </button>
                                             )}
                                             {isMated && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
-                                                    className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    className="flex items-center gap-1 bg-pink-500 hover:bg-pink-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
                                                     <ScanHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
                                                     <span>Assign Pregnant</span>
@@ -3871,6 +3906,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 >
                                                     <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
                                                     <span>Born Today</span>
+                                                </button>
+                                            )}
+                                            {isNursing && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleMarkAsWeaned(litter); }}
+                                                    className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                >
+                                                    <Baby className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                    <span>Wean Today</span>
                                                 </button>
                                             )}
                                             <button
@@ -4233,9 +4277,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 ) : (
                                                                     <EyeOff size={12} className="text-black" />
                                                                 )}
-                                                                {animal.isInMating && <Heart size={12} className="text-black" title="Mating" />}
+                                                                {animal.isInMating && <Hourglass size={12} className="text-black" title="Mating" />}
                                                                 {animal.isPregnant && <ScanHeart size={12} className="text-black" title="Pregnant" />}
-                                                                {animal.isNursing && <Baby size={12} className="text-black" title="Nursing" />}
+                                                                {animal.isNursing && <Droplet size={12} className="text-black" title="Nursing" />}
                                                             </div>
                                                             
                                                             {/* Name */}

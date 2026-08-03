@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, HeartPulse, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, HelpCircle, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal, ScanHeart } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, HeartPulse, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, HelpCircle, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets, Droplet, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal, ScanHeart } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -198,9 +198,9 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
                     <div className="flex items-center space-x-2 mt-1">
                         {parentData.isOwned ? <Heart size={12} className="text-black" title="Owned" /> : <HeartOff size={12} className="text-black" title="Not Owned" />}
                         {parentData.showOnPublicProfile ? <Eye size={12} className="text-black" title="Public" /> : <EyeOff size={12} className="text-black" title="Private" />}
-                        {parentData.isInMating && <Heart size={12} className="text-black" title="In Mating" />}
+                        {parentData.isInMating && <Hourglass size={12} className="text-black" title="In Mating" />}
                         {parentData.isPregnant && <ScanHeart size={12} className="text-black" title="Pregnant" />}
-                        {parentData.isNursing && <Baby size={12} className="text-black" title="Nursing" />}
+                        {parentData.isNursing && <Droplet size={12} className="text-black" title="Nursing" />}
                     </div>
                 </div>
             </div>
