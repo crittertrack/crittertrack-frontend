@@ -3465,6 +3465,17 @@ const AnimalFormModalV2 = ({
             payloadToSave.photoUrl = primaryImageUrl;
             payloadToSave.extraImages = extraImages;
 
+            // isPlannedMating/isInMating/isPregnant/isNursing are auto-computed from Litter records
+            // (see reproStatusSync.js) and must not be resent from this form's stale load-time
+            // snapshot on every unrelated save — that silently clobbers the litter-synced truth.
+            // Only send them when the user explicitly enabled the Manual Override in the Breeding tab.
+            if (!reproductiveStateOverride) {
+                delete payloadToSave.isPlannedMating;
+                delete payloadToSave.isInMating;
+                delete payloadToSave.isPregnant;
+                delete payloadToSave.isNursing;
+            }
+
             // isQuarantine/isInTreatment are derived from status + start/end dates, not set directly -
             // this is what the Health tab and dashboards on AnimalList rely on.
             payloadToSave.isQuarantine = isStatusPeriodActive(payloadToSave.quarantineDetails);
