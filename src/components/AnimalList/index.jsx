@@ -3427,10 +3427,10 @@ useEffect(() => {
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <StatCard icon={<Calendar size={32} className="text-indigo-800" />} label="Planned Matings" value={plannedMatingList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<Heart size={32} className="text-purple-800" />} label="In Mating" value={matingList.length} colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<ScanHeart size={32} className="text-pink-800" />} label="Pregnant" value={pregnantList.length} colorClass="bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<Baby size={32} className="text-blue-800" />} label="Nursing" value={nursingList.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Calendar size={32} className="text-indigo-800" />} label="Animals in Planned Mating" value={plannedMatingList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Heart size={32} className="text-purple-800" />} label="Animals In Mating" value={matingList.length} colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<ScanHeart size={32} className="text-pink-800" />} label="Animals Pregnant" value={pregnantList.length} colorClass="bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Baby size={32} className="text-blue-800" />} label="Animals Nursing" value={nursingList.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" onClick={() => setAnimalView('reproduction')} />
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<AlertTriangle size={32} className="text-orange-800" />}
