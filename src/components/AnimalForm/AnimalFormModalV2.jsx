@@ -8,7 +8,7 @@ import {
     Loader2, ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, DollarSign,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
-import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
+import { formatDate, formatDateShort, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
@@ -106,26 +106,6 @@ const parseJsonArrayField = (data) => {
         }
     }
     return Array.isArray(data) ? data.filter(Boolean) : [];
-};
-
-// A quarantine/treatment period (status + startDate/endDate) is only "active" once its start
-// date has arrived and, if set, its end date hasn't passed yet. This is the single source of
-// truth for isQuarantine/isInTreatment and for the health status pill/calculation.
-// startDate/endDate are stored as UTC-midnight timestamps representing a calendar date, not a
-// specific moment in time — parseLocalDate() reconstructs the intended calendar day regardless
-// of the viewer's timezone (see utils/dateFormatter.js), so use it instead of raw `new Date()`.
-const isStatusPeriodActive = (details) => {
-    if (!details || !details.status || details.status === 'None') return false;
-    if (!details.startDate) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const start = parseLocalDate(details.startDate);
-    if (start > today) return false;
-    if (details.endDate) {
-        const end = parseLocalDate(details.endDate);
-        if (end < today) return false;
-    }
-    return true;
 };
 
 const getContactDisplayName = (contact) => {

@@ -14,9 +14,11 @@ import {
     Sparkles, Trash2, Turtle, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
-import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate, parseLocalDate } from '../../utils/dateFormatter';
+import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
+import DatePicker from '../DatePicker';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from './LocationManagerModal';
+import AssignHealthStatusModal from './AssignHealthStatusModal';
 
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
@@ -607,6 +609,10 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [showAddMatingForm, setShowAddMatingForm] = useState(false);
     const [editingMatingId, setEditingMatingId] = useState(null);
     const [matingData, setMatingData] = useState({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
+
+    // Assign Quarantine/Treatment modal state
+    const [showAssignHealthStatusModal, setShowAssignHealthStatusModal] = useState(false);
+    const [assigningHealthStatus, setAssigningHealthStatus] = useState(false);
     const [selectedMatingSire, setSelectedMatingSire] = useState(null);
     const [selectedMatingDam, setSelectedMatingDam] = useState(null);
     const [showMatingBreedingDetails, setShowMatingBreedingDetails] = useState(false);
@@ -2178,6 +2184,46 @@ useEffect(() => {
             console.error('Error refreshing:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Bulk-assigns a quarantine/isolation or treatment period to one or more animals at once
+    // (see AssignHealthStatusModal), mirroring the per-animal archiving logic used by the
+    // Health tab in AnimalFormModalV2 (starting a new period over a prior one archives it).
+    const handleAssignHealthStatus = async (selectedIds, statusType, details) => {
+        setAssigningHealthStatus(true);
+        const isQuarantineType = statusType === 'quarantine';
+        const historyField = isQuarantineType ? 'quarantineHistory' : 'treatmentHistory';
+        const detailsField = isQuarantineType ? 'quarantineDetails' : 'treatmentDetails';
+        const flagField = isQuarantineType ? 'isQuarantine' : 'isInTreatment';
+
+        const results = await Promise.allSettled(selectedIds.map(async (id_public) => {
+            const animal = allAnimalsRaw.find(a => a.id_public === id_public);
+            if (!animal) return;
+
+            const prevDetails = animal[detailsField] || { status: 'None', type: '', reason: '', startDate: '', endDate: '' };
+            let history = animal[historyField] || [];
+            if (prevDetails.startDate && prevDetails.startDate !== details.startDate) {
+                history = [...history, prevDetails];
+            }
+            const newDetails = { status: details.status, type: details.type, reason: details.reason, startDate: details.startDate, endDate: details.endDate };
+            const patch = { [flagField]: isStatusPeriodActive(newDetails), [detailsField]: newDetails, [historyField]: history };
+
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === id_public ? { ...a, ...patch } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public, ...patch } }));
+
+            await axios.put(`${API_BASE_URL}/animals/${id_public}`, patch,
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+        }));
+
+        setAssigningHealthStatus(false);
+        setShowAssignHealthStatusModal(false);
+
+        const failures = results.filter(r => r.status === 'rejected');
+        if (failures.length > 0) {
+            console.error('Failed to assign health status to some animals:', failures);
+            showModalMessage('Partial Failure', `Assigned to ${selectedIds.length - failures.length} of ${selectedIds.length} animal(s). ${failures.length} failed — please refresh and try again.`);
+            fetchAllAnimals();
         }
     };
 
@@ -5449,7 +5495,11 @@ useEffect(() => {
                             <button onClick={() => setShowAddMatingForm(true)} className="flex bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Mating</span>
                             </button>
-                        ) : animalView === 'health' ? null : (
+                        ) : animalView === 'health' ? (
+                            <button onClick={() => setShowAssignHealthStatusModal(true)} className="flex bg-orange-600 hover:bg-orange-700 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Assign Quarantine or Treatment">
+                                <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Assign Quarantine/Treatment</span>
+                            </button>
+                        ) : (
                             <button
                                 onClick={() => openEnclosureModal()}
                                 className="flex bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
@@ -6046,6 +6096,13 @@ useEffect(() => {
                     saving={locationSaving}
                 />
             )}
+            <AssignHealthStatusModal
+                isOpen={showAssignHealthStatusModal}
+                onClose={() => setShowAssignHealthStatusModal(false)}
+                animals={activeAnimalsForDashboard}
+                onSubmit={handleAssignHealthStatus}
+                saving={assigningHealthStatus}
+            />
             {showAddMatingForm && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">

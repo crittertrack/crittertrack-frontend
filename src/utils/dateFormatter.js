@@ -27,6 +27,23 @@ export const parseLocalDate = (date) => {
     return new Date(date);
 };
 
+// A quarantine/treatment period (status + startDate/endDate) is only "active" once its start
+// date has arrived and, if set, its end date hasn't passed yet. This is the single source of
+// truth for isQuarantine/isInTreatment and for the health status pill/calculation.
+export const isStatusPeriodActive = (details) => {
+    if (!details || !details.status || details.status === 'None') return false;
+    if (!details.startDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = parseLocalDate(details.startDate);
+    if (start > today) return false;
+    if (details.endDate) {
+        const end = parseLocalDate(details.endDate);
+        if (end < today) return false;
+    }
+    return true;
+};
+
 export const formatDate = (date) => {
     if (!date) return '';
     
