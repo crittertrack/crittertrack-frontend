@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
-import { computeIsInTreatment, HEALTH_STATUS_TEXT_COLORS } from '../../utils/medicalStatus';
+import { computeIsInTreatment, HEALTH_STATUS_TEXT_COLORS, remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import DatePicker from '../DatePicker';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from './LocationManagerModal';
@@ -50,8 +50,8 @@ const renderHealthColumnCell = (animal) => {
     if (animal.isQuarantine) return <span className="font-medium text-orange-600">Quarantine</span>;
     if (animal.isInTreatment) return <span className="font-medium text-red-600">Treatment</span>;
     if (animal.status === 'Deceased') return <span className="text-gray-500">Deceased</span>;
-    const status = animal.healthStatusOverride || animal.healthStatus || 'Excellent';
-    return <span className={`font-medium ${HEALTH_STATUS_TEXT_COLORS[status] || HEALTH_STATUS_TEXT_COLORS.Excellent}`}>{status}</span>;
+    const status = remapLegacyHealthStatus(animal.healthStatusOverride || animal.healthStatus) || 'Healthy';
+    return <span className={`font-medium ${HEALTH_STATUS_TEXT_COLORS[status] || HEALTH_STATUS_TEXT_COLORS.Healthy}`}>{status}</span>;
 };
 
 const getSpeciesDisplayName = (species) => {
@@ -2015,9 +2015,9 @@ useEffect(() => {
             .map(() => ({ animal, reason: 'Medication dose due' }))
         ).filter((item, idx, arr) => arr.findIndex(o => o.animal.id_public === item.animal.id_public) === idx),
         ...quarantineList.filter(a => a.quarantineDetails?.endDate && daysSince(a.quarantineDetails.endDate) >= 0).map(animal => ({ animal, reason: 'Quarantine end date reached' })),
-        // A Poor/Critical derived health status is itself an actionable alert, regardless of quarantine/treatment state.
-        ...allAnimals.filter(a => ['Poor', 'Critical'].includes(a.healthStatusOverride || a.healthStatus))
-            .map(animal => ({ animal, reason: `Health status: ${animal.healthStatusOverride || animal.healthStatus}` })),
+        // A Concern/Critical derived health status is itself an actionable alert, regardless of quarantine/treatment state.
+        ...allAnimals.filter(a => ['Concern', 'Critical'].includes(remapLegacyHealthStatus(a.healthStatusOverride || a.healthStatus)))
+            .map(animal => ({ animal, reason: `Health status: ${remapLegacyHealthStatus(animal.healthStatusOverride || animal.healthStatus)}` })),
     ];
 
     const activeReproEventsByAnimal = useMemo(() => {
@@ -2106,18 +2106,27 @@ useEffect(() => {
     // would otherwise make the animal disappear from plannedMatingList/nursingList before this alert fires.
     const reproNeedsAttentionList = useMemo(() => {
         const items = [];
+        // Stages only advance via an explicit user action ("Mated Today"/confirm birth/"Wean
+        // Today"), so a due date that passes without that click must keep alerting (>= 0), not
+        // just fire once on the exact day (=== 0) and then silently disappear as "overdue".
+        const dueLabel = (days, label) => days > 0 ? `${label} (${days}d overdue)` : label;
         (litters || []).forEach(litter => {
             const dam = litter.damId_public ? allAnimals.find(a => a.id_public === litter.damId_public) : null;
             const sire = litter.sireId_public ? allAnimals.find(a => a.id_public === litter.sireId_public) : null;
 
-            if (litter.isPlanned && !litter.pregnancyDate && !litter.birthDate && litter.matingDate && daysSince(litter.matingDate) === 0) {
-                [dam, sire].filter(Boolean).forEach(animal => items.push({ animal, reason: 'Planned mating date is today', view: 'planned' }));
+            if (litter.isPlanned && !litter.pregnancyDate && !litter.birthDate && litter.matingDate) {
+                const days = daysSince(litter.matingDate);
+                if (days !== null && days >= 0) {
+                    [dam, sire].filter(Boolean).forEach(animal => items.push({ animal, reason: dueLabel(days, 'Planned mating date is today'), view: 'planned' }));
+                }
             }
-            if (litter.pregnancyDate && !litter.birthDate && litter.expectedDueDate && daysSince(litter.expectedDueDate) === 0 && dam) {
-                items.push({ animal: dam, reason: 'Due date is today', view: 'pregnant' });
+            if (litter.pregnancyDate && !litter.birthDate && litter.expectedDueDate && dam) {
+                const days = daysSince(litter.expectedDueDate);
+                if (days !== null && days >= 0) items.push({ animal: dam, reason: dueLabel(days, 'Due date is today'), view: 'pregnant' });
             }
-            if (litter.birthDate && litter.weaningDate && daysSince(litter.weaningDate) === 0 && dam) {
-                items.push({ animal: dam, reason: 'Weaning date is today', view: 'nursing' });
+            if (litter.birthDate && litter.weaningDate && dam) {
+                const days = daysSince(litter.weaningDate);
+                if (days !== null && days >= 0) items.push({ animal: dam, reason: dueLabel(days, 'Weaning date is today'), view: 'nursing' });
             }
         });
         return items;

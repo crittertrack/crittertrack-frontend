@@ -5,6 +5,7 @@ import {
     ChevronDown, ChevronUp, Info, Loader2, PawPrint, Shield, Sparkles, XCircle, X
 } from 'lucide-react';
 import { formatDate, parseLocalDate } from '../../utils/dateFormatter';
+import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 
 const API_BASE_URL = '/api';
 
@@ -649,11 +650,11 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
         if (!dismissed[key]) urgentItems.push({ key, type: 'supplies', label: 'Supplies', icon: '\uD83D\uDCE6', description: `${suppliesDue.length} item${suppliesDue.length !== 1 ? 's' : ''} need restocking` });
     }
 
-    // Poor/Critical health status (derived server-side, see utils/medicalStatus.js)
-    const poorHealthAnimals = animals.filter(a => ['Poor', 'Critical'].includes(a.healthStatusOverride || a.healthStatus));
+    // Concern/Critical health status (derived server-side, see utils/medicalStatus.js)
+    const poorHealthAnimals = animals.filter(a => ['Concern', 'Critical'].includes(remapLegacyHealthStatus(a.healthStatusOverride || a.healthStatus)));
     if (poorHealthAnimals.length > 0) {
         const key = 'mgmt-health';
-        if (!dismissed[key]) urgentItems.push({ key, type: 'health', label: 'Health', icon: '\u2695\uFE0F', description: `${poorHealthAnimals.length} animal${poorHealthAnimals.length !== 1 ? 's' : ''} with Poor/Critical health status` });
+        if (!dismissed[key]) urgentItems.push({ key, type: 'health', label: 'Health', icon: '\u2695\uFE0F', description: `${poorHealthAnimals.length} animal${poorHealthAnimals.length !== 1 ? 's' : ''} with Concern/Critical health status` });
     }
 
     if (urgentItems.length === 0) return null;

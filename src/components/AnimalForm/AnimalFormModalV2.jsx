@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
 import { formatDate, formatDateShort, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
-import { computeIsInTreatment, calculateHealthStatus as calculateHealthStatusShared } from '../../utils/medicalStatus';
+import { computeIsInTreatment, calculateHealthStatus as calculateHealthStatusShared, remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
@@ -1478,7 +1478,7 @@ const AnimalFormModalV2 = ({
     const [loadingSupplementSupplies, setLoadingSupplementSupplies] = useState(false);
 
     // Health status override states
-    const [healthStatusOverride, setHealthStatusOverride] = useState(animalToEdit?.healthStatusOverride || null);
+    const [healthStatusOverride, setHealthStatusOverride] = useState(remapLegacyHealthStatus(animalToEdit?.healthStatusOverride) || null);
     const [healthStatusOverrideNotes, setHealthStatusOverrideNotes] = useState(animalToEdit?.healthStatusOverrideNotes || '');
 
     // Enclosure states
@@ -4298,8 +4298,8 @@ const AnimalFormModalV2 = ({
                                                         setHealthStatusOverrideNotes('');
                                                         setFormData(prev => ({ ...prev, healthStatusOverride: null, healthStatusOverrideNotes: '' }));
                                                     } else {
-                                                        setHealthStatusOverride('Good');
-                                                        setFormData(prev => ({ ...prev, healthStatusOverride: 'Good', healthStatusOverrideNotes: '' }));
+                                                        setHealthStatusOverride('Healthy');
+                                                        setFormData(prev => ({ ...prev, healthStatusOverride: 'Healthy', healthStatusOverrideNotes: '' }));
                                                     }
                                                 }}
                                                 className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${healthStatusOverride ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
@@ -4319,10 +4319,9 @@ const AnimalFormModalV2 = ({
                                                         }}
                                                         className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
                                                     >
-                                                        <option value="Excellent">Excellent</option>
-                                                        <option value="Good">Good</option>
-                                                        <option value="Fair">Fair</option>
-                                                        <option value="Poor">Poor</option>
+                                                        <option value="Healthy">Healthy</option>
+                                                        <option value="Monitoring">Monitoring</option>
+                                                        <option value="Concern">Concern</option>
                                                         <option value="Critical">Critical</option>
                                                     </select>
                                                 </div>

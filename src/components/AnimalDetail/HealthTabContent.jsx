@@ -1,7 +1,7 @@
 import React from 'react';
 import { Shield, Microscope, HeartPulse, Stethoscope, AlertTriangle, Activity, Scale } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
-import { computeIsInTreatment } from '../../utils/medicalStatus';
+import { computeIsInTreatment, remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { useDetailFieldTemplate, DetailJsonList } from './utils';
 import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
 
@@ -25,10 +25,9 @@ const parseHealthRecords = (data) => {
 // New component for status
 const StatusIndicator = ({ status }) => {
     const statusStyles = {
-        'Excellent': 'bg-emerald-100 text-emerald-800',
-        'Good': 'bg-green-100 text-green-800',
-        'Fair': 'bg-yellow-100 text-yellow-800',
-        'Poor': 'bg-orange-100 text-orange-800',
+        'Healthy': 'bg-emerald-100 text-emerald-800',
+        'Monitoring': 'bg-blue-100 text-blue-800',
+        'Concern': 'bg-yellow-100 text-yellow-800',
         'Under Observation': 'bg-yellow-100 text-yellow-800',
         'Under Treatment': 'bg-blue-100 text-blue-800',
         'Quarantined': 'bg-orange-100 text-orange-800',
@@ -67,7 +66,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
     // healthStatus is derived server-side from quarantine/treatment/medications/conditions/
     // allergies (see utils/healthStatusSync.js's computeHealthStatus) \u2014 healthStatusOverride,
     // if set, takes precedence, same as the header pill in AnimalModalV2/ViewAnimalModalV2.
-    const calculatedHealthStatus = animal.healthStatusOverride || animal.healthStatus || 'Excellent';
+    const calculatedHealthStatus = remapLegacyHealthStatus(animal.healthStatusOverride || animal.healthStatus) || 'Healthy';
 
     return (
         <div className="space-y-6">

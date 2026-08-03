@@ -30,24 +30,53 @@ export function computeIsInTreatment({ medications, medicalConditions }) {
     return hasActiveMedication(medications) || hasActiveCriticalCondition(medicalConditions);
 }
 
+// Per-type quarantine score deductions (see the Type/Reason dropdown in AnimalFormModalV2.jsx /
+// AssignHealthStatusModal.jsx for the full option list) — mirrors
+// crittertrack-pedigree/utils/healthStatusSync.js. Preventive types don't deduct at all;
+// Contagious Disease and Aggression are weighted heaviest since they alone must reach Critical.
+export const QUARANTINE_TYPE_PENALTIES = {
+    'Preventive - New Arrival': 0,
+    'Preventive - Intake': 0,
+    'Medical - Illness/URI': 1.75,
+    'Medical - Contagious Disease': 3.5,
+    'Medical - Recovery': 1,
+    'Behavioral - Aggression': 3.25,
+    'Behavioral - Fear/Stress': 0.75,
+    'Other': 1.6,
+};
+export const DEFAULT_QUARANTINE_PENALTY = 1.25; // No type selected yet, or an unrecognized value
+
 export const HEALTH_STATUS_BADGE_COLORS = {
-    Excellent: 'bg-green-100 text-green-800 border-green-200',
-    Good: 'bg-blue-100 text-blue-800 border-blue-200',
-    Fair: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    Poor: 'bg-orange-100 text-orange-800 border-orange-200',
+    Healthy: 'bg-green-100 text-green-800 border-green-200',
+    Monitoring: 'bg-blue-100 text-blue-800 border-blue-200',
+    Concern: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     Critical: 'bg-red-100 text-red-800 border-red-200',
 };
 
 export const HEALTH_STATUS_TEXT_COLORS = {
-    Excellent: 'text-green-600',
-    Good: 'text-blue-600',
-    Fair: 'text-yellow-600',
-    Poor: 'text-orange-600',
+    Healthy: 'text-green-600',
+    Monitoring: 'text-blue-600',
+    Concern: 'text-yellow-600',
     Critical: 'text-red-600',
 };
 
-// Single source of truth for an animal's overall health status pill (Excellent/Good/Fair/
-// Poor/Critical), factoring in active quarantine, derived treatment, medication/condition
+// Animals saved before the Excellent/Good/Fair/Poor/Critical -> Healthy/Monitoring/Concern/
+// Critical rename still have old labels stored in healthStatus/healthStatusOverride. Remap on
+// read instead of a DB migration — Poor and Critical both collapse into the new Critical tier.
+const LEGACY_HEALTH_STATUS_MAP = {
+    Excellent: 'Healthy',
+    Good: 'Monitoring',
+    Fair: 'Concern',
+    Poor: 'Critical',
+    Critical: 'Critical',
+};
+export function remapLegacyHealthStatus(status) {
+    if (!status) return status;
+    return LEGACY_HEALTH_STATUS_MAP[status] || status;
+}
+
+// Single source of truth for an animal's overall health status pill (Healthy/Monitoring/
+// Concern/Critical), factoring in active quarantine, derived treatment, medication/condition
 // counts, and allergies — mirrors crittertrack-pedigree/utils/healthStatusSync.js's
 // computeHealthStatus. Accepts an animal-shaped object (or live form data with the same
 // field names): quarantineDetails, medications, medicalConditions, allergies,
@@ -63,17 +92,9 @@ export function calculateHealthStatus(animal) {
 
     // Quarantine assessment - only counts once the start date has arrived (and hasn't ended)
     if (isStatusPeriodActive(quarantine)) {
-        const qType = quarantine.type || 'unknown';
-        if (qType.includes('Medical') || qType.includes('Illness') || qType.includes('Disease')) {
-            score -= 2;
-            factors.push('Active medical quarantine');
-        } else if (qType.includes('Preventive') || qType.includes('New')) {
-            score -= 1;
-            factors.push('Preventive quarantine (new arrival)');
-        } else {
-            score -= 1.5;
-            factors.push(`${quarantine.status} status`);
-        }
+        const penalty = QUARANTINE_TYPE_PENALTIES[quarantine.type] ?? DEFAULT_QUARANTINE_PENALTY;
+        score -= penalty;
+        factors.push(quarantine.type ? `Active quarantine: ${quarantine.type}` : `${quarantine.status} status`);
     }
 
     // Treatment assessment - isInTreatment is derived from active medications/critical
@@ -105,15 +126,15 @@ export function calculateHealthStatus(animal) {
     }
 
     let calculatedStatus;
-    if (score >= 4.5) calculatedStatus = 'Excellent';
-    else if (score >= 3.5) calculatedStatus = 'Good';
-    else if (score >= 2.5) calculatedStatus = 'Fair';
-    else if (score >= 1.5) calculatedStatus = 'Poor';
+    if (score >= 4.5) calculatedStatus = 'Healthy';
+    else if (score >= 3.5) calculatedStatus = 'Monitoring';
+    else if (score >= 2.0) calculatedStatus = 'Concern';
     else calculatedStatus = 'Critical';
 
-    const status = animal.healthStatusOverride || calculatedStatus;
-    const isOverridden = !!animal.healthStatusOverride;
-    const badgeColor = HEALTH_STATUS_BADGE_COLORS[status] || HEALTH_STATUS_BADGE_COLORS.Excellent;
+    const overrideStatus = remapLegacyHealthStatus(animal.healthStatusOverride);
+    const status = overrideStatus || calculatedStatus;
+    const isOverridden = !!overrideStatus;
+    const badgeColor = HEALTH_STATUS_BADGE_COLORS[status] || HEALTH_STATUS_BADGE_COLORS.Healthy;
 
     return { status, calculatedStatus, badgeColor, score, factors, isOverridden };
 }

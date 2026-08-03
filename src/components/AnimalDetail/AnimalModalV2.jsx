@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
+import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import axios from 'axios';
 import { ViewOnlyParentCard, computeRelationships } from './utils';
 import { CareTabContent } from './CareTabContent';
@@ -38,10 +39,9 @@ const parseJsonArrayField = (data) => {
 
 const StatusIndicator = ({ status, icon }) => {
     const statusStyles = {
-        'Excellent': 'bg-emerald-100 text-emerald-800',
-        'Good': 'bg-green-100 text-green-800',
-        'Fair': 'bg-yellow-100 text-yellow-800',
-        'Poor': 'bg-orange-100 text-orange-800',
+        'Healthy': 'bg-emerald-100 text-emerald-800',
+        'Monitoring': 'bg-blue-100 text-blue-800',
+        'Concern': 'bg-yellow-100 text-yellow-800',
         'Under Observation': 'bg-yellow-100 text-yellow-800',
         'Under Treatment': 'bg-blue-100 text-blue-800',
         'Quarantined': 'bg-orange-100 text-orange-800',
@@ -387,7 +387,7 @@ const AnimalModalV2 = ({
                                                 </span>
                                                 {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
                                                 {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
-                                                <StatusIndicator status={animal.healthStatusOverride || animal.healthStatus || 'Excellent'} icon={<HeartPulse size={12} />} />
+                                                <StatusIndicator status={remapLegacyHealthStatus(animal.healthStatusOverride || animal.healthStatus) || 'Healthy'} icon={<HeartPulse size={12} />} />
                                                 {(() => {
                                                     const reproState = getReproductionState(animal);
                                                     return reproState ? <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${reproState.color}`}>{reproState.icon} {reproState.label}</span> : null;
@@ -611,7 +611,7 @@ const AnimalModalV2 = ({
                                         <div>
                                             <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Health Status</label>
                                             <div className="mt-1">
-                                                <StatusIndicator status={animal.healthStatusOverride || animal.healthStatus || 'Excellent'} />
+                                                <StatusIndicator status={remapLegacyHealthStatus(animal.healthStatusOverride || animal.healthStatus) || 'Healthy'} />
                                             </div>
                                         </div>
                                         {animal.lastVetCheck && (
