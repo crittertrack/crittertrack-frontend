@@ -742,6 +742,8 @@ const handleArchive = useCallback(async (animalToArchive) => {
     const [showCapacityBreakdown, setShowCapacityBreakdown] = useState(false);
     const [showNeedsAttentionBreakdown, setShowNeedsAttentionBreakdown] = useState(false);
     const [showMainAlertsBreakdown, setShowMainAlertsBreakdown] = useState(false);
+    const [showReproNeedsAttentionBreakdown, setShowReproNeedsAttentionBreakdown] = useState(false);
+    const [showHealthNeedsAttentionBreakdown, setShowHealthNeedsAttentionBreakdown] = useState(false);
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -1835,6 +1837,40 @@ useEffect(() => {
         return ds !== null && ds >= Number(freqDays);
     };
 
+    const parseArrayField = (val) => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        try { return JSON.parse(val); } catch { return [{ name: String(val) }]; }
+    };
+
+    const calcNextDose = (med) => {
+        if (!med.startDate || !med.intervalValue || !med.intervalUnit) return null;
+        const v = Number(med.intervalValue);
+        const unitMs = med.intervalUnit === 'hours' ? 3600000
+            : med.intervalUnit === 'days' ? 86400000
+            : med.intervalUnit === 'weeks' ? 604800000
+            : med.intervalUnit === 'months' ? 2592000000 : null;
+        if (!unitMs) return null;
+        const start = new Date(med.startDate).getTime();
+        if (isNaN(start)) return null;
+        const intervalMs = v * unitMs;
+        const now = Date.now();
+        const elapsed = now - start;
+        if (elapsed < 0) return new Date(start);
+        const nextDose = new Date(start + (Math.floor(elapsed / intervalMs) + 1) * intervalMs);
+        return nextDose;
+    };
+
+    const formatNextDose = (date) => {
+        const today = new Date(); today.setHours(0,0,0,0);
+        const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+        const d = new Date(date); d.setHours(0,0,0,0);
+        if (date <= Date.now()) return 'due now';
+        if (d.getTime() === today.getTime()) return 'today';
+        if (d.getTime() === tomorrow.getTime()) return 'tomorrow';
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    };
+
     // --- Dashboard Counter Calculations ---
     // Per your instructions, these counters strictly follow these rules:
     // - Total = All animals excluding sold/archived.
@@ -1955,6 +1991,17 @@ useEffect(() => {
     const quarantineList = allAnimalsRaw.filter(a => a.isQuarantine && !a.isViewOnly && !inHealthEnclosure(a));
     const treatmentList = allAnimalsRaw.filter(a => a.isInTreatment && !a.isQuarantine && !a.isViewOnly && !inHealthEnclosure(a));
     const allAnimals = allAnimalsRaw.filter(a => !a.isViewOnly);
+    const activeMedicationsCount = treatmentList.reduce((sum, a) => sum + parseArrayField(a.medications).filter(m => !m.status || m.status === 'active').length, 0);
+    // Entries needing action now: a medication dose is due, or a quarantine end date has been reached.
+    const healthNeedsAttentionList = [
+        ...treatmentList.flatMap(animal => parseArrayField(animal.medications)
+            .filter(m => !m.status || m.status === 'active')
+            .map(m => calcNextDose(m))
+            .filter(next => next && next.getTime() <= Date.now())
+            .map(() => ({ animal, reason: 'Medication dose due' }))
+        ).filter((item, idx, arr) => arr.findIndex(o => o.animal.id_public === item.animal.id_public) === idx),
+        ...quarantineList.filter(a => a.quarantineDetails?.endDate && daysSince(a.quarantineDetails.endDate) >= 0).map(animal => ({ animal, reason: 'Quarantine end date reached' })),
+    ];
 
     const activeReproEventsByAnimal = useMemo(() => {
         const map = new Map();
@@ -2035,6 +2082,12 @@ useEffect(() => {
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
     const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(isTaskDue).length, 0);
     const reproTotal = matingList.length + pregnantList.length + nursingList.length;
+    // Entries whose planned mating / due / weaning date lands on today — these are the ones that need action now.
+    const reproNeedsAttentionList = [
+        ...plannedMatingList.filter(a => a.matingDate && daysSince(a.matingDate) === 0).map(animal => ({ animal, reason: 'Planned mating date is today', view: 'planned' })),
+        ...pregnantList.filter(a => a.dueDate && daysSince(a.dueDate) === 0).map(animal => ({ animal, reason: 'Due date is today', view: 'pregnant' })),
+        ...nursingList.filter(a => a.weaningDate && daysSince(a.weaningDate) === 0).map(animal => ({ animal, reason: 'Weaning date is today', view: 'nursing' })),
+    ];
     const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
     const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
     const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
@@ -3370,6 +3423,80 @@ useEffect(() => {
         );
     };
 
+    const renderReproductionDashboard = () => {
+        return (
+            <div className="mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <StatCard icon={<Calendar size={32} className="text-indigo-800" />} label="Planned Matings" value={plannedMatingList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Heart size={32} className="text-purple-800" />} label="In Mating" value={matingList.length} colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<ScanHeart size={32} className="text-pink-800" />} label="Pregnant" value={pregnantList.length} colorClass="bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Baby size={32} className="text-blue-800" />} label="Nursing" value={nursingList.length} colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200" onClick={() => setAnimalView('reproduction')} />
+                    <div className="flex flex-col gap-2">
+                        <StatCard
+                            icon={<AlertTriangle size={32} className="text-orange-800" />}
+                            label="Needs Attention"
+                            value={reproNeedsAttentionList.length}
+                            colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                            hasDropdown={reproNeedsAttentionList.length > 0}
+                            isDropdownOpen={showReproNeedsAttentionBreakdown}
+                            onDropdownToggle={() => setShowReproNeedsAttentionBreakdown(prev => !prev)}
+                        />
+                        {showReproNeedsAttentionBreakdown && reproNeedsAttentionList.length > 0 && (
+                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Today</h4>
+                                <ul className="text-xs space-y-1.5">
+                                    {reproNeedsAttentionList.map(({ animal, reason }) => (
+                                        <li key={animal.id_public} className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
+                                            <span className="text-gray-700 dark:text-dark-text-secondary">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                            <span className="font-medium text-orange-700">{reason}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderHealthDashboard = () => {
+        return (
+            <div className="mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Total in Health Program" value={quarantineList.length + treatmentList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Quarantine" value={quarantineList.length} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<Activity size={32} className="text-red-800" />} label="In Treatment" value={treatmentList.length} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<Droplet size={32} className="text-teal-800" />} label="Active Medications" value={activeMedicationsCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('health')} />
+                    <div className="flex flex-col gap-2">
+                        <StatCard
+                            icon={<AlertTriangle size={32} className="text-orange-800" />}
+                            label="Needs Attention"
+                            value={healthNeedsAttentionList.length}
+                            colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                            hasDropdown={healthNeedsAttentionList.length > 0}
+                            isDropdownOpen={showHealthNeedsAttentionBreakdown}
+                            onDropdownToggle={() => setShowHealthNeedsAttentionBreakdown(prev => !prev)}
+                        />
+                        {showHealthNeedsAttentionBreakdown && healthNeedsAttentionList.length > 0 && (
+                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Now</h4>
+                                <ul className="text-xs space-y-1.5">
+                                    {healthNeedsAttentionList.map(({ animal, reason }) => (
+                                        <li key={animal.id_public} className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
+                                            <span className="text-gray-700 dark:text-dark-text-secondary">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                            <span className="font-medium text-orange-700">{reason}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const enclosureSpeciesLabels = useMemo(() => {
         const allLabels = new Set();
         enclosures.forEach(enc => {
@@ -3681,40 +3808,6 @@ useEffect(() => {
                 { lastMaintenanceDate: now },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .catch(err => { console.error('Mark maintenance failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: animal.lastMaintenanceDate } : a)); });
-        };
-
-        const parseArrayField = (val) => {
-            if (!val) return [];
-            if (Array.isArray(val)) return val;
-            try { return JSON.parse(val); } catch { return [{ name: String(val) }]; }
-        };
-
-        const calcNextDose = (med) => {
-            if (!med.startDate || !med.intervalValue || !med.intervalUnit) return null;
-            const v = Number(med.intervalValue);
-            const unitMs = med.intervalUnit === 'hours' ? 3600000
-                : med.intervalUnit === 'days' ? 86400000
-                : med.intervalUnit === 'weeks' ? 604800000
-                : med.intervalUnit === 'months' ? 2592000000 : null;
-            if (!unitMs) return null;
-            const start = new Date(med.startDate).getTime();
-            if (isNaN(start)) return null;
-            const intervalMs = v * unitMs;
-            const now = Date.now();
-            const elapsed = now - start;
-            if (elapsed < 0) return new Date(start);
-            const nextDose = new Date(start + (Math.floor(elapsed / intervalMs) + 1) * intervalMs);
-            return nextDose;
-        };
-
-        const formatNextDose = (date) => {
-            const today = new Date(); today.setHours(0,0,0,0);
-            const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-            const d = new Date(date); d.setHours(0,0,0,0);
-            if (date <= Date.now()) return 'due now';
-            if (d.getTime() === today.getTime()) return 'today';
-            if (d.getTime() === tomorrow.getTime()) return 'tomorrow';
-            return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         };
 
         const handleMarkRehomed = (e, animal) => {
@@ -5287,7 +5380,7 @@ useEffect(() => {
                             <button onClick={() => setShowAddMatingForm(true)} className="flex bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Mating</span>
                             </button>
-                        ) : (
+                        ) : animalView === 'health' ? null : (
                             <button
                                 onClick={() => openEnclosureModal()}
                                 className="flex bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
@@ -5323,7 +5416,11 @@ useEffect(() => {
                 {/* Conditional Dashboards */}
                 {animalView === 'enclosures' ? (
                     renderEnclosureDashboard()
-                ) : !['reproduction', 'health', 'feeding'].includes(animalView) ? (
+                ) : animalView === 'reproduction' ? (
+                    renderReproductionDashboard()
+                ) : animalView === 'health' ? (
+                    renderHealthDashboard()
+                ) : !['feeding'].includes(animalView) ? (
                     renderDashboard()
                 ) : null}
 
