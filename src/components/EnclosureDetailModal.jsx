@@ -7,7 +7,7 @@ import {
     Lightbulb, RefreshCw, Star, Info, Activity, Plus
 } from 'lucide-react';
 import AnimalImage from './shared/AnimalImage';
-import { formatDate } from '../utils/dateFormatter';
+import { formatDate, parseLocalDate } from '../utils/dateFormatter';
 
 const TABS = [
     { id: 'dashboard', label: 'Dashboard', icon: Info },
@@ -249,7 +249,7 @@ const EnclosureDetailModal = ({
             if (!task.frequencyDays && !task.frequency) return Infinity; // No schedule, sort last
             if (!task.lastDoneDate) return -Infinity; // Never done, due now, sort first
 
-            const lastDone = new Date(task.lastDoneDate);
+            const lastDone = parseLocalDate(task.lastDoneDate);
             const nextDue = new Date(lastDone);
             const frequencyInDays = task.frequencyDays || (task.frequencyUnit === 'weeks' ? task.frequency * 7 : task.frequencyUnit === 'months' ? task.frequency * 30 : task.frequency);
             nextDue.setDate(nextDue.getDate() + frequencyInDays);
@@ -413,7 +413,7 @@ const EnclosureDetailModal = ({
         if (!task.frequencyDays && !task.frequency) return { color: 'text-gray-400', label: 'No schedule', overdue: false };
         if (!task.lastDoneDate) return { color: 'text-red-600', label: 'Due now', overdue: true };
 
-        const lastDone = new Date(task.lastDoneDate);
+        const lastDone = parseLocalDate(task.lastDoneDate);
         const nextDue = new Date(lastDone);
         const frequencyInDays = task.frequencyDays || (task.frequencyUnit === 'weeks' ? task.frequency * 7 : task.frequencyUnit === 'months' ? task.frequency * 30 : task.frequency);
         nextDue.setDate(nextDue.getDate() + frequencyInDays);

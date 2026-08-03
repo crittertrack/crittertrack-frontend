@@ -5,6 +5,7 @@ import {
     CalendarPlus, Hourglass, BellRing, Cake, Rainbow,
     PartyPopper, UtensilsCrossed, Wrench, HandCoins, Package, Bell
 } from 'lucide-react';
+import { parseLocalDate } from '../../utils/dateFormatter';
 
 const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
@@ -98,7 +99,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     };
     const getDueStatusText = (expectedDueDate) => {
         if (!expectedDueDate) return 'Due';
-        const due = new Date(expectedDueDate);
+        const due = parseLocalDate(expectedDueDate);
         if (isNaN(due)) return 'Due';
         const now = new Date();
         now.setHours(0, 0, 0, 0);
@@ -375,8 +376,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         if (ev.type === 'due') {
             let dueText;
             if (l.birthDate && l.expectedDueDate) {
-                const due = new Date(l.expectedDueDate); due.setHours(0,0,0,0);
-                const born = new Date(l.birthDate); born.setHours(0,0,0,0);
+                const due = parseLocalDate(l.expectedDueDate); due.setHours(0,0,0,0);
+                const born = parseLocalDate(l.birthDate); born.setHours(0,0,0,0);
                 const diff = Math.round((born - due) / 86400000);
                 dueText = diff > 0 ? `${diff}d overdue` : diff === 0 ? 'On time' : `${Math.abs(diff)}d early`;
             } else {
@@ -391,7 +392,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         }
         if (ev.type === 'weaned') {
             const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0);
-            const wd = l.weaningDate ? new Date(l.weaningDate) : null;
+            const wd = l.weaningDate ? parseLocalDate(l.weaningDate) : null;
             const now = new Date();
             now.setHours(0, 0, 0, 0);
             let weanedPastOrToday = false;

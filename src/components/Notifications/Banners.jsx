@@ -4,7 +4,7 @@ import {
     AlertCircle, AlertTriangle, Baby, Bell, Check, CheckCircle,
     ChevronDown, ChevronUp, Info, Loader2, PawPrint, Shield, Sparkles, XCircle, X
 } from 'lucide-react';
-import { formatDate } from '../../utils/dateFormatter';
+import { formatDate, parseLocalDate } from '../../utils/dateFormatter';
 
 const API_BASE_URL = '/api';
 
@@ -402,14 +402,6 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
         const sireDam = `${sn} \u00d7 ${dn}`;
         const callId = l.litter_id_public;
 
-        // Parse a stored date string as LOCAL midnight to avoid UTC timezone shifting
-        const parseLocalDate = (v) => {
-            if (!v) return null;
-            const s = typeof v === 'string' ? v.substring(0, 10) : null;
-            const d = s ? new Date(s + 'T00:00:00') : new Date(v);
-            return isNaN(d.getTime()) ? null : d;
-        };
-
         // Mating due ? matingDate is today and litter not yet born
         if (l.matingDate && !l.birthDate) {
             const mated = parseLocalDate(l.matingDate);
@@ -607,7 +599,7 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const daysSince = (dateStr) => {
         if (!dateStr) return null;
-        const d = new Date(dateStr); d.setHours(0, 0, 0, 0);
+        const d = parseLocalDate(dateStr); d.setHours(0, 0, 0, 0);
         return Math.floor((today - d) / 86400000);
     };
     const isTaskDue = (lastDate, freqDays) => {

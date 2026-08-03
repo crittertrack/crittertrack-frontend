@@ -5,7 +5,7 @@ import {
     Droplets, Egg, Heart, Loader2, Milk, Package, PawPrint, Shield,
     UtensilsCrossed, Wrench, X, XCircle
 } from 'lucide-react';
-import { formatDate } from '../../utils/dateFormatter';
+import { formatDate, parseLocalDate } from '../../utils/dateFormatter';
 import { BroadcastPoll } from './Banners';
 
 const API_BASE_URL = '/api';
@@ -113,12 +113,6 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const breedingItems = [];
     if (breedingEnabled && !littersLoading) {
-        const parseLocalDate = (v) => {
-            if (!v) return null;
-            const s = typeof v === 'string' ? v.substring(0, 10) : null;
-            const d = s ? new Date(s + 'T00:00:00') : new Date(v);
-            return isNaN(d.getTime()) ? null : d;
-        };
         litters.forEach(l => {
             const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
             const sn = [l.sire?.prefix, l.sire?.name || l.sireId_public || '?', l.sire?.suffix].filter(Boolean).join(' ');
@@ -163,7 +157,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     if (mgmtEnabled && !mgmtLoading) {
         const daysSince = (dateStr) => {
             if (!dateStr) return null;
-            const d = new Date(dateStr); d.setHours(0, 0, 0, 0);
+            const d = parseLocalDate(dateStr); d.setHours(0, 0, 0, 0);
             return Math.floor((today - d) / 86400000);
         };
         const isTaskDue = (lastDate, freqDays) => {
@@ -196,7 +190,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         }
         const suppliesDue = supplies.filter(s =>
             (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
-            (s.nextOrderDate && new Date(s.nextOrderDate) <= today)
+            (s.nextOrderDate && parseLocalDate(s.nextOrderDate) <= today)
         );
         if (suppliesDue.length > 0) {
             const key = 'mgmt-supplies';

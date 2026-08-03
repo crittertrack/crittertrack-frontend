@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Package, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info, Loader2, Save, ShoppingBag, RefreshCw, AlertTriangle, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import axios from 'axios';
 import DatePicker from './DatePicker';
+import { parseLocalDate } from '../utils/dateFormatter';
 
 const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [supplies, setSupplies] = useState([]);
@@ -39,8 +40,8 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const BUDGET_CATEGORY_MAP = { Food: 'food', Bedding: 'housing', Medication: 'medical', Other: 'other' };
     const isLow = (item) => item.reorderThreshold != null && item.currentStock <= item.reorderThreshold;
     const today = new Date(); today.setHours(0, 0, 0, 0);
-    const isOverdue = (item) => item.nextOrderDate && new Date(item.nextOrderDate) < today;
-    const isDueSoon = (item) => { if (!item.nextOrderDate) return false; const d = new Date(item.nextOrderDate); const diff = (d - today) / (1000 * 60 * 60 * 24); return diff >= 0 && diff <= 14; };
+    const isOverdue = (item) => item.nextOrderDate && parseLocalDate(item.nextOrderDate) < today;
+    const isDueSoon = (item) => { if (!item.nextOrderDate) return false; const d = parseLocalDate(item.nextOrderDate); const diff = (d - today) / (1000 * 60 * 60 * 24); return diff >= 0 && diff <= 14; };
     const needsAttention = (item) => isLow(item) || isOverdue(item);
     const filtered = supplyCategoryFilter === 'All' ? supplies : supplies.filter(s => s.category === supplyCategoryFilter);
     const lowStockItems = supplies.filter(isLow);

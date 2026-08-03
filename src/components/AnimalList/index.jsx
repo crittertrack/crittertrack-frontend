@@ -14,7 +14,7 @@ import {
     Sparkles, Trash2, Turtle, Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
-import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate } from '../../utils/dateFormatter';
+import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate, parseLocalDate } from '../../utils/dateFormatter';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from './LocationManagerModal';
 
@@ -1825,7 +1825,7 @@ useEffect(() => {
 
     const daysSince = (dateStr) => {
         if (!dateStr) return null;
-        const d = new Date(dateStr);
+        const d = parseLocalDate(dateStr);
         d.setHours(0, 0, 0, 0);
         return Math.floor((today - d) / 86400000);
     };
@@ -1870,7 +1870,7 @@ useEffect(() => {
     const formatNextDose = (date) => {
         const today = new Date(); today.setHours(0,0,0,0);
         const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-        const d = new Date(date); d.setHours(0,0,0,0);
+        const d = parseLocalDate(date); d.setHours(0,0,0,0);
         if (date <= Date.now()) return 'due now';
         if (d.getTime() === today.getTime()) return 'today';
         if (d.getTime() === tomorrow.getTime()) return 'tomorrow';
@@ -1928,7 +1928,7 @@ useEffect(() => {
         if (!freq) return false;
         if (!task.lastDoneDate) return true;
 
-        const lastDone = new Date(task.lastDoneDate);
+        const lastDone = parseLocalDate(task.lastDoneDate);
         const nextDue = new Date(lastDone);
         
         let frequencyInDays = task.frequencyDays;

@@ -7,7 +7,7 @@ import {
     Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, Search, Star,
     Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
 } from 'lucide-react';
-import { formatDate, formatDateShort } from '../../utils/dateFormatter';
+import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
 import { matchFancyRatPhenotype } from '../../data/fancyRatPhenotypeRules';
@@ -4781,7 +4781,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             const daysStatus = (() => {
                                 if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-green-600 font-semibold' };
                                 if (!l.expectedDueDate) return null;
-                                const due = new Date(l.expectedDueDate);
+                                const due = parseLocalDate(l.expectedDueDate);
                                 if (isNaN(due)) return null;
                                 const now = new Date(); now.setHours(0,0,0,0); due.setHours(0,0,0,0);
                                 const diff = Math.round((due - now) / 86400000);
