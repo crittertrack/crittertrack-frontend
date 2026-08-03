@@ -2017,21 +2017,15 @@ useEffect(() => {
 
     const plannedMatingList = useMemo(() => allAnimals.filter(a => a.isPlannedMating && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
     const matingList = useMemo(() => allAnimals.filter(a => a.isInMating && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
+    // Membership relies solely on the backend-authoritative flags (which apply the per-species
+    // nursing cutoff) — the locally-derived litterStatus above has no cutoff and would otherwise
+    // keep long-past litters showing here forever, out of sync with the flag used for the status pill.
     const pregnantList = useMemo(() => allAnimals
-        .filter(a => {
-            if (a.gender === 'Male' || inReproEnclosure(a)) return false;
-            const litterStatus = activeReproEventsByAnimal.get(a.id_public)?.status;
-            if (litterStatus === 'nursing') return false;
-            return litterStatus === 'pregnant' || (!!a.isPregnant && litterStatus !== 'nursing');
-        })
-        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, activeReproEventsByAnimal]);
+        .filter(a => a.gender !== 'Male' && !inReproEnclosure(a) && !!a.isPregnant)
+        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
     const nursingList = useMemo(() => allAnimals
-        .filter(a => {
-            if (a.gender === 'Male' || inReproEnclosure(a)) return false;
-            const litterStatus = activeReproEventsByAnimal.get(a.id_public)?.status;
-            return litterStatus === 'nursing' || !!a.isNursing;
-        })
-        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, activeReproEventsByAnimal]);
+        .filter(a => a.gender !== 'Male' && !inReproEnclosure(a) && !!a.isNursing)
+        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
     const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
     const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays)); // This is for the Feeding management view
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
