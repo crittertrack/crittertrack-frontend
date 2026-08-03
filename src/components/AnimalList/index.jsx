@@ -5295,7 +5295,7 @@ useEffect(() => {
                     {/* Column 5: Needs Attention */}
                     <div className="flex flex-col gap-2">
                         {(() => {
-                            const totalAttention = feedDueDashboard.length + healthAttentionDashboardCount + reproTotal + enclosureMaintenanceDueCount;
+                            const totalAttention = feedDueDashboard.length + healthAttentionDashboardCount + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
                             return (
                                 <>
                                     <StatCard
@@ -5317,11 +5317,21 @@ useEffect(() => {
                                                 {healthAttentionDashboardCount > 0 && (
                                                     <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('health')}><span className="flex items-center gap-1.5 text-orange-700"><Activity size={14} /> Health</span><span className="font-medium">{healthAttentionDashboardCount}</span></li>
                                                 )}
-                                                {reproTotal > 0 && (
-                                                    <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('reproduction')}>
-                                                        <span className="flex items-center gap-1.5 text-pink-700"><Bean size={14} /> Reproduction</span>
-                                                        <span className="font-medium">{reproTotal}</span>
-                                                    </li>
+                                                {reproNeedsAttentionList.length > 0 && (
+                                                    <>
+                                                        <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('reproduction')}>
+                                                            <span className="flex items-center gap-1.5 text-pink-700"><Bean size={14} /> Reproduction</span>
+                                                            <span className="font-medium">{reproNeedsAttentionList.length}</span>
+                                                        </li>
+                                                        <ul className="pl-6 space-y-1 text-xs">
+                                                            {reproNeedsAttentionList.map(({ animal, reason }) => (
+                                                                <li key={`${animal.id_public}-${reason}`} className="flex justify-between items-center text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
+                                                                    <span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                                                    <span className="font-medium">{reason}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </>
                                                 )}
                                                 {enclosureMaintenanceDueCount > 0 && (
                                                     <>
