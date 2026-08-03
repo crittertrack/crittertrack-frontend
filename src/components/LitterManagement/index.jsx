@@ -3828,7 +3828,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     title="Mark litter as born today"
                                                     className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg px-2 py-1 hover:bg-green-100 transition flex items-center gap-1"
                                                   >
-                                                    <Droplet size={12} className="fill-current" /> Born today
+                                                    <Droplet size={12} /> Born today
                                                   </button>
                                                 : <div className="flex items-center gap-1.5">
                                                     <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
@@ -3904,7 +3904,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
                                                     className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
-                                                    <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
+                                                    <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     <span>Born Today</span>
                                                 </button>
                                             )}

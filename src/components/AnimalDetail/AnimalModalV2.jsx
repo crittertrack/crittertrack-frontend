@@ -56,7 +56,7 @@ const getReproductionState = (animal) => {
     // Females can be pregnant or nursing
     if (animal.gender === 'Female') {
         if (animal.isPregnant) return { label: 'Pregnant', color: 'bg-pink-100 text-pink-800', icon: <ScanHeart size={14} className="fill-current" /> };
-        if (animal.isNursing) return { label: 'Nursing', color: 'bg-red-100 text-red-800', icon: <Droplet size={14} className="fill-current" /> };
+        if (animal.isNursing) return { label: 'Nursing', color: 'bg-red-100 text-red-800', icon: <Droplet size={14} /> };
     }
     // Both genders can be in mating or have planned mating
     if (animal.isInMating) return { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: <Hourglass size={14} className="fill-current" /> };
