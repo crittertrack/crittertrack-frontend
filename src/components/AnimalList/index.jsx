@@ -1562,6 +1562,7 @@ useEffect(() => {
                 filteredAnimals = filteredAnimals.filter(a => a.isPlannedMating || a.isInMating || a.isPregnant || a.isNursing);
                 break;
             case 'medical':
+            case 'quarantine':
                 filteredAnimals = filteredAnimals.filter(a => a.isInTreatment === true || a.isQuarantine === true);
                 break;
             case 'general':
@@ -1868,7 +1869,7 @@ useEffect(() => {
         (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
         (s.nextOrderDate && new Date(s.nextOrderDate) < today)
     );
-    const healthEnclosures = enclosures.filter(e => e.purpose === 'health');
+    const healthEnclosures = enclosures.filter(e => e.purpose === 'medical' || e.purpose === 'quarantine');
     const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
     const inHealthEnclosure = useCallback(a => a.enclosureId && healthEnclosureIds.has(a.enclosureId), [healthEnclosureIds]);
 
@@ -3453,6 +3454,63 @@ useEffect(() => {
         );
     };
 
+    const HealthAnimalBar = ({ animal, type, onViewAnimal, onEditAnimal, handleUnquarantine, handleDischargeTreatment, parseArrayField, calcNextDose, formatNextDose }) => {
+        const isQuarantine = type === 'quarantine';
+        const details = animal.quarantineDetails || {};
+        const conds = parseArrayField(animal.medicalConditions).filter(c => !c.status || c.status === 'active');
+        const meds = parseArrayField(animal.medications).filter(m => !m.status || m.status === 'active');
+
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200">
+                <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                    <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
+                    <div className="min-w-0">
+                        <div className="font-semibold text-sm text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
+                        <div className="text-xs text-gray-500 truncate">{animal.species}</div>
+                    </div>
+                </div>
+
+                {isQuarantine ? (
+                    <>
+                        <div className="text-xs text-gray-600 truncate"><span className="sm:hidden font-semibold">Reason: </span>{details.reason || '—'}</div>
+                        <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Start: </span>{details.startDate ? formatDateShort(details.startDate) : '—'}</div>
+                        <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">End: </span>{details.endDate ? formatDateShort(details.endDate) : '—'}</div>
+                    </>
+                ) : (
+                    <>
+                        <div className="text-xs text-gray-600 truncate"><span className="sm:hidden font-semibold">Condition: </span>{conds.length > 0 ? conds.map(c => c.condition || c.name).filter(Boolean).join(', ') : '—'}</div>
+                        <div className="sm:col-span-2 text-xs space-y-0.5">
+                            <span className="sm:hidden font-semibold">Medications: </span>
+                            {meds.length > 0 ? meds.slice(0, 2).map((m, i) => {
+                                const next = calcNextDose(m);
+                                const nextLabel = next ? formatNextDose(next) : null;
+                                const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
+                                return (
+                                    <div key={i} className="leading-tight">
+                                        <span className="font-medium text-gray-700">{m.medication || m.name}</span>
+                                        <span className="text-blue-500"> {[m.dosage, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-500 ml-1">· {nextLabel}</span> : null}</span>
+                                    </div>
+                                );
+                            }) : <span className="text-gray-400">No active medications</span>}
+                        </div>
+                    </>
+                )}
+
+                <div className="text-center">
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${isQuarantine ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'}`}>{isQuarantine ? 'Quarantine' : 'Treatment'}</span>
+                </div>
+
+                <div className="sm:text-right flex items-center gap-1 justify-end">
+                    {isQuarantine
+                        ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><LockOpen size={12} /> Release</button>
+                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><LockOpen size={12} /> Discharge</button>
+                    }
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
+                </div>
+            </div>
+        );
+    };
+
     // -- For Sale Screen ----------------------------------------------------------
     const renderForSaleScreen = () => {
         const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
@@ -3740,12 +3798,14 @@ useEffect(() => {
         const handleUnquarantine = (e, animal) => {
             e.stopPropagation();
             if (!window.confirm(`Release ${animal.name || 'this animal'} from quarantine?`)) return;
+            const patch = { isQuarantine: false, quarantineDetails: { status: 'None', type: null, reason: null, startDate: null, endDate: null } };
+            const prev = { isQuarantine: animal.isQuarantine, quarantineDetails: animal.quarantineDetails };
             // Optimistic update
-            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, isQuarantine: false } : a));
-            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, isQuarantine: false } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isQuarantine: false },
+            setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .catch(err => { console.error('Unquarantine failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, isQuarantine: true } : a)); });
+                .catch(err => { console.error('Unquarantine failed:', err); setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...prev } : a)); });
         };
 
         const handleDischargeTreatment = (e, animal) => {
@@ -4138,7 +4198,7 @@ useEffect(() => {
                                         <span className="text-xs font-semibold text-gray-700">Enclosures</span>
                                         <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{healthEnclosures.length}</span>
                                     </div>
-                                    <button onClick={() => openEnclosureModal(null, { purpose: 'health' })} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
+                                    <button onClick={() => openEnclosureModal(null, { purpose: 'medical' })} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> Add
                                     </button>
                                 </div>
@@ -4156,68 +4216,60 @@ useEffect(() => {
                                 </div>
                             </div>
                             {(() => {
-                                const unassignedHealthAnimals = [...quarantineList, ...treatmentList];
+                                const healthSections = [
+                                    { key: 'quarantine', title: 'Quarantine', list: quarantineList, icon: <AlertTriangle size={16} className="text-orange-700" />, headerClass: 'bg-orange-50 border-b border-orange-100', emptyText: 'No animals in quarantine.' },
+                                    { key: 'treatment', title: 'In Treatment', list: treatmentList, icon: <Activity size={16} className="text-red-700" />, headerClass: 'bg-red-50 border-b border-red-100', emptyText: 'No animals currently in treatment.' },
+                                ];
+
                                 return (
-                                    <div>
-                                        <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('health_unassigned')}>
-                                            {collapsedMgmtGroups['health_unassigned'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
-                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Unassigned ({unassignedHealthAnimals.length})</span>
-                                        </div>
-                                        {!collapsedMgmtGroups['health_unassigned'] && (
-                                            unassignedHealthAnimals.length > 0 ? (
-                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                    {unassignedHealthAnimals.map(a => {
-                                                        const conds = parseArrayField(a.medicalConditions);
-                                                        const meds = parseArrayField(a.medications);
-                                                        const isTreatment = a.isInTreatment && !a.isQuarantine;
-                                                        const hasHealthState = a.isQuarantine || isTreatment;
-                                                        return (
-                                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                                hideControls hideBreedingLines
-                                                                cardActions={<>
-                                                                    {hasHealthState ? (
-                                                                        <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                                            {isTreatment ? 'Treatment' : 'Quarantine'}
-                                                                        </div>
+                                    <div className="space-y-4">
+                                        {healthSections.map(section => (
+                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`health_${section.key}`)}>
+                                                    <div className="flex items-center gap-3">
+                                                        {section.icon}
+                                                        <span className="font-semibold text-gray-800 text-base">{section.title}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{section.list.length}</span>
+                                                        {collapsedMgmtGroups[`health_${section.key}`] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
+                                                    </div>
+                                                </div>
+
+                                                {!collapsedMgmtGroups[`health_${section.key}`] && (
+                                                    <div className="p-2 space-y-1 bg-white">
+                                                        {section.list.length === 0 ? (
+                                                            <div className="text-center text-sm text-gray-400 py-4">
+                                                                {section.emptyText}
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                                                    <div className="col-span-2">Animal</div>
+                                                                    {section.key === 'quarantine' ? (
+                                                                        <>
+                                                                            <div>Reason</div>
+                                                                            <div>Start Date</div>
+                                                                            <div>End Date</div>
+                                                                        </>
                                                                     ) : (
-                                                                        <div className="text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full bg-gray-100 text-gray-500">
-                                                                            No health status
-                                                                        </div>
+                                                                        <>
+                                                                            <div>Condition</div>
+                                                                            <div className="col-span-2">Medications</div>
+                                                                        </>
                                                                     )}
-                                                                    {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                                    {isTreatment && meds.length > 0 && meds.slice(0, 2).map((m, i) => {
-                                                                        const next = calcNextDose(m);
-                                                                        const nextLabel = next ? formatNextDose(next) : null;
-                                                                        const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
-                                                                        return (
-                                                                            <div key={i} className="text-[10px] text-blue-600 w-full text-center leading-tight">
-                                                                                <span className="font-medium truncate block">{m.name || m}</span>
-                                                                                <span className="text-blue-400">{[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                    {a.isQuarantine
-                                                                        ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
-                                                                        : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>
-                                                                    }
-                                                                    {assigningAnimalId === a.id_public
-                                                                        ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-orange-300 rounded p-1 w-full">
-                                                                            <option value="" disabled>{healthEnclosures.length === 0 ? 'No enclosures yet' : 'Select enclosure...'}</option>
-                                                                            {healthEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
-                                                                          </select>
-                                                                        : <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-orange-500 hover:text-orange-700 border border-orange-200 rounded px-1.5 py-0.5 w-full">Assign enclosure</button>
-                                                                    }
-                                                                </>}
-                                                            />
-                                                        );
-                                                    })}
-                                                </div>
-                                            ) : (
-                                                <div className="text-center text-sm text-gray-400 py-4">
-                                                    No animals in this section.
-                                                </div>
-                                            )
-                                        )}
+                                                                    <div className="text-center">Status</div>
+                                                                    <div className="text-right pr-2">Action</div>
+                                                                </div>
+                                                                {section.list.map(a => (
+                                                                    <HealthAnimalBar key={a.id_public} animal={a} type={section.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleUnquarantine={handleUnquarantine} handleDischargeTreatment={handleDischargeTreatment} parseArrayField={parseArrayField} calcNextDose={calcNextDose} formatNextDose={formatNextDose} />
+                                                                ))}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 );
                             })()}
