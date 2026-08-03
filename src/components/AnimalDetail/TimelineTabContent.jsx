@@ -94,13 +94,118 @@ export const TimelineTabContent = ({ animal }) => {
         // Health events
         if (animal.quarantineDetails?.startDate) {
             events.push({
-                id: 'quarantine-' + animal.quarantineDetails.startDate,
+                id: 'quarantine-start-' + animal.quarantineDetails.startDate,
                 type: 'health',
                 date: animal.quarantineDetails.startDate,
                 title: 'Quarantine Started',
                 description: animal.quarantineDetails.reason || 'Quarantine'
             });
         }
+
+        if (animal.quarantineDetails?.endDate && animal.quarantineDetails.status === 'None') {
+            events.push({
+                id: 'quarantine-end-' + animal.quarantineDetails.endDate,
+                type: 'health',
+                date: animal.quarantineDetails.endDate,
+                title: 'Quarantine Ended',
+                description: animal.quarantineDetails.reason || 'Quarantine'
+            });
+        }
+
+        (parseJsonArrayField(animal.quarantineHistory) || []).forEach((period, idx) => {
+            if (period?.startDate) {
+                events.push({
+                    id: `quarantine-hist-start-${period.startDate}-${idx}`,
+                    type: 'health',
+                    date: period.startDate,
+                    title: 'Quarantine Started',
+                    description: period.reason || 'Quarantine'
+                });
+            }
+            if (period?.endDate) {
+                events.push({
+                    id: `quarantine-hist-end-${period.endDate}-${idx}`,
+                    type: 'health',
+                    date: period.endDate,
+                    title: 'Quarantine Ended',
+                    description: period.reason || 'Quarantine'
+                });
+            }
+        });
+
+        if (animal.treatmentDetails?.startDate) {
+            events.push({
+                id: 'treatment-start-' + animal.treatmentDetails.startDate,
+                type: 'health',
+                date: animal.treatmentDetails.startDate,
+                title: 'Treatment Started',
+                description: animal.treatmentDetails.reason || animal.treatmentDetails.type || 'Treatment'
+            });
+        }
+
+        if (animal.treatmentDetails?.endDate && animal.treatmentDetails.status === 'None') {
+            events.push({
+                id: 'treatment-end-' + animal.treatmentDetails.endDate,
+                type: 'health',
+                date: animal.treatmentDetails.endDate,
+                title: 'Treatment Ended',
+                description: animal.treatmentDetails.reason || animal.treatmentDetails.type || 'Treatment'
+            });
+        }
+
+        (parseJsonArrayField(animal.treatmentHistory) || []).forEach((period, idx) => {
+            if (period?.startDate) {
+                events.push({
+                    id: `treatment-hist-start-${period.startDate}-${idx}`,
+                    type: 'health',
+                    date: period.startDate,
+                    title: 'Treatment Started',
+                    description: period.reason || period.type || 'Treatment'
+                });
+            }
+            if (period?.endDate) {
+                events.push({
+                    id: `treatment-hist-end-${period.endDate}-${idx}`,
+                    type: 'health',
+                    date: period.endDate,
+                    title: 'Treatment Ended',
+                    description: period.reason || period.type || 'Treatment'
+                });
+            }
+        });
+
+        (parseJsonArrayField(animal.medications) || []).forEach((med, idx) => {
+            if (!med) return;
+            if (med.startDate) {
+                events.push({
+                    id: `med-start-${med.id || idx}-${med.startDate}`,
+                    type: 'health',
+                    date: med.startDate,
+                    title: `Medication Started: ${med.name || 'Medication'}`,
+                    description: med.dose ? `Dose: ${med.dose}` : 'Medication started'
+                });
+            }
+            (med.administrations || []).forEach((admin, aIdx) => {
+                if (admin?.date) {
+                    events.push({
+                        id: `med-admin-${med.id || idx}-${aIdx}-${admin.date}`,
+                        type: 'health',
+                        date: admin.date,
+                        title: `Treatment Performed: ${med.name || 'Medication'}`,
+                        description: med.dose ? `Dose administered: ${med.dose}` : 'Scheduled dose administered'
+                    });
+                }
+            });
+            if (med.stopDate) {
+                events.push({
+                    id: `med-stop-${med.id || idx}-${med.stopDate}`,
+                    type: 'health',
+                    date: med.stopDate,
+                    title: `Medication Finished: ${med.name || 'Medication'}`,
+                    description: 'Medication course ended'
+                });
+            }
+        });
 
         if (animal.spayNeuterDate) {
             events.push({

@@ -108,6 +108,23 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data.filter(Boolean) : [];
 };
 
+// A quarantine/treatment period (status + startDate/endDate) is only "active" once its start
+// date has arrived and, if set, its end date hasn't passed yet. This is the single source of
+// truth for isQuarantine/isInTreatment and for the health status pill/calculation.
+const isStatusPeriodActive = (details) => {
+    if (!details || !details.status || details.status === 'None') return false;
+    if (!details.startDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(details.startDate);
+    if (start > today) return false;
+    if (details.endDate) {
+        const end = new Date(details.endDate);
+        if (end < today) return false;
+    }
+    return true;
+};
+
 const getContactDisplayName = (contact) => {
     const personalName = contact?.personalName?.trim();
     const breederName = contact?.breederName?.trim();
@@ -1907,12 +1924,13 @@ const AnimalFormModalV2 = ({
         const conditions = parseJsonArrayField(formData.medicalConditions) || [];
         const allergies = parseJsonArrayField(formData.allergies) || [];
         const quarantine = formData.quarantineDetails || {};
+        const treatment = formData.treatmentDetails || {};
         
         let score = 5; // Start at excellent
         let factors = [];
 
-        // Quarantine assessment
-        if (quarantine.status === 'Quarantine' || quarantine.status === 'Isolation') {
+        // Quarantine assessment - only counts once the start date has arrived (and hasn't ended)
+        if (isStatusPeriodActive(quarantine)) {
             const qType = quarantine.type || 'unknown';
             if (qType.includes('Medical') || qType.includes('Illness') || qType.includes('Disease')) {
                 score -= 2;
@@ -1924,6 +1942,12 @@ const AnimalFormModalV2 = ({
                 score -= 1.5;
                 factors.push(`${quarantine.status} status`);
             }
+        }
+
+        // Treatment assessment - only counts once the start date has arrived (and hasn't ended)
+        if (isStatusPeriodActive(treatment)) {
+            score -= 1.5;
+            factors.push(treatment.type ? `Under treatment: ${treatment.type}` : 'Currently under treatment');
         }
 
         // Medications count
@@ -1981,7 +2005,38 @@ const AnimalFormModalV2 = ({
 
     const handleQuarantineChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, quarantineDetails: { ...(prev.quarantineDetails || { status: 'None', type: '', reason: '', startDate: '', endDate: '' }), [name]: value } }));
+        setFormData(prev => {
+            const prevDetails = prev.quarantineDetails || { status: 'None', type: '', reason: '', startDate: '', endDate: '' };
+            let history = prev.quarantineHistory || [];
+            // Starting a new period over a previously-used one archives the old period so it stays visible in the timeline.
+            if (name === 'startDate' && prevDetails.startDate && prevDetails.startDate !== value) {
+                history = [...history, prevDetails];
+            }
+            const details = { ...prevDetails, [name]: value };
+            // An end date of today or earlier automatically ends the quarantine/isolation status.
+            if (name === 'endDate' && value && value <= new Date().toISOString().substring(0, 10)) {
+                details.status = 'None';
+            }
+            return { ...prev, quarantineDetails: details, quarantineHistory: history };
+        });
+    };
+
+    const handleTreatmentChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => {
+            const prevDetails = prev.treatmentDetails || { status: 'None', type: '', reason: '', startDate: '', endDate: '' };
+            let history = prev.treatmentHistory || [];
+            // Starting a new period over a previously-used one archives the old period so it stays visible in the timeline.
+            if (name === 'startDate' && prevDetails.startDate && prevDetails.startDate !== value) {
+                history = [...history, prevDetails];
+            }
+            const details = { ...prevDetails, [name]: value };
+            // An end date of today or earlier automatically ends the treatment status.
+            if (name === 'endDate' && value && value <= new Date().toISOString().substring(0, 10)) {
+                details.status = 'None';
+            }
+            return { ...prev, treatmentDetails: details, treatmentHistory: history };
+        });
     };
 
     const addVaccination = () => {
@@ -2308,6 +2363,17 @@ const AnimalFormModalV2 = ({
                     startDate: animalToEdit.isQuarantine ? new Date().toISOString().substring(0, 10) : '',
                     endDate: ''
                   },
+            treatmentDetails: animalToEdit.treatmentDetails
+                ? (typeof animalToEdit.treatmentDetails === 'string' ? JSON.parse(animalToEdit.treatmentDetails) : animalToEdit.treatmentDetails)
+                : {
+                    status: animalToEdit.isInTreatment ? 'Treatment' : 'None',
+                    type: '',
+                    reason: '',
+                    startDate: animalToEdit.isInTreatment ? new Date().toISOString().substring(0, 10) : '',
+                    endDate: ''
+                  },
+            quarantineHistory: parseJsonArrayField(animalToEdit.quarantineHistory) || [],
+            treatmentHistory: parseJsonArrayField(animalToEdit.treatmentHistory) || [],
             identifiers: parseJsonArrayField(animalToEdit.identifiers),
             microchipNumber: animalToEdit.microchipNumber || '',
             pedigreeRegistrationId: animalToEdit.pedigreeRegistrationId || '',
@@ -2492,6 +2558,9 @@ const AnimalFormModalV2 = ({
             isOwned: true,
             isDisplay: true,
              quarantineDetails: { status: 'None', reason: '', startDate: '', endDate: '' },
+             treatmentDetails: { status: 'None', type: '', reason: '', startDate: '', endDate: '' },
+             quarantineHistory: [],
+             treatmentHistory: [],
             identifiers: [],
             microchipNumber: '',
             pedigreeRegistrationId: '',
@@ -2960,8 +3029,33 @@ const AnimalFormModalV2 = ({
         // Health events
         if (eventVisibility.health) {
             if (formData.quarantineDetails?.startDate) {
-                addEvent('health', formData.quarantineDetails.startDate, 'Quarantine Started', formData.quarantineDetails.reason || 'Quarantine');
+                addEvent('health', formData.quarantineDetails.startDate, 'Quarantine Started', formData.quarantineDetails.reason || 'Quarantine', `quarantine-start-${formData.quarantineDetails.startDate}`);
             }
+            if (formData.quarantineDetails?.endDate && formData.quarantineDetails.status === 'None') {
+                addEvent('health', formData.quarantineDetails.endDate, 'Quarantine Ended', formData.quarantineDetails.reason || 'Quarantine', `quarantine-end-${formData.quarantineDetails.endDate}`);
+            }
+            (formData.quarantineHistory || []).forEach((period, idx) => {
+                if (period?.startDate) addEvent('health', period.startDate, 'Quarantine Started', period.reason || 'Quarantine', `quarantine-hist-start-${period.startDate}-${idx}`);
+                if (period?.endDate) addEvent('health', period.endDate, 'Quarantine Ended', period.reason || 'Quarantine', `quarantine-hist-end-${period.endDate}-${idx}`);
+            });
+            if (formData.treatmentDetails?.startDate) {
+                addEvent('health', formData.treatmentDetails.startDate, 'Treatment Started', formData.treatmentDetails.reason || formData.treatmentDetails.type || 'Treatment', `treatment-start-${formData.treatmentDetails.startDate}`);
+            }
+            if (formData.treatmentDetails?.endDate && formData.treatmentDetails.status === 'None') {
+                addEvent('health', formData.treatmentDetails.endDate, 'Treatment Ended', formData.treatmentDetails.reason || formData.treatmentDetails.type || 'Treatment', `treatment-end-${formData.treatmentDetails.endDate}`);
+            }
+            (formData.treatmentHistory || []).forEach((period, idx) => {
+                if (period?.startDate) addEvent('health', period.startDate, 'Treatment Started', period.reason || period.type || 'Treatment', `treatment-hist-start-${period.startDate}-${idx}`);
+                if (period?.endDate) addEvent('health', period.endDate, 'Treatment Ended', period.reason || period.type || 'Treatment', `treatment-hist-end-${period.endDate}-${idx}`);
+            });
+            (parseJsonArrayField(formData.medications) || []).forEach((med, idx) => {
+                if (!med) return;
+                if (med.startDate) addEvent('health', med.startDate, `Medication Started: ${med.name || 'Medication'}`, med.dose ? `Dose: ${med.dose}` : 'Medication started', `med-start-${med.id || idx}-${med.startDate}`);
+                (med.administrations || []).forEach((admin, aIdx) => {
+                    if (admin?.date) addEvent('health', admin.date, `Treatment Performed: ${med.name || 'Medication'}`, med.dose ? `Dose administered: ${med.dose}` : 'Scheduled dose administered', `med-admin-${med.id || idx}-${aIdx}-${admin.date}`);
+                });
+                if (med.stopDate) addEvent('health', med.stopDate, `Medication Finished: ${med.name || 'Medication'}`, 'Medication course ended', `med-stop-${med.id || idx}-${med.stopDate}`);
+            });
             if (formData.spayNeuterDate) {
                 addEvent('health', formData.spayNeuterDate, 'Spay/Neuter Surgery', 'Surgical sterilization');
             }
@@ -3328,6 +3422,8 @@ const AnimalFormModalV2 = ({
         if (!formData.species?.trim()) missingFields.push('Species (Dashboard tab)');
         if (!formData.gender?.trim()) missingFields.push('Gender (Dashboard tab)');
         if (!formData.status?.trim()) missingFields.push('Status (Dashboard tab)');
+        if (formData.quarantineDetails?.status && formData.quarantineDetails.status !== 'None' && !formData.quarantineDetails?.startDate) missingFields.push('Quarantine Start Date (Health tab)');
+        if (formData.treatmentDetails?.status && formData.treatmentDetails.status !== 'None' && !formData.treatmentDetails?.startDate) missingFields.push('Treatment Start Date (Health tab)');
 
         if (missingFields.length > 0) {
             showModalMessage('Required Fields Missing', `Please fill in the following required fields:\n\n· ${missingFields.join('\n· ')}`);
@@ -3368,7 +3464,12 @@ const AnimalFormModalV2 = ({
             payloadToSave.imageUrl = primaryImageUrl;
             payloadToSave.photoUrl = primaryImageUrl;
             payloadToSave.extraImages = extraImages;
-            
+
+            // isQuarantine/isInTreatment are derived from status + start/end dates, not set directly -
+            // this is what the Health tab and dashboards on AnimalList rely on.
+            payloadToSave.isQuarantine = isStatusPeriodActive(payloadToSave.quarantineDetails);
+            payloadToSave.isInTreatment = isStatusPeriodActive(payloadToSave.treatmentDetails);
+
             // Add manual pedigree data
             if (Object.keys(mpEditForm).length > 0) {
                 payloadToSave.manualPedigree = mpEditForm;
@@ -4380,12 +4481,48 @@ const AnimalFormModalV2 = ({
                                                     <input type="text" name="reason" value={formData.quarantineDetails?.reason || ''} onChange={handleQuarantineChange} placeholder="e.g., Specific illness, concerns, observations" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Start Date</label>
+                                                    <label className="block text-xs font-medium text-gray-700">Start Date {(formData.quarantineDetails?.status === 'Quarantine' || formData.quarantineDetails?.status === 'Isolation') && <span className="text-red-500">*</span>}</label>
                                                     <DatePicker name="startDate" value={formData.quarantineDetails?.startDate || ''} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-700">End Date (Optional)</label>
                                                     <DatePicker name="endDate" value={formData.quarantineDetails?.endDate || ''} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                                    <p className="text-[11px] text-gray-400 mt-0.5">A past/today end date automatically ends this status.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Treatment Status */}
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700">Treatment Status</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Status</label>
+                                                    <select name="status" value={formData.treatmentDetails?.status || 'None'} onChange={handleTreatmentChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                        <option value="None">None</option>
+                                                        <option value="Treatment">Treatment</option>
+                                                    </select>
+                                                </div>
+                                                {formData.treatmentDetails?.status === 'Treatment' && (
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-700">Type/Reason</label>
+                                                        <input type="text" name="type" value={formData.treatmentDetails?.type || ''} onChange={handleTreatmentChange} placeholder="e.g., Post-surgical recovery, illness, injury" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Additional Notes</label>
+                                                    <input type="text" name="reason" value={formData.treatmentDetails?.reason || ''} onChange={handleTreatmentChange} placeholder="e.g., Specific illness, concerns, observations" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Start Date {formData.treatmentDetails?.status === 'Treatment' && <span className="text-red-500">*</span>}</label>
+                                                    <DatePicker name="startDate" value={formData.treatmentDetails?.startDate || ''} onChange={handleTreatmentChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">End Date (Optional)</label>
+                                                    <DatePicker name="endDate" value={formData.treatmentDetails?.endDate || ''} onChange={handleTreatmentChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                                    <p className="text-[11px] text-gray-400 mt-0.5">A past/today end date automatically ends this status.</p>
                                                 </div>
                                             </div>
                                         </div>

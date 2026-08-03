@@ -59,7 +59,10 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
 
     // Check for active medical situations based on the proposed data model
     const isQuarantined = animal.quarantineStatus?.active === true;
-    const hasActiveMedication = medications.some(m => m.status === 'active');
+    // Medications only record status when explicitly set (e.g. from admin panel); the standard
+    // add-medication form never sets it, so treat missing status as active — otherwise a med with
+    // no stopDate (or a stopDate in the future) would never register as "under treatment".
+    const hasActiveMedication = medications.some(m => (!m.status || m.status === 'active') && (!m.stopDate || new Date(m.stopDate) >= new Date()));
     const hasActiveCriticalCondition = medicalConditions.some(c => c.status === 'active' && c.severity === 'critical');
     const isUnderTreatment = hasActiveMedication || hasActiveCriticalCondition;
 
@@ -180,7 +183,16 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                          <>
                             {medicalConditions.length > 0 && <DetailJsonList label="Medical Conditions" data={medicalConditions.filter(Boolean)} renderItem={item => `${item.condition || item.name}`} />}
                             {allergies.length > 0 && <DetailJsonList label="Allergies" data={allergies.filter(Boolean)} renderItem={item => `${item.allergen || item.name}`} />}
-                            {medications.length > 0 && <DetailJsonList label="Current Medications" data={medications.filter(Boolean)} renderItem={item => `${item.medication || item.name}`} />}
+                            {medications.length > 0 && <DetailJsonList label="Current Medications" data={medications.filter(Boolean)} renderItem={item => {
+                                const parts = [item.name || item.medication];
+                                if (item.dose) parts.push(item.dose);
+                                if (item.intervalValue && item.intervalUnit) parts.push(`every ${item.intervalValue} ${item.intervalUnit}`);
+                                if (item.startDate) parts.push(`from ${formatDate(item.startDate)}`);
+                                if (item.stopDate) parts.push(`to ${formatDate(item.stopDate)}`);
+                                let text = parts.filter(Boolean).join(' \u2013 ');
+                                if (item.notes) text += ` (${item.notes})`;
+                                return text;
+                            }} />}
                         </>
                     ) : (
                          <p className="text-sm text-gray-400">No active medical records.</p>

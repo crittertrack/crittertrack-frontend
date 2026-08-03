@@ -1844,14 +1844,20 @@ useEffect(() => {
     };
 
     const calcNextDose = (med) => {
-        if (!med.startDate || !med.intervalValue || !med.intervalUnit) return null;
+        if (!med.intervalValue || !med.intervalUnit) return null;
+        // A finished medication (stop date reached) has no more doses due.
+        if (med.stopDate && new Date(med.stopDate) <= new Date()) return null;
         const v = Number(med.intervalValue);
         const unitMs = med.intervalUnit === 'hours' ? 3600000
             : med.intervalUnit === 'days' ? 86400000
             : med.intervalUnit === 'weeks' ? 604800000
             : med.intervalUnit === 'months' ? 2592000000 : null;
         if (!unitMs) return null;
-        const start = new Date(med.startDate).getTime();
+        // Anchor the schedule to the most recently confirmed dose, falling back to the start date.
+        const lastAdmin = med.administrations?.length > 0 ? med.administrations[med.administrations.length - 1].date : null;
+        const anchor = lastAdmin || med.startDate;
+        if (!anchor) return null;
+        const start = new Date(anchor).getTime();
         if (isNaN(start)) return null;
         const intervalMs = v * unitMs;
         const now = Date.now();
@@ -3584,7 +3590,7 @@ useEffect(() => {
         );
     };
 
-    const HealthAnimalBar = ({ animal, type, onViewAnimal, onEditAnimal, handleUnquarantine, handleDischargeTreatment, parseArrayField, calcNextDose, formatNextDose }) => {
+    const HealthAnimalBar = ({ animal, type, onViewAnimal, onEditAnimal, handleUnquarantine, handleDischargeTreatment, handleMedicationAction, parseArrayField, calcNextDose, formatNextDose }) => {
         const isQuarantine = type === 'quarantine';
         const details = animal.quarantineDetails || {};
         const conds = parseArrayField(animal.medicalConditions).filter(c => !c.status || c.status === 'active');
@@ -3616,9 +3622,18 @@ useEffect(() => {
                                 const nextLabel = next ? formatNextDose(next) : null;
                                 const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
                                 return (
-                                    <div key={i} className="leading-tight">
-                                        <span className="font-medium text-gray-700">{m.medication || m.name}</span>
-                                        <span className="text-blue-500"> {[m.dosage, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-500 ml-1">· {nextLabel}</span> : null}</span>
+                                    <div key={i} className="leading-tight flex items-center gap-1.5 flex-wrap">
+                                        <span>
+                                            <span className="font-medium text-gray-700">{m.name || m.medication}</span>
+                                            <span className="text-blue-500"> {[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-500 ml-1">· {nextLabel}</span> : null}</span>
+                                        </span>
+                                        {m.intervalValue && (
+                                            <span className="flex items-center gap-0.5">
+                                                <button title="Confirm dose given" onClick={(e) => handleMedicationAction(e, animal, m.id, 'confirm')} className="p-0.5 text-green-600 hover:bg-green-100 rounded"><Check size={12} /></button>
+                                                <button title="Prolong stop date" onClick={(e) => handleMedicationAction(e, animal, m.id, 'prolong')} className="p-0.5 text-blue-500 hover:bg-blue-100 rounded"><PlusCircle size={12} /></button>
+                                                <button title="Finish medication (stop date = today)" onClick={(e) => handleMedicationAction(e, animal, m.id, 'finish')} className="p-0.5 text-red-500 hover:bg-red-100 rounded"><X size={12} /></button>
+                                            </span>
+                                        )}
                                     </div>
                                 );
                             }) : <span className="text-gray-400">No active medications</span>}
@@ -3633,7 +3648,7 @@ useEffect(() => {
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     {isQuarantine
                         ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><LockOpen size={12} /> Release</button>
-                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><LockOpen size={12} /> Discharge</button>
+                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><LockOpen size={12} /> End Treatment</button>
                     }
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
                 </div>
@@ -3894,7 +3909,8 @@ useEffect(() => {
         const handleUnquarantine = (e, animal) => {
             e.stopPropagation();
             if (!window.confirm(`Release ${animal.name || 'this animal'} from quarantine?`)) return;
-            const patch = { isQuarantine: false, quarantineDetails: { status: 'None', type: null, reason: null, startDate: null, endDate: null } };
+            const today = new Date().toISOString().substring(0, 10);
+            const patch = { isQuarantine: false, quarantineDetails: { ...(animal.quarantineDetails || {}), status: 'None', endDate: today } };
             const prev = { isQuarantine: animal.isQuarantine, quarantineDetails: animal.quarantineDetails };
             // Optimistic update
             setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
@@ -3906,14 +3922,50 @@ useEffect(() => {
 
         const handleDischargeTreatment = (e, animal) => {
             e.stopPropagation();
-            if (!window.confirm(`Discharge ${animal.name || 'this animal'} from treatment? This will clear all recorded conditions and medications.`)) return;
-            const patch = { medicalConditions: null, medications: null, isInTreatment: false };
-            const prev = { medicalConditions: animal.medicalConditions, medications: animal.medications, isInTreatment: animal.isInTreatment };
+            if (!window.confirm(`End treatment for ${animal.name || 'this animal'}? Recorded conditions and medications are kept for history.`)) return;
+            const today = new Date().toISOString().substring(0, 10);
+            const patch = { isInTreatment: false, treatmentDetails: { ...(animal.treatmentDetails || {}), status: 'None', endDate: today } };
+            const prev = { isInTreatment: animal.isInTreatment, treatmentDetails: animal.treatmentDetails };
             setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .catch(err => { console.error('Discharge failed:', err); setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...prev } : a)); });
+                .catch(err => { console.error('End treatment failed:', err); setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...prev } : a)); });
+        };
+
+        const handleMedicationAction = (e, animal, medId, action) => {
+            e.stopPropagation();
+            const meds = parseArrayField(animal.medications);
+            const idx = meds.findIndex(m => m.id === medId);
+            if (idx === -1) return;
+            const med = meds[idx];
+            const updatedMed = { ...med };
+
+            if (action === 'confirm') {
+                updatedMed.administrations = [...(med.administrations || []), { date: new Date().toISOString() }];
+            } else if (action === 'prolong') {
+                const unitLabel = med.intervalUnit === 'hours' ? 'hours' : 'days';
+                const input = window.prompt(`Extend "${med.name}" stop date by how many ${unitLabel}?`, med.intervalUnit === 'hours' ? '24' : '7');
+                if (!input) return;
+                const amount = Number(input);
+                if (!amount || amount <= 0) return;
+                const unitMs = med.intervalUnit === 'hours' ? 3600000 : 86400000;
+                const base = med.stopDate ? new Date(med.stopDate).getTime() : Date.now();
+                updatedMed.stopDate = new Date(base + amount * unitMs).toISOString().substring(0, 10);
+            } else if (action === 'finish') {
+                if (!window.confirm(`Mark "${med.name}" as finished? This sets its stop date to today.`)) return;
+                updatedMed.stopDate = new Date().toISOString().substring(0, 10);
+            } else {
+                return;
+            }
+
+            const updatedMeds = [...meds];
+            updatedMeds[idx] = updatedMed;
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, medications: updatedMeds } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, medications: updatedMeds } }));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { medications: updatedMeds },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .catch(err => { console.error('Medication action failed:', err); fetchAllAnimals(); });
         };
 
         const handleReproStatusUpdate = (e, animal, patch) => {
@@ -4358,7 +4410,7 @@ useEffect(() => {
                                                                     <div className="text-right pr-2">Action</div>
                                                                 </div>
                                                                 {section.list.map(a => (
-                                                                    <HealthAnimalBar key={a.id_public} animal={a} type={section.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleUnquarantine={handleUnquarantine} handleDischargeTreatment={handleDischargeTreatment} parseArrayField={parseArrayField} calcNextDose={calcNextDose} formatNextDose={formatNextDose} />
+                                                                    <HealthAnimalBar key={a.id_public} animal={a} type={section.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleUnquarantine={handleUnquarantine} handleDischargeTreatment={handleDischargeTreatment} handleMedicationAction={handleMedicationAction} parseArrayField={parseArrayField} calcNextDose={calcNextDose} formatNextDose={formatNextDose} />
                                                                 ))}
                                                             </>
                                                         )}
