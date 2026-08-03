@@ -4070,18 +4070,16 @@ useEffect(() => {
                             </div>
                             {(() => {
                                 const reproSections = [
-                                    { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700" />, headerClass: 'bg-indigo-50 border-b border-indigo-100' },
-                                    { key: 'mating', title: 'Currently In Mating', list: matingList, icon: <Heart size={16} className="text-purple-700" />, headerClass: 'bg-purple-50 border-b border-purple-100' },
-                                    { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={16} className="text-pink-700" />, headerClass: 'bg-pink-50 border-b border-pink-100' },
-                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Baby size={16} className="text-blue-700" />, headerClass: 'bg-blue-50 border-b border-blue-100' }
+                                    { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700" />, headerClass: 'bg-indigo-50 border-b border-indigo-100', emptyText: 'No planned matings yet.' },
+                                    { key: 'mating', title: 'Currently In Mating', list: matingList, icon: <Heart size={16} className="text-purple-700" />, headerClass: 'bg-purple-50 border-b border-purple-100', emptyText: 'No animals currently mating.' },
+                                    { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={16} className="text-pink-700" />, headerClass: 'bg-pink-50 border-b border-pink-100', emptyText: 'No pregnant animals.' },
+                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Baby size={16} className="text-blue-700" />, headerClass: 'bg-blue-50 border-b border-blue-100', emptyText: 'No nursing animals.' }
                                 ];
-
-                                if (reproSections.every(s => s.list.length === 0)) return null;
 
                                 return (
                                     <div className="space-y-4">
                                         {reproSections.map(section => (
-                                            (section.list.length > 0 || (section.key === 'planned' && view === 'reproduction')) && <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
+                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
                                                 <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`repro_${section.key}`)}>
                                                     <div className="flex items-center gap-3">
                                                         {section.icon}
@@ -4097,7 +4095,7 @@ useEffect(() => {
                                                     <div className="p-2 space-y-1 bg-white">
                                                         {section.list.length === 0 ? (
                                                             <div className="text-center text-sm text-gray-400 py-4">
-                                                                No planned matings yet.
+                                                                {section.emptyText}
                                                             </div>
                                                         ) : (
                                                             <>
