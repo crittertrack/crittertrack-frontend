@@ -1,6 +1,7 @@
 import React from 'react';
 import { Shield, Microscope, HeartPulse, Stethoscope, AlertTriangle, Activity, Scale } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
+import { computeIsInTreatment } from '../../utils/medicalStatus';
 import { useDetailFieldTemplate, DetailJsonList } from './utils';
 import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
 
@@ -59,30 +60,14 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
 
     // Check for active medical situations based on the proposed data model
     const isQuarantined = animal.quarantineStatus?.active === true;
-    // Medications only record status when explicitly set (e.g. from admin panel); the standard
-    // add-medication form never sets it, so treat missing status as active — otherwise a med with
-    // no stopDate (or a stopDate in the future) would never register as "under treatment".
-    const hasActiveMedication = medications.some(m => (!m.status || m.status === 'active') && (!m.stopDate || new Date(m.stopDate) >= new Date()));
-    const hasActiveCriticalCondition = medicalConditions.some(c => c.status === 'active' && c.severity === 'critical');
-    const isUnderTreatment = hasActiveMedication || hasActiveCriticalCondition;
+    // isInTreatment is derived from active medications/critical conditions (see medicalStatus.js),
+    // matching the same computation the backend persists on animal.isInTreatment.
+    const isUnderTreatment = computeIsInTreatment({ medications: animal.medications, medicalConditions: animal.medicalConditions });
 
-    // Calculate health status based on active medical records
-    // Excellent/Good/Fair/Poor/Critical is the base health status
-    // Quarantine/Treatment are separate indicators shown as additional pills
-    const calculateHealthStatus = () => {
-        // No active records = Excellent
-        if (!hasActiveRecords) return 'Excellent';
-        
-        // Has active records - determine severity
-        const hasHighSeverity = medicalConditions.some(c => c.severity === 'critical' || c.severity === 'high');
-        const hasModerate = medicalConditions.length > 0;
-        
-        if (hasHighSeverity) return 'Critical';
-        if (hasModerate || medications.length > 0 || allergies.length > 0) return 'Fair';
-        
-        return 'Good';
-    };
-    const calculatedHealthStatus = animal.healthStatusOverride || calculateHealthStatus();
+    // healthStatus is derived server-side from quarantine/treatment/medications/conditions/
+    // allergies (see utils/healthStatusSync.js's computeHealthStatus) \u2014 healthStatusOverride,
+    // if set, takes precedence, same as the header pill in AnimalModalV2/ViewAnimalModalV2.
+    const calculatedHealthStatus = animal.healthStatusOverride || animal.healthStatus || 'Excellent';
 
     return (
         <div className="space-y-6">

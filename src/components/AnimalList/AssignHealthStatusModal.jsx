@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { X, Search, ShieldAlert, Stethoscope, Check } from 'lucide-react';
+import { X, Search, ShieldAlert, Stethoscope, Check, AlertTriangle } from 'lucide-react';
 import DatePicker from '../DatePicker';
 
 const QUARANTINE_TYPES = [
@@ -17,6 +17,8 @@ const defaultDetails = (type) => ({
     type: '', reason: '', startDate: todayStr(), endDate: '',
 });
 
+const defaultMedication = () => ({ name: '', dose: '', notes: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
+
 // Bulk-assigns a quarantine/isolation or treatment period to one or more animals at once,
 // mirroring the per-animal fields/logic in AnimalFormModalV2's Health tab.
 const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving }) => {
@@ -24,6 +26,9 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
     const [search, setSearch] = useState('');
     const [selectedIds, setSelectedIds] = useState(new Set());
     const [details, setDetails] = useState(defaultDetails('quarantine'));
+    // Active medications are what actually make an animal "under treatment" (see healthNeedsAttentionList),
+    // so treatment assignments can optionally record one alongside the treatment period itself.
+    const [medication, setMedication] = useState(defaultMedication());
 
     const filteredAnimals = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -39,6 +44,7 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
     const toggleType = (type) => {
         setStatusType(type);
         setDetails(defaultDetails(type));
+        setMedication(defaultMedication());
     };
 
     const toggleAnimal = (id_public) => {
@@ -57,11 +63,17 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
         setDetails(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleMedicationChange = (e) => {
+        const { name, value } = e.target;
+        setMedication(prev => ({ ...prev, [name]: value }));
+    };
+
     const resetState = () => {
         setSearch('');
         setSelectedIds(new Set());
         setStatusType('quarantine');
         setDetails(defaultDetails('quarantine'));
+        setMedication(defaultMedication());
     };
 
     const handleClose = () => {
@@ -73,7 +85,8 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
 
     const handleSubmit = async () => {
         if (!canSubmit) return;
-        await onSubmit([...selectedIds], statusType, details);
+        const medicationToSubmit = statusType === 'treatment' && medication.name.trim() ? medication : null;
+        await onSubmit([...selectedIds], statusType, details, medicationToSubmit);
         resetState();
     };
 
@@ -144,6 +157,49 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                                 <DatePicker name="endDate" value={details.endDate} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                             </div>
                         </div>
+
+                        {statusType === 'treatment' && (
+                            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-dark-border">
+                                <label className="block text-xs font-semibold text-gray-700 dark:text-dark-text-secondary mb-2">Medication (optional)</label>
+                                <div className="flex items-start gap-1.5 mb-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
+                                    <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
+                                    <span>"In Treatment" status is now automatic — it's only shown while an animal has an active medication or an active critical condition. Assigning Treatment without a medication here (and with no existing active critical condition) will NOT mark the animal as in treatment.</span>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Name</label>
+                                        <input type="text" name="name" value={medication.name} onChange={handleMedicationChange} placeholder="e.g., Amoxicillin" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dose</label>
+                                        <input type="text" name="dose" value={medication.dose} onChange={handleMedicationChange} placeholder="e.g., 50mg" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <div className="flex-1">
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dose Interval</label>
+                                            <input type="number" min="0" name="intervalValue" value={medication.intervalValue} onChange={handleMedicationChange} placeholder="e.g., 12" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Unit</label>
+                                            <select name="intervalUnit" value={medication.intervalUnit} onChange={handleMedicationChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <option value="hours">Hours</option>
+                                                <option value="days">Days</option>
+                                                <option value="weeks">Weeks</option>
+                                                <option value="months">Months</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Stop Date</label>
+                                        <DatePicker name="stopDate" value={medication.stopDate} onChange={handleMedicationChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Medication Notes</label>
+                                        <input type="text" name="notes" value={medication.notes} onChange={handleMedicationChange} placeholder="e.g., Give with food" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div>

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
+import { computeIsInTreatment, HEALTH_STATUS_TEXT_COLORS } from '../../utils/medicalStatus';
 import DatePicker from '../DatePicker';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from './LocationManagerModal';
@@ -41,6 +42,17 @@ const ALERT_CATEGORIES = {
 };
 
 const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, health: true, birthdateAge: true, breedingLines: true, tags: true };
+
+// Shared "Health" column renderer for the list/collection table views \u2014 Quarantine/Treatment
+// take priority as the most actionable state, otherwise falls back to the derived health status
+// pill (healthStatusOverride || healthStatus, computed server-side, see medicalStatus.js).
+const renderHealthColumnCell = (animal) => {
+    if (animal.isQuarantine) return <span className="font-medium text-orange-600">Quarantine</span>;
+    if (animal.isInTreatment) return <span className="font-medium text-red-600">Treatment</span>;
+    if (animal.status === 'Deceased') return <span className="text-gray-500">Deceased</span>;
+    const status = animal.healthStatusOverride || animal.healthStatus || 'Excellent';
+    return <span className={`font-medium ${HEALTH_STATUS_TEXT_COLORS[status] || HEALTH_STATUS_TEXT_COLORS.Excellent}`}>{status}</span>;
+};
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -1921,14 +1933,6 @@ useEffect(() => {
     const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
     const inHealthEnclosure = useCallback(a => a.enclosureId && healthEnclosureIds.has(a.enclosureId), [healthEnclosureIds]);
 
-    const quarantineDashboardList = useMemo(() => {
-        return activeAnimalsForDashboard.filter(a => a.isQuarantine && !inHealthEnclosure(a));
-    }, [activeAnimalsForDashboard, inHealthEnclosure]);
-
-    const treatmentDashboardList = useMemo(() => {
-        return activeAnimalsForDashboard.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
-    }, [activeAnimalsForDashboard, inHealthEnclosure]);
-
     const isTaskDue = useCallback((task) => {
         const freq = task.frequencyDays || task.frequency;
         if (!freq) return false;
@@ -1993,8 +1997,6 @@ useEffect(() => {
             .map(([type, count]) => ({ type, count }))
             .filter(item => item.count > 0);
     }, [enclosuresNeedingAttention]);
-
-    const healthAttentionDashboardCount = quarantineDashboardList.length + treatmentDashboardList.length;
 
     // The original 'allAnimals' variable (used for the main list and management views) remains unchanged.
     // Must exclude view-only animals (e.g. transferred away, kept only for pedigree/history access) —
@@ -2190,12 +2192,11 @@ useEffect(() => {
     // Bulk-assigns a quarantine/isolation or treatment period to one or more animals at once
     // (see AssignHealthStatusModal), mirroring the per-animal archiving logic used by the
     // Health tab in AnimalFormModalV2 (starting a new period over a prior one archives it).
-    const handleAssignHealthStatus = async (selectedIds, statusType, details) => {
+    const handleAssignHealthStatus = async (selectedIds, statusType, details, medication) => {
         setAssigningHealthStatus(true);
         const isQuarantineType = statusType === 'quarantine';
         const historyField = isQuarantineType ? 'quarantineHistory' : 'treatmentHistory';
         const detailsField = isQuarantineType ? 'quarantineDetails' : 'treatmentDetails';
-        const flagField = isQuarantineType ? 'isQuarantine' : 'isInTreatment';
 
         const results = await Promise.allSettled(selectedIds.map(async (id_public) => {
             const animal = allAnimalsRaw.find(a => a.id_public === id_public);
@@ -2207,7 +2208,35 @@ useEffect(() => {
                 history = [...history, prevDetails];
             }
             const newDetails = { status: details.status, type: details.type, reason: details.reason, startDate: details.startDate, endDate: details.endDate };
-            const patch = { [flagField]: isStatusPeriodActive(newDetails), [detailsField]: newDetails, [historyField]: history };
+            const patch = { [detailsField]: newDetails, [historyField]: history };
+
+            let updatedMedications = null;
+            if (!isQuarantineType && medication?.name?.trim()) {
+                const medicationRecord = {
+                    id: Date.now().toString() + '-' + id_public,
+                    name: medication.name.trim(),
+                    dose: medication.dose || '',
+                    notes: medication.notes || '',
+                    startDate: details.startDate || null,
+                    stopDate: medication.stopDate || null,
+                    intervalValue: medication.intervalValue ? Number(medication.intervalValue) : null,
+                    intervalUnit: medication.intervalUnit || 'hours',
+                    source: 'manual'
+                };
+                updatedMedications = [...parseArrayField(animal.medications), medicationRecord];
+                patch.medications = updatedMedications;
+            }
+
+            if (isQuarantineType) {
+                patch.isQuarantine = isStatusPeriodActive(newDetails);
+            } else {
+                // isInTreatment is derived from active medications/critical conditions, not from
+                // treatmentDetails' period \u2014 recompute using the (possibly just-added) medication.
+                patch.isInTreatment = computeIsInTreatment({
+                    medications: updatedMedications !== null ? updatedMedications : animal.medications,
+                    medicalConditions: animal.medicalConditions,
+                });
+            }
 
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public, ...patch } }));
@@ -3233,7 +3262,7 @@ useEffect(() => {
                                                                         <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.isQuarantine ? <span className="font-medium text-orange-600">Quarantine</span> : animal.isInTreatment ? <span className="font-medium text-red-600">Treatment</span> : animal.status === 'Deceased' ? <span className="text-gray-500">Deceased</span> : <span className="text-green-600">OK</span>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{renderHealthColumnCell(animal)}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400">{ageStr}</div></td>
                                                                         <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-500">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
@@ -3327,7 +3356,7 @@ useEffect(() => {
                                                                         <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.isQuarantine ? <span className="font-medium text-orange-600">Quarantine</span> : animal.isInTreatment ? <span className="font-medium text-red-600">Treatment</span> : animal.status === 'Deceased' ? <span className="text-gray-500">Deceased</span> : <span className="text-green-600">OK</span>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 text-xs">{renderHealthColumnCell(animal)}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400">{ageStr}</div></td>
                                                                         <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-500">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
@@ -3985,10 +4014,21 @@ useEffect(() => {
 
         const handleDischargeTreatment = (e, animal) => {
             e.stopPropagation();
-            if (!window.confirm(`End treatment for ${animal.name || 'this animal'}? Recorded conditions and medications are kept for history.`)) return;
+            if (!window.confirm(`End treatment for ${animal.name || 'this animal'}? Active medications will be marked finished (stop date = today); recorded conditions and medications are kept for history.`)) return;
             const today = new Date().toISOString().substring(0, 10);
-            const patch = { isInTreatment: false, treatmentDetails: { ...(animal.treatmentDetails || {}), status: 'None', endDate: today } };
-            const prev = { isInTreatment: animal.isInTreatment, treatmentDetails: animal.treatmentDetails };
+            const meds = parseArrayField(animal.medications);
+            const updatedMeds = meds.map(m => {
+                const isActive = (!m.status || m.status === 'active') && (!m.stopDate || new Date(m.stopDate) >= new Date());
+                return isActive ? { ...m, stopDate: today } : m;
+            });
+            // isInTreatment is derived, so ending treatment means finishing active medications above;
+            // if an active critical condition remains, the animal will still show as "in treatment".
+            const newIsInTreatment = computeIsInTreatment({ medications: updatedMeds, medicalConditions: animal.medicalConditions });
+            if (newIsInTreatment) {
+                window.alert(`${animal.name || 'This animal'} still has an active critical medical condition, so it will continue to show as "in treatment" until that condition is resolved.`);
+            }
+            const patch = { isInTreatment: newIsInTreatment, medications: updatedMeds, treatmentDetails: { ...(animal.treatmentDetails || {}), status: 'None', endDate: today } };
+            const prev = { isInTreatment: animal.isInTreatment, medications: animal.medications, treatmentDetails: animal.treatmentDetails };
             setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
@@ -4024,9 +4064,13 @@ useEffect(() => {
 
             const updatedMeds = [...meds];
             updatedMeds[idx] = updatedMed;
-            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, medications: updatedMeds } : a));
-            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, medications: updatedMeds } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { medications: updatedMeds },
+            // isInTreatment is derived from active medications/critical conditions — recompute it
+            // optimistically here too, so the badge updates immediately (backend recomputes on save).
+            const newIsInTreatment = computeIsInTreatment({ medications: updatedMeds, medicalConditions: animal.medicalConditions });
+            const patch = { medications: updatedMeds, isInTreatment: newIsInTreatment };
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .catch(err => { console.error('Medication action failed:', err); fetchAllAnimals(); });
         };
@@ -5295,7 +5339,7 @@ useEffect(() => {
                     {/* Column 5: Needs Attention */}
                     <div className="flex flex-col gap-2">
                         {(() => {
-                            const totalAttention = feedDueDashboard.length + healthAttentionDashboardCount + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
+                            const totalAttention = feedDueDashboard.length + healthNeedsAttentionList.length + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
                             return (
                                 <>
                                     <StatCard
@@ -5314,8 +5358,21 @@ useEffect(() => {
                                                 {feedDueDashboard.length > 0 && (
                                                     <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('feeding')}><span className="flex items-center gap-1.5 text-red-700"><Utensils size={14} /> Feeding & Care</span><span className="font-medium">{feedDueDashboard.length}</span></li>
                                                 )}
-                                                {healthAttentionDashboardCount > 0 && (
-                                                    <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('health')}><span className="flex items-center gap-1.5 text-orange-700"><Activity size={14} /> Health</span><span className="font-medium">{healthAttentionDashboardCount}</span></li>
+                                                {healthNeedsAttentionList.length > 0 && (
+                                                    <>
+                                                        <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('health')}>
+                                                            <span className="flex items-center gap-1.5 text-orange-700"><Activity size={14} /> Health</span>
+                                                            <span className="font-medium">{healthNeedsAttentionList.length}</span>
+                                                        </li>
+                                                        <ul className="pl-6 space-y-1 text-xs">
+                                                            {healthNeedsAttentionList.map(({ animal, reason }) => (
+                                                                <li key={`${animal.id_public}-${reason}`} className="flex justify-between items-center text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
+                                                                    <span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                                                    <span className="font-medium">{reason}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </>
                                                 )}
                                                 {reproNeedsAttentionList.length > 0 && (
                                                     <>
@@ -5840,12 +5897,7 @@ useEffect(() => {
                                         {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
                                         {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>}
                                         {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
-                                        {listViewColumns.health && <td className="px-3 py-1.5 text-gray-600 text-xs">{
-                                            animal.isQuarantine ? <span className="font-medium text-orange-600">Quarantine</span> :
-                                            animal.isInTreatment ? <span className="font-medium text-red-600">Treatment</span> :
-                                            animal.status === 'Deceased' ? <span className="text-gray-500">Deceased</span> :
-                                            <span className="text-green-600">OK</span>
-                                        }</td>}
+                                        {listViewColumns.health && <td className="px-3 py-1.5 text-gray-600 text-xs">{renderHealthColumnCell(animal)}</td>}
                                         {listViewColumns.birthdateAge && (
                                             <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">
                                                 <div>{formatLocalDate(animal.birthDate)}</div>

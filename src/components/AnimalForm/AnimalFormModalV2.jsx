@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
 import { formatDate, formatDateShort, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
+import { computeIsInTreatment, calculateHealthStatus as calculateHealthStatusShared } from '../../utils/medicalStatus';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
@@ -1902,89 +1903,9 @@ const AnimalFormModalV2 = ({
         }
     };
 
-    const calculateHealthStatus = () => {
-        const medications = parseJsonArrayField(formData.medications) || [];
-        const conditions = parseJsonArrayField(formData.medicalConditions) || [];
-        const allergies = parseJsonArrayField(formData.allergies) || [];
-        const quarantine = formData.quarantineDetails || {};
-        const treatment = formData.treatmentDetails || {};
-        
-        let score = 5; // Start at excellent
-        let factors = [];
-
-        // Quarantine assessment - only counts once the start date has arrived (and hasn't ended)
-        if (isStatusPeriodActive(quarantine)) {
-            const qType = quarantine.type || 'unknown';
-            if (qType.includes('Medical') || qType.includes('Illness') || qType.includes('Disease')) {
-                score -= 2;
-                factors.push('Active medical quarantine');
-            } else if (qType.includes('Preventive') || qType.includes('New')) {
-                score -= 1;
-                factors.push('Preventive quarantine (new arrival)');
-            } else {
-                score -= 1.5;
-                factors.push(`${quarantine.status} status`);
-            }
-        }
-
-        // Treatment assessment - only counts once the start date has arrived (and hasn't ended)
-        if (isStatusPeriodActive(treatment)) {
-            score -= 1.5;
-            factors.push(treatment.type ? `Under treatment: ${treatment.type}` : 'Currently under treatment');
-        }
-
-        // Medications count
-        if (medications.length > 0) {
-            const deduction = Math.min(medications.length, 2); // Max 2 points deducted
-            score -= deduction;
-            factors.push(`${medications.length} active medication(s)`);
-        }
-
-        // Conditions count
-        if (conditions.length > 0) {
-            const deduction = Math.min(conditions.length, 2);
-            score -= deduction;
-            factors.push(`${conditions.length} medical condition(s)`);
-        }
-
-        // Allergies
-        if (allergies.length > 2) {
-            score -= 0.5;
-            factors.push(`Multiple allergies (${allergies.length})`);
-        }
-
-        // Determine calculated status
-        let calculatedStatus = 'Excellent';
-        
-        if (score >= 4.5) {
-            calculatedStatus = 'Excellent';
-        } else if (score >= 3.5) {
-            calculatedStatus = 'Good';
-        } else if (score >= 2.5) {
-            calculatedStatus = 'Fair';
-        } else if (score >= 1.5) {
-            calculatedStatus = 'Poor';
-        } else {
-            calculatedStatus = 'Critical';
-        }
-
-        // Determine final status (override if set)
-        const status = healthStatusOverride || calculatedStatus;
-        const isOverridden = !!healthStatusOverride;
-
-        // Color coding
-        const colorMap = {
-            'Excellent': 'bg-green-100 text-green-800 border-green-200',
-            'Good': 'bg-blue-100 text-blue-800 border-blue-200',
-            'Fair': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-            'Poor': 'bg-orange-100 text-orange-800 border-orange-200',
-            'Critical': 'bg-red-100 text-red-800 border-red-200'
-        };
-
-        const badgeColor = colorMap[status] || colorMap['Excellent'];
-
-        return { status, calculatedStatus, badgeColor, score, factors, isOverridden };
-    };
+    // Live preview of the health status pill while editing — mirrors the same formula the
+    // backend persists on save (see utils/healthStatusSync.js's computeHealthStatus).
+    const calculateHealthStatus = () => calculateHealthStatusShared({ ...formData, healthStatusOverride });
 
     const handleQuarantineChange = (e) => {
         const { name, value } = e.target;
@@ -3459,10 +3380,15 @@ const AnimalFormModalV2 = ({
                 delete payloadToSave.isNursing;
             }
 
-            // isQuarantine/isInTreatment are derived from status + start/end dates, not set directly -
-            // this is what the Health tab and dashboards on AnimalList rely on.
+            // isQuarantine is derived from quarantineDetails' status + start/end dates; isInTreatment
+            // is derived from active medications/critical conditions (see medicalStatus.js) — neither
+            // is set directly. The backend recomputes both authoritatively on save regardless, but we
+            // send them here too so the Health tab and AnimalList dashboards reflect the change immediately.
             payloadToSave.isQuarantine = isStatusPeriodActive(payloadToSave.quarantineDetails);
-            payloadToSave.isInTreatment = isStatusPeriodActive(payloadToSave.treatmentDetails);
+            payloadToSave.isInTreatment = computeIsInTreatment({ medications: payloadToSave.medications, medicalConditions: payloadToSave.medicalConditions });
+            // healthStatus is likewise derived (see calculateHealthStatus/computeHealthStatus) — the
+            // backend recomputes it on save, but sending it keeps the optimistic UI in sync too.
+            payloadToSave.healthStatus = calculateHealthStatusShared({ ...payloadToSave, healthStatusOverride }).calculatedStatus;
 
             // Add manual pedigree data
             if (Object.keys(mpEditForm).length > 0) {

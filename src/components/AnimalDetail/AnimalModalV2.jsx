@@ -387,7 +387,7 @@ const AnimalModalV2 = ({
                                                 </span>
                                                 {animal.status && <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><ClipboardList size={12} />{animal.status}</span>}
                                                 {animal.lifeStage && <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5"><Sprout size={12} />{animal.lifeStage}</span>}
-                                                <StatusIndicator status={animal.healthStatus || 'Excellent'} icon={<HeartPulse size={12} />} />
+                                                <StatusIndicator status={animal.healthStatusOverride || animal.healthStatus || 'Excellent'} icon={<HeartPulse size={12} />} />
                                                 {(() => {
                                                     const reproState = getReproductionState(animal);
                                                     return reproState ? <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${reproState.color}`}>{reproState.icon} {reproState.label}</span> : null;
@@ -611,7 +611,7 @@ const AnimalModalV2 = ({
                                         <div>
                                             <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Health Status</label>
                                             <div className="mt-1">
-                                                <StatusIndicator status={animal.healthStatus || 'Excellent'} />
+                                                <StatusIndicator status={animal.healthStatusOverride || animal.healthStatus || 'Excellent'} />
                                             </div>
                                         </div>
                                         {animal.lastVetCheck && (
