@@ -3563,8 +3563,8 @@ useEffect(() => {
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Today</h4>
                                 <ul className="text-xs space-y-1.5">
                                     {reproNeedsAttentionList.map(({ animal, reason }) => (
-                                        <li key={animal.id_public} className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
-                                            <span className="text-gray-700 dark:text-dark-text-secondary">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                        <li key={animal.id_public} className="flex flex-col gap-0.5 p-1.5 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
+                                            <span className="text-gray-700 dark:text-dark-text-secondary font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
                                             <span className="font-medium text-orange-700">{reason}</span>
                                         </li>
                                     ))}
@@ -3600,8 +3600,8 @@ useEffect(() => {
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Now</h4>
                                 <ul className="text-xs space-y-1.5">
                                     {healthNeedsAttentionList.map(({ animal, reason }) => (
-                                        <li key={`${animal.id_public}-${reason}`} className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
-                                            <span className="text-gray-700 dark:text-dark-text-secondary">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                        <li key={`${animal.id_public}-${reason}`} className="flex flex-col gap-0.5 p-1.5 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
+                                            <span className="text-gray-700 dark:text-dark-text-secondary font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
                                             <span className="font-medium text-orange-700">{reason}</span>
                                         </li>
                                     ))}
@@ -5385,9 +5385,9 @@ useEffect(() => {
                                                         </li>
                                                         <ul className="pl-6 space-y-1 text-xs">
                                                             {healthNeedsAttentionList.map(({ animal, reason }) => (
-                                                                <li key={`${animal.id_public}-${reason}`} className="flex justify-between items-center text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
-                                                                    <span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
-                                                                    <span className="font-medium">{reason}</span>
+                                                                <li key={`${animal.id_public}-${reason}`} className="flex flex-col gap-0.5 text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
+                                                                    <span className="font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                                                    <span>{reason}</span>
                                                                 </li>
                                                             ))}
                                                         </ul>
@@ -5401,9 +5401,9 @@ useEffect(() => {
                                                         </li>
                                                         <ul className="pl-6 space-y-1 text-xs">
                                                             {reproNeedsAttentionList.map(({ animal, reason }) => (
-                                                                <li key={`${animal.id_public}-${reason}`} className="flex justify-between items-center text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
-                                                                    <span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
-                                                                    <span className="font-medium">{reason}</span>
+                                                                <li key={`${animal.id_public}-${reason}`} className="flex flex-col gap-0.5 text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
+                                                                    <span className="font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                                                    <span>{reason}</span>
                                                                 </li>
                                                             ))}
                                                         </ul>
