@@ -170,6 +170,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                             {allergies.length > 0 && <DetailJsonList label="Allergies" data={allergies.filter(Boolean)} renderItem={item => `${item.allergen || item.name}`} />}
                             {medications.length > 0 && <DetailJsonList label="Current Medications" data={medications.filter(Boolean)} renderItem={item => {
                                 const parts = [item.name || item.medication];
+                                if (item.reason) parts.push(item.reason);
                                 if (item.dose) parts.push(item.dose);
                                 if (item.intervalValue && item.intervalUnit) parts.push(`every ${item.intervalValue} ${item.intervalUnit}`);
                                 if (item.startDate) parts.push(`from ${formatDate(item.startDate)}`);

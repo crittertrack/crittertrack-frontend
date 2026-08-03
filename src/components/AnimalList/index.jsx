@@ -3705,7 +3705,7 @@ useEffect(() => {
 
                 {isQuarantine ? (
                     <>
-                        <div className="text-xs text-gray-600 truncate"><span className="sm:hidden font-semibold">Reason: </span>{details.reason || '—'}</div>
+                        <div className="text-xs text-gray-600 truncate"><span className="sm:hidden font-semibold">Type/Reason: </span>{[details.type, details.reason].filter(Boolean).join(' — ') || '—'}</div>
                         <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Start: </span>{details.startDate ? formatDateShort(details.startDate) : '—'}</div>
                         <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">End: </span>{details.endDate ? formatDateShort(details.endDate) : '—'}</div>
                     </>
@@ -3721,7 +3721,7 @@ useEffect(() => {
                                 return (
                                     <div key={i} className="leading-tight flex items-center gap-1.5 flex-wrap">
                                         <span>
-                                            <span className="font-medium text-gray-700">{m.name || m.medication}</span>
+                                            <span className="font-medium text-gray-700">{m.name || m.medication}{m.reason ? ` — ${m.reason}` : ''}</span>
                                             <span className="text-blue-500"> {[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-500 ml-1">· {nextLabel}</span> : null}</span>
                                         </span>
                                         {m.intervalValue && (
@@ -4508,7 +4508,7 @@ useEffect(() => {
                                                                     <div className="col-span-2">Animal</div>
                                                                     {section.key === 'quarantine' ? (
                                                                         <>
-                                                                            <div>Reason</div>
+                                                                            <div>Type/Reason</div>
                                                                             <div>Start Date</div>
                                                                             <div>End Date</div>
                                                                         </>
