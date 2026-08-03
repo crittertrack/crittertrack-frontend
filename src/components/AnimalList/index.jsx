@@ -2124,7 +2124,12 @@ useEffect(() => {
                 const days = daysSince(litter.expectedDueDate);
                 if (days !== null && days >= 0) items.push({ animal: dam, reason: dueLabel(days, 'Due date is today'), view: 'pregnant' });
             }
-            if (litter.birthDate && litter.weaningDate && dam) {
+            // Skip litters already weaned/closed, and rely on the dam's isNursing flag when
+            // available — the backend auto-closes it past the species' maxNursingDays safety-net
+            // cutoff (see utils/reproStatusSync.js), so a litter nobody marked "Wean Today" for
+            // doesn't alert forever once it's well past any realistic nursing window.
+            const stillNursing = dam ? !!dam.isNursing : (!litter.weaningConfirmed && !litter.pregnancyLost);
+            if (litter.birthDate && litter.weaningDate && dam && stillNursing) {
                 const days = daysSince(litter.weaningDate);
                 if (days !== null && days >= 0) items.push({ animal: dam, reason: dueLabel(days, 'Weaning date is today'), view: 'nursing' });
             }
