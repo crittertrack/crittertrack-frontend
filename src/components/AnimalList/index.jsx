@@ -1999,31 +1999,27 @@ useEffect(() => {
         return map;
     }, [litters]);
 
-    const allReproductiveAnimals = useMemo(() => allAnimals
-        .filter(a => a.isPlannedMating || a.isInMating || a.isPregnant || a.isNursing)
-        .map(a => {
-            const litterInfo = activeReproEventsByAnimal.get(a.id_public) || {}; // Provide a default empty object if no litter info
-            return {
-                ...a,
-                // The animal's own flags (isNursing, etc.) are now the source of truth.
-                // We just add litter dates for display context if available.
-                matingDate: litterInfo.matingDate,
-                dueDate: litterInfo.dueDate,
-                birthDate: litterInfo.birthDate,
-                weaningDate: litterInfo.weaningDate,
-                _litterId: litterInfo._litterId,
-            };
-        }), [allAnimals, activeReproEventsByAnimal]);
+    const mergeLitterData = useCallback((animal) => {
+        const litterInfo = activeReproEventsByAnimal.get(animal.id_public) || {};
+        return {
+            ...animal,
+            matingDate: litterInfo.matingDate,
+            dueDate: litterInfo.dueDate,
+            birthDate: litterInfo.birthDate,
+            weaningDate: litterInfo.weaningDate,
+            _litterId: litterInfo._litterId,
+        };
+    }, [activeReproEventsByAnimal]);
 
-    const plannedMatingList = useMemo(() => allReproductiveAnimals.filter(a => a.isPlannedMating && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
-    const matingList = useMemo(() => allReproductiveAnimals.filter(a => a.isInMating && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
-    const pregnantList = useMemo(() => allReproductiveAnimals.filter(a => a.isPregnant && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
-    const nursingList = useMemo(() => allReproductiveAnimals.filter(a => a.isNursing && !inReproEnclosure(a)), [allReproductiveAnimals, inReproEnclosure]);
+    const plannedMatingList = useMemo(() => allAnimals.filter(a => a.isPlannedMating && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
+    const matingList = useMemo(() => allAnimals.filter(a => a.isInMating && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
+    const pregnantList = useMemo(() => allAnimals.filter(a => a.isPregnant && a.gender !== 'Male' && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
+    const nursingList = useMemo(() => allAnimals.filter(a => a.isNursing && a.gender !== 'Male' && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
     const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
     const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays)); // This is for the Feeding management view
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
     const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(isTaskDue).length, 0);
-    const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
+    const reproTotal = matingList.length + pregnantList.length + nursingList.length;
     const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
     const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
     const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
@@ -4051,14 +4047,18 @@ useEffect(() => {
                                 <div className="p-3">
                                     {reproEnclosures.length === 0
                                         ? <div className="text-xs text-gray-400 text-center py-4">No breeding/nursery enclosures.</div>
-                                        : ( <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                {reproEnclosures.map(enclosure => ( <EnclosureCard key={enclosure._id} enclosure={enclosure} /> ))}
-                                            </div> )
+                                        : (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                                {reproEnclosures.map(enclosure => (
+                                                    <EnclosureCard key={enclosure._id} enclosure={enclosure} onViewAnimal={onViewAnimal} />
+                                                ))}
+                                            </div>
+                                        )
                                     }
                                 </div>
                             </div>
                             {(() => {
-                                 const reproSections = [
+                                const reproSections = [
                                     { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700" />, headerClass: 'bg-indigo-50 border-b border-indigo-100' },
                                     { key: 'mating', title: 'Currently In Mating', list: matingList, icon: <Heart size={16} className="text-purple-700" />, headerClass: 'bg-purple-50 border-b border-purple-100' },
                                     { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={16} className="text-pink-700" />, headerClass: 'bg-pink-50 border-b border-pink-100' },
@@ -4069,8 +4069,8 @@ useEffect(() => {
 
                                 return (
                                     <div className="space-y-4">
-                                        {reproSections.map(section => section.list.length > 0 && (
-                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
+                                        {reproSections.map(section => (
+                                            section.list.length > 0 && <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
                                                 <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`repro_${section.key}`)}>
                                                     <div className="flex items-center gap-3">
                                                         {section.icon}
@@ -4121,10 +4121,8 @@ useEffect(() => {
                                         <span className="text-xs font-semibold text-gray-700">Enclosures</span>
                                         <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{healthEnclosures.length}</span>
                                     </div>
-                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setHealthEncFormVisible(false); setEnclosureImageFile(null); setEnclosureImagePreview(null); } else { setNewEnclosureForm({ name: '', enclosureType: '', location: '', dimensions: '', capacity: '', tempMin: '', tempMax: '', humidityMin: '', humidityMax: '', lightingSchedule: '', notes: '', tags: [], speciesLabels: [], cleaningTasks: [], purpose: 'health', imageUrl: '' }); setEnclosureImageFile(null); setEnclosureImagePreview(null); setHealthEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
-                                        <button onClick={() => openEnclosureModal(null, { purpose: 'health' })} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
-                                            <Plus size={11} /> Add
-                                        </button>
+                                    <button onClick={() => openEnclosureModal(null, { purpose: 'health' })} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
+                                        <Plus size={11} /> Add
                                     </button>
                                 </div>
                                 <div className="p-3">
@@ -4142,60 +4140,66 @@ useEffect(() => {
                             </div>
                             {(() => {
                                 const unassignedHealthAnimals = [...quarantineList, ...treatmentList];
-                                return unassignedHealthAnimals.length === 0 ? null : (
+                                return (
                                     <div>
                                         <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('health_unassigned')}>
                                             {collapsedMgmtGroups['health_unassigned'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Unassigned ({unassignedHealthAnimals.length})</span>
                                         </div>
                                         {!collapsedMgmtGroups['health_unassigned'] && (
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {unassignedHealthAnimals.map(a => {
-                                                    const conds = parseArrayField(a.medicalConditions);
-                                                    const meds = parseArrayField(a.medications);
-                                                    const isTreatment = a.isInTreatment && !a.isQuarantine;
-                                                    const hasHealthState = a.isQuarantine || isTreatment;
-                                                    return (
-                                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                            hideControls hideBreedingLines
-                                                            cardActions={<>
-                                                                {hasHealthState ? (
-                                                                    <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                                        {isTreatment ? 'Treatment' : 'Quarantine'}
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full bg-gray-100 text-gray-500">
-                                                                        No health status
-                                                                    </div>
-                                                                )}
-                                                                {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                                {isTreatment && meds.length > 0 && meds.slice(0, 2).map((m, i) => {
-                                                                    const next = calcNextDose(m);
-                                                                    const nextLabel = next ? formatNextDose(next) : null;
-                                                                    const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
-                                                                    return (
-                                                                        <div key={i} className="text-[10px] text-blue-600 w-full text-center leading-tight">
-                                                                            <span className="font-medium truncate block">{m.name || m}</span>
-                                                                            <span className="text-blue-400">{[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
+                                            unassignedHealthAnimals.length > 0 ? (
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                    {unassignedHealthAnimals.map(a => {
+                                                        const conds = parseArrayField(a.medicalConditions);
+                                                        const meds = parseArrayField(a.medications);
+                                                        const isTreatment = a.isInTreatment && !a.isQuarantine;
+                                                        const hasHealthState = a.isQuarantine || isTreatment;
+                                                        return (
+                                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                                hideControls hideBreedingLines
+                                                                cardActions={<>
+                                                                    {hasHealthState ? (
+                                                                        <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                            {isTreatment ? 'Treatment' : 'Quarantine'}
                                                                         </div>
-                                                                    );
-                                                                })}
-                                                                {a.isQuarantine
-                                                                    ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
-                                                                    : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>
-                                                                }
-                                                                {assigningAnimalId === a.id_public
-                                                                    ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-orange-300 rounded p-1 w-full">
-                                                                        <option value="" disabled>{healthEnclosures.length === 0 ? 'No enclosures yet' : 'Select enclosure...'}</option>
-                                                                        {healthEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
-                                                                      </select>
-                                                                    : <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-orange-500 hover:text-orange-700 border border-orange-200 rounded px-1.5 py-0.5 w-full">Assign enclosure</button>
-                                                                }
-                                                            </>}
-                                                        />
-                                                    );
-                                                })}
-                                            </div>
+                                                                    ) : (
+                                                                        <div className="text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full bg-gray-100 text-gray-500">
+                                                                            No health status
+                                                                        </div>
+                                                                    )}
+                                                                    {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
+                                                                    {isTreatment && meds.length > 0 && meds.slice(0, 2).map((m, i) => {
+                                                                        const next = calcNextDose(m);
+                                                                        const nextLabel = next ? formatNextDose(next) : null;
+                                                                        const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
+                                                                        return (
+                                                                            <div key={i} className="text-[10px] text-blue-600 w-full text-center leading-tight">
+                                                                                <span className="font-medium truncate block">{m.name || m}</span>
+                                                                                <span className="text-blue-400">{[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                    {a.isQuarantine
+                                                                        ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
+                                                                        : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>
+                                                                    }
+                                                                    {assigningAnimalId === a.id_public
+                                                                        ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-orange-300 rounded p-1 w-full">
+                                                                            <option value="" disabled>{healthEnclosures.length === 0 ? 'No enclosures yet' : 'Select enclosure...'}</option>
+                                                                            {healthEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
+                                                                          </select>
+                                                                        : <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-orange-500 hover:text-orange-700 border border-orange-200 rounded px-1.5 py-0.5 w-full">Assign enclosure</button>
+                                                                    }
+                                                                </>}
+                                                            />
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <div className="text-center text-sm text-gray-400 py-4">
+                                                    No animals in this section.
+                                                </div>
+                                            )
                                         )}
                                     </div>
                                 );
