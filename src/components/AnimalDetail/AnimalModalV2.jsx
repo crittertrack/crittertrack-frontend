@@ -202,16 +202,15 @@ const AnimalModalV2 = ({
         run();
     }, [authToken, API_BASE_URL, animal?.id_public]);
 
-    // Fetch litters where this animal is sire or dam
+    // Fetch litters where this animal is sire or dam — includes litters registered by
+    // OTHER users using this animal, not just ones this user created themselves.
     useEffect(() => {
         if (!animal?.id_public || !authToken) return;
         let cancelled = false;
-        axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
+        axios.get(`${API_BASE_URL}/litters/for-animal/${animal.id_public}`, { headers: { Authorization: `Bearer ${authToken}` } })
             .then(res => {
                 if (cancelled) return;
-                const linked = (res.data || []).filter(l =>
-                    l.sireId_public === animal.id_public || l.damId_public === animal.id_public
-                );
+                const linked = res.data || [];
                 setAnimalLitters(linked);
                 linked.forEach(litter => {
                     const lid = litter.litter_id_public;
@@ -955,8 +954,10 @@ const AnimalModalV2 = ({
                                     const pedItems = (pedigreeOffspring || []).map(l => ({ ...l, _recordType: 'pedigree' }));
                                     const _offspringToday = new Date();
                                     const allRecords = [...litterItems, ...pedItems].sort((a, b) => {
-                                        const aIsMated = a.isPlanned && a.matingDate && new Date(a.matingDate) <= _offspringToday;
-                                        const bIsMated = b.isPlanned && b.matingDate && new Date(b.matingDate) <= _offspringToday;
+                                        // isPlanned only clears via the explicit "Mated Today" action, so a past
+                                        // matingDate alone must not be treated as "mated" (see reproStatusSync.js).
+                                        const aIsMated = !a.isPlanned && !!a.matingDate && !a.pregnancyDate && !a.birthDate;
+                                        const bIsMated = !b.isPlanned && !!b.matingDate && !b.pregnancyDate && !b.birthDate;
                                         const aRank = aIsMated ? 0 : a.isPlanned ? 1 : 2;
                                         const bRank = bIsMated ? 0 : b.isPlanned ? 1 : 2;
                                         if (aRank !== bRank) return aRank - bRank;
@@ -982,8 +983,10 @@ const AnimalModalV2 = ({
                                                         const mate = isSire ? litter.dam : litter.sire;
                                                         const isExpanded = expandedBreedingRecords[lid];
                                                         const displayName = litter.breedingPairCodeName;
-                                                        const lIsMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= _offspringToday;
-                                                        const lIsPlannedOnly = litter.isPlanned && !lIsMated;
+                                                        // isPlanned only clears via the explicit "Mated Today" action, so a past
+                                                        // matingDate alone must not be treated as "mated" (see reproStatusSync.js).
+                                                        const lIsMated = !litter.isPlanned && !!litter.matingDate && !litter.pregnancyDate && !litter.birthDate;
+                                                        const lIsPlannedOnly = !!litter.isPlanned && !litter.pregnancyDate && !litter.birthDate;
                                                         const lIsPregnant = !!litter.pregnancyDate && !litter.birthDate;
                                                         return (
                                                             <div key={lid} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>

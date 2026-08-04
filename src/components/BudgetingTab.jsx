@@ -630,7 +630,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         {/* Transaction Type Selection Screen */}
                         {!editingTransaction && showTypeSelection ? (
                             <div className="space-y-6">
-                                <p className="text-center text-gray-600 mb-8">What type of transaction would you like to add?</p>
+                                <p className="text-center text-gray-600 mb-2">What type of transaction would you like to add?</p>
+                                <p className="text-center text-xs text-gray-400 mb-8">These are manual entries only and won't transfer ownership. To transfer an animal to another user, use the <strong>Transfer</strong> button on that animal instead.</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <button
                                         type="button"

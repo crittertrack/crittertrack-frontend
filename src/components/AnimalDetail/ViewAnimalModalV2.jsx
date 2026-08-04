@@ -934,8 +934,10 @@ const ViewAnimalModalV2 = ({
                                     const pedItems = (pedigreeOffspring || []).map(l => ({ ...l, _recordType: 'pedigree' }));
                                     const _offspringToday = new Date();
                                     const allRecords = [...litterItems, ...pedItems].sort((a, b) => {
-                                        const aIsMated = a.isPlanned && a.matingDate && new Date(a.matingDate) <= _offspringToday;
-                                        const bIsMated = b.isPlanned && b.matingDate && new Date(b.matingDate) <= _offspringToday;
+                                        // isPlanned only clears via the explicit "Mated Today" action, so a past
+                                        // matingDate alone must not be treated as "mated" (see reproStatusSync.js).
+                                        const aIsMated = !a.isPlanned && !!a.matingDate && !a.pregnancyDate && !a.birthDate;
+                                        const bIsMated = !b.isPlanned && !!b.matingDate && !b.pregnancyDate && !b.birthDate;
                                         const aRank = aIsMated ? 0 : a.isPlanned ? 1 : 2;
                                         const bRank = bIsMated ? 0 : b.isPlanned ? 1 : 2;
                                         if (aRank !== bRank) return aRank - bRank;
@@ -961,8 +963,10 @@ const ViewAnimalModalV2 = ({
                                                         const mate = isSire ? litter.dam : litter.sire;
                                                         const isExpanded = expandedBreedingRecords[lid];
                                                         const displayName = litter.breedingPairCodeName;
-                                                        const lIsMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= _offspringToday;
-                                                        const lIsPlannedOnly = litter.isPlanned && !lIsMated;
+                                                        // isPlanned only clears via the explicit "Mated Today" action, so a past
+                                                        // matingDate alone must not be treated as "mated" (see reproStatusSync.js).
+                                                        const lIsMated = !litter.isPlanned && !!litter.matingDate && !litter.pregnancyDate && !litter.birthDate;
+                                                        const lIsPlannedOnly = !!litter.isPlanned && !litter.pregnancyDate && !litter.birthDate;
                                                         const lIsPregnant = !!litter.pregnancyDate && !litter.birthDate;
                                                         return (
                                                             <div key={lid} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>

@@ -2421,7 +2421,7 @@ const AnimalFormModalV2 = ({
             suffix: '',
             name: '',
             gender: 'Unknown',
-            birthDate: '',
+            birthDate: initialValues?.birthDate || '',
             deceasedDate: '',
             status: 'Pet',
             color: '',
@@ -2430,9 +2430,9 @@ const AnimalFormModalV2 = ({
             remarks: '',
             tags: [],
             geneticCode: '',
-            fatherId_public: null,
-            motherId_public: null,
-            breederId_public: null,
+            fatherId_public: initialValues?.fatherId_public || null,
+            motherId_public: initialValues?.motherId_public || null,
+            breederId_public: initialValues?.breederId_public || null,
             manualownerName: '',
             groupRole: '',
             enclosureId: '',
@@ -3147,8 +3147,8 @@ const AnimalFormModalV2 = ({
 
         allSlots.forEach(k => { if (pedigree[k]?.mode === 'ctc' && pedigree[k]?.ctcId) enqueue(k, pedigree[k].ctcId, pedigree[k].notes || ''); });
 
-        const sireId = animalToEdit?.fatherId_public || animalToEdit?.sireId_public;
-        const damId  = animalToEdit?.motherId_public || animalToEdit?.damId_public;
+        const sireId = animalToEdit?.fatherId_public || animalToEdit?.sireId_public || initialValues?.fatherId_public;
+        const damId  = animalToEdit?.motherId_public || animalToEdit?.damId_public || initialValues?.motherId_public;
         if (sireId && !pedigree.sire?.ctcId) enqueue('sire', sireId);
         if (damId  && !pedigree.dam?.ctcId)  enqueue('dam',  damId);
 
@@ -3173,7 +3173,7 @@ const AnimalFormModalV2 = ({
         };
 
         processQueue();
-    }, [activeTab, authToken, API_BASE_URL, animalToEdit?.manualPedigree]);
+    }, [activeTab, authToken, API_BASE_URL, animalToEdit?.manualPedigree, initialValues]);
 
     // Fetch medication supplies when switching to supply mode
     useEffect(() => {
@@ -5960,7 +5960,7 @@ const AnimalFormModalV2 = ({
                                         <Dna size={18} className="text-orange-500" />
                                         <h3 className="text-base font-semibold text-gray-700">Pedigree</h3>
                                     </div>
-                                    <p className="text-xs text-gray-400 -mt-3">This Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Changes are saved when you click Save Animal.</p>
+                                    <p className="text-xs text-gray-400 -mt-3">This Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Manual ancestors are also specific to this animal only — they do not seed or propagate to siblings, offspring, or any other relative's pedigree. Changes are saved when you click Save Animal.</p>
 
                                     <div>
                                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>

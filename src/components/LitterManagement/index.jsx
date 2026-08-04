@@ -8,6 +8,7 @@ import {
     Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
 } from 'lucide-react';
 import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
+import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
 import { matchFancyRatPhenotype } from '../../data/fancyRatPhenotypeRules';
@@ -1174,10 +1175,31 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 });
                 litterBackendId = editingMatingId;
             } else {
-                const resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                litterBackendId = resp.data.litterId_backend;
+                try {
+                    const resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    litterBackendId = resp.data.litterId_backend;
+                } catch (createError) {
+                    const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
+                    if (!duplicate) throw createError;
+                    const resolution = await resolveDuplicateLitter({ duplicate, authToken, API_BASE_URL });
+                    if (resolution.action === 'adopted') {
+                        showModalMessage('Success', 'Adopted the existing litter into your Litter Management!');
+                        setShowAddMatingForm(false);
+                        resetMatingForm();
+                        await fetchLitters();
+                        return;
+                    }
+                    if (resolution.action === 'create-anyway') {
+                        const retryResp = await axios.post(`${API_BASE_URL}/litters`, { ...payload, confirmDuplicate: true }, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        litterBackendId = retryResp.data.litterId_backend;
+                    } else {
+                        return;
+                    }
+                }
             }
             if (matingCOI != null) {
                 axios.put(`${API_BASE_URL}/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI }, {
@@ -1411,9 +1433,30 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 unknownLossesCount: formData.unknownLosses || null
             };
 
-            const litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            let litterResponse;
+            try {
+                litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            } catch (createError) {
+                const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
+                if (!duplicate) throw createError;
+                const resolution = await resolveDuplicateLitter({ duplicate, authToken, API_BASE_URL });
+                if (resolution.action === 'adopted') {
+                    showModalMessage('Success', 'Adopted the existing litter into your Litter Management!');
+                    setShowAddForm(false);
+                    setEditingLitter(null);
+                    fetchLitters();
+                    return;
+                }
+                if (resolution.action === 'create-anyway') {
+                    litterResponse = await axios.post(`${API_BASE_URL}/litters`, { ...litterPayload, confirmDuplicate: true }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                } else {
+                    return; // user cancelled
+                }
+            }
 
             const litterId = litterResponse.data.litterId_backend;
 

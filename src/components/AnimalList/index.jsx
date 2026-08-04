@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
+import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
 import { computeIsInTreatment, HEALTH_STATUS_TEXT_COLORS, remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import DatePicker from '../DatePicker';
 import EnclosureModal from '../EnclosureModal';
@@ -495,30 +496,6 @@ const AnimalList = ({
             setSoldTransferredRaw((res.data || []).filter(a => a.isViewOnly));
         } catch (err) { console.error('[fetchSoldTransferred]', err); }
     }, [authToken, API_BASE_URL]);
-
-const handleArchive = useCallback(async (animalToArchive) => {
-        if (!animalToArchive) return;
-        const isArchived = !!animalToArchive.archived;
-        const action = isArchived ? 'unarchive' : 'archive';
-        if (!window.confirm(`Are you sure you want to ${action} this animal?`)) return;
-
-        try {
-            const url = `${API_BASE_URL}/animals/${animalToArchive.id_public}/${action}`;
-            const res = await axios.post(url, {}, { headers: { Authorization: `Bearer ${authToken}` } });
-            
-            window.dispatchEvent(new CustomEvent('animal-updated', { detail: res.data }));
-            window.dispatchEvent(new Event('animals-changed'));
-            
-            showModalMessage('Success', `Animal ${action}d successfully.`);
-            
-            if (viewingAnimal && viewingAnimal.id_public === animalToArchive.id_public) {
-                onClose();
-            }
-        } catch (err) {
-            showModalMessage('Error', err.response?.data?.message || `Failed to ${action} animal.`);
-        }
-    }, [API_BASE_URL, authToken, showModalMessage, viewingAnimal, onClose]);
-
 
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
@@ -2538,18 +2515,18 @@ useEffect(() => {
         try {
             setLoading(true);
             for (const id of selectedIds) {
-                await axios.post(`${API_BASE_URL}/animals/${id}/archive`, {}, {
+                // Archive endpoint is a RESTful PUT with { archived: true } on the animal resource
+                // itself — there is no separate POST /:id/archive command endpoint on the backend.
+                await axios.put(`${API_BASE_URL}/animals/${id}`, { archived: true }, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
             }
+            window.dispatchEvent(new Event('animals-changed'));
             showModalMessage('Success', `Successfully archived ${selectedIds.length} animal(s).`);
             setBulkArchiveMode(prev => ({ ...prev, [species]: false }));
             setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
             await fetchAnimals();
             await fetchAllAnimals();
-            if (showArchiveScreen) {
-                await fetchArchiveData();
-            }
         } catch (error) {
             console.error('Error archiving animals:', error);
             showModalMessage('Error', 'Failed to archive some animals. Please try again.');
@@ -5172,9 +5149,30 @@ useEffect(() => {
                 isPlanned: true,
                 numberBorn: 0,
             };
-            const resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            let resp;
+            try {
+                resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            } catch (createError) {
+                const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
+                if (!duplicate) throw createError;
+                const resolution = await resolveDuplicateLitter({ duplicate, authToken, API_BASE_URL });
+                if (resolution.action === 'adopted') {
+                    showModalMessage('Success', 'Adopted the existing litter into your Litter Management!');
+                    setShowAddMatingForm(false);
+                    resetMatingForm();
+                    await fetchLitters();
+                    return;
+                }
+                if (resolution.action === 'create-anyway') {
+                    resp = await axios.post(`${API_BASE_URL}/litters`, { ...payload, confirmDuplicate: true }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                } else {
+                    return;
+                }
+            }
             const litterBackendId = resp.data.litterId_backend;
             if (matingCOI != null) {
                 axios.put(`${API_BASE_URL}/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI }, {
