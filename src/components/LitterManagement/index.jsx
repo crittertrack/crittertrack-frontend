@@ -4,7 +4,7 @@ import {
     Baby, Bell, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
     ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList,
     Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
-    Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, Search, Star,
+    Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, ScrollText, Search, Star,
     Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
 } from 'lucide-react';
 import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
@@ -12,6 +12,7 @@ import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
 import { matchFancyRatPhenotype } from '../../data/fancyRatPhenotypeRules';
+import { PedigreeChart } from '../AnimalForm';
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
@@ -688,6 +689,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
     const [editingLitter, setEditingLitter] = useState(null);
+    const [certLitter, setCertLitter] = useState(null); // { litter_id_public, vertical }
     const [litterImages, setLitterImages] = useState([]);
     const [litterImageUploading, setLitterImageUploading] = useState(false);
     const [pendingLitterImages, setPendingLitterImages] = useState([]);
@@ -3970,6 +3972,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                 <span className="hidden sm:inline">Edit</span>
                                             </button>
+                                            {(sire || dam) && (
+                                                <>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setCertLitter({ litter_id_public: litter.litter_id_public, vertical: false }); }}
+                                                        className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    >
+                                                        <ScrollText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                        <span className="hidden sm:inline">Horizontal Pedigree</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setCertLitter({ litter_id_public: litter.litter_id_public, vertical: true }); }}
+                                                        className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    >
+                                                        <ScrollText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                        <span className="hidden sm:inline">Vertical Pedigree</span>
+                                                    </button>
+                                                </>
+                                            )}
                                             {!litter.isPlanned && <button
                                                 onClick={() => handleLinkAnimals(litter)}
                                                 data-tutorial-target="link-animals-btn"
@@ -5161,6 +5181,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </button>
                     </div>
                 </div>
+            )}
+
+            {certLitter && (
+                <PedigreeChart
+                    litterId={certLitter.litter_id_public}
+                    vertical={certLitter.vertical}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                    onClose={() => setCertLitter(null)}
+                    onViewAnimal={onViewAnimal}
+                />
             )}
         </div>
     );

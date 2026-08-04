@@ -266,7 +266,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
 };
 
 
-const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
+const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [currentViewingAnimal, setCurrentViewingAnimal] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null); // breeder (breederId_public)
@@ -400,9 +400,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         // Note: inline mode still does the full recursive fetch so all ancestor generations load.
 
         const fetchPedigreeData = async () => {
-            const rootId = animalId || animalData?.id_public;
+            const rootId = litterId || animalId || animalData?.id_public;
             const authScope = authToken ? 'auth' : 'public';
-            const cacheKey = rootId ? `${authScope}:${rootId}` : null;
+            const cacheKey = rootId ? `${authScope}:${litterId ? 'litter:' : ''}${rootId}` : null;
             const cachedEntry = cacheKey ? pedigreeTreeCache.get(cacheKey) : null;
             if (cacheKey && isPedigreeCacheFresh(cachedEntry)) {
                 setPedigreeData(cachedEntry?.data || null);
@@ -556,7 +556,28 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     return result;
                 };
 
-                const data = await fetchAnimalWithFamily(rootId);
+                let data;
+                if (litterId) {
+                    // Litter root: fetch the litter record, then build full ancestor trees for its sire/dam
+                    const litterResponse = await axios.get(`${API_BASE_URL}/litters/${litterId}`, {
+                        headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
+                    });
+                    const litterInfo = litterResponse.data;
+                    const [sireTree, damTree] = await Promise.all([
+                        litterInfo?.sireId_public ? fetchAnimalWithFamily(litterInfo.sireId_public) : null,
+                        litterInfo?.damId_public ? fetchAnimalWithFamily(litterInfo.damId_public) : null,
+                    ]);
+                    data = {
+                        id_public: litterInfo?.litter_id_public || litterId,
+                        isLitterRoot: true,
+                        litterInfo,
+                        species: sireTree?.species || damTree?.species || null,
+                        father: sireTree,
+                        mother: damTree,
+                    };
+                } else {
+                    data = await fetchAnimalWithFamily(rootId);
+                }
                 setPedigreeData(data);
 
                 // Fetch breeder profile for the main animal
@@ -605,7 +626,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         };
 
         fetchPedigreeData();
-    }, [animalId, animalData?.id_public, API_BASE_URL, authToken]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [animalId, animalData?.id_public, litterId, API_BASE_URL, authToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Re-fetch pedigree when clicking an ancestor (currentViewingAnimal changes)
     useEffect(() => {
@@ -1144,6 +1165,57 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     };
     const renderCertMainCard = (animal) => {
         if (!animal) return null;
+        if (animal.isLitterRoot) {
+            const litter = animal.litterInfo || {};
+            const imgSrc = litter.images?.[0]?.url || null;
+            const idLabel = [litter.litter_id_public, litter.breedingPairCodeName].filter(Boolean).join(' · ');
+            const totalBorn = litter.litterSizeBorn ?? litter.numberBorn ?? null;
+            return (
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: '#f3f4f6', border: `1px solid ${certBorderColor}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
+                    {/* Photo */}
+                    <div className="hide-for-pdf" style={{ width: 115, height: 115, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${certBorderColor}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {imgSrc ? (
+                            <AnimalImage src={imgSrc} alt={idLabel} className="w-full h-full object-cover" iconSize={46} />
+                        ) : (
+                            <Cat size={46} style={{ color: '#9ca3af' }} />
+                        )}
+                    </div>
+                    {/* Details */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ marginBottom: 4 }}>
+                            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: certFontColor }}>{idLabel || 'Litter'}</span>
+                        </div>
+                        <table style={{ borderCollapse: 'collapse', fontSize: '0.7rem' }}>
+                            <tbody>
+                                <tr>
+                                    <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
+                                    <td style={{ color: certFontColor }}>{litter.birthDate ? formatDate(litter.birthDate) : '—'}</td>
+                                </tr>
+                                <tr>
+                                    <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>COI:</td>
+                                    <td style={{ color: certFontColor }}>{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</td>
+                                </tr>
+                                <tr>
+                                    <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Born:</td>
+                                    <td style={{ color: certFontColor }}>
+                                        {totalBorn != null ? totalBorn : '—'}
+                                        {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                            <span style={{ marginLeft: 6 }}>
+                                                <span style={{ color: '#3b82f6', fontWeight: 700 }}>{litter.maleCount ?? 0}M</span>
+                                                {' / '}
+                                                <span style={{ color: '#934E69', fontWeight: 700 }}>{litter.femaleCount ?? 0}F</span>
+                                                {' / '}
+                                                <span style={{ color: '#7c3aed', fontWeight: 700 }}>{litter.unknownCount ?? 0}U</span>
+                                            </span>
+                                        )}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        }
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
         const variety = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
         const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
