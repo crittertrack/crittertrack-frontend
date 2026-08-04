@@ -1932,10 +1932,6 @@ useEffect(() => {
     const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
     const inReproEnclosure = a => a.enclosureId && reproEnclosureIds.has(a.enclosureId);
 
-    const supplyReorderDue = supplies.filter(s =>
-        (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
-        (s.nextOrderDate && new Date(s.nextOrderDate) < today)
-    );
     const healthEnclosures = enclosures.filter(e => e.purpose === 'medical' || e.purpose === 'quarantine');
     const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
     const inHealthEnclosure = useCallback(a => a.enclosureId && healthEnclosureIds.has(a.enclosureId), [healthEnclosureIds]);
@@ -2156,8 +2152,6 @@ useEffect(() => {
     );
     const trainingScheduleDue = trainingScheduleEntries.filter(entry => isDue(entry.animal[entry.key]?.lastDoneDate, entry.animal[entry.key]?.frequencyDays));
     const trainingScheduleOk = trainingScheduleEntries.filter(entry => !isDue(entry.animal[entry.key]?.lastDoneDate, entry.animal[entry.key]?.frequencyDays));
-    const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
-    const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(isTaskDue).length, 0) + supplyReorderDue.length;
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
     const enclosureAnimalMap = {}; // { enclosureId: [animals] }
@@ -3899,61 +3893,34 @@ useEffect(() => {
 
         // Shared renderer for the Grooming & Special Care / Training clusters — each is a flat list of
         // {animal, key, label} schedule entries (one per assigned dedicated task) split into Due/Up to Date.
-        const renderScheduleCluster = ({ sectionKey, icon, title, dueList, okList, groupPrefix }) => {
+        const renderScheduleCluster = ({ sectionKey, icon, title, dueList, okList }) => {
             const total = dueList.length + okList.length;
+            const list = [...dueList, ...okList];
             return (
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey={sectionKey} icon={icon} title={title}
                         count={dueList.length > 0 ? `${dueList.length} due` : total} bgClass="bg-teal-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections[sectionKey] || !!view) && (
-                        <div className="p-3 space-y-4">
-                            {(() => {
-                                const sections = [
-                                    { key: 'due', title: 'Due Today / Overdue', list: dueList, headerClass: 'bg-red-50 border-b border-red-100', dotClass: 'bg-red-500', emptyText: 'Nothing due or overdue.' },
-                                    { key: 'ok', title: 'Up to Date', list: okList, headerClass: 'bg-green-50 border-b border-green-100', dotClass: 'bg-green-500', emptyText: 'No assigned schedules yet — set one up in the animal\'s Routine Care or Behavior tab.' },
-                                ];
-                                return (
-                                    <div className="space-y-4">
-                                        {sections.map(section => (
-                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
-                                                <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`${groupPrefix}_${section.key}`)}>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className={`w-2.5 h-2.5 rounded-full inline-block ${section.dotClass}`} />
-                                                        <span className="font-semibold text-gray-800 text-base">{section.title}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{section.list.length}</span>
-                                                        {collapsedMgmtGroups[`${groupPrefix}_${section.key}`] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
-                                                    </div>
-                                                </div>
-                                                {!collapsedMgmtGroups[`${groupPrefix}_${section.key}`] && (
-                                                    <div className="p-2 space-y-1 bg-white">
-                                                        {section.list.length === 0 ? (
-                                                            <div className="text-center text-sm text-gray-400 py-4">{section.emptyText}</div>
-                                                        ) : (
-                                                            <>
-                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
-                                                                    <div className="col-span-2">Animal</div>
-                                                                    <div>Last Done</div>
-                                                                    <div>Frequency</div>
-                                                                    <div className="col-span-2">Task</div>
-                                                                    <div className="text-center">Status</div>
-                                                                    <div className="text-right pr-2">Action</div>
-                                                                </div>
-                                                                {section.list.map(entry => (
-                                                                    <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key}
-                                                                        onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal}
-                                                                        handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />
-                                                                ))}
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
+                        <div className="p-3">
+                            {list.length === 0 ? (
+                                <div className="text-center text-sm text-gray-400 py-4">No assigned schedules yet — set one up in the animal's Routine Care or Behavior tab.</div>
+                            ) : (
+                                <div className="p-2 space-y-1 bg-white border border-gray-200 rounded-lg">
+                                    <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                        <div className="col-span-2">Animal</div>
+                                        <div>Last Done</div>
+                                        <div>Frequency</div>
+                                        <div className="col-span-2">Task</div>
+                                        <div className="text-center">Status</div>
+                                        <div className="text-right pr-2">Action</div>
                                     </div>
-                                );
-                            })()}
+                                    {list.map(entry => (
+                                        <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key}
+                                            onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal}
+                                            handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -4083,43 +4050,6 @@ useEffect(() => {
                     setAvailableAnimalsRaw(prev => [...prev, { ...animal }]);
                     setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Available' } : a));
                 });
-        };
-
-        const handleMarkEnclosureTaskDone = async (e, enc, taskIdx) => {
-            e.stopPropagation();
-            const task = enc.cleaningTasks?.[taskIdx];
-            if (!task) return;
-
-            const updated = [...(enc.cleaningTasks || [])];
-            updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
-            // Optimistic update
-            setEnclosures(prev => prev.map(ex => ex._id === enc._id ? { ...ex, cleaningTasks: updated } : ex));
-
-            // Create a history entry for this action
-            const historyEntry = {
-                timestamp: new Date().toISOString(),
-                userId: userProfile._id,
-                userName: userProfile.personalName || userProfile.breederName,
-                action: 'task_done',
-                action: 'task_complete',
-                details: { taskName: task.taskName, taskType: task.type || 'Other' }
-            };
-
-            // Atomically update the task's date and push to the history array
-            axios.patch(`${API_BASE_URL}/enclosures/${enc._id}`, { cleaningTasks: updated, '$push': { history: historyEntry } }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }).catch(err => { console.error('Mark enclosure task done failed:', err); fetchEnclosures(); });
-        };
-
-        const handleSkipEnclosureTask = async (e, enc, taskIdx) => {
-            e.stopPropagation();
-            const updated = [...(enc.cleaningTasks || [])];
-            const taskName = updated[taskIdx]?.taskName || 'Cleaning task';
-            updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString(), lastSkipped: true };
-            // Optimistic update
-            setEnclosures(prev => prev.map(ex => ex._id === enc._id ? { ...ex, cleaningTasks: updated } : ex));
-            axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
-                { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .catch(err => { console.error('Skip enclosure task failed:', err); fetchEnclosures(); });
         };
 
         const handleMarkAnimalCareTaskDone = (e, animal, taskIdx) => {
@@ -4439,7 +4369,7 @@ useEffect(() => {
                 {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="feeding"
                         icon={<Utensils size={18} className="text-green-600" />}
-                        title="Feeding" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" hideHeader={!!view} />
+                        title="Feeding" count={feedDue.length > 0 ? `${feedDue.length} due` : (feedDue.length + feedOk.length)} bgClass="bg-green-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['feeding'] || !!view) && (
                         <div className="p-3 space-y-4">
                             {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-green-100">
@@ -4447,46 +4377,21 @@ useEffect(() => {
                                 <span className="text-sm font-bold text-green-700 uppercase tracking-wide">Feeding Schedule</span>
                             </div>}
                             {(() => {
-                                const feedSections = [
-                                    { key: 'due', title: 'Due Today / Overdue', list: feedDue, headerClass: 'bg-red-50 border-b border-red-100', dotClass: 'bg-red-500', emptyText: 'No animals due or overdue for feeding.' },
-                                    { key: 'ok', title: 'Up to Date', list: feedOk, headerClass: 'bg-green-50 border-b border-green-100', dotClass: 'bg-green-500', emptyText: 'No animals up to date on feeding.' },
-                                ];
-                                return (
-                                    <div className="space-y-4">
-                                        {feedSections.map(section => (
-                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
-                                                <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`feed_${section.key}`)}>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className={`w-2.5 h-2.5 rounded-full inline-block ${section.dotClass}`} />
-                                                        <span className="font-semibold text-gray-800 text-base">{section.title}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{section.list.length}</span>
-                                                        {collapsedMgmtGroups[`feed_${section.key}`] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
-                                                    </div>
-                                                </div>
-                                                {!collapsedMgmtGroups[`feed_${section.key}`] && (
-                                                    <div className="p-2 space-y-1 bg-white">
-                                                        {section.list.length === 0 ? (
-                                                            <div className="text-center text-sm text-gray-400 py-4">{section.emptyText}</div>
-                                                        ) : (
-                                                            <>
-                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
-                                                                    <div className="col-span-2">Animal</div>
-                                                                    <div>Last Fed</div>
-                                                                    <div>Frequency</div>
-                                                                    <div className="col-span-2">Diet</div>
-                                                                    <div className="text-center">Status</div>
-                                                                    <div className="text-right pr-2">Action</div>
-                                                                </div>
-                                                                {section.list.map(a => (
-                                                                    <FeedingAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkFed={handleMarkFed} handleSkipFeeding={handleSkipFeeding} />
-                                                                ))}
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
+                                const feedList = [...feedDue, ...feedOk];
+                                return feedList.length === 0 ? (
+                                    <div className="text-center text-sm text-gray-400 py-4">No animals with a feeding schedule set yet.</div>
+                                ) : (
+                                    <div className="p-2 space-y-1 bg-white border border-gray-200 rounded-lg">
+                                        <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                            <div className="col-span-2">Animal</div>
+                                            <div>Last Fed</div>
+                                            <div>Frequency</div>
+                                            <div className="col-span-2">Diet</div>
+                                            <div className="text-center">Status</div>
+                                            <div className="text-right pr-2">Action</div>
+                                        </div>
+                                        {feedList.map(a => (
+                                            <FeedingAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkFed={handleMarkFed} handleSkipFeeding={handleSkipFeeding} />
                                         ))}
                                     </div>
                                 );
@@ -4785,78 +4690,6 @@ useEffect(() => {
                                     </div>
                                 );
                             })}
-                        </div>
-                    )}
-                </div>)}
-
-                {/* -- 7. MAINTENANCE ----------------------------------------- */}
-                {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="maintenance"
-                        icon={<Wrench size={18} className="text-amber-600" />}
-                        title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" hideHeader={!!view} />
-                    {(!collapsedMgmtSections['maintenance'] || !!view) && (
-                        <div className="divide-y divide-gray-100">
-                            {!!view && <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border-b border-amber-100">
-                                <Wrench size={15} className="text-amber-600 flex-shrink-0" />
-                                <span className="text-sm font-bold text-amber-700 uppercase tracking-wide">Maintenance</span>
-                            </div>}
-
-                            {/* -- Enclosure Cleaning -- */}
-                            <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide flex items-center gap-2 cursor-pointer" onClick={() => toggleGroup('maint_cleaning')}>
-                                    {collapsedMgmtGroups['maint_cleaning'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
-                                    Enclosure Cleaning
-                                </div>
-                                {!collapsedMgmtGroups['maint_cleaning'] && (enclosuresWithCleaningTasks.length === 0 ? (
-                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No cleaning tasks defined. Edit an enclosure above and add tasks.</div>
-                                ) : enclosuresWithCleaningTasks.map(enc => {
-                                    const grpKey = `maint_enc_${enc._id}`;
-                                    const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
-                                    const dueTasks = enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
-                                    return (
-                                        <div key={enc._id} className="border-b border-gray-100 last:border-0">
-                                            <div className="flex items-center justify-between px-3 py-2 bg-amber-50/40 cursor-pointer" onClick={() => toggleGroup(grpKey)}>
-                                                <div className="flex items-center gap-2">
-                                                    {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
-                                                    <span className="text-sm font-medium text-gray-800">{enc.name}</span>
-                                                    {enc.enclosureType && <span className="text-xs text-gray-400">({enc.enclosureType})</span>}
-                                                </div>
-                                                {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">{dueTasks.length} due</span>}
-                                            </div>
-                                            {!isGrpCollapsed && (
-                                                <div className="px-4 py-2 space-y-2">
-                                                    {enc.cleaningTasks.map((task, idx) => {
-                                                        const due = isTaskDue(task);
-                                                        const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
-                                                        const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
-                                                        const soon = !due && daysLeft !== null && daysLeft <= 2;
-                                                        return (
-                                                            <div key={idx} className="flex items-center justify-between gap-2 text-sm" onClick={e => e.stopPropagation()}>
-                                                                <div className="flex items-center gap-2 min-w-0">
-                                                                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                                                    <span className="text-gray-700 truncate">{task.taskName}</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1.5 shrink-0 text-xs text-gray-400">
-                                                                    {task.frequencyDays && <span><RefreshCw size={12} className="inline-block align-middle mr-0.5" /> Every {task.frequencyDays}d</span>}
-                                                                    {task.lastDoneDate ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} className="flex-shrink-0" /> Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500 flex items-center gap-0.5"><X size={10} className="flex-shrink-0" /> Never done</span>}
-                                                                    <button onClick={(e) => handleMarkEnclosureTaskDone(e, enc, idx)}
-                                                                        className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
-                                                                        <Check size={10} /> Done
-                                                                    </button>
-                                                                    <button onClick={(e) => handleSkipEnclosureTask(e, enc, idx)}
-                                                                        className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
-                                                                        <ChevronRight size={10} /> Skip
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                }))}
-                            </div>
                         </div>
                     )}
                 </div>)}
