@@ -1453,7 +1453,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 </div>
                 {/* Right 50%: breeder / current owner */}
                 <div style={{ width: '50%', paddingLeft: 10, borderLeft: `1px dashed ${certBorderColor}`, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18 }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 28 }}>
                         {[
                             { label: 'Breeder', profile: ownerProfile },
                             { label: 'Current Owner', profile: currentOwnerProfile },
@@ -1461,18 +1461,16 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                             const img = getProfileImage(profile);
                             const name = getDisplayName(profile);
                             return (
-                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'flex-end' }}>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af', fontWeight: 600 }}>{label}</div>
-                                        <div style={{ fontSize: '1.1rem', color: certFontColor, fontWeight: 700 }}>{name}</div>
-                                    </div>
+                                <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textAlign: 'center' }}>
                                     {img && (
                                         <img
                                             src={img}
                                             alt={name}
-                                            style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${certBorderColor}`, flexShrink: 0 }}
+                                            style={{ width: 76, height: 76, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${certBorderColor}`, flexShrink: 0 }}
                                         />
                                     )}
+                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af', fontWeight: 600 }}>{label}</div>
+                                    <div style={{ fontSize: '0.9rem', color: certFontColor, fontWeight: 700 }}>{name}</div>
                                 </div>
                             );
                         })}
