@@ -2152,6 +2152,7 @@ useEffect(() => {
     );
     const trainingScheduleDue = trainingScheduleEntries.filter(entry => isDue(entry.animal[entry.key]?.lastDoneDate, entry.animal[entry.key]?.frequencyDays));
     const trainingScheduleOk = trainingScheduleEntries.filter(entry => !isDue(entry.animal[entry.key]?.lastDoneDate, entry.animal[entry.key]?.frequencyDays));
+    const scheduledCareDueCount = animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
     const enclosureAnimalMap = {}; // { enclosureId: [animals] }
@@ -3891,45 +3892,6 @@ useEffect(() => {
         const toggleSection = (key) => setCollapsedMgmtSections(prev => ({ ...prev, [key]: !prev[key] }));
         const toggleGroup = (key) => setCollapsedMgmtGroups(prev => ({ ...prev, [key]: !prev[key] }));
 
-        // Shared renderer for the Grooming & Special Care / Training clusters — each is a flat list of
-        // {animal, key, label} schedule entries (one per assigned dedicated task) split into Due/Up to Date.
-        const renderScheduleCluster = ({ sectionKey, icon, title, dueList, okList, tabLabel }) => {
-            const total = dueList.length + okList.length;
-            const list = [...dueList, ...okList];
-            return (
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey={sectionKey} icon={icon} title={title}
-                        count={dueList.length > 0 ? `${dueList.length} due` : total} bgClass="bg-teal-50" hideHeader={!!view} />
-                    {(!collapsedMgmtSections[sectionKey] || !!view) && (
-                        <div className="p-3">
-                            {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-teal-100">
-                                {icon}
-                                <span className="text-sm font-bold text-teal-700 uppercase tracking-wide">{title}</span>
-                            </div>}
-                            {list.length === 0 ? (
-                                <div className="text-center text-sm text-gray-400 py-4">No assigned schedules yet — set one up in the animal's {tabLabel} tab.</div>
-                            ) : (
-                                <div className="p-2 space-y-1 bg-white border border-gray-200 rounded-lg">
-                                    <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
-                                        <div className="col-span-2">Animal</div>
-                                        <div>Last Done</div>
-                                        <div>Frequency</div>
-                                        <div className="col-span-2">Task</div>
-                                        <div className="text-center">Status</div>
-                                        <div className="text-right pr-2">Action</div>
-                                    </div>
-                                    {list.map(entry => (
-                                        <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key}
-                                            onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal}
-                                            handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            );
-        };
 
         const MgmtGroup = ({ groupKey, label, groupAnimals, headerClass, renderExtras }) => {
             const isGrpCollapsed = collapsedMgmtGroups[groupKey] || false;
@@ -4369,52 +4331,157 @@ useEffect(() => {
             )}
 
 
-                {/* -- 2. FEEDING -------------------------------------------- */}
+                {/* -- 2. FEEDING & CARE -------------------------------------- */}
                 {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="feeding"
+                    <SectionHeader sectionKey="feedingCare"
                         icon={<Utensils size={18} className="text-green-600" />}
-                        title="Feeding" count={feedDue.length > 0 ? `${feedDue.length} due` : (feedDue.length + feedOk.length)} bgClass="bg-green-50" hideHeader={!!view} />
-                    {(!collapsedMgmtSections['feeding'] || !!view) && (
+                        title="Feeding & Care"
+                        count={(feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount) > 0
+                            ? `${feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount} due`
+                            : (feedDue.length + feedOk.length + groomingScheduleDue.length + groomingScheduleOk.length + trainingScheduleDue.length + trainingScheduleOk.length + animalsWithAnimalTasks.length)}
+                        bgClass="bg-green-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['feedingCare'] || !!view) && (
                         <div className="p-3 space-y-4">
                             {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-green-100">
                                 <Utensils size={15} className="text-green-600 flex-shrink-0" />
-                                <span className="text-sm font-bold text-green-700 uppercase tracking-wide">Feeding Schedule</span>
+                                <span className="text-sm font-bold text-green-700 uppercase tracking-wide">Feeding & Care</span>
                             </div>}
                             {(() => {
-                                const feedList = [...feedDue, ...feedOk];
-                                return feedList.length === 0 ? (
-                                    <div className="text-center text-sm text-gray-400 py-4">No animals with a feeding schedule set yet — set one up in the animal's Routine Care tab.</div>
-                                ) : (
-                                    <div className="p-2 space-y-1 bg-white border border-gray-200 rounded-lg">
-                                        <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
-                                            <div className="col-span-2">Animal</div>
-                                            <div>Last Fed</div>
-                                            <div>Frequency</div>
-                                            <div className="col-span-2">Diet</div>
-                                            <div className="text-center">Status</div>
-                                            <div className="text-right pr-2">Action</div>
-                                        </div>
-                                        {feedList.map(a => (
-                                            <FeedingAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkFed={handleMarkFed} handleSkipFeeding={handleSkipFeeding} />
+                                const feedingCareSections = [
+                                    {
+                                        key: 'feeding', title: 'Feeding', icon: <Utensils size={16} className="text-green-700" />, headerClass: 'bg-green-50 border-b border-green-100',
+                                        list: [...feedDue, ...feedOk], dueCount: feedDue.length, colLabels: ['Last Fed', 'Diet'],
+                                        emptyText: "No animals with a feeding schedule set yet — set one up in the animal's Routine Care tab.",
+                                        renderRow: a => <FeedingAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkFed={handleMarkFed} handleSkipFeeding={handleSkipFeeding} />,
+                                    },
+                                    {
+                                        key: 'grooming', title: 'Grooming & Special Care', icon: <Scissors size={16} className="text-teal-700" />, headerClass: 'bg-teal-50 border-b border-teal-100',
+                                        list: [...groomingScheduleDue, ...groomingScheduleOk], dueCount: groomingScheduleDue.length, colLabels: ['Last Done', 'Task'],
+                                        emptyText: "No assigned schedules yet — set one up in the animal's Routine Care tab.",
+                                        renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />,
+                                    },
+                                    {
+                                        key: 'training', title: 'Training', icon: <Dumbbell size={16} className="text-teal-700" />, headerClass: 'bg-teal-50 border-b border-teal-100',
+                                        list: [...trainingScheduleDue, ...trainingScheduleOk], dueCount: trainingScheduleDue.length, colLabels: ['Last Done', 'Task'],
+                                        emptyText: "No assigned schedules yet — set one up in the animal's Behavior tab.",
+                                        renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />,
+                                    },
+                                ];
+
+                                return (
+                                    <div className="space-y-4">
+                                        {feedingCareSections.map(section => (
+                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`feedcare_${section.key}`)}>
+                                                    <div className="flex items-center gap-3">
+                                                        {section.icon}
+                                                        <span className="font-semibold text-gray-800 text-base">{section.title}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{section.dueCount > 0 ? `${section.dueCount} due` : section.list.length}</span>
+                                                        {collapsedMgmtGroups[`feedcare_${section.key}`] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
+                                                    </div>
+                                                </div>
+                                                {!collapsedMgmtGroups[`feedcare_${section.key}`] && (
+                                                    <div className="p-2 space-y-1 bg-white">
+                                                        {section.list.length === 0 ? (
+                                                            <div className="text-center text-sm text-gray-400 py-4">{section.emptyText}</div>
+                                                        ) : (
+                                                            <>
+                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                                                    <div className="col-span-2">Animal</div>
+                                                                    <div>{section.colLabels[0]}</div>
+                                                                    <div>Frequency</div>
+                                                                    <div className="col-span-2">{section.colLabels[1]}</div>
+                                                                    <div className="text-center">Status</div>
+                                                                    <div className="text-right pr-2">Action</div>
+                                                                </div>
+                                                                {section.list.map(section.renderRow)}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         ))}
+
+                                        {/* Scheduled Animal Care sub-section */}
+                                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                            <div className="flex items-center justify-between p-3 cursor-pointer bg-teal-50 border-b border-teal-100" onClick={() => toggleGroup('feedcare_scheduledcare')}>
+                                                <div className="flex items-center gap-3">
+                                                    <ClipboardList size={16} className="text-teal-700" />
+                                                    <span className="font-semibold text-gray-800 text-base">Scheduled Animal Care</span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{scheduledCareDueCount > 0 ? `${scheduledCareDueCount} due` : animalsWithAnimalTasks.length}</span>
+                                                    {collapsedMgmtGroups['feedcare_scheduledcare'] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
+                                                </div>
+                                            </div>
+                                            {!collapsedMgmtGroups['feedcare_scheduledcare'] && (
+                                                <div className="divide-y divide-gray-100 bg-white">
+                                                    {animalsWithAnimalTasks.length === 0 ? (
+                                                        <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Routine Care tab.</div>
+                                                    ) : animalsWithAnimalTasks.map(a => {
+                                                        const grpKey = `animalcare_${a.id_public}`;
+                                                        const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
+                                                        const tasks = (a.animalCareTasks || []);
+                                                        const dueTasks = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
+                                                        return (
+                                                            <div key={a.id_public} className="border-b border-gray-100 last:border-0">
+                                                                <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50" onClick={() => toggleGroup(grpKey)}>
+                                                                    <div className="flex items-center gap-2 min-w-0">
+                                                                        {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
+                                                                        {a.imageUrl
+                                                                            ? <img src={a.imageUrl} alt={a.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                                                                            : <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><Cat size={11} className="text-gray-400" /></div>}
+                                                                        <span className="text-sm font-medium text-gray-800 truncate">{[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}</span>
+                                                                        <span className="text-xs text-gray-400 hidden sm:block">{getSpeciesDisplayName(a.species)}</span>
+                                                                    </div>
+                                                                    {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">{dueTasks.length} due</span>}
+                                                                </div>
+                                                                {!isGrpCollapsed && (
+                                                                    <div className="px-4 py-2 space-y-1">
+                                                                        {tasks.map((task, idx) => {
+                                                                            const due = isTaskDue(task);
+                                                                            const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
+                                                                            const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
+                                                                            const soon = !due && daysLeft !== null && daysLeft <= 2;
+                                                                            return (
+                                                                                <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
+                                                                                    <div className="flex items-center gap-2 min-w-0">
+                                                                                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                                                                        <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
+                                                                                    </div>
+                                                                                    <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
+                                                                                        {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
+                                                                                        {task.lastDoneDate
+                                                                                            ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
+                                                                                            : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
+                                                                                        <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx)}
+                                                                                            className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
+                                                                                            <Check size={10} /> Done
+                                                                                        </button>
+                                                                                        <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx)}
+                                                                                            className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
+                                                                                            <ChevronRight size={10} /> Skip
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })()}
                         </div>
                     )}
                 </div>)}
-
-                {/* -- 2b. GROOMING & SPECIAL CARE ----------------------------- */}
-                {(!view || view === 'feeding') && renderScheduleCluster({
-                    sectionKey: 'groomingSchedules', icon: <Scissors size={18} className="text-teal-600" />, title: 'Grooming & Special Care',
-                    dueList: groomingScheduleDue, okList: groomingScheduleOk, tabLabel: 'Routine Care',
-                })}
-
-                {/* -- 2c. TRAINING --------------------------------------------- */}
-                {(!view || view === 'feeding') && renderScheduleCluster({
-                    sectionKey: 'trainingSchedules', icon: <Dumbbell size={18} className="text-teal-600" />, title: 'Training',
-                    dueList: trainingScheduleDue, okList: trainingScheduleOk, tabLabel: 'Behavior',
-                })}
 
                 {/* -- 3. REPRODUCTION ---------------------------------------- */}
                 {(!view || view === 'reproduction') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
@@ -4423,12 +4490,16 @@ useEffect(() => {
                         title="Reproduction" count={reproTotal} bgClass="bg-pink-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['reproduction'] || !!view) && (
                         <div className="p-3 space-y-4">
+                            {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-pink-100">
+                                <Heart size={15} className="text-pink-600 flex-shrink-0" />
+                                <span className="text-sm font-bold text-pink-700 uppercase tracking-wide">Reproduction</span>
+                            </div>}
                             <div className="border border-pink-200 rounded-lg overflow-hidden">
-                                <div className="flex items-center justify-between px-3 py-2 bg-pink-50/60">
-                                    <div className="flex items-center gap-2">
-                                        <Home size={13} className="text-pink-600" />
-                                        <span className="text-xs font-semibold text-gray-700">Breeding/Nursery Enclosures</span>
-                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{reproEnclosures.length}</span>
+                                <div className="flex items-center justify-between p-3 bg-pink-50/60">
+                                    <div className="flex items-center gap-3">
+                                        <Home size={16} className="text-pink-600" />
+                                        <span className="font-semibold text-gray-800 text-base">Breeding/Nursery Enclosures</span>
+                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{reproEnclosures.length}</span>
                                     </div>
                                     <button onClick={() => openEnclosureModal(null, { purpose: 'reproduction' })} className="flex items-center gap-1 text-xs font-medium text-pink-600 hover:text-pink-800 bg-white border border-pink-200 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> Add
@@ -4509,13 +4580,17 @@ useEffect(() => {
                         title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['medical'] || !!view) && (
                         <div className="p-3 space-y-4">
+                            {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-red-100">
+                                <Activity size={15} className="text-red-600 flex-shrink-0" />
+                                <span className="text-sm font-bold text-red-700 uppercase tracking-wide">Medical / Quarantine</span>
+                            </div>}
                             {/* Enclosures sub-panel */}
                             <div className="border border-orange-200 rounded-lg overflow-hidden">
-                                <div className="flex items-center justify-between px-3 py-2 bg-orange-50/60">
-                                    <div className="flex items-center gap-2">
-                                        <Home size={13} className="text-orange-600" />
-                                        <span className="text-xs font-semibold text-gray-700">Enclosures</span>
-                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{healthEnclosures.length}</span>
+                                <div className="flex items-center justify-between p-3 bg-orange-50/60">
+                                    <div className="flex items-center gap-3">
+                                        <Home size={16} className="text-orange-600" />
+                                        <span className="font-semibold text-gray-800 text-base">Enclosures</span>
+                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{healthEnclosures.length}</span>
                                     </div>
                                     <button onClick={() => openEnclosureModal(null, { purpose: 'medical' })} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> Add
@@ -4628,74 +4703,6 @@ useEffect(() => {
                     )}
                 </div>)}
 
-                {/* -- 6. SCHEDULED CARE ------------------------------------- */}
-                {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="scheduledcare"
-                        icon={<ClipboardList size={18} className="text-teal-600" />}
-                        title="Scheduled Care" count={animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) > 0 ? `${animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0)} due` : animalsWithAnimalTasks.length} bgClass="bg-teal-50" hideHeader={!!view} />
-                    {(!collapsedMgmtSections['scheduledcare'] || !!view) && (
-                        <div className="divide-y divide-gray-100">
-                            {!!view && <div className="flex items-center gap-2 px-3 py-2 bg-teal-50 border-b border-teal-100">
-                                <ClipboardList size={15} className="text-teal-600 flex-shrink-0" />
-                                <span className="text-sm font-bold text-teal-700 uppercase tracking-wide">Scheduled Animal Care</span>
-                            </div>}
-                            {animalsWithAnimalTasks.length === 0 ? (
-                                <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Routine Care tab.</div>
-                            ) : animalsWithAnimalTasks.map(a => {
-                                const grpKey = `animalcare_${a.id_public}`;
-                                const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
-                                const tasks = (a.animalCareTasks || []);
-                                const dueTasks = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
-                                return (
-                                    <div key={a.id_public} className="border-b border-gray-100 last:border-0">
-                                        <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50" onClick={() => toggleGroup(grpKey)}>
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
-                                                {a.imageUrl
-                                                    ? <img src={a.imageUrl} alt={a.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
-                                                    : <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><Cat size={11} className="text-gray-400" /></div>}
-                                                <span className="text-sm font-medium text-gray-800 truncate">{[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}</span>
-                                                <span className="text-xs text-gray-400 hidden sm:block">{getSpeciesDisplayName(a.species)}</span>
-                                            </div>
-                                            {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">{dueTasks.length} due</span>}
-                                        </div>
-                                        {!isGrpCollapsed && (
-                                            <div className="px-4 py-2 space-y-1">
-                                                {tasks.map((task, idx) => {
-                                                    const due = isTaskDue(task);
-                                                    const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
-                                                    const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
-                                                    const soon = !due && daysLeft !== null && daysLeft <= 2;
-                                                    return (
-                                                        <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
-                                                            <div className="flex items-center gap-2 min-w-0">
-                                                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                                                <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
-                                                            </div>
-                                                            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
-                                                                {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
-                                                                {task.lastDoneDate
-                                                                    ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
-                                                                    : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
-                                                                <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx)}
-                                                                    className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
-                                                                    <Check size={10} /> Done
-                                                                </button>
-                                                                <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx)}
-                                                                    className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
-                                                                    <ChevronRight size={10} /> Skip
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
                 </div>)}
 
                 {/* -- 8. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
