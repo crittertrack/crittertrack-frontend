@@ -56,10 +56,10 @@ const getReproductionState = (animal) => {
     // Females can be pregnant or nursing
     if (animal.gender === 'Female') {
         if (animal.isPregnant) return { label: 'Pregnant', color: 'bg-pink-100 text-pink-800', icon: <ScanHeart size={14} className="fill-current" /> };
-        if (animal.isNursing) return { label: 'Nursing', color: 'bg-red-100 text-red-800', icon: <Droplet size={14} /> };
+        if (animal.isNursing) return { label: 'Nursing', color: 'bg-violet-100 text-violet-800', icon: <Droplet size={14} /> };
     }
     // Both genders can be in mating or have planned mating
-    if (animal.isInMating) return { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: <Hourglass size={14} className="fill-current" /> };
+    if (animal.isInMating) return { label: 'In Mating', color: 'bg-teal-100 text-teal-800', icon: <Hourglass size={14} /> };
     if (animal.isPlannedMating) return { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: <Calendar size={14} /> };
     return null;
 };
@@ -1001,13 +1001,13 @@ const AnimalModalV2 = ({
                                                                             <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                                                                                 {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700">{lid}</span>}
                                                                                 {lIsPlannedOnly && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
-                                                                                {lIsMated && <span className="text-xs font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
+                                                                                {lIsMated && <span className="text-xs font-semibold text-teal-600 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
                                                                                 {lIsPregnant && <span className="text-xs font-semibold text-pink-600 bg-pink-50 border border-pink-200 rounded px-1.5 py-0.5"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Pregnant</span>}
                                                                             </div>
                                                                         </div>
                                                                         <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
-                                                                            {!litter.isPlanned && litter.birthDate && <span>{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</span>}
-                                                                            {lIsMated && <span className="text-purple-600">{formatDate(litter.matingDate)}</span>}
+                                                                            {!litter.isPlanned && litter.birthDate && <span>{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}</span>}
+                                                                            {lIsMated && <span className="text-teal-600">{formatDate(litter.matingDate)}</span>}
                                                                             {lIsPregnant && <span className="text-pink-600">{formatDate(litter.pregnancyDate)}</span>}
                                                                             {lIsPlannedOnly && litter.matingDate && <span className="text-indigo-600">{formatDate(litter.matingDate)}</span>}
                                                                             {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
@@ -1034,7 +1034,7 @@ const AnimalModalV2 = ({
                                                                         <div className="min-w-0">
                                                                             <p className="font-bold text-gray-800 text-sm truncate">{displayName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
                                                                             {lIsPlannedOnly && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
-                                                                            {lIsMated && <span className="text-xs font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
+                                                                            {lIsMated && <span className="text-xs font-semibold text-teal-600 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
                                                                             {lIsPregnant && <span className="text-xs font-semibold text-pink-600 bg-pink-50 border border-pink-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Pregnant</span>}
                                                                         </div>
                                                                         <div className="min-w-0">
@@ -1045,14 +1045,14 @@ const AnimalModalV2 = ({
                                                                                 <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Planned</span>
                                                                                 <span className="text-sm font-semibold text-indigo-700">{formatDate(litter.matingDate) || '?'}</span>
                                                                             </>) : lIsMated ? (<>
-                                                                                <span className="text-purple-400 text-[10px] uppercase tracking-wide font-semibold block">Mated</span>
-                                                                                <span className="text-sm font-semibold text-purple-700">{formatDate(litter.matingDate) || '?'}</span>
+                                                                                <span className="text-teal-400 text-[10px] uppercase tracking-wide font-semibold block">Mated</span>
+                                                                                <span className="text-sm font-semibold text-teal-700">{formatDate(litter.matingDate) || '?'}</span>
                                                                             </>) : lIsPregnant ? (<>
                                                                                 <span className="text-pink-400 text-[10px] uppercase tracking-wide font-semibold block">Pregnant</span>
                                                                                 <span className="text-sm font-semibold text-pink-700">{formatDate(litter.pregnancyDate) || '?'}</span>
                                                                             </>) : (<>
                                                                                 <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
-                                                                                <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 text-xs font-semibold text-green-600">• {litterAge(litter.birthDate)}</span>}</span>
+                                                                                <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 text-xs font-semibold text-blue-600">• {litterAge(litter.birthDate)}</span>}</span>
                                                                             </>)}
                                                                         </div>
                                                                         <div className="min-w-0">
@@ -1068,8 +1068,8 @@ const AnimalModalV2 = ({
                                                                                 <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Due</span>
                                                                                 <span className="text-sm font-semibold text-indigo-700">{formatDate(litter.expectedDueDate) || '•'}</span>
                                                                             </>) : lIsMated ? (<>
-                                                                                <span className="text-purple-400 text-[10px] uppercase tracking-wide font-semibold block">Status</span>
-                                                                                <span className="text-xs font-semibold text-purple-500">Awaiting pregnancy</span>
+                                                                                <span className="text-teal-400 text-[10px] uppercase tracking-wide font-semibold block">Status</span>
+                                                                                <span className="text-xs font-semibold text-teal-500">Awaiting pregnancy</span>
                                                                             </>) : lIsPregnant ? (<>
                                                                                 <span className="text-pink-400 text-[10px] uppercase tracking-wide font-semibold block">Status</span>
                                                                                 <span className="text-xs font-semibold text-pink-500"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
@@ -1143,7 +1143,7 @@ const AnimalModalV2 = ({
                                                                                     {litter.breedingConditionAtTime && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Condition</div><div className="font-semibold text-gray-800">{litter.breedingConditionAtTime}</div></div>}
                                                                                     {litter.outcome && !(litter.isPlanned && litter.outcome === 'Unknown') && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-500' : 'text-gray-800'}`}>{litter.outcome}</div></div>}
                                                                                     {!litter.isPlanned && litter.birthMethod && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Method</div><div className="font-semibold text-gray-800">{litter.birthMethod}</div></div>}
-                                                                                    {!litter.isPlanned && litter.birthDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-green-600">{litterAge(litter.birthDate)}</span>}</div></div>}
+                                                                                    {!litter.isPlanned && litter.birthDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-blue-600">{litterAge(litter.birthDate)}</span>}</div></div>}
                                                                                     {!litter.isPlanned && litter.weaningDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaning Date</div><div className="font-semibold text-gray-800">{formatDate(litter.weaningDate)}</div></div>}
                                                                                 </div>
                                                                             </div>
@@ -1154,7 +1154,7 @@ const AnimalModalV2 = ({
                                                                                 <div className="grid grid-cols-3 pr-3">
                                                                                     <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div></div>
                                                                                     <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{litter.stillbornCount ?? litter.stillborn ?? 0}</div></div>
-                                                                                    <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div></div>
+                                                                                    <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-blue-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div></div>
                                                                                 </div>
                                                                                 <div className="grid grid-cols-3 pl-3">
                                                                                     <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{litter.maleCount ?? 0}</div></div>

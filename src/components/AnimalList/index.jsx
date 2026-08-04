@@ -2613,9 +2613,9 @@ useEffect(() => {
                             if (animal.isPregnant) {
                                 state = { label: 'Pregnant', color: 'bg-pink-100 text-pink-800', icon: <ScanHeart size={14} className="fill-current" /> };
                             } else if (animal.isNursing) {
-                                state = { label: 'Nursing', color: 'bg-red-100 text-red-800', icon: <Droplet size={14} /> };
+                                state = { label: 'Nursing', color: 'bg-violet-100 text-violet-800', icon: <Droplet size={14} /> };
                             } else if (animal.isInMating) {
-                                state = { label: 'In Mating', color: 'bg-purple-100 text-purple-800', icon: <Hourglass size={14} className="fill-current" /> };
+                                state = { label: 'In Mating', color: 'bg-teal-100 text-teal-800', icon: <Hourglass size={14} /> };
                             } else if (animal.isPlannedMating) {
                                 state = { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: <Calendar size={14} /> };
                             }
@@ -3502,9 +3502,9 @@ useEffect(() => {
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
                     <StatCard icon={<Calendar size={32} className="text-indigo-800" />} label="Animals in Planned Mating" value={plannedMatingList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<Hourglass size={32} className="text-purple-800" />} label="Animals In Mating" value={matingList.length} colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Hourglass size={32} className="text-teal-800" />} label="Animals In Mating" value={matingList.length} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('reproduction')} />
                     <StatCard icon={<ScanHeart size={32} className="text-pink-800" />} label="Animals Pregnant" value={pregnantList.length} colorClass="bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<Droplet size={32} className="text-red-800" />} label="Animals Nursing" value={nursingList.length} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Droplet size={32} className="text-violet-800" />} label="Animals Nursing" value={nursingList.length} colorClass="bg-violet-100 text-violet-900 dark:bg-violet-900/30 dark:text-violet-200" onClick={() => setAnimalView('reproduction')} />
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<AlertTriangle size={32} className="text-orange-800" />}
@@ -3615,13 +3615,13 @@ useEffect(() => {
             statusColor = 'bg-indigo-100 text-indigo-800';
         } else if (animal.isInMating) {
             statusLabel = 'Mating';
-            statusColor = 'bg-purple-100 text-purple-800';
+            statusColor = 'bg-teal-100 text-teal-800';
         } else if (animal.isPregnant) {
             statusLabel = 'Pregnant';
             statusColor = 'bg-pink-100 text-pink-800';
         } else if (animal.isNursing) {
             statusLabel = 'Nursing';
-            statusColor = 'bg-blue-100 text-blue-800';
+            statusColor = 'bg-violet-100 text-violet-800';
         }
 
         return (
@@ -3651,7 +3651,7 @@ useEffect(() => {
 
                 {/* Actions */}
                 <div className="sm:text-right flex items-center gap-1 justify-end">
-                    {animal.isPlannedMating && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200"><Hourglass size={12} /> Mated today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )} {animal.isInMating && ( <> {animal.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-pink-100 text-pink-700 hover:bg-pink-200"><ScanHeart size={12} /> Assign Pregnant</button>} <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button> </>)} {animal.isPregnant && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"><Droplet size={12} /> Born today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isInMating: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )} {animal.isNursing && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><Check size={12} /> Mark Weaned</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, isPregnant: false, isInMating: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )}
+                    {animal.isPlannedMating && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-teal-100 text-teal-700 hover:bg-teal-200"><Hourglass size={12} /> Mated today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )} {animal.isInMating && ( <> {animal.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-pink-100 text-pink-700 hover:bg-pink-200"><ScanHeart size={12} /> Assign Pregnant</button>} <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button> </>)} {animal.isPregnant && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-violet-100 text-violet-700 hover:bg-violet-200"><Droplet size={12} /> Born today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isInMating: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )} {animal.isNursing && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"><Check size={12} /> Mark Weaned</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, isPregnant: false, isInMating: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )}
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
                 </div>
             </div>
@@ -4362,9 +4362,9 @@ useEffect(() => {
                             {(() => {
                                 const reproSections = [
                                     { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700" />, headerClass: 'bg-indigo-50 border-b border-indigo-100', emptyText: 'No planned matings yet.' },
-                                    { key: 'mating', title: 'Currently In Mating', list: matingList, icon: <Hourglass size={16} className="text-purple-700" />, headerClass: 'bg-purple-50 border-b border-purple-100', emptyText: 'No animals currently mating.' },
+                                    { key: 'mating', title: 'Currently In Mating', list: matingList, icon: <Hourglass size={16} className="text-teal-700" />, headerClass: 'bg-teal-50 border-b border-teal-100', emptyText: 'No animals currently mating.' },
                                     { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={16} className="text-pink-700" />, headerClass: 'bg-pink-50 border-b border-pink-100', emptyText: 'No pregnant animals.' },
-                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Droplet size={16} className="text-red-700" />, headerClass: 'bg-red-50 border-b border-red-100', emptyText: 'No nursing animals.' }
+                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Droplet size={16} className="text-violet-700" />, headerClass: 'bg-violet-50 border-b border-violet-100', emptyText: 'No nursing animals.' }
                                 ];
 
                                 return (

@@ -1240,7 +1240,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     );
                 };
                 const LitterPublicCard = ({ l, isMated }) => (
-                    <div className={`bg-white rounded-xl border p-4 pb-6 space-y-2.5 relative ${isMated ? 'border-purple-300' : l.isPlanned ? 'border-indigo-300' : 'border-gray-300'}`}>
+                    <div className={`bg-white rounded-xl border p-4 pb-6 space-y-2.5 relative ${isMated ? 'border-teal-300' : l.isPlanned ? 'border-indigo-300' : 'border-gray-300'}`}>
                         {/* First line: centered breeding pair name */}
                         <div className="text-center min-h-[1.25rem] flex items-center justify-center">
                             {l.breedingPairCodeName && (
@@ -1283,7 +1283,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
                             {l.matingDate && <span><span className="font-medium">{isMated ? 'Mated:' : l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
                             {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
-                            {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}{litterAge(l.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(l.birthDate)}</span>}</span>}
+                            {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}{litterAge(l.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(l.birthDate)}</span>}</span>}
                         </div>
                         
                         {/* CTL ID - bottom right corner */}
@@ -1299,7 +1299,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {mated.length > 0 && (
                             <div>
                                 <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Hourglass size={16} className="text-purple-500" /> Mated Pairings <span className="text-sm font-normal text-gray-400">({mated.length})</span>
+                                    <Hourglass size={16} className="text-teal-500" /> Mated Pairings <span className="text-sm font-normal text-gray-400">({mated.length})</span>
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {mated.map(l => <LitterPublicCard key={l._id} l={l} isMated={true} />)}
@@ -1320,7 +1320,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <div>
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
-                                        <Sparkles size={16} className="text-green-500" /> Past Pairings <span className="text-sm font-normal text-gray-400">({born.length})</span>
+                                        <Sparkles size={16} className="text-violet-500" /> Past Pairings <span className="text-sm font-normal text-gray-400">({born.length})</span>
                                     </h3>
                                     {bornYears.length > 1 && (
                                         <select

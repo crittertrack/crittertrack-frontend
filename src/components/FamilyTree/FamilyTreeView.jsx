@@ -148,6 +148,10 @@ const FamilyTreeView = ({
         setLineageLoading(true);
         setLineageData({});
 
+        // Guards against a slow, still in-flight fetch from a previous selection
+        // overwriting the state for the current selection once it finally resolves.
+        let cancelled = false;
+
         const fetchDirectLineage = async () => {
             const nodes = {};
             const visited = new Set();
@@ -213,16 +217,16 @@ const FamilyTreeView = ({
                 }
             }
 
-            // Phase 3: Fetch offspring for the identified set of animals
-            for (const animalId of idsToFetchOffspringFor) {
+            // Phase 3: Fetch offspring for the identified set of animals (concurrently — this set is small)
+            await Promise.all(Array.from(idsToFetchOffspringFor).map(async (animalId) => {
                 try {
                     const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalId}/offspring`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     const litters = offspringResponse.data || [];
                     for (const litter of litters) {
-                        // Add other parent if not already present
-                        const otherParentId = (litter.sireId === animalId || litter.sireId_public === animalId) ? (litter.damId || litter.damId_public) : (litter.sireId || litter.sireId_public);
+                        // Add other parent if not already present (endpoint already resolves this)
+                        const otherParentId = litter.otherParentId;
                         if (otherParentId && !nodes[otherParentId]) {
                             const parentData = await fetchAnimalData(otherParentId);
                             if (parentData) nodes[otherParentId] = parentData;
@@ -241,15 +245,15 @@ const FamilyTreeView = ({
                         console.error(`Failed to fetch offspring for ${animalId}`, e);
                     }
                 }
-            }
+            }));
 
-            setLineageData(nodes);
-            setLineageLoading(false);
+            return nodes;
         };
 
         const fetchFullGraph = async () => {
           const nodes = {};
           const visited = new Set();
+          const enqueued = new Set([focusAnimalId]); // avoid queueing the same id many times over (siblings sharing parents, etc.)
           const queue = [focusAnimalId]; // Start traversal from the selected animal
 
           const fetchAnimalData = async (id) => {
@@ -268,62 +272,87 @@ const FamilyTreeView = ({
               }
           };
 
+          // Process the queue in concurrent batches (per-generation, roughly) instead of one
+          // id at a time, so a large "full graph" doesn't need thousands of sequential round-trips.
+          const BATCH_SIZE = 25;
           let guard = 0;
           while (queue.length > 0 && guard < 5000) { // Safety guard, increased for deep pedigrees
-              guard++;
-              const currentId = queue.shift();
-
-              if (!currentId || visited.has(currentId)) {
-                  continue;
+              const batch = [];
+              while (queue.length > 0 && batch.length < BATCH_SIZE) {
+                  const id = queue.shift();
+                  if (id && !visited.has(id)) {
+                      visited.add(id);
+                      batch.push(id);
+                  }
               }
-              visited.add(currentId);
-              
-              const animalData = await fetchAnimalData(currentId);
-              
-              if (!animalData) {
-                  nodes[currentId] = { id_public: currentId, name: 'Unknown', isPlaceholder: true };
-                  continue;
-              }
-              nodes[currentId] = animalData;
+              if (batch.length === 0) continue;
+              guard += batch.length;
 
-              // Enqueue parents
-              const sireId = animalData.sireId_public || animalData.fatherId_public;
-              const damId = animalData.damId_public || animalData.motherId_public;
-              if (sireId && !visited.has(sireId)) queue.push(sireId);
-              if (damId && !visited.has(damId)) queue.push(damId);
+              const results = await Promise.all(batch.map(async (currentId) => {
+                  const animalData = await fetchAnimalData(currentId);
+                  let litters = [];
+                  try {
+                      const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${currentId}/offspring`, {
+                          headers: { Authorization: `Bearer ${authToken}` }
+                      });
+                      litters = offspringResponse.data || [];
+                  } catch (e) {
+                      if (e.response?.status !== 404) {
+                          console.error(`Failed to fetch offspring for ${currentId}`, e);
+                      }
+                  }
+                  return { currentId, animalData, litters };
+              }));
 
-              // Fetch and enqueue offspring and their other parents (partners)
-              try {
-                  const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${currentId}/offspring`, {
-                      headers: { Authorization: `Bearer ${authToken}` }
-                  });
-                  const litters = offspringResponse.data || [];
+              for (const { currentId, animalData, litters } of results) {
+                  if (!animalData) {
+                      nodes[currentId] = { id_public: currentId, name: 'Unknown', isPlaceholder: true };
+                      continue;
+                  }
+                  nodes[currentId] = animalData;
+
+                  // Enqueue parents
+                  const sireId = animalData.sireId_public || animalData.fatherId_public;
+                  const damId = animalData.damId_public || animalData.motherId_public;
+                  if (sireId && !enqueued.has(sireId)) { enqueued.add(sireId); queue.push(sireId); }
+                  if (damId && !enqueued.has(damId)) { enqueued.add(damId); queue.push(damId); }
+
+                  // Enqueue offspring and their other parents (partners)
                   for (const litter of litters) {
-                      const otherParentId = (litter.sireId === currentId || litter.sireId_public === currentId) ? (litter.damId || litter.damId_public) : (litter.sireId || litter.sireId_public);
-                      if (otherParentId && !visited.has(otherParentId)) queue.push(otherParentId);
+                      const otherParentId = litter.otherParentId;
+                      if (otherParentId && !enqueued.has(otherParentId)) { enqueued.add(otherParentId); queue.push(otherParentId); }
 
                       if (litter.offspring && Array.isArray(litter.offspring)) {
                           for (const offspring of litter.offspring) {
-                              if (offspring && offspring.id_public && !visited.has(offspring.id_public)) queue.push(offspring.id_public);
+                              if (offspring && offspring.id_public && !enqueued.has(offspring.id_public)) {
+                                  enqueued.add(offspring.id_public);
+                                  queue.push(offspring.id_public);
+                              }
                           }
                       }
-                  }
-              } catch (e) {
-                  if (e.response?.status !== 404) {
-                       console.error(`Failed to fetch offspring for ${currentId}`, e);
                   }
               }
           }
 
-          setLineageData(nodes);
-          setLineageLoading(false);
+          return nodes;
         };
 
-        if (graphMode === 'full' && selectedSpecies) {
-            fetchFullGraph();
-        } else {
-            fetchDirectLineage();
-        }
+        Promise.resolve()
+            .then(() => (graphMode === 'full' && selectedSpecies) ? fetchFullGraph() : fetchDirectLineage())
+            .then((nodes) => {
+                if (cancelled) return;
+                setLineageData(nodes || {});
+            })
+            .catch((error) => {
+                console.error('Failed to load family tree lineage:', error);
+                if (!cancelled) setLineageData({});
+            })
+            .finally(() => {
+                // Ignore results from a request that's no longer the current selection
+                if (!cancelled) setLineageLoading(false);
+            });
+
+        return () => { cancelled = true; };
     }, [focusAnimalId, authToken, animals, graphMode, selectedSpecies]);
 
     const graphData = useMemo(() => {

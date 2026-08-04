@@ -56,14 +56,14 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
 
     const typeStyles = {
         planned:     { bg: 'bg-indigo-100 hover:bg-indigo-200 text-indigo-800 border border-dashed border-indigo-400', dot: 'bg-indigo-400', label: 'Planned Mating', Icon: CalendarPlus },
-        mated:       { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated', Icon: Hourglass },
+        mated:       { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Mated', Icon: Hourglass },
         due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due', Icon: BellRing },
-        born:        { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born', Icon: Cake },
+        born:        { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-500', dot: 'bg-violet-500', label: 'Born', Icon: Cake },
         weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned', Icon: Rainbow },
         birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthdate', Icon: PartyPopper },
         feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due', Icon: UtensilsCrossed },
         maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance', Icon: Wrench },
-        caretask:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Care Task', Icon: HandCoins },
+        caretask:    { bg: 'bg-cyan-100 hover:bg-cyan-200 text-cyan-800 border border-cyan-300', dot: 'bg-cyan-400', label: 'Care Task', Icon: HandCoins },
         supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order', Icon: Package },
         milestone:   { bg: 'bg-lime-100 hover:bg-lime-200 text-lime-800 border border-lime-300', dot: 'bg-lime-400', label: 'Milestone', Icon: Bell },
     };
@@ -587,12 +587,12 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                     const callId = l.litter_id_public;
 
                     const daysStatus = (() => {
-                        if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-green-600 font-semibold' };
+                        if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-violet-600 font-semibold' };
                         if (!l.expectedDueDate) return null;
                         const due = new Date(l.expectedDueDate); if (isNaN(due)) return null;
                         const now = new Date(); now.setHours(0,0,0,0); due.setHours(0,0,0,0);
                         const diff = Math.round((due - now) / 86400000);
-                        if (diff > 0) return { text: `${diff} day${diff !== 1 ? 's' : ''} remaining`, cls: 'text-green-600' };
+                        if (diff > 0) return { text: `${diff} day${diff !== 1 ? 's' : ''} remaining`, cls: 'text-pink-600' };
                         if (diff === 0) return { text: 'Due today', cls: 'text-amber-600 font-semibold' };
                         return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
                     })();
@@ -642,7 +642,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                         const wd = new Date(l.weaningDate); if (isNaN(wd)) return null;
                                         const now = new Date(); now.setHours(0,0,0,0); wd.setHours(0,0,0,0);
                                         const diff = Math.round((wd - now) / 86400000);
-                                        if (diff > 0) return { text: `Due in ${diff} day${diff !== 1 ? 's' : ''}`, cls: 'text-green-600' };
+                                        if (diff > 0) return { text: `Due in ${diff} day${diff !== 1 ? 's' : ''}`, cls: 'text-violet-600' };
                                         if (diff === 0) return { text: 'Weaning today', cls: 'text-amber-600 font-semibold' };
                                         return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
                                     })();

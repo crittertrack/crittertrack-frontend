@@ -443,7 +443,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
     if (urgentItems.length === 0) return null;
 
     const typeConfig = {
-        mated:  { label: 'Mating',         bg: 'bg-purple-100 text-purple-700', icon: '\u2665\uFE0F' },
+        mated:  { label: 'Mating',         bg: 'bg-teal-100 text-teal-700', icon: '\u2665\uFE0F' },
         due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700',   icon: '\uD83D\uDC23' },
         weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',       icon: '\uD83C\uDF7C' },
     };

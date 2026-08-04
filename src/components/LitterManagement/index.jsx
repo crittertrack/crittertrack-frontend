@@ -2831,9 +2831,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 </div>
 
                                 {/* Birth Date & Offspring Counts */}
-                                <div className="mb-6 p-4 border border-green-200 rounded-lg bg-green-50">
+                                <div className="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
                                     <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
-                                        <Baby size={18} className="inline-block align-middle text-green-600 mr-2 flex-shrink-0" />Birth & Offspring Details
+                                        <Baby size={18} className="inline-block align-middle text-blue-600 mr-2 flex-shrink-0" />Birth & Offspring Details
                                     </h4>
 
                                     {/* Row 1: Dates */}
@@ -3629,12 +3629,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                             <button
                                 onClick={() => { handleEditLitter(matingEditChoice); setMatingEditChoice(null); }}
-                                className="w-full flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition text-left"
+                                className="w-full flex items-center gap-3 px-4 py-3 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition text-left"
                             >
-                                <ClipboardList size={18} className="text-green-600 flex-shrink-0" />
+                                <ClipboardList size={18} className="text-violet-600 flex-shrink-0" />
                                 <div>
-                                    <div className="font-semibold text-green-800 text-sm">Convert to Litter</div>
-                                    <div className="text-xs text-green-600">Record birth date and offspring details</div>
+                                    <div className="font-semibold text-violet-800 text-sm">Convert to Litter</div>
+                                    <div className="text-xs text-violet-600">Record birth date and offspring details</div>
                                 </div>
                             </button>
                         </div>
@@ -3671,9 +3671,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                                         litterStatusFilter === val
                                             ? val === 'planned' ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
-                                            : val === 'mated'   ? 'bg-purple-100 border-purple-300 text-purple-700'
+                                            : val === 'mated'   ? 'bg-teal-100 border-teal-300 text-teal-700'
                                             : val === 'pregnant' ? 'bg-pink-100 border-pink-300 text-pink-700'
-                                            : val === 'born'    ? 'bg-green-100 border-green-300 text-green-700'
+                                            : val === 'born'    ? 'bg-violet-100 border-violet-300 text-violet-700'
                                             : 'bg-primary border-primary/50 text-black'
                                             : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
                                     }`}
@@ -3767,7 +3767,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const isNursing = hasBirth && (dam ? !!dam.isNursing : !litter.weaningConfirmed);
                         
                         return (
-                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : isPregnant ? 'border-dashed border-pink-300 bg-pink-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
+                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-teal-300 bg-teal-50/20' : isPregnant ? 'border-dashed border-pink-300 bg-pink-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
@@ -3788,7 +3788,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <div className="flex-1">
                                                 <p className="font-bold text-gray-800 text-sm">
                                                     {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-2">Planned</span>}
-                                                    {isMated && <span className="text-[10px] font-semibold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
+                                                    {isMated && <span className="text-[10px] font-semibold bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
                                                     {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
                                                     {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
@@ -3802,7 +3802,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <p className="text-[10px] text-gray-500 mt-0.5">
                                             {formatDate(litter.birthDate)}
-                                            {!litter.isPlanned && litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}
+                                            {!litter.isPlanned && litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}
                                         </p>
                                         {(litter.inbreedingCoefficient != null || coiCalculating.has(litter._id)) && (
                                             <p className="text-[10px] text-gray-500 mt-0.5">
@@ -3828,10 +3828,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPlannedOnly
                                                 ? <span className="text-xs font-semibold text-indigo-600"><Calendar size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
                                                 : isMated
-                                                ? <span className="text-xs font-semibold text-purple-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
+                                                ? <span className="text-xs font-semibold text-teal-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
                                                 : isPregnant
                                                 ? <span className="text-xs font-semibold text-pink-600"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
-                                                : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</span>}
+                                                : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
                                         <div className="min-w-0">
@@ -3871,7 +3871,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
                                                     title="Mark litter as born today"
-                                                    className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg px-2 py-1 hover:bg-green-100 transition flex items-center gap-1"
+                                                    className="text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 rounded-lg px-2 py-1 hover:bg-violet-100 transition flex items-center gap-1"
                                                   >
                                                     <Droplet size={12} /> Born today
                                                   </button>
@@ -3895,7 +3895,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
                                             title="Mark as mated today"
-                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition"
+                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition"
                                         >
                                             <Hourglass size={11} /> Mated today
                                         </button>
@@ -3905,7 +3905,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleMarkAsWeaned(litter); }}
                                             title="Mark as weaned today"
-                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition"
+                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
                                         >
                                             <Baby size={11} /> Wean today
                                         </button>
@@ -3929,7 +3929,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPlannedOnly && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
-                                                    className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    className="flex items-center gap-1 bg-teal-500 hover:bg-teal-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
                                                     <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     <span>Mated Today</span>
@@ -3947,7 +3947,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPregnant && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
-                                                    className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    className="flex items-center gap-1 bg-violet-500 hover:bg-violet-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
                                                     <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     <span>Born Today</span>
@@ -3956,7 +3956,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isNursing && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsWeaned(litter); }}
-                                                    className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
                                                     <Baby className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     <span>Wean Today</span>
@@ -4116,7 +4116,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {litter.birthDate && (
                                                         <div>
                                                             <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div>
-                                                            <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</div>
+                                                            <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}</div>
                                                         </div>
                                                     )}
                                                     {litter.weaningDate && (
@@ -4144,7 +4144,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div>
-                                                        <div className="text-xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
+                                                        <div className="text-xl font-bold text-blue-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Losses</div>
@@ -4617,14 +4617,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 while (cells.length % 7 !== 0) cells.push(null);
 
                 const typeStyles = {
-                    mated:       { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated' },
+                    mated:       { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Mated' },
                     due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
-                    born:        { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
+                    born:        { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-500', dot: 'bg-violet-500', label: 'Born' },
                     weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
                     birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthday' },
                     feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due' },
                     maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance Due' },
-                    caretask:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Care Task' },
+                    caretask:    { bg: 'bg-cyan-100 hover:bg-cyan-200 text-cyan-800 border border-cyan-300', dot: 'bg-cyan-400', label: 'Care Task' },
                     supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order' },
                 };
 
@@ -4842,7 +4842,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             const callId = l.litter_id_public;
 
                             const daysStatus = (() => {
-                                if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-green-600 font-semibold' };
+                                if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-violet-600 font-semibold' };
                                 if (!l.expectedDueDate) return null;
                                 const due = parseLocalDate(l.expectedDueDate);
                                 if (isNaN(due)) return null;
@@ -4911,7 +4911,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 const wd = new Date(l.weaningDate); if (isNaN(wd)) return null;
                                                 const now = new Date(); now.setHours(0,0,0,0); wd.setHours(0,0,0,0);
                                                 const diff = Math.round((wd - now) / 86400000);
-                                                if (diff > 0) return { text: `Due in ${diff} day${diff !== 1 ? 's' : ''}`, cls: 'text-green-600' };
+                                                if (diff > 0) return { text: `Due in ${diff} day${diff !== 1 ? 's' : ''}`, cls: 'text-violet-600' };
                                                 if (diff === 0) return { text: 'Weaning today', cls: 'text-amber-600 font-semibold' };
                                                 return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
                                             })();
