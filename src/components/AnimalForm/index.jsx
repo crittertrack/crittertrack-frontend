@@ -1200,28 +1200,60 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         <table style={{ borderCollapse: 'collapse', fontSize: '0.7rem' }}>
                             <tbody>
                                 <tr>
-                                    <td style={{ color: '#7c3aed', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
+                                    <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
                                     <td style={{ color: certFontColor }}>{litter.birthDate ? formatDate(litter.birthDate) : '—'}</td>
                                 </tr>
+                                {litter.birthMethod && litter.birthMethod !== 'Unknown' && (
+                                    <tr>
+                                        <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth Method:</td>
+                                        <td style={{ color: certFontColor }}>{litter.birthMethod}</td>
+                                    </tr>
+                                )}
+                                {litter.matingDate && (
+                                    <tr>
+                                        <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Mated:</td>
+                                        <td style={{ color: certFontColor }}>{formatDate(litter.matingDate)}</td>
+                                    </tr>
+                                )}
                                 <tr>
-                                    <td style={{ color: '#7c3aed', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>COI:</td>
+                                    <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>COI:</td>
                                     <td style={{ color: certFontColor }}>{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</td>
                                 </tr>
                                 <tr>
-                                    <td style={{ color: '#7c3aed', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Born:</td>
+                                    <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Born:</td>
                                     <td style={{ color: certFontColor }}>
                                         {totalBorn != null ? totalBorn : '—'}
                                         {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                             <span style={{ marginLeft: 6 }}>
                                                 <span style={{ color: '#3b82f6', fontWeight: 700 }}>{litter.maleCount ?? 0}M</span>
                                                 {' / '}
-                                                <span style={{ color: '#934E69', fontWeight: 700 }}>{litter.femaleCount ?? 0}F</span>
+                                                <span style={{ color: '#ec4899', fontWeight: 700 }}>{litter.femaleCount ?? 0}F</span>
                                                 {' / '}
-                                                <span style={{ color: '#7c3aed', fontWeight: 700 }}>{litter.unknownCount ?? 0}U</span>
+                                                <span style={{ color: '#a855f7', fontWeight: 700 }}>{litter.unknownCount ?? 0}U</span>
                                             </span>
                                         )}
                                     </td>
                                 </tr>
+                                {(litter.litterSizeWeaned != null || litter.lossesCount != null || litter.stillbornCount != null) && (
+                                    <tr>
+                                        <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Weaned:</td>
+                                        <td style={{ color: certFontColor }}>
+                                            {litter.litterSizeWeaned ?? '—'}
+                                            {litter.stillbornCount != null && (
+                                                <span style={{ marginLeft: 6, color: '#6b7280' }}>{litter.stillbornCount} stillborn</span>
+                                            )}
+                                            {litter.lossesCount != null && (
+                                                <span style={{ marginLeft: 6, color: '#dc2626' }}>{litter.lossesCount} lost</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                )}
+                                {litter.breedingMethod && litter.breedingMethod !== 'Unknown' && (
+                                    <tr>
+                                        <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Method:</td>
+                                        <td style={{ color: certFontColor }}>{litter.breedingMethod}</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
