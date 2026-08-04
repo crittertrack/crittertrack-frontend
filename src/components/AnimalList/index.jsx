@@ -4755,8 +4755,6 @@ useEffect(() => {
                     )}
                 </div>)}
 
-                </div>)}
-
                 {/* -- 8. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
 
                 {/* -- Feeding Modal ------------------------------------------------------- */}
