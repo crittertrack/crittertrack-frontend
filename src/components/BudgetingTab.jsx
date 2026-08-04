@@ -630,7 +630,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         {/* Transaction Type Selection Screen */}
                         {!editingTransaction && showTypeSelection ? (
                             <div className="space-y-6">
-                                <p className="text-center text-gray-600 mb-8">What type of transaction would you like to add?</p>
+                                <p className="text-center text-gray-600 mb-8">
+                                    What type of transaction would you like to add?
+                                    <br />
+                                    <span className="text-xs text-gray-500">
+                                        This only records a manual budget entry — it will not change the animal's status (e.g. sold, transferred, or archived).
+                                    </span>
+                                </p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <button
                                         type="button"
@@ -746,8 +752,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                 <input
                                                     type="text"
                                                     value={animalSearchQuery}
-                                                    onChange={(e) => {
-                                                    }}
+                                                    onChange={(e) => setAnimalSearchQuery(e.target.value)}
                                                     onFocus={() => setShowAnimalDropdown(true)}
                                                     onBlur={() => setTimeout(() => setShowAnimalDropdown(false), 150)}
                                                     placeholder={animalsLoading ? 'Loading animals...' : 'Search by name or ID...'}
