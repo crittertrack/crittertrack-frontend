@@ -5374,7 +5374,7 @@ useEffect(() => {
                                                 {reproNeedsAttentionList.length > 0 && (
                                                     <>
                                                         <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('reproduction')}>
-                                                            <span className="flex items-center gap-1.5 text-pink-700"><Bean size={14} /> Reproduction</span>
+                                                            <span className="flex items-center gap-1.5 text-pink-700"><Heart size={14} /> Reproduction</span>
                                                             <span className="font-medium">{reproNeedsAttentionList.length}</span>
                                                         </li>
                                                         <ul className="pl-6 space-y-1 text-xs">
@@ -5614,7 +5614,7 @@ useEffect(() => {
                                 {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
                                     {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
                                     {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
-                                    {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
+                                    {key:'reproduction', icon:<Heart size={14} className="shrink-0" />, label:'Reproduction'},
                                     {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
                                     {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'}
                 ].map(tab => (

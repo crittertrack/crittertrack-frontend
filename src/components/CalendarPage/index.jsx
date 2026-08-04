@@ -59,7 +59,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         mated:       { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Mated', Icon: Hourglass },
         due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due', Icon: BellRing },
         born:        { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-500', dot: 'bg-violet-500', label: 'Born', Icon: Cake },
-        weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned', Icon: Rainbow },
+        weaned:      { bg: 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300', dot: 'bg-blue-400', label: 'Weaned', Icon: Rainbow },
         birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthdate', Icon: PartyPopper },
         feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due', Icon: UtensilsCrossed },
         maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance', Icon: Wrench },

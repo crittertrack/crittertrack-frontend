@@ -3962,16 +3962,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     <span>Wean Today</span>
                                                 </button>
                                             )}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (litter.isPlanned) { setMatingEditChoice(litter); } else { handleEditLitter(litter); }
-                                                }}
-                                                className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
-                                            >
-                                                <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                <span className="hidden sm:inline">Edit</span>
-                                            </button>
                                             {(sire || dam) && (
                                                 <>
                                                     <button
@@ -3990,23 +3980,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </button>
                                                 </>
                                             )}
-                                            {!litter.isPlanned && <button
-                                                onClick={() => handleLinkAnimals(litter)}
-                                                data-tutorial-target="link-animals-btn"
-                                                className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
-                                            >
-                                                <Link className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                <span className="hidden sm:inline">Link</span>
-                                            </button>}
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleDeleteLitter(litter._id);
+                                                    if (litter.isPlanned) { setMatingEditChoice(litter); } else { handleEditLitter(litter); }
                                                 }}
-                                                className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                             >
-                                                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                <span className="hidden sm:inline">Delete</span>
+                                                <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                <span className="hidden sm:inline">Edit</span>
                                             </button>
                                         </div>
 
@@ -4452,14 +4434,38 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 </div>
                                             </div>
                                         ) : !litter.isPlanned ? (
-                                            <button
-                                                onClick={() => handleAddOffspringToLitter(litter)}
-                                                className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-3 py-2 rounded-lg text-sm"
-                                            >
-                                                <Plus size={16} />
-                                                Add Offspring
-                                            </button>
+                                            <div className="flex flex-wrap gap-2">
+                                                <button
+                                                    onClick={() => handleAddOffspringToLitter(litter)}
+                                                    className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                >
+                                                    <Plus size={16} />
+                                                    Add Offspring
+                                                </button>
+                                                <button
+                                                    onClick={() => handleLinkAnimals(litter)}
+                                                    data-tutorial-target="link-animals-btn"
+                                                    className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-2 rounded-lg text-sm"
+                                                >
+                                                    <Link className="w-4 h-4" />
+                                                    <span>Link Offspring</span>
+                                                </button>
+                                            </div>
                                         ) : null}
+
+                                        {/* Delete - bottom right */}
+                                        <div className="flex justify-end mt-3">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteLitter(litter._id);
+                                                }}
+                                                className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                <span>Delete</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -4620,7 +4626,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     mated:       { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Mated' },
                     due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
                     born:        { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-500', dot: 'bg-violet-500', label: 'Born' },
-                    weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
+                    weaned:      { bg: 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300', dot: 'bg-blue-400', label: 'Weaned' },
                     birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthday' },
                     feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due' },
                     maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance Due' },

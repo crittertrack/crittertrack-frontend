@@ -260,9 +260,9 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const isLoading = littersLoading || mgmtLoading;
 
     const breedingTypeConfig = {
-        mated:  { label: 'Mating',         bg: 'bg-teal-100 text-teal-700', border: 'border-teal-200', icon: Heart },
+        mated:  { label: 'Mating',         bg: 'bg-sky-100 text-sky-700', border: 'border-sky-200', icon: Heart },
         due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700',   border: 'border-amber-200',  icon: Egg },
-        weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',       border: 'border-sky-200',    icon: Milk },
+        weaned: { label: 'Weaning',        bg: 'bg-blue-100 text-blue-700',       border: 'border-blue-200',    icon: Milk },
     };
     const mgmtTypeConfig = {
         feeding:     { bg: 'bg-orange-100 text-orange-700', border: 'border-orange-200', icon: UtensilsCrossed },

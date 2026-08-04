@@ -4,7 +4,7 @@ import {
     Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
     Activity, AlertTriangle, Medal, Target, Key, Ban, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList, Hourglass,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, Share, Info, Network, Star,
-    Scale, Eye, EyeOff, TableOfContents, Users, HeartOff, Hospital, CheckCircle, Link, Droplet, ScanHeart
+    Scale, Eye, EyeOff, TableOfContents, Users, HeartOff, Hospital, CheckCircle, Link, Droplet, ScanHeart, Cake, Baby
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
@@ -709,7 +709,7 @@ const ViewAnimalModalV2 = ({
                                         if (animal.matingDate) {
                                             timelineEvents.push({
                                                 date: new Date(animal.matingDate),
-                                                icon: <Heart size={14} className="text-red-500" />,
+                                                icon: <Hourglass size={14} className="text-sky-500" />,
                                                 title: 'Mating',
                                                 displayDate: animal.matingDate
                                             });
@@ -728,7 +728,7 @@ const ViewAnimalModalV2 = ({
                                             if (record?.birthEventDate) {
                                                 timelineEvents.push({
                                                     date: new Date(record.birthEventDate),
-                                                    icon: <Users size={14} className="text-emerald-500" />,
+                                                    icon: <Cake size={14} className="text-violet-500" />,
                                                     title: 'Birth/Hatching Event',
                                                     displayDate: record.birthEventDate
                                                 });
@@ -738,7 +738,7 @@ const ViewAnimalModalV2 = ({
                                         if (animal.weaningDate) {
                                             timelineEvents.push({
                                                 date: new Date(animal.weaningDate),
-                                                icon: <Users size={14} className="text-teal-500" />,
+                                                icon: <Baby size={14} className="text-blue-500" />,
                                                 title: 'Weaning',
                                                 displayDate: animal.weaningDate
                                             });

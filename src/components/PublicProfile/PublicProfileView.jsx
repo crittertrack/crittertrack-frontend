@@ -4,7 +4,7 @@ import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
     DollarSign, Flame, Gem, Globe, Heart, Hourglass, Key, Link, Loader2,
-    Mail, Mars, MessageSquare, Moon, QrCode, Search, Share2, Sparkles, Sprout,
+    Mail, Mars, MessageSquare, Moon, QrCode, ScanHeart, Search, Share2, Sparkles, Sprout,
     Star, User, Venus, VenusAndMars, X, Settings
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -1194,10 +1194,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             {/* Litters Tab */}
             {activeTab === 'litters' && publicLitters.length > 0 && (() => {
                 const formatLitterDate = (d) => d ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d)) : null;
-                const today = new Date();
-                const mated = publicLitters.filter(l => l.isPlanned && l.matingDate && new Date(l.matingDate) <= today);
-                const plannedOnly = publicLitters.filter(l => l.isPlanned && !(l.matingDate && new Date(l.matingDate) <= today));
-                let born = publicLitters.filter(l => !l.isPlanned);
+                // isPlanned flips to false as soon as a litter is marked mated (not only once born),
+                // so state must be derived from birthDate/pregnancyDate/matingDate, not isPlanned alone.
+                const plannedOnly = publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate);
+                const mated = publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate);
+                const pregnant = publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate);
+                let born = publicLitters.filter(l => !!l.birthDate);
                 
                 // Extract unique years from born litters
                 const bornYears = [...new Set(born
@@ -1239,8 +1241,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         </div>
                     );
                 };
-                const LitterPublicCard = ({ l, isMated }) => (
-                    <div className={`bg-white rounded-xl border p-4 pb-6 space-y-2.5 relative ${isMated ? 'border-sky-300' : l.isPlanned ? 'border-indigo-300' : 'border-gray-300'}`}>
+                const LitterPublicCard = ({ l, isMated, isPregnant }) => (
+                    <div className={`bg-white rounded-xl border p-4 pb-6 space-y-2.5 relative ${isMated ? 'border-sky-300' : isPregnant ? 'border-pink-300' : l.isPlanned ? 'border-indigo-300' : 'border-gray-300'}`}>
                         {/* First line: centered breeding pair name */}
                         <div className="text-center min-h-[1.25rem] flex items-center justify-center">
                             {l.breedingPairCodeName && (
@@ -1261,7 +1263,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         <div className="border-t border-gray-200 my-2"></div>
                         
                         {/* Born stats - full width */}
-                        {!l.isPlanned && l.litterSizeBorn != null && (
+                        {!!l.birthDate && l.litterSizeBorn != null && (
                             <div className="flex items-center justify-center text-xs">
                                 <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
                                 {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
@@ -1281,9 +1283,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         
                         {/* Dates - full width centered */}
                         <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
-                            {l.matingDate && <span><span className="font-medium">{isMated ? 'Mated:' : l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
-                            {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
-                            {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}{litterAge(l.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(l.birthDate)}</span>}</span>}
+                            {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
+                            {l.expectedDueDate && !l.birthDate && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
+                            {l.birthDate && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}{litterAge(l.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(l.birthDate)}</span>}</span>}
                         </div>
                         
                         {/* CTL ID - bottom right corner */}
@@ -1313,6 +1315,16 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {plannedOnly.map(l => <LitterPublicCard key={l._id} l={l} />)}
+                                </div>
+                            </div>
+                        )}
+                        {pregnant.length > 0 && (
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <ScanHeart size={16} className="text-pink-500" /> Pregnant Pairings <span className="text-sm font-normal text-gray-400">({pregnant.length})</span>
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {pregnant.map(l => <LitterPublicCard key={l._id} l={l} isPregnant={true} />)}
                                 </div>
                             </div>
                         )}
@@ -1353,8 +1365,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     return acc;
                 }, {});
 
-                const bornLitters = publicLitters.filter(l => !l.isPlanned);
-                const plannedLitters = publicLitters.filter(l => l.isPlanned && !(l.matingDate && new Date(l.matingDate) <= new Date()));
+                const bornLitters = publicLitters.filter(l => !!l.birthDate);
+                const plannedLitters = publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate);
 
                 const totalOffspring = bornLitters.reduce((sum, l) => sum + (l.litterSizeBorn ?? 0), 0);
 
@@ -1380,8 +1392,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const forSaleOrStud = animals.filter(a => a.isForSale || a.availableForBreeding).length;
                 const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
                 const withPetStatus = animals.filter(a => a.status === 'Pet').length;
-                const today = new Date();
-                const matedLitters = publicLitters.filter(l => l.isPlanned && l.matingDate && new Date(l.matingDate) <= today).length;
+                const matedLitters = publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate).length;
+                const pregnantLitters = publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate).length;
 
                 const StatCard = ({ label, value, sub }) => (
                     <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
@@ -1425,6 +1437,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <StatCard label="For Sale / Stud" value={forSaleOrStud} />
                             <StatCard label="Total Litters" value={publicLitters.length} />
                             <StatCard label="Mated Pairings" value={matedLitters} />
+                            <StatCard label="Pregnant Pairings" value={pregnantLitters} />
                             <StatCard label="Planned Pairings" value={plannedLitters.length} />
                             <StatCard label="Total Offspring" value={totalOffspring} />
                         </div>

@@ -16,7 +16,7 @@ const parseJsonArrayField = (data) => {
 const getEventIcon = (type) => {
     const icons = {
         'health': <Stethoscope size={14} className="text-blue-500" />,
-        'breeding': <Heart size={14} className="text-red-500" />,
+        'breeding': <Heart size={14} className="text-pink-500" />,
         'ownership': <User size={14} className="text-slate-500" />,
         'keeper': <User size={14} className="text-slate-500" />,
         'show': <Trophy size={14} className="text-amber-500" />,
