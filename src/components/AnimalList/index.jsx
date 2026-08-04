@@ -5331,9 +5331,9 @@ useEffect(() => {
                                                         </li>
                                                         <ul className="pl-6 space-y-1 text-xs">
                                                             {feedingCareDueDashboard.map(({ animal, reasons }) => (
-                                                                <li key={animal.id_public} className="flex flex-col gap-0.5 text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
+                                                                <li key={animal.id_public} className="flex justify-between items-center gap-2 text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
                                                                     <span className="font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
-                                                                    <span>{reasons.join(', ')}</span>
+                                                                    <span className="whitespace-nowrap">{reasons.length} task(s)</span>
                                                                 </li>
                                                             ))}
                                                         </ul>
