@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Calendar, Clock, Star, MessageSquare, Heart, Stethoscope, Droplets, Shield, Users, User, Target, Trash2, Trophy, UtensilsCrossed, FileEdit } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
@@ -14,7 +14,7 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data : [];
 };
 
-const getEventIcon = (type) => {
+export const getEventIcon = (type) => {
     const icons = {
         'health': <Stethoscope size={14} className="text-blue-500" />,
         'breeding': <Heart size={14} className="text-pink-500" />,
@@ -66,7 +66,7 @@ const logToTimelineEvent = (log) => {
 };
 
 // Renders **marker**-wrapped segments (e.g. "Fed: **Completed**") as bold text.
-const renderBoldText = (text) => text.split(/(\*\*[^*]+\*\*)/g).map((segment, i) => (
+export const renderBoldText = (text) => text.split(/(\*\*[^*]+\*\*)/g).map((segment, i) => (
     segment.startsWith('**') && segment.endsWith('**')
         ? <strong key={i}>{segment.slice(2, -2)}</strong>
         : <React.Fragment key={i}>{segment}</React.Fragment>
@@ -112,27 +112,13 @@ const TimelineEvent = ({ event, notes, isPinned }) => (
     </div>
 );
 
-export const TimelineTabContent = ({ animal, API_BASE_URL, authToken }) => {
-    const timelineNotes = parseJsonArrayField(animal.timelineNotes) || [];
-    const pinnedEvents = parseJsonArrayField(animal.pinnedEvents) || [];
-    const milestones = parseJsonArrayField(animal.milestones) || [];
-    const [animalLogs, setAnimalLogs] = useState([]);
-
-    useEffect(() => {
-        // Skip entirely for guest/unauthenticated views (public marketplace pages) — the
-        // endpoint requires a valid token anyway, so this avoids a guaranteed 401 on every load.
-        if (!animal?.id_public || !API_BASE_URL || !authToken) return;
-        let cancelled = false;
-        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
-            .then(res => { if (!cancelled) setAnimalLogs(Array.isArray(res.data) ? res.data : []); })
-            .catch(err => console.error('Failed to fetch animal logs for timeline:', err));
-        return () => { cancelled = true; };
-    }, [animal?.id_public, API_BASE_URL, authToken]);
-
-    // Aggregate all timeline events
-    const aggregateAllEvents = () => {
+// Aggregate all timeline events for a single animal, given its already-fetched AnimalLog docs.
+// Standalone (not a hook/component) so other views (e.g. the Dashboard tab's "Recent Activity"
+// preview) can share the exact same event list instead of maintaining their own duplicated logic.
+const aggregateAnimalTimelineEvents = (animal, animalLogs) => {
         const events = [];
-        
+        const milestones = parseJsonArrayField(animal.milestones) || [];
+
         // Milestones
         milestones.forEach((m, idx) => {
             if (m?.startDate) {
@@ -481,9 +467,32 @@ export const TimelineTabContent = ({ animal, API_BASE_URL, authToken }) => {
         animalLogs.forEach(log => events.push(logToTimelineEvent(log)));
 
         return events.sort((a, b) => new Date(b.date) - new Date(a.date));
-    };
+};
 
-    const allEvents = aggregateAllEvents();
+// Fetches an animal's AnimalLog entries and returns the fully-aggregated, sorted timeline event
+// list (derived events + logged actions). Shared by TimelineTabContent and any other view that
+// needs the same data (e.g. a "Recent Activity" preview of the last N events).
+export const useAnimalTimelineEvents = (animal, API_BASE_URL, authToken) => {
+    const [animalLogs, setAnimalLogs] = useState([]);
+
+    useEffect(() => {
+        // Skip entirely for guest/unauthenticated views (public marketplace pages) — the
+        // endpoint requires a valid token anyway, so this avoids a guaranteed 401 on every load.
+        if (!animal?.id_public || !API_BASE_URL || !authToken) return;
+        let cancelled = false;
+        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => { if (!cancelled) setAnimalLogs(Array.isArray(res.data) ? res.data : []); })
+            .catch(err => console.error('Failed to fetch animal logs for timeline:', err));
+        return () => { cancelled = true; };
+    }, [animal?.id_public, API_BASE_URL, authToken]);
+
+    return useMemo(() => aggregateAnimalTimelineEvents(animal, animalLogs), [animal, animalLogs]);
+};
+
+export const TimelineTabContent = ({ animal, API_BASE_URL, authToken }) => {
+    const timelineNotes = parseJsonArrayField(animal.timelineNotes) || [];
+    const pinnedEvents = parseJsonArrayField(animal.pinnedEvents) || [];
+    const allEvents = useAnimalTimelineEvents(animal, API_BASE_URL, authToken);
     const pinnedEventsList = allEvents.filter(e => pinnedEvents.includes(e.id));
     const regularEventsList = allEvents.filter(e => !pinnedEvents.includes(e.id));
 
