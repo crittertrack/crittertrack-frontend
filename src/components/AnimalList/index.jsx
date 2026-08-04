@@ -4394,10 +4394,6 @@ useEffect(() => {
                         bgClass="bg-green-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['feedingCare'] || !!view) && (
                         <div className="p-3 space-y-4">
-                            {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-green-100">
-                                <Utensils size={15} className="text-green-600 flex-shrink-0" />
-                                <span className="text-sm font-bold text-green-700 uppercase tracking-wide">Feeding & Care</span>
-                            </div>}
                             {(() => {
                                 const feedingCareSections = [
                                     {
@@ -4542,10 +4538,6 @@ useEffect(() => {
                         title="Reproduction" count={reproTotal} bgClass="bg-pink-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['reproduction'] || !!view) && (
                         <div className="p-3 space-y-4">
-                            {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-pink-100">
-                                <Heart size={15} className="text-pink-600 flex-shrink-0" />
-                                <span className="text-sm font-bold text-pink-700 uppercase tracking-wide">Reproduction</span>
-                            </div>}
                             <div className="border border-pink-200 rounded-lg overflow-hidden">
                                 <div className="flex items-center justify-between p-3 bg-pink-50/60">
                                     <div className="flex items-center gap-3">
@@ -4632,10 +4624,6 @@ useEffect(() => {
                         title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['medical'] || !!view) && (
                         <div className="p-3 space-y-4">
-                            {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-red-100">
-                                <Activity size={15} className="text-red-600 flex-shrink-0" />
-                                <span className="text-sm font-bold text-red-700 uppercase tracking-wide">Medical / Quarantine</span>
-                            </div>}
                             {/* Enclosures sub-panel */}
                             <div className="border border-orange-200 rounded-lg overflow-hidden">
                                 <div className="flex items-center justify-between p-3 bg-orange-50/60">
