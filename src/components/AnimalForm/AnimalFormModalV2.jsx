@@ -118,6 +118,13 @@ const formatLogValue = (value) => {
     return String(value);
 };
 
+// Renders **marker**-wrapped segments (e.g. "Fed: **Completed**") as bold text.
+const renderBoldText = (text) => text.split(/(\*\*[^*]+\*\*)/g).map((segment, i) => (
+    segment.startsWith('**') && segment.endsWith('**')
+        ? <strong key={i}>{segment.slice(2, -2)}</strong>
+        : <React.Fragment key={i}>{segment}</React.Fragment>
+));
+
 const getContactDisplayName = (contact) => {
     const personalName = contact?.personalName?.trim();
     const breederName = contact?.breederName?.trim();
@@ -3115,6 +3122,7 @@ const AnimalFormModalV2 = ({
                 const newVal = formatLogValue(c.newValue);
                 const oldVal = formatLogValue(c.oldValue);
                 if (oldVal && newVal) return `${c.label}: ${oldVal} → ${newVal}`;
+                if (newVal === 'Completed' || newVal === 'Skipped') return `${c.label}: **${newVal}**`;
                 return `${c.label}${newVal ? `: ${newVal}` : ''}`;
             }).filter(Boolean);
             const titles = {
@@ -6186,7 +6194,7 @@ const AnimalFormModalV2 = ({
                                                                     <div className="flex-1">
                                                                         <p className="text-sm font-semibold text-gray-800">{event.title}</p>
                                                                         <p className="text-xs text-gray-600">{event.date} • {event.type}</p>
-                                                                        {event.description && <p className="text-xs text-gray-700 mt-1">{event.description}</p>}
+                                                                        {event.description && <p className="text-xs text-gray-700 mt-1">{renderBoldText(event.description)}</p>}
                                                                     </div>
                                                                     <button
                                                                         type="button"
@@ -6231,7 +6239,7 @@ const AnimalFormModalV2 = ({
                                                                     <div className="flex-1">
                                                                         <p className="text-sm font-semibold text-gray-800">{event.title}</p>
                                                                         <p className="text-xs text-gray-600">{event.date} • {event.type}</p>
-                                                                        {event.description && <p className="text-xs text-gray-700 mt-1">{event.description}</p>}
+                                                                        {event.description && <p className="text-xs text-gray-700 mt-1">{renderBoldText(event.description)}</p>}
                                                                     </div>
                                                                     <button
                                                                         type="button"

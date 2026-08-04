@@ -46,6 +46,7 @@ const logToTimelineEvent = (log) => {
         const oldVal = formatLogValue(c.oldValue);
         if (c.field === 'lastFedDate') return null; // covered by the card title itself
         if (oldVal && newVal) return `${c.label}: ${oldVal} → ${newVal}`;
+        if (newVal === 'Completed' || newVal === 'Skipped') return `${c.label}: **${newVal}**`;
         return `${c.label}${newVal ? `: ${newVal}` : ''}`;
     }).filter(Boolean);
 
@@ -63,6 +64,13 @@ const logToTimelineEvent = (log) => {
         description: parts.join('; ') || undefined
     };
 };
+
+// Renders **marker**-wrapped segments (e.g. "Fed: **Completed**") as bold text.
+const renderBoldText = (text) => text.split(/(\*\*[^*]+\*\*)/g).map((segment, i) => (
+    segment.startsWith('**') && segment.endsWith('**')
+        ? <strong key={i}>{segment.slice(2, -2)}</strong>
+        : <React.Fragment key={i}>{segment}</React.Fragment>
+));
 
 const TimelineEvent = ({ event, notes, isPinned }) => (
     <div className="relative pl-10 pb-6 group">
@@ -85,7 +93,7 @@ const TimelineEvent = ({ event, notes, isPinned }) => (
                 </p>
                 <time className="text-xs font-medium text-gray-600 whitespace-nowrap">{formatDate(event.date)}</time>
             </div>
-            {event.description && <p className="text-xs text-gray-700 mb-2">{event.description}</p>}
+            {event.description && <p className="text-xs text-gray-700 mb-2">{renderBoldText(event.description)}</p>}
             {notes && notes.length > 0 && (
                 <div className="mt-2 space-y-1">
                     {notes.map(note => (
