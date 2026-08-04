@@ -1240,7 +1240,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     );
                 };
                 const LitterPublicCard = ({ l, isMated }) => (
-                    <div className={`bg-white rounded-xl border p-4 pb-6 space-y-2.5 relative ${isMated ? 'border-teal-300' : l.isPlanned ? 'border-indigo-300' : 'border-gray-300'}`}>
+                    <div className={`bg-white rounded-xl border p-4 pb-6 space-y-2.5 relative ${isMated ? 'border-sky-300' : l.isPlanned ? 'border-indigo-300' : 'border-gray-300'}`}>
                         {/* First line: centered breeding pair name */}
                         <div className="text-center min-h-[1.25rem] flex items-center justify-center">
                             {l.breedingPairCodeName && (
@@ -1299,7 +1299,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {mated.length > 0 && (
                             <div>
                                 <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Hourglass size={16} className="text-teal-500" /> Mated Pairings <span className="text-sm font-normal text-gray-400">({mated.length})</span>
+                                    <Hourglass size={16} className="text-sky-500" /> Mated Pairings <span className="text-sm font-normal text-gray-400">({mated.length})</span>
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {mated.map(l => <LitterPublicCard key={l._id} l={l} isMated={true} />)}

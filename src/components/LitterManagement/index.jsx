@@ -3671,7 +3671,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                                         litterStatusFilter === val
                                             ? val === 'planned' ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
-                                            : val === 'mated'   ? 'bg-teal-100 border-teal-300 text-teal-700'
+                                            : val === 'mated'   ? 'bg-sky-100 border-sky-300 text-sky-700'
                                             : val === 'pregnant' ? 'bg-pink-100 border-pink-300 text-pink-700'
                                             : val === 'born'    ? 'bg-violet-100 border-violet-300 text-violet-700'
                                             : 'bg-primary border-primary/50 text-black'
@@ -3767,7 +3767,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const isNursing = hasBirth && (dam ? !!dam.isNursing : !litter.weaningConfirmed);
                         
                         return (
-                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-teal-300 bg-teal-50/20' : isPregnant ? 'border-dashed border-pink-300 bg-pink-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
+                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-sky-300 bg-sky-50/20' : isPregnant ? 'border-dashed border-pink-300 bg-pink-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
@@ -3788,7 +3788,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <div className="flex-1">
                                                 <p className="font-bold text-gray-800 text-sm">
                                                     {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-2">Planned</span>}
-                                                    {isMated && <span className="text-[10px] font-semibold bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
+                                                    {isMated && <span className="text-[10px] font-semibold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
                                                     {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
                                                     {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
@@ -3828,7 +3828,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPlannedOnly
                                                 ? <span className="text-xs font-semibold text-indigo-600"><Calendar size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
                                                 : isMated
-                                                ? <span className="text-xs font-semibold text-teal-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
+                                                ? <span className="text-xs font-semibold text-sky-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
                                                 : isPregnant
                                                 ? <span className="text-xs font-semibold text-pink-600"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
                                                 : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}</span>}
@@ -3895,7 +3895,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
                                             title="Mark as mated today"
-                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition"
+                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 transition"
                                         >
                                             <Hourglass size={11} /> Mated today
                                         </button>
@@ -3929,7 +3929,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPlannedOnly && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
-                                                    className="flex items-center gap-1 bg-teal-500 hover:bg-teal-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    className="flex items-center gap-1 bg-sky-500 hover:bg-sky-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
                                                     <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     <span>Mated Today</span>
@@ -4617,7 +4617,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 while (cells.length % 7 !== 0) cells.push(null);
 
                 const typeStyles = {
-                    mated:       { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Mated' },
+                    mated:       { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Mated' },
                     due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
                     born:        { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-500', dot: 'bg-violet-500', label: 'Born' },
                     weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
