@@ -276,12 +276,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [generations, setGenerations] = useState(inline && inlineGenerations ? inlineGenerations : 4); // 1–4
     // Load persisted cert prefs from localStorage (shared across all animals for this user)
     const _savedPrefs = (() => { try { return JSON.parse(localStorage.getItem('ct_cert_prefs') || '{}'); } catch { return {}; } })();
-    const [certText, setCertText] = useState(_savedPrefs.certText ?? '');
     const [certTextTopRight, setCertTextTopRight] = useState(_savedPrefs.certTextTopRight ?? 'Certificate of Origin');
     const [certTextBottomLeft, setCertTextBottomLeft] = useState(_savedPrefs.certTextBottomLeft ?? 'This pedigree is not recognized by the state');
     const [certFontColor, setCertFontColor] = useState(_savedPrefs.certFontColor ?? '#1a1a1a');
     const [certBorderColor, setCertBorderColor] = useState(_savedPrefs.certBorderColor ?? '#374151');
     const [certBgColor, setCertBgColor] = useState(_savedPrefs.certBgColor ?? '#ffffff');
+    const [certBgImage, setCertBgImage] = useState(_savedPrefs.certBgImage ?? null);
     const [showCustomPanel, setShowCustomPanel] = useState(false);
     const [vertGenerations, setVertGenerations] = useState(inline && inlineGenerations ? inlineGenerations : 3);
     const [inlineZoomPct, setInlineZoomPct] = useState(30);
@@ -306,9 +306,42 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     // Persist cert prefs to localStorage whenever they change
     useEffect(() => {
         try {
-            localStorage.setItem('ct_cert_prefs', JSON.stringify({ certText, certTextTopRight, certTextBottomLeft, certFontColor, certBorderColor, certBgColor }));
+            localStorage.setItem('ct_cert_prefs', JSON.stringify({ certTextTopRight, certTextBottomLeft, certFontColor, certBorderColor, certBgColor, certBgImage }));
         } catch {}
-    }, [certText, certTextTopRight, certTextBottomLeft, certFontColor, certBorderColor, certBgColor]);
+    }, [certTextTopRight, certTextBottomLeft, certFontColor, certBorderColor, certBgColor, certBgImage]);
+
+    // Downscale and load a chosen background image as a data URL (keeps localStorage size reasonable)
+    const handleCertBgImageChange = async (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file || !file.type.startsWith('image/')) return;
+        try {
+            const rawDataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            const img = await new Promise((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => resolve(image);
+                image.onerror = reject;
+                image.src = rawDataUrl;
+            });
+            const maxDim = 1400;
+            let { width, height } = img;
+            if (width > maxDim || height > maxDim) {
+                const ratio = Math.min(maxDim / width, maxDim / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            setCertBgImage(canvas.toDataURL('image/jpeg', 0.75));
+        } catch {}
+    };
 
     // Merge manual ancestors into fetched pedigree tree wherever API returned nothing
     const displayData = useMemo(() => {
@@ -1387,8 +1420,16 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 width: '100%',
                 boxSizing: 'border-box',
                 fontFamily: 'Georgia, serif',
+                overflow: 'hidden',
             }}
         >
+            {certBgImage && (
+                <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${certBgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+            )}
+            {certBgImage && (
+                <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.72)' }} />
+            )}
+            <div style={{ position: 'relative', zIndex: 1 }}>
             {/* ── Header row: Species | Title ──────────────────────── */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4, borderBottom: `1px solid ${certBorderColor}`, paddingBottom: 4 }}>
                 <div>
@@ -1410,12 +1451,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 <div style={{ width: '50%' }}>
                     {subject && renderCertMainCard(subject)}
                 </div>
-                {/* Right 50%: cert text + logo + signature */}
+                {/* Right 50%: breeder / current owner */}
                 <div style={{ width: '50%', paddingLeft: 10, borderLeft: `1px dashed ${certBorderColor}`, display: 'flex', flexDirection: 'column' }}>
-                    {certText && (
-                        <div style={{ fontSize: '0.7rem', color: certFontColor, lineHeight: 1.6, flex: 1 }}>{certText}</div>
-                    )}
-                    <div style={{ marginTop: 'auto', borderTop: `1px solid ${certBorderColor}`, paddingTop: 6, display: 'flex', justifyContent: 'flex-end', gap: 14 }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18 }}>
                         {[
                             { label: 'Breeder', profile: ownerProfile },
                             { label: 'Current Owner', profile: currentOwnerProfile },
@@ -1423,16 +1461,16 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                             const img = getProfileImage(profile);
                             const name = getDisplayName(profile);
                             return (
-                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'flex-end' }}>
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#9ca3af' }}>{label}</div>
-                                        <div style={{ fontSize: '0.65rem', color: certFontColor, fontWeight: 600 }}>{name}</div>
+                                        <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af', fontWeight: 600 }}>{label}</div>
+                                        <div style={{ fontSize: '1.1rem', color: certFontColor, fontWeight: 700 }}>{name}</div>
                                     </div>
                                     {img && (
                                         <img
                                             src={img}
                                             alt={name}
-                                            style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${certBorderColor}`, flexShrink: 0 }}
+                                            style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${certBorderColor}`, flexShrink: 0 }}
                                         />
                                     )}
                                 </div>
@@ -1452,6 +1490,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 <div style={{ fontSize: '0.6rem', color: '#9ca3af', fontStyle: 'italic' }}>{certTextBottomLeft}</div>
                 <div style={{ fontSize: '0.6rem', color: '#6b7280' }}>{formatDate(new Date())}</div>
                 <div style={{ fontSize: '0.6rem', color: '#9ca3af' }}>Created by CritterTrack</div>
+            </div>
             </div>
         </div>
     );
@@ -1758,10 +1797,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                                 <input className="border rounded px-2 py-1" value={certTextTopRight} onChange={e => setCertTextTopRight(e.target.value)} />
                             </label>
                             <label className="flex flex-col gap-1">
-                                <span className="text-gray-500 font-medium">Centre text</span>
-                                <textarea className="border rounded px-2 py-1 resize-none" rows={2} value={certText} onChange={e => setCertText(e.target.value)} />
-                            </label>
-                            <label className="flex flex-col gap-1">
                                 <span className="text-gray-500 font-medium">Bottom-left text</span>
                                 <input className="border rounded px-2 py-1" value={certTextBottomLeft} onChange={e => setCertTextBottomLeft(e.target.value)} />
                             </label>
@@ -1784,6 +1819,15 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                                 <div className="flex gap-1 items-center">
                                     <input type="color" className="w-8 h-7 cursor-pointer rounded border" value={certBgColor} onChange={e => setCertBgColor(e.target.value)} />
                                     <input className="border rounded px-2 py-1 flex-1" value={certBgColor} onChange={e => setCertBgColor(e.target.value)} />
+                                </div>
+                            </label>
+                            <label className="flex flex-col gap-1">
+                                <span className="text-gray-500 font-medium">Background image</span>
+                                <div className="flex gap-1 items-center">
+                                    <input type="file" accept="image/*" className="text-[11px] flex-1" onChange={handleCertBgImageChange} />
+                                    {certBgImage && (
+                                        <button type="button" className="text-red-600 hover:underline whitespace-nowrap" onClick={() => setCertBgImage(null)}>Remove</button>
+                                    )}
                                 </div>
                             </label>
 
