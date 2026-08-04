@@ -224,6 +224,24 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
                 showModalMessage('Success', 'Transaction added successfully');
+
+                // Logging a sale doesn't change the animal's own status/list visibility —
+                // offer to do that explicitly, since users often assume it happens automatically.
+                if (transactionData.type === 'sale' && formData.animalId) {
+                    if (window.confirm(`You've logged a sale for ${formData.animalName || formData.animalId}. Would you also like to mark it as Rehomed and archive it so it moves out of your main animal list?`)) {
+                        try {
+                            await axios.put(
+                                `${API_BASE_URL}/animals/${formData.animalId}`,
+                                { status: 'Rehomed', archived: true },
+                                { headers: { Authorization: `Bearer ${authToken}` } }
+                            );
+                            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: formData.animalId, status: 'Rehomed', archived: true } }));
+                            window.dispatchEvent(new Event('animals-changed'));
+                        } catch (err) {
+                            showModalMessage('Error', 'Failed to update the animal\'s status.');
+                        }
+                    }
+                }
             }
 
             console.log('API call successful');
