@@ -86,8 +86,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                 ...prev,
                 type: preSelectedType,
                 animalId: preSelectedAnimal.id_public,
-                animalName: preSelectedAnimal.name,
-                buyer: userProfile?.breederName || userProfile?.personalName || ''
+                animalName: preSelectedAnimal.name
             }));
             setSelectedSpecies(preSelectedAnimal.species);
             setShowAddModal(true);
@@ -373,7 +372,22 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         <DollarSign className="w-5 h-5 sm:w-7 sm:h-7 text-green-600" />
                         Budget Tracker
                     </h1>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600">
+                            Currency:
+                            <select
+                                value={currency}
+                                onChange={(e) => handleCurrencyChange(e.target.value)}
+                                className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs sm:text-sm focus:ring-primary focus:border-primary"
+                                title="Sets the currency symbol shown across this entire page"
+                            >
+                                {currencyOptions.map(curr => (
+                                    <option key={curr.code} value={curr.code}>
+                                        {curr.symbol} {curr.code}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
                         <button
                             onClick={exportToCSV}
                             className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-xs sm:text-base"
@@ -461,7 +475,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
             {/* Filters */}
             <div className="bg-white rounded-xl shadow-lg p-2 sm:p-4 mb-4 sm:mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
                     <div className="relative col-span-2 md:col-span-1">
                         <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         <input
@@ -498,22 +512,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                             <option value="all">All Years</option>
                             {availableYears.map(year => (
                                 <option key={year} value={year}>{year}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="relative">
-                        <DollarSign className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
-                        <select
-                            value={currency}
-                            onChange={(e) => handleCurrencyChange(e.target.value)}
-                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                            title="Select Currency"
-                        >
-                            {currencyOptions.map(curr => (
-                                <option key={curr.code} value={curr.code}>
-                                    {curr.symbol} {curr.code}
-                                </option>
                             ))}
                         </select>
                     </div>
@@ -655,7 +653,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                         type="button"
                                         onClick={() => {
                                             console.log('[BudgetTab] Animal Sale button clicked');
-                                            setFormData({ ...formData, type: 'animal-sale', buyer: userProfile?.breederName || userProfile?.personalName || '' });
+                                            setFormData({ ...formData, type: 'animal-sale' });
                                             setShowTypeSelection(false);
                                         }}
                                         className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all"
@@ -765,8 +763,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                 <input
                                                     type="text"
                                                     value={animalSearchQuery}
-                                                    onChange={(e) => {
-                                                    }}
+                                                    onChange={(e) => setAnimalSearchQuery(e.target.value)}
                                                     onFocus={() => setShowAnimalDropdown(true)}
                                                     onBlur={() => setTimeout(() => setShowAnimalDropdown(false), 150)}
                                                     placeholder={animalsLoading ? 'Loading animals...' : 'Search by name or ID...'}

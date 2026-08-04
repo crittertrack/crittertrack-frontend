@@ -15,6 +15,38 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [restockingSupplyId, setRestockingSupplyId] = useState(null);
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
+    // Shared with Budget Tracker's currency picker (same localStorage key) so both stay in sync.
+    const [currency, setCurrency] = useState(() => localStorage.getItem('budgetCurrency') || 'USD');
+    const currencyOptions = [
+        { code: 'USD', symbol: '$', name: 'US Dollar' },
+        { code: 'EUR', symbol: '€', name: 'Euro' },
+        { code: 'GBP', symbol: '£', name: 'British Pound' },
+        { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+        { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+        { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+        { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+        { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+        { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
+        { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+        { code: 'MXN', symbol: 'Mex$', name: 'Mexican Peso' },
+        { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+        { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar' },
+        { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone' },
+        { code: 'KRW', symbol: '₩', name: 'South Korean Won' },
+        { code: 'TRY', symbol: '₺', name: 'Turkish Lira' },
+        { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
+        { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+        { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+        { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+        { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint' },
+        { code: 'PLN', symbol: 'zł', name: 'Polish Zloty' },
+        { code: 'DKK', symbol: 'kr', name: 'Danish Krone' }
+    ];
+    const getCurrencySymbol = () => currencyOptions.find(c => c.code === currency)?.symbol || '$';
+    const handleCurrencyChange = (newCurrency) => {
+        setCurrency(newCurrency);
+        localStorage.setItem('budgetCurrency', newCurrency);
+    };
 
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
@@ -147,7 +179,20 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     return (
         <div className="w-full max-w-7xl mx-auto p-2 sm:p-4">
             <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 space-y-4">
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-end gap-2">
+                    <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
+                        Currency:
+                        <select
+                            value={currency}
+                            onChange={e => handleCurrencyChange(e.target.value)}
+                            className="border border-gray-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+                            title="Sets the currency symbol shown across this page"
+                        >
+                            {currencyOptions.map(curr => (
+                                <option key={curr.code} value={curr.code}>{curr.symbol} {curr.code}</option>
+                            ))}
+                        </select>
+                    </label>
                     <button onClick={fetchSupplies} disabled={suppliesLoading}
                         className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50">
                         <RefreshCw size={12} /> Refresh
@@ -201,7 +246,7 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 <input type="text" value={supplyForm.unit} onChange={e => setSupplyForm(f => ({ ...f, unit: e.target.value }))} placeholder="bags" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Cost per unit</label>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Cost per unit ({getCurrencySymbol()})</label>
                                 <input type="number" min="0" step="0.01" value={supplyForm.costPerUnit} onChange={e => setSupplyForm(f => ({ ...f, costPerUnit: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
                             </div>
                             <div>
@@ -304,7 +349,7 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     <div className="flex flex-wrap gap-1.5 mt-0.5">
                                         {item.isFeederAnimal && item.feederType && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederType}</span>}
                                         {item.isFeederAnimal && item.feederSize && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederSize}</span>}
-                                        {item.costPerUnit != null && <span className="text-xs text-gray-400">${Number(item.costPerUnit).toFixed(2)} / {item.unit || 'unit'}</span>}
+                                        {item.costPerUnit != null && <span className="text-xs text-gray-400">{getCurrencySymbol()}{Number(item.costPerUnit).toFixed(2)} / {item.unit || 'unit'}</span>}
                                     </div>
                                 )}
                                 {item.nextOrderDate && (
@@ -328,7 +373,7 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                 }} placeholder="e.g. 5" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                             </div>
                                             <div>
-                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Cost paid *</label>
+                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Cost paid ({getCurrencySymbol()}) *</label>
                                                 <input type="number" min="0" step="0.01" value={restockForm.cost} onChange={e => setRestockForm(f => ({ ...f, cost: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                             </div>
                                             <div>
