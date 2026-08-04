@@ -5187,6 +5187,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 <PedigreeChart
                     litterId={certLitter.litter_id_public}
                     vertical={certLitter.vertical}
+                    currentUserIdPublic={userProfile?.id_public}
                     API_BASE_URL={API_BASE_URL}
                     authToken={authToken}
                     onClose={() => setCertLitter(null)}

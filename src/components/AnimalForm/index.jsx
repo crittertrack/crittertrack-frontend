@@ -266,7 +266,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
 };
 
 
-const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
+const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null, currentUserIdPublic = null, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [currentViewingAnimal, setCurrentViewingAnimal] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null); // breeder (breederId_public)
@@ -574,6 +574,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         species: sireTree?.species || damTree?.species || null,
                         father: sireTree,
                         mother: damTree,
+                        // Litters have no separate breeder concept — the account that owns the litter is the breeder
+                        breederId_public: currentUserIdPublic || null,
                     };
                 } else {
                     data = await fetchAnimalWithFamily(rootId);
@@ -596,6 +598,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     } catch (error) {
                         console.error('Failed to fetch owner profile:', error);
                     }
+                } else if (data?.manualBreederName) {
+                    // No linked account — show the free-text breeder name instead
+                    fetchedOwnerProfile = { personalName: data.manualBreederName, showPersonalName: true };
+                    setOwnerProfile(fetchedOwnerProfile);
                 }
 
                 // Fetch current owner profile (creatorId_public) — the person who currently has the
@@ -626,7 +632,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         };
 
         fetchPedigreeData();
-    }, [animalId, animalData?.id_public, litterId, API_BASE_URL, authToken]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [animalId, animalData?.id_public, litterId, currentUserIdPublic, API_BASE_URL, authToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Re-fetch pedigree when clicking an ancestor (currentViewingAnimal changes)
     useEffect(() => {
@@ -749,6 +755,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     } catch (error) {
                         console.error('Error fetching breeder profile:', error);
                     }
+                } else if (data?.manualBreederName) {
+                    // No linked account — show the free-text breeder name instead
+                    fetchedOwnerProfile = { personalName: data.manualBreederName, showPersonalName: true };
+                    setOwnerProfile(fetchedOwnerProfile);
                 }
 
                 // Fetch current owner profile (creatorId_public) if it differs from the breeder
@@ -1170,14 +1180,16 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             const imgSrc = litter.images?.[0]?.url || null;
             const idLabel = [litter.litter_id_public, litter.breedingPairCodeName].filter(Boolean).join(' · ');
             const totalBorn = litter.litterSizeBorn ?? litter.numberBorn ?? null;
+            const litterCardBg = '#f3e8ff';
+            const litterCardBorder = '#7c3aed';
             return (
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: '#f3f4f6', border: `1px solid ${certBorderColor}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: litterCardBg, border: `1px solid ${litterCardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
                     {/* Photo */}
-                    <div className="hide-for-pdf" style={{ width: 115, height: 115, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${certBorderColor}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="hide-for-pdf" style={{ width: 115, height: 115, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${litterCardBorder}`, backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {imgSrc ? (
                             <AnimalImage src={imgSrc} alt={idLabel} className="w-full h-full object-cover" iconSize={46} />
                         ) : (
-                            <Cat size={46} style={{ color: '#9ca3af' }} />
+                            <Cat size={46} style={{ color: '#a78bfa' }} />
                         )}
                     </div>
                     {/* Details */}
@@ -1188,15 +1200,15 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         <table style={{ borderCollapse: 'collapse', fontSize: '0.7rem' }}>
                             <tbody>
                                 <tr>
-                                    <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
+                                    <td style={{ color: '#7c3aed', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
                                     <td style={{ color: certFontColor }}>{litter.birthDate ? formatDate(litter.birthDate) : '—'}</td>
                                 </tr>
                                 <tr>
-                                    <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>COI:</td>
+                                    <td style={{ color: '#7c3aed', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>COI:</td>
                                     <td style={{ color: certFontColor }}>{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</td>
                                 </tr>
                                 <tr>
-                                    <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Born:</td>
+                                    <td style={{ color: '#7c3aed', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Born:</td>
                                     <td style={{ color: certFontColor }}>
                                         {totalBorn != null ? totalBorn : '—'}
                                         {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
