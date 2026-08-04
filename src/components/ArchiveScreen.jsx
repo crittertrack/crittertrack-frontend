@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, Loader2 } from 'lucide-react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, Loader2, Search, X } from 'lucide-react';
 import axios from 'axios';
 
 const ArchiveScreen = ({
@@ -19,6 +19,7 @@ const ArchiveScreen = ({
     const [archivedAnimals, setArchivedAnimals] = useState([]);
     const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);
     const [archiveLoading, setArchiveLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const fetchArchiveData = useCallback(async () => {
         if (!authToken) return;
@@ -44,6 +45,24 @@ const ArchiveScreen = ({
     }, [authToken, API_BASE_URL]);
 
     useEffect(() => { fetchArchiveData(); }, [fetchArchiveData]);
+
+    const matchesSearch = useCallback((animal, query) => {
+        if (!query) return true;
+        const q = query.trim().toLowerCase();
+        if (!q) return true;
+        return [animal.name, animal.prefix, animal.suffix, animal.id_public, animal.species, animal.manualownerName]
+            .filter(Boolean)
+            .some(field => field.toLowerCase().includes(q));
+    }, []);
+
+    const filteredArchivedAnimals = useMemo(
+        () => archivedAnimals.filter(a => matchesSearch(a, searchQuery)),
+        [archivedAnimals, searchQuery, matchesSearch]
+    );
+    const filteredSoldTransferredAnimals = useMemo(
+        () => soldTransferredAnimals.filter(a => matchesSearch(a, searchQuery)),
+        [soldTransferredAnimals, searchQuery, matchesSearch]
+    );
 
     const handleUnarchive = async (animal) => {
         try {
@@ -89,6 +108,26 @@ const ArchiveScreen = ({
                 </span>
             </div>
 
+            <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Search by name, prefix/suffix, or ID..."
+                    className="w-full pl-9 pr-8 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-400"
+                />
+                {searchQuery && (
+                    <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        title="Clear search"
+                    >
+                        <X size={14} />
+                    </button>
+                )}
+            </div>
+
             {archiveLoading ? (
                 <div className="flex justify-center py-12">
                     <Loader2 size={32} className="animate-spin text-gray-400" />
@@ -102,22 +141,22 @@ const ArchiveScreen = ({
                             sectionKey="soldTransferred"
                             icon={<ArrowLeftRight size={18} className="text-orange-600" />}
                             title="Sold / Transferred"
-                            count={soldTransferredAnimals.length}
+                            count={filteredSoldTransferredAnimals.length}
                             bgClass="bg-orange-50"
                         />
                         {!collapsedMgmtSections['soldTransferred'] && (() => {
                             const soldOwners = [...new Map(
-                                soldTransferredAnimals
+                                filteredSoldTransferredAnimals
                                     .filter(a => a.manualownerName)
                                     .map(a => [a.creatorId_public || a.manualownerName, { key: a.creatorId_public || a.manualownerName, label: a.manualownerName }])
                             ).values()].sort((a, b) => a.label.localeCompare(b.label));
                             const filteredSoldList = soldOwnerFilter
-                                ? soldTransferredAnimals.filter(a => (a.creatorId_public || a.manualownerName) === soldOwnerFilter)
-                                : soldTransferredAnimals;
+                                ? filteredSoldTransferredAnimals.filter(a => (a.creatorId_public || a.manualownerName) === soldOwnerFilter)
+                                : filteredSoldTransferredAnimals;
                             return (
                                 <div className="p-3 space-y-2">
-                                    {soldTransferredAnimals.length === 0
-                                        ? <div className="text-sm text-gray-400 text-center py-4">No sold or transferred animals.</div>
+                                    {filteredSoldTransferredAnimals.length === 0
+                                        ? <div className="text-sm text-gray-400 text-center py-4">{searchQuery ? 'No matching sold or transferred animals.' : 'No sold or transferred animals.'}</div>
                                         : <>
                                             {soldOwners.length > 1 && (
                                                 <div className="flex items-center gap-2">
@@ -127,10 +166,10 @@ const ArchiveScreen = ({
                                                         onChange={e => setSoldOwnerFilter(e.target.value)}
                                                         className="flex-1 text-xs border border-gray-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-400 bg-white"
                                                     >
-                                                        <option value="">All recipients ({soldTransferredAnimals.length})</option>
+                                                        <option value="">All recipients ({filteredSoldTransferredAnimals.length})</option>
                                                         {soldOwners.map(o => (
                                                             <option key={o.key} value={o.key}>
-                                                                {o.label} ({soldTransferredAnimals.filter(a => (a.creatorId_public || a.manualownerName) === o.key).length})
+                                                                {o.label} ({filteredSoldTransferredAnimals.filter(a => (a.creatorId_public || a.manualownerName) === o.key).length})
                                                             </option>
                                                         ))}
                                                     </select>
@@ -172,14 +211,14 @@ const ArchiveScreen = ({
                             sectionKey="archived"
                             icon={<Archive size={18} className="text-gray-600" />}
                             title="Archived Animals"
-                            count={archivedAnimals.length}
+                            count={filteredArchivedAnimals.length}
                             bgClass="bg-gray-50"
                         />
                         {!collapsedMgmtSections['archived'] && (
                             <div className="p-3 space-y-1.5">
-                                {archivedAnimals.length === 0
-                                    ? <div className="text-sm text-gray-400 text-center py-4">No archived animals.</div>
-                                    : archivedAnimals.map(a => (
+                                {filteredArchivedAnimals.length === 0
+                                    ? <div className="text-sm text-gray-400 text-center py-4">{searchQuery ? 'No matching archived animals.' : 'No archived animals.'}</div>
+                                    : filteredArchivedAnimals.map(a => (
                                         <MgmtAnimalCard
                                             key={a._id || a.id_public}
                                             animal={a}
