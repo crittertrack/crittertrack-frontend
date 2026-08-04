@@ -4,7 +4,7 @@ import {
     Shield, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Brain, HeartPulse, Feather,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, BookOpen, FileText, Calendar, Trophy, Loader2, ClipboardList, Hourglass,
     Clock, User, Camera, ChevronDown, ChevronUp, ChevronRight, Image as ImageIcon, FileJson, ArrowLeftRight, Share, Info, Network, Star,
-    Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital, Droplet, ScanHeart, Cake, Baby,
+    Scale, HeartOff, Eye, EyeOff, RotateCcw, PlusCircle, Trash2, Hospital, Droplet, ScanHeart, Cake, Baby, Dumbbell,
 } from 'lucide-react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
@@ -36,6 +36,29 @@ const parseJsonArrayField = (data) => {
     }
     return Array.isArray(data) ? data : [];
 };
+
+// Dedicated, individually-tracked Grooming/Special Care (Routine Care tab) and Training (Behavior
+// tab) schedules — each is its own { lastDoneDate, frequencyDays, lastSkipped } field on the animal.
+const SCHEDULE_EVENT_DEFS = [
+    { key: 'groomingSchedule', label: 'Grooming', icon: <Scissors size={14} className="text-teal-500" /> },
+    { key: 'brushingSchedule', label: 'Brushing', icon: <Scissors size={14} className="text-teal-500" /> },
+    { key: 'bathingSchedule', label: 'Bathing', icon: <Droplets size={14} className="text-teal-500" /> },
+    { key: 'nailCareSchedule', label: 'Nail/Claw/Hoof Care', icon: <Scissors size={14} className="text-teal-500" /> },
+    { key: 'beakHoofScaleSchedule', label: 'Beak/Hoof/Scale Maintenance', icon: <Scissors size={14} className="text-teal-500" /> },
+    { key: 'skinEarCareSchedule', label: 'Skin & Ear Care', icon: <Droplets size={14} className="text-teal-500" /> },
+    { key: 'dentalCareSchedule', label: 'Dental Care', icon: <Scissors size={14} className="text-teal-500" /> },
+    { key: 'healthMonitoringSchedule', label: 'Special Observations', icon: <Stethoscope size={14} className="text-teal-500" /> },
+    { key: 'specialCareSchedule', label: 'Special Care Needs', icon: <Heart size={14} className="text-teal-500" /> },
+    { key: 'exerciseSchedule', label: 'Daily Exercise', icon: <Activity size={14} className="text-indigo-500" /> },
+    { key: 'crateTrainingSchedule', label: 'Crate Training', icon: <Dumbbell size={14} className="text-indigo-500" /> },
+    { key: 'litterTrainingSchedule', label: 'Litter Training', icon: <Dumbbell size={14} className="text-indigo-500" /> },
+    { key: 'leashTrainingSchedule', label: 'Leash Training', icon: <Dumbbell size={14} className="text-indigo-500" /> },
+    { key: 'freeFlightTrainingSchedule', label: 'Free-Flight Training', icon: <Dumbbell size={14} className="text-indigo-500" /> },
+    { key: 'workingRoleTrainingSchedule', label: 'Working Role Training', icon: <Dumbbell size={14} className="text-indigo-500" /> },
+    { key: 'behavioralIssueTrainingSchedule', label: 'Behavioral Issue Training', icon: <Dumbbell size={14} className="text-indigo-500" /> },
+    { key: 'reactivityTrainingSchedule', label: 'Reactivity Training', icon: <Dumbbell size={14} className="text-indigo-500" /> },
+    { key: 'flightRiskTrainingSchedule', label: 'Flight Risk Training', icon: <Dumbbell size={14} className="text-indigo-500" /> },
+];
 
 const StatusIndicator = ({ status, icon }) => {
     const statusStyles = {
@@ -836,6 +859,50 @@ const AnimalModalV2 = ({
                                                     icon: <Shield size={14} className="text-blue-600" />,
                                                     title: `Parasite Prevention: ${schedule.treatment}`,
                                                     displayDate: schedule.startDate
+                                                });
+                                            }
+                                        });
+
+                                        if (animal.quarantineDetails?.endDate && animal.quarantineDetails.status === 'None') {
+                                            timelineEvents.push({
+                                                date: new Date(animal.quarantineDetails.endDate),
+                                                icon: <Shield size={14} className="text-green-500" />,
+                                                title: 'Quarantine Ended',
+                                                displayDate: animal.quarantineDetails.endDate
+                                            });
+                                        }
+
+                                        // Feeding
+                                        if (animal.lastFedDate) {
+                                            timelineEvents.push({
+                                                date: new Date(animal.lastFedDate),
+                                                icon: <UtensilsCrossed size={14} className="text-green-600" />,
+                                                title: 'Fed',
+                                                displayDate: animal.lastFedDate
+                                            });
+                                        }
+
+                                        // Custom animal care tasks
+                                        (animal.animalCareTasks || []).forEach((task) => {
+                                            if (task?.lastDoneDate) {
+                                                timelineEvents.push({
+                                                    date: new Date(task.lastDoneDate),
+                                                    icon: <ClipboardList size={14} className="text-teal-600" />,
+                                                    title: task.lastSkipped ? `${task.taskName || 'Care Task'}: Skipped` : `${task.taskName || 'Care Task'}: Completed`,
+                                                    displayDate: task.lastDoneDate
+                                                });
+                                            }
+                                        });
+
+                                        // Grooming/Special Care/Training dedicated schedules (Routine Care & Behavior tabs)
+                                        SCHEDULE_EVENT_DEFS.forEach((def) => {
+                                            const sched = animal[def.key];
+                                            if (sched?.lastDoneDate) {
+                                                timelineEvents.push({
+                                                    date: new Date(sched.lastDoneDate),
+                                                    icon: def.icon,
+                                                    title: sched.lastSkipped ? `${def.label}: Skipped` : `${def.label}: Completed`,
+                                                    displayDate: sched.lastDoneDate
                                                 });
                                             }
                                         });
