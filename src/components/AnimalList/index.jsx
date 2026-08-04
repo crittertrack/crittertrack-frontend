@@ -3893,7 +3893,7 @@ useEffect(() => {
 
         // Shared renderer for the Grooming & Special Care / Training clusters — each is a flat list of
         // {animal, key, label} schedule entries (one per assigned dedicated task) split into Due/Up to Date.
-        const renderScheduleCluster = ({ sectionKey, icon, title, dueList, okList }) => {
+        const renderScheduleCluster = ({ sectionKey, icon, title, dueList, okList, tabLabel }) => {
             const total = dueList.length + okList.length;
             const list = [...dueList, ...okList];
             return (
@@ -3902,8 +3902,12 @@ useEffect(() => {
                         count={dueList.length > 0 ? `${dueList.length} due` : total} bgClass="bg-teal-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections[sectionKey] || !!view) && (
                         <div className="p-3">
+                            {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-teal-100">
+                                {icon}
+                                <span className="text-sm font-bold text-teal-700 uppercase tracking-wide">{title}</span>
+                            </div>}
                             {list.length === 0 ? (
-                                <div className="text-center text-sm text-gray-400 py-4">No assigned schedules yet — set one up in the animal's Routine Care or Behavior tab.</div>
+                                <div className="text-center text-sm text-gray-400 py-4">No assigned schedules yet — set one up in the animal's {tabLabel} tab.</div>
                             ) : (
                                 <div className="p-2 space-y-1 bg-white border border-gray-200 rounded-lg">
                                     <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
@@ -4379,7 +4383,7 @@ useEffect(() => {
                             {(() => {
                                 const feedList = [...feedDue, ...feedOk];
                                 return feedList.length === 0 ? (
-                                    <div className="text-center text-sm text-gray-400 py-4">No animals with a feeding schedule set yet.</div>
+                                    <div className="text-center text-sm text-gray-400 py-4">No animals with a feeding schedule set yet — set one up in the animal's Routine Care tab.</div>
                                 ) : (
                                     <div className="p-2 space-y-1 bg-white border border-gray-200 rounded-lg">
                                         <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
@@ -4403,13 +4407,13 @@ useEffect(() => {
                 {/* -- 2b. GROOMING & SPECIAL CARE ----------------------------- */}
                 {(!view || view === 'feeding') && renderScheduleCluster({
                     sectionKey: 'groomingSchedules', icon: <Scissors size={18} className="text-teal-600" />, title: 'Grooming & Special Care',
-                    dueList: groomingScheduleDue, okList: groomingScheduleOk, groupPrefix: 'groom',
+                    dueList: groomingScheduleDue, okList: groomingScheduleOk, tabLabel: 'Routine Care',
                 })}
 
                 {/* -- 2c. TRAINING --------------------------------------------- */}
                 {(!view || view === 'feeding') && renderScheduleCluster({
                     sectionKey: 'trainingSchedules', icon: <Dumbbell size={18} className="text-teal-600" />, title: 'Training',
-                    dueList: trainingScheduleDue, okList: trainingScheduleOk, groupPrefix: 'train',
+                    dueList: trainingScheduleDue, okList: trainingScheduleOk, tabLabel: 'Behavior',
                 })}
 
                 {/* -- 3. REPRODUCTION ---------------------------------------- */}
@@ -4636,7 +4640,7 @@ useEffect(() => {
                                 <span className="text-sm font-bold text-teal-700 uppercase tracking-wide">Scheduled Animal Care</span>
                             </div>}
                             {animalsWithAnimalTasks.length === 0 ? (
-                                <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Care tab.</div>
+                                <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Routine Care tab.</div>
                             ) : animalsWithAnimalTasks.map(a => {
                                 const grpKey = `animalcare_${a.id_public}`;
                                 const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
