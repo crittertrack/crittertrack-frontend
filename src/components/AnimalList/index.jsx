@@ -588,6 +588,16 @@ const AnimalList = ({
             return DEFAULT_LIST_COLUMNS;
         }
     });
+    const [alertSettings, setAlertSettings] = useState(() =>
+        Object.keys(ALERT_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+    );
+    const toggleAlertCategory = (key) => {
+        setAlertSettings(prev => {
+            const next = { ...prev, [key]: !prev[key] };
+            try { localStorage.setItem(`ct_alert_settings_${userKey}`, JSON.stringify(next)); } catch {}
+            return next;
+        });
+    };
 
     // Mating form state
     const [showAddMatingForm, setShowAddMatingForm] = useState(false);
