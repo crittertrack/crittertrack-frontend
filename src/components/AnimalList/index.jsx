@@ -1929,8 +1929,16 @@ useEffect(() => {
         return activeAnimalsForDashboard.filter(a => a.status === 'Available');
     }, [activeAnimalsForDashboard]);
 
-    const feedDueDashboard = useMemo(() => {
-        return activeAnimalsForDashboard.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours));
+    // "Feeding & Care" needs-attention count for the main dashboard — one entry per animal that has
+    // ANY overdue feeding, custom animal care task, or Grooming/Special Care/Training schedule (not
+    // just feeding), so the counter/label actually match what it claims to cover.
+    const feedingCareDueDashboard = useMemo(() => {
+        return activeAnimalsForDashboard.filter(a =>
+            isFeedingDue(a.lastFedDate, a.feedingIntervalHours) ||
+            (a.animalCareTasks || []).some(t => isDue(t.lastDoneDate, t.frequencyDays)) ||
+            GROOMING_SCHEDULE_DEFS.some(def => a[def.key]?.frequencyDays && isDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) ||
+            TRAINING_SCHEDULE_DEFS.some(def => a[def.key]?.frequencyDays && isDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays))
+        );
     }, [activeAnimalsForDashboard]);
 
     const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
@@ -5289,7 +5297,7 @@ useEffect(() => {
                     {/* Column 5: Needs Attention */}
                     <div className="flex flex-col gap-2">
                         {(() => {
-                            const totalAttention = feedDueDashboard.length + healthNeedsAttentionList.length + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
+                            const totalAttention = feedingCareDueDashboard.length + healthNeedsAttentionList.length + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
                             return (
                                 <>
                                     <StatCard
@@ -5305,8 +5313,8 @@ useEffect(() => {
                                         <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
                                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Needs Attention Breakdown</h4>
                                             <ul className="text-sm space-y-1">
-                                                {feedDueDashboard.length > 0 && (
-                                                    <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('feeding')}><span className="flex items-center gap-1.5 text-red-700"><Utensils size={14} /> Feeding & Care</span><span className="font-medium">{feedDueDashboard.length}</span></li>
+                                                {feedingCareDueDashboard.length > 0 && (
+                                                    <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('feeding')}><span className="flex items-center gap-1.5 text-red-700"><Utensils size={14} /> Feeding & Care</span><span className="font-medium">{feedingCareDueDashboard.length}</span></li>
                                                 )}
                                                 {healthNeedsAttentionList.length > 0 && (
                                                     <>
@@ -5516,7 +5524,7 @@ useEffect(() => {
                             <button onClick={() => setShowAssignHealthStatusModal(true)} className="flex bg-orange-600 hover:bg-orange-700 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Assign Quarantine or Treatment">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Assign Quarantine/Treatment</span>
                             </button>
-                        ) : (
+                        ) : animalView === 'feeding' ? null : (
                             <button
                                 onClick={() => openEnclosureModal()}
                                 className="flex bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
