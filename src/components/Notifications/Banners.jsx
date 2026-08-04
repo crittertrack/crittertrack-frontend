@@ -13,6 +13,7 @@ const API_BASE_URL = '/api';
 // ({ lastDoneDate, frequencyDays }) — see AnimalList/index.jsx GROOMING_SCHEDULE_DEFS/TRAINING_SCHEDULE_DEFS.
 const SCHEDULE_FIELD_KEYS = [
     'groomingSchedule', 'brushingSchedule', 'bathingSchedule', 'specializedCareSchedule', 'specialCareSchedule',
+    'nailCareSchedule', 'beakHoofScaleSchedule', 'skinEarCareSchedule', 'dentalCareSchedule', 'healthMonitoringSchedule',
     'exerciseSchedule', 'crateTrainingSchedule', 'litterTrainingSchedule', 'leashTrainingSchedule',
     'freeFlightTrainingSchedule', 'workingRoleTrainingSchedule', 'behavioralIssueTrainingSchedule',
     'reactivityTrainingSchedule', 'flightRiskTrainingSchedule',

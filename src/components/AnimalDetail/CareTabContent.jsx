@@ -151,7 +151,7 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
             )}
 
             {/* Detailed Grooming */}
-            {(animal.groomingNeeds || animal.sheddingLevel || animal.brushingFrequency || animal.bathingFrequency || animal.coatCareNotes || animal.nailCareRequirements || animal.beakHoofScaleMaintenance || animal.skinEarCareNeeds || animal.dentalCareRequirements || animal.groomingNotes || formatScheduleValue(animal.groomingSchedule) || formatScheduleValue(animal.brushingSchedule) || formatScheduleValue(animal.bathingSchedule) || formatScheduleValue(animal.specializedCareSchedule)) && (
+            {(animal.groomingNeeds || animal.sheddingLevel || animal.brushingFrequency || animal.bathingFrequency || animal.coatCareNotes || animal.nailCareRequirements || animal.beakHoofScaleMaintenance || animal.skinEarCareNeeds || animal.dentalCareRequirements || animal.groomingNotes || formatScheduleValue(animal.groomingSchedule) || formatScheduleValue(animal.brushingSchedule) || formatScheduleValue(animal.bathingSchedule) || formatScheduleValue(animal.specializedCareSchedule) || formatScheduleValue(animal.nailCareSchedule) || formatScheduleValue(animal.beakHoofScaleSchedule) || formatScheduleValue(animal.skinEarCareSchedule) || formatScheduleValue(animal.dentalCareSchedule)) && (
                 <InfoCard title="Grooming & Personal Care" icon={<Scissors size={18} className="text-gray-400" />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} />}
@@ -162,9 +162,13 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
                         {animal.bathingFrequency && <InfoItem label="Bathing Frequency" value={animal.bathingFrequency} />}
                         {formatScheduleValue(animal.bathingSchedule) && <InfoItem label="Bathing Schedule" value={formatScheduleValue(animal.bathingSchedule)} />}
                         {animal.nailCareRequirements && <InfoItem label="Nail Care Requirements" value={animal.nailCareRequirements} />}
+                        {formatScheduleValue(animal.nailCareSchedule) && <InfoItem label="Nail/Claw/Hoof Care Schedule" value={formatScheduleValue(animal.nailCareSchedule)} />}
                         {animal.beakHoofScaleMaintenance && <InfoItem label="Beak/Hoof/Scale Maintenance" value={animal.beakHoofScaleMaintenance} />}
+                        {formatScheduleValue(animal.beakHoofScaleSchedule) && <InfoItem label="Beak/Hoof/Scale Maintenance Schedule" value={formatScheduleValue(animal.beakHoofScaleSchedule)} />}
                         {animal.skinEarCareNeeds && <InfoItem label="Skin & Ear Care Needs" value={animal.skinEarCareNeeds} />}
+                        {formatScheduleValue(animal.skinEarCareSchedule) && <InfoItem label="Skin & Ear Care Schedule" value={formatScheduleValue(animal.skinEarCareSchedule)} />}
                         {animal.dentalCareRequirements && <InfoItem label="Dental Care Requirements" value={animal.dentalCareRequirements} />}
+                        {formatScheduleValue(animal.dentalCareSchedule) && <InfoItem label="Dental Care Schedule" value={formatScheduleValue(animal.dentalCareSchedule)} />}
                         {formatScheduleValue(animal.specializedCareSchedule) && <InfoItem label="Specialized Care Schedule" value={formatScheduleValue(animal.specializedCareSchedule)} />}
                         {animal.coatCareNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Coat Care Notes"><p className="whitespace-pre-wrap text-sm">{animal.coatCareNotes}</p></InfoItem></div>}
                         {animal.groomingNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Grooming Notes"><p className="whitespace-pre-wrap text-sm">{animal.groomingNotes}</p></InfoItem></div>}
@@ -173,13 +177,14 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
             )}
 
             {/* Special Care & Health Monitoring */}
-            {(animal.specialCareRequirements || animal.specialCareNeeds || animal.healthMonitoringNotes || animal.additionalSpecialRequirements || formatScheduleValue(animal.specialCareSchedule)) && (
+            {(animal.specialCareRequirements || animal.specialCareNeeds || animal.healthMonitoringNotes || animal.additionalSpecialRequirements || formatScheduleValue(animal.specialCareSchedule) || formatScheduleValue(animal.healthMonitoringSchedule)) && (
                 <InfoCard title="Special Care & Health Monitoring" icon={<Droplets size={18} className="text-gray-400" />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.specialCareRequirements && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Special Care Requirements"><p className="whitespace-pre-wrap text-sm">{animal.specialCareRequirements}</p></InfoItem></div>}
                         {animal.specialCareNeeds && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Special Care Needs"><p className="whitespace-pre-wrap text-sm">{animal.specialCareNeeds}</p></InfoItem></div>}
                         {formatScheduleValue(animal.specialCareSchedule) && <InfoItem label="Special Care Schedule" value={formatScheduleValue(animal.specialCareSchedule)} />}
                         {animal.healthMonitoringNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Health Monitoring Notes"><p className="whitespace-pre-wrap text-sm">{animal.healthMonitoringNotes}</p></InfoItem></div>}
+                        {formatScheduleValue(animal.healthMonitoringSchedule) && <InfoItem label="Special Observations Schedule" value={formatScheduleValue(animal.healthMonitoringSchedule)} />}
                         {animal.additionalSpecialRequirements && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Additional Special Requirements"><p className="whitespace-pre-wrap text-sm">{animal.additionalSpecialRequirements}</p></InfoItem></div>}
                     </div>
                 </InfoCard>
