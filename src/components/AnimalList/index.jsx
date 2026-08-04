@@ -768,6 +768,7 @@ const AnimalList = ({
     const [showMainAlertsBreakdown, setShowMainAlertsBreakdown] = useState(false);
     const [showReproNeedsAttentionBreakdown, setShowReproNeedsAttentionBreakdown] = useState(false);
     const [showHealthNeedsAttentionBreakdown, setShowHealthNeedsAttentionBreakdown] = useState(false);
+    const [showFeedingCareNeedsAttentionBreakdown, setShowFeedingCareNeedsAttentionBreakdown] = useState(false);
     // Enclosure Detail Modal State
     const [selectedEnclosure, setSelectedEnclosure] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -2153,6 +2154,20 @@ useEffect(() => {
     const trainingScheduleDue = trainingScheduleEntries.filter(entry => isDue(entry.animal[entry.key]?.lastDoneDate, entry.animal[entry.key]?.frequencyDays));
     const trainingScheduleOk = trainingScheduleEntries.filter(entry => !isDue(entry.animal[entry.key]?.lastDoneDate, entry.animal[entry.key]?.frequencyDays));
     const scheduledCareDueCount = animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+    // Unique-animal totals for the Feeding & Care StatCards (entries assigned, not due counts — Needs Attention covers due).
+    const feedingAssignedCount = feedDue.length + feedOk.length;
+    const groomingAssignedCount = new Set(groomingScheduleEntries.map(entry => entry.animal.id_public)).size;
+    const trainingAssignedCount = new Set(trainingScheduleEntries.map(entry => entry.animal.id_public)).size;
+    const scheduledCareAssignedCount = animalsWithAnimalTasks.length;
+    const feedingCareNeedsAttentionList = [
+        ...feedDue.map(animal => ({ animal, reason: 'Feeding due' })),
+        ...groomingScheduleDue.map(entry => ({ animal: entry.animal, reason: `${entry.label} due` })),
+        ...trainingScheduleDue.map(entry => ({ animal: entry.animal, reason: `${entry.label} due` })),
+        ...animalsWithAnimalTasks.flatMap(a => (a.animalCareTasks || [])
+            .filter(t => isDue(t.lastDoneDate, t.frequencyDays))
+            .map(t => ({ animal: a, reason: `${t.taskName} due` }))
+        ),
+    ];
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
     const enclosureAnimalMap = {}; // { enclosureId: [animals] }
@@ -3609,6 +3624,43 @@ useEffect(() => {
                                 <ul className="text-xs space-y-1.5">
                                     {healthNeedsAttentionList.map(({ animal, reason }) => (
                                         <li key={`${animal.id_public}-${reason}`} className="flex flex-col gap-0.5 p-1.5 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
+                                            <span className="text-gray-700 dark:text-dark-text-secondary font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                            <span className="font-medium text-orange-700">{reason}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderFeedingDashboard = () => {
+        return (
+            <div className="mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
+                    <StatCard icon={<Utensils size={32} className="text-green-800" />} label="Feeding" value={feedingAssignedCount} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<Scissors size={32} className="text-teal-800" />} label="Grooming & Special Care" value={groomingAssignedCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<Dumbbell size={32} className="text-sky-800" />} label="Training" value={trainingAssignedCount} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<ClipboardList size={32} className="text-indigo-800" />} label="Scheduled Animal Care" value={scheduledCareAssignedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('feeding')} />
+                    <div className="flex flex-col gap-2">
+                        <StatCard
+                            icon={<AlertTriangle size={32} className="text-orange-800" />}
+                            label="Needs Attention"
+                            value={feedingCareNeedsAttentionList.length}
+                            colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                            hasDropdown={feedingCareNeedsAttentionList.length > 0}
+                            isDropdownOpen={showFeedingCareNeedsAttentionBreakdown}
+                            onDropdownToggle={() => setShowFeedingCareNeedsAttentionBreakdown(prev => !prev)}
+                        />
+                        {showFeedingCareNeedsAttentionBreakdown && feedingCareNeedsAttentionList.length > 0 && (
+                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Now</h4>
+                                <ul className="text-xs space-y-1.5">
+                                    {feedingCareNeedsAttentionList.map(({ animal, reason }, idx) => (
+                                        <li key={`${animal.id_public}-${reason}-${idx}`} className="flex flex-col gap-0.5 p-1.5 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
                                             <span className="text-gray-700 dark:text-dark-text-secondary font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
                                             <span className="font-medium text-orange-700">{reason}</span>
                                         </li>
@@ -5542,9 +5594,11 @@ useEffect(() => {
                     renderReproductionDashboard()
                 ) : animalView === 'health' ? (
                     renderHealthDashboard()
-                ) : !['feeding'].includes(animalView) ? (
+                ) : animalView === 'feeding' ? (
+                    renderFeedingDashboard()
+                ) : (
                     renderDashboard()
-                ) : null}
+                )}
 
                 {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
