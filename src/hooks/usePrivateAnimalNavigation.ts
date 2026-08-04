@@ -84,8 +84,20 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             setAnimalToView(animal);
             setAnimalToEdit(null);
             setViewAnimalBreederInfo(null);
+
+            // Some entry points (e.g. Archive) pass a slim projection that omits most fields —
+            // fetch the full record in the background so the detail view isn't missing data.
+            if (animal.id_public && authToken) {
+                axios.get(`${API_BASE_URL}/animals/${animal.id_public}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                }).then(res => {
+                    setAnimalToView(prev => (prev && prev.id_public === animal.id_public) ? res.data : prev);
+                }).catch(err => {
+                    console.warn('[handleViewAnimal] Failed to fetch full animal data:', err.message);
+                });
+            }
         },
-        [animalToView, privateAnimalInitialTab]
+        [animalToView, privateAnimalInitialTab, authToken, API_BASE_URL]
     );
 
     /**
