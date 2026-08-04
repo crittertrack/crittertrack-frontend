@@ -267,7 +267,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
 const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [currentViewingAnimal, setCurrentViewingAnimal] = useState(null);
-    const [ownerProfile, setOwnerProfile] = useState(null);
+    const [ownerProfile, setOwnerProfile] = useState(null); // breeder (breederId_public)
+    const [currentOwnerProfile, setCurrentOwnerProfile] = useState(null); // current owner (creatorId_public), only set when different from breeder
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [stackedPedigree, setStackedPedigree] = useState(null);
@@ -278,7 +279,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [certText, setCertText] = useState(_savedPrefs.certText ?? '');
     const [certTextTopRight, setCertTextTopRight] = useState(_savedPrefs.certTextTopRight ?? 'Certificate of Origin');
     const [certTextBottomLeft, setCertTextBottomLeft] = useState(_savedPrefs.certTextBottomLeft ?? 'This pedigree is not recognized by the state');
-    const [certTextSignature, setCertTextSignature] = useState(_savedPrefs.certTextSignature ?? 'Signature');
     const [certFontColor, setCertFontColor] = useState(_savedPrefs.certFontColor ?? '#1a1a1a');
     const [certBorderColor, setCertBorderColor] = useState(_savedPrefs.certBorderColor ?? '#374151');
     const [certBgColor, setCertBgColor] = useState(_savedPrefs.certBgColor ?? '#ffffff');
@@ -306,9 +306,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     // Persist cert prefs to localStorage whenever they change
     useEffect(() => {
         try {
-            localStorage.setItem('ct_cert_prefs', JSON.stringify({ certText, certTextTopRight, certTextBottomLeft, certTextSignature, certFontColor, certBorderColor, certBgColor }));
+            localStorage.setItem('ct_cert_prefs', JSON.stringify({ certText, certTextTopRight, certTextBottomLeft, certFontColor, certBorderColor, certBgColor }));
         } catch {}
-    }, [certText, certTextTopRight, certTextBottomLeft, certTextSignature, certFontColor, certBorderColor, certBgColor]);
+    }, [certText, certTextTopRight, certTextBottomLeft, certFontColor, certBorderColor, certBgColor]);
 
     // Merge manual ancestors into fetched pedigree tree wherever API returned nothing
     const displayData = useMemo(() => {
@@ -372,6 +372,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 const cached = pedigreeTreeCache.get(cacheKey);
                 setPedigreeData(cached?.data || null);
                 setOwnerProfile(cached?.ownerProfile || null);
+                setCurrentOwnerProfile(cached?.currentOwnerProfile || null);
                 setLoading(false);
                 return;
             }
@@ -528,21 +529,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 if (data?.breederId_public) {
                     try {
                         const breederId = data.breederId_public;
-                        console.log('[PEDIGREE] Fetching breeder profile for ID:', breederId);
                         const ownerResponse = await axios.get(
                             `${API_BASE_URL}/public/profiles/search?query=${breederId}&limit=1`
                         );
-                        console.log('[PEDIGREE] Owner profile response:', ownerResponse.data);
                         if (ownerResponse.data && ownerResponse.data.length > 0) {
                             const profile = ownerResponse.data[0];
-                            console.log('[PEDIGREE] Owner profile data:', {
-                                personalName: profile.personalName,
-                                breederName: profile.breederName,
-                                showBreederName: profile.showBreederName,
-                                profileImage: profile.profileImage,
-                                profileImageUrl: profile.profileImageUrl,
-                                id_public: profile.id_public
-                            });
                             setOwnerProfile(profile);
                             fetchedOwnerProfile = profile;
                         }
@@ -551,8 +542,25 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     }
                 }
 
+                // Fetch current owner profile (creatorId_public) — the person who currently has the
+                // animal, which may differ from the original breeder if it was ever transferred/sold.
+                let fetchedCurrentOwnerProfile = null;
+                if (data?.creatorId_public && data.creatorId_public !== data?.breederId_public) {
+                    try {
+                        const ownerResponse = await axios.get(
+                            `${API_BASE_URL}/public/profiles/search?query=${data.creatorId_public}&limit=1`
+                        );
+                        if (ownerResponse.data && ownerResponse.data.length > 0) {
+                            fetchedCurrentOwnerProfile = ownerResponse.data[0];
+                            setCurrentOwnerProfile(fetchedCurrentOwnerProfile);
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch current owner profile:', error);
+                    }
+                }
+
                 if (cacheKey) {
-                    pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile });
+                    pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile, currentOwnerProfile: fetchedCurrentOwnerProfile });
                 }
             } catch (error) {
                 console.error('Error fetching pedigree data:', error);
@@ -575,6 +583,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const cached = pedigreeTreeCache.get(cacheKey);
             setPedigreeData(cached?.data || null);
             setOwnerProfile(cached?.ownerProfile || null);
+            setCurrentOwnerProfile(cached?.currentOwnerProfile || null);
             setLoading(false);
             return;
         }
@@ -685,8 +694,22 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         console.error('Error fetching breeder profile:', error);
                     }
                 }
-                
-                pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile });
+
+                // Fetch current owner profile (creatorId_public) if it differs from the breeder
+                let fetchedCurrentOwnerProfile = null;
+                if (data?.creatorId_public && data.creatorId_public !== data?.breederId_public) {
+                    try {
+                        const r = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${data.creatorId_public}&limit=1`);
+                        if (r.data?.[0]) {
+                            fetchedCurrentOwnerProfile = r.data[0];
+                            setCurrentOwnerProfile(r.data[0]);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching current owner profile:', error);
+                    }
+                }
+
+                pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile, currentOwnerProfile: fetchedCurrentOwnerProfile });
             } catch (error) {
                 console.error('Error fetching ancestor pedigree:', error);
             } finally {
@@ -1330,14 +1353,15 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     };
 
     // ── Owner display helpers ──────────────────────────────────────────────
-    const getOwnerDisplayName = () => {
-        if (!ownerProfile) return '';
-        const { showPersonalName, showBreederName, personalName, breederName, id_public } = ownerProfile;
+    const getDisplayName = (profile) => {
+        if (!profile) return '';
+        const { showPersonalName, showBreederName, personalName, breederName, id_public } = profile;
         const parts = [];
         if (showPersonalName && personalName) parts.push(personalName);
         if (showBreederName && breederName) parts.push(breederName);
         return parts.join(' · ') || id_public || 'Anonymous Breeder';
     };
+    const getProfileImage = (profile) => profile && (profile.profileImage || profile.profileImageUrl || profile.imageUrl || profile.avatarUrl || profile.avatar || profile.profile_image);
 
     // ── Shared Certificate JSX ─────────────────────────────────────────────
     const handleCardClick = (clickedAnimal) => {
@@ -1376,17 +1400,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ textAlign: 'right' }}>
                         <div style={{ fontSize: '1.1rem', fontStyle: 'italic', fontWeight: 600, color: certFontColor }}>{certTextTopRight}</div>
-                        {ownerProfile && (
-                            <div style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: 2 }}>{getOwnerDisplayName()}</div>
-                        )}
                     </div>
-                    {ownerProfile && (ownerProfile.profileImage || ownerProfile.profileImageUrl || ownerProfile.imageUrl || ownerProfile.avatarUrl || ownerProfile.avatar || ownerProfile.profile_image) && (
-                        <img
-                            src={ownerProfile.profileImage || ownerProfile.profileImageUrl || ownerProfile.imageUrl || ownerProfile.avatarUrl || ownerProfile.avatar || ownerProfile.profile_image}
-                            alt={getOwnerDisplayName()}
-                            style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${certBorderColor}`, flexShrink: 0 }}
-                        />
-                    )}
                 </div>
             </div>
 
@@ -1401,8 +1415,29 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     {certText && (
                         <div style={{ fontSize: '0.7rem', color: certFontColor, lineHeight: 1.6, flex: 1 }}>{certText}</div>
                     )}
-                    <div style={{ marginTop: 'auto', borderTop: `1px solid ${certBorderColor}`, paddingTop: 4, textAlign: 'right' }}>
-                        <div style={{ fontSize: '0.6rem', color: '#9ca3af' }}>{certTextSignature}</div>
+                    <div style={{ marginTop: 'auto', borderTop: `1px solid ${certBorderColor}`, paddingTop: 6, display: 'flex', justifyContent: 'flex-end', gap: 14 }}>
+                        {[
+                            { label: 'Breeder', profile: ownerProfile },
+                            { label: 'Current Owner', profile: currentOwnerProfile },
+                        ].filter(({ profile }) => profile).map(({ label, profile }) => {
+                            const img = getProfileImage(profile);
+                            const name = getDisplayName(profile);
+                            return (
+                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#9ca3af' }}>{label}</div>
+                                        <div style={{ fontSize: '0.65rem', color: certFontColor, fontWeight: 600 }}>{name}</div>
+                                    </div>
+                                    {img && (
+                                        <img
+                                            src={img}
+                                            alt={name}
+                                            style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${certBorderColor}`, flexShrink: 0 }}
+                                        />
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -1729,10 +1764,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                             <label className="flex flex-col gap-1">
                                 <span className="text-gray-500 font-medium">Bottom-left text</span>
                                 <input className="border rounded px-2 py-1" value={certTextBottomLeft} onChange={e => setCertTextBottomLeft(e.target.value)} />
-                            </label>
-                            <label className="flex flex-col gap-1">
-                                <span className="text-gray-500 font-medium">Signature label</span>
-                                <input className="border rounded px-2 py-1" value={certTextSignature} onChange={e => setCertTextSignature(e.target.value)} />
                             </label>
                             <label className="flex flex-col gap-1">
                                 <span className="text-gray-500 font-medium">Font colour</span>
