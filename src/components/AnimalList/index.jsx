@@ -3644,7 +3644,7 @@ useEffect(() => {
                     <StatCard icon={<Utensils size={32} className="text-green-800" />} label="Feeding" value={feedingAssignedCount} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" onClick={() => setAnimalView('feeding')} />
                     <StatCard icon={<Scissors size={32} className="text-teal-800" />} label="Grooming & Special Care" value={groomingAssignedCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('feeding')} />
                     <StatCard icon={<Dumbbell size={32} className="text-sky-800" />} label="Training" value={trainingAssignedCount} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('feeding')} />
-                    <StatCard icon={<ClipboardList size={32} className="text-indigo-800" />} label="Scheduled Animal Care" value={scheduledCareAssignedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<ClipboardList size={32} className="text-indigo-800" />} label="Custom Animal Care" value={scheduledCareAssignedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('feeding')} />
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<AlertTriangle size={32} className="text-orange-800" />}
@@ -4452,12 +4452,12 @@ useEffect(() => {
                                             </div>
                                         ))}
 
-                                        {/* Scheduled Animal Care sub-section */}
+                                        {/* Custom Animal Care sub-section */}
                                         <div className="border border-gray-200 rounded-lg overflow-hidden">
                                             <div className="flex items-center justify-between p-3 cursor-pointer bg-teal-50 border-b border-teal-100" onClick={() => toggleGroup('feedcare_scheduledcare')}>
                                                 <div className="flex items-center gap-3">
                                                     <ClipboardList size={16} className="text-teal-700" />
-                                                    <span className="font-semibold text-gray-800 text-base">Scheduled Animal Care</span>
+                                                    <span className="font-semibold text-gray-800 text-base">Custom Animal Care</span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{scheduledCareDueCount > 0 ? `${scheduledCareDueCount} due` : animalsWithAnimalTasks.length}</span>
