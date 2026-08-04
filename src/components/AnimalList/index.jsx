@@ -39,8 +39,12 @@ const GROOMING_SCHEDULE_DEFS = [
     { key: 'groomingSchedule', label: 'Grooming' },
     { key: 'brushingSchedule', label: 'Brushing' },
     { key: 'bathingSchedule', label: 'Bathing' },
-    { key: 'specializedCareSchedule', label: 'Specialized Care' },
+    { key: 'nailCareSchedule', label: 'Nail/Claw/Hoof Care' },
+    { key: 'beakHoofScaleSchedule', label: 'Beak/Hoof/Scale Maintenance' },
+    { key: 'skinEarCareSchedule', label: 'Skin & Ear Care' },
+    { key: 'dentalCareSchedule', label: 'Dental Care' },
     { key: 'specialCareSchedule', label: 'Special Care Needs' },
+    { key: 'healthMonitoringSchedule', label: 'Special Observations' },
 ];
 // Training schedules come from the Behavior tab, but are clustered here in Feeding & Care
 // (no separate Behavior management view) per user preference.
@@ -2153,7 +2157,13 @@ useEffect(() => {
     );
     const trainingScheduleDue = trainingScheduleEntries.filter(entry => isDue(entry.animal[entry.key]?.lastDoneDate, entry.animal[entry.key]?.frequencyDays));
     const trainingScheduleOk = trainingScheduleEntries.filter(entry => !isDue(entry.animal[entry.key]?.lastDoneDate, entry.animal[entry.key]?.frequencyDays));
-    const scheduledCareDueCount = animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+    // Flatten Custom Animal Care tasks to one entry per task per animal, matching the Grooming/Training bar layout.
+    const animalCareTaskEntries = animalsWithAnimalTasks.flatMap(a =>
+        (a.animalCareTasks || []).map((task, taskIdx) => ({ animal: a, task, taskIdx }))
+    );
+    const animalCareTaskDue = animalCareTaskEntries.filter(entry => isDue(entry.task.lastDoneDate, entry.task.frequencyDays));
+    const animalCareTaskOk = animalCareTaskEntries.filter(entry => !isDue(entry.task.lastDoneDate, entry.task.frequencyDays));
+    const scheduledCareDueCount = animalCareTaskDue.length;
     // Unique-animal totals for the Feeding & Care StatCards (entries assigned, not due counts — Needs Attention covers due).
     const feedingAssignedCount = feedDue.length + feedOk.length;
     const groomingAssignedCount = new Set(groomingScheduleEntries.map(entry => entry.animal.id_public)).size;
@@ -3830,7 +3840,7 @@ useEffect(() => {
     const FeedingAnimalBar = ({ animal, onViewAnimal, onEditAnimal, handleMarkFed, handleSkipFeeding }) => {
         const due = isFeedingDue(animal.lastFedDate, animal.feedingIntervalHours);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
@@ -3866,7 +3876,7 @@ useEffect(() => {
         const sched = animal[fieldName] || {};
         const due = isDue(sched.lastDoneDate, sched.frequencyDays);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
@@ -3888,6 +3898,39 @@ useEffect(() => {
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     <button onClick={(e) => handleMarkScheduleDone(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><Check size={12} /> Done</button>
                     {due && <button onClick={(e) => handleSkipScheduleTask(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200"><SkipForward size={12} /> Skip</button>}
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
+                </div>
+            </div>
+        );
+    };
+
+    // Bar row for a single custom animal care task (one row per task per animal), matching the
+    // Grooming/Special Care/Training bar layout.
+    const AnimalCareTaskBar = ({ animal, taskIdx, task, onViewAnimal, onEditAnimal, handleMarkAnimalCareTaskDone, handleSkipAnimalCareTask }) => {
+        const due = isDue(task.lastDoneDate, task.frequencyDays);
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200">
+                <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                    <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
+                    <div className="min-w-0">
+                        <div className="font-semibold text-sm text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
+                        <div className="text-xs text-gray-500 truncate">{animal.species}</div>
+                    </div>
+                </div>
+
+                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Last Done: </span>{task.lastDoneDate ? formatDateShort(task.lastDoneDate) : <span className="text-orange-500">Never</span>}</div>
+
+                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Frequency: </span>{task.frequencyDays ? `Every ${task.frequencyDays}d` : '—'}</div>
+
+                <div className="sm:col-span-2 text-xs text-gray-400 truncate">{task.taskName}</div>
+
+                <div className="text-center">
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                </div>
+
+                <div className="sm:text-right flex items-center gap-1 justify-end">
+                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><Check size={12} /> Done</button>
+                    {due && <button onClick={(e) => handleSkipAnimalCareTask(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200"><SkipForward size={12} /> Skip</button>}
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
                 </div>
             </div>
@@ -4414,6 +4457,12 @@ useEffect(() => {
                                         emptyText: "No assigned schedules yet — set one up in the animal's Behavior tab.",
                                         renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />,
                                     },
+                                    {
+                                        key: 'animalcare', title: 'Custom Animal Care', icon: <ClipboardList size={16} className="text-teal-700" />, headerClass: 'bg-teal-50 border-b border-teal-100',
+                                        list: [...animalCareTaskDue, ...animalCareTaskOk], dueCount: animalCareTaskDue.length, colLabels: ['Last Done', 'Task'],
+                                        emptyText: "No animal care tasks. Edit an animal and add tasks in the Routine Care tab.",
+                                        renderRow: entry => <AnimalCareTaskBar key={`${entry.animal.id_public}_${entry.taskIdx}`} animal={entry.animal} taskIdx={entry.taskIdx} task={entry.task} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkAnimalCareTaskDone={handleMarkAnimalCareTaskDone} handleSkipAnimalCareTask={handleSkipAnimalCareTask} />,
+                                    },
                                 ];
 
                                 return (
@@ -4436,7 +4485,7 @@ useEffect(() => {
                                                             <div className="text-center text-sm text-gray-400 py-4">{section.emptyText}</div>
                                                         ) : (
                                                             <>
-                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                                                <div className="hidden sm:grid grid-cols-8 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
                                                                     <div className="col-span-2">Animal</div>
                                                                     <div>{section.colLabels[0]}</div>
                                                                     <div>Frequency</div>
@@ -4451,79 +4500,6 @@ useEffect(() => {
                                                 )}
                                             </div>
                                         ))}
-
-                                        {/* Custom Animal Care sub-section */}
-                                        <div className="border border-gray-200 rounded-lg overflow-hidden">
-                                            <div className="flex items-center justify-between p-3 cursor-pointer bg-teal-50 border-b border-teal-100" onClick={() => toggleGroup('feedcare_scheduledcare')}>
-                                                <div className="flex items-center gap-3">
-                                                    <ClipboardList size={16} className="text-teal-700" />
-                                                    <span className="font-semibold text-gray-800 text-base">Custom Animal Care</span>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{scheduledCareDueCount > 0 ? `${scheduledCareDueCount} due` : animalsWithAnimalTasks.length}</span>
-                                                    {collapsedMgmtGroups['feedcare_scheduledcare'] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
-                                                </div>
-                                            </div>
-                                            {!collapsedMgmtGroups['feedcare_scheduledcare'] && (
-                                                <div className="divide-y divide-gray-100 bg-white">
-                                                    {animalsWithAnimalTasks.length === 0 ? (
-                                                        <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Routine Care tab.</div>
-                                                    ) : animalsWithAnimalTasks.map(a => {
-                                                        const grpKey = `animalcare_${a.id_public}`;
-                                                        const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
-                                                        const tasks = (a.animalCareTasks || []);
-                                                        const dueTasks = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
-                                                        return (
-                                                            <div key={a.id_public} className="border-b border-gray-100 last:border-0">
-                                                                <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50" onClick={() => toggleGroup(grpKey)}>
-                                                                    <div className="flex items-center gap-2 min-w-0">
-                                                                        {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
-                                                                        {a.imageUrl
-                                                                            ? <img src={a.imageUrl} alt={a.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
-                                                                            : <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><Cat size={11} className="text-gray-400" /></div>}
-                                                                        <span className="text-sm font-medium text-gray-800 truncate">{[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}</span>
-                                                                        <span className="text-xs text-gray-400 hidden sm:block">{getSpeciesDisplayName(a.species)}</span>
-                                                                    </div>
-                                                                    {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">{dueTasks.length} due</span>}
-                                                                </div>
-                                                                {!isGrpCollapsed && (
-                                                                    <div className="px-4 py-2 space-y-1">
-                                                                        {tasks.map((task, idx) => {
-                                                                            const due = isTaskDue(task);
-                                                                            const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
-                                                                            const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
-                                                                            const soon = !due && daysLeft !== null && daysLeft <= 2;
-                                                                            return (
-                                                                                <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
-                                                                                    <div className="flex items-center gap-2 min-w-0">
-                                                                                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                                                                        <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
-                                                                                    </div>
-                                                                                    <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
-                                                                                        {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
-                                                                                        {task.lastDoneDate
-                                                                                            ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
-                                                                                            : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
-                                                                                        <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx)}
-                                                                                            className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
-                                                                                            <Check size={10} /> Done
-                                                                                        </button>
-                                                                                        <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx)}
-                                                                                            className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
-                                                                                            <ChevronRight size={10} /> Skip
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
                                 );
                             })()}

@@ -2605,13 +2605,17 @@ const AnimalFormModalV2 = ({
             groomingSchedule: {},
             brushingSchedule: {},
             bathingSchedule: {},
-            specializedCareSchedule: {},
+            nailCareSchedule: {},
+            beakHoofScaleSchedule: {},
+            skinEarCareSchedule: {},
+            dentalCareSchedule: {},
             dietaryRestrictions: '',
             dietaryPreferences: '',
             specialCareNeeds: '',
             healthMonitoringNotes: '',
             additionalSpecialRequirements: '',
             specialCareSchedule: {},
+            healthMonitoringSchedule: {},
             crateTrained: false,
             litterTrained: false,
             leashTrained: false,
@@ -5254,7 +5258,10 @@ const AnimalFormModalV2 = ({
                                             <div><label className="block text-xs font-medium text-gray-700">Beak/Hoof/Scale Maintenance</label><input type="text" name="beakHoofScaleMaintenance" value={formData.beakHoofScaleMaintenance || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Beak trimming, Hoof conditioning, Scale inspection" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Skin & Ear Care Needs</label><input type="text" name="skinEarCareNeeds" value={formData.skinEarCareNeeds || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Ears cleaned weekly, Skin check for mites, Moisturizing needed" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Dental Care Requirements</label><input type="text" name="dentalCareRequirements" value={formData.dentalCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, Professional cleaning, Chew toys for wear" /></div>
-                                            <ScheduleFieldControl label="Specialized Care" value={formData.specializedCareSchedule} onChange={v => setFormData(prev => ({ ...prev, specializedCareSchedule: v }))} />
+                                            <ScheduleFieldControl label="Nail/Claw/Hoof" value={formData.nailCareSchedule} onChange={v => setFormData(prev => ({ ...prev, nailCareSchedule: v }))} />
+                                            <ScheduleFieldControl label="Beak/Hoof/Scale" value={formData.beakHoofScaleSchedule} onChange={v => setFormData(prev => ({ ...prev, beakHoofScaleSchedule: v }))} />
+                                            <ScheduleFieldControl label="Skin & Ear" value={formData.skinEarCareSchedule} onChange={v => setFormData(prev => ({ ...prev, skinEarCareSchedule: v }))} />
+                                            <ScheduleFieldControl label="Dental" value={formData.dentalCareSchedule} onChange={v => setFormData(prev => ({ ...prev, dentalCareSchedule: v }))} />
                                         </div>
 
                                         {/* General Notes */}
@@ -5291,6 +5298,7 @@ const AnimalFormModalV2 = ({
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
                                             <h4 className="text-sm font-semibold text-gray-700">Special Observations</h4>
                                             <textarea name="healthMonitoringNotes" value={formData.healthMonitoringNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Watch for weight changes, Check skin condition weekly" />
+                                            <ScheduleFieldControl value={formData.healthMonitoringSchedule} onChange={v => setFormData(prev => ({ ...prev, healthMonitoringSchedule: v }))} />
                                         </div>
 
                                         {/* General Special Requirements */}
