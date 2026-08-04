@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
-import { Heart, Cat, EyeOff, Eye, Hourglass, Bean, Milk, Loader2, ChevronDown, ChevronRight, Mars, Venus, VenusAndMars, Circle } from 'lucide-react';
+import { Heart, Cat, EyeOff, Eye, Hourglass, ScanHeart, Droplet, Loader2, ChevronDown, ChevronRight, Mars, Venus, VenusAndMars, Circle } from 'lucide-react';
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
@@ -501,8 +501,8 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                                                     <EyeOff size={12} className="text-black" />
                                                 )}
                                                 {animal.isInMating && <Hourglass size={12} className="text-black" />}
-                                                {animal.isPregnant && <Bean size={12} className="text-black" />}
-                                                {animal.isNursing && <Milk size={12} className="text-black" />}
+                                                {animal.isPregnant && <ScanHeart size={12} className="text-black" />}
+                                                {animal.isNursing && <Droplet size={12} className="text-black" />}
                                             </div>
                                         )}
                                         
