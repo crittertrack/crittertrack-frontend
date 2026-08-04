@@ -37,31 +37,26 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
     const waterParameterChecks = parseJsonField(animal.waterParameterChecks);
     const dietSupplies = parseJsonField(animal.dietSupplies);
     const supplementSupplies = parseJsonField(animal.supplementSupplies);
-    const nutritionSchedule = animal.nutritionSchedule ? (typeof animal.nutritionSchedule === 'string' ? JSON.parse(animal.nutritionSchedule) : animal.nutritionSchedule) : null;
 
-    const hasNutrition = animal.dietType || animal.feedingSchedule || animal.supplements || dietSupplies.length > 0 || supplementSupplies.length > 0 || nutritionSchedule;
+    const hasNutrition = animal.dietType || animal.feedingSchedule || animal.supplements || dietSupplies.length > 0 || supplementSupplies.length > 0;
     const hasLegacyHousing = animal.housingType || animal.bedding || animal.enrichment;
     const hasEnvironment = animal.temperatureRange || animal.humidity || animal.lighting || animal.noise || animal.lastBulbChange;
     const hasGrooming = animal.groomingNeeds || animal.sheddingLevel;
+
+    const formatFeedingInterval = (hours) => {
+        const h = Number(hours);
+        if (!h) return null;
+        if (h % 24 === 0) return `Every ${h / 24} day${h / 24 !== 1 ? 's' : ''}`;
+        if (h < 24) return `Every ${h} hour${h !== 1 ? 's' : ''}`;
+        return `Every ${Math.floor(h / 24)}d ${h % 24}h`;
+    };
 
     return (
         <div className="space-y-6">
             {/* Nutrition & Feeding */}
             <InfoCard title="Nutrition & Feeding" icon={<UtensilsCrossed size={18} className="text-gray-400" />}>
-                {hasNutrition || animal.portionSize || animal.feedingMethod || animal.waterAccess || animal.feedingBehaviorNotes || animal.lastFedDate || animal.feedingFrequencyDays ? (
+                {hasNutrition || animal.portionSize || animal.feedingMethod || animal.waterAccess || animal.feedingBehaviorNotes || animal.lastFedDate || animal.feedingIntervalHours ? (
                     <div className="space-y-4">
-                        {nutritionSchedule && (
-                            <div className="p-3 bg-green-50 border-l-4 border-green-400 rounded mb-4">
-                                <p className="text-xs font-semibold text-green-700 mb-2">📋 Nutrition Schedule</p>
-                                <div className="text-sm text-green-900 space-y-1">
-                                    <p><strong>Status:</strong> {nutritionSchedule.enabled ? 'Active' : 'Inactive'}</p>
-                                    {nutritionSchedule.startDate && <p><strong>Started:</strong> {formatDate(nutritionSchedule.startDate)}</p>}
-                                    {nutritionSchedule.frequency && nutritionSchedule.unit && <p><strong>Frequency:</strong> Every {nutritionSchedule.frequency} {nutritionSchedule.unit}</p>}
-                                    {nutritionSchedule.timesPerDay && <p><strong>Daily Feedings:</strong> {nutritionSchedule.timesPerDay}x</p>}
-                                    {nutritionSchedule.notes && <p><strong>Notes:</strong> {nutritionSchedule.notes}</p>}
-                                </div>
-                            </div>
-                        )}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.dietType && <InfoItem label="Diet Type" value={animal.dietType} />}
                             {animal.feedingSchedule && <InfoItem label="Feeding Schedule" value={animal.feedingSchedule} />}
@@ -70,7 +65,7 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
                             {animal.feedingLocation && <InfoItem label="Feeding Location" value={animal.feedingLocation} />}
                             {animal.waterAccess && <InfoItem label="Water Access" value={animal.waterAccess} />}
                             {animal.lastFedDate && <InfoItem label="Last Fed Date" value={formatDate(animal.lastFedDate)} />}
-                            {animal.feedingFrequencyDays && <InfoItem label="Feeding Frequency" value={`Every ${animal.feedingFrequencyDays} days`} />}
+                            {animal.feedingIntervalHours && <InfoItem label="Feeding Frequency" value={formatFeedingInterval(animal.feedingIntervalHours)} />}
                             {animal.supplements && <InfoItem label="Supplements" value={animal.supplements} />}
                         </div>
                         {(dietSupplies.length > 0 || supplementSupplies.length > 0) && (

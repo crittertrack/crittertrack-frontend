@@ -1838,6 +1838,30 @@ useEffect(() => {
         return ds !== null && ds >= Number(freqDays);
     };
 
+    // Feeding uses an hours-based interval (supports multiple feedings/day, e.g. 12h = 2x/day),
+    // so it needs real elapsed-hours precision rather than the midnight-truncated daysSince() above.
+    const hoursSince = (dateStr) => {
+        if (!dateStr) return null;
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return null;
+        return (Date.now() - d.getTime()) / 3600000;
+    };
+
+    const isFeedingDue = (lastDate, intervalHours) => {
+        if (!intervalHours) return false;
+        if (!lastDate) return true;
+        const hrs = hoursSince(lastDate);
+        return hrs !== null && hrs >= Number(intervalHours);
+    };
+
+    const formatFeedingInterval = (hours) => {
+        const h = Number(hours);
+        if (!h) return '';
+        if (h % 24 === 0) return `Every ${h / 24}d`;
+        if (h < 24) return `Every ${h}h`;
+        return `Every ${Math.floor(h / 24)}d ${h % 24}h`;
+    };
+
     const parseArrayField = (val) => {
         if (!val) return [];
         if (Array.isArray(val)) return val;
@@ -1901,7 +1925,7 @@ useEffect(() => {
     }, [activeAnimalsForDashboard]);
 
     const feedDueDashboard = useMemo(() => {
-        return activeAnimalsForDashboard.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
+        return activeAnimalsForDashboard.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours));
     }, [activeAnimalsForDashboard]);
 
     const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
@@ -2079,7 +2103,7 @@ useEffect(() => {
         .filter(a => a.gender !== 'Male' && !inReproEnclosure(a) && !!a.isNursing)
         .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
     const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
-    const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays)); // This is for the Feeding management view
+    const feedDue = allAnimals.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours)); // This is for the Feeding management view
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
     const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(isTaskDue).length, 0);
     const reproTotal = matingList.length + pregnantList.length + nursingList.length;
@@ -2119,7 +2143,7 @@ useEffect(() => {
         });
         return items;
     }, [litters, allAnimals]);
-    const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
+    const feedOk = allAnimals.filter(a => a.feedingIntervalHours && !isFeedingDue(a.lastFedDate, a.feedingIntervalHours));
     // Flatten Grooming/Special Care and Training schedules to one entry per assigned task per animal —
     // each schedule is tracked/displayed completely separately (never merged), only shown when assigned.
     const groomingScheduleEntries = allAnimals.flatMap(a =>
@@ -3757,9 +3781,7 @@ useEffect(() => {
     };
 
     const FeedingAnimalBar = ({ animal, onViewAnimal, onEditAnimal, handleMarkFed, handleSkipFeeding }) => {
-        const due = isDue(animal.lastFedDate, animal.feedingFrequencyDays);
-        const rawSchedule = animal.nutritionSchedule;
-        const nutritionSchedule = typeof rawSchedule === 'string' ? (() => { try { return JSON.parse(rawSchedule); } catch { return null; } })() : rawSchedule;
+        const due = isFeedingDue(animal.lastFedDate, animal.feedingIntervalHours);
         return (
             <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
@@ -3772,15 +3794,10 @@ useEffect(() => {
 
                 <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Last Fed: </span>{animal.lastFedDate ? formatDateShort(animal.lastFedDate) : <span className="text-orange-500">Never</span>}</div>
 
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Frequency: </span>Every {animal.feedingFrequencyDays}d</div>
+                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Frequency: </span>{formatFeedingInterval(animal.feedingIntervalHours)}</div>
 
                 <div className="sm:col-span-2 text-xs text-gray-400">
                     <div>{animal.dietType || ''}</div>
-                    {nutritionSchedule?.enabled && (
-                        <div className="text-teal-600 truncate">
-                            🍽 Every {nutritionSchedule.frequency || '?'} {nutritionSchedule.unit || 'days'}{nutritionSchedule.timesPerDay ? `, ${nutritionSchedule.timesPerDay}x/day` : ''}
-                        </div>
-                    )}
                 </div>
 
                 <div className="text-center">

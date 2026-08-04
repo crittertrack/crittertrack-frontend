@@ -4590,12 +4590,27 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     next.setDate(next.getDate() + Number(freqDays));
                     return `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
                 };
+                // Feeding uses an hours-based interval (supports multiple feedings/day)
+                const nextFeedingDueDate = (lastDate, intervalHours) => {
+                    if (!intervalHours) return null;
+                    const base = lastDate ? new Date(lastDate) : new Date();
+                    if (isNaN(base.getTime())) return null;
+                    const next = new Date(base.getTime() + Number(intervalHours) * 3600000);
+                    return `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+                };
+                const formatFeedingInterval = (hours) => {
+                    const h = Number(hours);
+                    if (!h) return '';
+                    if (h % 24 === 0) return `Every ${h / 24}d`;
+                    if (h < 24) return `Every ${h}h`;
+                    return `Every ${Math.floor(h / 24)}d ${h % 24}h`;
+                };
 
                 calendarAnimals.forEach(a => {
                     addAnimalEvent(a.birthDate, 'birthday', a);
                     // Feeding due
-                    const feedNext = nextDueDate(a.lastFedDate?.substring?.(0,10) ?? a.lastFedDate, a.feedingFrequencyDays);
-                    if (feedNext) addAnimalEvent(feedNext, 'feeding', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Feed every ${a.feedingFrequencyDays}d` });
+                    const feedNext = nextFeedingDueDate(a.lastFedDate, a.feedingIntervalHours);
+                    if (feedNext) addAnimalEvent(feedNext, 'feeding', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Feed ${formatFeedingInterval(a.feedingIntervalHours)}` });
                     // Animal care tasks
                     (a.animalCareTasks || []).forEach(t => {
                         const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);

@@ -2282,7 +2282,7 @@ const AnimalFormModalV2 = ({
             groupRole: animalToEdit.groupRole || '',
             enclosureId: animalToEdit.enclosureId || '',
             lastFedDate: animalToEdit.lastFedDate ? new Date(animalToEdit.lastFedDate).toISOString().split('T')[0] : '',
-            feedingFrequencyDays: animalToEdit.feedingFrequencyDays || '',
+            feedingIntervalHours: animalToEdit.feedingIntervalHours || '',
             animalCareTasks: animalToEdit.animalCareTasks || [],
             milestones: (animalToEdit.milestones || []).map(m => ({
                 ...m,
@@ -2365,9 +2365,6 @@ const AnimalFormModalV2 = ({
             supplementSupplies: Array.isArray(animalToEdit.supplementSupplies)
                 ? animalToEdit.supplementSupplies
                 : (typeof animalToEdit.supplementSupplies === 'string' ? (JSON.parse(animalToEdit.supplementSupplies) || []) : []),
-            nutritionSchedule: animalToEdit.nutritionSchedule && typeof animalToEdit.nutritionSchedule === 'string'
-                ? (JSON.parse(animalToEdit.nutritionSchedule) || {})
-                : (animalToEdit.nutritionSchedule || {}),
 
             housingType: animalToEdit.housingType || '',
             bedding: animalToEdit.bedding || '',
@@ -2482,7 +2479,7 @@ const AnimalFormModalV2 = ({
             groupRole: '',
             enclosureId: '',
             lastFedDate: '',
-            feedingFrequencyDays: '',
+            feedingIntervalHours: '',
             animalCareTasks: [],
             milestones: [],
             breedingRole: 'both',
@@ -2549,14 +2546,6 @@ const AnimalFormModalV2 = ({
             // New structured nutrition fields
             dietSupplies: [],
             supplementSupplies: [],
-            nutritionSchedule: {
-                enabled: true,
-                startDate: '',
-                frequency: '',
-                unit: 'days',
-                timesPerDay: '',
-                notes: '',
-            },
 
             housingType: '',
             bedding: '',
@@ -3472,11 +3461,6 @@ const AnimalFormModalV2 = ({
                     payloadToSave[field] = null; // Send null for empty arrays
                 }
             });
-
-            // Serialize structured nutrition schedule (object) as JSON
-            if (payloadToSave.nutritionSchedule && typeof payloadToSave.nutritionSchedule === 'object') {
-                payloadToSave.nutritionSchedule = JSON.stringify(payloadToSave.nutritionSchedule);
-            }
 
 
             if (galleryImages.length === 0) {
@@ -5104,93 +5088,29 @@ const AnimalFormModalV2 = ({
                                             </div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                            <h4 className="text-sm font-semibold text-gray-700">Schedule (feeds Feeding & Care tab later)</h4>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Schedule</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Enabled</label>
-                                                    <select
-                                                        name="nutritionScheduleEnabled"
-                                                        value={formData.nutritionSchedule?.enabled ? 'yes' : 'no'}
-                                                        onChange={(e) => {
-                                                            const enabled = e.target.value === 'yes';
-                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), enabled } }));
-                                                        }}
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                    >
-                                                        <option value="yes">Yes</option>
-                                                        <option value="no">No</option>
-                                                    </select>
+                                                    <label className="block text-xs font-medium text-gray-700">Feed Every (hours)</label>
+                                                    <input type="number" min="1" name="feedingIntervalHours" value={formData.feedingIntervalHours || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 24" />
+                                                    <div className="flex flex-wrap gap-1 mt-1.5">
+                                                        {[6, 8, 12, 24, 48, 72, 168].map(h => (
+                                                            <button
+                                                                key={h}
+                                                                type="button"
+                                                                onClick={() => setFormData(prev => ({ ...prev, feedingIntervalHours: h }))}
+                                                                className={`text-[11px] px-2 py-0.5 rounded-full border ${Number(formData.feedingIntervalHours) === h ? 'bg-primary text-black border-primary' : 'bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100'}`}
+                                                            >
+                                                                {h < 24 ? `${h}h` : `${h / 24}d`}
+                                                            </button>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Start Date</label>
-                                                    <DatePicker
-                                                        value={formData.nutritionSchedule?.startDate || ''}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), startDate: val } }));
-                                                        }}
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                    />
+                                                    <label className="block text-xs font-medium text-gray-700">Last Fed</label>
+                                                    <p className="mt-1 py-1.5 px-2 text-sm text-gray-500">{formData.lastFedDate ? formatDate(formData.lastFedDate) : 'Never — use "Fed" in the Feeding & Care tab'}</p>
                                                 </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Frequency</label>
-                                                    <input
-                                                        type="number"
-                                                        value={formData.nutritionSchedule?.frequency || ''}
-                                                        onChange={(e) => {
-                                                            const v = e.target.value;
-                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), frequency: v } }));
-                                                        }}
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                        placeholder="e.g., 7"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Unit</label>
-                                                    <select
-                                                        value={formData.nutritionSchedule?.unit || 'days'}
-                                                        onChange={(e) => {
-                                                            const unit = e.target.value;
-                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), unit } }));
-                                                        }}
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                    >
-                                                        <option value="hours">Hours</option>
-                                                        <option value="days">Days</option>
-                                                        <option value="weeks">Weeks</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Times/Day</label>
-                                                    <input
-                                                        type="number"
-                                                        value={formData.nutritionSchedule?.timesPerDay || ''}
-                                                        onChange={(e) => {
-                                                            const v = e.target.value;
-                                                            setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), timesPerDay: v } }));
-                                                        }}
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                        placeholder="e.g., 2"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Notes</label>
-                                                <textarea
-                                                    value={formData.nutritionSchedule?.notes || ''}
-                                                    onChange={(e) => {
-                                                        const notes = e.target.value;
-                                                        setFormData(prev => ({ ...prev, nutritionSchedule: { ...(prev.nutritionSchedule || {}), notes } }));
-                                                    }}
-                                                    rows="2"
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                    placeholder="e.g., reduce for juveniles"
-                                                />
                                             </div>
 
                                             <div className="pt-2 border-t">
@@ -5202,20 +5122,6 @@ const AnimalFormModalV2 = ({
                                                     rows="2"
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
                                                 />
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Schedule (Feeding & Care tab tracking)</h4>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Feed Every (days)</label>
-                                                    <input type="number" min="1" name="feedingFrequencyDays" value={formData.feedingFrequencyDays || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 7" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Last Fed</label>
-                                                    <p className="mt-1 py-1.5 px-2 text-sm text-gray-500">{formData.lastFedDate ? formatDate(formData.lastFedDate) : 'Never — use "Fed" in the Feeding & Care tab'}</p>
-                                                </div>
                                             </div>
                                         </div>
 

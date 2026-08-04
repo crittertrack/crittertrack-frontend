@@ -10,6 +10,16 @@ import { BroadcastPoll } from './Banners';
 
 const API_BASE_URL = '/api';
 
+// Dedicated, individually-tracked Grooming/Special Care & Training schedule fields
+// ({ lastDoneDate, frequencyDays }) — see AnimalList/index.jsx GROOMING_SCHEDULE_DEFS/TRAINING_SCHEDULE_DEFS.
+const SCHEDULE_FIELD_KEYS = [
+    'groomingSchedule', 'brushingSchedule', 'bathingSchedule', 'specializedCareSchedule', 'specialCareSchedule',
+    'exerciseSchedule', 'crateTrainingSchedule', 'litterTrainingSchedule', 'leashTrainingSchedule',
+    'freeFlightTrainingSchedule', 'workingRoleTrainingSchedule', 'behavioralIssueTrainingSchedule',
+    'reactivityTrainingSchedule', 'flightRiskTrainingSchedule',
+];
+
+
 const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     // -- Breeding Reminders ------------------------------------------
     const [breedingEnabled] = useState(() => {
@@ -166,7 +176,16 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             const ds = daysSince(lastDate);
             return ds !== null && ds >= Number(freqDays);
         };
-        const feedingDue = animals.filter(a => isTaskDue(a.lastFedDate, a.feedingFrequencyDays));
+        // Feeding uses an hours-based interval (supports multiple feedings/day)
+        const isFeedingDue = (lastDate, intervalHours) => {
+            if (!intervalHours) return false;
+            if (!lastDate) return true;
+            const d = new Date(lastDate);
+            if (isNaN(d.getTime())) return false;
+            const hrs = (Date.now() - d.getTime()) / 3600000;
+            return hrs >= Number(intervalHours);
+        };
+        const feedingDue = animals.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours));
         if (feedingDue.length > 0) {
             const key = 'mgmt-feeding';
             if (!mgmtDismissed[key]) mgmtItems.push({ key, type: 'feeding', label: 'Feeding', icon: '\uD83C\uDF7D\uFE0F', description: `${feedingDue.length} animal${feedingDue.length !== 1 ? 's' : ''} overdue` });
@@ -174,6 +193,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         let careDueCount = 0;
         animals.forEach(a => {
             careDueCount += (a.animalCareTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+            careDueCount += SCHEDULE_FIELD_KEYS.filter(key => isTaskDue(a[key]?.lastDoneDate, a[key]?.frequencyDays)).length;
         });
         if (careDueCount > 0) {
             const key = 'mgmt-care';
