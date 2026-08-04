@@ -1929,16 +1929,26 @@ useEffect(() => {
         return activeAnimalsForDashboard.filter(a => a.status === 'Available');
     }, [activeAnimalsForDashboard]);
 
-    // "Feeding & Care" needs-attention count for the main dashboard — one entry per animal that has
-    // ANY overdue feeding, custom animal care task, or Grooming/Special Care/Training schedule (not
-    // just feeding), so the counter/label actually match what it claims to cover.
+    // "Feeding & Care" needs-attention entries for the main dashboard — one entry per animal with the
+    // list of reasons (feeding, custom animal care tasks, and/or Grooming/Special Care/Training
+    // schedules) so the breakdown dropdown can show which animal(s) and why, not just a bare count.
     const feedingCareDueDashboard = useMemo(() => {
-        return activeAnimalsForDashboard.filter(a =>
-            isFeedingDue(a.lastFedDate, a.feedingIntervalHours) ||
-            (a.animalCareTasks || []).some(t => isDue(t.lastDoneDate, t.frequencyDays)) ||
-            GROOMING_SCHEDULE_DEFS.some(def => a[def.key]?.frequencyDays && isDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) ||
-            TRAINING_SCHEDULE_DEFS.some(def => a[def.key]?.frequencyDays && isDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays))
-        );
+        return activeAnimalsForDashboard
+            .map(a => {
+                const reasons = [];
+                if (isFeedingDue(a.lastFedDate, a.feedingIntervalHours)) reasons.push('Feeding due');
+                (a.animalCareTasks || []).forEach(t => {
+                    if (isDue(t.lastDoneDate, t.frequencyDays)) reasons.push(`${t.taskName} due`);
+                });
+                GROOMING_SCHEDULE_DEFS.forEach(def => {
+                    if (a[def.key]?.frequencyDays && isDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) reasons.push(`${def.label} due`);
+                });
+                TRAINING_SCHEDULE_DEFS.forEach(def => {
+                    if (a[def.key]?.frequencyDays && isDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) reasons.push(`${def.label} due`);
+                });
+                return { animal: a, reasons };
+            })
+            .filter(entry => entry.reasons.length > 0);
     }, [activeAnimalsForDashboard]);
 
     const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
@@ -5314,7 +5324,20 @@ useEffect(() => {
                                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Needs Attention Breakdown</h4>
                                             <ul className="text-sm space-y-1">
                                                 {feedingCareDueDashboard.length > 0 && (
-                                                    <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('feeding')}><span className="flex items-center gap-1.5 text-red-700"><Utensils size={14} /> Feeding & Care</span><span className="font-medium">{feedingCareDueDashboard.length}</span></li>
+                                                    <>
+                                                        <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('feeding')}>
+                                                            <span className="flex items-center gap-1.5 text-red-700"><Utensils size={14} /> Feeding & Care</span>
+                                                            <span className="font-medium">{feedingCareDueDashboard.length}</span>
+                                                        </li>
+                                                        <ul className="pl-6 space-y-1 text-xs">
+                                                            {feedingCareDueDashboard.map(({ animal, reasons }) => (
+                                                                <li key={animal.id_public} className="flex flex-col gap-0.5 text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
+                                                                    <span className="font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                                                    <span>{reasons.join(', ')}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </>
                                                 )}
                                                 {healthNeedsAttentionList.length > 0 && (
                                                     <>
