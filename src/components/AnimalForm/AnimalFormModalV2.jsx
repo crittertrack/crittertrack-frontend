@@ -4860,24 +4860,38 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Nutrition" icon={<UtensilsCrossed size={16} />} initiallyOpen>
                                     <div className="space-y-3">
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Diet</h4>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Diet Type</label>
-                                                <input
-                                                    type="text"
-                                                    name="dietType"
-                                                    value={formData.dietType}
-                                                    onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                    placeholder="e.g., Pellets, fresh greens, mixed"
-                                                />
+                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Schedule</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Feed Every (hours)</label>
+                                                    <input type="number" min="1" name="feedingIntervalHours" value={formData.feedingIntervalHours || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 24" />
+                                                    <div className="flex flex-wrap gap-1 mt-1.5">
+                                                        {[6, 8, 12, 24, 48, 72, 168].map(h => (
+                                                            <button
+                                                                key={h}
+                                                                type="button"
+                                                                onClick={() => setFormData(prev => ({ ...prev, feedingIntervalHours: h }))}
+                                                                className={`text-[11px] px-2 py-0.5 rounded-full border ${Number(formData.feedingIntervalHours) === h ? 'bg-primary text-black border-primary' : 'bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100'}`}
+                                                            >
+                                                                {h < 24 ? `${h}h` : `${h / 24}d`}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Last Fed</label>
+                                                    <p className="mt-1 py-1.5 px-2 text-sm text-gray-500">{formData.lastFedDate ? formatDate(formData.lastFedDate) : 'Never — use "Fed" in the Feeding & Care tab'}</p>
+                                                </div>
                                             </div>
+                                        </div>
 
-                                            <div className="pt-2 border-t">
-                                                <label className="block text-xs font-semibold text-gray-700 mb-2">Diet Supplies</label>
-                                                <div className="flex gap-2 mb-2">
-                                                    <button type="button" onClick={() => setDietMode('manual')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${dietMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
-                                                    <button type="button" onClick={() => setDietMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${dietMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Details & Management</h4>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Diet</label>
+                                                <div className="flex gap-1.5 mb-1.5">
+                                                    <button type="button" onClick={() => setDietMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
+                                                    <button type="button" onClick={() => setDietMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
                                                 </div>
                                                 {dietMode === 'manual' ? (
                                                     <div className="space-y-2">
@@ -4968,27 +4982,11 @@ const AnimalFormModalV2 = ({
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>
-
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Supplements</h4>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">Supplements (legacy text)</label>
-                                                <textarea
-                                                    name="supplements"
-                                                    value={formData.supplements}
-                                                    onChange={handleChange}
-                                                    rows="2"
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                    placeholder="Optional notes or list of supplements"
-                                                />
-                                            </div>
-
                                             <div className="pt-2 border-t">
-                                                <label className="block text-xs font-semibold text-gray-700 mb-2">Supplement Supplies</label>
-                                                <div className="flex gap-2 mb-2">
-                                                    <button type="button" onClick={() => setSupplementMode('manual')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${supplementMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
-                                                    <button type="button" onClick={() => setSupplementMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${supplementMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Supplements</label>
+                                                <div className="flex gap-1.5 mb-1.5">
+                                                    <button type="button" onClick={() => setSupplementMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
+                                                    <button type="button" onClick={() => setSupplementMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
                                                 </div>
                                                 {supplementMode === 'manual' ? (
                                                     <div className="space-y-2">
@@ -5086,48 +5084,7 @@ const AnimalFormModalV2 = ({
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>
-
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Schedule</h4>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Feed Every (hours)</label>
-                                                    <input type="number" min="1" name="feedingIntervalHours" value={formData.feedingIntervalHours || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 24" />
-                                                    <div className="flex flex-wrap gap-1 mt-1.5">
-                                                        {[6, 8, 12, 24, 48, 72, 168].map(h => (
-                                                            <button
-                                                                key={h}
-                                                                type="button"
-                                                                onClick={() => setFormData(prev => ({ ...prev, feedingIntervalHours: h }))}
-                                                                className={`text-[11px] px-2 py-0.5 rounded-full border ${Number(formData.feedingIntervalHours) === h ? 'bg-primary text-black border-primary' : 'bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100'}`}
-                                                            >
-                                                                {h < 24 ? `${h}h` : `${h / 24}d`}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Last Fed</label>
-                                                    <p className="mt-1 py-1.5 px-2 text-sm text-gray-500">{formData.lastFedDate ? formatDate(formData.lastFedDate) : 'Never — use "Fed" in the Feeding & Care tab'}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="pt-2 border-t">
-                                                <label className="block text-xs font-medium text-gray-700">Feeding Schedule (legacy text)</label>
-                                                <textarea
-                                                    name="feedingSchedule"
-                                                    value={formData.feedingSchedule}
-                                                    onChange={handleChange}
-                                                    rows="2"
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Details & Management</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Portion Size/Amount Per Feeding</label><input type="text" name="portionSize" value={formData.portionSize || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 2 cups, 50g, 1/4 cup pellets + 2 tbsp fresh" /></div>
+                                            <div className="pt-2 border-t"><label className="block text-xs font-medium text-gray-700">Portion Size/Amount Per Feeding</label><input type="text" name="portionSize" value={formData.portionSize || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 2 cups, 50g, 1/4 cup pellets + 2 tbsp fresh" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Feeding Method</label><input type="text" name="feedingMethod" value={formData.feedingMethod || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Hand-fed, Self-fed, Free-choice, Timed bowl, Force-feeding" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Feeding Location/Container</label><input type="text" name="feedingLocation" value={formData.feedingLocation || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Separate bowl, Feeding station, Enclosure floor, Ceramic dish, Stainless steel feeder" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Water Access</label><input type="text" name="waterAccess" value={formData.waterAccess || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Free access, Water bottle, Water bowl (changed daily), Misting system, Soaking dish" /></div>
