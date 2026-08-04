@@ -4352,6 +4352,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* Add Offspring Section */}
                                         {!litter.isPlanned && addingOffspring && addingOffspring._id === litter._id ? (
+                                            <>
                                             <div className="bg-white rounded-lg border-2 border-primary p-4">
                                                 <h4 className="text-sm font-bold text-gray-700 mb-3">Add New Offspring</h4>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -4433,39 +4434,54 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </button>
                                                 </div>
                                             </div>
-                                        ) : !litter.isPlanned ? (
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="flex justify-end mt-3">
                                                 <button
-                                                    onClick={() => handleAddOffspringToLitter(litter)}
-                                                    className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLitter(litter._id);
+                                                    }}
+                                                    className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
                                                 >
-                                                    <Plus size={16} />
-                                                    Add Offspring
-                                                </button>
-                                                <button
-                                                    onClick={() => handleLinkAnimals(litter)}
-                                                    data-tutorial-target="link-animals-btn"
-                                                    className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-2 rounded-lg text-sm"
-                                                >
-                                                    <Link className="w-4 h-4" />
-                                                    <span>Link Offspring</span>
+                                                    <Trash2 className="w-4 h-4" />
+                                                    <span>Delete</span>
                                                 </button>
                                             </div>
-                                        ) : null}
-
-                                        {/* Delete - bottom right */}
-                                        <div className="flex justify-end mt-3">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteLitter(litter._id);
-                                                }}
-                                                className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                                <span>Delete</span>
-                                            </button>
-                                        </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                                <div className="flex flex-wrap gap-2">
+                                                    {!litter.isPlanned && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleAddOffspringToLitter(litter)}
+                                                                className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                            >
+                                                                <Plus size={16} />
+                                                                Add Offspring
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleLinkAnimals(litter)}
+                                                                data-tutorial-target="link-animals-btn"
+                                                                className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-2 rounded-lg text-sm"
+                                                            >
+                                                                <Link className="w-4 h-4" />
+                                                                <span>Link Offspring</span>
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLitter(litter._id);
+                                                    }}
+                                                    className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                    <span>Delete</span>
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
