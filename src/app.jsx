@@ -2364,13 +2364,6 @@ const App = () => {
             {animalToView && (() => {
                 // Only show editable modal if: user created it AND it's not marked as view-only
                 const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public && !animalToView.isViewOnly;
-                console.log('DEBUG: animalToView:', animalToView.name, {
-                    creatorId_public: animalToView.creatorId_public,
-                    userProfileId: userProfile?.id_public,
-                    isViewOnly: animalToView.isViewOnly,
-                    iCurrentlyOwn,
-                    creatorIdMatch: animalToView.creatorId_public === userProfile?.id_public
-                });
                 if (iCurrentlyOwn) {
                     return (
                         <AnimalModalV2
