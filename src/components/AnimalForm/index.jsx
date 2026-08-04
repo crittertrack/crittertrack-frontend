@@ -34,6 +34,8 @@ const pedigreeTreeCache = new Map();
 const pedigreePrefetchInFlight = new Map();
 const MAX_PEDIGREE_FETCH_NODES = 100;
 const MAX_PEDIGREE_FETCH_DEPTH = 5;
+const PEDIGREE_CACHE_TTL_MS = 2 * 60 * 1000; // treat cached trees older than this as stale (e.g. after editing breeder/owner)
+const isPedigreeCacheFresh = (cached) => !!cached && Date.now() - (cached.timestamp || 0) < PEDIGREE_CACHE_TTL_MS;
 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -401,11 +403,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const rootId = animalId || animalData?.id_public;
             const authScope = authToken ? 'auth' : 'public';
             const cacheKey = rootId ? `${authScope}:${rootId}` : null;
-            if (cacheKey && pedigreeTreeCache.has(cacheKey)) {
-                const cached = pedigreeTreeCache.get(cacheKey);
-                setPedigreeData(cached?.data || null);
-                setOwnerProfile(cached?.ownerProfile || null);
-                setCurrentOwnerProfile(cached?.currentOwnerProfile || null);
+            const cachedEntry = cacheKey ? pedigreeTreeCache.get(cacheKey) : null;
+            if (cacheKey && isPedigreeCacheFresh(cachedEntry)) {
+                setPedigreeData(cachedEntry?.data || null);
+                setOwnerProfile(cachedEntry?.ownerProfile || null);
+                setCurrentOwnerProfile(cachedEntry?.currentOwnerProfile || null);
                 setLoading(false);
                 return;
             }
@@ -593,7 +595,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 }
 
                 if (cacheKey) {
-                    pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile, currentOwnerProfile: fetchedCurrentOwnerProfile });
+                    pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile, currentOwnerProfile: fetchedCurrentOwnerProfile, timestamp: Date.now() });
                 }
             } catch (error) {
                 console.error('Error fetching pedigree data:', error);
@@ -612,11 +614,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const rootId = currentViewingAnimal.id_public;
         const authScope = authToken ? 'auth' : 'public';
         const cacheKey = `${authScope}:${rootId}`;
-        if (pedigreeTreeCache.has(cacheKey)) {
-            const cached = pedigreeTreeCache.get(cacheKey);
-            setPedigreeData(cached?.data || null);
-            setOwnerProfile(cached?.ownerProfile || null);
-            setCurrentOwnerProfile(cached?.currentOwnerProfile || null);
+        const cachedEntry = pedigreeTreeCache.get(cacheKey);
+        if (isPedigreeCacheFresh(cachedEntry)) {
+            setPedigreeData(cachedEntry?.data || null);
+            setOwnerProfile(cachedEntry?.ownerProfile || null);
+            setCurrentOwnerProfile(cachedEntry?.currentOwnerProfile || null);
             setLoading(false);
             return;
         }
@@ -742,7 +744,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     }
                 }
 
-                pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile, currentOwnerProfile: fetchedCurrentOwnerProfile });
+                pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile, currentOwnerProfile: fetchedCurrentOwnerProfile, timestamp: Date.now() });
             } catch (error) {
                 console.error('Error fetching ancestor pedigree:', error);
             } finally {
