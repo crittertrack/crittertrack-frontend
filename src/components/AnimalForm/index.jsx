@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import axios from 'axios';
+import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import {
     ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock,
     Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit, Users, HeartPulse,
