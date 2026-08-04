@@ -8,6 +8,25 @@ import {
     Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
 } from 'lucide-react';
 import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
+
+// Dedicated, individually-tracked Grooming/Special Care & Training schedule fields
+// ({ lastDoneDate, frequencyDays }) — mirrors CalendarPage/index.jsx SCHEDULE_FIELD_DEFS.
+const CALENDAR_SCHEDULE_FIELD_DEFS = [
+    { key: 'groomingSchedule', label: 'Grooming' },
+    { key: 'brushingSchedule', label: 'Brushing' },
+    { key: 'bathingSchedule', label: 'Bathing' },
+    { key: 'specializedCareSchedule', label: 'Specialized Care' },
+    { key: 'specialCareSchedule', label: 'Special Care Needs' },
+    { key: 'exerciseSchedule', label: 'Daily Exercise' },
+    { key: 'crateTrainingSchedule', label: 'Crate Training' },
+    { key: 'litterTrainingSchedule', label: 'Litter Training' },
+    { key: 'leashTrainingSchedule', label: 'Leash Training' },
+    { key: 'freeFlightTrainingSchedule', label: 'Free-Flight Training' },
+    { key: 'workingRoleTrainingSchedule', label: 'Working Role Training' },
+    { key: 'behavioralIssueTrainingSchedule', label: 'Behavioral Issue Training' },
+    { key: 'reactivityTrainingSchedule', label: 'Reactivity Training' },
+    { key: 'flightRiskTrainingSchedule', label: 'Flight Risk Training' },
+];
 import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
@@ -4577,18 +4596,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     // Feeding due
                     const feedNext = nextDueDate(a.lastFedDate?.substring?.(0,10) ?? a.lastFedDate, a.feedingFrequencyDays);
                     if (feedNext) addAnimalEvent(feedNext, 'feeding', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Feed every ${a.feedingFrequencyDays}d` });
-                    // Maintenance due
-                    const maintNext = nextDueDate(a.lastMaintenanceDate?.substring?.(0,10) ?? a.lastMaintenanceDate, a.maintenanceFrequencyDays);
-                    if (maintNext) addAnimalEvent(maintNext, 'maintenance', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Maintenance every ${a.maintenanceFrequencyDays}d` });
-                    // Enclosure care tasks
-                    (a.careTasks || []).forEach(t => {
-                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
-                        if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.name || 'Enclosure Task', _calDetail: a.name || a.id_public });
-                    });
                     // Animal care tasks
                     (a.animalCareTasks || []).forEach(t => {
                         const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
                         if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.name || 'Animal Task', _calDetail: a.name || a.id_public });
+                    });
+                    // Dedicated Grooming/Special Care & Training schedules (each tracked independently)
+                    CALENDAR_SCHEDULE_FIELD_DEFS.forEach(def => {
+                        const sched = a[def.key];
+                        const dn = nextDueDate(sched?.lastDoneDate?.substring?.(0,10) ?? sched?.lastDoneDate, sched?.frequencyDays);
+                        if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: def.label, _calDetail: a.name || a.id_public });
                     });
                 });
 

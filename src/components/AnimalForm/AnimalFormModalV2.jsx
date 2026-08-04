@@ -109,6 +109,15 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data.filter(Boolean) : [];
 };
 
+// Turns a raw AnimalLog value into readable text for timeline descriptions.
+const formatLogValue = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}(T|$)/.test(value)) return formatDate(value) || value;
+    if (typeof value === 'object') return null;
+    return String(value);
+};
+
 const getContactDisplayName = (contact) => {
     const personalName = contact?.personalName?.trim();
     const breederName = contact?.breederName?.trim();
@@ -1308,6 +1317,33 @@ const FormSection = ({ title, icon, children, initiallyOpen = false }) => {
     );
 };
 
+// Suggestions only (datalist) — task name stays free-text since this app supports any species.
+// Note: Nail/Hoof/Beak/Claw Trim, Bathing, Coat Brushing, Shedding/Molt Check, Shell Care/Scrubbing,
+// and Dental/Incisor Check are now covered by dedicated Grooming/Bathing/Brushing/Specialized Care schedules above.
+const CARE_TASK_SUGGESTIONS = ['Feather Care', 'Ear Cleaning', 'Weigh-In / Body Condition Check', 'Litter Box / Bedding Spot-Change', 'Handling / Socialization Session'];
+
+// Optional recurring schedule control for a single, dedicated (individually-tracked) care/training item.
+// value shape: { lastDoneDate, frequencyDays }. Only frequencyDays is editable here — lastDoneDate is
+// set via "Mark Done" actions in the Feeding & Care management view.
+const ScheduleFieldControl = ({ label, value, onChange }) => {
+    const frequencyDays = value?.frequencyDays ?? '';
+    const lastDoneDate = value?.lastDoneDate;
+    return (
+        <div className="flex items-center gap-2 flex-wrap pt-1">
+            <span className="text-xs font-medium text-gray-500">{label ? `${label} schedule:` : 'Optional schedule:'}</span>
+            <input
+                type="number" min="1" value={frequencyDays}
+                onChange={e => onChange({ ...(value || {}), frequencyDays: e.target.value ? Number(e.target.value) : null })}
+                placeholder="Every N days"
+                className="w-28 py-1 px-2 text-xs border border-gray-300 rounded-md"
+            />
+            <span className="text-xs text-gray-400">
+                {lastDoneDate ? `Last done ${formatDate(lastDoneDate)}` : 'Not started — mark done in Feeding & Care'}
+            </span>
+        </div>
+    );
+};
+
 const AnimalFormModalV2 = ({
     formTitle = "Create New Animal",
     animalToEdit,
@@ -1403,10 +1439,9 @@ const AnimalFormModalV2 = ({
     const [newAllergy, setNewAllergy] = useState({ name: '', notes: '' });
     const [newMedication, setNewMedication] = useState({ name: '', dose: '', reason: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
     const [newVetVisit, setNewVetVisit] = useState({ date: new Date().toISOString().substring(0, 10), reason: '', notes: '' });
-    const [newCareTaskName, setNewCareTaskName] = useState('');
-    const [newCareTaskFreq, setNewCareTaskFreq] = useState('');
     const [newAnimalCareTaskName, setNewAnimalCareTaskName] = useState('');
     const [newAnimalCareTaskFreq, setNewAnimalCareTaskFreq] = useState('');
+    const [newAnimalCareTaskNotes, setNewAnimalCareTaskNotes] = useState('');
     const [newMilestoneLabel, setNewMilestoneLabel] = useState('');
     const [newMilestoneDate, setNewMilestoneDate] = useState(() => new Date().toISOString().split('T')[0]);
     const [newMilestoneInterval, setNewMilestoneInterval] = useState('');
@@ -1806,11 +1841,24 @@ const AnimalFormModalV2 = ({
         keeper: true,
         show: true,
         milestones: true,
-        status: true
+        status: true,
+        feeding: true,
+        care: true,
+        field: true
     });
+    const [animalLogs, setAnimalLogs] = useState([]);
     const [pinnedEvents, setPinnedEvents] = useState(parseJsonArrayField(animalToEdit?.pinnedEvents) || []);
     const [newTimelineNote, setNewTimelineNote] = useState({ eventId: '', noteText: '' });
     const [showNoteForm, setShowNoteForm] = useState(false);
+
+    useEffect(() => {
+        if (!animalToEdit?.id_public || !API_BASE_URL || !authToken) return;
+        let cancelled = false;
+        axios.get(`${API_BASE_URL}/animals/${animalToEdit.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => { if (!cancelled) setAnimalLogs(Array.isArray(res.data) ? res.data : []); })
+            .catch(err => console.error('Failed to fetch animal logs for timeline:', err));
+        return () => { cancelled = true; };
+    }, [animalToEdit?.id_public, API_BASE_URL, authToken]);
 
     const removeArrayItem = (field, index) => {
         setFormData(prev => ({
@@ -2235,9 +2283,6 @@ const AnimalFormModalV2 = ({
             enclosureId: animalToEdit.enclosureId || '',
             lastFedDate: animalToEdit.lastFedDate ? new Date(animalToEdit.lastFedDate).toISOString().split('T')[0] : '',
             feedingFrequencyDays: animalToEdit.feedingFrequencyDays || '',
-            lastMaintenanceDate: animalToEdit.lastMaintenanceDate ? new Date(animalToEdit.lastMaintenanceDate).toISOString().split('T')[0] : '',
-            maintenanceFrequencyDays: animalToEdit.maintenanceFrequencyDays || '',
-            careTasks: animalToEdit.careTasks || [],
             animalCareTasks: animalToEdit.animalCareTasks || [],
             milestones: (animalToEdit.milestones || []).map(m => ({
                 ...m,
@@ -2438,9 +2483,6 @@ const AnimalFormModalV2 = ({
             enclosureId: '',
             lastFedDate: '',
             feedingFrequencyDays: '',
-            lastMaintenanceDate: '',
-            maintenanceFrequencyDays: '',
-            careTasks: [],
             animalCareTasks: [],
             milestones: [],
             breedingRole: 'both',
@@ -2563,6 +2605,24 @@ const AnimalFormModalV2 = ({
             dailyExerciseMinutes: '',
             groomingNeeds: '',
             sheddingLevel: '',
+            brushingFrequency: '',
+            bathingFrequency: '',
+            coatCareNotes: '',
+            nailCareRequirements: '',
+            beakHoofScaleMaintenance: '',
+            skinEarCareNeeds: '',
+            dentalCareRequirements: '',
+            groomingNotes: '',
+            groomingSchedule: {},
+            brushingSchedule: {},
+            bathingSchedule: {},
+            specializedCareSchedule: {},
+            dietaryRestrictions: '',
+            dietaryPreferences: '',
+            specialCareNeeds: '',
+            healthMonitoringNotes: '',
+            additionalSpecialRequirements: '',
+            specialCareSchedule: {},
             crateTrained: false,
             litterTrained: false,
             leashTrained: false,
@@ -2574,6 +2634,15 @@ const AnimalFormModalV2 = ({
             behavioralIssues: '',
             biteHistory: '',
             reactivityNotes: '',
+            exerciseSchedule: {},
+            crateTrainingSchedule: {},
+            litterTrainingSchedule: {},
+            leashTrainingSchedule: {},
+            freeFlightTrainingSchedule: {},
+            workingRoleTrainingSchedule: {},
+            behavioralIssueTrainingSchedule: {},
+            reactivityTrainingSchedule: {},
+            flightRiskTrainingSchedule: {},
             endOfLifeCareNotes: '',
             coOwnership: '',
             transferHistory: '',
@@ -3044,6 +3113,24 @@ const AnimalFormModalV2 = ({
                 addEvent('status', formData.dateOfDeath, 'Animal Deceased', `Status: ${formData.status || 'Deceased'}`);
             }
         }
+
+        // Feeding/care/field edit entries from the AnimalLog collection
+        animalLogs.forEach(log => {
+            if (!eventVisibility[log.category]) return;
+            const parts = log.changes.map(c => {
+                if (c.field === 'lastFedDate') return null;
+                const newVal = formatLogValue(c.newValue);
+                const oldVal = formatLogValue(c.oldValue);
+                if (oldVal && newVal) return `${c.label}: ${oldVal} → ${newVal}`;
+                return `${c.label}${newVal ? `: ${newVal}` : ''}`;
+            }).filter(Boolean);
+            const titles = {
+                feeding: log.changes.some(c => c.field === 'lastFedDate' && c.label === 'Feeding Skipped') ? 'Feeding Skipped' : 'Fed',
+                care: 'Care Schedule Updated',
+                field: 'Record Updated'
+            };
+            addEvent(log.category, log.createdAt, titles[log.category] || 'Animal Log', parts.join('; '), `animallog-${log._id}`);
+        });
 
         return events.sort((a, b) => new Date(b.date) - new Date(a.date));
     };
@@ -5119,6 +5206,20 @@ const AnimalFormModalV2 = ({
                                         </div>
 
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Schedule (Feeding & Care tab tracking)</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Feed Every (days)</label>
+                                                    <input type="number" min="1" name="feedingFrequencyDays" value={formData.feedingFrequencyDays || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 7" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700">Last Fed</label>
+                                                    <p className="mt-1 py-1.5 px-2 text-sm text-gray-500">{formData.lastFedDate ? formatDate(formData.lastFedDate) : 'Never — use "Fed" in the Feeding & Care tab'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
                                             <h4 className="text-sm font-semibold text-gray-700">Feeding Details & Management</h4>
                                             <div><label className="block text-xs font-medium text-gray-700">Portion Size/Amount Per Feeding</label><input type="text" name="portionSize" value={formData.portionSize || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 2 cups, 50g, 1/4 cup pellets + 2 tbsp fresh" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Feeding Method</label><input type="text" name="feedingMethod" value={formData.feedingMethod || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Hand-fed, Self-fed, Free-choice, Timed bowl, Force-feeding" /></div>
@@ -5270,6 +5371,7 @@ const AnimalFormModalV2 = ({
                                             <h4 className="text-sm font-semibold text-gray-700">General Grooming</h4>
                                             <div><label className="block text-xs font-medium text-gray-700">Grooming Needs</label><input type="text" name="groomingNeeds" value={formData.groomingNeeds} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, professional grooming" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Shedding Level</label><input type="text" name="sheddingLevel" value={formData.sheddingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Heavy, Moderate, Minimal" /></div>
+                                            <ScheduleFieldControl value={formData.groomingSchedule} onChange={v => setFormData(prev => ({ ...prev, groomingSchedule: v }))} />
                                         </div>
 
                                         {/* Brushing & Bathing */}
@@ -5278,6 +5380,8 @@ const AnimalFormModalV2 = ({
                                             <div><label className="block text-xs font-medium text-gray-700">Brushing Frequency</label><input type="text" name="brushingFrequency" value={formData.brushingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily, 3x per week, Weekly" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Bathing Frequency & Requirements</label><input type="text" name="bathingFrequency" value={formData.bathingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monthly, As needed, Never (dry species)" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Coat/Feather/Scale Care Notes</label><textarea name="coatCareNotes" value={formData.coatCareNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Double coat requires undercoat removal, oils for feathers, misting for scales" /></div>
+                                            <ScheduleFieldControl label="Brushing" value={formData.brushingSchedule} onChange={v => setFormData(prev => ({ ...prev, brushingSchedule: v }))} />
+                                            <ScheduleFieldControl label="Bathing" value={formData.bathingSchedule} onChange={v => setFormData(prev => ({ ...prev, bathingSchedule: v }))} />
                                         </div>
 
                                         {/* Specialized Care */}
@@ -5287,6 +5391,7 @@ const AnimalFormModalV2 = ({
                                             <div><label className="block text-xs font-medium text-gray-700">Beak/Hoof/Scale Maintenance</label><input type="text" name="beakHoofScaleMaintenance" value={formData.beakHoofScaleMaintenance || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Beak trimming, Hoof conditioning, Scale inspection" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Skin & Ear Care Needs</label><input type="text" name="skinEarCareNeeds" value={formData.skinEarCareNeeds || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Ears cleaned weekly, Skin check for mites, Moisturizing needed" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Dental Care Requirements</label><input type="text" name="dentalCareRequirements" value={formData.dentalCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, Professional cleaning, Chew toys for wear" /></div>
+                                            <ScheduleFieldControl label="Specialized Care" value={formData.specializedCareSchedule} onChange={v => setFormData(prev => ({ ...prev, specializedCareSchedule: v }))} />
                                         </div>
 
                                         {/* General Notes */}
@@ -5316,12 +5421,13 @@ const AnimalFormModalV2 = ({
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
                                             <h4 className="text-sm font-semibold text-gray-700">Special Care Needs</h4>
                                             <textarea name="specialCareNeeds" value={formData.specialCareNeeds || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Requires medication at specific times, Needs isolation during molting, Heat lamp essential, Water depth requirements" />
+                                            <ScheduleFieldControl value={formData.specialCareSchedule} onChange={v => setFormData(prev => ({ ...prev, specialCareSchedule: v }))} />
                                         </div>
 
-                                        {/* Medical/Health Monitoring Notes */}
+                                        {/* Special Observations */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Health Monitoring & Special Observations</h4>
-                                            <textarea name="healthMonitoringNotes" value={formData.healthMonitoringNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monitor for respiratory issues, Watch for weight changes, Check skin condition weekly" />
+                                            <h4 className="text-sm font-semibold text-gray-700">Special Observations</h4>
+                                            <textarea name="healthMonitoringNotes" value={formData.healthMonitoringNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Watch for weight changes, Check skin condition weekly" />
                                         </div>
 
                                         {/* General Special Requirements */}
@@ -5332,43 +5438,60 @@ const AnimalFormModalV2 = ({
                                     </div>
                                 </FormSection>
 
-                                {/* Custom Care Tasks */}
-                                <FormSection title="Custom Care Tasks" icon={<CheckSquare size={16} />}>
+                                {/* Animal Care Tasks (direct, hands-on animal upkeep — shown in Scheduled Care section of the management view) */}
+                                <FormSection title="Animal Care Tasks" icon={<CheckSquare size={16} />}>
                                     <div className="space-y-3">
-                                        {/* Add New Care Task */}
+                                        <datalist id="care-task-suggestions">
+                                            {CARE_TASK_SUGGESTIONS.map(s => <option key={s} value={s} />)}
+                                        </datalist>
+
+                                        {/* Add New Animal-Specific Care Task */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Add Care Task</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700">Add Animal Care Task</h4>
+                                            <p className="text-xs text-gray-500">Direct, hands-on care done to the animal (not feeding, not medical) — shown in the "Scheduled Care" section of the Feeding & Care management view.</p>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                <input type="text" value={newCareTaskName} onChange={e => setNewCareTaskName(e.target.value)} placeholder="Task name (e.g., Nail trim, Water change)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newCareTaskFreq} onChange={e => setNewCareTaskFreq(e.target.value)} placeholder="Frequency (e.g., Weekly, Monthly, As needed)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" list="care-task-suggestions" value={newAnimalCareTaskName} onChange={e => setNewAnimalCareTaskName(e.target.value)} placeholder="Task name (e.g., Nail trim, Weigh-in)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="number" min="1" value={newAnimalCareTaskFreq} onChange={e => setNewAnimalCareTaskFreq(e.target.value)} placeholder="Frequency (days)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newAnimalCareTaskNotes} onChange={e => setNewAnimalCareTaskNotes(e.target.value)} placeholder="Notes (optional)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md md:col-span-2" />
                                             </div>
                                             <button type="button" onClick={() => {
-                                                if (newCareTaskName.trim()) {
+                                                if (newAnimalCareTaskName.trim()) {
                                                     setFormData(prev => ({
                                                         ...prev,
-                                                        careTasks: [...(prev.careTasks || []), { name: newCareTaskName.trim(), frequency: newCareTaskFreq.trim() }]
+                                                        animalCareTasks: [...(prev.animalCareTasks || []), {
+                                                            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                                                            taskName: newAnimalCareTaskName.trim(),
+                                                            notes: newAnimalCareTaskNotes.trim() || null,
+                                                            frequencyDays: newAnimalCareTaskFreq ? Number(newAnimalCareTaskFreq) : null,
+                                                            lastDoneDate: null,
+                                                        }]
                                                     }));
-                                                    setNewCareTaskName('');
-                                                    setNewCareTaskFreq('');
+                                                    setNewAnimalCareTaskName('');
+                                                    setNewAnimalCareTaskFreq('');
+                                                    setNewAnimalCareTaskNotes('');
                                                 }
-                                            }} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">+ Add Care Task</button>
+                                            }} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">+ Add Animal Care Task</button>
                                         </div>
 
-                                        {/* Existing Care Tasks */}
-                                        {(formData.careTasks || []).length > 0 && (
+                                        {/* Existing Animal-Specific Care Tasks */}
+                                        {(formData.animalCareTasks || []).length > 0 && (
                                             <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                                <h4 className="text-sm font-semibold text-gray-700">Care Tasks ({(formData.careTasks || []).length})</h4>
+                                                <h4 className="text-sm font-semibold text-gray-700">Animal Care Tasks ({(formData.animalCareTasks || []).length})</h4>
                                                 <div className="space-y-1 max-h-48 overflow-y-auto">
-                                                    {(formData.careTasks || []).map((task, i) => (
-                                                        <div key={i} className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200 text-xs">
+                                                    {(formData.animalCareTasks || []).map((task, i) => (
+                                                        <div key={task.id || i} className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200 text-xs">
                                                             <div className="flex-1 min-w-0">
-                                                                <p className="font-medium text-gray-700 truncate">{task.name}</p>
-                                                                {task.frequency && <p className="text-gray-500 text-xs">{task.frequency}</p>}
+                                                                <p className="font-medium text-gray-700 truncate">{task.taskName}</p>
+                                                                <p className="text-gray-500 text-xs">
+                                                                    {task.frequencyDays ? `Every ${task.frequencyDays} day${task.frequencyDays === 1 ? '' : 's'}` : 'No schedule'}
+                                                                    {task.lastDoneDate ? ` • Last done ${formatDate(task.lastDoneDate)}` : ''}
+                                                                </p>
+                                                                {task.notes && <p className="text-gray-400 text-xs truncate" title={task.notes}>{task.notes}</p>}
                                                             </div>
                                                             <button type="button" onClick={() => {
                                                                 setFormData(prev => ({
                                                                     ...prev,
-                                                                    careTasks: (prev.careTasks || []).filter((_, idx) => idx !== i)
+                                                                    animalCareTasks: (prev.animalCareTasks || []).filter((_, idx) => idx !== i)
                                                                 }));
                                                             }} className="text-red-500 hover:text-red-700 ml-2 flex-shrink-0">
                                                                 <Trash2 size={14} />
@@ -5448,6 +5571,48 @@ const AnimalFormModalV2 = ({
                                             <h4 className="text-sm font-semibold text-gray-700">Stereotypic & Stress Behaviors</h4>
                                             <div><label className="block text-xs font-medium text-gray-700">Stereotypic Behaviors Present</label><textarea name="stereotypicBehaviors" value={formData.stereotypicBehaviors || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Pacing, feather plucking, bar biting, over-grooming, head bobbing, spinning" /></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Stress Indicators</label><textarea name="stressIndicators" value={formData.stressIndicators || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Panting, freezing, hiding, aggression, loss of appetite" /></div>
+                                        </div>
+                                    </div>
+                                </FormSection>
+
+                                <FormSection title="Training Schedules" icon={<Brain size={16} />}>
+                                    <p className="text-xs text-gray-500 -mt-1">Optional recurring schedules for training/exercise activities — each tracked independently and shown clustered in the Feeding & Care management view.</p>
+                                    <div className="space-y-3">
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700">Daily Exercise</h4>
+                                            <ScheduleFieldControl value={formData.exerciseSchedule} onChange={v => setFormData(prev => ({ ...prev, exerciseSchedule: v }))} />
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700">Crate Training</h4>
+                                            <ScheduleFieldControl value={formData.crateTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, crateTrainingSchedule: v }))} />
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700">Litter Training</h4>
+                                            <ScheduleFieldControl value={formData.litterTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, litterTrainingSchedule: v }))} />
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700">Leash Training</h4>
+                                            <ScheduleFieldControl value={formData.leashTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, leashTrainingSchedule: v }))} />
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700">Free-Flight Training</h4>
+                                            <ScheduleFieldControl value={formData.freeFlightTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, freeFlightTrainingSchedule: v }))} />
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700">Working Role Training <span className="font-normal text-gray-400">(service animal, etc.)</span></h4>
+                                            <ScheduleFieldControl value={formData.workingRoleTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, workingRoleTrainingSchedule: v }))} />
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700">Behavioral Issue Training <span className="font-normal text-gray-400">(general issues)</span></h4>
+                                            <ScheduleFieldControl value={formData.behavioralIssueTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, behavioralIssueTrainingSchedule: v }))} />
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700">Reactivity Training</h4>
+                                            <ScheduleFieldControl value={formData.reactivityTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, reactivityTrainingSchedule: v }))} />
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700">Flight Risk Training</h4>
+                                            <ScheduleFieldControl value={formData.flightRiskTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, flightRiskTrainingSchedule: v }))} />
                                         </div>
                                     </div>
                                 </FormSection>
@@ -6026,7 +6191,10 @@ const AnimalFormModalV2 = ({
                                             { key: 'keeper', label: 'Keeper & Ownership Events' },
                                             { key: 'show', label: 'Show Events' },
                                             { key: 'milestones', label: 'Milestones' },
-                                            { key: 'status', label: 'Status Changes' }
+                                            { key: 'status', label: 'Status Changes' },
+                                            { key: 'feeding', label: 'Feeding History' },
+                                            { key: 'care', label: 'Care Schedule Updates' },
+                                            { key: 'field', label: 'Field Edits' }
                                         ].map(({key, label}) => (
                                             <label key={key} className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded transition">
                                                 <input

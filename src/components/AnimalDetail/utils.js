@@ -57,6 +57,14 @@ export const parseJsonField = (data) => {
     return Array.isArray(data) ? data : [];
 };
 
+// Formats a dedicated, individually-tracked schedule field ({ lastDoneDate, frequencyDays }) for display.
+// Returns null if no frequency has been set (schedule not assigned yet).
+export const formatScheduleValue = (schedule) => {
+    if (!schedule || !schedule.frequencyDays) return null;
+    const last = schedule.lastDoneDate ? formatDate(schedule.lastDoneDate) : 'Never';
+    return `Every ${schedule.frequencyDays}d (last done: ${last})`;
+};
+
 // Component to render lists of items from parsed JSON
 export const DetailJsonList = ({ label, data, renderItem }) => {
     const parsed = parseJsonField(data);

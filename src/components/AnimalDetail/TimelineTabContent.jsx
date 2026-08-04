@@ -1,5 +1,6 @@
-import React from 'react';
-import { Calendar, Clock, Star, MessageSquare, Heart, Stethoscope, Droplets, Shield, Users, User, Target, Trash2, Trophy } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Calendar, Clock, Star, MessageSquare, Heart, Stethoscope, Droplets, Shield, Users, User, Target, Trash2, Trophy, UtensilsCrossed, FileEdit } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 
 const parseJsonArrayField = (data) => {
@@ -21,9 +22,46 @@ const getEventIcon = (type) => {
         'keeper': <User size={14} className="text-slate-500" />,
         'show': <Trophy size={14} className="text-amber-500" />,
         'milestones': <Target size={14} className="text-purple-500" />,
-        'status': <Calendar size={14} className="text-gray-600" />
+        'status': <Calendar size={14} className="text-gray-600" />,
+        'feeding': <UtensilsCrossed size={14} className="text-green-600" />,
+        'care': <Droplets size={14} className="text-blue-600" />,
+        'field': <FileEdit size={14} className="text-gray-500" />
     };
     return icons[type] || <Calendar size={14} className="text-gray-400" />;
+};
+
+// Turns a raw AnimalLog value into readable text for timeline descriptions.
+const formatLogValue = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}(T|$)/.test(value)) return formatDate(value) || value;
+    if (typeof value === 'object') return null;
+    return String(value);
+};
+
+// Converts a single AnimalLog document into a timeline event (one card per log entry).
+const logToTimelineEvent = (log) => {
+    const parts = log.changes.map(c => {
+        const newVal = formatLogValue(c.newValue);
+        const oldVal = formatLogValue(c.oldValue);
+        if (c.field === 'lastFedDate') return null; // covered by the card title itself
+        if (oldVal && newVal) return `${c.label}: ${oldVal} → ${newVal}`;
+        return `${c.label}${newVal ? `: ${newVal}` : ''}`;
+    }).filter(Boolean);
+
+    const titles = {
+        feeding: log.changes.some(c => c.field === 'lastFedDate' && c.label === 'Feeding Skipped') ? 'Feeding Skipped' : 'Fed',
+        care: 'Care Schedule Updated',
+        field: 'Record Updated'
+    };
+
+    return {
+        id: `animallog-${log._id}`,
+        type: log.category,
+        date: log.createdAt,
+        title: titles[log.category] || 'Animal Log',
+        description: parts.join('; ') || undefined
+    };
 };
 
 const TimelineEvent = ({ event, notes, isPinned }) => (
@@ -69,10 +107,22 @@ const TimelineEvent = ({ event, notes, isPinned }) => (
     </div>
 );
 
-export const TimelineTabContent = ({ animal }) => {
+export const TimelineTabContent = ({ animal, API_BASE_URL, authToken }) => {
     const timelineNotes = parseJsonArrayField(animal.timelineNotes) || [];
     const pinnedEvents = parseJsonArrayField(animal.pinnedEvents) || [];
     const milestones = parseJsonArrayField(animal.milestones) || [];
+    const [animalLogs, setAnimalLogs] = useState([]);
+
+    useEffect(() => {
+        // Skip entirely for guest/unauthenticated views (public marketplace pages) — the
+        // endpoint requires a valid token anyway, so this avoids a guaranteed 401 on every load.
+        if (!animal?.id_public || !API_BASE_URL || !authToken) return;
+        let cancelled = false;
+        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => { if (!cancelled) setAnimalLogs(Array.isArray(res.data) ? res.data : []); })
+            .catch(err => console.error('Failed to fetch animal logs for timeline:', err));
+        return () => { cancelled = true; };
+    }, [animal?.id_public, API_BASE_URL, authToken]);
 
     // Aggregate all timeline events
     const aggregateAllEvents = () => {
@@ -421,6 +471,9 @@ export const TimelineTabContent = ({ animal }) => {
                 description: `Status: ${animal.status || 'Deceased'}`
             });
         }
+
+        // Feeding/care/field edit entries from the AnimalLog collection
+        animalLogs.forEach(log => events.push(logToTimelineEvent(log)));
 
         return events.sort((a, b) => new Date(b.date) - new Date(a.date));
     };

@@ -7,6 +7,26 @@ import {
 } from 'lucide-react';
 import { parseLocalDate } from '../../utils/dateFormatter';
 
+// Dedicated, individually-tracked Grooming/Special Care & Training schedule fields
+// ({ lastDoneDate, frequencyDays }) — see AnimalList/index.jsx GROOMING_SCHEDULE_DEFS/TRAINING_SCHEDULE_DEFS.
+const SCHEDULE_FIELD_DEFS = [
+    { key: 'groomingSchedule', label: 'Grooming' },
+    { key: 'brushingSchedule', label: 'Brushing' },
+    { key: 'bathingSchedule', label: 'Bathing' },
+    { key: 'specializedCareSchedule', label: 'Specialized Care' },
+    { key: 'specialCareSchedule', label: 'Special Care Needs' },
+    { key: 'exerciseSchedule', label: 'Daily Exercise' },
+    { key: 'crateTrainingSchedule', label: 'Crate Training' },
+    { key: 'litterTrainingSchedule', label: 'Litter Training' },
+    { key: 'leashTrainingSchedule', label: 'Leash Training' },
+    { key: 'freeFlightTrainingSchedule', label: 'Free-Flight Training' },
+    { key: 'workingRoleTrainingSchedule', label: 'Working Role Training' },
+    { key: 'behavioralIssueTrainingSchedule', label: 'Behavioral Issue Training' },
+    { key: 'reactivityTrainingSchedule', label: 'Reactivity Training' },
+    { key: 'flightRiskTrainingSchedule', label: 'Flight Risk Training' },
+];
+
+
 const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
     const [calendarTooltip, setCalendarTooltip] = useState(null);
@@ -196,22 +216,22 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             _calDetail: `Feed every ${a.feedingFrequencyDays}d`,
             _calFeedType: a.dietType || '',
         });
-        const maintNext = nextDueDate(a.lastMaintenanceDate, a.maintenanceFrequencyDays);
-        if (maintNext) addAnimalEvent(maintNext, 'maintenance', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Maintenance every ${a.maintenanceFrequencyDays}d` });
-        (a.careTasks || []).forEach(t => {
-            const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
-            if (dn) addAnimalEvent(dn, 'caretask', {
-                ...a,
-                _calLabel: t.taskName || t.name || 'Enclosure Task',
-                _calDetail: a.name || a.id_public,
-                _calSubject: '',
-            });
-        });
         (a.animalCareTasks || []).forEach(t => {
             const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
             if (dn) addAnimalEvent(dn, 'caretask', {
                 ...a,
                 _calLabel: t.taskName || t.name || 'Animal Task',
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
+        });
+        // Dedicated, individually-tracked Grooming/Special Care & Training schedules
+        // (each tracked independently; surfaced alongside other care tasks on the calendar).
+        SCHEDULE_FIELD_DEFS.forEach(def => {
+            const dn = nextDueDate(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays);
+            if (dn) addAnimalEvent(dn, 'caretask', {
+                ...a,
+                _calLabel: def.label,
                 _calDetail: a.name || a.id_public,
                 _calSubject: '',
             });

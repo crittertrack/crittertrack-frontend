@@ -1,7 +1,7 @@
 import React from 'react';
 import { UtensilsCrossed, Home, Droplets, Thermometer, Scissors, CheckSquare, Sun, Wind, Bug, Activity } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
-import { useDetailFieldTemplate, DetailJsonList, parseJsonField } from './utils';
+import { useDetailFieldTemplate, DetailJsonList, parseJsonField, formatScheduleValue } from './utils';
 import { InfoCard, InfoItem } from './DashboardComponents';
 import { EnclosureCard } from './EnclosureCard';
 
@@ -29,7 +29,6 @@ const TaskList = ({ tasks, label }) => {
 export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
     const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
-    const careTasks = parseJsonField(animal.careTasks);
     const animalCareTasks = parseJsonField(animal.animalCareTasks);
     
     // New structured records
@@ -150,8 +149,6 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.spotCleaningFrequency && <InfoItem label="Spot Cleaning Frequency" value={animal.spotCleaningFrequency} />}
                         {animal.deepCleaningFrequency && <InfoItem label="Deep Cleaning Frequency" value={animal.deepCleaningFrequency} />}
-                        {animal.lastMaintenanceDate && <InfoItem label="Last Maintenance Date" value={formatDate(animal.lastMaintenanceDate)} />}
-                        {animal.maintenanceFrequencyDays && <InfoItem label="Maintenance Frequency" value={`Every ${animal.maintenanceFrequencyDays} days`} />}
                         {animal.cleaningChecklist && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Cleaning Checklist"><p className="whitespace-pre-wrap text-sm">{animal.cleaningChecklist}</p></InfoItem></div>}
                         {animal.maintenanceTasksDue && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Maintenance Tasks Due"><p className="whitespace-pre-wrap text-sm">{animal.maintenanceTasksDue}</p></InfoItem></div>}
                     </div>
@@ -159,17 +156,21 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
             )}
 
             {/* Detailed Grooming */}
-            {(animal.groomingNeeds || animal.sheddingLevel || animal.brushingFrequency || animal.bathingFrequency || animal.coatCareNotes || animal.nailCareRequirements || animal.beakHoofScaleMaintenance || animal.skinEarCareNeeds || animal.dentalCareRequirements || animal.groomingNotes) && (
+            {(animal.groomingNeeds || animal.sheddingLevel || animal.brushingFrequency || animal.bathingFrequency || animal.coatCareNotes || animal.nailCareRequirements || animal.beakHoofScaleMaintenance || animal.skinEarCareNeeds || animal.dentalCareRequirements || animal.groomingNotes || formatScheduleValue(animal.groomingSchedule) || formatScheduleValue(animal.brushingSchedule) || formatScheduleValue(animal.bathingSchedule) || formatScheduleValue(animal.specializedCareSchedule)) && (
                 <InfoCard title="Grooming & Personal Care" icon={<Scissors size={18} className="text-gray-400" />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} />}
+                        {formatScheduleValue(animal.groomingSchedule) && <InfoItem label="Grooming Schedule" value={formatScheduleValue(animal.groomingSchedule)} />}
                         {animal.sheddingLevel && <InfoItem label={getLabel('sheddingLevel', 'Shedding Level')} value={animal.sheddingLevel} />}
                         {animal.brushingFrequency && <InfoItem label="Brushing Frequency" value={animal.brushingFrequency} />}
+                        {formatScheduleValue(animal.brushingSchedule) && <InfoItem label="Brushing Schedule" value={formatScheduleValue(animal.brushingSchedule)} />}
                         {animal.bathingFrequency && <InfoItem label="Bathing Frequency" value={animal.bathingFrequency} />}
+                        {formatScheduleValue(animal.bathingSchedule) && <InfoItem label="Bathing Schedule" value={formatScheduleValue(animal.bathingSchedule)} />}
                         {animal.nailCareRequirements && <InfoItem label="Nail Care Requirements" value={animal.nailCareRequirements} />}
                         {animal.beakHoofScaleMaintenance && <InfoItem label="Beak/Hoof/Scale Maintenance" value={animal.beakHoofScaleMaintenance} />}
                         {animal.skinEarCareNeeds && <InfoItem label="Skin & Ear Care Needs" value={animal.skinEarCareNeeds} />}
                         {animal.dentalCareRequirements && <InfoItem label="Dental Care Requirements" value={animal.dentalCareRequirements} />}
+                        {formatScheduleValue(animal.specializedCareSchedule) && <InfoItem label="Specialized Care Schedule" value={formatScheduleValue(animal.specializedCareSchedule)} />}
                         {animal.coatCareNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Coat Care Notes"><p className="whitespace-pre-wrap text-sm">{animal.coatCareNotes}</p></InfoItem></div>}
                         {animal.groomingNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Grooming Notes"><p className="whitespace-pre-wrap text-sm">{animal.groomingNotes}</p></InfoItem></div>}
                     </div>
@@ -177,11 +178,12 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
             )}
 
             {/* Special Care & Health Monitoring */}
-            {(animal.specialCareRequirements || animal.specialCareNeeds || animal.healthMonitoringNotes || animal.additionalSpecialRequirements) && (
+            {(animal.specialCareRequirements || animal.specialCareNeeds || animal.healthMonitoringNotes || animal.additionalSpecialRequirements || formatScheduleValue(animal.specialCareSchedule)) && (
                 <InfoCard title="Special Care & Health Monitoring" icon={<Droplets size={18} className="text-gray-400" />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.specialCareRequirements && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Special Care Requirements"><p className="whitespace-pre-wrap text-sm">{animal.specialCareRequirements}</p></InfoItem></div>}
                         {animal.specialCareNeeds && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Special Care Needs"><p className="whitespace-pre-wrap text-sm">{animal.specialCareNeeds}</p></InfoItem></div>}
+                        {formatScheduleValue(animal.specialCareSchedule) && <InfoItem label="Special Care Schedule" value={formatScheduleValue(animal.specialCareSchedule)} />}
                         {animal.healthMonitoringNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Health Monitoring Notes"><p className="whitespace-pre-wrap text-sm">{animal.healthMonitoringNotes}</p></InfoItem></div>}
                         {animal.additionalSpecialRequirements && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Additional Special Requirements"><p className="whitespace-pre-wrap text-sm">{animal.additionalSpecialRequirements}</p></InfoItem></div>}
                     </div>
@@ -191,8 +193,7 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
             {/* Scheduled Tasks */}
             <InfoCard title="Scheduled Tasks" icon={<Activity size={18} className="text-gray-400" />}>
                 <TaskList tasks={animalCareTasks} label="Animal-Specific Tasks" />
-                <TaskList tasks={careTasks} label="Enclosure-Related Tasks" />
-                {animalCareTasks.length === 0 && careTasks.length === 0 && <p className="text-sm text-gray-400">No scheduled care tasks.</p>}
+                {animalCareTasks.length === 0 && <p className="text-sm text-gray-400">No scheduled care tasks.</p>}
             </InfoCard>
 
             {/* Shedding History */}

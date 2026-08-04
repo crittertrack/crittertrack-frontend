@@ -173,7 +173,6 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         }
         let careDueCount = 0;
         animals.forEach(a => {
-            careDueCount += (a.careTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
             careDueCount += (a.animalCareTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
         });
         if (careDueCount > 0) {

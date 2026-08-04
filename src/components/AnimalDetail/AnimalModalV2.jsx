@@ -1468,7 +1468,7 @@ const AnimalModalV2 = ({
                         <GalleryTabContent animal={animal} />
                     )}
                     {activeTab === 'timeline' && (
-                        <TimelineTabContent animal={animal} />
+                        <TimelineTabContent animal={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} />
                     )}
                     {activeTab === 'records' && (
                         <div className="space-y-6">

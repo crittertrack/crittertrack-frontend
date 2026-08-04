@@ -1,6 +1,6 @@
 import React from 'react';
-import { MessageSquare, Activity, AlertTriangle, CheckSquare } from 'lucide-react';
-import { useDetailFieldTemplate } from './utils';
+import { MessageSquare, Activity, AlertTriangle, CheckSquare, Dumbbell } from 'lucide-react';
+import { useDetailFieldTemplate, formatScheduleValue } from './utils';
 import { InfoCard, InfoItem } from './DashboardComponents';
 
 export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
@@ -10,7 +10,19 @@ export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
     const hasActivity = animal.activityCycle || animal.exerciseRequirements || animal.dailyExerciseMinutes || animal.trainingLevel || animal.trainingDisciplines || animal.workingRole || animal.certifications;
     const hasTraining = animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained;
     const hasKnownIssues = animal.behavioralIssues || animal.biteHistory || animal.reactivityNotes;
-    const hasAnyData = hasBehavior || hasActivity || hasTraining || hasKnownIssues;
+    const trainingSchedules = [
+        { key: 'exerciseSchedule', label: 'Daily Exercise' },
+        { key: 'crateTrainingSchedule', label: 'Crate Training' },
+        { key: 'litterTrainingSchedule', label: 'Litter Training' },
+        { key: 'leashTrainingSchedule', label: 'Leash Training' },
+        { key: 'freeFlightTrainingSchedule', label: 'Free-Flight Training' },
+        { key: 'workingRoleTrainingSchedule', label: 'Working Role Training' },
+        { key: 'behavioralIssueTrainingSchedule', label: 'Behavioral Issue Training' },
+        { key: 'reactivityTrainingSchedule', label: 'Reactivity Training' },
+        { key: 'flightRiskTrainingSchedule', label: 'Flight Risk Training' },
+    ].filter(def => formatScheduleValue(animal[def.key]));
+    const hasAnyData = hasBehavior || hasActivity || hasTraining || hasKnownIssues || trainingSchedules.length > 0;
+
 
     return (
         <div className="space-y-6">
@@ -48,6 +60,17 @@ export const BehaviorTabContent = ({ animal, API_BASE_URL }) => {
                         {animal.litterTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('litterTrained', 'Litter Trained')}</span>}
                         {animal.leashTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('leashTrained', 'Leash Trained')}</span>}
                         {animal.freeFlightTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
+                    </div>
+                </InfoCard>
+            )}
+
+            {/* Training Schedules — dedicated, individually-tracked recurring training/exercise items */}
+            {trainingSchedules.length > 0 && (
+                <InfoCard title="Training Schedules" icon={<Dumbbell size={18} className="text-gray-400" />}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {trainingSchedules.map(def => (
+                            <InfoItem key={def.key} label={def.label} value={formatScheduleValue(animal[def.key])} />
+                        ))}
                     </div>
                 </InfoCard>
             )}

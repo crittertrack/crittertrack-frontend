@@ -1444,12 +1444,15 @@ const ViewAnimalModalV2 = ({
                         <GalleryTabContent animal={animal} />
                     )}
                     {activeTab === 'timeline' && (
-                        <TimelineTabContent animal={animal} />
+                        <TimelineTabContent animal={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} />
                     )}
                     {activeTab === 'records' && (
                         <div className="space-y-6">
                             <RecordsTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
                         </div>
+                    )}
+                    {activeTab === 'logs' && isPrivate && (
+                        <LogsTabContent animal={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} />
                     )}
                     {/* Placeholder for other tabs */}
                     {activeTab !== 'dashboard' &&
@@ -1462,7 +1465,8 @@ const ViewAnimalModalV2 = ({
                         activeTab !== 'pedigree' &&
                         activeTab !== 'gallery' &&
                         activeTab !== 'timeline' &&
-                        activeTab !== 'records' && (
+                        activeTab !== 'records' &&
+                        activeTab !== 'logs' && (
                         <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
                             <p className="text-gray-500">Content for the {activeTab} tab goes here.</p>
                         </div>
