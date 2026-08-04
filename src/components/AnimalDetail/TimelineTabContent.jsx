@@ -79,13 +79,10 @@ const TimelineEvent = ({ event, notes, isPinned }) => (
         {/* Content */}
         <div className="ml-2 bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
             <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2 mb-1">
-                <div>
-                    <p className={`font-semibold text-sm ${isPinned ? 'text-yellow-800' : 'text-gray-900'}`}>
-                        {event.title}
-                        {isPinned && <Star size={12} className="inline ml-1" fill="currentColor" />}
-                    </p>
-                    <p className={`text-xs font-medium capitalize ${isPinned ? 'text-yellow-700' : 'text-gray-600'}`}>{event.type}</p>
-                </div>
+                <p className={`font-semibold text-sm ${isPinned ? 'text-yellow-800' : 'text-gray-900'}`}>
+                    {event.title}
+                    {isPinned && <Star size={12} className="inline ml-1" fill="currentColor" />}
+                </p>
                 <time className="text-xs font-medium text-gray-600 whitespace-nowrap">{formatDate(event.date)}</time>
             </div>
             {event.description && <p className="text-xs text-gray-700 mb-2">{event.description}</p>}
