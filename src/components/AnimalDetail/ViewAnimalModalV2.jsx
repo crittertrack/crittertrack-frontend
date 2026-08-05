@@ -338,13 +338,13 @@ const ViewAnimalModalV2 = ({
                 {/* Header */}
                 <div className={`flex flex-col md:flex-row md:items-stretch p-3 md:p-6 pb-2 md:pb-4 border-b border-gray-200 gap-3 md:gap-6`}>
                     {/* Left: Gallery */}
-                    <div className={`w-full md:w-1/4 h-44 sm:h-56 md:h-auto flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
+                    <div className={`w-full md:w-1/4 h-64 sm:h-72 md:h-auto flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
                         <div className="flex-grow bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-300">
                             {mainImage ? (
                                 <img 
                                     src={mainImage} 
                                     alt={animal.name} 
-                                    className="w-full h-full object-cover cursor-pointer"
+                                    className="w-full h-full object-contain cursor-pointer"
                                     onClick={() => {
                                         if (setShowImageModal && setEnlargedImageUrl) {
                                             setEnlargedImageUrl(mainImage);
@@ -537,7 +537,7 @@ const ViewAnimalModalV2 = ({
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="w-full md:w-1/3 flex flex-col">
+                                        <div className="hidden md:w-1/3 md:flex flex-col">
                                             <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} className="flex-1" contentClassName="overflow-y-auto">
                                                 <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
                                             </InfoCard> {/* Remarks are now on the Dashboard tab */}
@@ -576,6 +576,11 @@ const ViewAnimalModalV2 = ({
                 <div className="p-3 sm:p-6 overflow-y-auto rounded-b-xl flex-1">
                     {activeTab === 'dashboard' && (
                         <div className="space-y-6">
+                            <div className="md:hidden">
+                                <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />}>
+                                    <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
+                                </InfoCard>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Sire Card */}
                             <div className="bg-white rounded-lg border border-gray-200 shadow-sm h-full">
