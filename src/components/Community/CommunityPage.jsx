@@ -58,17 +58,30 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
 
     // Combine active and new users for the "Recent Activity" section
     useEffect(() => {
-        // Take 3 most active users
-        const active = communityUsers.slice(0, 3);
-        const activeIds = new Set(active.map(u => u.id_public));
+        // Define "new" as within the last 30 days
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
 
-        // Take 2 newest users that are not in the active list
-        const newFiltered = newUsers.filter(u => !activeIds.has(u.id_public)).slice(0, 2);
+        const monthlyNewUsers = newUsers.filter(u => new Date(u.createdAt) > oneMonthAgo);
 
-        // Add a flag to distinguish new users for the badge
-        const newWithFlag = newFiltered.map(u => ({ ...u, isNew: true }));
+        let usersForActivity = [];
 
-        setRecentActivityUsers([...active, ...newWithFlag]);
+        if (monthlyNewUsers.length > 0) {
+            // We have new users. Show up to 3 active, then fill with new.
+            const activeUsers = communityUsers.slice(0, 3);
+            const activeUserIds = new Set(activeUsers.map(u => u.id_public));
+
+            const newUsersNotActive = monthlyNewUsers.filter(u => !activeUserIds.has(u.id_public));
+            const newUsersToShowCount = 5 - activeUsers.length;
+            const newUsersToDisplay = newUsersNotActive.slice(0, newUsersToShowCount).map(u => ({ ...u, isNew: true }));
+
+            usersForActivity = [...activeUsers, ...newUsersToDisplay];
+        } else {
+            // No new users in the last month, so just show up to 5 active users.
+            usersForActivity = communityUsers.slice(0, 5);
+        }
+
+        setRecentActivityUsers(usersForActivity);
     }, [communityUsers, newUsers]);
 
     return (
