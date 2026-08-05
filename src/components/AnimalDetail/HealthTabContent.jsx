@@ -4,6 +4,7 @@ import { formatDate } from '../../utils/dateFormatter';
 import { computeIsInTreatment, remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { DetailJsonList } from './utils';
 import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
+import { isFieldHiddenForSpecies } from '../../utils/speciesFieldTemplates';
 
 // Helper to parse fields that might be JSON strings or arrays
 const parseHealthRecords = (data) => {
@@ -39,14 +40,16 @@ const StatusIndicator = ({ status }) => {
 };
 
 export const HealthTabContent = ({ animal }) => {
+    const species = animal.species;
+    const hidden = (field) => isFieldHiddenForSpecies(field, species);
 
-    const vaccinations = parseHealthRecords(animal.vaccinations);
-    const dewormingRecords = parseHealthRecords(animal.dewormingRecords);
+    const vaccinations = hidden('vaccinations') ? [] : parseHealthRecords(animal.vaccinations);
+    const dewormingRecords = hidden('dewormingRecords') ? [] : parseHealthRecords(animal.dewormingRecords);
     const parasiteControl = parseHealthRecords(animal.parasiteControl);
     const medicalProcedures = parseHealthRecords(animal.medicalProcedures);
     const labResults = parseHealthRecords(animal.labResults || animal.laboratoryResults);
     const medicalConditions = parseHealthRecords(animal.medicalConditions);
-    const allergies = parseHealthRecords(animal.allergies);
+    const allergies = hidden('allergies') ? [] : parseHealthRecords(animal.allergies);
     const medications = parseHealthRecords(animal.medications);
     const vetVisits = parseHealthRecords(animal.vetVisits);
 
@@ -54,7 +57,7 @@ export const HealthTabContent = ({ animal }) => {
     const hasProcedures = medicalProcedures.length > 0 || labResults.length > 0;
     const hasActiveRecords = medicalConditions.length > 0 || allergies.length > 0 || medications.length > 0;
     const hasVetCare = animal.primaryVet || vetVisits.length > 0;
-    const hasClearances = animal.healthStatus || animal.spayNeuterDate || animal.heartwormStatus || animal.hipElbowScores || animal.eyeClearance || animal.cardiacClearance || animal.dentalRecords || animal.geneticTestResults || animal.chronicConditions;
+    const hasClearances = animal.healthStatus || (!hidden('spayNeuterDate') && animal.spayNeuterDate) || (!hidden('heartwormStatus') && animal.heartwormStatus) || (!hidden('hipElbowScores') && animal.hipElbowScores) || (!hidden('eyeClearance') && animal.eyeClearance) || (!hidden('cardiacClearance') && animal.cardiacClearance) || (!hidden('dentalRecords') && animal.dentalRecords) || animal.geneticTestResults || animal.chronicConditions;
 
     // Check for active medical situations based on the proposed data model
     const isQuarantined = animal.quarantineStatus?.active === true;
@@ -215,15 +218,15 @@ export const HealthTabContent = ({ animal }) => {
                             )}
 
                             {/* Legacy Fields */}
-                            {(animal.spayNeuterDate || animal.heartwormStatus || animal.hipElbowScores || animal.eyeClearance || 
-                              animal.cardiacClearance || animal.dentalRecords || animal.geneticTestResults || animal.chronicConditions) && (
+                            {((!hidden('spayNeuterDate') && animal.spayNeuterDate) || (!hidden('heartwormStatus') && animal.heartwormStatus) || (!hidden('hipElbowScores') && animal.hipElbowScores) || (!hidden('eyeClearance') && animal.eyeClearance) ||
+                              (!hidden('cardiacClearance') && animal.cardiacClearance) || (!hidden('dentalRecords') && animal.dentalRecords) || animal.geneticTestResults || animal.chronicConditions) && (
                                 <div className="pt-2 border-t">
-                                    {animal.spayNeuterDate && <InfoItem label="Spay/Neuter Date" value={formatDate(animal.spayNeuterDate)} />}
-                                    {animal.heartwormStatus && <InfoItem label="Heartworm Status" value={animal.heartwormStatus} />}
-                                    {animal.hipElbowScores && <InfoItem label="Hip/Elbow Scores" value={animal.hipElbowScores} />}
-                                    {animal.eyeClearance && <InfoItem label="Eye Clearance" value={animal.eyeClearance} />}
-                                    {animal.cardiacClearance && <InfoItem label="Cardiac Clearance" value={animal.cardiacClearance} />}
-                                    {animal.dentalRecords && <InfoItem label="Dental Records" value={animal.dentalRecords} />}
+                                    {!hidden('spayNeuterDate') && animal.spayNeuterDate && <InfoItem label="Spay/Neuter Date" value={formatDate(animal.spayNeuterDate)} />}
+                                    {!hidden('heartwormStatus') && animal.heartwormStatus && <InfoItem label="Heartworm Status" value={animal.heartwormStatus} />}
+                                    {!hidden('hipElbowScores') && animal.hipElbowScores && <InfoItem label="Hip/Elbow Scores" value={animal.hipElbowScores} />}
+                                    {!hidden('eyeClearance') && animal.eyeClearance && <InfoItem label="Eye Clearance" value={animal.eyeClearance} />}
+                                    {!hidden('cardiacClearance') && animal.cardiacClearance && <InfoItem label="Cardiac Clearance" value={animal.cardiacClearance} />}
+                                    {!hidden('dentalRecords') && animal.dentalRecords && <InfoItem label="Dental Records" value={animal.dentalRecords} />}
                                     {animal.geneticTestResults && <InfoItem label="Genetic Test Results" value={animal.geneticTestResults} />}
                                     {animal.chronicConditions && <InfoItem label="Chronic Conditions" value={animal.chronicConditions} />}
                                 </div>

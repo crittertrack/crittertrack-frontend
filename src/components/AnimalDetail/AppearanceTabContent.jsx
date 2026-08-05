@@ -2,6 +2,7 @@ import React from 'react';
 import { Palette, Dna, Sprout, Ruler } from 'lucide-react';
 import { InfoCard, InfoItem } from './DashboardComponents';
 import { formatDate } from '../../utils/dateFormatter';
+import { isFieldHiddenForSpecies, getFieldLabel } from '../../utils/speciesFieldTemplates';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -17,18 +18,21 @@ const parseJsonArrayField = (data) => {
 };
 
 export const AppearanceTabContent = ({ animal }) => {
+    const species = animal.species;
+    const hidden = (field) => isFieldHiddenForSpecies(field, species);
+    const label = (field, def) => getFieldLabel(field, species, def);
     return (
         <div className="space-y-6">
                 <InfoCard title="Appearance" icon={<Palette size={18} />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.color && <InfoItem label="Color" value={animal.color} />}
-                        {animal.coatPattern && <InfoItem label="Pattern" value={animal.coatPattern} />}
-                        {animal.coat && <InfoItem label="Coat" value={animal.coat} />}
-                        {animal.earset && <InfoItem label="Earset" value={animal.earset} />}
+                        {animal.coatPattern && !hidden('coatPattern') && <InfoItem label={label('coatPattern', 'Pattern')} value={animal.coatPattern} />}
+                        {animal.coat && !hidden('coat') && <InfoItem label={label('coat', 'Coat')} value={animal.coat} />}
+                        {animal.earset && !hidden('earset') && <InfoItem label="Earset" value={animal.earset} />}
                         {animal.morph && <InfoItem label="Morph" value={animal.morph} />}
                         {animal.markings && <InfoItem label="Markings" value={animal.markings} />}
                         {animal.eyeColor && <InfoItem label="Eye Color" value={animal.eyeColor} />}
-                        {animal.nailColor && <InfoItem label="Nail Color" value={animal.nailColor} />}
+                        {animal.nailColor && !hidden('nailColor') && <InfoItem label="Nail Color" value={animal.nailColor} />}
                         {animal.size && <InfoItem label="Size" value={animal.size} />}
                         {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
                     </div>
@@ -36,7 +40,7 @@ export const AppearanceTabContent = ({ animal }) => {
                 <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400" />}>
                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
                 </InfoCard>
-                <InfoCard title="Life Stage" icon={<Sprout size={18} />}>
+                <InfoCard title={label('lifeStage', 'Life Stage')} icon={<Sprout size={18} />}>
                     <p>{animal.lifeStage || 'Not specified'}</p>
                 </InfoCard>
                 {(() => {

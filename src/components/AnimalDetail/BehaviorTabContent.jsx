@@ -2,11 +2,14 @@ import React from 'react';
 import { MessageSquare, Activity, AlertTriangle, CheckSquare, Dumbbell } from 'lucide-react';
 import { formatScheduleValue } from './utils';
 import { InfoCard, InfoItem } from './DashboardComponents';
+import { isFieldHiddenForSpecies } from '../../utils/speciesFieldTemplates';
 
 export const BehaviorTabContent = ({ animal }) => {
+    const species = animal.species;
+    const hidden = (field) => isFieldHiddenForSpecies(field, species);
     const hasBehavior = animal.temperament || animal.handlingTolerance || animal.socialStructure || animal.handlingNotes || animal.socializationNotes;
-    const hasActivity = animal.activityCycle || animal.exerciseRequirements || animal.dailyExerciseMinutes || animal.trainingLevel || animal.trainingDisciplines || animal.workingRole || animal.certifications;
-    const hasTraining = animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained;
+    const hasActivity = (!hidden('exerciseRequirements') && animal.exerciseRequirements) || (!hidden('dailyExerciseMinutes') && animal.dailyExerciseMinutes) || (!hidden('trainingLevel') && animal.trainingLevel) || (!hidden('trainingDisciplines') && animal.trainingDisciplines) || (!hidden('workingRole') && animal.workingRole) || (!hidden('certifications') && animal.certifications) || animal.activityCycle;
+    const hasTraining = (!hidden('crateTrained') && animal.crateTrained) || (!hidden('litterTrained') && animal.litterTrained) || (!hidden('leashTrained') && animal.leashTrained) || (!hidden('freeFlightTrained') && animal.freeFlightTrained);
     const hasKnownIssues = animal.behavioralIssues || animal.biteHistory || animal.reactivityNotes;
     const trainingSchedules = [
         { key: 'exerciseSchedule', label: 'Daily Exercise' },
@@ -18,7 +21,7 @@ export const BehaviorTabContent = ({ animal }) => {
         { key: 'behavioralIssueTrainingSchedule', label: 'Behavioral Issue Training' },
         { key: 'reactivityTrainingSchedule', label: 'Reactivity Training' },
         { key: 'flightRiskTrainingSchedule', label: 'Flight Risk Training' },
-    ].filter(def => formatScheduleValue(animal[def.key]));
+    ].filter(def => !hidden(def.key) && formatScheduleValue(animal[def.key]));
     const hasAnyData = hasBehavior || hasActivity || hasTraining || hasKnownIssues || trainingSchedules.length > 0;
 
 
@@ -40,12 +43,12 @@ export const BehaviorTabContent = ({ animal }) => {
                 {hasActivity ? (
                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.activityCycle && <InfoItem label="Activity Cycle" value={animal.activityCycle} />}
-                        {animal.exerciseRequirements && <InfoItem label="Exercise Requirements" value={animal.exerciseRequirements} />}
-                        {animal.dailyExerciseMinutes && <InfoItem label="Daily Exercise (min)" value={animal.dailyExerciseMinutes} />}
-                        {animal.trainingLevel && <InfoItem label="Training Level" value={animal.trainingLevel} />}
-                        {animal.trainingDisciplines && <InfoItem label="Training Disciplines" value={animal.trainingDisciplines} />}
-                        {animal.workingRole && <InfoItem label="Working Role" value={animal.workingRole} />}
-                        {animal.certifications && <InfoItem label="Certifications" value={animal.certifications} />}
+                        {animal.exerciseRequirements && !hidden('exerciseRequirements') && <InfoItem label="Exercise Requirements" value={animal.exerciseRequirements} />}
+                        {animal.dailyExerciseMinutes && !hidden('dailyExerciseMinutes') && <InfoItem label="Daily Exercise (min)" value={animal.dailyExerciseMinutes} />}
+                        {animal.trainingLevel && !hidden('trainingLevel') && <InfoItem label="Training Level" value={animal.trainingLevel} />}
+                        {animal.trainingDisciplines && !hidden('trainingDisciplines') && <InfoItem label="Training Disciplines" value={animal.trainingDisciplines} />}
+                        {animal.workingRole && !hidden('workingRole') && <InfoItem label="Working Role" value={animal.workingRole} />}
+                        {animal.certifications && !hidden('certifications') && <InfoItem label="Certifications" value={animal.certifications} />}
                     </div>
                 ) : <p className="text-sm text-gray-400">No activity or training information recorded.</p>}
             </InfoCard>
@@ -54,10 +57,10 @@ export const BehaviorTabContent = ({ animal }) => {
             {hasTraining && (
                 <InfoCard title="Training Status" icon={<CheckSquare size={18} className="text-gray-400" />}>
                     <div className="flex flex-wrap gap-2">
-                        {animal.crateTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> Crate Trained</span>}
-                        {animal.litterTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> Litter Trained</span>}
-                        {animal.leashTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> Leash Trained</span>}
-                        {animal.freeFlightTrained && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> Free Flight Trained</span>}
+                        {animal.crateTrained && !hidden('crateTrained') && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> Crate Trained</span>}
+                        {animal.litterTrained && !hidden('litterTrained') && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> Litter Trained</span>}
+                        {animal.leashTrained && !hidden('leashTrained') && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> Leash Trained</span>}
+                        {animal.freeFlightTrained && !hidden('freeFlightTrained') && <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1"><CheckSquare size={12}/> Free Flight Trained</span>}
                     </div>
                 </InfoCard>
             )}

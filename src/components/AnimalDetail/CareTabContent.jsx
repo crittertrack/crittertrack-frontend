@@ -4,6 +4,7 @@ import { formatDate } from '../../utils/dateFormatter';
 import { DetailJsonList, parseJsonField, formatScheduleValue } from './utils';
 import { InfoCard, InfoItem } from './DashboardComponents';
 import { EnclosureCard } from './EnclosureCard';
+import { isFieldHiddenForSpecies, getFieldLabel } from '../../utils/speciesFieldTemplates';
 
 // Helper to render tasks
 const TaskList = ({ tasks, label }) => {
@@ -27,13 +28,16 @@ const TaskList = ({ tasks, label }) => {
 };
 
 export const CareTabContent = ({ animal, enclosureInfo }) => {
+    const species = animal.species;
+    const hidden = (field) => isFieldHiddenForSpecies(field, species);
+    const label = (field, def) => getFieldLabel(field, species, def);
 
     const animalCareTasks = parseJsonField(animal.animalCareTasks);
     
     // New structured records
-    const sheddingRecords = parseJsonField(animal.sheddingRecords);
-    const moltingRecords = parseJsonField(animal.moltingRecords);
-    const waterParameterChecks = parseJsonField(animal.waterParameterChecks);
+    const sheddingRecords = hidden('sheddingRecords') ? [] : parseJsonField(animal.sheddingRecords);
+    const moltingRecords = hidden('moltingRecords') ? [] : parseJsonField(animal.moltingRecords);
+    const waterParameterChecks = hidden('waterParameterChecks') ? [] : parseJsonField(animal.waterParameterChecks);
     const dietSupplies = parseJsonField(animal.dietSupplies);
     const supplementSupplies = parseJsonField(animal.supplementSupplies);
 
@@ -96,7 +100,7 @@ export const CareTabContent = ({ animal, enclosureInfo }) => {
                     {hasLegacyHousing || hasEnvironment ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.housingType && <InfoItem label="Housing Type" value={animal.housingType} />}
-                            {animal.bedding && <InfoItem label="Bedding" value={animal.bedding} />}
+                            {animal.bedding && <InfoItem label={label('bedding', 'Bedding')} value={animal.bedding} />}
                             {animal.temperatureRange && <InfoItem label="Temperature Range" value={animal.temperatureRange} icon={<Thermometer size={14} />} />}
                             {animal.humidity && <InfoItem label="Humidity" value={animal.humidity} icon={<Wind size={14} />} />}
                         </div>
@@ -150,27 +154,27 @@ export const CareTabContent = ({ animal, enclosureInfo }) => {
             )}
 
             {/* Detailed Grooming */}
-            {(animal.groomingNeeds || animal.sheddingLevel || animal.brushingFrequency || animal.bathingFrequency || animal.coatCareNotes || animal.nailCareRequirements || animal.beakHoofScaleMaintenance || animal.skinEarCareNeeds || animal.dentalCareRequirements || animal.groomingNotes || formatScheduleValue(animal.groomingSchedule) || formatScheduleValue(animal.brushingSchedule) || formatScheduleValue(animal.bathingSchedule) || formatScheduleValue(animal.specializedCareSchedule) || formatScheduleValue(animal.nailCareSchedule) || formatScheduleValue(animal.beakHoofScaleSchedule) || formatScheduleValue(animal.skinEarCareSchedule) || formatScheduleValue(animal.dentalCareSchedule)) && (
+            {((animal.groomingNeeds || (!hidden('sheddingLevel') && animal.sheddingLevel) || (!hidden('brushingFrequency') && animal.brushingFrequency) || animal.bathingFrequency || (!hidden('coatCareNotes') && animal.coatCareNotes) || animal.nailCareRequirements || animal.beakHoofScaleMaintenance || animal.skinEarCareNeeds || (!hidden('dentalCareRequirements') && animal.dentalCareRequirements) || animal.groomingNotes || formatScheduleValue(animal.groomingSchedule) || (!hidden('brushingSchedule') && formatScheduleValue(animal.brushingSchedule)) || formatScheduleValue(animal.bathingSchedule) || formatScheduleValue(animal.specializedCareSchedule) || formatScheduleValue(animal.nailCareSchedule) || formatScheduleValue(animal.beakHoofScaleSchedule) || formatScheduleValue(animal.skinEarCareSchedule) || (!hidden('dentalCareSchedule') && formatScheduleValue(animal.dentalCareSchedule)))) && (
                 <InfoCard title="Grooming & Personal Care" icon={<Scissors size={18} className="text-gray-400" />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {animal.groomingNeeds && <InfoItem label="Grooming Needs" value={animal.groomingNeeds} />}
+                        {animal.groomingNeeds && <InfoItem label={label('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} />}
                         {formatScheduleValue(animal.groomingSchedule) && <InfoItem label="Grooming Schedule" value={formatScheduleValue(animal.groomingSchedule)} />}
-                        {animal.sheddingLevel && <InfoItem label="Shedding Level" value={animal.sheddingLevel} />}
-                        {animal.brushingFrequency && <InfoItem label="Brushing Frequency" value={animal.brushingFrequency} />}
-                        {formatScheduleValue(animal.brushingSchedule) && <InfoItem label="Brushing Schedule" value={formatScheduleValue(animal.brushingSchedule)} />}
-                        {animal.bathingFrequency && <InfoItem label="Bathing Frequency" value={animal.bathingFrequency} />}
+                        {animal.sheddingLevel && !hidden('sheddingLevel') && <InfoItem label="Shedding Level" value={animal.sheddingLevel} />}
+                        {animal.brushingFrequency && !hidden('brushingFrequency') && <InfoItem label="Brushing Frequency" value={animal.brushingFrequency} />}
+                        {!hidden('brushingSchedule') && formatScheduleValue(animal.brushingSchedule) && <InfoItem label="Brushing Schedule" value={formatScheduleValue(animal.brushingSchedule)} />}
+                        {animal.bathingFrequency && <InfoItem label={label('bathingFrequency', 'Bathing Frequency')} value={animal.bathingFrequency} />}
                         {formatScheduleValue(animal.bathingSchedule) && <InfoItem label="Bathing Schedule" value={formatScheduleValue(animal.bathingSchedule)} />}
                         {animal.nailCareRequirements && <InfoItem label="Nail Care Requirements" value={animal.nailCareRequirements} />}
                         {formatScheduleValue(animal.nailCareSchedule) && <InfoItem label="Nail/Claw/Hoof Care Schedule" value={formatScheduleValue(animal.nailCareSchedule)} />}
-                        {animal.beakHoofScaleMaintenance && <InfoItem label="Beak/Hoof/Scale Maintenance" value={animal.beakHoofScaleMaintenance} />}
+                        {animal.beakHoofScaleMaintenance && <InfoItem label={label('beakHoofScaleMaintenance', 'Beak/Hoof/Scale Maintenance')} value={animal.beakHoofScaleMaintenance} />}
                         {formatScheduleValue(animal.beakHoofScaleSchedule) && <InfoItem label="Beak/Hoof/Scale Maintenance Schedule" value={formatScheduleValue(animal.beakHoofScaleSchedule)} />}
-                        {animal.skinEarCareNeeds && <InfoItem label="Skin & Ear Care Needs" value={animal.skinEarCareNeeds} />}
+                        {animal.skinEarCareNeeds && <InfoItem label={label('skinEarCareNeeds', 'Skin & Ear Care Needs')} value={animal.skinEarCareNeeds} />}
                         {formatScheduleValue(animal.skinEarCareSchedule) && <InfoItem label="Skin & Ear Care Schedule" value={formatScheduleValue(animal.skinEarCareSchedule)} />}
-                        {animal.dentalCareRequirements && <InfoItem label="Dental Care Requirements" value={animal.dentalCareRequirements} />}
-                        {formatScheduleValue(animal.dentalCareSchedule) && <InfoItem label="Dental Care Schedule" value={formatScheduleValue(animal.dentalCareSchedule)} />}
+                        {animal.dentalCareRequirements && !hidden('dentalCareRequirements') && <InfoItem label="Dental Care Requirements" value={animal.dentalCareRequirements} />}
+                        {!hidden('dentalCareSchedule') && formatScheduleValue(animal.dentalCareSchedule) && <InfoItem label="Dental Care Schedule" value={formatScheduleValue(animal.dentalCareSchedule)} />}
                         {formatScheduleValue(animal.specializedCareSchedule) && <InfoItem label="Specialized Care Schedule" value={formatScheduleValue(animal.specializedCareSchedule)} />}
-                        {animal.coatCareNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Coat Care Notes"><p className="whitespace-pre-wrap text-sm">{animal.coatCareNotes}</p></InfoItem></div>}
-                        {animal.groomingNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Grooming Notes"><p className="whitespace-pre-wrap text-sm">{animal.groomingNotes}</p></InfoItem></div>}
+                        {animal.coatCareNotes && !hidden('coatCareNotes') && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Coat Care Notes"><p className="whitespace-pre-wrap text-sm">{animal.coatCareNotes}</p></InfoItem></div>}
+                        {animal.groomingNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label={label('groomingNotes', 'Grooming Notes')}><p className="whitespace-pre-wrap text-sm">{animal.groomingNotes}</p></InfoItem></div>}
                     </div>
                 </InfoCard>
             )}
@@ -196,25 +200,31 @@ export const CareTabContent = ({ animal, enclosureInfo }) => {
             </InfoCard>
 
             {/* Shedding History */}
+            {!hidden('sheddingRecords') && (
             <InfoCard title="Shedding History" icon={<Bug size={18} className="text-gray-400" />}>
                 {sheddingRecords.length > 0 ? (
                     <DetailJsonList label="" data={sheddingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
                 ) : <p className="text-sm text-gray-400">No shedding records.</p>}
             </InfoCard>
+            )}
 
             {/* Molting History */}
+            {!hidden('moltingRecords') && (
             <InfoCard title="Molting History" icon={<Bug size={18} className="text-gray-400" />}>
                 {moltingRecords.length > 0 ? (
                     <DetailJsonList label="" data={moltingRecords.filter(Boolean)} renderItem={r => `${formatDate(r.date)} ${r.notes ? `- ${r.notes}` : ''}`} />
                 ) : <p className="text-sm text-gray-400">No molting records.</p>}
             </InfoCard>
+            )}
 
             {/* Water Quality Checks */}
+            {!hidden('waterParameterChecks') && (
             <InfoCard title="Water Quality Checks" icon={<Droplets size={18} className="text-gray-400" />}>
                 {waterParameterChecks.length > 0 ? (
                     <DetailJsonList label="" data={waterParameterChecks.filter(Boolean)} renderItem={r => `${formatDate(r.date)} - pH: ${r.ph}, Ammonia: ${r.ammonia}`} />
                 ) : <p className="text-sm text-gray-400">No water quality records.</p>}
             </InfoCard>
+            )}
         </div>
     );
 };

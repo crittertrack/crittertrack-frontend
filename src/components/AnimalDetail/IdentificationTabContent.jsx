@@ -1,6 +1,7 @@
 import React from 'react';
 import { Hash, FolderOpen, Globe, Tag, Users } from 'lucide-react';
 import { InfoCard, InfoItem } from './DashboardComponents';
+import { isFieldHiddenForSpecies, getFieldLabel } from '../../utils/speciesFieldTemplates';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -23,18 +24,21 @@ export const IdentificationTabContent = ({
     setAnimalBreedingLinesDirect,
     isEditable = true
 }) => {
+    const species = animal.species;
+    const hidden = (field) => isFieldHiddenForSpecies(field, species);
+    const label = (field, def) => getFieldLabel(field, species, def);
     return (
         <div className="space-y-6">
             <InfoCard title="Identification Numbers" icon={<Hash size={18} className="text-gray-400" />}>
                     <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="CritterTrack ID" value={animal.id_public} />
                         {animal.breederAssignedId && <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />}
-                        {animal.microchipNumber && <InfoItem label="Microchip Number" value={animal.microchipNumber} />}
-                        {animal.tattooId && <InfoItem label="Tattoo" value={animal.tattooId} />}
-                        {animal.ringId && <InfoItem label="Ring ID" value={animal.ringId} />}
-                        {animal.eartagNumber && <InfoItem label="Ear Tag" value={animal.eartagNumber} />}
-                        {animal.pedigreeRegistrationId && <InfoItem label="Pedigree Registration" value={animal.pedigreeRegistrationId} />}
-                        {animal.colonyId && <InfoItem label="Colony ID" value={animal.colonyId} />}
+                        {animal.microchipNumber && !hidden('microchipNumber') && <InfoItem label="Microchip Number" value={animal.microchipNumber} />}
+                        {animal.tattooId && !hidden('tattooId') && <InfoItem label="Tattoo" value={animal.tattooId} />}
+                        {animal.ringId && !hidden('ringId') && <InfoItem label="Ring ID" value={animal.ringId} />}
+                        {animal.eartagNumber && !hidden('eartagNumber') && <InfoItem label="Ear Tag" value={animal.eartagNumber} />}
+                        {animal.pedigreeRegistrationId && !hidden('pedigreeRegistrationId') && <InfoItem label="Pedigree Registration" value={animal.pedigreeRegistrationId} />}
+                        {animal.colonyId && <InfoItem label={label('colonyId', 'Colony ID')} value={animal.colonyId} />}
                         {parseJsonArrayField(animal.identifiers).map((identifier, index) => (
                             <InfoItem key={index} label={identifier.title} value={identifier.value} />
                         ))}
@@ -43,15 +47,17 @@ export const IdentificationTabContent = ({
             <InfoCard title="Classification" icon={<FolderOpen size={18} className="text-gray-400" />}>
                     <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="Species" value={animal.species} />
-                        {animal.breed && <InfoItem label="Breed" value={animal.breed} />}
-                        {animal.strain && <InfoItem label="Strain" value={animal.strain} />}
+                        {animal.breed && !hidden('breed') && <InfoItem label={label('breed', 'Breed')} value={animal.breed} />}
+                        {animal.strain && !hidden('strain') && <InfoItem label="Strain" value={animal.strain} />}
                     </dl>
             </InfoCard>
+            {!hidden('origin') && (
             <InfoCard title="Origin" icon={<Globe size={18} className="text-gray-400" />}>
                     <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="Origin" value={animal.origin} />
                     </dl>
             </InfoCard>
+            )}
             <InfoCard title="Tags" icon={<Tag size={18} className="text-gray-400" />}>
                     {animal.tags && animal.tags.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
