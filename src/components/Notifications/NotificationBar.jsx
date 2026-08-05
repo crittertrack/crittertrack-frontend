@@ -145,10 +145,14 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
         headers: { Authorization: `Bearer ${authToken}` },
       });
       const conversations = Array.isArray(response.data) ? response.data : [];
-      const unread = conversations
-        .filter(c => c.unreadCount > 0 && !c.otherUser?.isStaff)
+      const unreadConvos = conversations
+        .filter(c => c.unreadCount > 0)
         .sort((a, b) => new Date(b.lastMessageDate) - new Date(a.lastMessageDate));
-      setLatestMessageSender(unread[0]?.otherUser || null);
+      // Prefer a non-staff sender, but a conversation that once had a mod message (flagged
+      // "isStaff") can still carry an unread regular reply counted in regularMessageCount —
+      // fall back to it rather than leaving the preview blank.
+      const preview = unreadConvos.find(c => !c.otherUser?.isStaff) || unreadConvos[0] || null;
+      setLatestMessageSender(preview?.otherUser || null);
     } catch (error) {
       console.error('Failed to fetch message preview:', error);
     }
