@@ -117,13 +117,18 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
     if (!authToken) return;
     try {
       const headers = { Authorization: `Bearer ${authToken}` };
+      // Deliberately NOT passing isOwned=true — the Dashboard's own "Needs Attention" widgets
+      // (AnimalList's activeAnimalsForDashboard) include every non-archived, non-view-only animal
+      // regardless of ownership, so restricting to owned-only here silently hid alerts for
+      // animals not marked "owned" and made the ticker disagree with the Dashboard.
       const [ar, lr, er, sr] = await Promise.all([
-        axios.get(`${API_BASE_URL}/animals`, { headers, params: { isOwned: 'true' } }),
+        axios.get(`${API_BASE_URL}/animals`, { headers }),
         axios.get(`${API_BASE_URL}/litters`, { headers }),
         axios.get(`${API_BASE_URL}/enclosures`, { headers }),
         axios.get(`${API_BASE_URL}/supplies`, { headers }).catch(() => ({ data: [] })),
       ]);
-      setAnimals(Array.isArray(ar.data) ? ar.data : []);
+      const ownAnimals = (Array.isArray(ar.data) ? ar.data : []).filter(a => !a.isViewOnly && !a.archived);
+      setAnimals(ownAnimals);
       setLitters(Array.isArray(lr.data) ? lr.data : []);
       setEnclosures(Array.isArray(er.data) ? er.data : []);
       setSupplies(Array.isArray(sr.data) ? sr.data : []);

@@ -65,12 +65,14 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         setLoading(true);
         Promise.all([
             axios.get(`${API_BASE_URL}/litters`, { headers }),
-            axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers }),
+            // No isOwned filter — matches the Dashboard's Needs Attention widgets, which include
+            // every non-archived, non-view-only animal regardless of ownership.
+            axios.get(`${API_BASE_URL}/animals`, { headers }),
             axios.get(`${API_BASE_URL}/supplies`, { headers }),
             axios.get(`${API_BASE_URL}/enclosures`, { headers }),
         ]).then(([l, a, s, e]) => {
             setLitters(Array.isArray(l.data) ? l.data : []);
-            setAnimals(Array.isArray(a.data) ? a.data : []);
+            setAnimals((Array.isArray(a.data) ? a.data : []).filter(x => !x.isViewOnly && !x.archived));
             setSupplies(Array.isArray(s.data) ? s.data : []);
             setEnclosures(Array.isArray(e.data) ? e.data : []);
         }).catch(() => {}).finally(() => setLoading(false));

@@ -77,12 +77,14 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     useEffect(() => {
         if (!authToken) return;
         Promise.all([
-            axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` }, params: { isOwned: 'true' } }),
+            // No isOwned filter — matches the Dashboard's Needs Attention widgets, which include
+            // every non-archived, non-view-only animal regardless of ownership.
+            axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } }),
             axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } }),
             axios.get(`${API_BASE_URL}/supplies`, { headers: { Authorization: `Bearer ${authToken}` } }),
         ])
             .then(([ar, er, sr]) => {
-                const a = Array.isArray(ar.data) ? ar.data : [];
+                const a = (Array.isArray(ar.data) ? ar.data : []).filter(x => !x.isViewOnly && !x.archived);
                 const e = Array.isArray(er.data) ? er.data : [];
                 const s = Array.isArray(sr.data) ? sr.data : [];
                 setAnimals(a); setEnclosures(e); setSupplies(s);
