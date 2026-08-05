@@ -58,12 +58,12 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
 
     // Combine active and new users for the "Recent Activity" section
     useEffect(() => {
-        // Take 2 most active users
-        const active = communityUsers.slice(0, 2);
+        // Take 3 most active users
+        const active = communityUsers.slice(0, 3);
         const activeIds = new Set(active.map(u => u.id_public));
 
-        // Take 3 newest users that are not in the active list
-        const newFiltered = newUsers.filter(u => !activeIds.has(u.id_public)).slice(0, 3);
+        // Take 2 newest users that are not in the active list
+        const newFiltered = newUsers.filter(u => !activeIds.has(u.id_public)).slice(0, 2);
 
         // Add a flag to distinguish new users for the badge
         const newWithFlag = newFiltered.map(u => ({ ...u, isNew: true }));
