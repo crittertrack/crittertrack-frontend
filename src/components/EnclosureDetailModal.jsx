@@ -580,7 +580,7 @@ const EnclosureDetailModal = ({
                                             <span className="text-gray-500 dark:text-dark-text-muted">Dimensions</span>
                                             <span className="text-gray-800 dark:text-dark-text">
                                                 {(() => {
-                                                    const dims = enclosure.dimensions || enclosure.size;
+                                                    const dims = enclosure.dimensions;
                                                     if (typeof dims === 'object' && dims !== null) {
                                                         return `${dims.length || '?'}x${dims.width || '?'}x${dims.height || '?'} ${dims.unit || 'in'}`;
                                                     }

@@ -97,11 +97,11 @@ const formatTime12h = (time24) => {
     return `${hour12}:${minutes} ${ampm}`;
 };
 
-const formatDimensions = (dim, size) => {
+const formatDimensions = (dim) => {
     if (dim && (dim.length || dim.width || dim.height)) {
         return `${dim.length || '?'}x${dim.width || '?'}x${dim.height || '?'} ${dim.unit || ''}`;
     }
-    return size || null;
+    return null;
 };
 
 const formatDateDisplay = (dateStr) => {
@@ -1155,7 +1155,7 @@ useEffect(() => {
             ? `${formatTime12h(enclosure.lightsOnTime)} - ${formatTime12h(enclosure.lightsOffTime)}`
             : null;
 
-        const dimensions = formatDimensions(enclosure.dimensions, enclosure.size);
+        const dimensions = formatDimensions(enclosure.dimensions);
 
         const dueTasks = (enclosure.cleaningTasks || []).filter(isTaskDue);
         const needsAttention = dueTasks.length > 0;
@@ -1377,7 +1377,7 @@ useEffect(() => {
         console.log('[AnimalList] openEnclosureModal called. Editing enclosure:', enclosure ? enclosure._id : 'new');
         if (enclosure) {
               setOriginalEnclosureForEdit(enclosure); // Edit mode
-            const dims = enclosure.dimensions || enclosure.size;
+            const dims = enclosure.dimensions;
             let length = '', width = '', height = '', dimensionsUnit = 'in';
             if (typeof dims === 'object' && dims !== null) {
                 length = dims.length || '';
@@ -3075,7 +3075,7 @@ useEffect(() => {
 
     // -- Shared Management Components ------------------------------------------
     // All appearance fields that make up "Variety" ? same set as Tab 3 / Appearance section
-    const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size'];
+    const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size'];
     const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
 
     const MgmtAnimalCard = ({ animal, extras }) => (
@@ -3275,7 +3275,7 @@ useEffect(() => {
                                                         <tbody className="divide-y divide-gray-100">
                                                             {colAnimals.map(animal => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                                                 const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false);
                                                                 return (
@@ -3369,7 +3369,7 @@ useEffect(() => {
                                                         <tbody className="divide-y divide-gray-100">
                                                             {uncategorized.map(animal => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                                                 const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false);
                                                                 return (
@@ -3403,23 +3403,29 @@ useEffect(() => {
         );
     };
 
-    const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => (
-        <div
-            className={`relative flex items-center h-[104px] p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
-            onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
-        >
-            {icon}
-            <div className="ml-4">
-                <div className="text-2xl font-bold">{value}</div>
-                <div className="text-sm font-medium opacity-90 line-clamp-2">{label}</div>
+    const StatCard = ({ icon, label, value, colorClass, onClick, hasDropdown, isDropdownOpen, onDropdownToggle }) => {
+        // Icon is passed in pre-sized (size={32}); strip that so the responsive w/h classes below can take over on mobile.
+        const responsiveIcon = React.isValidElement(icon)
+            ? React.cloneElement(icon, { size: undefined, className: `${icon.props.className || ''} w-6 h-6 sm:w-8 sm:h-8 shrink-0`.trim() })
+            : icon;
+        return (
+            <div
+                className={`relative flex items-center h-[72px] sm:h-[104px] p-2.5 sm:p-4 rounded-xl shadow-sm transition-all duration-200 ${onClick || onDropdownToggle ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''} ${colorClass}`}
+                onClick={onClick || (onDropdownToggle ? () => onDropdownToggle() : undefined)}
+            >
+                {responsiveIcon}
+                <div className="ml-2.5 sm:ml-4 min-w-0">
+                    <div className="text-base sm:text-2xl font-bold leading-tight">{value}</div>
+                    <div className="text-[11px] sm:text-sm font-medium opacity-90 line-clamp-2 leading-tight">{label}</div>
+                </div>
+                {hasDropdown && (
+                    <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-1 right-1 sm:top-2 sm:right-2 p-1 text-inherit opacity-60 hover:opacity-100">
+                        <ChevronDown size={16} className={`sm:w-5 sm:h-5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                )}
             </div>
-            {hasDropdown && (
-                <button onClick={(e) => { e.stopPropagation(); if (onDropdownToggle) onDropdownToggle(); }} className="absolute top-2 right-2 p-1 text-inherit opacity-60 hover:opacity-100">
-                    <ChevronDown size={20} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-            )}
-        </div>
-    );
+        );
+    };
 
     const renderEnclosureDashboard = () => {
         const occupiedEnclosuresList = enclosures.filter(enc => (enclosureAnimalMap[enc._id] || []).length > 0);
@@ -3431,7 +3437,7 @@ useEffect(() => {
 
         return (
             <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<Home size={32} className="text-blue-800" />}
@@ -3548,7 +3554,7 @@ useEffect(() => {
     const renderReproductionDashboard = () => {
         return (
             <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
                     <StatCard icon={<Calendar size={32} className="text-indigo-800" />} label="Animals in Planned Mating" value={plannedMatingList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
                     <StatCard icon={<Hourglass size={32} className="text-sky-800" />} label="Animals In Mating" value={matingList.length} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('reproduction')} />
                     <StatCard icon={<ScanHeart size={32} className="text-pink-800" />} label="Animals Pregnant" value={pregnantList.length} colorClass="bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
@@ -3585,7 +3591,7 @@ useEffect(() => {
     const renderHealthDashboard = () => {
         return (
             <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
                     <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Total in Health Program" value={quarantineList.length + treatmentList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('health')} />
                     <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Quarantine" value={quarantineList.length} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" onClick={() => setAnimalView('health')} />
                     <StatCard icon={<Activity size={32} className="text-red-800" />} label="In Treatment" value={treatmentList.length} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" onClick={() => setAnimalView('health')} />
@@ -3622,7 +3628,7 @@ useEffect(() => {
     const renderFeedingDashboard = () => {
         return (
             <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
                     <StatCard icon={<Utensils size={32} className="text-green-800" />} label="Feeding" value={feedingAssignedCount} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" onClick={() => setAnimalView('feeding')} />
                     <StatCard icon={<Scissors size={32} className="text-teal-800" />} label="Grooming & Special Care" value={groomingAssignedCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('feeding')} />
                     <StatCard icon={<Dumbbell size={32} className="text-sky-800" />} label="Training" value={trainingAssignedCount} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('feeding')} />
@@ -5137,7 +5143,7 @@ useEffect(() => {
 
         return (
             <div className="mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
                     {/* Column 1: Total Animals */}
                     <div className="flex flex-col gap-2">
                         <StatCard
@@ -5772,7 +5778,7 @@ useEffect(() => {
                                 return displayedAnimalsForList.map(animal => {
                                     const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
                                     const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                    const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                    const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                     const assignedIds = animalBreedingLines[animal.id_public] || [];
                                     const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false);
 

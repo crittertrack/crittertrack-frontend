@@ -131,7 +131,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                             const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ').toLowerCase();
                             return fullName.includes(q) || (animal.id_public || '').toLowerCase().includes(q) || (animal.species || '').toLowerCase().includes(q);
                         }).map(animal => {
-                            const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
+                            const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'morph', 'markings'];
                             const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
                             const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
                             const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];

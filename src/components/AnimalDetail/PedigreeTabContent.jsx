@@ -23,7 +23,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
             
             const toSlot = (a) => {
                 if (!a) return null;
-                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                const variety = ['color','coatPattern','coat','earset','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
                 return { 
                     mode: 'ctc', 
                     ctcId: a.id_public || '', 

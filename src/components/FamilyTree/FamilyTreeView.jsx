@@ -50,7 +50,7 @@ const keepAwayFromNode = (value, nodeTop, nodeBottom, gap = 6) => {
 };
 
 const VARIETY_KEYS = [
-    'color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph',
+    'color', 'coatPattern', 'coat', 'earset', 'morph',
     'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size',
 ];
 

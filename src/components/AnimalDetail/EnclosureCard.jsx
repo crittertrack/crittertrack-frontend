@@ -2,11 +2,11 @@ import React from 'react';
 import { Home, Thermometer, Droplets, Sun, Sparkles, Package } from 'lucide-react';
 import { InfoItem } from './DashboardComponents';
 
-const formatDimensions = (dims, size) => {
+const formatDimensions = (dims) => {
     if (dims && (dims.length || dims.width || dims.height)) {
         return `${dims.length || '?'} x ${dims.width || '?'} x ${dims.height || '?'} ${dims.unit || 'in'}`;
     }
-    return size || null;
+    return null;
 };
 
 export const EnclosureCard = ({ enclosureInfo }) => {
@@ -14,7 +14,7 @@ export const EnclosureCard = ({ enclosureInfo }) => {
         return null; // Don't render anything if no info
     }
 
-    const dimensions = formatDimensions(enclosureInfo.dimensions, enclosureInfo.size);
+    const dimensions = formatDimensions(enclosureInfo.dimensions);
 
     return (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">

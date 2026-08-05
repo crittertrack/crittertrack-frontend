@@ -2324,7 +2324,6 @@ const AnimalFormModalV2 = ({
             breed: animalToEdit.breed || '',
             strain: animalToEdit.strain || '',
             coatPattern: animalToEdit.coatPattern || '',
-            phenotype: animalToEdit.phenotype || '',
             morph: animalToEdit.morph || '',
             markings: animalToEdit.markings || '',
             eyeColor: animalToEdit.eyeColor || '',
@@ -2502,7 +2501,6 @@ const AnimalFormModalV2 = ({
             breed: '',
             strain: '',
             coatPattern: '',
-            phenotype: '',
             morph: '',
             markings: '',
             eyeColor: '',
@@ -3170,7 +3168,7 @@ const AnimalFormModalV2 = ({
     // Pedigree helper functions
     const mpEmptySlot = () => ({ mode: 'ctc', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
     const mpToSlot = (a) => {
-        const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+        const variety = ['color','coatPattern','coat','earset','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
         return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
     };
     const mpFetchByCtc = async (id) => {
@@ -3210,7 +3208,7 @@ const AnimalFormModalV2 = ({
         const pedigree = animalToEdit?.manualPedigree || {};
 
         const toSlot = (a, notes = '') => {
-            const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
+            const variety = ['color','coatPattern','coat','earset','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
             return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes };
         };
 
@@ -3967,12 +3965,6 @@ const AnimalFormModalV2 = ({
                                                     placeholder="e.g., Standard, Dumbo" />
                                             </div>
                                         )}
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Phenotype</label>
-                                            <input type="text" name="phenotype" value={formData.phenotype || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                placeholder="Observable traits" />
-                                        </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Morph</label>
                                             <input type="text" name="morph" value={formData.morph || ''} onChange={handleChange}

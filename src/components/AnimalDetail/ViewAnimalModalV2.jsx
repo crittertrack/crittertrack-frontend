@@ -453,7 +453,7 @@ const ViewAnimalModalV2 = ({
                                             <dl className="grid grid-cols-3 gap-x-6 gap-y-4 text-xs">
                                                 {/* Row 1 */}
                                                 <InfoItem label="Variety">
-                                                    {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400">N/A</span>}
+                                                    {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400">N/A</span>}
                                                 </InfoItem>
                                                 <InfoItem label="Carries" value={animal.carrierTraits} />
                                                 <InfoItem label="Genetics">

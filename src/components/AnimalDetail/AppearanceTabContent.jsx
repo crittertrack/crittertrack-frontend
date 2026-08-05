@@ -25,7 +25,6 @@ export const AppearanceTabContent = ({ animal }) => {
                         {animal.coatPattern && <InfoItem label="Pattern" value={animal.coatPattern} />}
                         {animal.coat && <InfoItem label="Coat" value={animal.coat} />}
                         {animal.earset && <InfoItem label="Earset" value={animal.earset} />}
-                        {animal.phenotype && <InfoItem label="Phenotype" value={animal.phenotype} />}
                         {animal.morph && <InfoItem label="Morph" value={animal.morph} />}
                         {animal.markings && <InfoItem label="Markings" value={animal.markings} />}
                         {animal.eyeColor && <InfoItem label="Eye Color" value={animal.eyeColor} />}
