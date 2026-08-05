@@ -1023,11 +1023,11 @@ const V2LaunchBanner = () => (
             <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 sm:p-5 rounded-xl shadow-lg mb-3">
                 <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2 mb-2">
                     <Sparkles size={20} className="flex-shrink-0" />
-                    CritterTrack V2 is launching tonight! 🎉
+                    CritterTrack V2 is launching today! 🎉
                 </h3>
                 <div className="space-y-2 text-sm sm:text-[15px] text-purple-50 leading-relaxed">
                     <p>
-                        At <strong className="text-white">22:00 CEST (Central European Summer Time)</strong> tonight,{' '}
+                        At <strong className="text-white">22:00 CEST (Central European Summer Time) on August 5th, 2026</strong>,{' '}
                         <strong className="text-white">CritterTrack.net</strong> will officially transition to <strong className="text-white">V2</strong>.
                     </p>
                     <p>
@@ -1045,7 +1045,7 @@ const V2LaunchBanner = () => (
                         Your core animal, litter, pedigree, and account data should remain unaffected.
                     </p>
                     <p className="font-medium">
-                        Thank you for your patience and for helping improve CritterTrack V2! 💚
+                        Thank you for your patience and for helping improve CritterTrack V2! 💚 (because we have users all over the world)
                     </p>
                 </div>
             </div>
