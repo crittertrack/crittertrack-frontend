@@ -41,6 +41,40 @@ const cleaningTaskFreqDays = (t) => {
   return t.frequency * mult;
 };
 
+// Same display-name precedence as MessagesView's conversation list (getDisplayName).
+const getSenderDisplayName = (user) => {
+  if (!user) return 'Unknown User';
+  if (user.displayName) return user.displayName;
+  if (user.showBreederName && user.breederName) return user.breederName;
+  if (user.showPersonalName && user.personalName) return user.personalName;
+  return `User ${user.id_public}`;
+};
+
+// Fallback descriptions for notification types that lack an animalName/requestedBy_name.
+const NOTIFICATION_TYPE_LABELS = {
+  breeder_request: 'a breeder request', parent_request: 'a parent request', link_request: 'a link request',
+  transfer_request: 'a transfer request', transfer_accepted: 'an accepted transfer', transfer_declined: 'a declined transfer',
+  transfer_cancelled: 'a cancelled transfer', animal_returned: 'a returned animal', animal_recalled: 'a recalled animal',
+  marketplace_inquiry: 'a marketplace inquiry', litter_assignment: 'a litter assignment', mating_reminder: 'a mating reminder',
+  new_rating: 'a new rating',
+};
+const describeNotification = (n) => {
+  if (!n) return '';
+  if (n.animalName) return `${n.animalPrefix ? n.animalPrefix + ' ' : ''}${n.animalName}`.trim();
+  if (n.requestedBy_name) return n.requestedBy_name;
+  return NOTIFICATION_TYPE_LABELS[n.type] || 'an update';
+};
+
+// Matches AnimalList's own [prefix, name, suffix] display convention.
+const animalDisplayName = (a) => [a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ');
+
+// "(Name1, Name2 +N more)" — keeps the ticker text from growing unbounded.
+const formatNameList = (names, max = 2) => {
+  if (!names.length) return '';
+  if (names.length <= max) return `(${names.join(', ')})`;
+  return `(${names.slice(0, max).join(', ')} +${names.length - max} more)`;
+};
+
 const defaultAlertSettings = () =>
   Object.keys(ALERT_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: true }), {});
 
@@ -56,6 +90,8 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
 
   const [modMessages, setModMessages] = useState([]);
   const [processingModMessage, setProcessingModMessage] = useState(null);
+  const [latestNotification, setLatestNotification] = useState(null);
+  const [latestMessageSender, setLatestMessageSender] = useState(null);
   const [animals, setAnimals] = useState([]);
   const [litters, setLitters] = useState([]);
   const [enclosures, setEnclosures] = useState([]);
@@ -86,6 +122,10 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       });
       const all = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
       setModMessages(all.filter(n => n.type === 'moderator_message' && n.status === 'pending'));
+      // Backend already sorts newest-first — grab the most recent unread, non-admin notification
+      // so the ticker can say what it's actually about (e.g. "regarding <animal name>").
+      const unread = all.filter(n => !n.read && n.status === 'pending' && !['broadcast', 'announcement', 'moderator_message'].includes(n.type));
+      setLatestNotification(unread[0] || null);
     } catch (error) {
       console.error('Failed to fetch moderator messages:', error);
     }
@@ -96,6 +136,33 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
     window.addEventListener('notifications-changed', fetchModMessages);
     return () => window.removeEventListener('notifications-changed', fetchModMessages);
   }, [fetchModMessages]);
+
+  // -- Which contact the most recent unread (non-staff) message is from, for the ticker text --
+  const fetchMessagePreview = useCallback(async () => {
+    if (!authToken) return;
+    try {
+      const response = await axios.get(`${API_BASE_URL}/messages/conversations`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const conversations = Array.isArray(response.data) ? response.data : [];
+      const unread = conversations
+        .filter(c => c.unreadCount > 0 && !c.otherUser?.isStaff)
+        .sort((a, b) => new Date(b.lastMessageDate) - new Date(a.lastMessageDate));
+      setLatestMessageSender(unread[0]?.otherUser || null);
+    } catch (error) {
+      console.error('Failed to fetch message preview:', error);
+    }
+  }, [authToken, API_BASE_URL]);
+
+  useEffect(() => {
+    fetchMessagePreview();
+    const interval = setInterval(fetchMessagePreview, 60000);
+    window.addEventListener('notifications-changed', fetchMessagePreview);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('notifications-changed', fetchMessagePreview);
+    };
+  }, [fetchMessagePreview]);
 
   const handleAcknowledgeModMessage = async (id) => {
     setProcessingModMessage(id);
@@ -152,18 +219,20 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
     const today = new Date(); today.setHours(0, 0, 0, 0);
 
     if (alertSettings.feeding) {
-      const count = animals.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours)).length;
-      if (count > 0) items.push({ id: 'feeding', icon: Utensils, iconColor: 'text-amber-300', text: `Feeding: ${count} animal${count !== 1 ? 's' : ''} overdue`, onClick: () => navigate('/') });
+      const due = animals.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours));
+      if (due.length > 0) items.push({ id: 'feeding', icon: Utensils, iconColor: 'text-amber-300', text: `Feeding: ${due.length} animal${due.length !== 1 ? 's' : ''} overdue ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/') });
     }
     if (alertSettings.grooming) {
       let count = 0;
-      animals.forEach(a => GROOMING_SCHEDULE_DEFS.forEach(def => { if (isTaskDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) count++; }));
-      if (count > 0) items.push({ id: 'grooming', icon: Scissors, iconColor: 'text-teal-300', text: `Grooming/Special Care: ${count} task${count !== 1 ? 's' : ''} due`, onClick: () => navigate('/') });
+      const names = new Set();
+      animals.forEach(a => GROOMING_SCHEDULE_DEFS.forEach(def => { if (isTaskDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) { count++; names.add(animalDisplayName(a)); } }));
+      if (count > 0) items.push({ id: 'grooming', icon: Scissors, iconColor: 'text-teal-300', text: `Grooming/Special Care: ${count} task${count !== 1 ? 's' : ''} due ${formatNameList([...names])}`, onClick: () => navigate('/') });
     }
     if (alertSettings.training) {
       let count = 0;
-      animals.forEach(a => TRAINING_SCHEDULE_DEFS.forEach(def => { if (isTaskDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) count++; }));
-      if (count > 0) items.push({ id: 'training', icon: Dumbbell, iconColor: 'text-lime-300', text: `Training: ${count} session${count !== 1 ? 's' : ''} due`, onClick: () => navigate('/') });
+      const names = new Set();
+      animals.forEach(a => TRAINING_SCHEDULE_DEFS.forEach(def => { if (isTaskDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) { count++; names.add(animalDisplayName(a)); } }));
+      if (count > 0) items.push({ id: 'training', icon: Dumbbell, iconColor: 'text-lime-300', text: `Training: ${count} session${count !== 1 ? 's' : ''} due ${formatNameList([...names])}`, onClick: () => navigate('/') });
     }
     if (alertSettings.reproduction) {
       let mated = 0, due = 0, weaned = 0;
@@ -191,25 +260,24 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       }
     }
     if (alertSettings.health) {
-      const count = animals.filter(a => a.isQuarantine || a.isInTreatment || ['Concern', 'Critical'].includes(remapLegacyHealthStatus(a.healthStatusOverride || a.healthStatus))).length;
-      if (count > 0) items.push({ id: 'health', icon: HeartPulse, iconColor: 'text-red-300', text: `Health: ${count} animal${count !== 1 ? 's' : ''} need attention`, onClick: () => navigate('/') });
+      const due = animals.filter(a => a.isQuarantine || a.isInTreatment || ['Concern', 'Critical'].includes(remapLegacyHealthStatus(a.healthStatusOverride || a.healthStatus)));
+      if (due.length > 0) items.push({ id: 'health', icon: HeartPulse, iconColor: 'text-red-300', text: `Health: ${due.length} animal${due.length !== 1 ? 's' : ''} need attention ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/') });
     }
     if (alertSettings.maintenance) {
-      let count = 0;
-      enclosures.forEach(enc => { if ((enc.cleaningTasks || []).some(t => isTaskDue(t.lastDoneDate, cleaningTaskFreqDays(t)))) count++; });
-      if (count > 0) items.push({ id: 'maintenance', icon: Wrench, iconColor: 'text-orange-300', text: `Maintenance: ${count} enclosure${count !== 1 ? 's' : ''} overdue`, onClick: () => navigate('/') });
+      const due = enclosures.filter(enc => (enc.cleaningTasks || []).some(t => isTaskDue(t.lastDoneDate, cleaningTaskFreqDays(t))));
+      if (due.length > 0) items.push({ id: 'maintenance', icon: Wrench, iconColor: 'text-orange-300', text: `Maintenance: ${due.length} enclosure${due.length !== 1 ? 's' : ''} overdue ${formatNameList(due.map(enc => enc.name || 'Unnamed'))}`, onClick: () => navigate('/') });
     }
     if (alertSettings.supplies) {
       const count = supplies.filter(s => (s.reorderThreshold != null && Number(s.currentStock) <= Number(s.reorderThreshold)) || (s.nextOrderDate && parseLocalDate(s.nextOrderDate) <= today)).length;
       if (count > 0) items.push({ id: 'supplies', icon: Package, iconColor: 'text-cyan-300', text: `Supplies: ${count} item${count !== 1 ? 's' : ''} need restocking`, onClick: () => navigate('/') });
     }
     if (alertSettings.birthdays) {
-      const count = animals.filter(a => {
+      const due = animals.filter(a => {
         if (!a.birthDate || a.status === 'Deceased') return false;
         const b = new Date(a.birthDate);
         return !isNaN(b.getTime()) && b.getMonth() === today.getMonth() && b.getDate() === today.getDate();
-      }).length;
-      if (count > 0) items.push({ id: 'birthdays', icon: Cake, iconColor: 'text-fuchsia-300', text: `Birthdays: ${count} animal${count !== 1 ? 's' : ''} today`, onClick: () => navigate('/') });
+      });
+      if (due.length > 0) items.push({ id: 'birthdays', icon: Cake, iconColor: 'text-fuchsia-300', text: `Birthdays: ${due.length} animal${due.length !== 1 ? 's' : ''} today ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/') });
     }
     return items;
   }, [careDataLoaded, alertSettings, animals, litters, enclosures, supplies, navigate]);
@@ -251,16 +319,22 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
     });
   }
   if (notificationCount > 0) {
+    const notifDesc = describeNotification(latestNotification);
     items.push({
       id: 'notifications', icon: Info, iconColor: 'text-purple-300',
-      text: `(${notificationCount}) unread Notification${notificationCount > 1 ? 's' : ''}`,
+      text: notifDesc
+        ? (notificationCount === 1 ? `(1) unread Notification regarding ${notifDesc}` : `(${notificationCount}) unread Notifications, latest regarding ${notifDesc}`)
+        : `(${notificationCount}) unread Notification${notificationCount > 1 ? 's' : ''}`,
       onClick: () => { if (setShowNotifications) setShowNotifications(true); refetchNotifications(); },
     });
   }
   if (regularMessageCount > 0) {
+    const senderName = latestMessageSender ? getSenderDisplayName(latestMessageSender) : null;
     items.push({
       id: 'regular-messages', icon: Shield, iconColor: 'text-purple-300',
-      text: `(${regularMessageCount}) unread Message${regularMessageCount > 1 ? 's' : ''}`,
+      text: senderName
+        ? (regularMessageCount === 1 ? `(1) unread Message from ${senderName}` : `(${regularMessageCount}) unread Messages, latest from ${senderName}`)
+        : `(${regularMessageCount}) unread Message${regularMessageCount > 1 ? 's' : ''}`,
       onClick: () => { if (setShowMessages) setShowMessages(true); refetchMessages(); },
     });
   }
