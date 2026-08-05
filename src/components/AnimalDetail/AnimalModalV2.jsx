@@ -377,7 +377,7 @@ const AnimalModalV2 = ({
                                             <p className="text-xs text-gray-700">
                                                 {[animal.species, animal.strain, animal.breed, animal.origin].filter(Boolean).join(' • ')}
                                             </p>
-                                            <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                            <div className="flex items-center gap-2 mt-2 sm:mt-3 flex-wrap">
                                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${animal.isOwned ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
                                                     {animal.isOwned ? <Heart size={12} /> : <HeartOff size={12} />}
                                                     {animal.isOwned ? 'Owned' : 'Not Owned'}
@@ -399,7 +399,7 @@ const AnimalModalV2 = ({
                                         </>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:justify-end">
+                                <div className="flex items-center gap-2 flex-wrap justify-end sm:flex-nowrap">
                                     {onToggleOwned && <button onClick={() => onToggleOwned(animal.id_public, !animal.isOwned)} className={`p-2 rounded-lg transition ${animal.isOwned ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-700'}`} title={animal.isOwned ? 'Mark as Not Owned' : 'Mark as Owned'}>{animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}</button>}
                                     {onUpdateAnimal && <button onClick={() => {
                                         const newIsDisplay = !animal.isDisplay;
@@ -470,19 +470,19 @@ const AnimalModalV2 = ({
                                 <>
                                     <div className="mt-3 flex flex-col md:flex-row gap-4 flex-grow">
                                         <div className="w-full md:w-2/3 space-y-4">
-                                            <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-4 text-xs">
+                                            <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-2 sm:gap-y-4 text-xs">
                                                 {/* Row 1 */}
-                                                <InfoItem label="Variety">
+                                                <InfoItem compact label="Variety">
                                                     {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400">N/A</span>}
                                                 </InfoItem>
-                                                <InfoItem label="Carries" value={animal.carrierTraits} />
-                                                <InfoItem label="Genetics">
+                                                <InfoItem compact label="Carries" value={animal.carrierTraits} />
+                                                <InfoItem compact label="Genetics">
                                                     {animal.geneticCode && <code className="font-mono">{animal.geneticCode}</code>}
                                                 </InfoItem>
 
                                                 {/* Row 2 */}
-                                                <InfoItem label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
-                                                <InfoItem label="Birthdate">
+                                                <InfoItem compact label="Weight" value={animal.bodyWeight ? `${animal.bodyWeight}${animal.measurementUnits?.weight || 'g'}` : null} />
+                                                <InfoItem compact label="Birthdate">
                                                     {animal.birthDate ? (
                                                         <>
                                                             {formatDate(animal.birthDate)}
@@ -502,15 +502,15 @@ const AnimalModalV2 = ({
                                                         </>
                                                     ) : null}
                                                 </InfoItem>
-                                                <InfoItem label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
+                                                <InfoItem compact label="Purchase Date" value={animal.purchaseDate ? formatDate(animal.purchaseDate) : null} />
 
                                                 {/* Row 3 */}
-                                                <InfoItem label="Enclosure" value={enclosureInfo?.name} /> 
-                                                <InfoItem label="Owner">
+                                                <InfoItem compact label="Enclosure" value={enclosureInfo?.name} /> 
+                                                <InfoItem compact label="Owner">
                                                     <span>{ownerInfo ? ownerInfo.breederName || ownerInfo.personalName : animal.manualownerName || 'N/A'}</span>
                                                     {animal.coOwnership && <span className="text-gray-500 ml-1">({animal.coOwnership})</span>}
                                                 </InfoItem>
-                                                <InfoItem label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
+                                                <InfoItem compact label="Breeder">{breederInfo ? breederInfo.breederName || breederInfo.personalName : animal.manualBreederName || 'N/A'}</InfoItem>
                                             </dl>
                                             <div className="pt-2 border-t border-gray-200">
                                                 <p className="text-xs text-gray-700 text-center flex justify-center items-center gap-x-2">

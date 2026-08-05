@@ -15,10 +15,10 @@ export const InfoCard = ({ title, icon, children, className = '', contentClassNa
     </div>
 );
 
-export const InfoItem = ({ label, value, children }) => (
+export const InfoItem = ({ label, value, children, compact = false }) => (
     <div>
-        <dt className="text-xs font-semibold uppercase tracking-wider text-gray-600">{label}</dt>
-        <dd className="text-xs font-medium text-gray-900">{children || value || <span className="text-gray-500">N/A</span>}</dd>
+        <dt className={`${compact ? 'text-[9px] sm:text-xs' : 'text-xs'} font-semibold uppercase tracking-wider text-gray-600`}>{label}</dt>
+        <dd className={`${compact ? 'text-[11px] sm:text-xs' : 'text-xs'} font-medium text-gray-900`}>{children || value || <span className="text-gray-500">N/A</span>}</dd>
     </div>
 );
 
