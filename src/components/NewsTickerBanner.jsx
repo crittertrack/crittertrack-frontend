@@ -44,8 +44,8 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
     fetchNews();
   }, [authToken, API_BASE_URL]);
 
-  if (loading || error || news.length === 0) {
-    return null; // Don't render the banner if there's no news
+  if (loading) {
+    return null; // Don't render the banner while loading to prevent content/animation jumps
   }
 
   const getBroadcastIcon = (item) => {
