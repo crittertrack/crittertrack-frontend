@@ -271,8 +271,12 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         }
     });
 
-    // Animal events
-    animals.forEach(a => {
+    // Animal events — also searchable via the filter box, not just litters
+    const filteredAnimals = animals.filter(a => {
+        if (!q) return true;
+        return [a.prefix, a.name, a.suffix, a.id_public].filter(Boolean).join(' ').toLowerCase().includes(q);
+    });
+    filteredAnimals.forEach(a => {
         addAnimalEvent(a.birthDate, 'birthday', a);
         const feedNext = nextFeedingDueDate(a.lastFedDate, a.feedingIntervalHours);
         if (feedNext) addAnimalEvent(feedNext, 'feeding', {
@@ -339,8 +343,12 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         return t.frequency * mult;
     };
 
-    // Enclosure cleaning/maintenance tasks
-    enclosures.forEach(enc => {
+    // Enclosure cleaning/maintenance tasks — filterable by enclosure name
+    const filteredEnclosures = enclosures.filter(enc => {
+        if (!q) return true;
+        return (enc.name || '').toLowerCase().includes(q);
+    });
+    filteredEnclosures.forEach(enc => {
         (enc.cleaningTasks || []).forEach(t => {
             const dn = nextDueDate(t.lastDoneDate, cleaningTaskFreqDays(t));
             if (dn && calendarEventFilters.maintenance) {
@@ -352,7 +360,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                         _calLabel: t.taskName || t.name || 'Cleaning Task',
                         _calDetail: enc.name || 'Enclosure',
                         _calSubject: enc.name || 'Enclosure',
-                        _calAnimalName: 'Enclosure',
+                        _calAnimalName: enc.name || 'Enclosure',
                         id_public: enc._id,
                     },
                 });
@@ -360,8 +368,12 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         });
     });
 
-    // Supplies
-    supplies.forEach(s => {
+    // Supplies — filterable by item name/category
+    const filteredSupplies = supplies.filter(s => {
+        if (!q) return true;
+        return [s.name, s.category].filter(Boolean).join(' ').toLowerCase().includes(q);
+    });
+    filteredSupplies.forEach(s => {
         if (s.nextOrderDate) addAnimalEvent(s.nextOrderDate.substring(0,10), 'supply', {
             _id: s._id,
             _calLabel: s.name || 'Supply',
@@ -374,7 +386,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
 
     // Animal milestones
     if (calendarEventFilters.milestone) {
-        animals.forEach(a => {
+        filteredAnimals.forEach(a => {
             (a.milestones || []).forEach(m => {
                 if (!m.startDate || !m.label) return;
                 try {
@@ -472,7 +484,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 const feedType = (a._calFeedType || '').trim();
                 return { prefix: 'Feed:', bold: animalName, rest: feedType };
             }
-            if (ev.type === 'maintenance') return { prefix: 'Maintenance:', bold: animalName, rest: '' };
+            if (ev.type === 'maintenance') return { prefix: 'Maintenance:', bold: animalName, rest: a._calLabel || '' };
             if (ev.type === 'grooming' || ev.type === 'training') {
                 const taskName = a._calLabel || 'Task';
                 return { prefix: ev.type === 'grooming' ? 'Grooming:' : 'Training:', bold: animalName, rest: taskName };
@@ -570,7 +582,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                             <input
                                 value={calendarQuery}
                                 onChange={e => setCalendarQuery(e.target.value)}
-                                placeholder="Filter by pair, litter ID, sire or dam"
+                                placeholder="Filter by pair, litter ID, sire/dam, animal, or enclosure"
                                 className="w-full md:w-80 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                             />
                         </div>
