@@ -495,7 +495,7 @@ const ViewAnimalModalV2 = ({
                                             <div className="pt-2 border-t border-gray-200">
                                                 <p className="text-xs text-gray-700 text-center flex justify-center items-center gap-x-2">
                                                     {(() => {
-                                                        const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(Boolean);
+                                                        const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false);
                                                         const idParts = [
                                                             animal.id_public,
                                                             animal.breederAssignedId,

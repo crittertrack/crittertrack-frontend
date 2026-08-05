@@ -66,7 +66,7 @@ export const IdentificationTabContent = ({
             {isEditable && (
             <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400" />}>
                 {(() => {
-                    const namedLines = breedingLineDefs.filter(l => l.name);
+                    const namedLines = breedingLineDefs.filter(l => l.name && l.enabled !== false);
                     if (namedLines.length === 0) {
                         return <p className="text-sm text-gray-400">No breeding lines available.</p>;
                     }

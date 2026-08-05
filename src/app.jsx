@@ -2502,6 +2502,7 @@ const App = () => {
                   setArchiveLoading={setArchiveLoading}
                   breedingLineDefs={breedingLineDefs}
                   animalBreedingLines={animalBreedingLines}
+                  setAnimalBreedingLines={setAnimalBreedingLines}
                   saveBreedingLineDefs={saveBreedingLineDefs}
                   toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                   BL_PRESETS_APP={BL_PRESETS_APP}

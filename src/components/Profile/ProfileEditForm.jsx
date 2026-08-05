@@ -3,7 +3,7 @@ import axios from 'axios';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
     AlertTriangle, ArrowLeft, CheckCircle, ChevronDown, ChevronUp,
-    Download, FileText, Flame, Gem, Globe, Loader2, Mail, Plus, Save,
+    Download, Eye, EyeOff, FileText, Flame, Gem, Globe, Loader2, Mail, Plus, Save,
     Search, Settings, Star, TableOfContents, Trash2, Upload, User, X
 } from 'lucide-react';
 import { BreederDirectorySettings } from '../PublicProfile/BreederDirectory';
@@ -297,7 +297,7 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
     );
 };
 
-const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken, breedingLineDefs = [], animalBreedingLines = {}, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP = [] }) => {
+const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken, breedingLineDefs = [], animalBreedingLines = {}, setAnimalBreedingLines, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP = [] }) => {
     console.log('[ProfileEditForm] userProfile.allowMessages:', userProfile.allowMessages);
     
     const [personalName, setPersonalName] = useState(userProfile.personalName);
@@ -396,7 +396,32 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [localBLDefs, setLocalBLDefs] = useState(breedingLineDefs);
     const [blSaving, setBlSaving] = useState(false);
     const [blSaved, setBlSaved] = useState(false);
+    const [blDeletingId, setBlDeletingId] = useState(null);
     useEffect(() => { setLocalBLDefs(breedingLineDefs); }, [breedingLineDefs]);
+
+    const handleDeleteBreedingLine = async (lineId, idx) => {
+        const line = localBLDefs.find(l => l.id === lineId);
+        if (!line || !line.name) return;
+        if (!window.confirm(`Delete the "${line.name}" breeding line? This will permanently remove it and unassign it from every animal it's currently assigned to.`)) {
+            return;
+        }
+        setBlDeletingId(lineId);
+        try {
+            const resetDefs = localBLDefs.map((l, i) => i === idx ? { id: lineId, name: '', color: BL_PRESETS_APP[idx] || l.color, enabled: true } : l);
+            const cleanedAssignments = Object.fromEntries(
+                Object.entries(animalBreedingLines).map(([animalId, lineIds]) => [animalId, (lineIds || []).filter(id => id !== lineId)])
+            );
+            await saveBreedingLineDefs(resetDefs, cleanedAssignments);
+            setAnimalBreedingLines?.(cleanedAssignments);
+            setLocalBLDefs(resetDefs);
+            showModalMessage?.('Success', `Breeding line "${line.name}" has been deleted and unassigned from all animals.`);
+        } catch (error) {
+            console.error('Error deleting breeding line:', error);
+            showModalMessage?.('Error', 'Failed to delete breeding line.');
+        } finally {
+            setBlDeletingId(null);
+        }
+    };
 
     const location = useLocation();
     const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -1267,9 +1292,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 space-y-5">
                     <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
                     <p className="text-sm text-gray-600">Define up to 10 personal breeding lines. These are private and only visible to you. Assign them to animals in the animal&apos;s detail view under the Identification tab.</p>
+                    <p className="text-xs text-gray-500">Toggle a line off to hide it everywhere without losing its assignments, or delete it to permanently remove it and unassign it from every animal.</p>
                     <div className="space-y-3">
-                        {localBLDefs.map((line, idx) => (
-                            <div key={line.id} className="flex items-center gap-3 flex-wrap">
+                        {localBLDefs.map((line, idx) => {
+                            const isEnabled = line.enabled !== false;
+                            return (
+                            <div key={line.id} className={`flex items-center gap-3 flex-wrap ${(!isEnabled && line.name) ? 'opacity-50' : ''}`}>
                                 <span className="text-sm text-gray-400 w-4 text-right">{idx + 1}</span>
                                 <div className="flex gap-1">
                                     {BL_PRESETS_APP.map(color => (
@@ -1292,8 +1320,30 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     className="flex-1 min-w-[120px] p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
                                 />
                                 <span style={{ color: line.color }} className="text-xl leading-none" title={line.name || `Line ${idx + 1}`}>&#x25C6;</span>
+                                {line.name && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => setLocalBLDefs(localBLDefs.map((l, i) => i === idx ? { ...l, enabled: !isEnabled } : l))}
+                                            className={`p-1.5 rounded-full hover:bg-gray-200 flex-shrink-0 ${isEnabled ? 'text-gray-500' : 'text-gray-400'}`}
+                                            title={isEnabled ? 'Active - visible throughout the site. Click to hide.' : 'Hidden - not shown anywhere. Click to show.'}
+                                        >
+                                            {isEnabled ? <Eye size={16} /> : <EyeOff size={16} />}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={blDeletingId === line.id}
+                                            onClick={() => handleDeleteBreedingLine(line.id, idx)}
+                                            className="p-1.5 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 disabled:opacity-50"
+                                            title="Delete line and unassign from all animals"
+                                        >
+                                            {blDeletingId === line.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                                        </button>
+                                    </>
+                                )}
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                     <div className="flex items-center gap-3 pt-1">
                         <button

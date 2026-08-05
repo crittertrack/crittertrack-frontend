@@ -94,6 +94,7 @@ export function AppRoutes({
   // Breeding Lines
   breedingLineDefs,
   animalBreedingLines,
+  setAnimalBreedingLines,
   saveBreedingLineDefs,
   locations,
   fetchLocations,
@@ -248,6 +249,7 @@ export function AppRoutes({
           }} 
           breedingLineDefs={breedingLineDefs} 
           animalBreedingLines={animalBreedingLines} 
+          setAnimalBreedingLines={setAnimalBreedingLines} 
           saveBreedingLineDefs={saveBreedingLineDefs} 
           toggleAnimalBreedingLine={toggleAnimalBreedingLine} 
           BL_PRESETS_APP={BL_PRESETS_APP} 

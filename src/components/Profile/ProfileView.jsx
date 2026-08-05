@@ -12,7 +12,7 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked, breedingLineDefs, animalBreedingLines, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP }) => {
+const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked, breedingLineDefs, animalBreedingLines, setAnimalBreedingLines, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP }) => {
     const navigate = useNavigate();
 
     if (!userProfile) return <LoadingSpinner />;
@@ -32,6 +32,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
             authToken={authToken}
             breedingLineDefs={breedingLineDefs}
             animalBreedingLines={animalBreedingLines}
+            setAnimalBreedingLines={setAnimalBreedingLines}
             saveBreedingLineDefs={saveBreedingLineDefs}
             toggleAnimalBreedingLine={toggleAnimalBreedingLine}
             BL_PRESETS_APP={BL_PRESETS_APP}
