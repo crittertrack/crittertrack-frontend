@@ -333,12 +333,12 @@ const ViewAnimalModalV2 = ({
     return (
         <>
             {!animal ? null : (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
-            <div className="bg-[#e1f2f5] rounded-xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-0 sm:p-4 z-[80] backdrop-blur-sm">
+            <div className="bg-[#e1f2f5] rounded-none sm:rounded-xl shadow-2xl w-full max-w-7xl h-full sm:h-[95vh] flex flex-col">
                 {/* Header */}
-                <div className={`flex items-stretch p-4 md:p-6 pb-3 md:pb-4 border-b border-gray-200 gap-4 md:gap-6`}>
+                <div className={`flex flex-col md:flex-row md:items-stretch p-3 md:p-6 pb-2 md:pb-4 border-b border-gray-200 gap-3 md:gap-6`}>
                     {/* Left: Gallery */}
-                    <div className={`w-1/4 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
+                    <div className={`w-full md:w-1/4 h-44 sm:h-56 md:h-auto flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
                         <div className="flex-grow bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-300">
                             {mainImage ? (
                                 <img 
@@ -359,7 +359,7 @@ const ViewAnimalModalV2 = ({
                         {allImages.length > 1 && (
                             <div className="flex-shrink-0 flex gap-2">
                                 {allImages.slice(0, 3).map((img, idx) => (
-                                    <button key={idx} onClick={() => setMainImage(img)} className={`w-1/3 aspect-square rounded-md overflow-hidden border-2 ${mainImage === img ? 'border-primary' : 'border-gray-300'}`}>
+                                    <button key={idx} onClick={() => setMainImage(img)} className={`w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-md overflow-hidden border-2 ${mainImage === img ? 'border-primary' : 'border-gray-300'}`}>
                                         <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                                     </button>
                                 ))}
@@ -368,11 +368,11 @@ const ViewAnimalModalV2 = ({
                     </div>
 
                     {/* Right: Info & Actions */}
-                    <div className="flex-1 flex flex-col">
-                        <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-300 shadow-sm p-4 h-full flex flex-col">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <div className="flex-1 flex flex-col min-w-0">
+                        <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-300 shadow-sm p-3 md:p-4 h-full flex flex-col">
+                            <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-start gap-2">
+                                <div className="min-w-0">
+                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2 flex-wrap break-words">
                                         {animal.prefix} {animal.name} {animal.suffix} {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
                                     </h2>
                                     {!isHeaderCollapsed && (
@@ -402,7 +402,7 @@ const ViewAnimalModalV2 = ({
                                         </>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:justify-end">
                                     {/* Favorite Button (if logged in) */}
                                     {authToken && (
                                         <button 
@@ -448,9 +448,9 @@ const ViewAnimalModalV2 = ({
 
                             {!isHeaderCollapsed && (
                                 <>
-                                    <div className="mt-3 flex gap-4 flex-grow">
-                                        <div className="w-2/3 space-y-4">
-                                            <dl className="grid grid-cols-3 gap-x-6 gap-y-4 text-xs">
+                                    <div className="mt-3 flex flex-col md:flex-row gap-4 flex-grow">
+                                        <div className="w-full md:w-2/3 space-y-4">
+                                            <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-4 text-xs">
                                                 {/* Row 1 */}
                                                 <InfoItem label="Variety">
                                                     {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400">N/A</span>}
@@ -537,7 +537,7 @@ const ViewAnimalModalV2 = ({
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="w-1/3 flex flex-col">
+                                        <div className="w-full md:w-1/3 flex flex-col">
                                             <InfoCard title="Notes" icon={<FileText size={16} className="text-gray-400" />} className="flex-1" contentClassName="overflow-y-auto">
                                                 <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{animal.remarks || 'No remarks for this animal.'}</p>
                                             </InfoCard> {/* Remarks are now on the Dashboard tab */}
@@ -551,10 +551,10 @@ const ViewAnimalModalV2 = ({
 
                 {/* Tabs */}
                 <div className="bg-white border-b border-gray-200">
-                    <nav className="flex items-center space-x-4 -mb-px overflow-x-auto px-4">
+                    <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-4 -mb-px px-2 sm:px-4">
                         <button
                             onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
-                            className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors border border-gray-300"
+                            className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors border border-gray-300 shrink-0"
                             title={isHeaderCollapsed ? 'Expand Header' : 'Collapse Header'}
                         >
                             {isHeaderCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
@@ -564,7 +564,7 @@ const ViewAnimalModalV2 = ({
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-700 hover:text-gray-800 hover:border-gray-400'}`}
+                                className={`flex items-center gap-1.5 sm:gap-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors shrink-0 ${activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-700 hover:text-gray-800 hover:border-gray-400'}`}
                             >
                                 {tab.icon} {tab.label}
                             </button>
@@ -573,7 +573,7 @@ const ViewAnimalModalV2 = ({
                 </div>
 
                 {/* Content */}
-                <div className="p-6 overflow-y-auto rounded-b-xl flex-1">
+                <div className="p-3 sm:p-6 overflow-y-auto rounded-b-xl flex-1">
                     {activeTab === 'dashboard' && (
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

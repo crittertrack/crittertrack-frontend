@@ -356,7 +356,7 @@ const AnimalModalV2 = ({
                         {allImages.length > 1 && (
                             <div className="flex-shrink-0 flex gap-2">
                                 {allImages.slice(0, 3).map((img, idx) => (
-                                    <button key={idx} onClick={() => setMainImage(img)} className={`w-1/3 aspect-square rounded-md overflow-hidden border-2 ${mainImage === img ? 'border-primary' : 'border-gray-300'}`}>
+                                    <button key={idx} onClick={() => setMainImage(img)} className={`w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-md overflow-hidden border-2 ${mainImage === img ? 'border-primary' : 'border-gray-300'}`}>
                                         <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                                     </button>
                                 ))}
@@ -367,7 +367,7 @@ const AnimalModalV2 = ({
                     {/* Right: Info & Actions */}
                     <div className="flex-1 flex flex-col min-w-0">
                         <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-300 shadow-sm p-3 md:p-4 h-full flex flex-col">
-                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                            <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-start gap-2">
                                 <div className="min-w-0">
                                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2 flex-wrap break-words">
                                         {animal.prefix} {animal.name} {animal.suffix} {animal.gender === 'Male' && <Mars className="text-blue-500" size={24} />} {animal.gender === 'Female' && <Venus className="text-pink-500" size={24} />}
@@ -571,7 +571,7 @@ const AnimalModalV2 = ({
 
                 {/* Tabs */}
                 <div className="bg-white border-b border-gray-200">
-                    <nav className="flex items-center space-x-2 sm:space-x-4 -mb-px overflow-x-auto px-2 sm:px-4">
+                    <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-4 -mb-px px-2 sm:px-4">
                         <button
                             onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
                             className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors border border-gray-300 shrink-0"

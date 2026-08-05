@@ -3508,7 +3508,7 @@ const AnimalFormModalV2 = ({
     ];
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-0 sm:p-4 z-[80] backdrop-blur-sm">
             <AssignContactModal
                 isOpen={assignModalOpen}
                 onClose={() => setAssignModalOpen(false)}
@@ -3518,29 +3518,29 @@ const AnimalFormModalV2 = ({
                 authToken={authToken}
                 userProfile={userProfile}
             />
-            <form onSubmit={handleSubmit} className="bg-[#e1f2f5] rounded-xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col">
+            <form onSubmit={handleSubmit} className="bg-[#e1f2f5] rounded-none sm:rounded-xl shadow-2xl w-full max-w-7xl h-full sm:h-[95vh] flex flex-col">
                 {/* Header */}
-                <div className="p-6 border-b border-gray-300 flex-shrink-0">
-                    <h2 className="text-3xl font-bold text-gray-800 flex items-center justify-between">
+                <div className="p-3 sm:p-6 border-b border-gray-300 flex-shrink-0">
+                    <h2 className="text-lg sm:text-3xl font-bold text-gray-800 flex items-center justify-between">
                         <span>
-                            <PlusCircle size={24} className="inline mr-2 text-primary" />
+                            <PlusCircle size={20} className="inline mr-2 text-primary" />
                             {formTitle}
                         </span>
                         <button type="button" onClick={onCancel} className="text-gray-500 hover:text-gray-700 transition duration-150 p-2 rounded-lg" title="Cancel">
-                            <X size={24} />
+                            <X size={22} />
                         </button>
                     </h2>
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-[#e1f2f5] z-10 border-b border-gray-300 px-6 py-2">
-                    <div className="flex flex-wrap gap-2">
+                <div className="bg-[#e1f2f5] z-10 border-b border-gray-300 px-3 sm:px-6 py-2">
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {TABS.map(tab => (
                             <button
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex-shrink-0 px-5 py-2 text-sm font-medium rounded border-2 transition-colors ${activeTab === tab.id ? 'bg-[#F2E4E9] text-black border-gray-300' : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'}`}
+                                className={`flex-shrink-0 px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded border-2 transition-colors ${activeTab === tab.id ? 'bg-[#F2E4E9] text-black border-gray-300' : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'}`}
                                 title={tab.label}
                             >
                                 {React.createElement(tab.icon, { size: 15, className: `inline-block align-middle flex-shrink-0 mr-1 ${tab.color || ''}` })}
@@ -3552,11 +3552,11 @@ const AnimalFormModalV2 = ({
                 {/* Scrollable Content Area */}
                 <div className="flex-1 overflow-y-auto">
                     {/* Tab Content */}
-                    <div className="p-6">
+                    <div className="p-3 sm:p-6">
                         {activeTab === 'dashboard' && ( // DASHBOARD
-                            <div className="flex gap-4">
+                            <div className="flex flex-col md:flex-row gap-4">
                                 {/* Left Column: Image Upload */}
-                                <div className="w-1/4 flex-shrink-0 flex flex-col gap-2">
+                                <div className="w-full md:w-1/4 flex-shrink-0 flex flex-col gap-2">
                                     {(() => {
                                         const mainImage = galleryImages[0];
                                         const thumbnailImages = galleryImages.slice(1, 4);
@@ -3600,7 +3600,7 @@ const AnimalFormModalV2 = ({
                                 </div>
 
                                 {/* Right Column: Identity Fields */}
-                                <div className="w-3/4 flex-1 flex flex-col gap-4">
+                                <div className="w-full md:w-3/4 flex-1 flex flex-col gap-4">
                                     <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => toggleSection('identity')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
                                             <h3 className="text-base font-semibold text-gray-700">Identity</h3>
