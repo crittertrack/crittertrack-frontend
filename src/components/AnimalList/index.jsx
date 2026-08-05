@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import axios from 'axios';
-import NotificationBar from '../Notifications/NotificationBar';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
@@ -24,6 +23,9 @@ import AssignHealthStatusModal from './AssignHealthStatusModal';
 
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
+import { ALERT_CATEGORIES } from '../../utils/alertCategories';
+import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
+import { getUserKey } from '../../utils/userKey';
 
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 
@@ -33,42 +35,8 @@ const FAMILY_TREE_MIN_WIDTH = 900;
 const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 
-// Dedicated, individually-tracked optional schedules ({ lastDoneDate, frequencyDays } shape).
-// Grooming & Special Care schedules come from the Routine Care tab.
-const GROOMING_SCHEDULE_DEFS = [
-    { key: 'groomingSchedule', label: 'Grooming' },
-    { key: 'brushingSchedule', label: 'Brushing' },
-    { key: 'bathingSchedule', label: 'Bathing' },
-    { key: 'nailCareSchedule', label: 'Nail/Claw/Hoof Care' },
-    { key: 'beakHoofScaleSchedule', label: 'Beak/Hoof/Scale Maintenance' },
-    { key: 'skinEarCareSchedule', label: 'Skin & Ear Care' },
-    { key: 'dentalCareSchedule', label: 'Dental Care' },
-    { key: 'specialCareSchedule', label: 'Special Care Needs' },
-    { key: 'healthMonitoringSchedule', label: 'Special Observations' },
-];
-// Training schedules come from the Behavior tab, but are clustered here in Feeding & Care
-// (no separate Behavior management view) per user preference.
-const TRAINING_SCHEDULE_DEFS = [
-    { key: 'exerciseSchedule', label: 'Daily Exercise' },
-    { key: 'crateTrainingSchedule', label: 'Crate Training' },
-    { key: 'litterTrainingSchedule', label: 'Litter Training' },
-    { key: 'leashTrainingSchedule', label: 'Leash Training' },
-    { key: 'freeFlightTrainingSchedule', label: 'Free-Flight Training' },
-    { key: 'workingRoleTrainingSchedule', label: 'Working Role Training' },
-    { key: 'behavioralIssueTrainingSchedule', label: 'Behavioral Issue Training' },
-    { key: 'reactivityTrainingSchedule', label: 'Reactivity Training' },
-    { key: 'flightRiskTrainingSchedule', label: 'Flight Risk Training' },
-];
-
 const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
-
-const ALERT_CATEGORIES = {
-    feeding: 'Feeding Due',
-    reproduction: 'Reproduction',
-    health: 'Medical / Quarantine',
-    maintenance: 'Maintenance'
-};
 
 const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, health: true, birthdateAge: true, breedingLines: true, tags: true };
 
@@ -168,15 +136,6 @@ const BreedingLineManagerModal = ({ lines, onClose, onClearLine }) => {
             </div>
         </div>
     );
-};
-
-// -- Decode JWT payload to get a stable per-user key for localStorage scoping --
-const getUserKey = (token) => {
-    try {
-        if (!token) return 'anon';
-        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-        return payload.sub || payload.id || payload.userId || 'anon';
-    } catch { return 'anon'; }
 };
 
 // -- Module-level cache so AnimalList survives unmount/remount without refetching --
@@ -390,17 +349,6 @@ const AnimalList = ({
     });
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: false }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
-    const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
-        try { return localStorage.getItem('ct_mgmt_urgency_enabled') !== 'false'; } catch { return true; }
-    });
-    const toggleMgmtAlerts = () => {
-        const next = !mgmtAlertsEnabled;
-        setMgmtAlertsEnabled(next);
-        try {
-            localStorage.setItem('ct_mgmt_urgency_enabled', next ? 'true' : 'false');
-            window.dispatchEvent(new StorageEvent('storage', { key: 'ct_mgmt_urgency_enabled' }));
-        } catch {}
-    };
 
     const [litters, setLitters] = useState([]);
 
@@ -622,7 +570,13 @@ const AnimalList = ({
     const toggleAlertCategory = (key) => {
         setAlertSettings(prev => {
             const next = { ...prev, [key]: !prev[key] };
-            try { localStorage.setItem(`ct_alert_settings_${userKey}`, JSON.stringify(next)); } catch {}
+            const storageKey = `ct_alert_settings_${userKey}`;
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(next));
+                // Notify the globally-rendered NotificationBar (a sibling, not a child) so it
+                // picks up the change immediately without needing a page reload.
+                window.dispatchEvent(new StorageEvent('storage', { key: storageKey }));
+            } catch {}
             return next;
         });
     };
@@ -5397,10 +5351,10 @@ useEffect(() => {
                             <button
                                 onClick={() => setShowAlertsDropdown(prev => !prev)}
                                 title="Configure alerts"
-                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${mgmtAlertsEnabled ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${Object.values(alertSettings).some(Boolean) ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
                                 <Bell size={14} className="sm:w-4 sm:h-4" />
-                                <span>Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
+                                <span>Alerts {Object.values(alertSettings).some(Boolean) ? 'On' : 'Off'}</span>
                                 <ChevronDown size={14} className={`ml-1 transition-transform ${showAlertsDropdown ? 'rotate-180' : ''}`} />
                             </button>
                             {showAlertsDropdown && (
@@ -5491,16 +5445,6 @@ useEffect(() => {
 
     return (
         <>
-            {/* Notification banner */}
-            <div className="w-full max-w-7xl mx-auto mb-4">
-                <NotificationBar
-                    authToken={authToken}
-                    API_BASE_URL={API_BASE_URL}
-                    setShowNotifications={setShowNotifications}
-                    setShowMessages={setShowMessages}
-                />
-            </div>
-
             {/* Animal List section */}
             <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
                 <div className="flex items-center justify-between w-full gap-2 min-w-0 mb-4">

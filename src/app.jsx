@@ -34,7 +34,8 @@ import LitterManagement from './components/LitterManagement';
 import AnimalForm, { PedigreeChart } from './components/AnimalForm';
 import AnimalList from './components/AnimalList';
 import AuthView from './components/Auth/AuthView';
-import { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
+import { BroadcastPoll, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
+import NotificationBar from './components/Notifications/NotificationBar';
 import NotificationsHub from './components/Notifications/NotificationsHub';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
@@ -2068,31 +2069,18 @@ const App = () => {
                         </button>
                     </nav>
                 </div>
-
-                {/* Admin message alert ? shown when there are unread moderator messages */}
-                {unreadAdminMessageCount > 0 && (
-                    <div
-                        onClick={() => setShowMessages(true)}
-                        className="mt-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-red-100 transition"
-                    >
-                        <Shield size={15} className="text-red-600 flex-shrink-0" />
-                        <span className="text-sm text-red-700 font-medium flex-1">
-                            You have {unreadAdminMessageCount} unread message{unreadAdminMessageCount > 1 ? 's' : ''} from CritterTrack — please respond
-                        </span>
-                        <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full font-semibold flex-shrink-0">View</span>
-                    </div>
-                )}
             </header>
 
-            {/* Moderator Warning Banner */}
-            <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
-            {/* Moderator Inform Banner */}
-            <InformBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
+            {/* Unified alerts/notifications banner — unread messages/notifications, moderator
+                warnings/notices, and optional care/breeding alerts. Shown on every page. */}
+            <NotificationBar
+                authToken={authToken}
+                API_BASE_URL={API_BASE_URL}
+                userProfile={userProfile}
+                setShowNotifications={setShowNotifications}
+                setShowMessages={setShowMessages}
+            />
 
-
-            
-
-            
             {/* Urgent Broadcast Popup (warning/alert) */}
             <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />
 

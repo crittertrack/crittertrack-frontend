@@ -1,46 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import {
     Calendar, ChevronLeft, ChevronRight, Search, X,
     CalendarPlus, Hourglass, BellRing, Cake, Rainbow,
-    PartyPopper, UtensilsCrossed, Wrench, HandCoins, Package, Bell
+    PartyPopper, UtensilsCrossed, Wrench, HandCoins, Package, Bell,
+    Scissors, Dumbbell, HeartPulse, Filter, ChevronDown,
 } from 'lucide-react';
 import { parseLocalDate } from '../../utils/dateFormatter';
-
-// Dedicated, individually-tracked Grooming/Special Care & Training schedule fields
-// ({ lastDoneDate, frequencyDays }) — see AnimalList/index.jsx GROOMING_SCHEDULE_DEFS/TRAINING_SCHEDULE_DEFS.
-const SCHEDULE_FIELD_DEFS = [
-    { key: 'groomingSchedule', label: 'Grooming' },
-    { key: 'brushingSchedule', label: 'Brushing' },
-    { key: 'bathingSchedule', label: 'Bathing' },
-    { key: 'specializedCareSchedule', label: 'Specialized Care' },
-    { key: 'specialCareSchedule', label: 'Special Care Needs' },
-    { key: 'nailCareSchedule', label: 'Nail/Claw/Hoof Care' },
-    { key: 'beakHoofScaleSchedule', label: 'Beak/Hoof/Scale Maintenance' },
-    { key: 'skinEarCareSchedule', label: 'Skin & Ear Care' },
-    { key: 'dentalCareSchedule', label: 'Dental Care' },
-    { key: 'healthMonitoringSchedule', label: 'Special Observations' },
-    { key: 'exerciseSchedule', label: 'Daily Exercise' },
-    { key: 'crateTrainingSchedule', label: 'Crate Training' },
-    { key: 'litterTrainingSchedule', label: 'Litter Training' },
-    { key: 'leashTrainingSchedule', label: 'Leash Training' },
-    { key: 'freeFlightTrainingSchedule', label: 'Free-Flight Training' },
-    { key: 'workingRoleTrainingSchedule', label: 'Working Role Training' },
-    { key: 'behavioralIssueTrainingSchedule', label: 'Behavioral Issue Training' },
-    { key: 'reactivityTrainingSchedule', label: 'Reactivity Training' },
-    { key: 'flightRiskTrainingSchedule', label: 'Flight Risk Training' },
-];
-
+import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
+import { getUserKey } from '../../utils/userKey';
 
 const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
     const [calendarTooltip, setCalendarTooltip] = useState(null);
     const [calendarQuery, setCalendarQuery] = useState('');
+    const [showEventTypesDropdown, setShowEventTypesDropdown] = useState(false);
+    const eventTypesDropdownRef = useRef(null);
 
-    const [calendarEventFilters, setCalendarEventFilters] = useState({
-        planned: true, mated: true, due: true, born: true, weaned: true,
-        birthday: true, feeding: true, maintenance: true, caretask: true, supply: true, milestone: true,
+    const userKey = useMemo(() => getUserKey(authToken), [authToken]);
+    const DEFAULT_EVENT_FILTERS = {
+        planned: true, mated: true, due: true, born: true, weaned: true, birthday: true,
+        feeding: true, grooming: true, training: true, health: true, maintenance: true,
+        caretask: true, supply: true, milestone: true,
+    };
+    const [calendarEventFilters, setCalendarEventFilters] = useState(() => {
+        try {
+            const saved = localStorage.getItem(`ct_calendar_event_filters_${userKey}`);
+            return saved ? { ...DEFAULT_EVENT_FILTERS, ...JSON.parse(saved) } : DEFAULT_EVENT_FILTERS;
+        } catch { return DEFAULT_EVENT_FILTERS; }
     });
+    const toggleEventFilter = (key) => {
+        setCalendarEventFilters(prev => {
+            const next = { ...prev, [key]: !prev[key] };
+            try { localStorage.setItem(`ct_calendar_event_filters_${userKey}`, JSON.stringify(next)); } catch {}
+            return next;
+        });
+    };
+    const setAllEventFilters = (value) => {
+        const next = Object.keys(DEFAULT_EVENT_FILTERS).reduce((acc, k) => ({ ...acc, [k]: value }), {});
+        setCalendarEventFilters(next);
+        try { localStorage.setItem(`ct_calendar_event_filters_${userKey}`, JSON.stringify(next)); } catch {}
+    };
+
+    // Close the event-types dropdown when clicking outside it
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (eventTypesDropdownRef.current && !eventTypesDropdownRef.current.contains(event.target)) {
+                setShowEventTypesDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const [litters, setLitters] = useState([]);
     const [animals, setAnimals] = useState([]);
@@ -87,6 +98,9 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         weaned:      { bg: 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300', dot: 'bg-blue-400', label: 'Weaned', Icon: Rainbow },
         birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthdate', Icon: PartyPopper },
         feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due', Icon: UtensilsCrossed },
+        grooming:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Grooming/Special Care', Icon: Scissors },
+        training:    { bg: 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300', dot: 'bg-emerald-400', label: 'Training', Icon: Dumbbell },
+        health:      { bg: 'bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-400', dot: 'bg-rose-500', label: 'Health', Icon: HeartPulse },
         maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance', Icon: Wrench },
         caretask:    { bg: 'bg-cyan-100 hover:bg-cyan-200 text-cyan-800 border border-cyan-300', dot: 'bg-cyan-400', label: 'Care Task', Icon: HandCoins },
         supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order', Icon: Package },
@@ -159,6 +173,34 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         if (h % 24 === 0) return `Every ${h / 24}d`;
         if (h < 24) return `Every ${h}h`;
         return `Every ${Math.floor(h / 24)}d ${h % 24}h`;
+    };
+
+    const parseArrayField = (val) => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        try { return JSON.parse(val); } catch { return [{ name: String(val) }]; }
+    };
+    // Mirrors AnimalList/index.jsx's calcNextDose — anchors to the most recent administration
+    // (falling back to the medication's start date) and projects the next dose from there.
+    const calcNextDose = (med) => {
+        if (!med.intervalValue || !med.intervalUnit) return null;
+        if (med.stopDate && new Date(med.stopDate) <= new Date()) return null;
+        const v = Number(med.intervalValue);
+        const unitMs = med.intervalUnit === 'hours' ? 3600000
+            : med.intervalUnit === 'days' ? 86400000
+            : med.intervalUnit === 'weeks' ? 604800000
+            : med.intervalUnit === 'months' ? 2592000000 : null;
+        if (!unitMs) return null;
+        const lastAdmin = med.administrations?.length > 0 ? med.administrations[med.administrations.length - 1].date : null;
+        const anchor = lastAdmin || med.startDate;
+        if (!anchor) return null;
+        const start = new Date(anchor).getTime();
+        if (isNaN(start)) return null;
+        const intervalMs = v * unitMs;
+        const now = Date.now();
+        const elapsed = now - start;
+        if (elapsed < 0) return new Date(start);
+        return new Date(start + (Math.floor(elapsed / intervalMs) + 1) * intervalMs);
     };
 
     const getEventIcon = (type, size = 12, className = '') => {
@@ -246,27 +288,55 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 _calSubject: '',
             });
         });
-        // Dedicated, individually-tracked Grooming/Special Care & Training schedules
-        // (each tracked independently; surfaced alongside other care tasks on the calendar).
-        SCHEDULE_FIELD_DEFS.forEach(def => {
+        // Dedicated, individually-tracked Grooming/Special Care schedules
+        GROOMING_SCHEDULE_DEFS.forEach(def => {
             const dn = nextDueDate(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays);
-            if (dn) addAnimalEvent(dn, 'caretask', {
+            if (dn) addAnimalEvent(dn, 'grooming', {
                 ...a,
                 _calLabel: def.label,
                 _calDetail: a.name || a.id_public,
                 _calSubject: '',
             });
         });
+        // Dedicated, individually-tracked Training schedules
+        TRAINING_SCHEDULE_DEFS.forEach(def => {
+            const dn = nextDueDate(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays);
+            if (dn) addAnimalEvent(dn, 'training', {
+                ...a,
+                _calLabel: def.label,
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
+        });
+        // Health: upcoming medication doses (active treatment) + quarantine end date reached
+        parseArrayField(a.medications).filter(m => !m.status || m.status === 'active').forEach(m => {
+            const nextDose = calcNextDose(m);
+            if (!nextDose) return;
+            addAnimalEvent(nextDose.toISOString().substring(0, 10), 'health', {
+                ...a,
+                _calLabel: `Medication: ${m.name || 'Dose'}`,
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
+        });
+        if (a.isQuarantine && a.quarantineDetails?.endDate) {
+            addAnimalEvent(a.quarantineDetails.endDate, 'health', {
+                ...a,
+                _calLabel: 'Quarantine ends',
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
+        }
     });
 
-    // Enclosure cleaning tasks
+    // Enclosure cleaning/maintenance tasks
     enclosures.forEach(enc => {
         (enc.cleaningTasks || []).forEach(t => {
             const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
-            if (dn && calendarEventFilters.caretask) {
+            if (dn && calendarEventFilters.maintenance) {
                 if (!eventMap[dn]) eventMap[dn] = [];
                 eventMap[dn].push({
-                    type: 'caretask',
+                    type: 'maintenance',
                     animal: {
                         _id: enc._id,
                         _calLabel: t.taskName || t.name || 'Cleaning Task',
@@ -363,7 +433,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         .sort((a, b) => {
             if (a.dateKey < b.dateKey) return -1;
             if (a.dateKey > b.dateKey) return 1;
-            const order = { planned: 0, mated: 1, due: 2, born: 3, weaned: 4, birthday: 5, feeding: 6, maintenance: 7, caretask: 8, supply: 9, milestone: 10 };
+            const order = { planned: 0, mated: 1, due: 2, born: 3, weaned: 4, birthday: 5, feeding: 6, grooming: 7, training: 8, health: 9, maintenance: 10, caretask: 11, supply: 12, milestone: 13 };
             return (order[a.type] ?? 99) - (order[b.type] ?? 99);
         });
 
@@ -393,6 +463,13 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 return { prefix: 'Feed:', bold: animalName, rest: feedType };
             }
             if (ev.type === 'maintenance') return { prefix: 'Maintenance:', bold: animalName, rest: '' };
+            if (ev.type === 'grooming' || ev.type === 'training') {
+                const taskName = a._calLabel || 'Task';
+                return { prefix: ev.type === 'grooming' ? 'Grooming:' : 'Training:', bold: animalName, rest: taskName };
+            }
+            if (ev.type === 'health') {
+                return { prefix: 'Health:', bold: animalName, rest: a._calLabel || '' };
+            }
             if (ev.type === 'caretask') {
                 const taskName = a._calLabel || 'Task';
                 const subject = (a._calSubject || '').trim();
@@ -478,7 +555,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 {/* Filters */}
                 <div className="px-4 py-3 bg-white border-b border-gray-200 space-y-3">
                     <div className="flex flex-col md:flex-row md:items-center gap-2">
-                        <div className="flex items-center gap-2 w-full md:w-auto">
+                        <div className="flex items-center gap-2 w-full md:w-auto flex-1">
                             <Search size={14} className="text-gray-400" />
                             <input
                                 value={calendarQuery}
@@ -487,21 +564,45 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                 className="w-full md:w-80 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                             />
                         </div>
-
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {Object.entries(typeStyles).map(([key, style]) => (
+                        <div className="relative" ref={eventTypesDropdownRef}>
                             <button
-                                key={key}
-                                onClick={() => setCalendarEventFilters(prev => ({ ...prev, [key]: !prev[key] }))}
-                                className={`px-2.5 py-1 text-xs font-medium rounded-full border transition ${calendarEventFilters[key] ? style.bg : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'}`}
+                                onClick={() => setShowEventTypesDropdown(prev => !prev)}
+                                title="Configure which event types are shown"
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${Object.values(calendarEventFilters).some(Boolean) ? 'bg-primary/10 text-primary-dark hover:bg-primary/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
-                                <span className="inline-flex items-center gap-1">
-                                    {getEventIcon(key, 12)}
-                                    <span>{style.label}</span>
-                                </span>
+                                <Filter size={14} />
+                                <span>Event Types {Object.values(calendarEventFilters).some(Boolean) ? 'On' : 'Off'}</span>
+                                <ChevronDown size={14} className={`ml-1 transition-transform ${showEventTypesDropdown ? 'rotate-180' : ''}`} />
                             </button>
-                        ))}
+                            {showEventTypesDropdown && (
+                                <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl z-10">
+                                    <div className="p-3 border-b flex items-center justify-between">
+                                        <div>
+                                            <h4 className="font-semibold text-sm text-gray-800">Calendar Event Types</h4>
+                                            <p className="text-xs text-gray-500">Select which events to show.</p>
+                                        </div>
+                                        <div className="flex flex-col gap-1 text-xs flex-shrink-0">
+                                            <button onClick={() => setAllEventFilters(true)} className="text-primary-dark hover:underline text-left">All</button>
+                                            <button onClick={() => setAllEventFilters(false)} className="text-gray-400 hover:underline text-left">None</button>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 space-y-2 max-h-80 overflow-y-auto">
+                                        {Object.entries(typeStyles).map(([key, style]) => (
+                                            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!!calendarEventFilters[key]}
+                                                    onChange={() => toggleEventFilter(key)}
+                                                    className="w-4 h-4 rounded text-primary focus:ring-primary"
+                                                />
+                                                <style.Icon size={13} className="flex-shrink-0" />
+                                                {style.label}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -599,6 +700,16 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                         {a.id_public && <TooltipRow label="Animal:" value={getAnimalDisplayName(a)} />}
                                         {a.species && <TooltipRow label="Species:" value={a.species} />}
                                         <TooltipRow label="Schedule:" value={a._calDetail} />
+                                    </>)}
+                                    {(calendarTooltip.type === 'grooming' || calendarTooltip.type === 'training') && (<>
+                                        <TooltipRow label="Task:" value={a._calLabel} />
+                                        {a.id_public && <TooltipRow label="Animal:" value={getAnimalDisplayName(a)} />}
+                                        {a.species && <TooltipRow label="Species:" value={a.species} />}
+                                    </>)}
+                                    {calendarTooltip.type === 'health' && (<>
+                                        <TooltipRow label="Item:" value={a._calLabel} />
+                                        {a.id_public && <TooltipRow label="Animal:" value={getAnimalDisplayName(a)} />}
+                                        {a.species && <TooltipRow label="Species:" value={a.species} />}
                                     </>)}
                                     {calendarTooltip.type === 'caretask' && (<>
                                         <TooltipRow label="Task:" value={a._calLabel} />

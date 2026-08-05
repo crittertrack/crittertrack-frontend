@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import {
-    Baby, Bell, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
+    Baby, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
     ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList,
     Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
     Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, ScrollText, Search, Star,
@@ -774,17 +774,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [calendarAnimals, setCalendarAnimals] = useState([]);
     const [calendarSupplies, setCalendarSupplies] = useState([]);
     const [calendarEnclosures, setCalendarEnclosures] = useState([]);
-    const [urgencyEnabled, setUrgencyEnabled] = useState(() => {
-        try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
-    });
-    const toggleUrgency = () => {
-        const next = !urgencyEnabled;
-        setUrgencyEnabled(next);
-        try {
-            localStorage.setItem('ct_urgency_enabled', next ? 'true' : 'false');
-            window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_enabled' }));
-        } catch {}
-    };
 
     // Mating quick-add form state
     const [showAddMatingForm, setShowAddMatingForm] = useState(false);
@@ -2370,15 +2359,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <Calendar size={14} /> Calendar
                         </button>
                     </div>
-                    {/* Urgency Alerts Toggle */}
-                    <button
-                        onClick={toggleUrgency}
-                        title={urgencyEnabled ? 'Urgency alerts on — click to disable' : 'Urgency alerts off — click to enable'}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm transition-colors ${urgencyEnabled ? 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'}`}
-                    >
-                        <Bell size={14} />
-                        <span className="hidden sm:inline">Alerts {urgencyEnabled ? 'On' : 'Off'}</span>
-                    </button>
                     {initialView !== 'calendar' && <button
                         onClick={handleRecalculateOffspringCounts}
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
