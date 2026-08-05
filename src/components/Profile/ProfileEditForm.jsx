@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
     AlertTriangle, ArrowLeft, CheckCircle, ChevronDown, ChevronUp,
-    Download, FileText, Flame, Gem, Globe, Loader2, Mail, Plus, Save,
+    Download, Eye, EyeOff, FileText, Flame, Gem, Globe, Loader2, Mail, Plus, Save,
     Search, Settings, Star, TableOfContents, Trash2, Upload, User, X
 } from 'lucide-react';
 import { BreederDirectorySettings } from '../PublicProfile/BreederDirectory';
 
 const API_BASE_URL = '/api';
 
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
 
 // Helper function to get flag class from country code (for flag-icons library)
@@ -296,7 +297,7 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
     );
 };
 
-const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken, breedingLineDefs = [], animalBreedingLines = {}, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP = [] }) => {
+const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken, breedingLineDefs = [], animalBreedingLines = {}, setAnimalBreedingLines, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP = [] }) => {
     console.log('[ProfileEditForm] userProfile.allowMessages:', userProfile.allowMessages);
     
     const [personalName, setPersonalName] = useState(userProfile.personalName);
@@ -388,8 +389,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
-    const [settingsTab, setSettingsTab] = useState('profile');
     const [myReceivedRatings, setMyReceivedRatings] = useState(null);
     const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
 
@@ -397,23 +396,53 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [localBLDefs, setLocalBLDefs] = useState(breedingLineDefs);
     const [blSaving, setBlSaving] = useState(false);
     const [blSaved, setBlSaved] = useState(false);
+    const [blDeletingId, setBlDeletingId] = useState(null);
     useEffect(() => { setLocalBLDefs(breedingLineDefs); }, [breedingLineDefs]);
 
+    const handleDeleteBreedingLine = async (lineId, idx) => {
+        const line = localBLDefs.find(l => l.id === lineId);
+        if (!line || !line.name) return;
+        if (!window.confirm(`Delete the "${line.name}" breeding line? This will permanently remove it and unassign it from every animal it's currently assigned to.`)) {
+            return;
+        }
+        setBlDeletingId(lineId);
+        try {
+            const resetDefs = localBLDefs.map((l, i) => i === idx ? { id: lineId, name: '', color: BL_PRESETS_APP[idx] || l.color, enabled: true } : l);
+            const cleanedAssignments = Object.fromEntries(
+                Object.entries(animalBreedingLines).map(([animalId, lineIds]) => [animalId, (lineIds || []).filter(id => id !== lineId)])
+            );
+            await saveBreedingLineDefs(resetDefs, cleanedAssignments);
+            setAnimalBreedingLines?.(cleanedAssignments);
+            setLocalBLDefs(resetDefs);
+            showModalMessage?.('Success', `Breeding line "${line.name}" has been deleted and unassigned from all animals.`);
+        } catch (error) {
+            console.error('Error deleting breeding line:', error);
+            showModalMessage?.('Error', 'Failed to delete breeding line.');
+        } finally {
+            setBlDeletingId(null);
+        }
+    };
+
+    const location = useLocation();
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const activeTab = pathSegments[pathSegments.length - 1] === 'settings' ? 'profile' : pathSegments[pathSegments.length - 1];
+    const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
+
     useEffect(() => {
-        if (settingsTab !== 'ratings' || !userProfile?.id_public) return;
+        if (activeTab !== 'ratings' || !userProfile?.id_public) return;
         setMyReceivedRatingsLoading(true);
         axios.get(`${API_BASE_URL}/public/ratings/${userProfile.id_public}`)
             .then(r => setMyReceivedRatings(r.data))
             .catch(() => setMyReceivedRatings({ ratings: [], average: 0, count: 0 }))
             .finally(() => setMyReceivedRatingsLoading(false));
-    }, [settingsTab, userProfile?.id_public]);
+    }, [activeTab, userProfile?.id_public]);
 
     useEffect(() => {
-        if (settingsTab !== 'data') return;
+        if (activeTab !== 'data') return;
         axios.get(`${API_BASE_URL}/species`, { headers: { Authorization: `Bearer ${authToken}` } })
             .then(r => setZeSpeciesList(Array.isArray(r.data) ? r.data : []))
             .catch(() => {});
-    }, [settingsTab, API_BASE_URL, authToken]);
+    }, [activeTab, API_BASE_URL, authToken]);
 
     // Data Portability ? Export
     const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
@@ -858,13 +887,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { id: 'data',            label: 'Data Portability' },
                     { id: 'account',         label: 'Account' },
                 ].map(tab => (
-                    <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${settingsTab === tab.id ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                    >{tab.label}</button>
+                    <NavLink 
+                        key={tab.id} 
+                        to={tab.id === 'profile' ? '' : tab.id}
+                        end={tab.id === 'profile'}
+                        className={({ isActive }) => `px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >
+                        {tab.label}
+                    </NavLink>
                 ))}
             </div>
 
-            {settingsTab === 'profile' && <>
+            {activeTab === 'profile' && <>
             <form id="profile-info-form" onSubmit={handleProfileUpdate} className="space-y-6 mb-4 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Public Profile Information</h3>
                 
@@ -1088,7 +1122,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
             </>}
 
-            {settingsTab === 'info-adoption' && <>
+            {activeTab === 'info-adoption' && <>
             <form onSubmit={handleBreederInfoSave} className="space-y-4 p-4 sm:p-6 border rounded-lg bg-gray-50">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Info &amp; Adoption</h3>
                 <p className="text-sm text-gray-500">Shown on your public profile under the <strong>Info &amp; Adoption</strong> tab. Leave fields blank to hide them.</p>
@@ -1196,7 +1230,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </form>
             </>}
 
-            {settingsTab === 'directory' && <>
+            {activeTab === 'directory' && <>
             <BreederDirectorySettings
                 authToken={authToken}
                 API_BASE_URL={API_BASE_URL}
@@ -1205,7 +1239,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             />
             </>}
 
-            {settingsTab === 'ratings' && <>
+            {activeTab === 'ratings' && <>
             <div className="p-4 sm:p-6 border rounded-lg bg-gray-50">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Ratings Received</h3>
                 {myReceivedRatingsLoading ? (
@@ -1254,13 +1288,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
             </>}
 
-            {settingsTab === 'breeding-lines' && (
+            {activeTab === 'breeding-lines' && (
                 <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 space-y-5">
                     <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
                     <p className="text-sm text-gray-600">Define up to 10 personal breeding lines. These are private and only visible to you. Assign them to animals in the animal&apos;s detail view under the Identification tab.</p>
+                    <p className="text-xs text-gray-500">Toggle a line off to hide it everywhere without losing its assignments, or delete it to permanently remove it and unassign it from every animal.</p>
                     <div className="space-y-3">
-                        {localBLDefs.map((line, idx) => (
-                            <div key={line.id} className="flex items-center gap-3 flex-wrap">
+                        {localBLDefs.map((line, idx) => {
+                            const isEnabled = line.enabled !== false;
+                            return (
+                            <div key={line.id} className={`flex items-center gap-3 flex-wrap ${(!isEnabled && line.name) ? 'opacity-50' : ''}`}>
                                 <span className="text-sm text-gray-400 w-4 text-right">{idx + 1}</span>
                                 <div className="flex gap-1">
                                     {BL_PRESETS_APP.map(color => (
@@ -1283,8 +1320,30 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     className="flex-1 min-w-[120px] p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
                                 />
                                 <span style={{ color: line.color }} className="text-xl leading-none" title={line.name || `Line ${idx + 1}`}>&#x25C6;</span>
+                                {line.name && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => setLocalBLDefs(localBLDefs.map((l, i) => i === idx ? { ...l, enabled: !isEnabled } : l))}
+                                            className={`p-1.5 rounded-full hover:bg-gray-200 flex-shrink-0 ${isEnabled ? 'text-gray-500' : 'text-gray-400'}`}
+                                            title={isEnabled ? 'Active - visible throughout the site. Click to hide.' : 'Hidden - not shown anywhere. Click to show.'}
+                                        >
+                                            {isEnabled ? <Eye size={16} /> : <EyeOff size={16} />}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={blDeletingId === line.id}
+                                            onClick={() => handleDeleteBreedingLine(line.id, idx)}
+                                            className="p-1.5 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 disabled:opacity-50"
+                                            title="Delete line and unassign from all animals"
+                                        >
+                                            {blDeletingId === line.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                                        </button>
+                                    </>
+                                )}
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                     <div className="flex items-center gap-3 pt-1">
                         <button
@@ -1308,7 +1367,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
             )}
 
-            {settingsTab === 'account' && <>
+            {activeTab === 'account' && <>
             <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Email Address</h3>
                 <input type="email" placeholder="New Email Address *" value={email} onChange={(e) => setEmail(e.target.value)} required 
@@ -1342,7 +1401,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </form>
             </>}
 
-            {settingsTab === 'data' && <>
+            {activeTab === 'data' && <>
             <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden space-y-6">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Data Portability</h3>
                 <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export or another service.</p>
@@ -3091,7 +3150,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
             </>}
 
-            {settingsTab === 'account' && <>
+            {activeTab === 'account' && <>
             <div className="mt-2 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
                 <button type="button" onClick={() => setDangerZoneOpen(v => !v)}
                     className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 transition"

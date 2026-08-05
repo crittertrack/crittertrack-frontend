@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import {
-    Baby, Bean, Bell, Bird, BookOpen, Bug, Calculator, Calendar, Camera, Cat,
-    CheckCircle, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList,
-    Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff, Hourglass,
-    Images, Link, Loader2, Mars, Milk, PawPrint, Plus, RefreshCw, Search, Star,
-    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X
+    Baby, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
+    ChevronDown, ChevronUp, ClipboardList,
+    Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
+    Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, ScrollText, Search, Star,
+    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
 } from 'lucide-react';
-import { formatDate, formatDateShort } from '../../utils/dateFormatter';
+import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
+import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
 import { matchFancyRatPhenotype } from '../../data/fancyRatPhenotypeRules';
+import { PedigreeChart } from '../AnimalForm';
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
@@ -21,566 +23,6 @@ const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-co
 };
 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
-const TARGET_OUTCOME_PROTOTYPE_SPECIES = 'Fancy Mouse';
-const TARGET_OUTCOME_SUPPORTED_SPECIES = ['Fancy Mouse', 'Fancy Rat'];
-const TARGET_OUTCOME_PENDING_SPECIES = DEFAULT_SPECIES_OPTIONS.filter(species => !TARGET_OUTCOME_SUPPORTED_SPECIES.includes(species));
-
-const TARGET_OUTCOME_TRAIT_CHIPS = {
-    'Fancy Mouse': [
-        // Base Color — Black series
-        { id: 'black',              label: 'Black',             code: 'a/a',            group: 'Base Color — Black' },
-        { id: 'tan',                label: 'Tan',               code: '−/at',           group: 'Base Color — Black' },
-        { id: 'chocolate',          label: 'Chocolate',         code: 'b/b',            group: 'Base Color — Black' },
-        { id: 'blue',               label: 'Blue',              code: 'd/d',            group: 'Base Color — Black' },
-        { id: 'dove',               label: 'Dove',              code: 'p/p',            group: 'Base Color — Black' },
-        { id: 'lilac',              label: 'Lilac',             code: 'b/b d/d',        group: 'Base Color — Black' },
-        { id: 'champagne',          label: 'Champagne',         code: 'b/b p/p',        group: 'Base Color — Black' },
-        { id: 'silver',             label: 'Silver',            code: 'd/d p/p',        group: 'Base Color — Black' },
-        { id: 'lavender',           label: 'Lavender',          code: 'b/b d/d p/p',    group: 'Base Color — Black' },
-        // Base Color — Agouti series
-        { id: 'agouti',             label: 'Agouti',            code: 'A/-',            group: 'Base Color — Agouti' },
-        { id: 'cinnamon',           label: 'Cinnamon',          code: 'A/- b/b',        group: 'Base Color — Agouti' },
-        { id: 'blue-agouti',        label: 'Blue Agouti',       code: 'A/- d/d',        group: 'Base Color — Agouti' },
-        { id: 'argente',            label: 'Argente',           code: 'A/- p/p',        group: 'Base Color — Agouti' },
-        { id: 'cinnamon-argente',   label: 'Cinnamon Argente',  code: 'A/- b/b p/p',   group: 'Base Color — Agouti' },
-        // Base Color — Other
-        { id: 'dom-red',            label: 'Dominant Red',      code: 'Ay/-',           group: 'Base Color — Other' },
-        { id: 'rec-red',            label: 'Recessive Red',     code: 'e/e',            group: 'Base Color — Other' },
-        { id: 'am-brindle',         label: 'Am. Brindle',       code: 'Avy/-',          group: 'Base Color — Other' },
-        { id: 'Leaden',            label: 'Leaden',            code: 'ln/ln',          group: 'Base Color — Other' },
-        // Albino & Dilution
-        { id: 'albino',             label: 'Albino',            code: 'c/c',            group: 'Albino & Dilution' },
-        { id: 'himalayan',          label: 'Himalayan',         code: 'c/ch',           group: 'Albino & Dilution' },
-        { id: 'bone',               label: 'Bone',              code: 'c/ce',           group: 'Albino & Dilution' },
-        { id: 'siamese',            label: 'Siamese',           code: 'ch/ch',          group: 'Albino & Dilution' },
-        { id: 'burmese',            label: 'Burmese',           code: 'ch/cch',         group: 'Albino & Dilution' },
-        { id: 'stone',              label: 'Stone',             code: 'c/cch',          group: 'Albino & Dilution' },
-        { id: 'beige',              label: 'Beige',             code: 'ce/ce',          group: 'Albino & Dilution' },
-        { id: 'colorpoint-beige',   label: 'Colorpoint Beige',  code: 'ch/ce',          group: 'Albino & Dilution' },
-        { id: 'mock-choc',          label: 'Mock Chocolate',    code: 'ce/cch',         group: 'Albino & Dilution' },
-        { id: 'sepia',              label: 'Sepia',             code: 'a/a cch/cch',    group: 'Albino & Dilution' },
-        { id: 'silver-agouti',      label: 'Silver Agouti',     code: 'A/- cch/cch',    group: 'Albino & Dilution' },
-        { id: 'fox',                label: 'Fox',               code: '−/at + C',        group: 'Albino & Dilution' },
-        // Pattern & Markings
-
-        { id: 'xbrindle',           label: 'Xbrindle',          code: 'Mobr/mobr',      group: 'Pattern & Markings' },
-        { id: 'pied',               label: 'Pied',              code: 's/s',            group: 'Pattern & Markings' },
-        { id: 'variegated',         label: 'Variegated',        code: 'W/w',            group: 'Pattern & Markings' },
-        { id: 'banded',             label: 'Banded',            code: 'Wsh/w',          group: 'Pattern & Markings' },
-        { id: 'splashed',           label: 'Splashed',          code: 'Spl/spl',        group: 'Pattern & Markings' },
-        { id: 'merle',              label: 'Merle',             code: 'rn/rn',          group: 'Pattern & Markings' },
-        { id: 'pearl',              label: 'Pearl',             code: 'si/si',          group: 'Pattern & Markings' },
-        { id: 'umbrous',            label: 'Umbrous',           code: 'U/-',            group: 'Pattern & Markings' },
-        // Coat & Texture
-        { id: 'shorthair',          label: 'Shorthair',         code: 'Go/-',           group: 'Coat & Texture' },
-        { id: 'longhair',           label: 'Longhair',          code: 'go/go',          group: 'Coat & Texture' },
-        { id: 'satin',              label: 'Satin',             code: 'sa/sa',          group: 'Coat & Texture' },
-        { id: 'astrex',             label: 'Astrex',            code: 'Re/-',           group: 'Coat & Texture' },
-        { id: 'texel',              label: 'Texel',             code: 'Re/- go/go',     group: 'Coat & Texture' },
-        { id: 'rosette',            label: 'Rosette',           code: 'rst/rst',        group: 'Coat & Texture' },
-        { id: 'fuzz',               label: 'Fuzz',              code: 'fz/fz',          group: 'Coat & Texture' },
-        { id: 'dom-hairless',       label: 'Dominant Hairless', code: 'Nu/-',           group: 'Coat & Texture' },
-    ],
-    'Fancy Rat': [
-        // Base Color — Black series
-        { id: 'rat-black',         label: 'Black',               code: 'a/a',          group: 'Base Color — Black' },
-        { id: 'rat-chocolate',     label: 'Chocolate',           code: 'a/a b/b',      group: 'Base Color — Black' },
-        { id: 'rat-russian-blue',  label: 'Russian Blue',        code: 'a/a d/d',      group: 'Base Color — Black' },
-        { id: 'rat-american-blue', label: 'American Blue',       code: 'a/a g/g',      group: 'Base Color — Black' },
-        { id: 'rat-mink',          label: 'Mink',                code: 'a/a m/m',      group: 'Base Color — Black' },
-        { id: 'rat-champagne',     label: 'Champagne',           code: 'a/a p/p',      group: 'Base Color — Black' },
-        { id: 'rat-beige',         label: 'Beige',               code: 'a/a r/r',      group: 'Base Color — Black' },
-        // Base Color — Agouti series
-        { id: 'rat-agouti',        label: 'Agouti',              code: 'A/A',          group: 'Base Color — Agouti' },
-        { id: 'rat-choc-agouti',   label: 'Chocolate Agouti',   code: 'A/A b/b',      group: 'Base Color — Agouti' },
-        { id: 'rat-rub-agouti',    label: 'Russian Blue Agouti', code: 'A/A d/d',     group: 'Base Color — Agouti' },
-        { id: 'rat-opal',          label: 'Opal',                code: 'A/A g/g',      group: 'Base Color — Agouti' },
-        { id: 'rat-cinnamon',      label: 'Cinnamon',            code: 'A/A m/m',      group: 'Base Color — Agouti' },
-        { id: 'rat-silver-fawn',   label: 'Silver Fawn',         code: 'A/A p/p',      group: 'Base Color — Agouti' },
-        { id: 'rat-topaz',         label: 'Topaz',               code: 'A/A r/r',      group: 'Base Color — Agouti' },
-        // C-locus & Color Modifier
-        { id: 'rat-albino',        label: 'Albino',              code: 'c/c',          group: 'C-locus & Color Modifier' },
-        { id: 'rat-himalayan',     label: 'Himalayan',           code: 'ch/c',         group: 'C-locus & Color Modifier' },
-        { id: 'rat-siamese',       label: 'Siamese',             code: 'ch/ch',        group: 'C-locus & Color Modifier' },
-        { id: 'rat-tonkinese',     label: 'Tonkinese',           code: 'ct/ct',        group: 'C-locus & Color Modifier' },
-        { id: 'rat-marten',        label: 'Ivory Marten',        code: 'cm/c',         group: 'C-locus & Color Modifier' },
-        { id: 'rat-burmese',       label: 'Burmese',             code: 'Bu/bu + ct',   group: 'C-locus & Color Modifier' },
-        { id: 'rat-sable',         label: 'Sable',               code: 'Bu/Bu + ct',   group: 'C-locus & Color Modifier' },
-        // Marking
-        { id: 'rat-self',          label: 'Self',                code: 'H/H',          group: 'Marking' },
-        { id: 'rat-berkshire',     label: 'Berkshire',           code: 'H/h',          group: 'Marking' },
-        { id: 'rat-bareback',      label: 'Bareback',            code: 'H/hi',         group: 'Marking' },
-        { id: 'rat-capped',        label: 'Capped',              code: 'Hre/h',        group: 'Marking' },
-        { id: 'rat-variegated',    label: 'Variegated',          code: 'H/he',         group: 'Marking' },
-        { id: 'rat-hooded',        label: 'Hooded',              code: 'h/h',          group: 'Marking' },
-        { id: 'rat-dalmatian',     label: 'Dalmatian',           code: 'Dal/dal',      group: 'Marking' },
-        { id: 'rat-roan',          label: 'Roan',                code: 'ro/ro',        group: 'Marking' },
-        { id: 'rat-whiteside',     label: 'Whiteside',           code: 'wh/wh',        group: 'Marking' },
-        { id: 'rat-white-spot',    label: 'White Spot',          code: 'Ws/w',         group: 'Marking' },
-        { id: 'rat-marble',        label: 'Marble',              code: 'Ma/ma',        group: 'Marking' },
-        // Pearl & Merle
-        { id: 'rat-pearl',         label: 'Pearl',               code: 'Pe/pe + m/m',  group: 'Pearl & Merle' },
-        { id: 'rat-merle',         label: 'Merle',               code: 'Me/me + m/m',  group: 'Pearl & Merle' },
-        // Coat & Texture
-        { id: 'rat-rex',           label: 'Rex',                 code: 'Re/re',        group: 'Coat & Texture' },
-        { id: 'rat-double-rex',    label: 'Double Rex',          code: 'Re/Re',        group: 'Coat & Texture' },
-        { id: 'rat-velveteen',     label: 'Velveteen',           code: 'Ve/ve',        group: 'Coat & Texture' },
-        { id: 'rat-bristle',       label: 'Bristle',             code: 'Br/br',        group: 'Coat & Texture' },
-        // Ear Type
-        { id: 'rat-dumbo',         label: 'Dumbo',               code: 'du/du',        group: 'Ear Type' },
-    ],
-};
-
-const getTargetTraitChipCatalog = (species = TARGET_OUTCOME_PROTOTYPE_SPECIES) =>
-    TARGET_OUTCOME_TRAIT_CHIPS[species] || TARGET_OUTCOME_TRAIT_CHIPS[TARGET_OUTCOME_PROTOTYPE_SPECIES];
-
-const getTargetTraitChipGroups = (species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
-    const chips = getTargetTraitChipCatalog(species);
-    const order = [];
-    const map = {};
-    chips.forEach(chip => {
-        if (!map[chip.group]) { map[chip.group] = []; order.push(chip.group); }
-        map[chip.group].push(chip);
-    });
-    return order.map(g => ({ group: g, chips: map[g] }));
-};
-
-const getTargetTraitChipById = (chipId, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) =>
-    getTargetTraitChipCatalog(species).find(c => c.id === chipId);
-
-const formatTargetTraitChip = (chip) => {
-    if (!chip) return '';
-    return `${chip.label} (${chip.code})`;
-};
-
-const buildPrototypeGenotypeFromTraits = (selectedTraits, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
-    const genotype = {};
-    const assumptions = [];
-
-    if (species === 'Fancy Rat') {
-        selectedTraits.forEach((id) => {
-            switch (id) {
-                // Black series
-                case 'rat-black':         genotype.A = 'a/a'; break;
-                case 'rat-chocolate':     genotype.A = 'a/a'; genotype.B = 'b/b'; break;
-                case 'rat-russian-blue':  genotype.A = 'a/a'; genotype.D = 'd/d'; break;
-                case 'rat-american-blue': genotype.A = 'a/a'; genotype.G = 'g/g'; break;
-                case 'rat-mink':          genotype.A = 'a/a'; genotype.M = 'm/m'; break;
-                case 'rat-champagne':     genotype.A = 'a/a'; genotype.P = 'p/p'; break;
-                case 'rat-beige':         genotype.A = 'a/a'; genotype.R = 'r/r'; break;
-                // Agouti series
-                case 'rat-agouti':        genotype.A = 'A/A'; break;
-                case 'rat-choc-agouti':   genotype.A = 'A/A'; genotype.B = 'b/b'; break;
-                case 'rat-rub-agouti':    genotype.A = 'A/A'; genotype.D = 'd/d'; break;
-                case 'rat-opal':          genotype.A = 'A/A'; genotype.G = 'g/g'; break;
-                case 'rat-cinnamon':      genotype.A = 'A/A'; genotype.M = 'm/m'; break;
-                case 'rat-silver-fawn':   genotype.A = 'A/A'; genotype.P = 'p/p'; break;
-                case 'rat-topaz':         genotype.A = 'A/A'; genotype.R = 'r/r'; break;
-                // C-locus
-                case 'rat-albino':        genotype.C = 'c/c'; break;
-                case 'rat-himalayan':     genotype.C = 'ch/c'; break;
-                case 'rat-siamese':       genotype.C = 'ch/ch'; break;
-                case 'rat-tonkinese':     genotype.C = 'ct/ct'; break;
-                case 'rat-marten':        genotype.C = 'cm/c'; break;
-                case 'rat-burmese':       genotype.Bu = 'Bu/bu'; genotype.C = 'ct/ct'; break;
-                case 'rat-sable':         genotype.Bu = 'Bu/Bu'; genotype.C = 'ct/ct'; break;
-                // Marking — H locus
-                case 'rat-self':          genotype.H = 'H/H'; break;
-                case 'rat-berkshire':     genotype.H = 'H/h'; break;
-                case 'rat-bareback':      genotype.H = 'H/hi'; break;
-                case 'rat-capped':        genotype.H = 'Hre/h'; break;
-                case 'rat-variegated':    genotype.H = 'H/he'; break;
-                case 'rat-hooded':        genotype.H = 'h/h'; break;
-                // Marking — other
-                case 'rat-dalmatian':     genotype.Dal = 'Dal/dal'; break;
-                case 'rat-roan':          genotype.Ro = 'ro/ro'; break;
-                case 'rat-whiteside':     genotype.Wh = 'wh/wh'; break;
-                case 'rat-white-spot':    genotype.Ws = 'Ws/w'; break;
-                case 'rat-marble':        genotype.Ma = 'Ma/ma'; break;
-                // Pearl / Merle (require m/m)
-                case 'rat-pearl':         genotype.Pe = 'Pe/pe'; genotype.M = 'm/m'; break;
-                case 'rat-merle':         genotype.Me = 'Me/me'; genotype.M = 'm/m'; break;
-                // Coat
-                case 'rat-rex':           genotype.Re = 'Re/re'; break;
-                case 'rat-double-rex':    genotype.Re = 'Re/Re'; break;
-                case 'rat-velveteen':     genotype.Ve = 'Ve/ve'; break;
-                case 'rat-bristle':       genotype.Br = 'Br/br'; break;
-                // Ear
-                case 'rat-dumbo':         genotype.Du = 'du/du'; break;
-                default: break;
-            }
-        });
-        const ratCChips = ['rat-albino','rat-himalayan','rat-siamese','rat-tonkinese','rat-marten','rat-burmese','rat-sable'];
-        if (selectedTraits.some(id => ratCChips.includes(id)) && !genotype.A) {
-            genotype.A = 'a/a';
-            assumptions.push('C-locus phenotype assumed on black base (a/a) — add a Base Color chip to override.');
-        }
-        return { genotype, assumptions };
-    }
-
-    selectedTraits.forEach((id) => {
-        switch (id) {
-            // Base Color — Black series
-            case 'black':            genotype.A  = 'a/a';     break;
-            case 'tan':              genotype.A  = 'at/a';    break;
-            case 'chocolate':        genotype.A  = 'a/a';  genotype.B = 'b/b'; break;
-            case 'blue':             genotype.A  = 'a/a';  genotype.D = 'd/d'; break;
-            case 'dove':             genotype.A  = 'a/a';  genotype.P = 'p/p'; break;
-            case 'lilac':            genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; break;
-            case 'champagne':        genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
-            case 'silver':           genotype.A  = 'a/a';  genotype.D = 'd/d'; genotype.P = 'p/p'; break;
-            case 'lavender':         genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; genotype.P = 'p/p'; break;
-            // Base Color — Agouti series
-            case 'agouti':           genotype.A  = 'A/A';     break;
-            case 'cinnamon':         genotype.A  = 'A/A';  genotype.B = 'b/b'; break;
-            case 'blue-agouti':      genotype.A  = 'A/A';  genotype.D = 'd/d'; break;
-            case 'argente':          genotype.A  = 'A/A';  genotype.P = 'p/p'; break;
-            case 'cinnamon-argente': genotype.A  = 'A/A';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
-            // Base Color — Other
-            case 'dom-red':          genotype.A  = 'Ay/a';    break;
-            case 'rec-red':          genotype.E  = 'e/e';     break;
-            case 'Leaden':          genotype.Ln = 'ln/ln';   break;
-            // Albino & Dilution — C locus
-            case 'albino':           genotype.C  = 'c/c';     break;
-            case 'himalayan':        genotype.C  = 'c/ch';    break;
-            case 'bone':             genotype.C  = 'c/ce';    break;
-            case 'siamese':          genotype.C  = 'ch/ch';   break;
-            case 'burmese':          genotype.C  = 'ch/cch';  break;
-            case 'stone':            genotype.C  = 'c/cch';   break;
-            case 'beige':            genotype.C  = 'ce/ce';   break;
-            case 'colorpoint-beige': genotype.C  = 'ch/ce';   break;
-            case 'mock-choc':        genotype.C  = 'ce/cch';  break;
-            case 'sepia':            genotype.A  = 'a/a'; genotype.C = 'cch/cch'; break;
-            case 'silver-agouti':    genotype.A  = 'A/A'; genotype.C = 'cch/cch'; break;
-            case 'fox':              genotype.A  = 'at/a';    break; // pair with a C chip for full fox expression
-            // Pattern & Markings
-            case 'am-brindle':       genotype.A  = 'Avy/a';   break;
-            case 'xbrindle':         genotype.Mobr = 'Mobr/mobr'; break;
-            case 'pied':             genotype.S  = 's/s';     break;
-            case 'variegated':       genotype.W  = 'W/w';     break;
-            case 'banded':           genotype.W  = 'Wsh/w';   break;
-            case 'splashed':         genotype.Spl = 'Spl/spl'; break;
-            case 'merle':            genotype.Rn = 'rn/rn';   break;
-            case 'pearl':            genotype.Si = 'si/si';   break;
-            case 'umbrous':          genotype.U  = 'U/u';     break;
-            // Coat & Texture
-            case 'shorthair':        genotype.Go = 'Go/Go';   break;
-            case 'longhair':         genotype.Go = 'go/go';   break;
-            case 'satin':            genotype.Sa = 'sa/sa';   break;
-            case 'astrex':           genotype.Re = 'Re/re';   break;
-            case 'texel':            genotype.Re = 'Re/re'; genotype.Go = 'go/go'; break;
-            case 'rosette':          genotype.Rst = 'rst/rst'; break;
-            case 'fuzz':             genotype.Fz = 'fz/fz';  break;
-            case 'dom-hairless':     genotype.Nu = 'Nu/nu';   break;
-            default: break;
-        }
-    });
-
-    // If a C-locus chip is selected without an A-locus chip, assume black base
-    const cLociChips = ['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc'];
-    if (selectedTraits.some(id => cLociChips.includes(id)) && !genotype.A) {
-        genotype.A = 'a/a';
-        assumptions.push('C-locus phenotype assumed on black base (a/a) — add a Base Color chip to override.');
-    }
-
-    // E-locus (e/e) is epistatic over A-locus — auto-assume a/a so phenotype resolves
-    const eLociChips = ['rec-red'];
-    if (selectedTraits.some(id => eLociChips.includes(id)) && !genotype.A) {
-        genotype.A = 'a/a';
-    }
-
-    // Resolve compound A-locus combinations when multiple A-locus chips are selected.
-    // The forEach above lets whichever ran last win — this corrects known multi-chip combos.
-    const hasTan        = selectedTraits.some(id => id === 'tan' || id === 'fox');
-    const hasAgouti     = selectedTraits.some(id => ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti'].includes(id));
-    const hasBrindle    = selectedTraits.includes('am-brindle');
-    const hasBlackSeries = selectedTraits.some(id => ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'].includes(id));
-    const hasDomRed     = selectedTraits.includes('dom-red');
-
-    // Compound A-locus combinations — priority: most specific first
-    if      (hasTan && hasBrindle)          genotype.A = 'Avy/at'; // Brindle Tan
-    else if (hasTan && hasAgouti)           genotype.A = 'A/at';   // Agouti Tan
-    else if (hasTan && hasDomRed)           genotype.A = 'Ay/at';  // Dom Red Tan
-    else if (hasBrindle && hasAgouti)       genotype.A = 'Avy/A';  // Agouti Brindle
-    else if (hasBrindle && hasBlackSeries)  genotype.A = 'Avy/a';  // Brindle Black/Choc/etc (B/D/P modifiers already set)
-    else if (hasDomRed && hasAgouti)        genotype.A = 'Ay/A';   // Dom Red Agouti
-    else if (hasDomRed && hasBlackSeries)   genotype.A = 'Ay/a';   // Dom Red Black/Choc/etc (B/D/P modifiers already set)
-    // rec-red (e/e) is E-locus — A-locus set separately by black/agouti chip if present
-
-    return { genotype, assumptions };
-};
-
-const getPrototypePhenotypeInterpretation = (selectedTraits, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
-    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits, species);
-    if (!Object.keys(genotype).length) return null;
-
-    if (species === 'Fancy Rat') {
-        const ratResult = matchFancyRatPhenotype(genotype);
-        const phenotype = ratResult?.phenotype || null;
-        if (phenotype) return phenotype;
-        // Explain what's missing based on what IS selected
-        const hasPe = genotype.Pe === 'Pe/pe';
-        const hasMerle = genotype.Me === 'Me/me';
-        if (hasPe || hasMerle) {
-            const genes = [hasPe && 'Pearl', hasMerle && 'Merle'].filter(Boolean).join(' and ');
-            return `${genes} only express on a Mink base — add a Base Color chip (e.g. Mink or Cinnamon).`;
-        }
-        return 'Add a Base Color chip (e.g. Black or Agouti) to see the phenotype.';
-    }
-
-    const result = calculatePhenotype(genotype, genotype);
-    const basePheno = result?.phenotype && result.phenotype !== 'Standard' && result.phenotype !== 'Unknown' && result.phenotype !== ''
-        ? result.phenotype
-        : null;
-
-    const catalog = getTargetTraitChipCatalog(species);
-    const MODIFIER_GROUPS = new Set(['Pattern & Markings', 'Coat & Texture']);
-
-    // Some chip labels don't literally appear in the resolved phenotype — map to what the engine actually outputs
-    const CHIP_EXPRESSED_AS = {
-        'am-brindle':   ['brindle'],
-        'tan':          ['tan'],
-        'fox':          ['fox'],
-        'dom-red':      ['brindle', 'red', 'fawn', 'amber'],
-        'dom-fawn':     ['fawn'],
-        'dom-amber':    ['amber'],
-        'astrex':       ['astrex'],
-        'texel':        ['texel'],
-        'mock-choc':    ['mock chocolate'],
-        'colorpoint-beige': ['colorpoint'],
-        'blue-agouti':  ['blue agouti'],
-        'cinnamon-argente': ['cinnamon argente'],
-        'silver-agouti': ['silver agouti'],
-        'dom-hairless':  ['hairless'],
-        // When Pied + Splashed are both selected, the engine outputs "Tricolor" (replaces both)
-        'pied':         ['pied', 'tricolor'],
-        'splashed':     ['splashed', 'tricolor'],
-    };
-
-    // Build a list of all selected modifier chip labels
-    const selectedModifierChips = selectedTraits
-        .map(id => catalog.find(c => c.id === id))
-        .filter(c => c && MODIFIER_GROUPS.has(c.group));
-
-    // Append modifier labels that aren't already present in the calculated phenotype string
-    const phenoLower = basePheno ? basePheno.toLowerCase() : '';
-    const missingModifiers = selectedModifierChips
-        .filter(c => {
-            if ((c.id === 'longhair' || c.id === 'astrex')
-                && selectedTraits.includes('longhair')
-                && selectedTraits.includes('astrex')
-                && phenoLower.includes('texel')) {
-                return false;
-            }
-            const keywords = CHIP_EXPRESSED_AS[c.id] || [c.label.toLowerCase()];
-            return !keywords.some(kw => phenoLower.includes(kw));
-        })
-        .map(c => c.label);
-
-    if (basePheno) {
-        return [basePheno, ...missingModifiers].join(' ');
-    }
-
-    // No base color resolved — fall back to composing from chip labels directly
-    const allLabels = selectedTraits
-        .map(id => catalog.find(c => c.id === id))
-        .filter(Boolean)
-        .map(c => c.label);
-
-    if (allLabels.length) {
-        return allLabels.join(' ');
-    }
-
-    return 'Select more trait chips to resolve a named phenotype.';
-};
-
-const getPrototypePhenotypeConfidence = (selectedTraits, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
-    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits, species);
-    const lociSelected = Object.keys(genotype).length;
-    const result = lociSelected
-        ? (species === 'Fancy Rat' ? matchFancyRatPhenotype(genotype) : calculatePhenotype(genotype, genotype))
-        : null;
-    const hasResolvedPhenotype = Boolean(result?.phenotype && result.phenotype !== 'Standard');
-    const phenotypeLabel = hasResolvedPhenotype ? result.phenotype : 'unresolved';
-    const assumptionCount = assumptions.length;
-
-    if (hasResolvedPhenotype && lociSelected >= 3 && assumptions.length === 0) {
-        return {
-            level: 'high',
-            label: 'High Confidence',
-            className: 'bg-emerald-100 text-emerald-800',
-            detail: `Phenotype "${phenotypeLabel}" fully resolved across ${lociSelected} loci.`
-        };
-    }
-
-    if (hasResolvedPhenotype || lociSelected >= 2) {
-        const mediumReason = hasResolvedPhenotype
-            ? `Phenotype "${phenotypeLabel}" resolved across ${lociSelected} loci${assumptionCount > 0 ? ` (${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'})` : ''}.`
-            : `Phenotype not yet resolved — ${lociSelected} loci selected${assumptionCount > 0 ? `, ${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'}` : ''}. Add more chips.`;
-        return {
-            level: 'medium',
-            label: 'Medium Confidence',
-            className: 'bg-amber-100 text-amber-800',
-            detail: mediumReason
-        };
-    }
-
-    return {
-        level: 'low',
-        label: 'Needs More Loci',
-        className: 'bg-gray-100 text-gray-700',
-        detail: `Only ${lociSelected} locus selected — add more trait chips to resolve a phenotype.`
-    };
-};
-
-const getMinimumParentCarrierRequirements = (selectedTraits, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
-    const { genotype } = buildPrototypeGenotypeFromTraits(selectedTraits, species);
-    if (!Object.keys(genotype).length) return { bothParents: [], oneParent: [] };
-
-    if (species === 'Fancy Rat') {
-        const RAT_BLACK_CHIPS = ['rat-black','rat-chocolate','rat-russian-blue','rat-american-blue','rat-mink','rat-champagne','rat-beige'];
-        const RAT_CHIP_REQS = {
-            'rat-chocolate':     [{ type: 'both', label: 'chocolate (b)' }],
-            'rat-russian-blue':  [{ type: 'both', label: 'Russian Blue dilute (d)' }],
-            'rat-american-blue': [{ type: 'both', label: 'American Blue (g)' }],
-            'rat-mink':          [{ type: 'both', label: 'Mink (m)' }],
-            'rat-champagne':     [{ type: 'both', label: 'pink-eyed dilute (p)' }],
-            'rat-beige':         [{ type: 'both', label: 'red-eye dilute (r)' }],
-            'rat-choc-agouti':   [{ type: 'both', label: 'chocolate (b)' }],
-            'rat-rub-agouti':    [{ type: 'both', label: 'Russian Blue dilute (d)' }],
-            'rat-opal':          [{ type: 'both', label: 'American Blue (g)' }],
-            'rat-cinnamon':      [{ type: 'both', label: 'Mink (m)' }],
-            'rat-silver-fawn':   [{ type: 'both', label: 'pink-eyed dilute (p)' }],
-            'rat-topaz':         [{ type: 'both', label: 'red-eye dilute (r)' }],
-            'rat-albino':        [{ type: 'both', label: 'albino (c)' }],
-            'rat-himalayan':     [{ type: 'split', label: 'one parent: Siamese/ch \u00b7 other parent: albino carrier (c)' }],
-            'rat-siamese':       [{ type: 'both', label: 'Siamese (ch)' }],
-            'rat-tonkinese':     [{ type: 'both', label: 'Tonkinese (ct)' }],
-            'rat-marten':        [{ type: 'split', label: 'one parent: Marten (cm) \u00b7 other parent: albino carrier (c)' }],
-            'rat-burmese':       [{ type: 'one', label: 'Burmese gene (Bu) + Tonkinese C (ct)' }],
-            'rat-sable':         [{ type: 'both', label: 'Burmese gene (Bu) + Tonkinese C (ct)' }],
-            'rat-berkshire':     [{ type: 'one', label: 'Berkshire H allele' }],
-            'rat-bareback':      [{ type: 'one', label: 'Bareback (hi) allele' }],
-            'rat-capped':        [{ type: 'one', label: 'Capped (Hre) allele' }],
-            'rat-variegated':    [{ type: 'one', label: 'Variegated (he) allele' }],
-            'rat-hooded':        [{ type: 'both', label: 'hooded (h)' }],
-            'rat-dalmatian':     [{ type: 'one', label: 'Dalmatian gene (Dal)' }],
-            'rat-roan':          [{ type: 'both', label: 'Roan (ro)' }],
-            'rat-whiteside':     [{ type: 'both', label: 'Whiteside (wh)' }],
-            'rat-white-spot':    [{ type: 'one', label: 'White Spotting gene (Ws)' }],
-            'rat-marble':        [{ type: 'one', label: 'Marble gene (Ma)' }],
-            'rat-pearl':         [{ type: 'one', label: 'Pearl gene (Pe)' }, { type: 'both', label: 'Mink (m)' }],
-            'rat-merle':         [{ type: 'one', label: 'Merle gene (Me)' }, { type: 'both', label: 'Mink (m)' }],
-            'rat-rex':           [{ type: 'one', label: 'Rex gene (Re)' }],
-            'rat-double-rex':    [{ type: 'both', label: 'Rex gene (Re)' }],
-            'rat-velveteen':     [{ type: 'one', label: 'Velveteen gene (Ve)' }],
-            'rat-bristle':       [{ type: 'one', label: 'Bristle gene (Br)' }],
-            'rat-dumbo':         [{ type: 'both', label: 'Dumbo (du)' }],
-        };
-        const bothSet = new Map();
-        const oneSet = new Map();
-        const splitArr = [];
-        if (selectedTraits.some(id => RAT_BLACK_CHIPS.includes(id))) {
-            bothSet.set('non-agouti (a)', true);
-        }
-        selectedTraits.forEach(id => {
-            (RAT_CHIP_REQS[id] || []).forEach(req => {
-                if (req.type === 'both') bothSet.set(req.label, true);
-                else if (req.type === 'one') oneSet.set(req.label, true);
-                else if (req.type === 'split') splitArr.push({ label: req.label });
-            });
-        });
-        return {
-            bothParents: [...bothSet.keys()].map(label => ({ label })),
-            oneParent:   [...oneSet.keys()].map(label => ({ label })),
-            splitParents: splitArr,
-        };
-    }
-
-    const bothParents = [];
-    const oneParent = [];
-    const splitParents = []; // compound-het dominant: each parent must supply a DIFFERENT allele
-
-    // Human-readable names for recessive alleles
-    const ALLELE_NAMES = {
-        a: 'non-agouti', at: 'tan', b: 'chocolate', d: 'blue dilute',
-        p: 'pink-eyed dilute', e: 'recessive red', c: 'albino',
-        ch: 'himalayan/siamese', ce: 'beige', cch: 'chinchilla/burmese',
-        s: 'piebald', si: 'pearl', go: 'longhair', re: 'rex',
-        sa: 'satin', rst: 'rosette', fz: 'fuzz', nu: 'hairless',
-        rn: 'merle', spl: 'splashed', mobr: 'xbrindle',
-        Ay: 'dominant red', Avy: 'am. brindle', A: 'agouti',
-    };
-    const alleleName = (a) => ALLELE_NAMES[a] || ALLELE_NAMES[a.toLowerCase()] || a;
-
-    // Compound-het dominant A-locus combos: one parent must carry each allele separately
-    const COMPOUND_HET_DOM_A = new Set(['Avy/at', 'at/Avy', 'Ay/at', 'at/Ay', 'A/at', 'at/A', 'Avy/A', 'A/Avy', 'Ay/A', 'A/Ay', 'Ay/Avy', 'Avy/Ay']);
-
-    // Heterozygous dominant targets — only one parent needs the dominant allele
-    const domHetTargets = {
-        W:    { 'W/w': 'Variegated gene (W)', 'Wsh/w': 'Banded gene (Wsh)' },
-        Spl:  { 'Spl/spl': 'Splashed gene (Spl)' },
-        Mobr: { 'Mobr/mobr': 'XBrindle gene (Mobr)' },
-        Re:   { 'Re/re': 'Rex gene (Re)' },
-        Nu:   { 'Nu/nu': 'Hairless gene (Nu)' },
-        U:    { 'U/u': 'Umbrous gene (U)' },
-    };
-
-    const eLociSelected = selectedTraits.some(id => id === 'rec-red');
-    const aLociExplicit = selectedTraits.some(id => ['black','tan','chocolate','blue','dove','lilac','champagne','silver','lavender','agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti','dom-red','fox','am-brindle','sepia'].includes(id));
-    const skipALocus = eLociSelected && !aLociExplicit;
-
-    for (const [locus, value] of Object.entries(genotype)) {
-        if (!value || !value.includes('/')) continue;
-        const [a1, a2] = value.split('/');
-
-        // e/e is epistatic over A-locus — skip A-locus requirement when no explicit base color was picked
-        if (locus === 'A' && skipALocus) continue;
-
-        // Explicitly dominant-het targets
-        if (domHetTargets[locus]?.[value]) {
-            oneParent.push({ label: domHetTargets[locus][value] });
-            continue;
-        }
-        // A-locus compound-het dominant (e.g. Avy/at, A/at) — split parents
-        if (locus === 'A' && COMPOUND_HET_DOM_A.has(value)) {
-            splitParents.push({ label: `one parent: ${alleleName(a1)} (${a1}) · other parent: ${alleleName(a2)} (${a2})` });
-            continue;
-        }
-        // A-locus simple dominant-het (Ay/a, Avy/a) — one parent only
-        if (locus === 'A' && (value === 'Ay/a' || value === 'Avy/a')) {
-            oneParent.push({ label: value === 'Ay/a' ? 'Dominant red gene (Ay)' : 'Am. Brindle gene (Avy)' });
-            continue;
-        }
-        // A-locus a/a — both parents must carry a recessive a
-        if (locus === 'A' && value === 'a/a') {
-            bothParents.push({ label: 'non-agouti (a)' });
-            continue;
-        }
-        // A-locus at/a — split: one parent must have 'at' (visible as tan/fox), other must have 'a' (self or agouti-carrier)
-        // at cannot be silently carried, so self (a/a) mice cannot carry tan — they are the 'a' contributor
-        if (locus === 'A' && value === 'at/a') {
-            splitParents.push({ label: `one parent: tan (at) · other parent: non-agouti (a)` });
-            continue;
-        }
-        // A-locus A/A — dominant, one parent is sufficient
-        if (locus === 'A' && value === 'A/A') {
-            oneParent.push({ label: 'agouti (A)' });
-            continue;
-        }
-        // Homozygous recessive: both alleles equal and lowercase — each parent must carry one copy
-        if (a1 === a2 && a1 === a1.toLowerCase()) {
-            bothParents.push({ label: `${alleleName(a1)} (${a1})` });
-            continue;
-        }
-        // Compound heterozygous recessive (e.g. c/ch, ce/cch): both parents must together supply both alleles
-        if (a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()) {
-            bothParents.push({ label: `${alleleName(a1)} (${a1}) + ${alleleName(a2)} (${a2})` });
-        }
-    }
-
-    return { bothParents, oneParent, splitParents };
-};
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -594,6 +36,7 @@ const getSpeciesDisplayName = (species) => {
     };
     return displayNames[species] || species;
 };
+
 
 const litterAge = (birthDate) => {
     if (!birthDate) return null;
@@ -1189,124 +632,9 @@ const ParentSearchModal = ({
     );
 };
 
-
-
-const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUsePair }) => {
-    const cardKey = `${r.sireId}:${r.damId}:${globalIdx}`;
-    const isExpanded = expandedCard === cardKey;
-    return (
-        <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-            <div className="p-3">
-                <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                        <div className="text-sm font-semibold text-gray-800 truncate">{r.sireName} × {r.damName}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">
-                            Match: <span className="font-semibold text-emerald-700">{r.probability}%</span>
-                            {' '}•{' '}
-                            COI: <span className={`font-semibold ${r.coiValue >= 12.5 ? 'text-amber-600' : 'text-gray-700'}`}>{r.coiValue.toFixed(2)}%</span>
-                        </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">#{idx + 1}</span>
-                        <button
-                            type="button"
-                            onClick={() => setExpandedCard(isExpanded ? null : cardKey)}
-                            className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold cursor-pointer transition bg-gray-100 text-gray-600 hover:bg-gray-200"
-                        >
-                            Details {isExpanded ? '▲' : '▼'}
-                        </button>
-                    </div>
-                </div>
-                {r.warnings.length > 0 && (
-                    <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
-                        {r.warnings.join(' • ')}
-                    </div>
-                )}
-                <div className="mt-2 flex justify-end">
-                    <button
-                        type="button"
-                        onClick={() => onUsePair(r)}
-                        className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
-                    >
-                        Use in Planned Mating
-                    </button>
-                </div>
-            </div>
-            {isExpanded && (
-                <div className="border-t border-gray-100 bg-gray-50 px-3 py-2.5 space-y-2.5">
-                    <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">Why this pair?</div>
-                    {/* Per-parent summary */}
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                            <div className="font-semibold text-gray-700 mb-0.5">{r.sireName} (sire)</div>
-                            <div className="text-gray-500 text-[11px] leading-snug">{r.sireVariety}</div>
-                        </div>
-                        <div>
-                            <div className="font-semibold text-gray-700 mb-0.5">{r.damName} (dam)</div>
-                            <div className="text-gray-500 text-[11px] leading-snug">{r.damVariety}</div>
-                        </div>
-                    </div>
-                    {/* Per-locus coverage */}
-                    {r.locusBreakdown?.length > 0 && (
-                        <div>
-                            <div className="text-[11px] font-semibold text-gray-500 mb-1">Locus coverage</div>
-                            <div className="space-y-1">
-                                {r.locusBreakdown.map((l, i) => {
-                                    const sireNotNeeded = l.isDominant && !l.sireHas && !!l.damHas;
-                                    const damNotNeeded  = l.isDominant && !l.damHas  && !!l.sireHas;
-                                    return (
-                                    <div key={i} className="flex items-center gap-2 text-xs">
-                                        <span className="w-36 text-gray-600 truncate">{l.locus} <span className="text-gray-400">({l.alleles})</span></span>
-                                        {sireNotNeeded
-                                            ? <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-400">{r.sireName}: —</span>
-                                            : <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.sireHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.sireHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.sireName}: {l.sireHas === 'visual' ? '✓ visual' : l.sireHas === 'carrier' ? '✓ carrier' : 'not present'}</span>
-                                        }
-                                        {damNotNeeded
-                                            ? <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-400">{r.damName}: —</span>
-                                            : <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.damHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.damHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.damName}: {l.damHas === 'visual' ? '✓ visual' : l.damHas === 'carrier' ? '✓ carrier' : 'not present'}</span>
-                                        }
-                                    </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-                    {r.assumptions?.length > 0 && (
-                        <div className="pt-1.5 border-t border-yellow-200">
-                            <div className="text-[11px] font-semibold text-yellow-800 mb-0.5">Assumptions applied</div>
-                            <ul className="text-xs text-yellow-700 space-y-0.5 list-disc list-inside">
-                                {r.assumptions.map((a, i) => <li key={i}>{a}</li>)}
-                            </ul>
-                        </div>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-};
-
-const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) => {
-    return (
-        <div className="space-y-2 pr-1">
-            {results.length > 0 ? (
-                results.map((r, i) => (
-                    <TpResultCard key={i} r={r} idx={i} globalIdx={i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
-                ))
-            ) : (
-                <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500 space-y-1">
-                    <div>No matching pairs found for the selected traits.</div>
-                    <div className="text-xs text-gray-400">Only animals with a genetic code entered are included. Make sure your animals have their genetic codes filled in.</div>
-                </div>
-            )}
-        </div>
-    );
-};
-
 // Litter Management Component
-const TARGET_OUTCOME_ALLOWED_USERS = ['CTU1', 'CTU2', 'CTU5', 'CTU9', 'CTU24'];
 
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, initialView = 'list' }) => {
-    const canAccessTargetOutcome = TARGET_OUTCOME_ALLOWED_USERS.includes(userProfile?.id_public);
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -1361,6 +689,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
     const [editingLitter, setEditingLitter] = useState(null);
+    const [certLitter, setCertLitter] = useState(null); // { litter_id_public, vertical }
     const [litterImages, setLitterImages] = useState([]);
     const [litterImageUploading, setLitterImageUploading] = useState(false);
     const [pendingLitterImages, setPendingLitterImages] = useState([]);
@@ -1387,12 +716,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [showSpeciesPicker, setShowSpeciesPicker] = useState(false);
     const [selectedSireAnimal, setSelectedSireAnimal] = useState(null);
     const [selectedDamAnimal, setSelectedDamAnimal] = useState(null);
-    const [selectedTpSireAnimal, setSelectedTpSireAnimal] = useState(null);
-    const [selectedTpDamAnimal, setSelectedTpDamAnimal] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
-    const [litterStatusFilter, setLitterStatusFilter] = useState('all'); // 'all' | 'planned' | 'mated' | 'born'
+    const [litterStatusFilter, setLitterStatusFilter] = useState('all'); // 'all' | 'planned' | 'mated' | 'pregnant' | 'born'
     // COI calculation state
     const [predictedCOI, setPredictedCOI] = useState(null);
     const [calculatingCOI, setCalculatingCOI] = useState(false);
@@ -1414,26 +741,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [myAnimalsLoaded, setMyAnimalsLoaded] = useState(false);
     const [litterOffspringMap, setLitterOffspringMap] = useState({}); // litter._id ? offspring array (undefined = not yet loaded)
     const [offspringRefetchToken, setOffspringRefetchToken] = useState(0); // increment to force offspring re-fetch
-    const [viewMode, setViewMode] = useState(initialView === 'calendar' ? 'calendar' : 'list'); // 'list' | 'calendar'
-    const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
-    const [calendarTooltip, setCalendarTooltip] = useState(null); // { litterId, eventType, litter, x, y }
-    const [calendarQuery, setCalendarQuery] = useState('');
-    const [calendarPlannedOnly, setCalendarPlannedOnly] = useState(false);
-    const [calendarEventFilters, setCalendarEventFilters] = useState({ mated: true, due: true, born: true, weaned: true, birthday: true, feeding: true, maintenance: true, caretask: true, supply: true });
-    const [calendarAnimals, setCalendarAnimals] = useState([]);
-    const [calendarSupplies, setCalendarSupplies] = useState([]);
-    const [calendarEnclosures, setCalendarEnclosures] = useState([]);
-    const [urgencyEnabled, setUrgencyEnabled] = useState(() => {
-        try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
-    });
-    const toggleUrgency = () => {
-        const next = !urgencyEnabled;
-        setUrgencyEnabled(next);
-        try {
-            localStorage.setItem('ct_urgency_enabled', next ? 'true' : 'false');
-            window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_enabled' }));
-        } catch {}
-    };
 
     // Mating quick-add form state
     const [showAddMatingForm, setShowAddMatingForm] = useState(false);
@@ -1446,633 +753,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [matingCOI, setMatingCOI] = useState(null);
     const [matingCalcCOI, setMatingCalcCOI] = useState(false);
     const [showMatingSpeciesPicker, setShowMatingSpeciesPicker] = useState(false);
-
-    // Test Pairing modal state
-    const [showTestPairingModal, setShowTestPairingModal] = useState(false);
-    const [tpSireId, setTpSireId] = useState('');
-    const [tpDamId, setTpDamId] = useState('');
-    const [tpCOI, setTpCOI] = useState(null);
-    const [tpCalculating, setTpCalculating] = useState(false);
-    const [tpError, setTpError] = useState(null);
-    const [tpMode, setTpMode] = useState('coi'); // 'coi' | 'target'
-    const [tpSourceMode, setTpSourceMode] = useState('mine'); // 'mine' | 'mine+favorited'
-    const [tpTargetSpecies, setTpTargetSpecies] = useState(TARGET_OUTCOME_PROTOTYPE_SPECIES);
-    const [tpSelectedTraits, setTpSelectedTraits] = useState([]);
-    const [tpGenerating, setTpGenerating] = useState(false);
-    const [tpMockResults, setTpMockResults] = useState([]);
-    const [tpHasRun, setTpHasRun] = useState(false);
-    const [tpExpandedCard, setTpExpandedCard] = useState(null); // key = `${sireId}:${damId}:${idx}`
-    const [tpShowResultsHelp, setTpShowResultsHelp] = useState(false);
-    const [tpHideActiveFemales, setTpHideActiveFemales] = useState(false);
-    const handleCalculateTestPairing = async () => {
-        if (!tpSireId || !tpDamId) return;
-        const cacheKey = `${tpSireId}:${tpDamId}`;
-        if (coiCacheRef.current[cacheKey] != null) {
-            setTpCOI(coiCacheRef.current[cacheKey]);
-            return;
-        }
-        setTpCalculating(true);
-        setTpError(null);
-        setTpCOI(null);
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-        try {
-            const res = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-                params: { sireId: tpSireId, damId: tpDamId, generations: 20 },
-                headers: { Authorization: `Bearer ${authToken}` },
-                signal: controller.signal,
-            });
-            const val = res.data.inbreedingCoefficient ?? 0;
-            coiCacheRef.current[cacheKey] = val;
-            setTpCOI(val);
-        } catch (err) {
-            if (axios.isCancel(err)) setTpError('Request timed out — please try again.');
-            else setTpError('Failed to calculate COI. Please try again.');
-        } finally {
-            clearTimeout(timeout);
-            setTpCalculating(false);
-        }
-    };
-
-    // Chips are grouped by the locus they write to. Selecting a chip from one group removes
-    // chips from competing groups. Exceptions:
-    //   - tan & fox are A-locus but compound-het capable — they may coexist with one other A series
-    //   - Within the same A-locus series (e.g. blue + chocolate = lilac) chips can combine freely
-
-    const CHIP_A_SERIES = {
-        black:        ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'],
-        agouti:       ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente'],
-        sepia:        ['sepia'],         // a/a + C-locus
-        silveragouti: ['silver-agouti'], // A/A + C-locus
-        // dom-red, am-brindle, rec-red are NOT here — they combine with black/agouti series
-    };
-    // Build chip→series lookup
-    const chipToASeries = {};
-    Object.entries(CHIP_A_SERIES).forEach(([series, chips]) => chips.forEach(c => chipToASeries[c] = series));
-
-    const CHIP_A_COMPOUND_HET_CAPABLE = new Set(['tan', 'fox']); // may pair with one A-locus series
-    // E-locus: only rec-red remains (fawn/amber removed); can combine with A-locus chips
-    // ln-locus: only leaden remains; can combine with A-locus chips
-    const CHIP_E_EXCLUSIVE  = new Set(['rec-red']);
-    const CHIP_LEADEN_EXCLUSIVE = new Set(['leaden']);
-    const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
-    const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
-    const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
-    // Rat-specific exclusivity sets
-    const RAT_CHIP_C_EXCLUSIVE    = new Set(['rat-albino','rat-himalayan','rat-siamese','rat-tonkinese','rat-marten','rat-burmese','rat-sable']);
-    const RAT_CHIP_H_EXCLUSIVE    = new Set(['rat-self','rat-berkshire','rat-bareback','rat-capped','rat-variegated','rat-hooded']);
-    const RAT_CHIP_BASE_EXCLUSIVE = new Set(['rat-black','rat-chocolate','rat-russian-blue','rat-american-blue','rat-mink','rat-champagne','rat-beige','rat-agouti','rat-choc-agouti','rat-rub-agouti','rat-opal','rat-cinnamon','rat-silver-fawn','rat-topaz']);
-
-    const toggleTargetTraitChip = (chipId) => {
-        setTpMockResults([]); setTpHasRun(false); // clear stale results whenever chip selection changes
-        setTpSelectedTraits(prev => {
-            if (prev.includes(chipId)) return prev.filter(id => id !== chipId);
-            let next = [...prev];
-            // A-locus: all base color chips are mutually exclusive (lilac, blue, chocolate etc. are all
-            // complete phenotypes — selecting one removes all others except tan/fox compound-het chips)
-            // rec-red/fawn/amber are E-locus, not A-locus — they are NOT cleared here
-            if (chipToASeries[chipId]) {
-                next = next.filter(id =>
-                    CHIP_A_COMPOUND_HET_CAPABLE.has(id) || // keep tan/fox
-                    CHIP_E_EXCLUSIVE.has(id)             || // keep E-locus chips
-                    !chipToASeries[id]                      // keep non-A chips
-                );
-            }
-            // tan and fox share the same A-locus (at/a) — mutually exclusive with each other
-            if (CHIP_A_COMPOUND_HET_CAPABLE.has(chipId)) {
-                next = next.filter(id => !CHIP_A_COMPOUND_HET_CAPABLE.has(id));
-            }
-            // E-locus: rec-red is the only E chip; clearing is a no-op but kept for consistency
-            if (CHIP_E_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_E_EXCLUSIVE.has(id));
-            // ln-locus: only leaden remains; can combine with A-locus chips
-            if (CHIP_LEADEN_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_LEADEN_EXCLUSIVE.has(id));
-            // C-locus: mutually exclusive
-            if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
-            // Go-locus: mutually exclusive
-            if (CHIP_GO_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_GO_EXCLUSIVE.has(id));
-            // W-locus: mutually exclusive
-            if (CHIP_W_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_W_EXCLUSIVE.has(id));
-            // Rat C-locus: mutually exclusive
-            if (RAT_CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !RAT_CHIP_C_EXCLUSIVE.has(id));
-            // Rat H-locus marking: mutually exclusive
-            if (RAT_CHIP_H_EXCLUSIVE.has(chipId)) next = next.filter(id => !RAT_CHIP_H_EXCLUSIVE.has(id));
-            // Rat base color: mutually exclusive
-            if (RAT_CHIP_BASE_EXCLUSIVE.has(chipId)) next = next.filter(id => !RAT_CHIP_BASE_EXCLUSIVE.has(id));
-            return [...next, chipId];
-        });
-    };
-
-    const runTargetOutcomePrototype = () => {
-        if (tpSelectedTraits.length === 0) return;
-        setTpGenerating(true);
-
-        const speciesForPairs = tpTargetSpecies;
-        const parseGeneticCodeTokens = (animal) => {
-            if (!animal?.geneticCode) return [];
-            return animal.geneticCode
-                .replace(/,/g, ' ')
-                .replace(/\t/g, ' ')
-                .trim()
-                .split(/\s+/)
-                .filter(Boolean);
-        };
-        const shouldExcludeAstrexForLonghair = tpSelectedTraits.includes('longhair')
-            && !tpSelectedTraits.includes('astrex')
-            && !tpSelectedTraits.includes('texel');
-        const shouldExcludeLonghairForAstrex = tpSelectedTraits.includes('astrex')
-            && !tpSelectedTraits.includes('longhair')
-            && !tpSelectedTraits.includes('texel');
-        const animalHasAstrexEvidence = (animal) => {
-            if (!animal) return false;
-            for (const token of parseGeneticCodeTokens(animal)) {
-                const slash = token.indexOf('/');
-                if (slash < 0) continue;
-                const left = token.slice(0, slash).trim();
-                const right = token.slice(slash + 1).trim();
-                if (left === 'Re' || right === 'Re') return true;
-            }
-            const text = [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase();
-            return ['astrex', 'texel', 'rex'].some(keyword => text.includes(keyword));
-        };
-        const animalHasLonghairEvidence = (animal) => {
-            if (!animal) return false;
-            for (const token of parseGeneticCodeTokens(animal)) {
-                const slash = token.indexOf('/');
-                if (slash < 0) continue;
-                const left = token.slice(0, slash).trim();
-                const right = token.slice(slash + 1).trim();
-                if (left === 'go' && right === 'go') return true;
-            }
-            const text = [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase();
-            return ['longhair', 'angora', 'texel'].some(keyword => text.includes(keyword));
-        };
-        const malePool = myAnimals.filter(a =>
-            (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
-            ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
-            a.status !== 'Deceased' &&
-            a.isOwned === true &&
-            !a.isViewOnly &&
-            !a.isTransferred &&
-            !(shouldExcludeAstrexForLonghair && animalHasAstrexEvidence(a)) &&
-            !(shouldExcludeLonghairForAstrex && animalHasLonghairEvidence(a)) &&
-            !!a.geneticCode
-        );
-        const femalePool = myAnimals.filter(a =>
-            (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
-            ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
-            a.status !== 'Deceased' &&
-            a.isOwned === true &&
-            !a.isViewOnly &&
-            !a.isTransferred &&
-            !!a.geneticCode &&
-            !(shouldExcludeAstrexForLonghair && animalHasAstrexEvidence(a)) &&
-            !(shouldExcludeLonghairForAstrex && animalHasLonghairEvidence(a)) &&
-            !(tpHideActiveFemales && (a.isInMating || a.isPregnant || a.isNursing || a.status === 'Retired'))
-        );
-
-        const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
-        const selectedDam = tpDamId ? (myAnimals.find(a => a.id_public === tpDamId) || selectedTpDamAnimal) : null;
-
-        // Derive per-locus requirements from the target chip selection
-        const { genotype: targetGenotype } = buildPrototypeGenotypeFromTraits(tpSelectedTraits, tpTargetSpecies);
-        const eLociActive = tpSelectedTraits.some(id => id === 'rec-red');
-        const aLociExplicit = tpSelectedTraits.some(id => ['black','tan','chocolate','blue','dove','lilac','champagne','silver','lavender','agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti','dom-red','fox','am-brindle','sepia'].includes(id));
-        // e/e is epistatic over A-locus — exclude A from scoring only when no explicit base color chip selected
-        const targetLoci = Object.entries(targetGenotype).filter(([locus]) => !(locus === 'A' && eLociActive && !aLociExplicit));
-
-        // === DIAGNOSTICS (temporary) ===
-        console.log('[TP] selectedTraits:', tpSelectedTraits);
-        console.log('[TP] targetLoci:', targetLoci);
-        console.log('[TP] myAnimals total:', myAnimals.length);
-        console.log('[TP] malePool size:', malePool.length, malePool.map(a => `${a.id_public}(${a.species}|isViewOnly=${a.isViewOnly}|gc=${a.geneticCode||'none'})`));
-        console.log('[TP] femalePool size:', femalePool.length, femalePool.map(a => `${a.id_public}(${a.species}|isViewOnly=${a.isViewOnly}|gc=${a.geneticCode||'none'})`));
-
-        // Keywords indicating an animal likely carries at least one copy of an allele (fallback only)
-        const ALLELE_KW = {
-            'a':    ['black','chocolate','blue','dove','lilac','champagne','silver','lavender','tan','fox'],
-            'at':   ['tan','fox','black tan'],
-            'A':    ['agouti','cinnamon','argente','blue agouti','silver agouti'],
-            'Ay':   ['dominant red','dominant fawn','dominant amber'],
-            'Avy':  ['brindle','american brindle','am. brindle'],
-            'b':    ['chocolate','cinnamon','lilac','champagne','lavender'],
-            'd':    ['blue','lilac','silver','lavender','blue agouti','dominant amber','recessive amber'],
-            'p':    ['dove','champagne','argente','silver','lavender','cinnamon argente','dominant fawn','recessive fawn'],
-            'e':    ['recessive red','recessive fawn','recessive amber'],
-            'c':    ['albino','himalayan','bone'],
-            'ch':   ['siamese','himalayan','burmese','colorpoint'],
-            'ce':   ['beige','bone','stone','mock chocolate','sepia'],
-            'cch':  ['stone','burmese','colorpoint beige','sepia','silver agouti'],
-            'si':   ['pearl','silver agouti'],
-            's':    ['pied','piebald'],
-            'W':    ['variegated'],
-            'Wsh':  ['banded'],
-            'rst':  ['rosette'],
-            'go':   ['longhair','angora','texel'],
-            'Re':   ['astrex','texel','rex'],
-            'sa':   ['satin'],
-            'rn':   ['merle'],
-            'Spl':  ['splashed'],
-            'fz':   ['fuzz'],
-            'Nu':   ['hairless'],
-            'Mobr': ['xbrindle'],
-            'U':    ['umbrous'],
-        };
-
-        // Parse an animal's geneticCode string ("a/a d/d Go/Go ...") into a set of alleles present.
-        // Handles: spaces, commas, tabs, extra whitespace, mixed case allele names like Avy, Wsh, Mobr.
-        // An animal carries an allele if either slot at any locus contains it.
-        const parseAnimalAlleles = (animal) => {
-            const alleles = new Set();
-            if (!animal?.geneticCode) return alleles;
-            const parts = animal.geneticCode
-                .replace(/,/g, ' ')
-                .replace(/\t/g, ' ')
-                .trim()
-                .split(/\s+/)
-                .filter(Boolean);
-            for (const part of parts) {
-                const slash = part.indexOf('/');
-                if (slash > 0 && slash < part.length - 1) {
-                    const a1 = part.slice(0, slash).trim();
-                    const a2 = part.slice(slash + 1).trim();
-                    if (a1) alleles.add(a1);
-                    if (a2) alleles.add(a2);
-                }
-            }
-            return alleles;
-        };
-
-        const getVarietyText = (animal) =>
-            [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
-                .filter(Boolean).join(' ').toLowerCase();
-
-        // Returns 'visual' (homozygous recessive confirmed in gc), 'carrier' (het recessive), or false
-        const animalLocusStatus = (animal, a1, a2) => {
-            if (!animal) return false;
-            // Special case: at/a (tan/fox) — 'at' is always expressed and cannot be silently carried.
-            // Both parents are phenotypically visible contributors: the 'at' parent shows tan,
-            // the 'a' parent shows self. Neither is a hidden carrier — both show as 'visual'.
-            if (a1 === 'at' && a2 === 'a') {
-                if (animal.geneticCode) {
-                    const alleles = parseAnimalAlleles(animal);
-                    if (alleles.has('at')) return 'visual';
-                    if (alleles.has('a'))  return 'visual';
-                    return false;
-                }
-                const text = getVarietyText(animal);
-                if ((ALLELE_KW['at'] || []).some(kw => text.includes(kw))) return 'visual';
-                if ((ALLELE_KW['a']  || []).some(kw => text.includes(kw))) return 'visual';
-                return false;
-            }
-            // Compound-het dominant A-locus (e.g. A/at, Ay/at, Avy/at): each parent supplies ONE
-            // of the two alleles — an animal carrying either allele is a visual contributor.
-            if (COMPOUND_HET_DOMINANT.has(a1 + '/' + a2) || COMPOUND_HET_DOMINANT.has(a2 + '/' + a1)) {
-                if (animal.geneticCode) {
-                    const alleles = parseAnimalAlleles(animal);
-                    if (alleles.has(a1) || alleles.has(a2)) return 'visual';
-                    return false;
-                }
-                const text = getVarietyText(animal);
-                if ([...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw))) return 'visual';
-                return false;
-            }
-            const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
-            const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
-                && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
-            const isDominant = !isRecessiveHom && !isCompoundHetRec;
-
-            if (isRecessiveHom && animal.geneticCode) {
-                const allele = a1;
-                const tokens = animal.geneticCode
-                    .replace(/,/g, ' ').replace(/\t/g, ' ').trim().split(/\s+/).filter(Boolean);
-                for (const token of tokens) {
-                    const slash = token.indexOf('/');
-                    if (slash < 0) continue;
-                    const left = token.slice(0, slash).trim();
-                    const right = token.slice(slash + 1).trim();
-                    if (left === allele || right === allele) {
-                        return (left === allele && right === allele) ? 'visual' : 'carrier';
-                    }
-                }
-                // Locus not found in gc tokens — fall through to keyword
-            }
-            if (animal.geneticCode) {
-                const alleles = parseAnimalAlleles(animal);
-                if (isDominant) {
-                    // For dominant targets, ONLY check the dominant allele.
-                    // Checking the recessive counterpart (e.g. 'a' in Ay/a, 're' in Re/re) would
-                    // produce false positives — most animals carry 'a' on the A-locus for example.
-                    const domAllele = (a1 === a2) ? a1
-                        : DOMINANT_LOWERCASE_ALLELES.has(a1) ? a1
-                        : DOMINANT_LOWERCASE_ALLELES.has(a2) ? a2
-                        : a1 !== a1.toLowerCase() ? a1
-                        : a2 !== a2.toLowerCase() ? a2
-                        : a1;
-                    if (alleles.has(domAllele)) return 'visual';
-                } else {
-                    if (alleles.has(a1) || alleles.has(a2)) return 'carrier';
-                }
-            }
-            const text = getVarietyText(animal);
-            if (isDominant) {
-                const domAllele = (a1 === a2) ? a1
-                    : DOMINANT_LOWERCASE_ALLELES.has(a1) ? a1
-                    : DOMINANT_LOWERCASE_ALLELES.has(a2) ? a2
-                    : a1 !== a1.toLowerCase() ? a1
-                    : a2 !== a2.toLowerCase() ? a2
-                    : a1;
-                return (ALLELE_KW[domAllele] || []).some(kw => text.includes(kw)) ? 'visual' : false;
-            }
-            return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw)) ? 'carrier' : false;
-        };
-
-        // Does this animal carry at least one copy of a1 OR a2?
-        const animalCoversLocus = (animal, a1, a2) => !!animalLocusStatus(animal, a1, a2);
-
-        const animalHasAllele = (animal, allele) => {
-            if (!animal) return false;
-            if (animal.geneticCode && parseAnimalAlleles(animal).has(allele)) return true;
-            const text = getVarietyText(animal);
-            return (ALLELE_KW[allele] || []).some(kw => text.includes(kw));
-        };
-
-        // Score how many of the target loci an animal shows evidence of carrying
-        const scoreAnimalLoci = (animal) =>
-            targetLoci.reduce((acc, [, value]) => {
-                const [a1, a2] = value.split('/');
-                return acc + (animalCoversLocus(animal, a1, a2) ? 1 : 0);
-            }, 0);
-
-        // Alleles that are lowercase but dominant in expression (e.g. at = tan, dominant over a)
-        const DOMINANT_LOWERCASE_ALLELES = new Set(['at']);
-
-        // Compound-het dominant combinations — each parent must supply a different allele
-        const COMPOUND_HET_DOMINANT = new Set(['Avy/at', 'at/Avy', 'Ay/at', 'at/Ay', 'A/at', 'at/A', 'Avy/A', 'A/Avy', 'Ay/A', 'A/Ay', 'Ay/Avy', 'Avy/Ay']);
-
-        // Does the given pair split-cover a compound-het dominant (one parent has a1, the other has a2)?
-        const splitCoverCompoundHetDom = (sire, dam, value) => {
-            const [a1, a2] = value.split('/');
-            const sireHasA1 = animalHasAllele(sire, a1);
-            const sireHasA2 = animalHasAllele(sire, a2);
-            const damHasA1  = animalHasAllele(dam,  a1);
-            const damHasA2  = animalHasAllele(dam,  a2);
-            // Valid split: one parent has a1 (but not a2), the other has a2 (but not a1)
-            return (sireHasA1 && !sireHasA2 && damHasA2 && !damHasA1) || (sireHasA2 && !sireHasA1 && damHasA1 && !damHasA2);
-        };
-
-        // Score a pair: returns probability (0–1) of producing the target across all loci.
-        //   recessive hom (a1===a2 lowercase): visual×visual=1.0, visual×carrier=0.5, carrier×carrier=0.25, missing=0
-        //   compound-het recessive: binary — both must contribute; probability factor 0.25
-        //   compound-het dominant (Avy/at, etc): split-pair required, binary
-        //   dominant: one parent sufficient, binary (probability unchanged if either carries)
-        const scorePairProduction = (sire, dam) => {
-            let probability = 1.0;
-            let dominantBlocked = false;
-            for (const [locus, value] of targetLoci) {
-                const [a1, a2] = value.split('/');
-                const sireStatus = animalLocusStatus(sire, a1, a2);
-                const damStatus  = animalLocusStatus(dam,  a1, a2);
-                const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
-                const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
-                    && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
-
-                if (locus === 'A' && value === 'at/a') {
-                    // at cannot be silently carried — need one parent with 'at' AND one parent with 'a'
-                    const anyHasAt = animalHasAllele(sire, 'at') || animalHasAllele(dam, 'at');
-                    const anyHasA  = animalHasAllele(sire, 'a')  || animalHasAllele(dam, 'a');
-                    if (!anyHasAt || !anyHasA) { probability = 0; break; }
-                    probability *= 0.5; // approximate: at/a×a/a and at/a×at/a both give ~50%
-                } else if (locus === 'A' && COMPOUND_HET_DOMINANT.has(value)) {
-                    const [da1, da2] = value.split('/');
-                    const anyHasA1 = animalHasAllele(sire, da1) || animalHasAllele(dam, da1);
-                    const anyHasA2 = animalHasAllele(sire, da2) || animalHasAllele(dam, da2);
-                    if (!anyHasA1 || !anyHasA2) { dominantBlocked = true; break; }
-                    if (!splitCoverCompoundHetDom(sire, dam, value)) { probability = 0; break; }
-                } else if (isRecessiveHom) {
-                    if (!sireStatus || !damStatus) { probability = 0; break; }
-                    if (sireStatus === 'visual' && damStatus === 'visual') { /* ×1.0 */ }
-                    else if (sireStatus === 'visual' || damStatus === 'visual') probability *= 0.5;
-                    else probability *= 0.25; // both het carriers
-                } else if (isCompoundHetRec) {
-                    if (!(!!sireStatus && !!damStatus)) { probability = 0; break; }
-                    probability *= 0.25;
-                } else {
-                    // Dominant — one parent is sufficient
-                    // Only check the dominant allele; checking the recessive counterpart (e.g. 'a' in Ay/a)
-                    // would make "definitely lacks" almost never true since most animals carry 'a'.
-                    const domAllele = (a1 === a2) ? a1
-                        : DOMINANT_LOWERCASE_ALLELES.has(a1) ? a1
-                        : DOMINANT_LOWERCASE_ALLELES.has(a2) ? a2
-                        : a1 !== a1.toLowerCase() ? a1
-                        : a2 !== a2.toLowerCase() ? a2
-                        : a1;
-                    const sireDefinitelyLacks = !!sire.geneticCode && !animalHasAllele(sire, domAllele);
-                    const damDefinitelyLacks  = !!dam.geneticCode  && !animalHasAllele(dam,  domAllele);
-                    if (sireDefinitelyLacks && damDefinitelyLacks) { dominantBlocked = true; break; }
-                    if (!sireStatus && !damStatus) { probability = 0; break; }
-                }
-            }
-            return { probability: dominantBlocked ? 0 : probability, dominantBlocked };
-        };
-
-        // Sort animals by how many target loci they cover, then cross top candidates
-        const scoredMales = malePool
-            .map(a => ({ animal: a, score: scoreAnimalLoci(a) }))
-            .sort((a, b) => b.score - a.score);
-        const scoredFemales = femalePool
-            .map(a => ({ animal: a, score: scoreAnimalLoci(a) }))
-            .sort((a, b) => b.score - a.score);
-
-        const pairs = [];
-        if (selectedSire?.id_public && selectedDam?.id_public) {
-            const { probability: selProbability, dominantBlocked: selBlocked } = scorePairProduction(selectedSire, selectedDam);
-            if (!selBlocked && selProbability > 0) pairs.push({
-                sireId: selectedSire.id_public,
-                sireName: [selectedSire.prefix, selectedSire.name, selectedSire.suffix].filter(Boolean).join(' ') || selectedSire.id_public,
-                damId: selectedDam.id_public,
-                damName: [selectedDam.prefix, selectedDam.name, selectedDam.suffix].filter(Boolean).join(' ') || selectedDam.id_public,
-                pairProb: selProbability,
-                source: 'selected'
-            });
-        }
-
-        scoredMales.forEach(({ animal: sire }) => {
-            scoredFemales.forEach(({ animal: dam }) => {
-                if (sire.id_public === dam.id_public) return;
-                const { probability, dominantBlocked } = scorePairProduction(sire, dam);
-                if (dominantBlocked || probability === 0) return;
-                pairs.push({
-                    sireId: sire.id_public,
-                    sireName: [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') || sire.id_public,
-                    damId: dam.id_public,
-                    damName: [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') || dam.id_public,
-                    pairProb: probability,
-                    source: 'mine',
-                    sireBirthDate: sire.birthDate || null,
-                    damBirthDate: dam.birthDate || null,
-                });
-            });
-        });
-
-        const uniq = [];
-        const seen = new Set();
-        pairs.forEach(p => {
-            const key = `${p.sireId}:${p.damId}`;
-            if (seen.has(key)) return;
-            seen.add(key);
-            uniq.push(p);
-        });
-
-        const { assumptions: prototypeAssumptions } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
-        const phenotypeInterpretation = getPrototypePhenotypeInterpretation(tpSelectedTraits);
-        const phenotypeConfidence = getPrototypePhenotypeConfidence(tpSelectedTraits);
-
-        const sorted = uniq.sort((a, b) => (b.pairProb || 0) - (a.pairProb || 0));
-        const tieredPairs = sorted.filter(p => (p.pairProb || 0) > 0);
-
-        const mapPair = (pair) => {
-                const pairProb = pair.pairProb || 0;
-                const probability = Math.round(pairProb * 100);
-
-                const hash = `${pair.sireId}${pair.damId}`
-                    .split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-
-                const coiKey = `${pair.sireId}:${pair.damId}`;
-                const coiValue = (pair.source === 'selected' && tpCOI != null)
-                    ? tpCOI
-                    : coiCacheRef.current[coiKey] != null
-                        ? coiCacheRef.current[coiKey]
-                        : Math.max(0, ((hash % 190) / 10));
-
-                // COI above 12.5% lowers the sort score proportionally
-                const sortScore = probability - Math.max(0, (coiValue - 12.5) * 0.5);
-
-                const warnings = [];
-                if (coiValue >= 12.5) warnings.push('Higher COI than ideal range');
-                if (tpSourceMode === 'mine+favorited' && pair.source !== 'mine') warnings.push('Favorited external candidate');
-
-                // Build per-locus breakdown for each parent
-                const sireAnimal = myAnimals.find(a => a.id_public === pair.sireId);
-                const damAnimal  = myAnimals.find(a => a.id_public === pair.damId);
-                const sireVariety = [sireAnimal?.color, sireAnimal?.phenotype, sireAnimal?.geneticCode].filter(Boolean).join(' · ') || 'No data recorded';
-                const damVariety  = [damAnimal?.color,  damAnimal?.phenotype,  damAnimal?.geneticCode ].filter(Boolean).join(' · ') || 'No data recorded';
-                const locusBreakdown = targetLoci.map(([locus, value]) => {
-                    const [a1, a2] = value.split('/');
-                    const sireHas = animalLocusStatus(sireAnimal, a1, a2);
-                    const damHas  = animalLocusStatus(damAnimal,  a1, a2);
-                    const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
-                    const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase();
-                    // at/a and compound-het dominant (A/at, Ay/at, etc.) are split targets — both
-                    // parents contribute a different allele, so neither should ever show as '—'
-                    const isCompoundHetDom = COMPOUND_HET_DOMINANT.has(value);
-                    const isDominant = !isRecessiveHom && !isCompoundHetRec && !(a1 === 'at' && a2 === 'a') && !isCompoundHetDom;
-                    const locusLabel = locus === 'A' ? 'A-locus' : locus === 'B' ? 'B-locus (chocolate)' : locus === 'D' ? 'D-locus (blue dilute)' : locus === 'P' ? 'P-locus (pink-eyed dilute)' : locus === 'E' ? 'E-locus (extension)' : locus === 'C' ? 'C-locus (dilution)' : locus === 'Go' ? 'Go-locus (coat length)' : locus === 'S' ? 'S-locus (piebald)' : locus === 'W' ? 'W-locus (variegation)' : locus;
-                    return { locus: locusLabel, alleles: value, sireHas, damHas, isDominant };
-                });
-
-                return {
-                    ...pair,
-                    probability,
-                    sortScore,
-                    coiValue,
-                    warnings,
-                    phenotypeConfidence,
-                    assumptions: prototypeAssumptions,
-                    sireVariety,
-                    damVariety,
-                    locusBreakdown,
-                };
-        };
-
-        const results = tieredPairs.map(mapPair).filter(Boolean)
-            .sort((a, b) => b.sortScore - a.sortScore);
-
-        setTimeout(() => {
-            setTpMockResults(results);
-            setTpHasRun(true);
-            setTpGenerating(false);
-            setTpExpandedCard(null);
-
-            // Fetch actual COI for pairs not cached this session
-            const pairsNeedingCOI = results.filter(r => {
-                if (r.source === 'selected' && tpCOI != null) return false; // already have real COI
-                const cacheKey = `${r.sireId}:${r.damId}`;
-                return coiCacheRef.current[cacheKey] == null;
-            });
-
-            pairsNeedingCOI.forEach(async (result) => {
-                const cacheKey = `${result.sireId}:${result.damId}`;
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 15000);
-                try {
-                    const res = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-                        params: { sireId: result.sireId, damId: result.damId, generations: 20 },
-                        headers: { Authorization: `Bearer ${authToken}` },
-                        signal: controller.signal,
-                    });
-                    const realCOI = res.data.inbreedingCoefficient ?? 0;
-                    coiCacheRef.current[cacheKey] = realCOI;
-
-                    // Update results with real COI and re-sort
-                    setTpMockResults(prev => {
-                        const updated = prev.map(r => {
-                            if (r.sireId === result.sireId && r.damId === result.damId) {
-                                const newSortScore = r.probability - Math.max(0, (realCOI - 12.5) * 0.5);
-                                return {
-                                    ...r,
-                                    coiValue: realCOI,
-                                    sortScore: newSortScore,
-                                    warnings: realCOI >= 12.5
-                                        ? Array.from(new Set([...r.warnings, 'Higher COI than ideal range']))
-                                        : r.warnings.filter(w => w !== 'Higher COI than ideal range'),
-                                };
-                            }
-                            return r;
-                        });
-                        // Re-sort by new sortScore
-                        return updated.sort((a, b) => b.sortScore - a.sortScore);
-                    });
-                } catch (err) {
-                    coiCacheRef.current[cacheKey] = 0; // prevent retry loops on error
-                } finally {
-                    clearTimeout(timeout);
-                }
-            });
-        }, 350);
-    };
-
-    const usePairForPlannedMating = (pair) => {
-        const selectedTraitLabels = tpSelectedTraits
-            .map(id => getTargetTraitChipById(id, tpTargetSpecies))
-            .filter(Boolean)
-            .map(formatTargetTraitChip);
-
-        setMatingData(prev => ({
-            ...prev,
-            species: tpTargetSpecies,
-            sireId_public: pair.sireId,
-            damId_public: pair.damId,
-            notes: [
-                prev.notes || '',
-                `Target Outcome prototype: ${selectedTraitLabels.join(', ')}`,
-                `Predicted match: ${pair.probability.toFixed(2)}%`
-            ].filter(Boolean).join('\n')
-        }));
-
-        const sire = myAnimals.find(a => a.id_public === pair.sireId) || null;
-        const dam = myAnimals.find(a => a.id_public === pair.damId) || null;
-        setSelectedMatingSire(sire);
-        setSelectedMatingDam(dam);
-
-        setShowTestPairingModal(false);
-        setShowAddMatingForm(true);
-    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -2206,18 +886,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setLoading(false);
         }
     };
-
-    // Fetch animals, supplies, and enclosures for calendar view
-    useEffect(() => {
-        if (viewMode !== 'calendar' || !authToken) return;
-        const headers = { Authorization: `Bearer ${authToken}` };
-        axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers })
-            .then(r => setCalendarAnimals(Array.isArray(r.data) ? r.data : [])).catch(() => {});
-        axios.get(`${API_BASE_URL}/supplies`, { headers })
-            .then(r => setCalendarSupplies(Array.isArray(r.data) ? r.data : [])).catch(() => {});
-        axios.get(`${API_BASE_URL}/enclosures`, { headers })
-            .then(r => setCalendarEnclosures(Array.isArray(r.data) ? r.data : [])).catch(() => {});
-    }, [viewMode, authToken, API_BASE_URL]);
 
     const fetchLitters = async ({ preserveOffspring = false } = {}) => {
         try {
@@ -2380,16 +1048,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setFormData(prev => ({...prev, otherParent1Id_public: animal?.id_public || ''}));
         } else if (modalTarget === 'other-parent2-litter') {
             setFormData(prev => ({...prev, otherParent2Id_public: animal?.id_public || ''}));
-        } else if (modalTarget === 'tp-sire') {
-            setTpSireId(animal?.id_public || '');
-            setSelectedTpSireAnimal(animal || null);
-            setTpCOI(null);
-            setTpError(null);
-        } else if (modalTarget === 'tp-dam') {
-            setTpDamId(animal?.id_public || '');
-            setSelectedTpDamAnimal(animal || null);
-            setTpCOI(null);
-            setTpError(null);
         } else if (modalTarget === 'sire-mating') {
             setMatingData(prev => ({...prev, sireId_public: animal?.id_public || '', species: prev.species || animal?.species || ''}));
             setSelectedMatingSire(animal || null);
@@ -2487,10 +1145,31 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 });
                 litterBackendId = editingMatingId;
             } else {
-                const resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                litterBackendId = resp.data.litterId_backend;
+                try {
+                    const resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    litterBackendId = resp.data.litterId_backend;
+                } catch (createError) {
+                    const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
+                    if (!duplicate) throw createError;
+                    const resolution = await resolveDuplicateLitter({ duplicate, authToken, API_BASE_URL });
+                    if (resolution.action === 'adopted') {
+                        showModalMessage('Success', 'Adopted the existing litter into your Litter Management!');
+                        setShowAddMatingForm(false);
+                        resetMatingForm();
+                        await fetchLitters();
+                        return;
+                    }
+                    if (resolution.action === 'create-anyway') {
+                        const retryResp = await axios.post(`${API_BASE_URL}/litters`, { ...payload, confirmDuplicate: true }, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        litterBackendId = retryResp.data.litterId_backend;
+                    } else {
+                        return;
+                    }
+                }
             }
             if (matingCOI != null) {
                 axios.put(`${API_BASE_URL}/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI }, {
@@ -2510,7 +1189,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleMarkAsMated = async (litter) => {
         const today = new Date().toISOString().split('T')[0];
         try {
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { matingDate: today }, {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { matingDate: today, isPlanned: false }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             // Auto-dismiss the "mating due today" urgency notification for this litter
@@ -2522,8 +1201,92 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_dismissed' }));
             } catch {}
             await fetchLitters();
+            // Small delay to allow React to process state updates
+            await new Promise(resolve => setTimeout(resolve, 100));
         } catch (err) {
             showModalMessage('Error', 'Failed to mark as mated');
+        }
+    };
+
+    const handleMarkAsPregnant = async (litter) => {
+        if (!litter.damId_public) {
+            showModalMessage('Error', 'This litter has no dam assigned.');
+            return;
+        }
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            // Set pregnancyDate on litter and mark dam as pregnant (clear isInMating)
+            await Promise.all([
+                axios.put(`${API_BASE_URL}/litters/${litter._id}`, { pregnancyDate: today }, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                }),
+                axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isPregnant: true, isInMating: false }, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                })
+            ]);
+            await Promise.all([fetchLitters(), fetchMyAnimals()]);
+            // Small delay to allow React to process state updates before dispatching event
+            await new Promise(resolve => setTimeout(resolve, 100));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: litter.damId_public, isPregnant: true, isInMating: false } }));
+        } catch (err) {
+            showModalMessage('Error', 'Failed to mark dam as pregnant');
+        }
+    };
+
+    const handleBornToday = async (litter) => {
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { birthDate: today }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            // Sync dam to nursing state
+            await syncDamPostBirth(litter.damId_public);
+            await fetchLitters();
+            // Small delay to allow React to process state updates
+            await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (err) {
+            showModalMessage('Error', 'Failed to mark as born');
+        }
+    };
+
+    // Auto-transition a dam from Pregnant -> Nursing whenever a litter's birthDate is
+    // recorded for the first time (covers both new litters created with a birth date,
+    // and planned/mated litters being converted to a litter via "Convert to Litter").
+    const syncDamPostBirth = async (damId_public) => {
+        if (!damId_public) return;
+        try {
+            await axios.put(`${API_BASE_URL}/animals/${damId_public}`, { isPregnant: false, isNursing: true }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            await fetchMyAnimals();
+            // Small delay to allow React to process state updates
+            await new Promise(resolve => setTimeout(resolve, 100));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: damId_public, isPregnant: false, isNursing: true } }));
+        } catch (err) {
+            console.warn('Failed to sync dam nursing state after birth:', err?.response?.data?.message || err?.message);
+        }
+    };
+
+    // Explicit "Wean Today" action — weaningConfirmed is only ever set here, so recording/
+    // correcting a plain weaningDate elsewhere never ends nursing on its own.
+    const handleMarkAsWeaned = async (litter) => {
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { weaningDate: today, weaningConfirmed: true }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            if (litter.damId_public) {
+                await axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isNursing: false }, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            }
+            await Promise.all([fetchLitters(), fetchMyAnimals()]);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            if (litter.damId_public) {
+                window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: litter.damId_public, isNursing: false } }));
+            }
+        } catch (err) {
+            showModalMessage('Error', 'Failed to mark as weaned');
         }
     };
 
@@ -2640,11 +1403,37 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 unknownLossesCount: formData.unknownLosses || null
             };
 
-            const litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            let litterResponse;
+            try {
+                litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            } catch (createError) {
+                const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
+                if (!duplicate) throw createError;
+                const resolution = await resolveDuplicateLitter({ duplicate, authToken, API_BASE_URL });
+                if (resolution.action === 'adopted') {
+                    showModalMessage('Success', 'Adopted the existing litter into your Litter Management!');
+                    setShowAddForm(false);
+                    setEditingLitter(null);
+                    fetchLitters();
+                    return;
+                }
+                if (resolution.action === 'create-anyway') {
+                    litterResponse = await axios.post(`${API_BASE_URL}/litters`, { ...litterPayload, confirmDuplicate: true }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                } else {
+                    return; // user cancelled
+                }
+            }
 
             const litterId = litterResponse.data.litterId_backend;
+
+            // Litter was created with a birth date already recorded ? dam transitions to nursing
+            if (formData.birthDate) {
+                syncDamPostBirth(formData.damId_public);
+            }
 
             // Upload any images that were staged during creation
             if (pendingLitterImages.length > 0) {
@@ -2695,17 +1484,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 
                 // Create males
                 for (let i = 1; i <= parseInt(createOffspringCounts.males || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: sire.species, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: sire.species, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
                 
                 // Create females
                 for (let i = 1; i <= parseInt(createOffspringCounts.females || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: sire.species, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: sire.species, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
 
                 // Create unknown/intersex
                 for (let i = 1; i <= parseInt(createOffspringCounts.unknown || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: sire.species, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: sire.species, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
             }
             
@@ -3181,13 +1970,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 }
                 
                 for (let i = 1; i <= parseInt(createOffspringCounts.males || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: offspringSpecies, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: offspringSpecies, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
                 for (let i = 1; i <= parseInt(createOffspringCounts.females || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: offspringSpecies, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: offspringSpecies, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
                 for (let i = 1; i <= parseInt(createOffspringCounts.unknown || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: offspringSpecies, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', fatherId_public: formData.sireId_public, motherId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: offspringSpecies, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
                 }
             }
             
@@ -3202,6 +1991,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const proceed = window.confirm(`Warning:\n${updateWarnings.join('\n')}\n\nSave anyway?`);
                 if (!proceed) return;
             }
+
+            // Detect a first-time birth recording (no birthDate previously ? one now) so we
+            // can auto-transition the dam from Pregnant -> Nursing after the litter save succeeds.
+            const originalLitter = litters.find(l => l._id === editingLitter);
+            const isNewBirth = !!formData.birthDate && !originalLitter?.birthDate;
 
             await axios.put(`${API_BASE_URL}/litters/${editingLitter}`, {
                 breedingPairCodeName: formData.breedingPairCodeName,
@@ -3238,6 +2032,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+
+            // First-time birth recorded on this litter ? dam transitions Pregnant -> Nursing
+            if (isNewBirth) {
+                syncDamPostBirth(formData.damId_public);
+            }
 
             // Update all linked offspring to have the correct parents.
             // Use allSettled so that offspring the user no longer owns (transferred/sold)
@@ -3328,8 +2127,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 gender: newOffspringData.gender,
                 birthDate: addingOffspring.birthDate,
                 status: 'Pet',
-                fatherId_public: addingOffspring.sireId_public,
-                motherId_public: addingOffspring.damId_public,
+                sireId_public: addingOffspring.sireId_public,
+                damId_public: addingOffspring.damId_public,
                 color: newOffspringData.color || null,
                 coat: newOffspringData.coat || null,
                 remarks: newOffspringData.remarks || null,
@@ -3410,12 +2209,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         // Status filter
         if (litterStatusFilter !== 'all') {
-            const today = new Date();
-            const isMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= today;
-            const isPlannedOnly = litter.isPlanned && !isMated;
-            const isBorn = !litter.isPlanned;
+            const hasBirth = !!litter.birthDate;
+            const hasPregnancy = !!litter.pregnancyDate;
+            const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth;
+            const isPregnant = hasPregnancy && !hasBirth;
+            const isPlannedOnly = litter.isPlanned && !hasPregnancy && !hasBirth;
+            const isBorn = hasBirth;
             if (litterStatusFilter === 'planned' && !isPlannedOnly) return false;
             if (litterStatusFilter === 'mated'   && !isMated)       return false;
+            if (litterStatusFilter === 'pregnant' && !isPregnant)   return false;
             if (litterStatusFilter === 'born'    && !isBorn)        return false;
         }
 
@@ -3456,15 +2258,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         
         return false;
     }).sort((a, b) => {
-        // Sort order: Mated (isPlanned + past matingDate) ? Planned-only ? Born (newest first)
-        const today = new Date();
-        const aIsMated = a.isPlanned && a.matingDate && new Date(a.matingDate) <= today;
-        const bIsMated = b.isPlanned && b.matingDate && new Date(b.matingDate) <= today;
-        const aIsPlannedOnly = a.isPlanned && !aIsMated;
-        const bIsPlannedOnly = b.isPlanned && !bIsMated;
-        const rank = (l, isMated, isPlannedOnly) => isMated ? 0 : isPlannedOnly ? 1 : 2;
-        const aRank = rank(a, aIsMated, aIsPlannedOnly);
-        const bRank = rank(b, bIsMated, bIsPlannedOnly);
+        // Sort order: Planned → Mated → Pregnant → Born (newest first)
+        const aHasBirth = !!a.birthDate;
+        const bHasBirth = !!b.birthDate;
+        const aHasPregnancy = !!a.pregnancyDate;
+        const bHasPregnancy = !!b.pregnancyDate;
+        const aIsPlannedOnly = a.isPlanned && !aHasPregnancy && !aHasBirth;
+        const bIsPlannedOnly = b.isPlanned && !bHasPregnancy && !bHasBirth;
+        const aIsMated = !a.isPlanned && !!a.matingDate && !aHasPregnancy && !aHasBirth;
+        const bIsMated = !b.isPlanned && !!b.matingDate && !bHasPregnancy && !bHasBirth;
+        const aIsPregnant = aHasPregnancy && !aHasBirth;
+        const bIsPregnant = bHasPregnancy && !bHasBirth;
+        const rank = (l, isPlannedOnly, isMated, isPregnant) => isPregnant ? 0 : isMated ? 1 : isPlannedOnly ? 2 : 3;
+        const aRank = rank(a, aIsPlannedOnly, aIsMated, aIsPregnant);
+        const bRank = rank(b, bIsPlannedOnly, bIsMated, bIsPregnant);
         if (aRank !== bRank) return aRank - bRank;
         // Within same group: newest date first
         const aDate = (a.birthDate || a.matingDate) ? new Date(a.birthDate || a.matingDate).getTime() : null;
@@ -3487,70 +2294,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         <div className="w-full max-w-7xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
-                    {initialView === 'calendar'
-                        ? <><Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Calendar</>
-                        : <><BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management</>}
+                    <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management
                 </h2>
                 <div className="flex gap-2 flex-wrap">
-                    {/* View Toggle */}
-                    <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                        >
-                            <BookOpen size={14} /> List
-                        </button>
-                        <button
-                            onClick={() => setViewMode('calendar')}
-                            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1.5 transition-colors border-l border-gray-200 ${viewMode === 'calendar' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                        >
-                            <Calendar size={14} /> Calendar
-                        </button>
-                    </div>
-                    {/* Urgency Alerts Toggle */}
                     <button
-                        onClick={toggleUrgency}
-                        title={urgencyEnabled ? 'Urgency alerts on — click to disable' : 'Urgency alerts off — click to enable'}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm transition-colors ${urgencyEnabled ? 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'}`}
-                    >
-                        <Bell size={14} />
-                        <span className="hidden sm:inline">Alerts {urgencyEnabled ? 'On' : 'Off'}</span>
-                    </button>
-                    {/* Test Pairing Button */}
-                    {initialView !== 'calendar' && <button
-                        onClick={() => {
-                            setShowTestPairingModal(true);
-                            setTpSireId('');
-                            setTpDamId('');
-                            setTpCOI(null);
-                            setTpError(null);
-                            setTpCalculating(false);
-                            setTpMode('coi');
-                            setTpSourceMode('mine');
-                            setTpTargetSpecies(TARGET_OUTCOME_PROTOTYPE_SPECIES);
-                            setTpSelectedTraits([]);
-                            setTpMockResults([]);
-                            setTpHasRun(false);
-                            setTpGenerating(false);
-                            setTpExpandedCard(null);
-                            // Ensure animals are loaded for the pairing pool
-                            if (!myAnimalsLoaded) fetchMyAnimals().catch(err => console.error('[TP] animal fetch failed:', err));
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-                        title="Test a sire/dam pairing to predict COI"
-                    >
-                        <Calculator size={14} />
-                        <span className="hidden sm:inline">Test Pairing</span>
-                    </button>}
-                    {initialView !== 'calendar' && <button
                         onClick={handleRecalculateOffspringCounts}
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
                         title="Recalculate offspring counts for all litters"
                     >
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>}
+                    </button>
                     {/* + Mating / + Litter — grouped so they never split across rows */}
-                    {initialView !== 'calendar' && <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                    <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                         {/* Mating button */}
                         <button
                             onClick={() => {
@@ -3558,7 +2313,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddMatingForm(!showAddMatingForm);
                                 if (showAddMatingForm) resetMatingForm();
                             }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-r border-gray-200 ${showAddMatingForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors border-r border-gray-200 whitespace-nowrap ${showAddMatingForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
                             title="Record a planned mating"
                         >
                             {showAddMatingForm ? <X size={14} /> : <Plus size={14} />}
@@ -3590,27 +2345,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddForm(!showAddForm);
                             }}
                             data-tutorial-target="new-litter-btn"
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${showAddForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
                         >
                             {showAddForm ? <X size={14} /> : <Plus size={14} />}
                             <span>Litter</span>
                         </button>
-                    </div>}
+                    </div>
                 </div>
             </div>
 
-            {/* Stats bar — hidden on standalone calendar page */}
-            {initialView !== 'calendar' && (
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mb-4 sm:mb-6 pl-0.5">
                 <span><span className="font-semibold text-gray-700">{litterStats.litters}</span> Litters</span>
-                <span className="text-gray-300">|</span>
-                <span><span className="font-semibold text-blue-600">{litterStats.males}</span> Males</span>
-                <span className="text-gray-300">|</span>
-                <span><span className="font-semibold text-pink-500">{litterStats.females}</span> Females</span>
-                <span className="text-gray-300">|</span>
-                <span><span className="font-semibold text-gray-500">{litterStats.unknown}</span> Unknown</span>
+                <span className="border-l border-gray-200 pl-4"><span className="font-semibold text-blue-600">{litterStats.males}</span> Males</span>
+                <span className="border-l border-gray-200 pl-4"><span className="font-semibold text-pink-500">{litterStats.females}</span> Females</span>
+                <span className="border-l border-gray-200 pl-4"><span className="font-semibold text-gray-500">{litterStats.unknown}</span> Unknown</span>
             </div>
-            )}
 
             {loading && litters.length === 0 && (
                 /* Skeleton litter cards ? shown only until first fetch completes */
@@ -4018,9 +2767,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 </div>
 
                                 {/* Birth Date & Offspring Counts */}
-                                <div className="mb-6 p-4 border border-green-200 rounded-lg bg-green-50">
+                                <div className="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
                                     <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
-                                        <Baby size={18} className="inline-block align-middle text-green-600 mr-2 flex-shrink-0" />Birth & Offspring Details
+                                        <Baby size={18} className="inline-block align-middle text-blue-600 mr-2 flex-shrink-0" />Birth & Offspring Details
                                     </h4>
 
                                     {/* Row 1: Dates */}
@@ -4816,12 +3565,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                             <button
                                 onClick={() => { handleEditLitter(matingEditChoice); setMatingEditChoice(null); }}
-                                className="w-full flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition text-left"
+                                className="w-full flex items-center gap-3 px-4 py-3 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition text-left"
                             >
-                                <ClipboardList size={18} className="text-green-600 flex-shrink-0" />
+                                <ClipboardList size={18} className="text-violet-600 flex-shrink-0" />
                                 <div>
-                                    <div className="font-semibold text-green-800 text-sm">Convert to Litter</div>
-                                    <div className="text-xs text-green-600">Record birth date and offspring details</div>
+                                    <div className="font-semibold text-violet-800 text-sm">Convert to Litter</div>
+                                    <div className="text-xs text-violet-600">Record birth date and offspring details</div>
                                 </div>
                             </button>
                         </div>
@@ -4831,7 +3580,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             )}
 
             {/* Litter List */}
-            {viewMode === 'list' && (
             <div className="space-y-4">
                 {/* Search Bar */}
                 {litters.length > 0 && (
@@ -4850,7 +3598,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         {/* Status filter */}
                         <div className="flex flex-wrap gap-1.5 items-center">
                             <span className="text-xs font-medium text-gray-500 mr-0.5">Show:</span>
-                            {[['all','All'],['planned','Planned'],['mated','Mated'],['born','Born']].map(([val, label]) => (
+                            {[['all','All'],['pregnant','Pregnant'],['mated','Mated'],['planned','Planned'],['born','Born']].map(([val, label]) => (
                                 <button
                                     key={val}
                                     type="button"
@@ -4858,8 +3606,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                                         litterStatusFilter === val
                                             ? val === 'planned' ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
-                                            : val === 'mated'   ? 'bg-purple-100 border-purple-300 text-purple-700'
-                                            : val === 'born'    ? 'bg-green-100 border-green-300 text-green-700'
+                                            : val === 'mated'   ? 'bg-sky-100 border-sky-300 text-sky-700'
+                                            : val === 'pregnant' ? 'bg-pink-100 border-pink-300 text-pink-700'
+                                            : val === 'born'    ? 'bg-violet-100 border-violet-300 text-violet-700'
                                             : 'bg-primary border-primary/50 text-black'
                                             : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
                                     }`}
@@ -4933,35 +3682,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <p className="text-gray-600">No litters yet. Create your first litter above!</p>
                     </div>
                 ) : (
-                    filteredLitters.sort((a, b) => {
-                        // Determine state priority for each litter
-                        const getStatePriority = (litter) => {
-                            const hasBirthDate = !!litter.birthDate;
-                            const hasPregnancyDate = !!litter.pregnancyDate;
-                            const hasMatingDate = !!litter.matingDate;
-                            const isMatingDatePassed = hasMatingDate && new Date(litter.matingDate) <= new Date();
-                            
-                            const isBorn = hasBirthDate;
-                            const isPregnant = hasPregnancyDate && !hasBirthDate;
-                            const isMated = (hasMatingDate && !hasPregnancyDate && !hasBirthDate) || (litter.isPlanned && hasMatingDate && isMatingDatePassed && !hasPregnancyDate && !hasBirthDate);
-                            
-                            // Priority order: Pregnant (0) → Mated (1) → Planned (2) → Born (3)
-                            if (isPregnant) return 0;
-                            if (isMated) return 1;
-                            if (!isBorn) return 2; // Planned
-                            return 3; // Born
-                        };
-                        
-                        const priorityA = getStatePriority(a);
-                        const priorityB = getStatePriority(b);
-                        
-                        if (priorityA !== priorityB) return priorityA - priorityB;
-                        
-                        // Within same state, sort by date (most recent first)
-                        const dateA = a.birthDate || a.pregnancyDate || a.matingDate || a.pairingDate || new Date(8640000000000000);
-                        const dateB = b.birthDate || b.pregnancyDate || b.matingDate || b.pairingDate || new Date(8640000000000000);
-                        return new Date(dateB) - new Date(dateA);
-                    }).map(litter => {
+                    filteredLitters.map(litter => {
                         // Use parent data from litter object (includes transferred/hidden animals)
                         const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
                         const dam = litter.dam || myAnimals.find(a => a.id_public === litter.damId_public);
@@ -4969,21 +3690,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         // Use endpoint-fetched offspring (includes transferred animals) with fallback to myAnimals
                         const offspringList = litterOffspringMap[litter._id] ?? [];
                         const offspringLoading = isExpanded && litterOffspringMap[litter._id] === undefined;
-                        
-                        // Robust state detection that works with both old and new backends
-                        // Priority: birthDate → pregnancyDate → matingDate → isPlanned
-                        const hasBirthDate = !!litter.birthDate;
-                        const hasPregnancyDate = !!litter.pregnancyDate;
-                        const hasMatingDate = !!litter.matingDate;
-                        const isMatingDatePassed = hasMatingDate && new Date(litter.matingDate) <= new Date();
-                        
-                        const isBorn = hasBirthDate;
-                        const isPregnant = hasPregnancyDate && !hasBirthDate;
-                        const isMated = (hasMatingDate && !hasPregnancyDate && !hasBirthDate) || (litter.isPlanned && hasMatingDate && isMatingDatePassed && !hasPregnancyDate && !hasBirthDate);
-                        const isPlannedOnly = (!hasMatingDate && !hasPregnancyDate && !hasBirthDate) || (litter.isPlanned && !hasMatingDate);
+                        // Mating state helpers
+                        const hasBirth = !!litter.birthDate;
+                        const hasPregnancy = !!litter.pregnancyDate;
+                        const isMated = !litter.isPlanned && !!litter.matingDate && !hasPregnancy && !hasBirth;
+                        const isPregnant = hasPregnancy && !hasBirth;
+                        const isPlannedOnly = litter.isPlanned && !hasPregnancy && !hasBirth;
+                        // Mirror the Reproduction tab: rely on the dam's isNursing flag, which the backend
+                        // already recomputes using each species' maxNursingDays safety-net cutoff — not just
+                        // weaningConfirmed — so a litter past that window stops showing as nursing here too.
+                        const isNursing = hasBirth && (dam ? !!dam.isNursing : !litter.weaningConfirmed);
                         
                         return (
-                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : isPregnant ? 'border-dashed border-red-300 bg-red-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
+                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-sky-300 bg-sky-50/20' : isPregnant ? 'border-dashed border-pink-300 bg-pink-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
@@ -5004,8 +3723,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <div className="flex-1">
                                                 <p className="font-bold text-gray-800 text-sm">
                                                     {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-2">Planned</span>}
-                                                    {isMated && <span className="text-[10px] font-semibold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
-                                                    {isPregnant && <span className="text-[10px] font-semibold bg-red-100 text-red-700 px-1.5 py-0.5 rounded mr-2">Pregnant</span>}
+                                                    {isMated && <span className="text-[10px] font-semibold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
+                                                    {isPregnant && <span className="text-[10px] font-semibold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded mr-2">Pregnant</span>}
                                                     {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
                                                     {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
@@ -5019,7 +3738,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <p className="text-[10px] text-gray-500 mt-0.5">
                                             {formatDate(litter.birthDate)}
-                                            {!litter.isPlanned && litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}
+                                            {!litter.isPlanned && litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}
                                         </p>
                                         {(litter.inbreedingCoefficient != null || coiCalculating.has(litter._id)) && (
                                             <p className="text-[10px] text-gray-500 mt-0.5">
@@ -5043,12 +3762,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block mb-0.5 w-fit">{litter.litter_id_public}</span>
                                                 : <span className="text-xs text-gray-400">?</span>}
                                             {isPlannedOnly
-                                                ? <span className="text-xs font-semibold text-indigo-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
+                                                ? <span className="text-xs font-semibold text-indigo-600"><Calendar size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
                                                 : isMated
-                                                ? <span className="text-xs font-semibold text-purple-600"><Heart size={12} className="inline-block align-middle mr-0.5" /> Mated {formatDate(litter.matingDate)}</span>
+                                                ? <span className="text-xs font-semibold text-sky-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
                                                 : isPregnant
-                                                ? <span className="text-xs font-semibold text-red-600">🤰 Pregnant</span>
-                                                : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</span>}
+                                                ? <span className="text-xs font-semibold text-pink-600"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
+                                                : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
                                         <div className="min-w-0">
@@ -5075,7 +3794,23 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPlannedOnly
                                                 ? <span className="text-xs font-semibold text-indigo-500">Awaiting mating</span>
                                                 : isMated
-                                                ? <span className="text-xs font-semibold text-purple-500">Awaiting birth</span>
+                                                ? <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
+                                                    title="Mark dam as pregnant"
+                                                    className="text-[11px] font-semibold text-pink-700 bg-pink-50 border border-pink-200 rounded-lg px-2 py-1 hover:bg-pink-100 transition flex items-center gap-1"
+                                                  >
+                                                    <ScanHeart size={12} className="fill-current" /> Assign Pregnant
+                                                  </button>
+                                                : isPregnant
+                                                ? <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
+                                                    title="Mark litter as born today"
+                                                    className="text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 rounded-lg px-2 py-1 hover:bg-violet-100 transition flex items-center gap-1"
+                                                  >
+                                                    <Droplet size={12} /> Born today
+                                                  </button>
                                                 : <div className="flex items-center gap-1.5">
                                                     <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                                     {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
@@ -5096,9 +3831,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
                                             title="Mark as mated today"
-                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition"
+                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 transition"
                                         >
-                                            <Heart size={11} /> Mated today
+                                            <Hourglass size={11} /> Mated today
+                                        </button>
+                                    )}
+                                    {isNursing && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); handleMarkAsWeaned(litter); }}
+                                            title="Mark as weaned today"
+                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+                                        >
+                                            <Baby size={11} /> Wean today
                                         </button>
                                     )}
                                     {(litter.images?.length > 0) && (
@@ -5120,11 +3865,56 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {isPlannedOnly && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
-                                                    className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    className="flex items-center gap-1 bg-sky-500 hover:bg-sky-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                 >
-                                                    <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                    <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     <span>Mated Today</span>
                                                 </button>
+                                            )}
+                                            {isMated && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
+                                                    className="flex items-center gap-1 bg-pink-500 hover:bg-pink-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                >
+                                                    <ScanHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
+                                                    <span>Assign Pregnant</span>
+                                                </button>
+                                            )}
+                                            {isPregnant && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
+                                                    className="flex items-center gap-1 bg-violet-500 hover:bg-violet-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                >
+                                                    <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                    <span>Born Today</span>
+                                                </button>
+                                            )}
+                                            {isNursing && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleMarkAsWeaned(litter); }}
+                                                    className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                >
+                                                    <Baby className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                    <span>Wean Today</span>
+                                                </button>
+                                            )}
+                                            {(sire || dam) && (
+                                                <>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setCertLitter({ litter_id_public: litter.litter_id_public, vertical: false }); }}
+                                                        className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    >
+                                                        <ScrollText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                        <span className="hidden sm:inline">Horizontal Pedigree</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setCertLitter({ litter_id_public: litter.litter_id_public, vertical: true }); }}
+                                                        className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                    >
+                                                        <ScrollText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                        <span className="hidden sm:inline">Vertical Pedigree</span>
+                                                    </button>
+                                                </>
                                             )}
                                             <button
                                                 onClick={(e) => {
@@ -5135,24 +3925,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             >
                                                 <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                 <span className="hidden sm:inline">Edit</span>
-                                            </button>
-                                            {!litter.isPlanned && <button
-                                                onClick={() => handleLinkAnimals(litter)}
-                                                data-tutorial-target="link-animals-btn"
-                                                className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
-                                            >
-                                                <Link className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                <span className="hidden sm:inline">Link</span>
-                                            </button>}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteLitter(litter._id);
-                                                }}
-                                                className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                <span className="hidden sm:inline">Delete</span>
                                             </button>
                                         </div>
 
@@ -5262,7 +4034,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {litter.birthDate && (
                                                         <div>
                                                             <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div>
-                                                            <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</div>
+                                                            <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}</div>
                                                         </div>
                                                     )}
                                                     {litter.weaningDate && (
@@ -5290,7 +4062,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div>
-                                                        <div className="text-xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
+                                                        <div className="text-xl font-bold text-blue-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Losses</div>
@@ -5486,15 +4258,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 ) : (
                                                                     <EyeOff size={12} className="text-black" />
                                                                 )}
-                                                                {animal.isInMating && <Hourglass size={12} className="text-black" />}
-                                                                {animal.isPregnant && <Bean size={12} className="text-black" />}
-                                                                {animal.isNursing && <Milk size={12} className="text-black" />}
+                                                                {animal.isInMating && <Hourglass size={12} className="text-black" title="Mating" />}
+                                                                {animal.isPregnant && <ScanHeart size={12} className="text-black" title="Pregnant" />}
+                                                                {animal.isNursing && <Droplet size={12} className="text-black" title="Nursing" />}
                                                             </div>
                                                             
                                                             {/* Name */}
                                                             <div className="w-full text-center px-2 pb-1">
                                                                 <div className="text-sm font-semibold text-gray-800 truncate">
-                                                                    {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                                                                    {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
                                                                 </div>
                                                             </div>
 
@@ -5516,6 +4288,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* Add Offspring Section */}
                                         {!litter.isPlanned && addingOffspring && addingOffspring._id === litter._id ? (
+                                            <>
                                             <div className="bg-white rounded-lg border-2 border-primary p-4">
                                                 <h4 className="text-sm font-bold text-gray-700 mb-3">Add New Offspring</h4>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -5597,15 +4370,54 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </button>
                                                 </div>
                                             </div>
-                                        ) : !litter.isPlanned ? (
-                                            <button
-                                                onClick={() => handleAddOffspringToLitter(litter)}
-                                                className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-3 py-2 rounded-lg text-sm"
-                                            >
-                                                <Plus size={16} />
-                                                Add Offspring
-                                            </button>
-                                        ) : null}
+                                            <div className="flex justify-end mt-3">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLitter(litter._id);
+                                                    }}
+                                                    className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                    <span>Delete</span>
+                                                </button>
+                                            </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                                <div className="flex flex-wrap gap-2">
+                                                    {!litter.isPlanned && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleAddOffspringToLitter(litter)}
+                                                                className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                            >
+                                                                <Plus size={16} />
+                                                                Add Offspring
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleLinkAnimals(litter)}
+                                                                data-tutorial-target="link-animals-btn"
+                                                                className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-2 rounded-lg text-sm"
+                                                            >
+                                                                <Link className="w-4 h-4" />
+                                                                <span>Link Offspring</span>
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLitter(litter._id);
+                                                    }}
+                                                    className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                    <span>Delete</span>
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -5613,525 +4425,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     })
                 )}
             </div>
-            )} {/* End viewMode === 'list' */}
-
-            {/* Calendar View */}
-            {viewMode === 'calendar' && (() => {
-                const year = calendarMonth.getFullYear();
-                const month = calendarMonth.getMonth();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                const today = new Date();
-                const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-
-                // Locale-aware first day of week (0=Sun, 1=Mon, ... 6=Sat)
-                const localeFirstDay = (() => {
-                    try {
-                        const loc = new Intl.Locale(navigator.language || 'en-US');
-                        const fw = loc.weekInfo?.firstDay ?? (loc.getWeekInfo?.()?.firstDay ?? 7);
-                        return fw % 7; // JS: 7(Sun)?0, 1(Mon)?1, 6(Sat)?6
-                    } catch(e) { return 0; }
-                })();
-
-                // Build event map: 'YYYY-MM-DD' -> [{type, litter}]
-                const eventMap = {};
-                const q = (calendarQuery || '').trim().toLowerCase();
-                const filteredLitters = litters.filter(l => {
-                    if (calendarPlannedOnly && !l.isPlanned) return false;
-                    if (!q) return true;
-                    const text = [
-                        l.breedingPairCodeName,
-                        l.litter_id_public,
-                        l.sire?.name,
-                        l.dam?.name,
-                        l.sireId_public,
-                        l.damId_public
-                    ].filter(Boolean).join(' ').toLowerCase();
-                    return text.includes(q);
-                });
-
-                const addEvent = (dateVal, type, litter) => {
-                    if (!dateVal) return;
-                    if (!calendarEventFilters[type]) return;
-                    let d;
-                    try {
-                        // Parse as local time to avoid UTC-offset date shifting
-                        const s = typeof dateVal === 'string' ? dateVal.substring(0, 10) : null;
-                        d = s ? new Date(s + 'T00:00:00') : new Date(dateVal);
-                        if (isNaN(d.getTime())) return;
-                    } catch(e) { return; }
-                    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                    if (!eventMap[k]) eventMap[k] = [];
-                    // Skip only duplicate same litter + same event type on same day.
-                    if (eventMap[k].some(e => e.litter._id === litter._id && e.type === type)) return;
-                    eventMap[k].push({ type, litter });
-                };
-                filteredLitters.forEach(l => {
-                    addEvent(l.matingDate, 'mated', l);
-                    addEvent(l.expectedDueDate, 'due', l);
-                    addEvent(l.birthDate, 'born', l);
-                    addEvent(l.weaningDate, 'weaned', l);
-                });
-
-                // Animal events
-                const addAnimalEvent = (dateVal, type, animal) => {
-                    if (!dateVal || !calendarEventFilters[type]) return;
-                    let d;
-                    try {
-                        const s = typeof dateVal === 'string' ? dateVal.substring(0, 10) : null;
-                        d = s ? new Date(s + 'T00:00:00') : new Date(dateVal);
-                        if (isNaN(d.getTime())) return;
-                    } catch(e) { return; }
-                    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                    if (!eventMap[k]) eventMap[k] = [];
-                    if (eventMap[k].some(e => e.animal?._id === animal._id && e.type === type)) return;
-                    eventMap[k].push({ type, animal });
-                };
-                // Helper: compute next due date from lastDoneDate + freqDays
-                const nextDueDate = (lastDate, freqDays) => {
-                    if (!freqDays) return null;
-                    const base = lastDate ? new Date(lastDate + 'T00:00:00') : new Date();
-                    if (isNaN(base.getTime())) return null;
-                    const next = new Date(base);
-                    next.setDate(next.getDate() + Number(freqDays));
-                    return `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
-                };
-
-                calendarAnimals.forEach(a => {
-                    addAnimalEvent(a.birthDate, 'birthday', a);
-                    // Feeding due
-                    const feedNext = nextDueDate(a.lastFedDate?.substring?.(0,10) ?? a.lastFedDate, a.feedingFrequencyDays);
-                    if (feedNext) addAnimalEvent(feedNext, 'feeding', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Feed every ${a.feedingFrequencyDays}d` });
-                    // Maintenance due
-                    const maintNext = nextDueDate(a.lastMaintenanceDate?.substring?.(0,10) ?? a.lastMaintenanceDate, a.maintenanceFrequencyDays);
-                    if (maintNext) addAnimalEvent(maintNext, 'maintenance', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Maintenance every ${a.maintenanceFrequencyDays}d` });
-                    // Enclosure care tasks
-                    (a.careTasks || []).forEach(t => {
-                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
-                        if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.name || 'Enclosure Task', _calDetail: a.name || a.id_public });
-                    });
-                    // Animal care tasks
-                    (a.animalCareTasks || []).forEach(t => {
-                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
-                        if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.name || 'Animal Task', _calDetail: a.name || a.id_public });
-                    });
-                });
-
-                // Enclosure cleaning tasks
-                calendarEnclosures.forEach(enc => {
-                    (enc.cleaningTasks || []).forEach(t => {
-                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
-                        if (dn && calendarEventFilters.caretask) {
-                            if (!eventMap[dn]) eventMap[dn] = [];
-                            eventMap[dn].push({ type: 'caretask', animal: { _id: enc._id, _calLabel: t.name || 'Cleaning Task', _calDetail: enc.name || 'Enclosure', id_public: enc._id } });
-                        }
-                    });
-                });
-
-                // Supply reorder dates
-                calendarSupplies.forEach(s => {
-                    if (s.nextOrderDate) addAnimalEvent(s.nextOrderDate.substring(0,10), 'supply', { _id: s._id, _calLabel: s.name || 'Supply', _calDetail: s.category || '', id_public: s._id });
-                });
-
-                const monthStart = new Date(year, month, 1);
-                const monthEnd = new Date(year, month + 1, 0);
-                const monthEventList = Object.entries(eventMap)
-                    .flatMap(([dateKey, events]) => events.map(ev => ({ dateKey, ...ev })))
-                    .filter(ev => {
-                        const d = new Date(`${ev.dateKey}T00:00:00`);
-                        return d >= monthStart && d <= monthEnd;
-                    })
-                    .sort((a, b) => {
-                        if (a.dateKey < b.dateKey) return -1;
-                        if (a.dateKey > b.dateKey) return 1;
-                        const order = { mated: 0, due: 1, born: 2, weaned: 3, birthday: 4, feeding: 5, maintenance: 6, caretask: 7, supply: 8 };
-                        return (order[a.type] ?? 99) - (order[b.type] ?? 99);
-                    });
-
-                const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-                const allDayAbbr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-                const dayNames = [...allDayAbbr.slice(localeFirstDay), ...allDayAbbr.slice(0, localeFirstDay)];
-                // true for columns that land on Saturday or Sunday
-                const isWeekendCol = dayNames.map(d => d === 'Sun' || d === 'Sat');
-
-                // Offset of the month's first day relative to the locale week start
-                const rawFirstDay = new Date(year, month, 1).getDay();
-                const firstDayOffset = (rawFirstDay - localeFirstDay + 7) % 7;
-
-                const cells = [];
-                for (let i = 0; i < firstDayOffset; i++) cells.push(null);
-                for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-                while (cells.length % 7 !== 0) cells.push(null);
-
-                const typeStyles = {
-                    mated:       { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated' },
-                    due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
-                    born:        { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
-                    weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
-                    birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthday' },
-                    feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due' },
-                    maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance Due' },
-                    caretask:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Care Task' },
-                    supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order' },
-                };
-
-                const getLitterName = (l) => l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
-                const getSireDam = (l) => {
-                    const sn = l.sire?.name || l.sireId_public || '?';
-                    const dn = l.dam?.name || l.damId_public || '?';
-                    return `${sn} · ${dn}`;
-                };
-                // Format a date value as "10 Jan 2026"
-                const fmtD = (v) => {
-                    if (!v) return null;
-                    try { const d = new Date(v); if (isNaN(d)) return null; return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); } catch(e) { return null; }
-                };
-                // Type-specific pill label
-                const getAnimalDisplayName = (a) => [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || a.id_public || 'Unknown';
-
-                const getPillLabel = (ev) => {
-                    if (ev.animal) {
-                        const a = ev.animal;
-                        if (ev.type === 'birthday') return `🎂 ${getAnimalDisplayName(a)}`;
-                        if (ev.type === 'feeding') return `🍽️ ${a._calLabel || getAnimalDisplayName(a)}`;
-                        if (ev.type === 'maintenance') return `🔧 ${a._calLabel || getAnimalDisplayName(a)}`;
-                        if (ev.type === 'caretask') return `✅ ${a._calLabel || 'Task'} · ${a._calDetail || ''}`;
-                        if (ev.type === 'supply') return `📦 ${a._calLabel || 'Supply'}`;
-                        return getAnimalDisplayName(a);
-                    }
-                    const l = ev.litter;
-                    const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed';
-                    const sn = l.sire?.name || l.sireId_public || '?';
-                    const dn = l.dam?.name || l.damId_public || '?';
-                    if (ev.type === 'due') return `${pairName} · ${dn}`;
-                    if (ev.type === 'born') {
-                        const total = l.litterSizeBorn ?? l.numberBorn ?? 0;
-                        const m = l.maleCount ?? 0;
-                        const f = l.femaleCount ?? 0;
-                        return `${pairName} · ${total} born (${m}M/${f}F)`;
-                    }
-                    if (ev.type === 'weaned') {
-                        const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0);
-                        return `${pairName} · ${total} to wean`;
-                    }
-                    // mated
-                    return `${pairName} · ${sn} · ${dn}`;
-                };
-
-                return (
-                    <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm overflow-hidden">
-                        {/* Month Navigation */}
-                        <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
-                            <button
-                                onClick={() => setCalendarMonth(new Date(year, month - 1, 1))}
-                                className="p-1.5 rounded-lg hover:bg-gray-200 transition"
-                            >
-                                <ChevronLeft size={20} className="text-gray-600" />
-                            </button>
-                            <h3 className="text-lg font-bold text-gray-800">{monthNames[month]} {year}</h3>
-                            <button
-                                onClick={() => setCalendarMonth(new Date(year, month + 1, 1))}
-                                className="p-1.5 rounded-lg hover:bg-gray-200 transition"
-                            >
-                                <ChevronRight size={20} className="text-gray-600" />
-                            </button>
-                        </div>
-
-                        <div className="px-4 py-3 bg-white border-b border-gray-200 space-y-3">
-                            <div className="flex flex-col md:flex-row md:items-center gap-2">
-                                <div className="flex items-center gap-2 w-full md:w-auto">
-                                    <Search size={14} className="text-gray-400" />
-                                    <input
-                                        value={calendarQuery}
-                                        onChange={(e) => setCalendarQuery(e.target.value)}
-                                        placeholder="Filter by pair, litter ID, sire or dam"
-                                        className="w-full md:w-80 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <button
-                                        onClick={() => {
-                                            const now = new Date();
-                                            setCalendarMonth(new Date(now.getFullYear(), now.getMonth(), 1));
-                                        }}
-                                        className="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Today
-                                    </button>
-                                    <button
-                                        onClick={() => setCalendarPlannedOnly(v => !v)}
-                                        className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border ${calendarPlannedOnly ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-                                    >
-                                        Planned Only
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                {Object.entries(typeStyles).map(([key, style]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => setCalendarEventFilters(prev => ({ ...prev, [key]: !prev[key] }))}
-                                        className={`px-2.5 py-1 text-xs font-medium rounded-full border transition ${calendarEventFilters[key] ? `${style.bg}` : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'}`}
-                                    >
-                                        {style.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Day-of-week headers */}
-                        <div className="grid grid-cols-7 border-b-2 border-gray-300 bg-gray-50">
-                            {dayNames.map((d, i) => (
-                                <div key={d} className={`py-2 text-center text-xs font-bold uppercase tracking-wide ${isWeekendCol[i] ? 'text-rose-400' : 'text-gray-500'}`}>
-                                    {d}
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Day Cells */}
-                        <div className="grid grid-cols-7 divide-x divide-y divide-gray-300">
-                            {cells.map((day, idx) => {
-                                const colIdx = idx % 7;
-                                const isWeekend = isWeekendCol[colIdx];
-                                if (day === null) return (
-                                    <div key={`blank-${idx}`} className={`min-h-[72px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />
-                                );
-                                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                                const events = eventMap[dateKey] || [];
-                                const isToday = dateKey === todayStr;
-                                return (
-                                    <div key={dateKey} className={`min-h-[72px] p-1 ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
-                                        <span className={`inline-flex items-center justify-center w-6 h-6 text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
-                                            {day}
-                                        </span>
-                                        <div className="mt-0.5 space-y-0.5">
-                                            {events.map((ev, i) => {
-                                                const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                                    ? { bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
-                                                    : (typeStyles[ev.type] || typeStyles.born);
-                                                return (
-                                                    <button
-                                                        key={i}
-                                                        onClick={() => setCalendarTooltip(t => (t && t.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}${ev.litter?.isPlanned ? ' border-dashed opacity-80' : ''}`}
-                                                        title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${ev.litter?.isPlanned ? '[Planned] ' : ''}${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
-                                                    >
-                                                        {ev.litter?.isPlanned && '~ '}{getPillLabel(ev)}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Selected event detail */}
-                        {calendarTooltip && (() => {
-                            // Animal / supply / task event tooltip
-                            if (calendarTooltip.animal) {
-                                const a = calendarTooltip.animal;
-                                const st = typeStyles[calendarTooltip.type] || typeStyles.born;
-                                const TooltipRow = ({ label, value }) => value ? (
-                                    <div className="flex gap-2 text-sm"><span className="text-gray-500 w-36 flex-shrink-0">{label}</span><span className="text-gray-800 font-medium">{value}</span></div>
-                                ) : null;
-                                return (
-                                    <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                                        <div className="flex justify-between items-start gap-2 mb-2">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${st.bg}`}>{st.label}</span>
-                                                <span className="font-bold text-gray-800 text-sm">{a._calLabel || getAnimalDisplayName(a)}</span>
-                                            </div>
-                                            <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={16} /></button>
-                                        </div>
-                                        <div className="space-y-1">
-                                            {calendarTooltip.type === 'birthday' && (<>
-                                                {a.id_public && <TooltipRow label="ID:" value={a.id_public} />}
-                                                {a.species && <TooltipRow label="Species:" value={a.species} />}
-                                                {a.gender && <TooltipRow label="Gender:" value={a.gender} />}
-                                                {a.birthDate && (() => {
-                                                    const born = new Date(a.birthDate + 'T00:00:00');
-                                                    const now = new Date(); now.setHours(0,0,0,0);
-                                                    const ageDays = Math.round((now - born) / 86400000);
-                                                    const years = Math.floor(ageDays / 365);
-                                                    const months = Math.floor((ageDays % 365) / 30);
-                                                    const ageStr = years > 0 ? `${years}y ${months}m` : `${months} month${months !== 1 ? 's' : ''}`;
-                                                    return (<>
-                                                        <TooltipRow label="Birthday:" value={fmtD(a.birthDate)} />
-                                                        <TooltipRow label="Age (today):" value={ageStr} />
-                                                    </>);
-                                                })()}
-                                            </>)}
-                                            {(calendarTooltip.type === 'feeding' || calendarTooltip.type === 'maintenance') && (<>
-                                                {a.id_public && <TooltipRow label="Animal:" value={getAnimalDisplayName(a)} />}
-                                                {a.species && <TooltipRow label="Species:" value={a.species} />}
-                                                <TooltipRow label="Schedule:" value={a._calDetail} />
-                                            </>)}
-                                            {calendarTooltip.type === 'caretask' && (<>
-                                                <TooltipRow label="Task:" value={a._calLabel} />
-                                                <TooltipRow label="Animal / Enclosure:" value={a._calDetail} />
-                                            </>)}
-                                            {calendarTooltip.type === 'supply' && (<>
-                                                <TooltipRow label="Supply:" value={a._calLabel} />
-                                                <TooltipRow label="Category:" value={a._calDetail} />
-                                            </>)}
-                                        </div>
-                                    </div>
-                                );
-                            }
-
-                            const l = calendarTooltip.litter;
-                            const type = calendarTooltip.type;
-                            const sn = l.sire?.name || l.sireId_public || '?';
-                            const dn = l.dam?.name || l.damId_public || '?';
-                            const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
-                            const callId = l.litter_id_public;
-
-                            const daysStatus = (() => {
-                                if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-green-600 font-semibold' };
-                                if (!l.expectedDueDate) return null;
-                                const due = new Date(l.expectedDueDate);
-                                if (isNaN(due)) return null;
-                                const now = new Date(); now.setHours(0,0,0,0); due.setHours(0,0,0,0);
-                                const diff = Math.round((due - now) / 86400000);
-                                if (diff > 0) return { text: `${diff} day${diff !== 1 ? 's' : ''} remaining`, cls: 'text-green-600' };
-                                if (diff === 0) return { text: 'Due today', cls: 'text-amber-600 font-semibold' };
-                                return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
-                            })();
-
-                            const Row = ({ label, value, cls }) => {
-                                if (value == null || value === '') return null;
-                                return (
-                                    <div className="flex gap-2 text-sm">
-                                        <span className="text-gray-500 w-32 flex-shrink-0">{label}</span>
-                                        <span className={`text-gray-800 font-medium ${cls || ''}`}>{value}</span>
-                                    </div>
-                                );
-                            };
-
-                            const tooltipPillStyle = (type === 'due' && l.birthDate)
-                                ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
-                                : (typeStyles[type] || typeStyles.born);
-
-                            return (
-                                <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                                    {/* Header */}
-                                    <div className="flex justify-between items-start gap-2 mb-3 pb-2 border-b border-gray-200">
-                                        <div>
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${tooltipPillStyle.bg}`}>
-                                                    {tooltipPillStyle.label}
-                                                </span>
-                                                <span className="font-bold text-gray-800 text-sm">{pairName} · {sn} · {dn}</span>
-                                            </div>
-                                            {callId && <p className="text-xs text-gray-400 mt-0.5">{callId}</p>}
-                                        </div>
-                                        <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0">
-                                            <X size={16} />
-                                        </button>
-                                    </div>
-
-                                    {/* Body */}
-                                    <div className="space-y-1.5">
-                                        {type === 'due' && (<>
-                                            <Row label="Mated:" value={fmtD(l.matingDate)} />
-                                            <Row label="Due:" value={fmtD(l.expectedDueDate)} />
-                                            {daysStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Status:</span><span className={daysStatus.cls}>{daysStatus.text}</span></div>}
-                                            <Row label="Method:" value={l.breedingMethod && l.breedingMethod !== 'Unknown' ? l.breedingMethod : null} />
-                                            <Row label="Condition:" value={l.breedingConditionAtTime || null} />
-                                        </>)}
-                                        {type === 'born' && (<>
-                                            <Row label="Birth Method:" value={l.birthMethod || null} />
-                                            <Row label="Born:" value={fmtD(l.birthDate)} />
-                                            <Row label="Total:" value={l.litterSizeBorn ?? l.numberBorn ?? null} />
-                                            <Row label="Males:" value={l.maleCount ?? null} />
-                                            <Row label="Females:" value={l.femaleCount ?? null} />
-                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Stillborn:</span><span className="text-gray-800 font-medium">{l.stillbornCount ?? 0}</span></div>
-                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Losses:</span><span className="text-gray-800 font-medium">{l.lossesCount ?? 0}</span></div>
-                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Weaned:</span><span className="text-gray-800 font-medium">{l.litterSizeWeaned ?? l.numberWeaned ?? 0}</span></div>
-                                            <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
-                                        </>)}
-                                        {type === 'weaned' && (() => {
-                                            const weanStatus = (() => {
-                                                if (!l.weaningDate) return null;
-                                                const wd = new Date(l.weaningDate); if (isNaN(wd)) return null;
-                                                const now = new Date(); now.setHours(0,0,0,0); wd.setHours(0,0,0,0);
-                                                const diff = Math.round((wd - now) / 86400000);
-                                                if (diff > 0) return { text: `Due in ${diff} day${diff !== 1 ? 's' : ''}`, cls: 'text-green-600' };
-                                                if (diff === 0) return { text: 'Weaning today', cls: 'text-amber-600 font-semibold' };
-                                                return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
-                                            })();
-                                            const ageInDays = (() => {
-                                                if (!l.birthDate || !l.weaningDate) return null;
-                                                const b = new Date(l.birthDate); const w = new Date(l.weaningDate);
-                                                if (isNaN(b) || isNaN(w)) return null;
-                                                return Math.round((w - b) / 86400000);
-                                            })();
-                                            return (<>
-                                                <Row label="Born:" value={fmtD(l.birthDate)} />
-                                                <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
-                                                {ageInDays != null && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Age:</span><span className="text-gray-800 font-medium">{ageInDays} day{ageInDays !== 1 ? 's' : ''}</span></div>}
-                                                {weanStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Status:</span><span className={weanStatus.cls}>{weanStatus.text}</span></div>}
-                                            </>);
-                                        })()}
-                                        {type === 'mated' && (<>
-                                            <Row label="Mating Date:" value={fmtD(l.matingDate)} />
-                                            <Row label="Expected Due:" value={fmtD(l.expectedDueDate)} />
-                                            <Row label="Method:" value={l.breedingMethod && l.breedingMethod !== 'Unknown' ? l.breedingMethod : null} />
-                                            <Row label="Condition:" value={l.breedingConditionAtTime || null} />
-                                        </>)}
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                        <div className="mx-3 mb-3 p-3 bg-white border border-gray-200 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-sm font-semibold text-gray-800">Month Agenda</h4>
-                                <span className="text-xs text-gray-500">{monthEventList.length} event{monthEventList.length !== 1 ? 's' : ''}</span>
-                            </div>
-                            {monthEventList.length === 0 ? (
-                                <p className="text-xs text-gray-500">No events match the current month/filter selection.</p>
-                            ) : (
-                                <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-                                    {monthEventList.map((ev, idx) => {
-                                        const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                            ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
-                                            : (typeStyles[ev.type] || typeStyles.born);
-                                        return (
-                                            <button
-                                                key={`${ev.dateKey}-${ev.type}-${ev.litter?._id ?? ev.animal?._id ?? idx}-${idx}`}
-                                                onClick={() => setCalendarTooltip({ key: `${ev.dateKey}-${idx}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                                className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:bg-gray-50 transition"
-                                            >
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full ${st.bg}`}>{st.label}</span>
-                                                    <span className="text-[11px] text-gray-500">{fmtD(ev.dateKey)}</span>
-                                                </div>
-                                                <div className="text-xs text-gray-800 font-medium mt-1 truncate">{getPillLabel(ev)}</div>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Legend */}
-                        <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-4 text-xs text-gray-600 items-center">
-                            {Object.entries(typeStyles).map(([k, v]) => (
-                                <span key={k} className="flex items-center gap-1.5">
-                                    <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${v.dot}`} />
-                                    {v.label}
-                                </span>
-                            ))}
-                            {filteredLitters.length === 0 && (
-                                <span className="text-gray-400 italic ml-auto">No litters match current calendar filters</span>
-                            )}
-                            <span className="text-gray-400 ml-auto hidden sm:block">Click a pill for details</span>
-                        </div>
-                    </div>
-                );
-            })()}
 
             {/* Link Animals Modal */}
             {linkingAnimals && (
@@ -6223,7 +4516,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Male', 'Intersex', 'Unknown']}
+                    requiredGender={['Male', 'Intersex', 'Mixed', 'Unknown']}
                     species={formData.species || undefined}
                 />
             )}
@@ -6241,7 +4534,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Female', 'Intersex', 'Unknown']}
+                    requiredGender={['Female', 'Intersex', 'Mixed', 'Unknown']}
                     species={formData.species || undefined}
                 />
             )}
@@ -6276,7 +4569,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Male', 'Intersex', 'Unknown']}
+                    requiredGender={['Male', 'Intersex', 'Mixed', 'Unknown']}
                     species={matingData.species || undefined}
                 />
             )}
@@ -6294,379 +4587,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Female', 'Intersex', 'Unknown']}
+                    requiredGender={['Female', 'Intersex', 'Mixed', 'Unknown']}
                     species={matingData.species || undefined}
-                />
-            )}
-
-            {/* Test Pairing Modal */}
-            {showTestPairingModal && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-6 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-7xl flex flex-col h-[90vh]">
-                        {/* Header */}
-                        <div className="flex justify-between items-center border-b border-gray-200 px-5 py-4 flex-shrink-0">
-                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                <Calculator size={18} className="text-primary" />
-                                Test Pairing
-                            </h3>
-                            <button onClick={() => setShowTestPairingModal(false)} className="text-gray-500 hover:text-gray-800">
-                                <X size={22} />
-                            </button>
-                        </div>
-                        {/* Tab bar */}
-                        <div className="px-5 py-3 border-b border-gray-200 flex-shrink-0">
-                            <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
-                                <button
-                                    type="button"
-                                    onClick={() => setTpMode('coi')}
-                                    className={`px-3 py-1.5 text-sm font-medium ${tpMode === 'coi' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                                >
-                                    COI Calculator
-                                </button>
-                                {canAccessTargetOutcome && (
-                                <button
-                                    type="button"
-                                    onClick={() => setTpMode('target')}
-                                    className={`px-3 py-1.5 text-sm font-medium border-l border-gray-200 ${tpMode === 'target' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                                >
-                                    Target Outcome
-                                </button>
-                                )}
-                            </div>
-                        </div>
-                        {/* Scrollable body */}
-                        <div className="flex-1 min-h-0 overflow-hidden">
-
-                        {tpMode === 'coi' && (
-                        <div className="p-5 space-y-5 overflow-y-auto h-full">
-                            <p className="text-sm text-gray-500">Pick a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring.</p>
-                            <hr className="border-gray-100" />
-                            {/* Sire */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father)</label>
-                                <button
-                                    type="button"
-                                    onClick={() => setModalTarget('tp-sire')}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    {tpSireId ? (
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="font-medium">{myAnimals.find(a => a.id_public === tpSireId)?.name || selectedTpSireAnimal?.name || 'Unknown'}</div>
-                                                <div className="text-xs text-gray-500">{tpSireId}</div>
-                                            </div>
-                                            {!myAnimals.find(a => a.id_public === tpSireId) && selectedTpSireAnimal && (
-                                                <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="text-gray-400">Select Sire...</div>
-                                    )}
-                                </button>
-                            </div>
-                            {/* Dam */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Dam (Mother)</label>
-                                <button
-                                    type="button"
-                                    onClick={() => setModalTarget('tp-dam')}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    {tpDamId ? (
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="font-medium">{myAnimals.find(a => a.id_public === tpDamId)?.name || selectedTpDamAnimal?.name || 'Unknown'}</div>
-                                                <div className="text-xs text-gray-500">{tpDamId}</div>
-                                            </div>
-                                            {!myAnimals.find(a => a.id_public === tpDamId) && selectedTpDamAnimal && (
-                                                <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="text-gray-400">Select Dam...</div>
-                                    )}
-                                </button>
-                            </div>
-                            {/* Calculate Button */}
-                            <hr className="border-gray-100" />
-                            <button
-                                onClick={handleCalculateTestPairing}
-                                disabled={!tpSireId || !tpDamId || tpCalculating}
-                                className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
-                            >
-                                {tpCalculating ? (
-                                    <><Loader2 className="w-4 h-4 animate-spin" /> Calculating...</>
-                                ) : (
-                                    <><Calculator size={15} /> Calculate COI</>
-                                )}
-                            </button>
-                            {/* Result */}
-                            {tpCOI !== null && (
-                                <div className="p-4 rounded-lg border border-gray-200 bg-gray-50 text-center">
-                                    <div className="text-sm font-medium text-gray-600 mb-1">Predicted COI</div>
-                                    <div className="text-3xl font-bold text-gray-800">{tpCOI.toFixed(2)}%</div>
-                                </div>
-                            )}
-                            {/* Error */}
-                            {tpError && (
-                                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{tpError}</div>
-                            )}
-                        </div>
-                        )}
-
-                        {tpMode === 'target' && canAccessTargetOutcome && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 h-full">
-                            <div className="divide-y divide-gray-200 overflow-y-auto min-h-0">
-
-                                {/* Pair Source + Species */}
-                                <div className="px-5 py-4">
-                                    <div className="flex items-end gap-6 flex-wrap">
-                                        <div>
-                                            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Pair Source</label>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setTpSourceMode('mine')}
-                                                    className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                                                >
-                                                    My Animals
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setTpSourceMode('mine+favorited')}
-                                                    className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine+favorited' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                                                >
-                                                    My Animals + Favorited
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Species</label>
-                                            <div className="flex gap-2">
-                                                {TARGET_OUTCOME_SUPPORTED_SPECIES.map(sp => (
-                                                    <button
-                                                        key={sp}
-                                                        type="button"
-                                                        onClick={() => { setTpTargetSpecies(sp); setTpSelectedTraits([]); setTpMockResults([]); setTpHasRun(false); setTpExpandedCard(null); }}
-                                                        className={`px-3 py-1.5 text-sm rounded-lg border ${tpTargetSpecies === sp ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                                                    >
-                                                        {sp}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Female Filter</label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setTpHideActiveFemales(v => !v)}
-                                                className={`px-3 py-1.5 text-sm rounded-lg border transition ${tpHideActiveFemales ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                                            >
-                                                Hide Mating / Pregnant / Nursing / Retired
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Live phenotype preview */}
-                                {tpSelectedTraits.length > 0 && (() => {
-                                    const preview = getPrototypePhenotypeInterpretation(tpSelectedTraits, tpTargetSpecies);
-                                    const conf = getPrototypePhenotypeConfidence(tpSelectedTraits, tpTargetSpecies);
-                                    const reqs = getMinimumParentCarrierRequirements(tpSelectedTraits, tpTargetSpecies);
-                                    const { assumptions } = buildPrototypeGenotypeFromTraits(tpSelectedTraits, tpTargetSpecies);
-                                    const isResolved = conf?.level === 'high' || conf?.level === 'medium';
-                                    return (
-                                        <div className={`px-5 py-4 border-b border-gray-200 text-xs ${isResolved ? 'bg-emerald-50' : 'bg-gray-50'}`}>
-                                            <div className={`flex items-center gap-1.5 ${isResolved ? 'text-emerald-800' : 'text-gray-500'}`}>
-                                                <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isResolved ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                                                <span className="font-semibold flex-shrink-0">Target phenotype:</span>
-                                                <span className="truncate">{preview || 'Select chips below to preview'}</span>
-                                            </div>
-                                            {assumptions.length > 0 && (
-                                                <div className="mt-1.5 pl-3 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
-                                                    Also select a <span className="font-semibold">Base Color</span> chip to fully specify this target.
-                                                </div>
-                                            )}
-                                            {(reqs.bothParents.length > 0 || reqs.oneParent.length > 0 || reqs.splitParents?.length > 0) && (
-                                                <div className="mt-2 pl-3 space-y-0.5 border-t border-gray-200 pt-2">
-                                                    {reqs.bothParents.length > 0 && (
-                                                        <div className="text-[10px] text-gray-500">
-                                                            <span className="font-medium text-gray-700">Both parents must carry:</span>{' '}
-                                                            <span className="font-mono">{reqs.bothParents.map(r => r.label).join(' · ')}</span>
-                                                        </div>
-                                                    )}
-                                                    {reqs.oneParent.length > 0 && (
-                                                        <div className="text-[10px] text-gray-500">
-                                                            <span className="font-medium text-gray-700">At least one parent needs:</span>{' '}
-                                                            <span className="font-mono">{reqs.oneParent.map(r => r.label).join(' · ')}</span>
-                                                        </div>
-                                                    )}
-                                                    {reqs.splitParents?.length > 0 && reqs.splitParents.map((r, i) => (
-                                                        <div key={i} className="text-[10px] text-indigo-700 bg-indigo-50 rounded px-1.5 py-0.5">
-                                                            <span className="font-medium">Split pair needed —</span>{' '}{r.label}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })()}
-
-                                {/* Trait Chips */}
-                                <div className="px-5 py-4">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <label className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                                            Trait Chips
-                                            {tpSelectedTraits.length > 0 && (
-                                                <span className="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full bg-primary/20 text-gray-700 font-semibold normal-case tracking-normal">
-                                                    {tpSelectedTraits.length} selected
-                                                </span>
-                                            )}
-                                        </label>
-                                        {tpSelectedTraits.length > 0 && (
-                                            <button
-                                                type="button"
-                                                onClick={() => { setTpSelectedTraits([]); setTpMockResults([]); setTpHasRun(false); setTpExpandedCard(null); }}
-                                                className="text-xs text-gray-400 hover:text-red-500 transition"
-                                            >
-                                                Clear all
-                                            </button>
-                                        )}
-                                    </div>
-                                    <div className="space-y-3">
-                                        {getTargetTraitChipGroups(tpTargetSpecies).map(({ group, chips }) => (
-                                            <div key={group}>
-                                                <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">{group}</div>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {chips.map(chip => {
-                                                        const active = tpSelectedTraits.includes(chip.id);
-                                                        return (
-                                                            <button
-                                                                key={chip.id}
-                                                                type="button"
-                                                                onClick={() => toggleTargetTraitChip(chip.id)}
-                                                                className={`px-2.5 py-1.5 text-xs rounded-full border transition ${active ? 'bg-primary/20 border-primary text-gray-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                                                                title={formatTargetTraitChip(chip)}
-                                                            >
-                                                                {formatTargetTraitChip(chip)}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-{/* Run button */}
-                                <div className="px-5 py-4">
-                                {tpSelectedTraits.includes('fox') && !tpSelectedTraits.some(id => ['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc'].includes(id)) && (
-                                    <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
-                                        Fox requires a C-locus dilution chip — please also select Himalayan, Siamese, Burmese, or similar.
-                                    </p>
-                                )}
-                                <button
-                                    type="button"
-                                    onClick={runTargetOutcomePrototype}
-                                    disabled={
-                                        tpSelectedTraits.length === 0 ||
-                                        tpGenerating ||
-                                        !myAnimalsLoaded ||
-                                        (tpSelectedTraits.includes('fox') && !tpSelectedTraits.some(id => ['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc'].includes(id)))
-                                    }
-                                    className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
-                                >
-                                    {!myAnimalsLoaded ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading Animals...</> : tpGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Finding Best Pairings...</> : <><Star size={15} /> Find Best Pairings</>}
-                                </button>
-                            </div>{/* end Run button section */}
-
-                            </div>{/* end left divide-y column */}
-
-                            <div className="p-5 space-y-3 overflow-y-auto min-h-0">
-                                <div className="flex items-center justify-between">
-                                    <h4 className="text-sm font-semibold text-gray-700">Ranked Results Preview</h4>
-                                </div>
-                                {tpGenerating ? (
-                                    <div className="space-y-2">
-                                        {[1,2,3].map(i => (
-                                            <div key={i} className="rounded-lg border border-gray-200 bg-white p-3 animate-pulse">
-                                                <div className="flex items-start justify-between gap-2">
-                                                    <div className="flex-1 space-y-2">
-                                                        <div className="h-3 bg-gray-200 rounded w-3/4" />
-                                                        <div className="h-2.5 bg-gray-100 rounded w-1/2" />
-                                                    </div>
-                                                    <div className="flex flex-col items-end gap-1.5">
-                                                        <div className="h-4 w-6 bg-gray-100 rounded-full" />
-                                                        <div className="h-4 w-20 bg-gray-200 rounded-full" />
-                                                    </div>
-                                                </div>
-                                                <div className="mt-3 flex justify-end">
-                                                    <div className="h-6 w-36 bg-gray-100 rounded-lg" />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : tpHasRun && tpMockResults.length === 0 ? (
-                                    <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
-                                        <div className="font-medium text-gray-600 mb-1">No matching pairs found.</div>
-                                        <div>No animals in the pool carry enough of the required genetics to produce this target. Only animals with a genetic code entered are included.</div>
-                                    </div>
-                                ) : !tpHasRun ? (
-                                    <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
-                                        Select traits and run the prototype to see ranked pair cards here.
-                                    </div>
-                                ) : (
-                                    <TpResultsList
-                                        results={tpMockResults}
-                                        expandedCard={tpExpandedCard}
-                                        setExpandedCard={setTpExpandedCard}
-                                        tpSourceMode={tpSourceMode}
-                                        onUsePair={usePairForPlannedMating}
-                                    />
-                                )}
-                            </div>
-                        </div>
-                        )}
-
-                        </div>{/* end scrollable body */}
-                        <div className="border-t border-gray-200 px-5 py-3 flex justify-end flex-shrink-0">
-                            <button onClick={() => setShowTestPairingModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Close</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Test Pairing ? Sire Search Modal */}
-            {modalTarget === 'tp-sire' && (
-                <ParentSearchModal
-                    title="Select Sire"
-                    onSelect={handleSelectOtherParentForLitter}
-                    onClose={() => setModalTarget(null)}
-                    authToken={authToken}
-                    showModalMessage={showModalMessage}
-                    API_BASE_URL={API_BASE_URL}
-                    X={X}
-                    Search={Search}
-                    Loader2={Loader2}
-                    LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Male', 'Intersex', 'Unknown']}
-                />
-            )}
-
-            {/* Test Pairing ? Dam Search Modal */}
-            {modalTarget === 'tp-dam' && (
-                <ParentSearchModal
-                    title="Select Dam"
-                    onSelect={handleSelectOtherParentForLitter}
-                    onClose={() => setModalTarget(null)}
-                    authToken={authToken}
-                    showModalMessage={showModalMessage}
-                    API_BASE_URL={API_BASE_URL}
-                    X={X}
-                    Search={Search}
-                    Loader2={Loader2}
-                    LoadingSpinner={LoadingSpinner}
-                    requiredGender={['Female', 'Intersex', 'Unknown']}
                 />
             )}
 
@@ -6698,6 +4620,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </button>
                     </div>
                 </div>
+            )}
+
+            {certLitter && (
+                <PedigreeChart
+                    litterId={certLitter.litter_id_public}
+                    vertical={certLitter.vertical}
+                    currentUserIdPublic={userProfile?.id_public}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                    onClose={() => setCertLitter(null)}
+                    onViewAnimal={onViewAnimal}
+                />
             )}
         </div>
     );

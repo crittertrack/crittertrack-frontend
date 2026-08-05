@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
-    DollarSign, Flame, Gem, Globe, Heart, Key, Link, Loader2,
-    Mail, Mars, MessageSquare, Moon, QrCode, Search, Share2, Sparkles, Sprout,
-    Star, User, Venus, VenusAndMars, X
+    DollarSign, Flame, Gem, Globe, Heart, Hourglass, Key, Link, Loader2,
+    Mail, Mars, MessageSquare, Moon, QrCode, ScanHeart, Search, Share2, Sparkles, Sprout,
+    Star, User, Venus, VenusAndMars, X, Settings
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate } from '../../utils/dateFormatter';
@@ -12,7 +13,7 @@ import ReportButton from '../ReportButton';
 
 const API_BASE_URL = '/api';
 
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -283,11 +284,12 @@ const RatingStarRow = ({ score, interactive, onSelect }) => (
 // Public Profile View Component - Shows a breeder's public animals
 
 const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext, currentUserIdPublic = null, currentUserRole = 'user' }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
-    const [activeTab, setActiveTab] = useState('animals');
     const [animalSearch, setAnimalSearch] = useState('');
     const [bioExpanded, setBioExpanded] = useState(false);
     const [speciesFilter, setSpeciesFilter] = useState('');
@@ -318,6 +320,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         return next;
     });
 
+    const activeTab = useMemo(() => {
+        const pathSegments = location.pathname.split('/').filter(Boolean);
+        if (pathSegments.length > 2) return pathSegments[2];
+        return 'animals';
+    }, [location.pathname]);
+
+    const isOwnProfile = currentUserIdPublic === profile.id_public;
     const isModOrAdmin = ['moderator', 'admin'].includes(currentUserRole);
 
     // Check if this user is favorited
@@ -652,55 +661,67 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             </div>
         )}
         <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
+            <div className="flex justify-between items-start gap-3 mb-6">
                 <button 
                     onClick={handleBackClick}
-                    className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                    className="flex items-center text-gray-600 hover:text-gray-800 transition flex-shrink-0"
                 >
                     <ArrowLeft size={18} className="mr-1" /> Back
                 </button>
-                <div className="flex gap-2 flex-wrap">
-                    {onStartMessage && freshProfile?.allowMessages === true && (
+                <div className="flex gap-2 flex-wrap justify-end">
+                    {isOwnProfile ? (
                         <button
-                            onClick={onStartMessage}
-                            data-tutorial-target="profile-message-btn"
-                            className="px-3 py-1.5 bg-accent hover:bg-accent/80 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                            onClick={() => navigate('/settings')}
+                            className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                         >
-                            <MessageSquare size={16} />
-                            Message
+                            <Settings size={16} />
+                            Profile Settings
                         </button>
+                    ) : (
+                        <>
+                            {onStartMessage && freshProfile?.allowMessages === true && (
+                                <button
+                                    onClick={onStartMessage}
+                                    data-tutorial-target="profile-message-btn"
+                                    className="px-3 py-1.5 bg-accent hover:bg-accent/80 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                >
+                                    <MessageSquare size={16} />
+                                    Message
+                                </button>
+                            )}
+                            {authToken && (
+                                <button
+                                    onClick={toggleFavorite}
+                                    disabled={favoritePending}
+                                    className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 ${
+                                        isFavorited 
+                                            ? 'bg-purple-100 hover:bg-purple-200 text-purple-700'
+                                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                    } ${favoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                                >
+                                    <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
+                                    {isFavorited ? 'Favorited' : 'Favorite'}
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setShowQR(true)}
+                                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                            >
+                                <QrCode size={16} />
+                                Share Profile
+                            </button>
+                            {showQR && <QRModal url={`${window.location.origin}/user/${freshProfile?.id_public || profile.id_public}`} title={freshProfile?.breederName || freshProfile?.personalName || 'Share Profile'} onClose={() => setShowQR(false)} />}
+                            <ReportButton
+                                contentType="profile"
+                                contentId={profile.id_public}
+                                contentcreatorId={profile.userId_backend}
+                                authToken={authToken}
+                                API_BASE_URL={API_BASE_URL}
+                                tooltipText="Report this profile"
+                            />
+                        </>
                     )}
-                    {authToken && currentUserIdPublic !== profile.id_public && (
-                        <button
-                            onClick={toggleFavorite}
-                            disabled={favoritePending}
-                            className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 ${
-                                isFavorited 
-                                    ? 'bg-purple-100 hover:bg-purple-200 text-purple-700'
-                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                            } ${favoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-                        >
-                            <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
-                            {isFavorited ? 'Favorited' : 'Favorite'}
-                        </button>
-                    )}
-                    <button
-                        onClick={() => setShowQR(true)}
-                        className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                    >
-                        <QrCode size={16} />
-                        Share Profile
-                    </button>
-                    {showQR && <QRModal url={`${window.location.origin}/user/${freshProfile?.id_public || profile.id_public}`} title={freshProfile?.breederName || freshProfile?.personalName || 'Share Profile'} onClose={() => setShowQR(false)} />}
-                    <ReportButton
-                        contentType="profile"
-                        contentId={profile.id_public}
-                        contentcreatorId={profile.userId_backend}
-                        authToken={authToken}
-                        API_BASE_URL={API_BASE_URL}
-                        tooltipText="Report this profile"
-                    />
                 </div>
             </div>
 
@@ -729,11 +750,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {freshProfile?.id_public || profile.id_public}
                     </span>
                     {ratingData.count > 0 && (
-                        <button onClick={() => setActiveTab('ratings')} className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
+                        <NavLink to={`/user/${profile.id_public}/ratings`} className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
                             <Star size={12} className="inline-block align-middle fill-current" />
                             <span>{ratingData.average.toFixed(1)}</span>
                             <span className="text-gray-400 font-normal">({ratingData.count})</span>
-                        </button>
+                        </NavLink>
                     )}
                     <span className="text-xs text-gray-500">Member since {memberSince}</span>
                     {(freshProfile?.country || profile.country) && (
@@ -809,50 +830,51 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
             {/* Tab Bar */}
             <div className="flex flex-wrap border-b border-gray-200 mb-6">
-                <button
-                    onClick={() => setActiveTab('animals')}
-                    className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                <NavLink
+                    to={`/user/${profile.id_public}`}
+                    end
+                    className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Animals ({animals.filter(a => a.isOwned !== false).length})
-                </button>
+                </NavLink>
                 {hasBreederInfo && (
-                    <button
-                        onClick={() => setActiveTab('info-adoption')}
-                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    <NavLink
+                        to={`/user/${profile.id_public}/info-adoption`}
+                        className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Info &amp; Adoption
-                    </button>
+                    </NavLink>
                 )}
                 {publicLitters.length > 0 && (
-                    <button
-                        onClick={() => setActiveTab('litters')}
-                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    <NavLink
+                        to={`/user/${profile.id_public}/litters`}
+                        className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Pairings ({publicLitters.length})
-                    </button>
+                    </NavLink>
                 )}
                 {animals.some(a => a.isForSale || a.availableForBreeding) && (
-                    <button
-                        onClick={() => setActiveTab('for-sale-stud')}
-                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'for-sale-stud' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    <NavLink
+                        to={`/user/${profile.id_public}/for-sale-stud`}
+                        className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         For Sale / Stud ({animals.filter(a => a.isForSale || a.availableForBreeding).length})
-                    </button>
+                    </NavLink>
                 )}
                 {(freshProfile?.showStatsTab ?? true) && (
-                    <button
-                        onClick={() => setActiveTab('stats')}
-                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    <NavLink
+                        to={`/user/${profile.id_public}/stats`}
+                        className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Stats
-                    </button>
+                    </NavLink>
                 )}
-                <button
-                    onClick={() => setActiveTab('ratings')}
-                    className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'ratings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                <NavLink
+                    to={`/user/${profile.id_public}/ratings`}
+                    className={({ isActive }) => `flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Ratings{ratingData.count > 0 && ` (${ratingData.count})`}
-                </button>
+                </NavLink>
             </div>
 
             {/* Animals Tab */}
@@ -1172,10 +1194,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             {/* Litters Tab */}
             {activeTab === 'litters' && publicLitters.length > 0 && (() => {
                 const formatLitterDate = (d) => d ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d)) : null;
-                const today = new Date();
-                const mated = publicLitters.filter(l => l.isPlanned && l.matingDate && new Date(l.matingDate) <= today);
-                const plannedOnly = publicLitters.filter(l => l.isPlanned && !(l.matingDate && new Date(l.matingDate) <= today));
-                let born = publicLitters.filter(l => !l.isPlanned);
+                // isPlanned flips to false as soon as a litter is marked mated (not only once born),
+                // so state must be derived from birthDate/pregnancyDate/matingDate, not isPlanned alone.
+                const plannedOnly = publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate);
+                const mated = publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate);
+                const pregnant = publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate);
+                let born = publicLitters.filter(l => !!l.birthDate);
                 
                 // Extract unique years from born litters
                 const bornYears = [...new Set(born
@@ -1217,8 +1241,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         </div>
                     );
                 };
-                const LitterPublicCard = ({ l, isMated }) => (
-                    <div className={`bg-white rounded-xl border p-4 pb-6 space-y-2.5 relative ${isMated ? 'border-purple-300' : l.isPlanned ? 'border-indigo-300' : 'border-gray-300'}`}>
+                const LitterPublicCard = ({ l, isMated, isPregnant }) => (
+                    <div className={`bg-white rounded-xl border p-4 pb-6 space-y-2.5 relative ${isMated ? 'border-sky-300' : isPregnant ? 'border-pink-300' : l.isPlanned ? 'border-indigo-300' : 'border-gray-300'}`}>
                         {/* First line: centered breeding pair name */}
                         <div className="text-center min-h-[1.25rem] flex items-center justify-center">
                             {l.breedingPairCodeName && (
@@ -1239,7 +1263,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         <div className="border-t border-gray-200 my-2"></div>
                         
                         {/* Born stats - full width */}
-                        {!l.isPlanned && l.litterSizeBorn != null && (
+                        {!!l.birthDate && l.litterSizeBorn != null && (
                             <div className="flex items-center justify-center text-xs">
                                 <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
                                 {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
@@ -1259,9 +1283,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         
                         {/* Dates - full width centered */}
                         <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
-                            {l.matingDate && <span><span className="font-medium">{isMated ? 'Mated:' : l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
-                            {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
-                            {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}{litterAge(l.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(l.birthDate)}</span>}</span>}
+                            {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
+                            {l.expectedDueDate && !l.birthDate && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
+                            {l.birthDate && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}{litterAge(l.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(l.birthDate)}</span>}</span>}
                         </div>
                         
                         {/* CTL ID - bottom right corner */}
@@ -1277,7 +1301,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {mated.length > 0 && (
                             <div>
                                 <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Heart size={16} className="text-purple-500" /> Mated Pairings <span className="text-sm font-normal text-gray-400">({mated.length})</span>
+                                    <Hourglass size={16} className="text-sky-500" /> Mated Pairings <span className="text-sm font-normal text-gray-400">({mated.length})</span>
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {mated.map(l => <LitterPublicCard key={l._id} l={l} isMated={true} />)}
@@ -1294,11 +1318,21 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 </div>
                             </div>
                         )}
+                        {pregnant.length > 0 && (
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <ScanHeart size={16} className="text-pink-500" /> Pregnant Pairings <span className="text-sm font-normal text-gray-400">({pregnant.length})</span>
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {pregnant.map(l => <LitterPublicCard key={l._id} l={l} isPregnant={true} />)}
+                                </div>
+                            </div>
+                        )}
                         {born.length > 0 && (
                             <div>
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
-                                        <Sparkles size={16} className="text-green-500" /> Past Pairings <span className="text-sm font-normal text-gray-400">({born.length})</span>
+                                        <Sparkles size={16} className="text-violet-500" /> Past Pairings <span className="text-sm font-normal text-gray-400">({born.length})</span>
                                     </h3>
                                     {bornYears.length > 1 && (
                                         <select
@@ -1331,8 +1365,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     return acc;
                 }, {});
 
-                const bornLitters = publicLitters.filter(l => !l.isPlanned);
-                const plannedLitters = publicLitters.filter(l => l.isPlanned && !(l.matingDate && new Date(l.matingDate) <= new Date()));
+                const bornLitters = publicLitters.filter(l => !!l.birthDate);
+                const plannedLitters = publicLitters.filter(l => l.isPlanned && !l.pregnancyDate && !l.birthDate);
 
                 const totalOffspring = bornLitters.reduce((sum, l) => sum + (l.litterSizeBorn ?? 0), 0);
 
@@ -1358,8 +1392,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const forSaleOrStud = animals.filter(a => a.isForSale || a.availableForBreeding).length;
                 const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
                 const withPetStatus = animals.filter(a => a.status === 'Pet').length;
-                const today = new Date();
-                const matedLitters = publicLitters.filter(l => l.isPlanned && l.matingDate && new Date(l.matingDate) <= today).length;
+                const matedLitters = publicLitters.filter(l => !l.isPlanned && !!l.matingDate && !l.pregnancyDate && !l.birthDate).length;
+                const pregnantLitters = publicLitters.filter(l => !!l.pregnancyDate && !l.birthDate).length;
 
                 const StatCard = ({ label, value, sub }) => (
                     <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
@@ -1403,6 +1437,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <StatCard label="For Sale / Stud" value={forSaleOrStud} />
                             <StatCard label="Total Litters" value={publicLitters.length} />
                             <StatCard label="Mated Pairings" value={matedLitters} />
+                            <StatCard label="Pregnant Pairings" value={pregnantLitters} />
                             <StatCard label="Planned Pairings" value={plannedLitters.length} />
                             <StatCard label="Total Offspring" value={totalOffspring} />
                         </div>

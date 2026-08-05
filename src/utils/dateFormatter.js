@@ -1,3 +1,4 @@
+import { differenceInDays } from 'date-fns';
 /**
  * Date formatting utility for consistent date display across the application
  * Uses browser's locale for formatting
@@ -8,7 +9,7 @@
  * Date-only strings (YYYY-MM-DD) are parsed as midnight local time.
  * Full ISO strings and Date objects are handled normally.
  */
-const parseLocalDate = (date) => {
+export const parseLocalDate = (date) => {
     if (date instanceof Date) return date;
     if (typeof date === 'string') {
         // Match YYYY-MM-DD (no time component) — parse as local midnight
@@ -24,6 +25,23 @@ const parseLocalDate = (date) => {
         }
     }
     return new Date(date);
+};
+
+// A quarantine/treatment period (status + startDate/endDate) is only "active" once its start
+// date has arrived and, if set, its end date hasn't passed yet. This is the single source of
+// truth for isQuarantine/isInTreatment and for the health status pill/calculation.
+export const isStatusPeriodActive = (details) => {
+    if (!details || !details.status || details.status === 'None') return false;
+    if (!details.startDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = parseLocalDate(details.startDate);
+    if (start > today) return false;
+    if (details.endDate) {
+        const end = parseLocalDate(details.endDate);
+        if (end < today) return false;
+    }
+    return true;
 };
 
 export const formatDate = (date) => {
@@ -52,38 +70,15 @@ export const formatDateShort = (date) => {
     }).format(d);
 };
 
-// Helper function to format date strings for display
-export const formatDateDisplay = (dateString) => {
-    if (!dateString) return '';
-    try {
-        // Pass the raw string to formatDateShort so it can parse as local time
-        return formatDateShort(dateString);
-    } catch (e) {
-        return dateString; // Return as-is if parsing fails
-    }
-};
-
-// Returns a human-friendly age string from a birth date, matching the animal age format (e.g. "9d", "3m 5d", "1y 2m 10d")
-export const litterAge = (birthDate) => {
-    if (!birthDate) return null;
-    const born = new Date(birthDate);
-    const now = new Date();
-    if (isNaN(born.getTime()) || born > now) return null;
-    let years = now.getFullYear() - born.getFullYear();
-    let months = now.getMonth() - born.getMonth();
-    let days = now.getDate() - born.getDate();
-    if (days < 0) {
-        months--;
-        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-        days += prevMonth.getDate();
-    }
-    if (months < 0) {
-        years--;
-        months += 12;
-    }
-    if (years > 0) return `${years}y ${months}m ${days}d`;
-    if (months > 0) return `${months}m ${days}d`;
-    return `${days}d`;
+/**
+ * Formats a date string into the user's local date format (e.g., MM/DD/YYYY or DD/MM/YYYY).
+ * @param {string | Date | null} date - The date to format.
+ * @returns {string} The locally formatted date string, or '—' if invalid.
+ */
+export const formatLocalDate = (date) => {
+    if (!date) return '—';
+    const dateObj = parseLocalDate(date);
+    return !isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString() : '—';
 };
 
 // Formats a date/ISO string as a relative time phrase (e.g. "2 hours ago")
@@ -104,4 +99,93 @@ export const formatTimeAgo = (dateStr) => {
     const diffMo = Math.floor(diffDays / 30);
     if (diffMo < 12) return `${diffMo}mo ago`;
     return `${Math.floor(diffMo / 12)}y ago`;
+};
+
+/**
+ * Calculates age for breeding purposes where a month is consistently 28 days.
+ * @param {string | Date | null} birthDate - The birth date of the animal.
+ * @param {string | Date | null} [endDate] - The date to calculate age until (e.g., deceasedDate or today). Defaults to the current date.
+ * @returns {string} The formatted age string (e.g., "1y 2m", "3m 4d", "5d"), or '—' if the birth date is invalid.
+ */
+export const calculateBreedingAge = (birthDate, endDate) => {
+    if (!birthDate) return '—';
+
+    const start = new Date(birthDate);
+    const end = endDate ? new Date(endDate) : new Date();
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return '—';
+    }
+
+    const totalDays = Math.abs(differenceInDays(end, start));
+
+    const daysInBreedingMonth = 28; // 4 weeks
+    const daysInBreedingYear = 365;
+
+    const years = Math.floor(totalDays / daysInBreedingYear);
+    const remainingDaysAfterYears = totalDays % daysInBreedingYear;
+
+    const months = Math.floor(remainingDaysAfterYears / daysInBreedingMonth);
+    const remainingDays = remainingDaysAfterYears % daysInBreedingMonth;
+
+    if (years > 0) return `${years}y ${months}m`;
+    if (months > 0) return `${months}m ${remainingDays}d`;
+    return `${remainingDays}d`;
+};
+
+export const litterAge = calculateBreedingAge;
+
+/**
+ * Format animal age from birth date into an object.
+ * @param {string|Date} birthDate - Animal birth date
+ * @returns {object} Object with years, months, label (e.g., { years: 1, months: 2, label: "1y 2m" }), or null.
+ */
+export const formatAnimalAge = (birthDate) => {
+    if (!birthDate) return null;
+    
+    const birth = new Date(birthDate);
+    const today = new Date();
+    
+    let years = today.getFullYear() - birth.getFullYear();
+    let months = today.getMonth() - birth.getMonth();
+    
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+    
+    if (years < 0) return null;
+    
+    const ageLabel = years > 0 
+        ? `${years}y ${months}m`
+        : `${months}m`;
+    
+    return { years, months, label: ageLabel };
+};
+
+/**
+ * Returns a human-friendly age string from a birth date (e.g. "1y 2m 10d", "3m 5d", "9d").
+ * @param {string|Date} birthDate - The birth date.
+ * @returns {string|null} The formatted age string, or null if invalid.
+ */
+export const calculateAgeDetailed = (birthDate) => {
+    if (!birthDate) return null;
+    const born = new Date(birthDate);
+    const now = new Date();
+    if (isNaN(born.getTime()) || born > now) return null;
+    let years = now.getFullYear() - born.getFullYear();
+    let months = now.getMonth() - born.getMonth();
+    let days = now.getDate() - born.getDate();
+    if (days < 0) {
+        months--;
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        days += prevMonth.getDate();
+    }
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+    if (years > 0) return `${years}y ${months}m ${days}d`;
+    if (months > 0) return `${months}m ${days}d`;
+    return `${days}d`;
 };

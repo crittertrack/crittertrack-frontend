@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, X, Filter, ChevronLeft, ChevronRight, DollarSign, Heart, Mail, MapPin, Loader2, ShoppingBag, Tag, MessageSquare, Send } from 'lucide-react';
 import axios from 'axios';
 import 'flag-icons/css/flag-icons.min.css';
-import ViewOnlyAnimalDetail from './AnimalDetail/ViewOnlyAnimalDetail';
+import ViewAnimalModalV2 from './AnimalDetail/ViewAnimalModalV2';
+import { getCountryFlag, getCountryName, US_STATES, getStateName } from '../utils/locationUtils';
 
 const API_BASE_URL = '/api';
 
@@ -22,50 +23,30 @@ const formatPrice = (amount, currency) => {
     return `${symbol}${amount.toLocaleString()}`;
 };
 
-// Helper function to get flag class from country code (for flag-icons library)
-const getCountryFlag = (countryCode) => {
-    if (!countryCode || countryCode.length !== 2) return '';
-    return `fi fi-${countryCode.toLowerCase()}`;
-};
+// Calculate age in years, months, and days
+const calculateAge = (birthDate) => {
+    if (!birthDate) return null;
+    const birth = new Date(birthDate);
+    const now = new Date();
 
-// Get country name from code
-const getCountryName = (countryCode) => {
-    const countryNames = {
-        'US': 'United States', 'CA': 'Canada', 'GB': 'United Kingdom', 'AU': 'Australia',
-        'NZ': 'New Zealand', 'DE': 'Germany', 'FR': 'France', 'IT': 'Italy', 'HU': 'Hungary',
-        'ES': 'Spain', 'NL': 'Netherlands', 'SE': 'Sweden', 'NO': 'Norway',
-        'DK': 'Denmark', 'CH': 'Switzerland', 'BE': 'Belgium', 'AT': 'Austria',
-        'PL': 'Poland', 'CZ': 'Czech Republic', 'IE': 'Ireland', 'PT': 'Portugal',
-        'GR': 'Greece', 'RU': 'Russia', 'JP': 'Japan', 'KR': 'South Korea',
-        'CN': 'China', 'IN': 'India', 'BR': 'Brazil', 'MX': 'Mexico',
-        'ZA': 'South Africa', 'SG': 'Singapore', 'HK': 'Hong Kong', 'MY': 'Malaysia', 'TH': 'Thailand'
-    };
-    return countryNames[countryCode] || countryCode;
-};
+    let years = now.getFullYear() - birth.getFullYear();
+    let months = now.getMonth() - birth.getMonth();
+    let days = now.getDate() - birth.getDate();
 
-const US_STATES = [
-    { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
-    { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
-    { code: 'CT', name: 'Connecticut' }, { code: 'DC', name: 'District of Columbia' }, { code: 'DE', name: 'Delaware' },
-    { code: 'FL', name: 'Florida' }, { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' },
-    { code: 'ID', name: 'Idaho' }, { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' },
-    { code: 'IA', name: 'Iowa' }, { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' },
-    { code: 'LA', name: 'Louisiana' }, { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' },
-    { code: 'MA', name: 'Massachusetts' }, { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' },
-    { code: 'MS', name: 'Mississippi' }, { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' },
-    { code: 'NE', name: 'Nebraska' }, { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' },
-    { code: 'NJ', name: 'New Jersey' }, { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' },
-    { code: 'NC', name: 'North Carolina' }, { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' },
-    { code: 'OK', name: 'Oklahoma' }, { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' },
-    { code: 'RI', name: 'Rhode Island' }, { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' },
-    { code: 'TN', name: 'Tennessee' }, { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' },
-    { code: 'VT', name: 'Vermont' }, { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' },
-    { code: 'WV', name: 'West Virginia' }, { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }
-];
+    if (days < 0) {
+        months--;
+        days += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); // Days in previous month
+    }
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
 
-const getStateName = (stateCode) => {
-    const found = US_STATES.find(s => s.code === stateCode);
-    return found ? found.name : stateCode;
+    let ageStr = '';
+    if (years > 0) ageStr += `${years}y `;
+    if (months > 0) ageStr += `${months}m `;
+    if (days > 0 || ageStr === '') ageStr += `${days}d`; // Show days even if 0 if no years/months
+    return ageStr.trim();
 };
 
 const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onStartConversation, showModalMessage }) => {
@@ -322,7 +303,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <ShoppingBag className="text-accent" />
-                    Available Animals
+                    Marketplace
                 </h1>
                 <p className="text-gray-600 mt-1">Browse animals available for sale or stud services</p>
             </div>
@@ -427,6 +408,9 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                                 <option value="">Any Gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
+                                <option value="Intersex">Intersex</option>
+                                <option value="Mixed">Mixed</option>
+                                <option value="Unknown">Unknown</option>
                             </select>
                         </div>
                         <div>
@@ -711,10 +695,10 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
 
             {/* Animal Detail Modal Overlay */}
             {selectedAnimalForModal && (
-                <ViewOnlyAnimalDetail 
+                <ViewAnimalModalV2 
                     animal={selectedAnimalForModal}
+                    mode="public"
                     onClose={() => setSelectedAnimalForModal(null)}
-                    onCloseAll={() => setSelectedAnimalForModal(null)}
                     API_BASE_URL={API_BASE_URL}
                     onViewProfile={onViewProfile}
                     onViewAnimal={onViewAnimal}
@@ -729,32 +713,6 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
 const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwnListing, isLoggedIn }) => {
     const isForSale = animal.isForSale;
     const isForStud = animal.availableForBreeding;
-    
-    // Calculate age in years, months, and days
-    const calculateAge = (birthDate) => {
-        if (!birthDate) return null;
-        const birth = new Date(birthDate);
-        const now = new Date();
-
-        let years = now.getFullYear() - birth.getFullYear();
-        let months = now.getMonth() - birth.getMonth();
-        let days = now.getDate() - birth.getDate();
-
-        if (days < 0) {
-            months--;
-            days += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); // Days in previous month
-        }
-        if (months < 0) {
-            years--;
-            months += 12;
-        }
-
-        let ageStr = '';
-        if (years > 0) ageStr += `${years}y `;
-        if (months > 0) ageStr += `${months}m `;
-        if (days > 0 || ageStr === '') ageStr += `${days}d`; // Show days even if 0 if no years/months
-        return ageStr.trim();
-    };
 
     const age = calculateAge(animal.birthDate);
     

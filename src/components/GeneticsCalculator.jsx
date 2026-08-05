@@ -8,11 +8,11 @@ const GENE_LOCI = {
     description: 'Multiple alleles controlling base color with complex dominance. e.g. Black (a/a), Agouti (A/-), Tan (at/-), Brindle (Avy/-), Dom. Red (Ay/-)',
     combinations: [
       'ae/ae',
-      'a/ae', 'a/a',
+      'a/ae', 'a/a', 'a/-',
       'at/ae', 'at/a', 'at/at',
-      'A/ae', 'A/a', 'A/at', 'A/A',
-      'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/A', 'Avy/Avy',
-      'Ay/ae', 'Ay/a', 'Ay/at', 'Ay/A', 'Ay/Avy'
+      'A/ae', 'A/a', 'A/at', 'A/A', 'A/-',
+      'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/A', 'Avy/Avy', 'Avy/-',
+      'Ay/ae', 'Ay/a', 'Ay/at', 'Ay/A', 'Ay/Avy', 'Ay/-'
     ]
   },
   B: {
@@ -20,7 +20,7 @@ const GENE_LOCI = {
     description: 'Recessive. Turns black pigment brown. e.g. Chocolate (b/b), Cinnamon (b/b + Agouti)',
     combinations: [
       'b/b',
-      'B/b', 'B/B'
+      'B/b', 'B/B', 'B/-'
     ]
   },
   C: {
@@ -31,7 +31,7 @@ const GENE_LOCI = {
       'c/ch', 'ch/ch',
       'c/ce', 'ce/ch', 'ce/ce',
       'c/cch', 'ch/cch', 'ce/cch', 'cch/cch',
-      'C/c', 'C/ch', 'C/ce', 'C/cch', 'C/C'
+      'C/c', 'C/ch', 'C/ce', 'C/cch', 'C/C', 'C/-'
     ]
   },
   D: {
@@ -39,7 +39,7 @@ const GENE_LOCI = {
     description: 'Recessive. Dilutes pigment. e.g. Blue (d/d on black), Blue Agouti (d/d on agouti)',
     combinations: [
       'd/d',
-      'D/d', 'D/D'
+      'D/d', 'D/D', 'D/-'
     ]
   },
   E: {
@@ -47,7 +47,7 @@ const GENE_LOCI = {
     description: 'Recessive. Controls pigment expression. e.g. Recessive Red (e/e)',
     combinations: [
       'e/e',
-      'E/e', 'E/E'
+      'E/e', 'E/E', 'E/-'
     ]
   },
   Ln: {
@@ -55,7 +55,7 @@ const GENE_LOCI = {
     description: 'Recessive. Dilutes black pigment to a blue-grey (leaden) colour, independent of the D locus.',
     combinations: [
       'ln/ln',
-      'Ln/ln', 'Ln/Ln'
+      'Ln/ln', 'Ln/Ln', 'Ln/-'
     ]
   },
   P: {
@@ -63,15 +63,15 @@ const GENE_LOCI = {
     description: 'Recessive. Dilutes pigment with pink eyes. e.g. Dove (p/p on black), Argente (p/p on agouti)',
     combinations: [
       'p/p',
-      'P/p', 'P/P'
+      'P/p', 'P/P', 'P/-'
     ]
   },
   S: {
     name: 'Pied',
     description: 'Recessive. White spotting patterns. e.g. Pied (s/s), Hereford (s/s+), Dutch (s/s+). The + represents polygenic modifiers that affect spotting pattern specifics.',
     combinations: [
-      's/s',
-      'S/s', 'S/S'
+      's/s', 's/s+',
+      'S/s', 'S/S', 'S/-', 'S/s+'
     ]
   },
   W: {
@@ -92,7 +92,7 @@ const GENE_LOCI = {
     description: 'Dominant. White facial/body patches. e.g. Splashed (Spl/-). Tricolor = Splashed + Pied',
     combinations: [
       'spl/spl',
-      'Spl/spl', 'Spl/Spl'
+      'Spl/spl', 'Spl/Spl', 'Spl/-'
     ]
   },
   Rn: {
@@ -100,7 +100,7 @@ const GENE_LOCI = {
     description: 'Recessive. Intermingled white hairs. e.g. Roan (rn/rn - evenly intermingled white hairs), Merle (rn/rn - intermingled white hairs + solid patches of original color)',
     combinations: [
       'rn/rn',
-      'Rn/rn', 'Rn/Rn'
+      'Rn/rn', 'Rn/Rn', 'Rn/-'
     ]
   },
   Si: {
@@ -108,7 +108,7 @@ const GENE_LOCI = {
     description: 'Recessive. Silvering/ticking on coat. e.g. Pearl, Silvered',
     combinations: [
       'si/si',
-      'Si/si', 'Si/Si'
+      'Si/si', 'Si/Si', 'Si/-'
     ]
   },
   Mobr: {
@@ -137,7 +137,7 @@ const GENE_LOCI = {
     description: 'Controls base coat length. Go/Go (wildtype) is shorthaired; go is the recessive longhair mutation. e.g. Shorthair (Go/-), Longhair (go/go)',
     combinations: [
       'go/go',
-      'Go/go', 'Go/Go'
+      'Go/go', 'Go/Go', 'Go/-'
     ]
   },
   Re: {
@@ -145,7 +145,7 @@ const GENE_LOCI = {
     description: 'Dominant. Curly coat. e.g. Astrex (Re/-), Texel = Astrex + Longhair (Re/- go/go)',
     combinations: [
       're/re',
-      'Re/re', 'Re/Re'
+      'Re/re', 'Re/Re', 'Re/-'
     ]
   },
   Sa: {
@@ -153,7 +153,7 @@ const GENE_LOCI = {
     description: 'High-sheen silky coat. Satin is recessive; only sa/sa shows the satin phenotype.',
     combinations: [
       'sa/sa',
-      'Sa/sa', 'Sa/Sa'
+      'Sa/sa', 'Sa/Sa', 'Sa/-'
     ]
   },
   Rst: {
@@ -161,7 +161,7 @@ const GENE_LOCI = {
     description: 'Whorls/rosettes in coat. Also called Abyssinian. Recessive; rst/rst shows rosette phenotype.',
     combinations: [
       'rst/rst',
-      'Rst/rst', 'Rst/Rst'
+      'Rst/rst', 'Rst/Rst', 'Rst/-'
     ]
   },
   Fz: {
@@ -169,7 +169,7 @@ const GENE_LOCI = {
     description: 'Recessive. Short fuzzy coat (fz/fz). Combined with other coat genes (e.g. Satin, Astrex) it creates unique textures.',
     combinations: [
       'fz/fz',
-      'Fz/fz', 'Fz/Fz'
+      'Fz/fz', 'Fz/Fz', 'Fz/-'
     ]
   },
   Nu: {
@@ -177,7 +177,7 @@ const GENE_LOCI = {
     description: 'Causes hairlessness. Dominant gene; Nu/- removes all coat expression, overriding other coat genes.',
     combinations: [
       'nu/nu',
-      'Nu/nu', 'Nu/Nu'
+      'Nu/nu', 'Nu/Nu', 'Nu/-'
     ]
   }
 };
@@ -465,7 +465,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Check if this is ae/ae, a/ae, or a/a (non-agouti self colors)
   const isExtremeBlack = genotype.A === 'ae/ae';
   const isBlackHetero = genotype.A === 'a/ae' || genotype.A === 'ae/a';
-  const isBlack = genotype.A === 'a/a';
+  const isBlack = genotype.A === 'a/a' || genotype.A === 'a/-';
   const isSelfBlackVariant = isExtremeBlack || isBlackHetero || isBlack;
 
   // Check if this is at/ae, ae/at, at/a, or at/at (tan/fox variants)
@@ -523,6 +523,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // B-locus carriers
   if (genotype.B === 'B/b' || genotype.B === 'b/B') carriers.push('Chocolate');
   
+  // Note for a/-
+  if (genotype.A === 'a/-') {
+    notes.push('Incomplete genotype (a/-). Actual genotype could be a/a or a/ae.');
+  }
+
   // C-locus carriers
   if (genotype.C && (genotype.C.includes('C/') || genotype.C.includes('/C'))) {
     const alleles = genotype.C.split('/');
@@ -544,6 +549,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   
   // S-locus carriers (Pied)
   if (genotype.S === 'S/s' || genotype.S === 's/S') carriers.push('Pied');
+  if (genotype.S === 'S/s' || genotype.S === 's/S') {
+    carriers.push('Pied');
+  } else if (genotype.S === 'S/s+') {
+    carriers.push('Pied (with modifiers)');
+  }
   
   // P-locus carriers (Pink-eye)
   if (genotype.P === 'P/p' || genotype.P === 'p/P') carriers.push('Pink-eye');
@@ -1247,6 +1257,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Don't add Pied if it's already in the color name (for Ay/Avy)
   if (genotype.S === 's/s' && !color.includes('Pied')) {
     markings.push('Pied');
+  } else if (genotype.S === 's/s+' && !color.includes('Pied')) {
+    markings.push('Pied');
+    notes.push('s+ indicates polygenic modifiers affecting the spotting pattern (e.g., Hereford, Dutch).');
   }
 
   // W-locus markings with all combinations
@@ -1467,6 +1480,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   const [showExamples, setShowExamples] = useState(false);
   const [activeTab, setActiveTab] = useState('self');
   const [offspringResults, setOffspringResults] = useState(null);
+  const [showWildcardNote, setShowWildcardNote] = useState(false);
   const [expandedPhenotypes, setExpandedPhenotypes] = useState({});
   const [feedbackGenotype, setFeedbackGenotype] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState('');
@@ -1623,6 +1637,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     setParent2(newDefaults);
     setActiveTab('self');
     setOffspringResults(null);
+    setShowWildcardNote(false);
     setExpandedPhenotypes({});
     setFeedbackGenotype(null);
     setFeedbackMessage('');
@@ -1672,7 +1687,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         .map(([locus, alleles]) => `${locus}: ${alleles}`)
         .join(', ');
 
-      const response = await fetch(`${API_BASE_URL}/api/genetics-feedback`, {
+      const response = await fetch(`${API_BASE_URL}/genetics-feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1939,6 +1954,13 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       percentage: ((data.count / totalCount) * 100).toFixed(2)
     })).sort((a, b) => b.percentage - a.percentage);
     
+    const hasWildcard = resultsArray.some(result =>
+      result.genotypes.some(geno =>
+        Object.values(geno).some(alleles => alleles && alleles.includes('/-'))
+      )
+    );
+    setShowWildcardNote(hasWildcard);
+
     setOffspringResults(resultsArray);
   };
 
@@ -2340,7 +2362,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         <div className="w-full max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Genetics Calculator</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Offspring Calculator</h1>
               
               {/* Species Selector */}
               <select
@@ -2552,6 +2574,11 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                   </span>
                 </div>
               </div>
+              {showWildcardNote && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg text-sm">
+                  <p><strong>Note on "/-" notation:</strong> A genotype like "A/-" indicates that the animal has at least one dominant "A" allele, but the other allele is unknown because one or both parents had an unknown allele at that locus. This is a placeholder for a dominant phenotype where the full genotype isn't certain.</p>
+                </div>
+              )}
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => {
                   // For offspring display: if phenotype is empty but has carriers, show carrier status
@@ -2747,9 +2774,11 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 <div className="space-y-2">
                   {myAnimals
                     .filter(animal => {
-                      // Filter by gender
-                      if (selectingForParent === 'parent1' && animal.gender !== 'Male') return false;
-                      if (selectingForParent === 'parent2' && animal.gender !== 'Female') return false;
+                      // Filter by gender, allowing for intersex, mixed, and unknown
+                      const sireGenders = ['Male', 'Intersex', 'Mixed', 'Unknown'];
+                      const damGenders = ['Female', 'Intersex', 'Mixed', 'Unknown'];
+                      if (selectingForParent === 'parent1' && !sireGenders.includes(animal.gender)) return false;
+                      if (selectingForParent === 'parent2' && !damGenders.includes(animal.gender)) return false;
                       
                       // Filter by selected species
                       if (animal.species !== selectedSpecies) return false;
@@ -2839,4 +2868,3 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
 export default GeneticsCalculator;
 export { calculatePhenotype, GENE_LOCI };
-

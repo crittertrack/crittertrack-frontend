@@ -1,12 +1,11 @@
 import React, { Suspense, lazy } from 'react';
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes, useNavigate, Navigate } from 'react-router-dom';
 
 // Lazy-loaded views — each page is only downloaded when first visited
 const AnimalList = lazy(() => import('./components/AnimalList'));
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const Marketplace = lazy(() => import('./components/Marketplace'));
 const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
-const ContactsPage = lazy(() => import('./components/Contacts'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
 const LitterManagement = lazy(() => import('./components/LitterManagement'));
@@ -16,8 +15,23 @@ const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'))
 const SpeciesSelector = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesSelector })));
 const SpeciesManager = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesManager })));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
-const PrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/PrivateAnimalDetail'));
-const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
+
+const TutorialsPage = lazy(() => import('./components/tools/TutorialsPage'));
+const SuppliesPage = lazy(() => import('./components/SuppliesPage'));
+const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
+const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
+const FamilyTreePage = lazy(() => import('./components/tools/FamilyTreePage'));
+const ReportPage = lazy(() => import('./components/ReportPage'));
+
+
+// New Contact pages for refactor
+const ContactsListPage = lazy(() => import('./components/Contacts/ContactsListPage'));
+const ContactDetailPage = lazy(() => import('./components/Contacts/ContactDetailPage'));
+const ContactOverview = lazy(() => import('./components/Contacts/Overview'));
+const ContactOwnedAnimals = lazy(() => import('./components/Contacts/OwnedAnimals'));
+const ContactBredAnimals = lazy(() => import('./components/Contacts/BredAnimals'));
+const AddContactPage = lazy(() => import('./components/Contacts/AddContactPage'));
+const EditContactPage = lazy(() => import('./components/Contacts/EditContactPage'));
 
 const PageLoader = () => (
     <div className="w-full flex items-center justify-center py-24">
@@ -80,7 +94,10 @@ export function AppRoutes({
   // Breeding Lines
   breedingLineDefs,
   animalBreedingLines,
+  setAnimalBreedingLines,
   saveBreedingLineDefs,
+  locations,
+  fetchLocations,
   toggleAnimalBreedingLine,
   BL_PRESETS_APP,
   
@@ -97,7 +114,6 @@ export function AppRoutes({
   setSpeciesToAdd,
   speciesOptions,
   setSpeciesOptions,
-  speciesConfigs,
   speciesSearchTerm,
   setSpeciesSearchTerm,
   speciesCategoryFilter,
@@ -166,6 +182,9 @@ export function AppRoutes({
           setArchiveLoading={setArchiveLoading}
           breedingLineDefs={breedingLineDefs}
           animalBreedingLines={animalBreedingLines}
+          speciesOptions={speciesOptions}
+          locations={locations}
+          fetchLocations={fetchLocations}
         />
       } />
       
@@ -189,6 +208,9 @@ export function AppRoutes({
           setArchiveLoading={setArchiveLoading}
           breedingLineDefs={breedingLineDefs}
           animalBreedingLines={animalBreedingLines}
+          speciesOptions={speciesOptions}
+          locations={locations}
+          fetchLocations={fetchLocations}
         />
       } />
 
@@ -202,17 +224,17 @@ export function AppRoutes({
           userProfile={userProfile}
           showModalMessage={showModalMessage}
           onViewAnimal={(animalId) => {
-            window.location.href = `/animal/${animalId}`;
+            navigate(`/animal/${animalId}`);
           }}
           onViewProfile={(userId) => {
-            window.location.href = `/user/${userId}`;
+            navigate(`/user/${userId}`);
           }}
           onStartConversation={handleStartConversation}
         />
       } />
 
       {/* Profile */}
-      <Route path="/profile" element={
+      <Route path="/settings/*" element={
         <ProfileView 
           userProfile={userProfile} 
           showModalMessage={showModalMessage} 
@@ -226,6 +248,7 @@ export function AppRoutes({
           }} 
           breedingLineDefs={breedingLineDefs} 
           animalBreedingLines={animalBreedingLines} 
+          setAnimalBreedingLines={setAnimalBreedingLines} 
           saveBreedingLineDefs={saveBreedingLineDefs} 
           toggleAnimalBreedingLine={toggleAnimalBreedingLine} 
           BL_PRESETS_APP={BL_PRESETS_APP} 
@@ -234,10 +257,37 @@ export function AppRoutes({
 
       {/* Contacts */}
       <Route path="/contacts" element={
-        <ContactsPage
+        <ContactsListPage
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
           showModalMessage={showModalMessage}
+        />
+      } />
+      <Route path="/contacts/:contactId" element={
+        <ContactDetailPage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+        />
+      }>
+        <Route index element={<Navigate to="overview" replace />} />
+        <Route path="overview" element={<ContactOverview />} />
+        <Route path="owned" element={<ContactOwnedAnimals />} />
+        <Route path="bred" element={<ContactBredAnimals />} />
+      </Route>
+      <Route path="/contacts/new" element={
+        <AddContactPage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          showModalMessage={showModalMessage}
+          userProfile={userProfile}
+        />
+      } />
+      <Route path="/contacts/:contactId/edit" element={
+        <EditContactPage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          showModalMessage={showModalMessage}
+          userProfile={userProfile}
         />
       } />
 
@@ -247,15 +297,6 @@ export function AppRoutes({
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           userProfile={userProfile}
-        />
-      } />
-
-      {/* Breeder Directory */}
-      <Route path="/breeder-directory" element={
-        <BreederDirectory
-          authToken={authToken}
-          API_BASE_URL={API_BASE_URL}
-          onBack={() => navigate('/')}
         />
       } />
 
@@ -300,13 +341,44 @@ export function AppRoutes({
         />
       } />
 
+      {/* Supplies */}
+      <Route path="/supplies" element={
+        <SuppliesPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          showModalMessage={showModalMessage}
+        />
+      } />
+
       {/* Genetics Calculator */}
-      <Route path="/genetics-calculator" element={
+      <Route path="/calculator" element={
         <GeneticsCalculator
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
           myAnimals={myAnimalsForCalculator}
           userRole={userProfile?.role}
+        />
+      } />
+
+      {/* COI Calculator */}
+      <Route path="/coi" element={
+        <COICalculatorPage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          myAnimals={myAnimalsForCalculator}
+          userProfile={userProfile}
+        />
+      } />
+
+      {/* Target Outcome Calculator */}
+      <Route path="/target" element={
+        <TargetOutcomePage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          myAnimals={myAnimalsForCalculator}
+          userProfile={userProfile}
+          // Pass species data for trait selection
+          speciesOptions={speciesOptions || []}
         />
       } />
 
@@ -365,7 +437,6 @@ export function AppRoutes({
             showModalMessage={showModalMessage}
             API_BASE_URL={API_BASE_URL}
             userProfile={userProfile}
-            speciesConfigs={speciesConfigs}
             X={X}
             Search={Search}
             Loader2={Loader2}
@@ -380,6 +451,29 @@ export function AppRoutes({
             AnimalImageUpload={AnimalImageUpload}
           />
         )
+      } />
+
+      {/* Tutorials Page */}
+      <Route path="/tutorials" element={<TutorialsPage />} />
+
+      {/* Family Tree Page */}
+      <Route path="/pedigree" element={
+        <FamilyTreePage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          myAnimals={myAnimalsForCalculator}
+          userProfile={userProfile}
+          onViewAnimal={handleViewAnimal}
+        />
+      } />
+
+      {/* Report Page */}
+      <Route path="/report" element={
+        <ReportPage
+          authToken={authToken}
+          userProfile={userProfile}
+          showModalMessage={showModalMessage}
+        />
       } />
 
     </Routes>

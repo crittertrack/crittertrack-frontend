@@ -238,9 +238,9 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
                                 className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
                                 disabled={loading}
                             >
-                                <option value="owner">ðŸ  Owner</option>
-                                <option value="breeder">â­ Active Breeder</option>
-                                <option value="retired">ðŸŒ™ Retired Breeder</option>
+                                <option value="owner">🏠 Owner</option>
+                                <option value="breeder">⭐ Active Breeder</option>
+                                <option value="retired">🌙 Retired Breeder</option>
                             </select>
                         </div>
                     );
@@ -395,7 +395,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                         </button>
                         <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                             <Star size={24} className="text-primary" />
-                            Breeders Registry
+                            Breeders
                         </h1>
                     </div>
 
@@ -486,7 +486,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                         )}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                         {filteredBreeders.map(breeder => {
                             // Build display name based on what's public
                             let displayName = '';
@@ -505,6 +505,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
 
                             return (
                                 <div
+                                    // Added a state to manage expanded/collapsed status for each card
                                     key={breeder.id_public}
                                     className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition"
                                 >
@@ -530,7 +531,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                         {/* Name and CTU Badge */}
                                         <div className="flex-1 min-w-0">
                                             <div className="mb-1">
-                                                <h3 className="text-xl font-bold text-gray-800 inline">{displayName}</h3>
+                                                <h3 className="text-lg font-bold text-gray-800 inline">{displayName}</h3>
                                                 <span className="ml-1 inline-block"><DonationBadge user={breeder} size="sm" /></span>
                                             </div>
                                             <div className="flex items-center gap-3 flex-wrap">
@@ -538,7 +539,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                                     {breeder.id_public}
                                                 </span>
                                                 {breeder.country && (
-                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <div className="flex items-center gap-2 text-xs text-gray-600">
                                                         <span className={`${getCountryFlag(breeder.country)} inline-block h-4 w-6 flex-shrink-0`}></span>
                                                         <span>{getCountryName(breeder.country)}{breeder.country === 'US' && breeder.state ? `, ${getStateName(breeder.state)}` : ''}</span>
                                                     </div>
@@ -549,27 +550,24 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                         {/* View Profile Button */}
                                         <button
                                             onClick={() => navigate(`/user/${breeder.id_public}`)}
-                                            className="px-4 py-2 bg-primary hover:bg-primary/80 text-black text-sm font-medium rounded transition flex-shrink-0 w-full sm:w-auto"
+                                            className="px-4 py-2 bg-primary hover:bg-primary/80 text-black text-xs font-medium rounded transition flex-shrink-0 w-full sm:w-auto"
                                         >
                                             View Profile
                                         </button>
                                     </div>
-
-                                    {/* Bio */}
-                                    {breeder.bio && (
-                                        <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-                                            {breeder.bio}
-                                        </p>
+                                    {/* Bio and Expand/Collapse button */}
+                                    {breeder.bio && ( // Only show bio section if bio exists
+                                        <BreederBioSection bio={breeder.bio} />
                                     )}
 
                                     {/* Breeding Species */}
                                     <div className="flex flex-wrap gap-3">
                                         {breeder.breedingStatus && Object.entries(breeder.breedingStatus).map(([species, status]) => {
                                             if (status !== 'breeder' && status !== 'retired') return null;
-                                            
+
                                             return (
-                                                <div 
-                                                    key={species} 
+                                                <div
+                                                    key={species}
                                                     className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200"
                                                 >
                                                     {status === 'breeder' ? (
@@ -577,7 +575,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                                     ) : (
                                                         <Moon size={14} className="text-gray-500" />
                                                     )}
-                                                    <span className="text-sm font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
+                                                    <span className="text-xs font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
                                                     <span className="text-xs text-gray-500">
                                                         ({status === 'breeder' ? 'Active' : 'Retired'})
                                                     </span>
@@ -591,6 +589,42 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                     </div>
                 )}
             </div>
+        </div>
+    );
+};
+
+// New component for the expandable bio section
+const BreederBioSection = ({ bio }) => {
+    const [expanded, setExpanded] = useState(false);
+    const bioRef = React.useRef(null);
+    const [showToggle, setShowToggle] = useState(false);
+
+    useEffect(() => {
+        if (bioRef.current) {
+            // text-xs (12px) with leading-relaxed (1.625) is a line-height of ~19.5px.
+            // We show the button if the content is taller than 3 lines.
+            const approxThreeLinesHeight = 19.5 * 3;
+            if (bioRef.current.scrollHeight > approxThreeLinesHeight) {
+                setShowToggle(true);
+            }
+        }
+    }, [bio]);
+
+    return (
+        <div className="mb-4">
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expanded ? 'max-h-[1000px]' : 'max-h-[58px]'}`}>
+                <p ref={bioRef} className="text-xs text-gray-700 leading-relaxed">
+                    {bio}
+                </p>
+            </div>
+            {showToggle && (
+                <button
+                    onClick={() => setExpanded(!expanded)}
+                    className="text-xs text-primary hover:underline mt-1"
+                >
+                    {expanded ? 'Show less' : 'Read more'}
+                </button>
+            )}
         </div>
     );
 };

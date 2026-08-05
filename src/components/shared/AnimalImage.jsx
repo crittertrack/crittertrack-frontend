@@ -1,33 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Cat } from 'lucide-react';
 
-const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-cover", iconSize = 24 }) => {
-    const [imageError, setImageError] = useState(false);
-    const [imageSrc, setImageSrc] = useState(src);
+const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
+    const [imageError, setImageError] = React.useState(false);
+    const [imageSrc, setImageSrc] = React.useState(src);
 
-    useEffect(() => {
-        setImageSrc(src);
-        setImageError(false);
-    }, [src]);
+    React.useEffect(() => { setImageSrc(src); setImageError(false); }, [src]);
 
-    const handleError = () => {
-        console.warn('Image failed to load:', imageSrc);
-        setImageError(true);
-    };
-
-    if (!imageSrc || imageError) {
-        return <Cat size={iconSize} className="text-gray-400" />;
+    if (imageError || !imageSrc) {
+        return (
+            <div className="w-full h-full bg-gray-100 dark:bg-dark-surface-hover rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                <Cat size={iconSize} />
+            </div>
+        );
     }
-
-    return (
-        <img 
-            src={imageSrc} 
-            alt={alt} 
-            className={className}
-            onError={handleError}
-            loading="lazy"
-        />
-    );
+    return <img src={imageSrc} alt={alt} className={className} onError={() => setImageError(true)} />;
 };
 
 export default AnimalImage;

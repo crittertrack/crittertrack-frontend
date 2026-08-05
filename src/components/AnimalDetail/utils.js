@@ -1,48 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
-import { Heart, Cat, EyeOff, Eye, Hourglass, Bean, Milk, Loader2, ChevronDown, ChevronRight, Mars, Venus, VenusAndMars, Circle } from 'lucide-react';
+import { Heart, Cat, EyeOff, Eye, Hourglass, ScanHeart, Droplet, Loader2, ChevronDown, ChevronRight, Mars, Venus, VenusAndMars, Circle } from 'lucide-react';
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
-
-// Hook to fetch field template for species
-export const useDetailFieldTemplate = (species, API_BASE_URL) => {
-    const [fieldTemplate, setFieldTemplate] = useState(null);
-    
-    useEffect(() => {
-        if (!species || !API_BASE_URL) {
-            setFieldTemplate(null);
-            return;
-        }
-
-        const fetchTemplate = async () => {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/species/with-template/${species}`);
-                if (response.data && response.data.fieldTemplate) {
-                    setFieldTemplate(response.data.fieldTemplate);
-                }
-            } catch (error) {
-                console.error('Error fetching field template:', error);
-                setFieldTemplate(null);
-            }
-        };
-
-        fetchTemplate();
-    }, [species, API_BASE_URL]);
-
-    const getLabel = useCallback((key, defaultLabel) => {
-        if (!fieldTemplate?.fields || !fieldTemplate.fields[key]) {
-            return defaultLabel;
-        }
-        const field = fieldTemplate.fields[key];
-        if (field.customLabel && field.customLabel.trim()) {
-            return field.customLabel;
-        }
-        return field.label || defaultLabel;
-    }, [fieldTemplate]);
-
-    return { fieldTemplate, getLabel };
-};
 
 // Utility to safely parse JSON fields
 export const parseJsonField = (data) => {
@@ -55,6 +16,14 @@ export const parseJsonField = (data) => {
         }
     }
     return Array.isArray(data) ? data : [];
+};
+
+// Formats a dedicated, individually-tracked schedule field ({ lastDoneDate, frequencyDays }) for display.
+// Returns null if no frequency has been set (schedule not assigned yet).
+export const formatScheduleValue = (schedule) => {
+    if (!schedule || !schedule.frequencyDays) return null;
+    const last = schedule.lastDoneDate ? formatDate(schedule.lastDoneDate) : 'Never';
+    return `Every ${schedule.frequencyDays}d (last done: ${last})`;
 };
 
 // Component to render lists of items from parsed JSON
@@ -98,9 +67,9 @@ export const computeRelationships = (animal, collection = []) => {
         }
         
         // Offspring relationships
-        else if (animal.sireId_public && a.sireId_public === animal.id_public) {
+        else if (a.sireId_public === animal.id_public) {
             rel = `${a.gender === 'Female' ? 'Daughter' : 'Son'}`;
-        } else if (animal.damId_public && a.damId_public === animal.id_public) {
+        } else if (a.damId_public === animal.id_public) {
             rel = `${a.gender === 'Female' ? 'Daughter' : 'Son'}`;
         }
         
@@ -119,14 +88,11 @@ export const computeRelationships = (animal, collection = []) => {
 };
 
 // View-Only Parent Card Component
-export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, authToken, mode = "private" }) => {
+export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, authToken }) => {
     const [parentData, setParentData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [notFound, setNotFound] = useState(false);
     const [foundViaOwned, setFoundViaOwned] = useState(false);
-
-    // Validate mode
-    const isPublicMode = mode === "public";
 
     useEffect(() => {
         if (!parentId) {
@@ -148,15 +114,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         if (ownedResponse.data) {
-                            // Found in user's own animals
-                            // In public mode, hide private ancestors
-                            if (isPublicMode && !ownedResponse.data.isDisplay) {
-                                setNotFound(true);
-                                setParentData(null);
-                                setLoading(false);
-                                return;
-                            }
-                            // In private mode or parent is public, show it
+                            // Found in user's own animals – always show, even if private
                             setParentData(ownedResponse.data);
                             setFoundViaOwned(true);
                             setLoading(false);
@@ -169,14 +127,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                                 headers: { Authorization: `Bearer ${authToken}` }
                             });
                             if (anyResponse.data) {
-                                // Found via related (not owned)
-                                // In public mode, only show if public
-                                if (isPublicMode && !anyResponse.data.isDisplay) {
-                                    setNotFound(true);
-                                    setParentData(null);
-                                    setLoading(false);
-                                    return;
-                                }
+                                // Found via related (not owned) – respect isPrivate flag
                                 setParentData(anyResponse.data);
                                 setLoading(false);
                                 return;
@@ -187,7 +138,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                     }
                 }
 
-                // Try fetching from global public animals database (only available in public mode anyway)
+                // Try fetching from global public animals database
                 const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
                 if (publicResponse.data && publicResponse.data.length > 0) {
                     setParentData(publicResponse.data[0]);
@@ -205,7 +156,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
         };
 
         fetchParent();
-    }, [parentId, parentType, API_BASE_URL, authToken, isPublicMode]);
+    }, [parentId, parentType, API_BASE_URL, authToken]);
 
     if (!parentId) {
         return (
@@ -223,7 +174,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
         );
     }
 
-    if (notFound || !parentData?.isDisplay) {
+    if (notFound || (!foundViaOwned && !parentData?.isDisplay)) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                 <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -316,12 +267,8 @@ export const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
                 {parent.gender && (
                     <div>
                         {parent.gender === 'Male' 
-                            ? <Mars size={12} strokeWidth={2.5} className="text-primary" />
-                            : parent.gender === 'Female'
-                                ? <Venus size={12} strokeWidth={2.5} className="text-accent" />
-                                : (parent.gender === 'Intersex' || parent.gender === 'Mixed')
-                                    ? <VenusAndMars size={12} strokeWidth={2.5} className="text-purple-500" />
-                                    : <Circle size={12} strokeWidth={2.5} className="text-gray-500" />
+                            ? <Mars size={12} strokeWidth={2.5} className="text-primary" /> 
+                            : <Venus size={12} strokeWidth={2.5} className="text-accent" />
                         }
                     </div>
                 )}
@@ -488,12 +435,8 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                                         {animal.gender && (
                                             <div className="absolute top-1.5 right-1.5">
                                                 {animal.gender === 'Male' 
-                                                    ? <Mars size={14} strokeWidth={2.5} className="text-primary" />
-                                                    : animal.gender === 'Female'
-                                                        ? <Venus size={14} strokeWidth={2.5} className="text-accent" />
-                                                        : (animal.gender === 'Intersex' || animal.gender === 'Mixed')
-                                                            ? <VenusAndMars size={14} strokeWidth={2.5} className="text-purple-500" />
-                                                            : <Circle size={14} strokeWidth={2.5} className="text-gray-500" />
+                                                    ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> 
+                                                    : <Venus size={14} strokeWidth={2.5} className="text-accent" />
                                                 }
                                             </div>
                                         )}
@@ -527,8 +470,8 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                                                     <EyeOff size={12} className="text-black" />
                                                 )}
                                                 {animal.isInMating && <Hourglass size={12} className="text-black" />}
-                                                {animal.isPregnant && <Bean size={12} className="text-black" />}
-                                                {animal.isNursing && <Milk size={12} className="text-black" />}
+                                                {animal.isPregnant && <ScanHeart size={12} className="text-black" />}
+                                                {animal.isNursing && <Droplet size={12} className="text-black" />}
                                             </div>
                                         )}
                                         

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, Eye, MessageSquare, Ban, UserX, Edit3, TrendingDown, Check } from 'lucide-react';
+import { Shield, AlertTriangle, Eye, MessageSquare, UserX, Edit3, TrendingDown, Check, Loader2 } from 'lucide-react';
 import './ModeratorActionSidebar.css';
 import { 
     FlagContentModal, 
@@ -25,6 +25,8 @@ export default function ModeratorActionSidebar({
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [notes, setNotes] = useState('');
     const [activeModal, setActiveModal] = useState(null);
+    const [targetUserContext, setTargetUserContext] = useState(null); // Normalized user context for modals
+    const [loadingUserContext, setLoadingUserContext] = useState(false);
 
     const handleQuickFlag = (action) => {
         setActiveModal(action);
@@ -40,6 +42,45 @@ export default function ModeratorActionSidebar({
         setNotes('');
         setActiveModal(null);
     };
+
+    // Effect to normalize currentContext into targetUserContext for modals
+    React.useEffect(() => {
+        const resolveUserContext = async () => {
+            if (!currentContext) {
+                setTargetUserContext(null);
+                return;
+            }
+
+            setLoadingUserContext(true);
+            let userId = null;
+            let userName = null;
+
+            if (currentContext.type === 'profile') {
+                userId = currentContext.userId;
+                userName = currentContext.name || currentContext.ownerName;
+            } else if (currentContext.type === 'animal') {
+                userId = currentContext.creatorId;
+                // Fetch user's name from creatorId
+                if (userId) {
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${userId}&limit=1`);
+                        if (response.data && response.data.length > 0) {
+                            const user = response.data[0];
+                            userName = user.personalName || user.breederName || user.id_public;
+                        } else {
+                            userName = `User ${userId}`;
+                        }
+                    } catch (err) {
+                        console.error('Error fetching user name for animal creator:', err);
+                        userName = `User ${userId}`;
+                    }
+                }
+            }
+            setTargetUserContext({ userId, userName, originalContext: currentContext });
+            setLoadingUserContext(false);
+        };
+        resolveUserContext();
+    }, [currentContext, API_BASE_URL, authToken]);
 
     if (!isActive) return null;
 
@@ -60,14 +101,14 @@ export default function ModeratorActionSidebar({
             {!isCollapsed && (
                 <div className="mod-action-content">
                     {/* Quick context info */}
-                    {currentContext && (
+                    {loadingUserContext ? (
+                        <div className="mod-context-display">
+                            <Loader2 size={16} className="animate-spin" /> Loading context...
+                        </div>
+                    ) : targetUserContext?.userName && (
                         <div className="mod-context-display">
                             <div className="mod-context-label">Current Context:</div>
-                            <div className="mod-context-value">
-                                {currentContext.type === 'profile' && `Profile: ${currentContext.name || currentContext.id}`}
-                                {currentContext.type === 'animal' && `Animal: ${currentContext.name || currentContext.id}`}
-                                {currentContext.type === 'message' && 'Message Thread'}
-                            </div>
+                            <div className="mod-context-value">{targetUserContext.userName}</div>
                         </div>
                     )}
 

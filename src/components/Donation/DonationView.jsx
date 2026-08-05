@@ -1,45 +1,9 @@
 import React from 'react';
 import axios from 'axios';
-import { ArrowLeft, Heart, DollarSign, RefreshCw, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Heart } from 'lucide-react';
 
 const DonationView = ({ onBack, authToken, userProfile, API_BASE_URL }) => {
-    const [subSuccess, setSubSuccess] = React.useState(false);
-    const [subError, setSubError] = React.useState('');
-    const [subLoading, setSubLoading] = React.useState(false);
-
-    // On return from PayPal, activate the badge
-    React.useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        if (!params.get('subscribed') || !authToken) return;
-        const subscriptionID = params.get('subscription_id') || params.get('ba_token');
-        if (!subscriptionID) { setSubSuccess(true); return; } // fallback – webhook will handle it
-        axios.post(
-            `${API_BASE_URL}/payments/paypal/subscription/activate`,
-            { subscriptionID },
-            { headers: { Authorization: `Bearer ${authToken}` } }
-        ).then(() => setSubSuccess(true))
-         .catch(() => {
-             // Webhook will still fire, so just show success
-             setSubSuccess(true);
-         });
-    }, [authToken, API_BASE_URL]);
-
-    const handleSubscribe = async () => {
-        setSubLoading(true);
-        setSubError('');
-        try {
-            const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
-            const res = await axios.post(
-                `${API_BASE_URL}/payments/paypal/subscription/create`,
-                {},
-                { headers }
-            );
-            window.location.href = res.data.approvalUrl;
-        } catch (err) {
-            setSubError('Could not start subscription. Please try again.');
-            setSubLoading(false);
-        }
-    };
+    // State and effects for PayPal subscriptions are no longer needed.
 
     return (
         <div className="w-full max-w-2xl bg-white p-8 rounded-xl shadow-lg">
@@ -92,17 +56,16 @@ const DonationView = ({ onBack, authToken, userProfile, API_BASE_URL }) => {
             {/* Donation Options */}
             <h2 className="text-xl font-bold text-gray-800 mb-4">How to Support</h2>
             <div className="space-y-4">
-                {/* Ko-fi Donation */}
+                {/* Support on Ko-fi */}
                 <div className="border-2 border-blue-500/30 rounded-lg p-6 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 hover:shadow-md transition">
                     <div className="flex items-start gap-4">
                         <div className="bg-blue-500/20 p-3 rounded-lg">
                             <Heart size={24} className="text-blue-600" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="font-bold text-lg text-gray-800 mb-2">Support CritterTrack on Ko-fi</h3>
+                            <h3 className="font-bold text-lg text-gray-800 mb-2">Support on Ko-fi</h3>
                             <p className="text-sm text-gray-600 mb-4">
-                                Support CritterTrack with a one-time or recurring donation on Ko-fi. Every contribution, no matter the size,
-                                helps fund server costs and development, ensuring the platform remains free and continuously improves.
+                                Support CritterTrack with a one-time donation or become a monthly member on Ko-fi. Your support helps cover server costs, fund new features, and allows the platform to remain free for everyone.
                             </p>
                             <a
                                 href="https://ko-fi.com/crittertrack"
@@ -110,33 +73,8 @@ const DonationView = ({ onBack, authToken, userProfile, API_BASE_URL }) => {
                                 rel="noopener noreferrer"
                                 className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
                             >
-                                <Heart size={18} className="fill-current" />
-                                Donate on Ko-fi
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Ko-fi Shop */}
-                <div className="border-2 border-blue-500/30 rounded-lg p-6 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 hover:shadow-md transition">
-                    <div className="flex items-start gap-4">
-                        <div className="bg-blue-500/20 p-3 rounded-lg">
-                            <ShoppingBag size={24} className="text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="font-bold text-lg text-gray-800 mb-2">Ko-fi Shop - Mouse Magic Genetics Guide</h3>
-                            <p className="text-sm text-gray-600 mb-4">
-                                Support CritterTrack by purchasing the Mouse Magic genetics guide. Currently Available in English and French!
-                                Every purchase helps fund server costs and development while you get quality products in return.
-                            </p>
-                            <a
-                                href="https://ko-fi.com/mousemagic/shop"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
-                            >
-                                <ShoppingBag size={18} />
-                                Buy Mouse Magic Genetics Guide
+                                <Heart size={18} />
+                                Support on Ko-fi
                             </a>
                         </div>
                     </div>
@@ -146,7 +84,8 @@ const DonationView = ({ onBack, authToken, userProfile, API_BASE_URL }) => {
             {/* Footer Note */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="text-xs text-gray-600 text-center leading-relaxed">
-                    All donations are processed securely through Ko-fi. You are not required to have a Ko-fi account to donate.
+                    All donations are processed securely through Ko-fi. You can use a credit card or PayPal account.
+                    Monthly subscriptions can be managed through your Ko-fi account.
                 </p>
             </div>
 

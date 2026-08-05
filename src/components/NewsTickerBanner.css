@@ -1,0 +1,10 @@
+/* c:\Projects\crittertrack-frontend\src\components\NewsTickerBanner.css */
+.news-ticker-container {
+  animation: ticker-scroll linear infinite;
+  animation-duration: 30s; /* Adjust speed as needed */
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}

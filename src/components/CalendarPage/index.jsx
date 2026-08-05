@@ -1,20 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import {
     Calendar, ChevronLeft, ChevronRight, Search, X,
     CalendarPlus, Hourglass, BellRing, Cake, Rainbow,
-    PartyPopper, UtensilsCrossed, Wrench, HandCoins, Package, Bell
+    PartyPopper, UtensilsCrossed, Wrench, HandCoins, Package, Bell,
+    Scissors, Dumbbell, HeartPulse, Filter, ChevronDown,
 } from 'lucide-react';
+import { parseLocalDate } from '../../utils/dateFormatter';
+import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
+import { getUserKey } from '../../utils/userKey';
 
 const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
     const [calendarTooltip, setCalendarTooltip] = useState(null);
     const [calendarQuery, setCalendarQuery] = useState('');
+    const [showEventTypesDropdown, setShowEventTypesDropdown] = useState(false);
+    const eventTypesDropdownRef = useRef(null);
 
-    const [calendarEventFilters, setCalendarEventFilters] = useState({
-        planned: true, mated: true, due: true, born: true, weaned: true,
-        birthday: true, feeding: true, maintenance: true, caretask: true, supply: true, milestone: true,
+    const userKey = useMemo(() => getUserKey(authToken), [authToken]);
+    const DEFAULT_EVENT_FILTERS = {
+        planned: true, mated: true, due: true, born: true, weaned: true, birthday: true,
+        feeding: true, grooming: true, training: true, health: true, maintenance: true,
+        caretask: true, supply: true, milestone: true,
+    };
+    const [calendarEventFilters, setCalendarEventFilters] = useState(() => {
+        try {
+            const saved = localStorage.getItem(`ct_calendar_event_filters_${userKey}`);
+            return saved ? { ...DEFAULT_EVENT_FILTERS, ...JSON.parse(saved) } : DEFAULT_EVENT_FILTERS;
+        } catch { return DEFAULT_EVENT_FILTERS; }
     });
+    const toggleEventFilter = (key) => {
+        setCalendarEventFilters(prev => {
+            const next = { ...prev, [key]: !prev[key] };
+            try { localStorage.setItem(`ct_calendar_event_filters_${userKey}`, JSON.stringify(next)); } catch {}
+            return next;
+        });
+    };
+    const setAllEventFilters = (value) => {
+        const next = Object.keys(DEFAULT_EVENT_FILTERS).reduce((acc, k) => ({ ...acc, [k]: value }), {});
+        setCalendarEventFilters(next);
+        try { localStorage.setItem(`ct_calendar_event_filters_${userKey}`, JSON.stringify(next)); } catch {}
+    };
+
+    // Close the event-types dropdown when clicking outside it
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (eventTypesDropdownRef.current && !eventTypesDropdownRef.current.contains(event.target)) {
+                setShowEventTypesDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const [litters, setLitters] = useState([]);
     const [animals, setAnimals] = useState([]);
@@ -28,12 +65,14 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         setLoading(true);
         Promise.all([
             axios.get(`${API_BASE_URL}/litters`, { headers }),
-            axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers }),
+            // No isOwned filter — matches the Dashboard's Needs Attention widgets, which include
+            // every non-archived, non-view-only animal regardless of ownership.
+            axios.get(`${API_BASE_URL}/animals`, { headers }),
             axios.get(`${API_BASE_URL}/supplies`, { headers }),
             axios.get(`${API_BASE_URL}/enclosures`, { headers }),
         ]).then(([l, a, s, e]) => {
             setLitters(Array.isArray(l.data) ? l.data : []);
-            setAnimals(Array.isArray(a.data) ? a.data : []);
+            setAnimals((Array.isArray(a.data) ? a.data : []).filter(x => !x.isViewOnly && !x.archived));
             setSupplies(Array.isArray(s.data) ? s.data : []);
             setEnclosures(Array.isArray(e.data) ? e.data : []);
         }).catch(() => {}).finally(() => setLoading(false));
@@ -55,14 +94,17 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
 
     const typeStyles = {
         planned:     { bg: 'bg-indigo-100 hover:bg-indigo-200 text-indigo-800 border border-dashed border-indigo-400', dot: 'bg-indigo-400', label: 'Planned Mating', Icon: CalendarPlus },
-        mated:       { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated', Icon: Hourglass },
+        mated:       { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Mated', Icon: Hourglass },
         due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due', Icon: BellRing },
-        born:        { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born', Icon: Cake },
-        weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned', Icon: Rainbow },
+        born:        { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-500', dot: 'bg-violet-500', label: 'Born', Icon: Cake },
+        weaned:      { bg: 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300', dot: 'bg-blue-400', label: 'Weaned', Icon: Rainbow },
         birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthdate', Icon: PartyPopper },
         feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due', Icon: UtensilsCrossed },
+        grooming:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Grooming/Special Care', Icon: Scissors },
+        training:    { bg: 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300', dot: 'bg-emerald-400', label: 'Training', Icon: Dumbbell },
+        health:      { bg: 'bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-400', dot: 'bg-rose-500', label: 'Health', Icon: HeartPulse },
         maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance', Icon: Wrench },
-        caretask:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Care Task', Icon: HandCoins },
+        caretask:    { bg: 'bg-cyan-100 hover:bg-cyan-200 text-cyan-800 border border-cyan-300', dot: 'bg-cyan-400', label: 'Care Task', Icon: HandCoins },
         supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order', Icon: Package },
         milestone:   { bg: 'bg-lime-100 hover:bg-lime-200 text-lime-800 border border-lime-300', dot: 'bg-lime-400', label: 'Milestone', Icon: Bell },
     };
@@ -98,7 +140,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     };
     const getDueStatusText = (expectedDueDate) => {
         if (!expectedDueDate) return 'Due';
-        const due = new Date(expectedDueDate);
+        const due = parseLocalDate(expectedDueDate);
         if (isNaN(due)) return 'Due';
         const now = new Date();
         now.setHours(0, 0, 0, 0);
@@ -117,6 +159,50 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         const next = new Date(base);
         next.setDate(next.getDate() + Number(freqDays));
         return `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+    };
+    // Feeding uses an hours-based interval (supports multiple feedings/day); needs full
+    // timestamp precision rather than the midnight-truncated day math nextDueDate() uses above.
+    const nextFeedingDueDate = (lastDate, intervalHours) => {
+        if (!intervalHours) return null;
+        const base = lastDate ? new Date(lastDate) : new Date();
+        if (isNaN(base.getTime())) return null;
+        const next = new Date(base.getTime() + Number(intervalHours) * 3600000);
+        return `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+    };
+    const formatFeedingInterval = (hours) => {
+        const h = Number(hours);
+        if (!h) return '';
+        if (h % 24 === 0) return `Every ${h / 24}d`;
+        if (h < 24) return `Every ${h}h`;
+        return `Every ${Math.floor(h / 24)}d ${h % 24}h`;
+    };
+
+    const parseArrayField = (val) => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        try { return JSON.parse(val); } catch { return [{ name: String(val) }]; }
+    };
+    // Mirrors AnimalList/index.jsx's calcNextDose — anchors to the most recent administration
+    // (falling back to the medication's start date) and projects the next dose from there.
+    const calcNextDose = (med) => {
+        if (!med.intervalValue || !med.intervalUnit) return null;
+        if (med.stopDate && new Date(med.stopDate) <= new Date()) return null;
+        const v = Number(med.intervalValue);
+        const unitMs = med.intervalUnit === 'hours' ? 3600000
+            : med.intervalUnit === 'days' ? 86400000
+            : med.intervalUnit === 'weeks' ? 604800000
+            : med.intervalUnit === 'months' ? 2592000000 : null;
+        if (!unitMs) return null;
+        const lastAdmin = med.administrations?.length > 0 ? med.administrations[med.administrations.length - 1].date : null;
+        const anchor = lastAdmin || med.startDate;
+        if (!anchor) return null;
+        const start = new Date(anchor).getTime();
+        if (isNaN(start)) return null;
+        const intervalMs = v * unitMs;
+        const now = Date.now();
+        const elapsed = now - start;
+        if (elapsed < 0) return new Date(start);
+        return new Date(start + (Math.floor(elapsed / intervalMs) + 1) * intervalMs);
     };
 
     const getEventIcon = (type, size = 12, className = '') => {
@@ -185,26 +271,19 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         }
     });
 
-    // Animal events
-    animals.forEach(a => {
+    // Animal events — also searchable via the filter box, not just litters
+    const filteredAnimals = animals.filter(a => {
+        if (!q) return true;
+        return [a.prefix, a.name, a.suffix, a.id_public].filter(Boolean).join(' ').toLowerCase().includes(q);
+    });
+    filteredAnimals.forEach(a => {
         addAnimalEvent(a.birthDate, 'birthday', a);
-        const feedNext = nextDueDate(a.lastFedDate, a.feedingFrequencyDays);
+        const feedNext = nextFeedingDueDate(a.lastFedDate, a.feedingIntervalHours);
         if (feedNext) addAnimalEvent(feedNext, 'feeding', {
             ...a,
             _calLabel: a.name || a.id_public,
-            _calDetail: `Feed every ${a.feedingFrequencyDays}d`,
+            _calDetail: `Feed ${formatFeedingInterval(a.feedingIntervalHours)}`,
             _calFeedType: a.dietType || '',
-        });
-        const maintNext = nextDueDate(a.lastMaintenanceDate, a.maintenanceFrequencyDays);
-        if (maintNext) addAnimalEvent(maintNext, 'maintenance', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Maintenance every ${a.maintenanceFrequencyDays}d` });
-        (a.careTasks || []).forEach(t => {
-            const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
-            if (dn) addAnimalEvent(dn, 'caretask', {
-                ...a,
-                _calLabel: t.taskName || t.name || 'Enclosure Task',
-                _calDetail: a.name || a.id_public,
-                _calSubject: '',
-            });
         });
         (a.animalCareTasks || []).forEach(t => {
             const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
@@ -215,22 +294,73 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 _calSubject: '',
             });
         });
+        // Dedicated, individually-tracked Grooming/Special Care schedules
+        GROOMING_SCHEDULE_DEFS.forEach(def => {
+            const dn = nextDueDate(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays);
+            if (dn) addAnimalEvent(dn, 'grooming', {
+                ...a,
+                _calLabel: def.label,
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
+        });
+        // Dedicated, individually-tracked Training schedules
+        TRAINING_SCHEDULE_DEFS.forEach(def => {
+            const dn = nextDueDate(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays);
+            if (dn) addAnimalEvent(dn, 'training', {
+                ...a,
+                _calLabel: def.label,
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
+        });
+        // Health: upcoming medication doses (active treatment) + quarantine end date reached
+        parseArrayField(a.medications).filter(m => !m.status || m.status === 'active').forEach(m => {
+            const nextDose = calcNextDose(m);
+            if (!nextDose) return;
+            addAnimalEvent(nextDose.toISOString().substring(0, 10), 'health', {
+                ...a,
+                _calLabel: `Medication: ${m.name || 'Dose'}`,
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
+        });
+        if (a.isQuarantine && a.quarantineDetails?.endDate) {
+            addAnimalEvent(a.quarantineDetails.endDate, 'health', {
+                ...a,
+                _calLabel: 'Quarantine ends',
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
+        }
     });
 
-    // Enclosure cleaning tasks
-    enclosures.forEach(enc => {
+    // Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so nextDueDate works.
+    const cleaningTaskFreqDays = (t) => {
+        if (t.frequencyDays) return t.frequencyDays;
+        if (!t.frequency) return null;
+        const mult = t.frequencyUnit === 'weeks' ? 7 : t.frequencyUnit === 'months' ? 30 : t.frequencyUnit === 'years' ? 365 : 1;
+        return t.frequency * mult;
+    };
+
+    // Enclosure cleaning/maintenance tasks — filterable by enclosure name
+    const filteredEnclosures = enclosures.filter(enc => {
+        if (!q) return true;
+        return (enc.name || '').toLowerCase().includes(q);
+    });
+    filteredEnclosures.forEach(enc => {
         (enc.cleaningTasks || []).forEach(t => {
-            const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
-            if (dn && calendarEventFilters.caretask) {
+            const dn = nextDueDate(t.lastDoneDate, cleaningTaskFreqDays(t));
+            if (dn && calendarEventFilters.maintenance) {
                 if (!eventMap[dn]) eventMap[dn] = [];
                 eventMap[dn].push({
-                    type: 'caretask',
+                    type: 'maintenance',
                     animal: {
                         _id: enc._id,
                         _calLabel: t.taskName || t.name || 'Cleaning Task',
                         _calDetail: enc.name || 'Enclosure',
                         _calSubject: enc.name || 'Enclosure',
-                        _calAnimalName: 'Enclosure',
+                        _calAnimalName: enc.name || 'Enclosure',
                         id_public: enc._id,
                     },
                 });
@@ -238,8 +368,12 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         });
     });
 
-    // Supplies
-    supplies.forEach(s => {
+    // Supplies — filterable by item name/category
+    const filteredSupplies = supplies.filter(s => {
+        if (!q) return true;
+        return [s.name, s.category].filter(Boolean).join(' ').toLowerCase().includes(q);
+    });
+    filteredSupplies.forEach(s => {
         if (s.nextOrderDate) addAnimalEvent(s.nextOrderDate.substring(0,10), 'supply', {
             _id: s._id,
             _calLabel: s.name || 'Supply',
@@ -252,7 +386,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
 
     // Animal milestones
     if (calendarEventFilters.milestone) {
-        animals.forEach(a => {
+        filteredAnimals.forEach(a => {
             (a.milestones || []).forEach(m => {
                 if (!m.startDate || !m.label) return;
                 try {
@@ -321,7 +455,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         .sort((a, b) => {
             if (a.dateKey < b.dateKey) return -1;
             if (a.dateKey > b.dateKey) return 1;
-            const order = { planned: 0, mated: 1, due: 2, born: 3, weaned: 4, birthday: 5, feeding: 6, maintenance: 7, caretask: 8, supply: 9, milestone: 10 };
+            const order = { planned: 0, mated: 1, due: 2, born: 3, weaned: 4, birthday: 5, feeding: 6, grooming: 7, training: 8, health: 9, maintenance: 10, caretask: 11, supply: 12, milestone: 13 };
             return (order[a.type] ?? 99) - (order[b.type] ?? 99);
         });
 
@@ -350,7 +484,14 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 const feedType = (a._calFeedType || '').trim();
                 return { prefix: 'Feed:', bold: animalName, rest: feedType };
             }
-            if (ev.type === 'maintenance') return { prefix: 'Maintenance:', bold: animalName, rest: '' };
+            if (ev.type === 'maintenance') return { prefix: 'Maintenance:', bold: animalName, rest: a._calLabel || '' };
+            if (ev.type === 'grooming' || ev.type === 'training') {
+                const taskName = a._calLabel || 'Task';
+                return { prefix: ev.type === 'grooming' ? 'Grooming:' : 'Training:', bold: animalName, rest: taskName };
+            }
+            if (ev.type === 'health') {
+                return { prefix: 'Health:', bold: animalName, rest: a._calLabel || '' };
+            }
             if (ev.type === 'caretask') {
                 const taskName = a._calLabel || 'Task';
                 const subject = (a._calSubject || '').trim();
@@ -375,8 +516,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         if (ev.type === 'due') {
             let dueText;
             if (l.birthDate && l.expectedDueDate) {
-                const due = new Date(l.expectedDueDate); due.setHours(0,0,0,0);
-                const born = new Date(l.birthDate); born.setHours(0,0,0,0);
+                const due = parseLocalDate(l.expectedDueDate); due.setHours(0,0,0,0);
+                const born = parseLocalDate(l.birthDate); born.setHours(0,0,0,0);
                 const diff = Math.round((born - due) / 86400000);
                 dueText = diff > 0 ? `${diff}d overdue` : diff === 0 ? 'On time' : `${Math.abs(diff)}d early`;
             } else {
@@ -391,7 +532,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         }
         if (ev.type === 'weaned') {
             const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0);
-            const wd = l.weaningDate ? new Date(l.weaningDate) : null;
+            const wd = l.weaningDate ? parseLocalDate(l.weaningDate) : null;
             const now = new Date();
             now.setHours(0, 0, 0, 0);
             let weanedPastOrToday = false;
@@ -436,39 +577,63 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 {/* Filters */}
                 <div className="px-4 py-3 bg-white border-b border-gray-200 space-y-3">
                     <div className="flex flex-col md:flex-row md:items-center gap-2">
-                        <div className="flex items-center gap-2 w-full md:w-auto">
+                        <div className="flex items-center gap-2 w-full md:w-auto flex-1">
                             <Search size={14} className="text-gray-400" />
                             <input
                                 value={calendarQuery}
                                 onChange={e => setCalendarQuery(e.target.value)}
-                                placeholder="Filter by pair, litter ID, sire or dam"
+                                placeholder="Filter by pair, litter ID, sire/dam, animal, or enclosure"
                                 className="w-full md:w-80 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                             />
                         </div>
-
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {Object.entries(typeStyles).map(([key, style]) => (
+                        <div className="relative" ref={eventTypesDropdownRef}>
                             <button
-                                key={key}
-                                onClick={() => setCalendarEventFilters(prev => ({ ...prev, [key]: !prev[key] }))}
-                                className={`px-2.5 py-1 text-xs font-medium rounded-full border transition ${calendarEventFilters[key] ? style.bg : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'}`}
+                                onClick={() => setShowEventTypesDropdown(prev => !prev)}
+                                title="Configure which event types are shown"
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${Object.values(calendarEventFilters).some(Boolean) ? 'bg-primary/10 text-primary-dark hover:bg-primary/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
-                                <span className="inline-flex items-center gap-1">
-                                    {getEventIcon(key, 12)}
-                                    <span>{style.label}</span>
-                                </span>
+                                <Filter size={14} />
+                                <span>Event Types {Object.values(calendarEventFilters).some(Boolean) ? 'On' : 'Off'}</span>
+                                <ChevronDown size={14} className={`ml-1 transition-transform ${showEventTypesDropdown ? 'rotate-180' : ''}`} />
                             </button>
-                        ))}
+                            {showEventTypesDropdown && (
+                                <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl z-10">
+                                    <div className="p-3 border-b flex items-center justify-between">
+                                        <div>
+                                            <h4 className="font-semibold text-sm text-gray-800">Calendar Event Types</h4>
+                                            <p className="text-xs text-gray-500">Select which events to show.</p>
+                                        </div>
+                                        <div className="flex flex-col gap-1 text-xs flex-shrink-0">
+                                            <button onClick={() => setAllEventFilters(true)} className="text-primary-dark hover:underline text-left">All</button>
+                                            <button onClick={() => setAllEventFilters(false)} className="text-gray-400 hover:underline text-left">None</button>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 space-y-2 max-h-80 overflow-y-auto">
+                                        {Object.entries(typeStyles).map(([key, style]) => (
+                                            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!!calendarEventFilters[key]}
+                                                    onChange={() => toggleEventFilter(key)}
+                                                    className="w-4 h-4 rounded text-primary focus:ring-primary"
+                                                />
+                                                <style.Icon size={13} className="flex-shrink-0" />
+                                                {style.label}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
-                    <div className="min-w-[42rem]">
+                    <div className="min-w-full sm:min-w-[42rem]">
                         {/* Day-of-week headers */}
                         <div className="grid grid-cols-7 border-b-2 border-gray-300 bg-gray-50">
                             {dayNames.map((d, i) => (
-                                <div key={d} className={`py-2 text-center text-xs font-bold uppercase tracking-wide ${isWeekendCol[i] ? 'text-rose-400' : 'text-gray-500'}`}>{d}</div>
+                                <div key={d} className={`py-1 sm:py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wide ${isWeekendCol[i] ? 'text-rose-400' : 'text-gray-500'}`}>{d}</div>
                             ))}
                         </div>
 
@@ -484,13 +649,13 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                 {cells.map((day, idx) => {
                                     const colIdx = idx % 7;
                                     const isWeekend = isWeekendCol[colIdx];
-                                    if (day === null) return <div key={`blank-${idx}`} className={`min-h-[96px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />;
+                                    if (day === null) return <div key={`blank-${idx}`} className={`min-h-[64px] sm:min-h-[96px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />;
                                     const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                                     const events = eventMap[dateKey] || [];
                                     const isToday = dateKey === todayStr;
                                     return (
-                                        <div key={dateKey} className={`min-h-[96px] p-1.5 overflow-hidden ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
-                                            <span className={`inline-flex items-center justify-center w-6 h-6 text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
+                                        <div key={dateKey} className={`min-h-[64px] sm:min-h-[96px] p-1 sm:p-1.5 overflow-hidden ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
+                                            <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-xs sm:text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
                                                 {day}
                                             </span>
                                             <div className="mt-0.5 space-y-0.5">
@@ -502,7 +667,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                                         <button
                                                             key={i}
                                                             onClick={() => setCalendarTooltip(t => (t?.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                                            className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium overflow-hidden transition-colors ${st.bg}`}
+                                                            className={`w-full text-left px-1 py-0.5 sm:px-1.5 sm:py-1 rounded text-[9px] sm:text-[11px] leading-tight font-medium overflow-hidden transition-colors ${st.bg}`}
                                                             title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
                                                         >
                                                             <span className="flex items-start gap-1 min-w-0 w-full">
@@ -558,6 +723,16 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                         {a.species && <TooltipRow label="Species:" value={a.species} />}
                                         <TooltipRow label="Schedule:" value={a._calDetail} />
                                     </>)}
+                                    {(calendarTooltip.type === 'grooming' || calendarTooltip.type === 'training') && (<>
+                                        <TooltipRow label="Task:" value={a._calLabel} />
+                                        {a.id_public && <TooltipRow label="Animal:" value={getAnimalDisplayName(a)} />}
+                                        {a.species && <TooltipRow label="Species:" value={a.species} />}
+                                    </>)}
+                                    {calendarTooltip.type === 'health' && (<>
+                                        <TooltipRow label="Item:" value={a._calLabel} />
+                                        {a.id_public && <TooltipRow label="Animal:" value={getAnimalDisplayName(a)} />}
+                                        {a.species && <TooltipRow label="Species:" value={a.species} />}
+                                    </>)}
                                     {calendarTooltip.type === 'caretask' && (<>
                                         <TooltipRow label="Task:" value={a._calLabel} />
                                         <TooltipRow label="Animal / Enclosure:" value={a._calDetail} />
@@ -586,12 +761,12 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                     const callId = l.litter_id_public;
 
                     const daysStatus = (() => {
-                        if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-green-600 font-semibold' };
+                        if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-violet-600 font-semibold' };
                         if (!l.expectedDueDate) return null;
                         const due = new Date(l.expectedDueDate); if (isNaN(due)) return null;
                         const now = new Date(); now.setHours(0,0,0,0); due.setHours(0,0,0,0);
                         const diff = Math.round((due - now) / 86400000);
-                        if (diff > 0) return { text: `${diff} day${diff !== 1 ? 's' : ''} remaining`, cls: 'text-green-600' };
+                        if (diff > 0) return { text: `${diff} day${diff !== 1 ? 's' : ''} remaining`, cls: 'text-pink-600' };
                         if (diff === 0) return { text: 'Due today', cls: 'text-amber-600 font-semibold' };
                         return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
                     })();
@@ -641,7 +816,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                         const wd = new Date(l.weaningDate); if (isNaN(wd)) return null;
                                         const now = new Date(); now.setHours(0,0,0,0); wd.setHours(0,0,0,0);
                                         const diff = Math.round((wd - now) / 86400000);
-                                        if (diff > 0) return { text: `Due in ${diff} day${diff !== 1 ? 's' : ''}`, cls: 'text-green-600' };
+                                        if (diff > 0) return { text: `Due in ${diff} day${diff !== 1 ? 's' : ''}`, cls: 'text-violet-600' };
                                         if (diff === 0) return { text: 'Weaning today', cls: 'text-amber-600 font-semibold' };
                                         return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
                                     })();

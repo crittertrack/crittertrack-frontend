@@ -46,7 +46,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
         { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint' },
         { code: 'PLN', symbol: 'zł', name: 'Polish Zloty' },
-        { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah' },
+        { code: 'DKK', symbol: 'kr', name: 'Danish Krone' }
     ];
 
     const getCurrencySymbol = () => {
@@ -86,8 +86,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                 ...prev,
                 type: preSelectedType,
                 animalId: preSelectedAnimal.id_public,
-                animalName: preSelectedAnimal.name,
-                buyer: userProfile?.breederName || userProfile?.personalName || ''
+                animalName: preSelectedAnimal.name
             }));
             setSelectedSpecies(preSelectedAnimal.species);
             setShowAddModal(true);
@@ -224,6 +223,24 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
                 showModalMessage('Success', 'Transaction added successfully');
+
+                // Logging a sale doesn't change the animal's own status/list visibility —
+                // offer to do that explicitly, since users often assume it happens automatically.
+                if (transactionData.type === 'sale' && formData.animalId) {
+                    if (window.confirm(`You've logged a sale for ${formData.animalName || formData.animalId}. Would you also like to mark it as Rehomed and archive it so it moves out of your main animal list?`)) {
+                        try {
+                            await axios.put(
+                                `${API_BASE_URL}/animals/${formData.animalId}`,
+                                { status: 'Rehomed', archived: true },
+                                { headers: { Authorization: `Bearer ${authToken}` } }
+                            );
+                            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: formData.animalId, status: 'Rehomed', archived: true } }));
+                            window.dispatchEvent(new Event('animals-changed'));
+                        } catch (err) {
+                            showModalMessage('Error', 'Failed to update the animal\'s status.');
+                        }
+                    }
+                }
             }
 
             console.log('API call successful');
@@ -355,7 +372,22 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         <DollarSign className="w-5 h-5 sm:w-7 sm:h-7 text-green-600" />
                         Budget Tracker
                     </h1>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600">
+                            Currency:
+                            <select
+                                value={currency}
+                                onChange={(e) => handleCurrencyChange(e.target.value)}
+                                className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs sm:text-sm focus:ring-primary focus:border-primary"
+                                title="Sets the currency symbol shown across this entire page"
+                            >
+                                {currencyOptions.map(curr => (
+                                    <option key={curr.code} value={curr.code}>
+                                        {curr.symbol} {curr.code}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
                         <button
                             onClick={exportToCSV}
                             className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-xs sm:text-base"
@@ -443,7 +475,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
             {/* Filters */}
             <div className="bg-white rounded-xl shadow-lg p-2 sm:p-4 mb-4 sm:mb-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
                     <div className="relative col-span-2 md:col-span-1">
                         <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         <input
@@ -480,22 +512,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                             <option value="all">All Years</option>
                             {availableYears.map(year => (
                                 <option key={year} value={year}>{year}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="relative">
-                        <DollarSign className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
-                        <select
-                            value={currency}
-                            onChange={(e) => handleCurrencyChange(e.target.value)}
-                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                            title="Select Currency"
-                        >
-                            {currencyOptions.map(curr => (
-                                <option key={curr.code} value={curr.code}>
-                                    {curr.symbol} {curr.code}
-                                </option>
                             ))}
                         </select>
                     </div>
@@ -630,19 +646,14 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         {/* Transaction Type Selection Screen */}
                         {!editingTransaction && showTypeSelection ? (
                             <div className="space-y-6">
-                                <p className="text-center text-gray-600 mb-8">
-                                    What type of transaction would you like to add?
-                                    <br />
-                                    <span className="text-xs text-gray-500">
-                                        This only records a manual budget entry — it will not change the animal's status (e.g. sold, transferred, or archived).
-                                    </span>
-                                </p>
+                                <p className="text-center text-gray-600 mb-2">What type of transaction would you like to add?</p>
+                                <p className="text-center text-xs text-gray-400 mb-8">These are manual entries only and won't transfer ownership. To transfer an animal to another user, use the <strong>Transfer</strong> button on that animal instead.</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <button
                                         type="button"
                                         onClick={() => {
                                             console.log('[BudgetTab] Animal Sale button clicked');
-                                            setFormData({ ...formData, type: 'animal-sale', buyer: userProfile?.breederName || userProfile?.personalName || '' });
+                                            setFormData({ ...formData, type: 'animal-sale' });
                                             setShowTypeSelection(false);
                                         }}
                                         className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all"

@@ -5,11 +5,21 @@ import {
     Droplets, Egg, Heart, Loader2, Milk, Package, PawPrint, Shield,
     UtensilsCrossed, Wrench, X, XCircle
 } from 'lucide-react';
-import { formatDate } from '../../utils/dateFormatter';
+import { formatDate, parseLocalDate } from '../../utils/dateFormatter';
 import { BroadcastPoll } from './Banners';
-import { parseJsonField } from '../AnimalDetail/utils';
 
 const API_BASE_URL = '/api';
+
+// Dedicated, individually-tracked Grooming/Special Care & Training schedule fields
+// ({ lastDoneDate, frequencyDays }) — see AnimalList/index.jsx GROOMING_SCHEDULE_DEFS/TRAINING_SCHEDULE_DEFS.
+const SCHEDULE_FIELD_KEYS = [
+    'groomingSchedule', 'brushingSchedule', 'bathingSchedule', 'specializedCareSchedule', 'specialCareSchedule',
+    'nailCareSchedule', 'beakHoofScaleSchedule', 'skinEarCareSchedule', 'dentalCareSchedule', 'healthMonitoringSchedule',
+    'exerciseSchedule', 'crateTrainingSchedule', 'litterTrainingSchedule', 'leashTrainingSchedule',
+    'freeFlightTrainingSchedule', 'workingRoleTrainingSchedule', 'behavioralIssueTrainingSchedule',
+    'reactivityTrainingSchedule', 'flightRiskTrainingSchedule',
+];
+
 
 const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     // -- Breeding Reminders ------------------------------------------
@@ -67,12 +77,14 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     useEffect(() => {
         if (!authToken) return;
         Promise.all([
-            axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` }, params: { isOwned: 'true' } }),
+            // No isOwned filter — matches the Dashboard's Needs Attention widgets, which include
+            // every non-archived, non-view-only animal regardless of ownership.
+            axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } }),
             axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } }),
             axios.get(`${API_BASE_URL}/supplies`, { headers: { Authorization: `Bearer ${authToken}` } }),
         ])
             .then(([ar, er, sr]) => {
-                const a = Array.isArray(ar.data) ? ar.data : [];
+                const a = (Array.isArray(ar.data) ? ar.data : []).filter(x => !x.isViewOnly && !x.archived);
                 const e = Array.isArray(er.data) ? er.data : [];
                 const s = Array.isArray(sr.data) ? sr.data : [];
                 setAnimals(a); setEnclosures(e); setSupplies(s);
@@ -93,7 +105,8 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                 const response = await axios.get(`${API_BASE_URL}/notifications`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
-                const broadcastNotifications = (response.data || []).filter(n => {
+            const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
+            const broadcastNotifications = allNotifications.filter(n => {
                     const isBroadcastType = n.type === 'broadcast' || n.type === 'announcement';
                     const isNotUrgent = n.broadcastType !== 'warning' && n.broadcastType !== 'alert';
                     const isNotDismissed = !dismissedBroadcastIds.includes(n._id);
@@ -113,12 +126,6 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const breedingItems = [];
     if (breedingEnabled && !littersLoading) {
-        const parseLocalDate = (v) => {
-            if (!v) return null;
-            const s = typeof v === 'string' ? v.substring(0, 10) : null;
-            const d = s ? new Date(s + 'T00:00:00') : new Date(v);
-            return isNaN(d.getTime()) ? null : d;
-        };
         litters.forEach(l => {
             const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
             const sn = [l.sire?.prefix, l.sire?.name || l.sireId_public || '?', l.sire?.suffix].filter(Boolean).join(' ');
@@ -163,7 +170,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     if (mgmtEnabled && !mgmtLoading) {
         const daysSince = (dateStr) => {
             if (!dateStr) return null;
-            const d = new Date(dateStr); d.setHours(0, 0, 0, 0);
+            const d = parseLocalDate(dateStr); d.setHours(0, 0, 0, 0);
             return Math.floor((today - d) / 86400000);
         };
         const isTaskDue = (lastDate, freqDays) => {
@@ -172,15 +179,31 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             const ds = daysSince(lastDate);
             return ds !== null && ds >= Number(freqDays);
         };
-        const feedingDue = animals.filter(a => isTaskDue(a.lastFedDate, a.feedingFrequencyDays));
+        // Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so isTaskDue works.
+        const cleaningTaskFreqDays = (t) => {
+            if (t.frequencyDays) return t.frequencyDays;
+            if (!t.frequency) return null;
+            const mult = t.frequencyUnit === 'weeks' ? 7 : t.frequencyUnit === 'months' ? 30 : t.frequencyUnit === 'years' ? 365 : 1;
+            return t.frequency * mult;
+        };
+        // Feeding uses an hours-based interval (supports multiple feedings/day)
+        const isFeedingDue = (lastDate, intervalHours) => {
+            if (!intervalHours) return false;
+            if (!lastDate) return true;
+            const d = new Date(lastDate);
+            if (isNaN(d.getTime())) return false;
+            const hrs = (Date.now() - d.getTime()) / 3600000;
+            return hrs >= Number(intervalHours);
+        };
+        const feedingDue = animals.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours));
         if (feedingDue.length > 0) {
             const key = 'mgmt-feeding';
             if (!mgmtDismissed[key]) mgmtItems.push({ key, type: 'feeding', label: 'Feeding', icon: '\uD83C\uDF7D\uFE0F', description: `${feedingDue.length} animal${feedingDue.length !== 1 ? 's' : ''} overdue` });
         }
         let careDueCount = 0;
         animals.forEach(a => {
-            careDueCount += parseJsonField(a.careTasks).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
-            careDueCount += parseJsonField(a.animalCareTasks).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+            careDueCount += (a.animalCareTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+            careDueCount += SCHEDULE_FIELD_KEYS.filter(key => isTaskDue(a[key]?.lastDoneDate, a[key]?.frequencyDays)).length;
         });
         if (careDueCount > 0) {
             const key = 'mgmt-care';
@@ -188,7 +211,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         }
         let maintDueCount = 0;
         enclosures.forEach(enc => {
-            maintDueCount += parseJsonField(enc.cleaningTasks).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+            maintDueCount += (enc.cleaningTasks || []).filter(t => isTaskDue(t.lastDoneDate, cleaningTaskFreqDays(t))).length;
         });
         if (maintDueCount > 0) {
             const key = 'mgmt-maintenance';
@@ -196,7 +219,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         }
         const suppliesDue = supplies.filter(s =>
             (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
-            (s.nextOrderDate && new Date(s.nextOrderDate) <= today)
+            (s.nextOrderDate && parseLocalDate(s.nextOrderDate) <= today)
         );
         if (suppliesDue.length > 0) {
             const key = 'mgmt-supplies';
@@ -266,9 +289,9 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const isLoading = littersLoading || mgmtLoading;
 
     const breedingTypeConfig = {
-        mated:  { label: 'Mating',         bg: 'bg-purple-100 text-purple-700', border: 'border-purple-200', icon: Heart },
+        mated:  { label: 'Mating',         bg: 'bg-sky-100 text-sky-700', border: 'border-sky-200', icon: Heart },
         due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700',   border: 'border-amber-200',  icon: Egg },
-        weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',       border: 'border-sky-200',    icon: Milk },
+        weaned: { label: 'Weaning',        bg: 'bg-blue-100 text-blue-700',       border: 'border-blue-200',    icon: Milk },
     };
     const mgmtTypeConfig = {
         feeding:     { bg: 'bg-orange-100 text-orange-700', border: 'border-orange-200', icon: UtensilsCrossed },

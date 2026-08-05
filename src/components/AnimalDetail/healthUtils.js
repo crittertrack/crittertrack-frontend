@@ -1,5 +1,3 @@
-import { parseJsonField } from './utils';
-
 /**
  * Determines an animal's health status based on its active medical records.
  * This function assumes an enhanced data model where medical records have a `status`
@@ -11,8 +9,8 @@ import { parseJsonField } from './utils';
 export function determineHealthStatus(animal) {
   if (!animal) return 'Unknown';
 
-  const medicalConditions = parseJsonField(animal.medicalConditions);
-  const medications = parseJsonField(animal.medications);
+  const medicalConditions = Array.isArray(animal.medicalConditions) ? animal.medicalConditions : [];
+  const medications = Array.isArray(animal.medications) ? animal.medications : [];
 
   // Rule 1: Quarantine is the highest priority status.
   if (animal.quarantineStatus?.active) {

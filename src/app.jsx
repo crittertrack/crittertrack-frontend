@@ -1,8 +1,8 @@
-﻿﻿// CritterTrack Frontend Application
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, HelpCircle, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, HeartPulse, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets, Droplet, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal, ScanHeart } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -24,7 +24,6 @@ import AdminPanel from './components/EnhancedAdminPanel';
 import MaintenanceMode from './MaintenanceMode';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import DatePicker from './components/DatePicker';
-import InfoTab from './components/InfoTab';
 import WelcomeGuideModal from './components/WelcomeGuideModal';
 import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
@@ -34,9 +33,9 @@ import Marketplace from './components/Marketplace';
 import LitterManagement from './components/LitterManagement';
 import AnimalForm, { PedigreeChart } from './components/AnimalForm';
 import AnimalList from './components/AnimalList';
-import ContactsPage from './components/Contacts';
 import AuthView from './components/Auth/AuthView';
-import { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup, V2LaunchBanner } from './components/Notifications/Banners';
+import { BroadcastPoll, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
+import NotificationBar from './components/Notifications/NotificationBar';
 import NotificationsHub from './components/Notifications/NotificationsHub';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
@@ -55,9 +54,9 @@ import DonationView from './components/Donation/DonationView';
 import CommunityPage from './components/Community/CommunityPage';
 // import ThemeToggle from './components/ThemeToggle';
 
-import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
-import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
-import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
+import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
+import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
+import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import { OffspringSection } from './components/AnimalDetail/utils';
 import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Import the new modal
 
@@ -78,14 +77,17 @@ import { useTransferWorkflow } from './hooks/useTransferWorkflow.ts';
 import { useBreedingLines } from './hooks/useBreedingLines.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
+import NewsTickerBanner from './components/NewsTickerBanner';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
+import ToolsDropdown from './components/ToolsDropdown';
+import FinanceDropdown from './components/FinanceDropdown';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
 
 // App version for cache invalidation - increment to force cache clear
-const APP_VERSION = '7.0.7'; // Force cache clear + filter reset for empty list bug fix
+const APP_VERSION = '7.0.6';
 
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes in milliseconds
 
@@ -176,49 +178,36 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
             <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
                 <p className="text-xs font-semibold text-gray-600">{parentType}</p>
             </div>
-            <div className="p-3 flex flex-col items-center">
+            <div className="p-3 flex items-center gap-3">
                 {/* Image */}
-                <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mb-2">
+                <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
                         <img src={imgSrc} alt={parentData.name} className="w-full h-full object-cover" />
                     ) : (
-                        <Cat size={28} className="text-gray-400" />
+                        <Cat size={24} className="text-gray-400" />
                     )}
                 </div>
 
-                {/* Icon row */}
-                <div className="flex justify-center items-center space-x-2 mb-2">
-                    {parentData.isOwned ? (
-                        <Heart size={12} className="text-black" />
-                    ) : (
-                        <HeartOff size={12} className="text-black" />
-                    )}
-                    {parentData.showOnPublicProfile ? (
-                        <Eye size={12} className="text-black" />
-                    ) : (
-                        <EyeOff size={12} className="text-black" />
-                    )}
-                    {parentData.isInMating && <Hourglass size={12} className="text-black" />}
-                    {parentData.isPregnant && <Bean size={12} className="text-black" />}
-                    {parentData.isNursing && <Milk size={12} className="text-black" />}
-                </div>
-
-                {/* Name */}
-                <div className="text-center mb-1">
+                <div className="flex-1 min-w-0">
+                    {/* Name */}
                     <p className="text-sm font-semibold text-gray-800 truncate">
                         {parentData.prefix ? `${parentData.prefix} ` : ''}{parentData.name}{parentData.suffix ? ` ${parentData.suffix}` : ''}
                     </p>
-                </div>
-
-                {/* ID */}
-                <div className="text-center mb-2">
+                    {/* ID */}
                     <p className="text-xs text-gray-500">{parentData.id_public}</p>
+                    {/* Icon row */}
+                    <div className="flex items-center space-x-2 mt-1">
+                        {parentData.isOwned ? <Heart size={12} className="text-black" title="Owned" /> : <HeartOff size={12} className="text-black" title="Not Owned" />}
+                        {parentData.showOnPublicProfile ? <Eye size={12} className="text-black" title="Public" /> : <EyeOff size={12} className="text-black" title="Private" />}
+                        {parentData.isInMating && <Hourglass size={12} className="text-black" title="In Mating" />}
+                        {parentData.isPregnant && <ScanHeart size={12} className="text-black" title="Pregnant" />}
+                        {parentData.isNursing && <Droplet size={12} className="text-black" title="Nursing" />}
+                    </div>
                 </div>
-
-                {/* Status bar */}
-                <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300">
-                    <p className="text-xs font-medium text-gray-700">{parentData.status || 'Unknown'}</p>
-                </div>
+            </div>
+            {/* Status bar */}
+            <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300">
+                <p className="text-xs font-medium text-gray-700">{parentData.status || 'Unknown'}</p>
             </div>
         </div>
     );
@@ -300,7 +289,7 @@ const App = () => {
     // Map hook states to legacy variable names for backward compatibility
     const { viewingPublicAnimal, setViewingPublicAnimal, publicAnimalViewHistory, setPublicAnimalViewHistory, publicAnimalInitialTab, setPublicAnimalInitialTab, handleViewPublicAnimal, handleBackFromPublicAnimal, handleCloseAllPublicAnimals } = publicAnimalNav;
     const { animalToView, setAnimalToView, animalToEdit, setAnimalToEdit, animalViewHistory, privateAnimalInitialTab, setPrivateAnimalInitialTab, privateBetaView, setPrivateBetaView, speciesToAdd, setSpeciesToAdd, editReturnPathRef, viewReturnPathRef, handleViewAnimal, handleEditAnimal, handleCancelEditAnimal, handleBackFromAnimal, handleCloseAllAnimals, handleSaveAnimal, handleArchiveAnimal, handleDeleteAnimal, toggleAnimalOwned, handleRestoreViewOnlyAnimal } = privateAnimalNav;
-    const { showTransferModal, setShowTransferModal, budgetModalOpen, setBudgetModalOpen, transferAnimal, setTransferAnimal, preSelectedTransferAnimal, preSelectedTransactionType, setPreSelectedTransferAnimal, setPreSelectedTransactionType, transferUserQuery, setTransferUserQuery, transferUserResults, setTransferUserResults, transferSelectedUser, setTransferSelectedUser, transferSearching, setTransferSearching, transferSearchPerformed, setTransferSearchPerformed, transferPrice, setTransferPrice, transferNotes, setTransferNotes, handleSearchTransferUser, handleSelectTransferUser, handleSubmitTransfer, handleCloseTransferWorkflow, handleOpenTransferWithAnimal, returningAnimal, handleReturnTransferredAnimal, handleWithdrawTransfer, handleAcceptTransfer, handleRejectTransfer } = transferWorkflow;
+    const { showTransferModal, setShowTransferModal, budgetModalOpen, setBudgetModalOpen, transferAnimal, setTransferAnimal, preSelectedTransferAnimal, preSelectedTransactionType, setPreSelectedTransferAnimal, setPreSelectedTransactionType, transferUserQuery, setTransferUserQuery, transferUserResults, setTransferUserResults, transferSelectedUser, setTransferSelectedUser, transferSearching, setTransferSearching, transferSearchPerformed, setTransferSearchPerformed, transferPrice, setTransferPrice, transferNotes, setTransferNotes, handleSearchTransferUser, handleSelectTransferUser, handleSubmitTransfer, handleCloseTransferWorkflow, handleOpenTransferWithAnimal } = transferWorkflow;
     const { breedingLineDefs, setBreedingLineDefs, animalBreedingLines, setAnimalBreedingLines, BL_PRESETS_APP, saveBreedingLineDefs, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect } = breedingLinesState;
     const { inModeratorMode, setInModeratorMode, showAdminPanel, setShowAdminPanel, showModReportQueue, setShowModReportQueue, showModerationAuthModal, setShowModerationAuthModal, modCurrentContext, setModCurrentContext, handleToggleModerationMode, handleModerationAuth, handleModQuickFlag } = modMode;
     const { setAnimalViewHistory } = privateAnimalNav;
@@ -309,9 +298,26 @@ const App = () => {
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [speciesOptions, setSpeciesOptions] = useState([]);
-    const [speciesConfigs, setSpeciesConfigs] = useState({});
     const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
     const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('All');
+    const [locations, setLocations] = useState([]);
+
+    const fetchLocations = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/locations`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setLocations(res.data || []);
+        } catch (err) {
+            console.error('[fetchLocations]', err);
+            setLocations([]);
+        }
+    }, [authToken, API_BASE_URL]);
+
+    useEffect(() => {
+        if (authToken) fetchLocations();
+    }, [authToken, fetchLocations]);
     
     // Detect mobile/app environment
     React.useEffect(() => {
@@ -346,29 +352,7 @@ const App = () => {
             
             // Update stored version
             localStorage.setItem('appVersion', APP_VERSION);
-            
-            // Force hard reload to ensure clean state with new cache
-            window.location.reload(true);
         }
-    }, []);
-    
-    // Listen for service worker updates - force reload for users with site already open
-    React.useEffect(() => {
-        if (!navigator.serviceWorker) return;
-        
-        const handleControllerChange = () => {
-            console.log('[App] New service worker activated - forcing reload for cache update');
-            // Give a tiny delay to ensure new cache is fully ready
-            setTimeout(() => {
-                window.location.reload(true);
-            }, 500);
-        };
-        
-        navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
-        
-        return () => {
-            navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
-        };
     }, []);
     
     // Sync species favorites between localStorage and backend
@@ -810,7 +794,7 @@ const App = () => {
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
     
-    // Animals for genetics calculator
+    // Animals for offspring calculator
     const [myAnimalsForCalculator, setMyAnimalsForCalculator] = useState([]);
     
     // Cached litters to prevent re-fetching on navigation
@@ -831,11 +815,16 @@ const App = () => {
     const [archiveLoading, setArchiveLoading] = useState(false);
     
     // Tutorial modal states
-    const [showInfoTab, setShowInfoTab] = useState(false);
     // NOTE: showAdminPanel, inModeratorMode, showModReportQueue now handled by useModerationMode hook
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [showToolsMenu, setShowToolsMenu] = useState(false);
     const profileMenuDesktopRef = useRef(null);
+    const [showFinanceMenu, setShowFinanceMenu] = useState(false);
+    const financeMenuDesktopRef = useRef(null);
+    const financeMenuMobileRef = useRef(null);
     const profileMenuMobileRef = useRef(null);
+    const toolsMenuDesktopRef = useRef(null);
+    const toolsMenuMobileRef = useRef(null);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [maintenanceMessage, setMaintenanceMessage] = useState('');
     const [showUrgentNotification, setShowUrgentNotification] = useState(false);
@@ -1047,8 +1036,8 @@ const App = () => {
             delete axios.defaults.headers.common['Authorization'];
             localStorage.removeItem('authToken');
             setUserProfile(null);
-            // Only redirect to home if not on a public route
-            const publicRoutes = ['donation', 'genetics-calculator', 'breeder', 'animal'];
+            // Only redirect to home if not on a public route. Note: /calculator is the Offspring Calculator.
+            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal'];
             const currentPath = location.pathname.split('/')[1] || '';
             if (!publicRoutes.includes(currentPath)) {
                 navigate('/');
@@ -1114,12 +1103,12 @@ const App = () => {
         }
     }, [authToken, userProfile]);
 
-    // Fetch animals for genetics calculator when needed
+    // Fetch animals for offspring calculator when needed
     useEffect(() => {
         const fetchAnimalsForCalculator = async () => {
-            if (currentView === 'genetics-calculator' && authToken) {
+            if ((currentView === 'calculator' || currentView === 'coi' || currentView === 'pedigree') && authToken) {
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, {
+                    const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true&slim=false`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     setMyAnimalsForCalculator(response.data || []);
@@ -1215,22 +1204,25 @@ const App = () => {
         const handleClickOutside = (e) => {
             const inDesktop = profileMenuDesktopRef.current?.contains(e.target);
             const inMobile = profileMenuMobileRef.current?.contains(e.target);
+            const inToolsDesktop = toolsMenuDesktopRef.current?.contains(e.target);
+            const inToolsMobile = toolsMenuMobileRef.current?.contains(e.target);
+            const inFinanceDesktop = financeMenuDesktopRef.current?.contains(e.target);
+            const inFinanceMobile = financeMenuMobileRef.current?.contains(e.target);
+
             if (!inDesktop && !inMobile) setShowProfileMenu(false);
+            if (!inToolsDesktop && !inToolsMobile) setShowToolsMenu(false);
+            if (!inFinanceDesktop && !inFinanceMobile) setShowFinanceMenu(false);
         };
-        if (showProfileMenu) document.addEventListener('mousedown', handleClickOutside);
+        if (showProfileMenu || showToolsMenu || showFinanceMenu) document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showProfileMenu]);
+    }, [showProfileMenu, showToolsMenu, showFinanceMenu]);
 	
-    // Fetch global species list and configs
+    // Fetch global species list
     useEffect(() => {
         const fetchSpeciesAndConfigs = async () => {
             try {
-                const [speciesResponse, configsResponse] = await Promise.all([
-                    axios.get(`${API_BASE_URL}/species`),
-                    axios.get(`${API_BASE_URL}/species/configs`)
-                ]);
+                const speciesResponse = await axios.get(`${API_BASE_URL}/species`);
                 setSpeciesOptions(speciesResponse.data);
-                setSpeciesConfigs(configsResponse.data || {});
             } catch (error) {
                 console.error('Failed to fetch species:', error);
                 // Fallback to defaults if API fails
@@ -1243,7 +1235,6 @@ const App = () => {
                     { name: 'Syrian Hamster', category: 'Mammal', isDefault: true },
                     { name: 'Guinea Pig', category: 'Mammal', isDefault: true }
                 ]);
-                setSpeciesConfigs({});
             }
         };
         fetchSpeciesAndConfigs();
@@ -1361,16 +1352,14 @@ const App = () => {
                 <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     {viewingPublicAnimal && (
-                        <ViewOnlyAnimalDetail 
+                        <ViewAnimalModalV2 
                             animal={viewingPublicAnimal}
+                            mode="public"
                             onClose={handleBackFromPublicAnimal}
-                            onCloseAll={handleCloseAllPublicAnimals}
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
                             onViewAnimal={handleViewPublicAnimal}
-                            setModCurrentContext={setModCurrentContext}
-                            initialTab={publicAnimalInitialTab}
                         />
                     )}
 
@@ -1466,8 +1455,8 @@ const App = () => {
             );
         }
         
-        // Genetics calculator for non-logged-in users
-        if (currentView === 'genetics-calculator') {
+        // Offspring Calculator for non-logged-in users
+        if (currentView === 'calculator') {
             return (
                 <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
@@ -1506,18 +1495,16 @@ const App = () => {
                     )}
                     
                     {viewingPublicAnimal && (
-                        <ViewOnlyAnimalDetail 
+                        <ViewAnimalModalV2 
                             animal={viewingPublicAnimal}
+                            mode="public"
                             onClose={handleBackFromPublicAnimal}
-                            onCloseAll={handleCloseAllPublicAnimals}
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
                             onViewAnimal={handleViewPublicAnimal}
-                            setModCurrentContext={setModCurrentContext}
                             setShowImageModal={setShowImageModal}
                             setEnlargedImageUrl={setEnlargedImageUrl}
-                            initialTab={publicAnimalInitialTab}
                         />
                     )}
                     
@@ -1550,10 +1537,10 @@ const App = () => {
                 <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     <button 
-                        onClick={() => navigate('/genetics-calculator')}
+                        onClick={() => navigate('/calculator')}
                         className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
                     >
-                        <Cat size={18} className="mr-1" /> Calculator
+                        <Cat size={18} className="mr-1" /> Offspring Calculator
                     </button>
                 </header>
                 
@@ -1570,12 +1557,12 @@ const App = () => {
                 )}
                 
                 {viewingPublicAnimal && (
-                    <ViewOnlyAnimalDetail 
+                    <ViewAnimalModalV2 
                         animal={viewingPublicAnimal}
+                        mode="public"
                         onClose={handleBackFromPublicAnimal}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
-                        setModCurrentContext={setModCurrentContext}
                         onViewProfile={(user) => setViewingPublicProfile(user)}
                         onViewAnimal={handleViewPublicAnimal}
                         setShowImageModal={setShowImageModal}
@@ -1609,7 +1596,7 @@ const App = () => {
                             no matter the size, makes a difference!
                         </p>
                         
-                        <RouterLink 
+                        <RouterLink
                             to="/donation"
                             className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
                         >
@@ -1756,13 +1743,12 @@ const App = () => {
                 />
             )}
             {viewingPublicAnimal && (
-                <ViewOnlyAnimalDetail 
+                <ViewAnimalModalV2 
                     animal={viewingPublicAnimal}
+                    mode="public"
                     onClose={handleBackFromPublicAnimal}
-                    onCloseAll={handleCloseAllPublicAnimals}
                     API_BASE_URL={API_BASE_URL}
                     authToken={authToken}
-                    setModCurrentContext={setModCurrentContext}
                     onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
                     onViewAnimal={handleViewPublicAnimal}
                     setShowImageModal={setShowImageModal}
@@ -1791,6 +1777,10 @@ const App = () => {
 />
             )}
             
+             <div className="w-full max-w-7xl mx-auto">
+                <NewsTickerBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
+            </div>
+
             <header className="w-full bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible transition-colors duration-200">
                 {/* Desktop: Two row layout with search bar on top */}
                 <div className="hidden md:block mb-3">
@@ -1805,10 +1795,6 @@ const App = () => {
                     <CustomAppLogo size="w-10 h-10" />
                     
                     <nav className="flex space-x-3">
-                        <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Users size={18} className="mb-1" />
-                            <span>My Feed</span>
-                        </button>
                         <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Animals</span>
@@ -1817,39 +1803,45 @@ const App = () => {
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
                         </button>
+                        <button onClick={() => navigate('/contacts')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'contacts' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Users size={18} className="mb-1" />
+                            <span>Contacts</span>
+                        </button>
+                        <button onClick={() => navigate('/marketplace')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <ShoppingBag size={18} className="mb-1" />
+                            <span>Marketplace</span>
+                        </button>
                         <button onClick={() => navigate('/calendar')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Calendar size={18} className="mb-1" />
                             <span>Calendar</span>
                         </button>
-                        <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <DollarSign size={18} className="mb-1" />
-                            <span>Budget</span>
+                        <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Users size={18} className="mb-1" />
+                            <span>Community</span>
                         </button>
-                        <button onClick={() => navigate('/marketplace')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <ShoppingBag size={18} className="mb-1" />
-                            <span>Available Animals</span>
-                        </button>
-                        <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Calculator size={18} className="mb-1" />
-                            <span>Calculator</span>
-                        </button>
-                        <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <MoonStar size={18} className="mb-1" />
-                            <span>Breeders</span>
-                        </button>
+                        <div className="relative" ref={toolsMenuDesktopRef}>
+                            <button onClick={() => setShowToolsMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <Wrench size={18} className="mb-1" />
+                                <span>Tools</span>
+                            </button>
+                            {showToolsMenu && (
+                                <ToolsDropdown onLinkClick={() => setShowToolsMenu(false)} />
+                            )}
+                        </div>
+                        <div className="relative" ref={financeMenuDesktopRef}>
+                            <button onClick={() => setShowFinanceMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['budget', 'inventory'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <DollarSign size={18} className="mb-1" />
+                                <span>Finance</span>
+                            </button>
+                            {showFinanceMenu && (
+                                <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
+                            )}
+                        </div>
                     </nav>
 
                     <div className="flex items-center space-x-3">
                         {/* <ThemeToggle /> */}
                         
-                        <button
-                            onClick={() => setShowInfoTab(true)}
-                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                            title="Help"
-                        >
-                            <HelpCircle size={18} />
-                        </button>
-
                         <button
                             onClick={() => {
                                 setShowNotifications(true);
@@ -1901,13 +1893,13 @@ const App = () => {
                             </button>
                             {showProfileMenu && (
                                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
-                                    <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
+                                    <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <User size={15} /> Profile
                                     </button>
-                                    <button onClick={() => { navigate('/contacts'); setShowProfileMenu(false); }}
+                                    <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
-                                        <Users size={15} /> Contacts
+                                        <MessageSquare size={15} /> Report an Issue
                                     </button>
                                     {['admin', 'moderator'].includes(userProfile?.role) && (
                                         <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
@@ -1979,14 +1971,6 @@ const App = () => {
                                 )}
                             </button>
 
-                            <button
-                                onClick={() => setShowInfoTab(true)}
-                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
-                                title="Help"
-                            >
-                                <HelpCircle size={18} />
-                            </button>
-                            
                             {/* Avatar / Profile Dropdown (mobile) */}
                             <div className="relative" ref={profileMenuMobileRef}>
                                 <button
@@ -2001,13 +1985,13 @@ const App = () => {
                                 </button>
                                 {showProfileMenu && (
                                     <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
-                                        <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
+                                        <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <User size={15} /> Profile
                                         </button>
-                                        <button onClick={() => { navigate('/contacts'); setShowProfileMenu(false); }}
+                                        <button onClick={() => { navigate('/report'); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
-                                            <Users size={15} /> Contacts
+                                            <MessageSquare size={15} /> Report an Issue
                                         </button>
                                         {['admin', 'moderator'].includes(userProfile?.role) && (
                                             <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
@@ -2028,10 +2012,6 @@ const App = () => {
 
                     {/* Third row: Navigation row 1 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1 mb-1">
-                        <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Users size={18} className="mb-0.5" />
-                            <span>My Feed</span>
-                        </button>
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <Cat size={18} className="mb-0.5" />
                             <span>Animals</span>
@@ -2040,78 +2020,60 @@ const App = () => {
                             <BookOpen size={18} className="mb-0.5" />
                             <span>Litters</span>
                         </button>
-                        <button onClick={() => navigate('/calendar')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Calendar size={18} className="mb-0.5" />
-                            <span>Calendar</span>
-                        </button>
-                    </nav>
-
-                    {/* Fourth row: Navigation row 2 (4 buttons) */}
-                    <nav className="grid grid-cols-4 gap-1">
-                        <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <DollarSign size={18} className="mb-0.5" />
-                            <span>Budget</span>
+                        <button onClick={() => navigate('/contacts')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'contacts' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Users size={18} className="mb-0.5" />
+                            <span>Contacts</span>
                         </button>
                         <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
                             <span>Available</span>
                         </button>
-                        <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Calculator size={18} className="mb-0.5" />
-                            <span>Calculator</span>
+                    </nav>
+
+                    {/* Fourth row: Navigation row 2 (4 buttons) */}
+                    <nav className="grid grid-cols-4 gap-1">
+                        <button onClick={() => navigate('/calendar')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'calendar' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Calendar size={18} className="mb-0.5" />
+                            <span>Calendar</span>
                         </button>
-                        <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <MoonStar size={18} className="mb-0.5" />
-                            <span>Breeders</span>
+                        <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <Users size={18} className="mb-0.5" />
+                            <span>Community</span>
                         </button>
+                        <div className="relative" ref={toolsMenuMobileRef}>
+                            <button onClick={() => setShowToolsMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target', 'pedigree'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <Wrench size={18} className="mb-0.5" />
+                                <span>Tools</span>
+                            </button>
+                            {showToolsMenu && (
+                                <ToolsDropdown onLinkClick={() => setShowToolsMenu(false)} />
+                            )}
+                        </div>
+                        <div className="relative" ref={financeMenuMobileRef}>
+                            <button onClick={() => setShowFinanceMenu(p => !p)} data-tutorial-target="budget-btn" className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['budget', 'inventory'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <DollarSign size={18} className="mb-0.5" />
+                                <span>Finance</span>
+                            </button>
+                            {showFinanceMenu && (
+                                <FinanceDropdown onLinkClick={() => setShowFinanceMenu(false)} />
+                            )}
+                        </div>
                     </nav>
                 </div>
-
-                {/* Admin message alert ? shown when there are unread moderator messages */}
-                {unreadAdminMessageCount > 0 && (
-                    <div
-                        onClick={() => setShowMessages(true)}
-                        className="mt-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-red-100 transition"
-                    >
-                        <Shield size={15} className="text-red-600 flex-shrink-0" />
-                        <span className="text-sm text-red-700 font-medium flex-1">
-                            You have {unreadAdminMessageCount} unread message{unreadAdminMessageCount > 1 ? 's' : ''} from CritterTrack — please respond
-                        </span>
-                        <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full font-semibold flex-shrink-0">View</span>
-                    </div>
-                )}
             </header>
 
-            {/* V2 launch announcement — temporary, no dismiss */}
-            <V2LaunchBanner />
+            {/* Unified alerts/notifications banner — unread messages/notifications, moderator
+                warnings/notices, and optional care/breeding alerts. Shown on every page. */}
+            <NotificationBar
+                authToken={authToken}
+                API_BASE_URL={API_BASE_URL}
+                userProfile={userProfile}
+                setShowNotifications={setShowNotifications}
+                setShowMessages={setShowMessages}
+            />
 
-            {/* Moderator Warning Banner */}
-            <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
-            {/* Moderator Inform Banner */}
-            <InformBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
-
-
-            
-
-            
             {/* Urgent Broadcast Popup (warning/alert) */}
             <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />
-
-            {/* Beta Feedback Button - Temporary prominent feedback access for beta users */}
-            {!inModeratorMode && (
-                <button
-                    onClick={() => setShowBugReportModal(true)}
-                    className="fixed left-0 z-40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-2 py-4 rounded-r-lg shadow-lg transition-all duration-200 hover:px-3 group"
-                    style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', top: '50%', transform: 'translateY(-50%)' }}
-                    title="Share feedback or report issues"
-                >
-                    <span className="flex items-center gap-2 text-sm font-medium">
-                        <MessageSquare size={16} className="rotate-90" />
-                        <span>Beta Feedback</span>
-                        <AlertCircle size={14} className="rotate-90 opacity-70" />
-                    </span>
-                </button>
-            )}
 
             {showNotifications && (
                 <NotificationPanel
@@ -2301,13 +2263,6 @@ const App = () => {
                 </div>
             )}
 
-            {/* Help/Lessons Tab Modal */}
-            {showInfoTab && (
-                <InfoTab 
-                    onClose={() => setShowInfoTab(false)}
-                />
-            )}
-
             {/* Moderation Auth Modal */}
             {showModerationAuthModal && authToken && !inModeratorMode && (
                 <ModerationAuthModal
@@ -2368,83 +2323,51 @@ const App = () => {
                 />
             )}
 
-
-
-            {/* Profile Card + Banners - shown only on desktop in list view */}
-            {currentView === 'list' && currentView !== 'profile' && userProfile && (
-                <>
-                    <div className="w-full max-w-7xl mb-6 hidden sm:flex gap-4 items-stretch">
-                        <div className="flex-shrink-0 flex flex-col">
-                            <UserProfileCard userProfile={userProfile} API_BASE_URL={API_BASE_URL} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                        </div>
-                    </div>
-                    <div className="w-full max-w-7xl mb-4 sm:hidden">
-                        <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                    </div>
-                </>
-            )}
-
             {/* Animal detail overlay - renders on top of whatever route is active */}
             {animalToView && (() => {
-                const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public;
+                // Only show editable modal if: user created it AND it's not marked as view-only
+                const iCurrentlyOwn = animalToView.creatorId_public === userProfile?.id_public && !animalToView.isViewOnly;
                 if (iCurrentlyOwn) {
                     return (
-                        <PrivateAnimalDetail
-                                animal={animalToView}
-                                initialTab={privateAnimalInitialTab}
-                                initialBetaView={privateBetaView}
-                                onClose={handleBackFromAnimal}
-                                onCloseAll={handleCloseAllAnimals}
-                                onEdit={handleEditAnimal}
-                                onArchive={handleArchiveAnimal}
-                                API_BASE_URL={API_BASE_URL}
-                                authToken={authToken}
-                                setShowImageModal={setShowImageModal}
-                                setEnlargedImageUrl={setEnlargedImageUrl}
-                                onUpdateAnimal={handleAnimalFieldUpdate}
-                                showModalMessage={showModalMessage}
-                                onTransfer={(animal) => { // Open the new transfer modal directly
-                                    handleOpenTransferWithAnimal(animal); }}
-                                onViewAnimal={handleViewAnimal}
-                                onViewPublicAnimal={handleViewPublicAnimal}
-                                onToggleOwned={handleToggleAnimalOwned}
-                                userProfile={userProfile}
-                                breedingLineDefs={breedingLineDefs}
-                                animalBreedingLines={animalBreedingLines}
-                                toggleAnimalBreedingLine={toggleAnimalBreedingLine}
-                                setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
-                                onAddSibling={handleAddSibling}
-                                returningAnimal={returningAnimal}
-                                handleReturnTransferredAnimal={() => {
-                                    if (animalToView?.id_public) {
-                                        handleReturnTransferredAnimal(animalToView.id_public);
-                                    }
-                                }}
-                                handleWithdrawTransfer={handleWithdrawTransfer}
-                                handleAcceptTransfer={handleAcceptTransfer}
-                                handleRejectTransfer={handleRejectTransfer}
-                            />
+                        <AnimalModalV2
+                            animal={animalToView}
+                            onClose={handleBackFromAnimal}
+                            onEdit={handleEditAnimal}
+                            onArchive={handleArchiveAnimal}
+                            onAddSibling={handleAddSibling}
+                            onTransfer={handleOpenTransferWithAnimal}
+                            API_BASE_URL={API_BASE_URL}
+                            authToken={authToken}
+                            onViewAnimal={handleViewAnimal}
+                            onUpdateAnimal={handleAnimalFieldUpdate}
+                            onToggleOwned={toggleAnimalOwned}
+                            userProfile={userProfile}
+                            handleReturnTransferredAnimal={transferWorkflow.handleReturnTransferredAnimal}
+                            handleWithdrawTransfer={transferWorkflow.handleWithdrawTransfer}
+                            handleAcceptTransfer={transferWorkflow.handleAcceptTransfer}
+                            handleRejectTransfer={transferWorkflow.handleRejectTransfer}
+                            breedingLineDefs={breedingLinesState.breedingLineDefs}
+                            animalBreedingLines={breedingLinesState.animalBreedingLines}
+                            toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                            setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
+                            setShowImageModal={setShowImageModal}
+                            setEnlargedImageUrl={setEnlargedImageUrl}
+                        />
                     );
                 } else {
                     return (
-                        <ViewOnlyPrivateAnimalDetail
+                        <ViewAnimalModalV2
                                 animal={animalToView}
-                                initialTab={privateAnimalInitialTab}
-                                initialBetaView={privateBetaView}
+                                mode="private"
                                 onClose={handleBackFromAnimal}
-                                onCloseAll={handleCloseAllAnimals}
                                 API_BASE_URL={API_BASE_URL}
                                 authToken={authToken}
                                 setShowImageModal={setShowImageModal}
                                 setEnlargedImageUrl={setEnlargedImageUrl}
-                                showModalMessage={showModalMessage}
                                 onViewAnimal={handleViewAnimal}
                                 breedingLineDefs={breedingLineDefs}
                                 animalBreedingLines={animalBreedingLines}
-                                toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                                toggleAnimalBreedingLine={null}
                             />
                     );
                 }
@@ -2452,33 +2375,47 @@ const App = () => {
 
             {/* Animal edit overlay */}
             {animalToEdit && (
-                <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
-                    <AnimalForm
-                        formTitle={`Edit ${animalToEdit.name}`}
-                        animalToEdit={animalToEdit}
-                        species={animalToEdit.species}
-                        onSave={handleSaveAnimalWithRefresh}
-                        onCancel={handleCancelEditAnimal}
-                        onDelete={handleDeleteAnimal}
-                        authToken={authToken}
-                        showModalMessage={showModalMessage}
-                        API_BASE_URL={API_BASE_URL}
-                        userProfile={userProfile}
-                        speciesConfigs={speciesConfigs}
-                        X={X}
-                        Search={Search}
-                        Loader2={Loader2}
-                        LoadingSpinner={LoadingSpinner}
-                        PlusCircle={PlusCircle}
-                        ArrowLeft={ArrowLeft}
-                        Save={Save}
-                        Trash2={Trash2}
-                        RotateCcw={RotateCcw}
-                        GENDER_OPTIONS={GENDER_OPTIONS}
-                        STATUS_OPTIONS={STATUS_OPTIONS}
-                        AnimalImageUpload={AnimalImageUpload}
-                    />
-                </div>
+                (() => {
+                    const iCurrentlyOwn = animalToEdit.creatorId_public === userProfile?.id_public;
+                    return (
+                        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
+                            {iCurrentlyOwn ? (
+                                <AnimalFormModalV2
+                                    formTitle={`Edit ${animalToEdit.name}`}
+                                    animalToEdit={animalToEdit}
+                                    species={animalToEdit.species}
+                                    onSave={handleSaveAnimalWithRefresh}
+                                    onCancel={handleCancelEditAnimal}
+                                    onDelete={handleDeleteAnimal}
+                                    authToken={authToken}
+                                    showModalMessage={showModalMessage}
+                                    API_BASE_URL={API_BASE_URL}
+                                    userProfile={userProfile}
+                                    GENDER_OPTIONS={[...GENDER_OPTIONS, 'Mixed']}
+                                    STATUS_OPTIONS={STATUS_OPTIONS}
+                                />
+                            ) : (
+                                <AnimalForm
+                                    formTitle={`Edit ${animalToEdit.name}`}
+                                    animalToEdit={animalToEdit}
+                                    species={animalToEdit.species}
+                                    onSave={handleSaveAnimalWithRefresh}
+                                    onCancel={handleCancelEditAnimal}
+                                    onDelete={handleDeleteAnimal}
+                                    authToken={authToken}
+                                    showModalMessage={showModalMessage}
+                                    API_BASE_URL={API_BASE_URL}
+                                    userProfile={userProfile}
+                                    X={X} Search={Search} Loader2={Loader2} LoadingSpinner={LoadingSpinner}
+                                    PlusCircle={PlusCircle} ArrowLeft={ArrowLeft} Save={Save} Trash2={Trash2} RotateCcw={RotateCcw}
+                                    GENDER_OPTIONS={GENDER_OPTIONS}
+                                    STATUS_OPTIONS={STATUS_OPTIONS}
+                                    AnimalImageUpload={AnimalImageUpload}
+                                />
+                            )}
+                        </div>
+                    );
+                })()
             )}
 
             {/* Add Sibling overlay */}
@@ -2499,7 +2436,6 @@ const App = () => {
                         showModalMessage={showModalMessage}
                         API_BASE_URL={API_BASE_URL}
                         userProfile={userProfile}
-                        speciesConfigs={speciesConfigs}
                         X={X}
                         Search={Search}
                         Loader2={Loader2}
@@ -2509,7 +2445,7 @@ const App = () => {
                         Save={Save}
                         Trash2={Trash2}
                         RotateCcw={RotateCcw}
-                        GENDER_OPTIONS={GENDER_OPTIONS}
+                        GENDER_OPTIONS={[...GENDER_OPTIONS, 'Mixed']}
                         STATUS_OPTIONS={STATUS_OPTIONS}
                         AnimalImageUpload={AnimalImageUpload}
                     />
@@ -2554,6 +2490,7 @@ const App = () => {
                   setArchiveLoading={setArchiveLoading}
                   breedingLineDefs={breedingLineDefs}
                   animalBreedingLines={animalBreedingLines}
+                  setAnimalBreedingLines={setAnimalBreedingLines}
                   saveBreedingLineDefs={saveBreedingLineDefs}
                   toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                   BL_PRESETS_APP={BL_PRESETS_APP}
@@ -2567,11 +2504,12 @@ const App = () => {
                   setSpeciesToAdd={setSpeciesToAdd}
                   speciesOptions={speciesOptions}
                   setSpeciesOptions={setSpeciesOptions}
-                  speciesConfigs={speciesConfigs}
                   speciesSearchTerm={speciesSearchTerm}
                   setSpeciesSearchTerm={setSpeciesSearchTerm}
                   speciesCategoryFilter={speciesCategoryFilter}
                   setSpeciesCategoryFilter={setSpeciesCategoryFilter}
+                  locations={locations}
+                  fetchLocations={fetchLocations}
                   setShowImageModal={setShowImageModal}
                   setEnlargedImageUrl={setEnlargedImageUrl}
                   showTransferModal={showTransferModal}
@@ -2585,7 +2523,7 @@ const App = () => {
                   Save={Save}
                   Trash2={Trash2}
                   RotateCcw={RotateCcw}
-                  GENDER_OPTIONS={GENDER_OPTIONS}
+                  GENDER_OPTIONS={[...GENDER_OPTIONS, 'Mixed']}
                   STATUS_OPTIONS={STATUS_OPTIONS}
                   AnimalImageUpload={AnimalImageUpload}
                   API_BASE_URL={API_BASE_URL}
@@ -2660,7 +2598,7 @@ const AppRouter = () => {
         <>
             <Routes>
                 <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
-                <Route path="/user/:userId" element={<PublicProfilePage />} />
+                <Route path="/user/:userId/*" element={<PublicProfilePage />} />
                 <Route path="/*" element={<App />} />
             </Routes>
         </>

@@ -24,6 +24,16 @@ export const getActionLabel = (action) => {
         report_submit: 'Submitted a report',
         transaction_create: 'Added a budget transaction',
         transaction_delete: 'Deleted a budget transaction',
+        // Enclosure / Management panel actions
+        enclosure_create: 'Created an enclosure',
+        enclosure_update: 'Updated enclosure',
+        enclosure_delete: 'Deleted an enclosure',
+        enclosure_assign: 'Assigned animal to enclosure',
+        enclosure_unassign: 'Unassigned animal from enclosure',
+        enclosure_task_done: 'Completed enclosure task',
+        care_task_done: 'Completed a care task',
+        animal_fed: 'Fed an animal',
+        reproduction_update: 'Updated reproduction status',
     };
     return labels[action] || action?.replace(/_/g, ' ') || 'Unknown action';
 };
@@ -38,5 +48,10 @@ export const getActionColor = (action) => {
     if (action === 'login' || action === 'logout') return 'bg-gray-400';
     if (action.startsWith('profile_') || action.startsWith('privacy_')) return 'bg-yellow-400';
     if (action === 'report_submit') return 'bg-red-400';
+    // Enclosure / Management panel actions
+    if (action.startsWith('enclosure_')) return 'bg-cyan-400';
+    if (action === 'enclosure_task_done' || action === 'care_task_done') return 'bg-teal-400';
+    if (action === 'animal_fed') return 'bg-orange-400';
+    if (action === 'reproduction_update') return 'bg-pink-400';
     return 'bg-gray-300';
 };
