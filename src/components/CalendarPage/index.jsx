@@ -329,10 +329,18 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         }
     });
 
+    // Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so nextDueDate works.
+    const cleaningTaskFreqDays = (t) => {
+        if (t.frequencyDays) return t.frequencyDays;
+        if (!t.frequency) return null;
+        const mult = t.frequencyUnit === 'weeks' ? 7 : t.frequencyUnit === 'months' ? 30 : t.frequencyUnit === 'years' ? 365 : 1;
+        return t.frequency * mult;
+    };
+
     // Enclosure cleaning/maintenance tasks
     enclosures.forEach(enc => {
         (enc.cleaningTasks || []).forEach(t => {
-            const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
+            const dn = nextDueDate(t.lastDoneDate, cleaningTaskFreqDays(t));
             if (dn && calendarEventFilters.maintenance) {
                 if (!eventMap[dn]) eventMap[dn] = [];
                 eventMap[dn].push({

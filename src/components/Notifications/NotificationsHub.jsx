@@ -177,6 +177,13 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             const ds = daysSince(lastDate);
             return ds !== null && ds >= Number(freqDays);
         };
+        // Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so isTaskDue works.
+        const cleaningTaskFreqDays = (t) => {
+            if (t.frequencyDays) return t.frequencyDays;
+            if (!t.frequency) return null;
+            const mult = t.frequencyUnit === 'weeks' ? 7 : t.frequencyUnit === 'months' ? 30 : t.frequencyUnit === 'years' ? 365 : 1;
+            return t.frequency * mult;
+        };
         // Feeding uses an hours-based interval (supports multiple feedings/day)
         const isFeedingDue = (lastDate, intervalHours) => {
             if (!intervalHours) return false;
@@ -202,7 +209,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         }
         let maintDueCount = 0;
         enclosures.forEach(enc => {
-            maintDueCount += (enc.cleaningTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+            maintDueCount += (enc.cleaningTasks || []).filter(t => isTaskDue(t.lastDoneDate, cleaningTaskFreqDays(t))).length;
         });
         if (maintDueCount > 0) {
             const key = 'mgmt-maintenance';

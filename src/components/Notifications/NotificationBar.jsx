@@ -33,6 +33,14 @@ const isFeedingDue = (lastDate, intervalHours) => {
   return (Date.now() - d.getTime()) / 3600000 >= Number(intervalHours);
 };
 
+// Enclosure cleaningTasks store frequency+frequencyUnit, not frequencyDays — convert so isTaskDue works.
+const cleaningTaskFreqDays = (t) => {
+  if (t.frequencyDays) return t.frequencyDays;
+  if (!t.frequency) return null;
+  const mult = t.frequencyUnit === 'weeks' ? 7 : t.frequencyUnit === 'months' ? 30 : t.frequencyUnit === 'years' ? 365 : 1;
+  return t.frequency * mult;
+};
+
 const defaultAlertSettings = () =>
   Object.keys(ALERT_CATEGORIES).reduce((acc, key) => ({ ...acc, [key]: true }), {});
 
@@ -183,7 +191,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
     }
     if (alertSettings.maintenance) {
       let count = 0;
-      enclosures.forEach(enc => { if ((enc.cleaningTasks || []).some(t => isTaskDue(t.lastDoneDate, t.frequencyDays))) count++; });
+      enclosures.forEach(enc => { if ((enc.cleaningTasks || []).some(t => isTaskDue(t.lastDoneDate, cleaningTaskFreqDays(t)))) count++; });
       if (count > 0) items.push({ id: 'maintenance', icon: Wrench, iconColor: 'text-orange-300', text: `Maintenance: ${count} enclosure${count !== 1 ? 's' : ''} overdue`, onClick: () => navigate('/') });
     }
     if (alertSettings.supplies) {

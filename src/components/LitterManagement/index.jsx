@@ -4609,10 +4609,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     });
                 });
 
-                // Enclosure cleaning tasks
+                // Enclosure cleaning tasks (cleaningTasks store frequency+frequencyUnit, not frequencyDays)
                 calendarEnclosures.forEach(enc => {
                     (enc.cleaningTasks || []).forEach(t => {
-                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
+                        const freqDays = t.frequencyDays || (t.frequency ? t.frequency * (t.frequencyUnit === 'weeks' ? 7 : t.frequencyUnit === 'months' ? 30 : t.frequencyUnit === 'years' ? 365 : 1) : null);
+                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, freqDays);
                         if (dn && calendarEventFilters.caretask) {
                             if (!eventMap[dn]) eventMap[dn] = [];
                             eventMap[dn].push({ type: 'caretask', animal: { _id: enc._id, _calLabel: t.name || 'Cleaning Task', _calDetail: enc.name || 'Enclosure', id_public: enc._id } });
