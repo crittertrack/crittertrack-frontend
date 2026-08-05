@@ -6025,7 +6025,7 @@ const AnimalFormModalV2 = ({
 
                                     <div>
                                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {renderEditSlot('sire', 'Sire', 'sire')}
                                             {renderEditSlot('dam', 'Dam', 'dam')}
                                         </div>
@@ -6033,7 +6033,7 @@ const AnimalFormModalV2 = ({
 
                                     <div>
                                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
                                                 {renderEditSlot('sireSire', 'Grandsire', 'sire')}
@@ -6049,7 +6049,7 @@ const AnimalFormModalV2 = ({
 
                                     <div>
                                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
                                                 <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>

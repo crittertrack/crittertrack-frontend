@@ -471,7 +471,7 @@ const EnclosureDetailModal = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex-shrink-0 flex gap-0.5 px-4 pt-2 pb-0 bg-gray-50 dark:bg-dark-surface border-b dark:border-dark-border overflow-x-auto">
+                <div className="flex-shrink-0 flex flex-wrap gap-0.5 px-4 pt-2 pb-0 bg-gray-50 dark:bg-dark-surface border-b dark:border-dark-border">
                     {TABS.map(tab => (
                         <button
                             key={tab.id}
