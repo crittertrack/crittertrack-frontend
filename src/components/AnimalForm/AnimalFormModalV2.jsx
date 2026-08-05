@@ -4593,11 +4593,11 @@ const AnimalFormModalV2 = ({
                                             )}
                                         </div>
                                         {(formData.medications || []).filter(Boolean).map((rec, i) => (
-                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border">
-                                                <span>
+                                            <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border">
+                                                <span className="flex-1 min-w-0 break-words">
                                                     {rec.name} {rec.dose} {rec.source === 'supply' && <span className="text-xs text-blue-600 font-medium">(from supply)</span>} {rec.reason && `— ${rec.reason}`} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})
                                                 </span>
-                                                <button type="button" onClick={() => removeArrayItem('medications', i)}><Trash2 size={14} className="text-red-500" /></button>
+                                                <button type="button" onClick={() => removeArrayItem('medications', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -4613,9 +4613,9 @@ const AnimalFormModalV2 = ({
                                             <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Medical Condition</button>
                                         </div>
                                         {(formData.medicalConditions || []).filter(Boolean).map((rec, i) => (
-                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border">
-                                                <span>{rec.name} {rec.notes && `(${rec.notes})`}</span>
-                                                <button type="button" onClick={() => removeArrayItem('medicalConditions', i)}><Trash2 size={14} className="text-red-500" /></button>
+                                            <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border">
+                                                <span className="flex-1 min-w-0 break-words">{rec.name} {rec.notes && `(${rec.notes})`}</span>
+                                                <button type="button" onClick={() => removeArrayItem('medicalConditions', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -4631,9 +4631,9 @@ const AnimalFormModalV2 = ({
                                             <button type="button" onClick={addAllergy} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Allergy</button>
                                         </div>
                                         {(formData.allergies || []).filter(Boolean).map((rec, i) => (
-                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border">
-                                                <span>{rec.name} {rec.notes && `(${rec.notes})`}</span>
-                                                <button type="button" onClick={() => removeArrayItem('allergies', i)}><Trash2 size={14} className="text-red-500" /></button>
+                                            <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border">
+                                                <span className="flex-1 min-w-0 break-words">{rec.name} {rec.notes && `(${rec.notes})`}</span>
+                                                <button type="button" onClick={() => removeArrayItem('allergies', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -4651,7 +4651,7 @@ const AnimalFormModalV2 = ({
                                             </div>
                                             <button type="button" onClick={addVaccination} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vaccination</button>
                                         </div>
-                                    {(formData.vaccinations || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.vaccinations || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Deworming */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -4664,7 +4664,7 @@ const AnimalFormModalV2 = ({
                                             </div>
                                             <button type="button" onClick={addDeworming} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Deworming</button>
                                         </div>
-                                    {(formData.dewormingRecords || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.dewormingRecords || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Parasite Control */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -4677,7 +4677,7 @@ const AnimalFormModalV2 = ({
                                             </div>
                                             <button type="button" onClick={addParasiteControl} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Parasite Control</button>
                                         </div>
-                                    {(formData.parasiteControl || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.treatment} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('parasiteControl', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.parasiteControl || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.treatment} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('parasiteControl', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     
                                     {/* Parasite Prevention Schedule - Timeline Events */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -4809,7 +4809,7 @@ const AnimalFormModalV2 = ({
                                             </div>
                                             <button type="button" onClick={addMedicalProcedure} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Procedure</button>
                                         </div>
-                                    {(formData.medicalProcedures || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.medicalProcedures || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Lab Results */}
                                     <div className="space-y-2 pt-2 border-t">
@@ -4822,7 +4822,7 @@ const AnimalFormModalV2 = ({
                                             </div>
                                             <button type="button" onClick={addLabResult} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Lab Result</button>
                                         </div>
-                                    {(formData.labResults || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.labResults || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -4842,7 +4842,7 @@ const AnimalFormModalV2 = ({
                                             </div>
                                             <button type="button" onClick={addVetVisit} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vet Visit</button>
                                         </div>
-                                    {(formData.vetVisits || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-white rounded border"><span>{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)}><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.vetVisits || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
@@ -5842,19 +5842,11 @@ const AnimalFormModalV2 = ({
 
                                 {/* Original Breeding Records Section (kept for history) */}
                                 <FormSection title="Add Breeding Record (Manual Log)" icon={<Egg size={16} />} initiallyOpen>
-                                    <div className="p-3 bg-red-50 border-2 border-red-400 rounded-lg flex items-start gap-2 mb-1">
-                                        <AlertTriangle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
-                                        <div className="text-sm text-red-800">
-                                            <p className="font-bold uppercase tracking-wide">Warning: This section is completely separate from Litters</p>
-                                            <p className="mt-1">This form only saves a manual, free-text note on this animal. It does <b>NOT</b>:</p>
-                                            <ul className="list-disc list-inside mt-1 space-y-0.5">
-                                                <li>Create a Litter</li>
-                                                <li>Link or create offspring</li>
-                                                <li>Affect pedigree/COI calculations</li>
-                                                <li>Update the auto-calculated reproductive state shown above (Planned Mating / In Mating / Pregnant / Nursing)</li>
-                                            </ul>
-                                            <p className="mt-1">To record a real litter with offspring and pedigree links, use <b>Litter Management</b> instead. Use this section only as a plain historical note.</p>
-                                        </div>
+                                    <div className="p-2 bg-red-50 border-2 border-red-400 rounded-lg flex items-start gap-2 mb-1">
+                                        <AlertTriangle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
+                                        <p className="text-xs text-red-800 leading-snug">
+                                            <span className="font-bold uppercase">Manual note only</span> — does <b>NOT</b> create a Litter, link offspring, or affect pedigree/COI. Use <b>Litter Management</b> to record a real litter.
+                                        </p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>

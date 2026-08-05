@@ -5503,7 +5503,7 @@ useEffect(() => {
                                 className="flex bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
                                 title="Add New Enclosure"
                             >
-                                <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Enclosure</span>
+                                <Plus size={14} className="sm:w-4 sm:h-4" /> <span><span className="hidden sm:inline">Add </span>Enclosure</span>
                             </button>
                         )}
                         {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
@@ -5524,7 +5524,7 @@ useEffect(() => {
                             data-tutorial-target="add-animal-btn"
                             title="Add Animal"
                         >
-                            <PlusCircle size={14} /> <span className="sm:hidden">Add</span>
+                            <PlusCircle size={14} /> <span className="sm:hidden">Animal</span>
                         </button>
                         )}
                     </div>

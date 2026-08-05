@@ -2,36 +2,12 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import axios from 'axios';
 import {
     Baby, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
-    ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList,
+    ChevronDown, ChevronUp, ClipboardList,
     Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
     Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, ScrollText, Search, Star,
     Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
 } from 'lucide-react';
 import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
-
-// Dedicated, individually-tracked Grooming/Special Care & Training schedule fields
-// ({ lastDoneDate, frequencyDays }) — mirrors CalendarPage/index.jsx SCHEDULE_FIELD_DEFS.
-const CALENDAR_SCHEDULE_FIELD_DEFS = [
-    { key: 'groomingSchedule', label: 'Grooming' },
-    { key: 'brushingSchedule', label: 'Brushing' },
-    { key: 'bathingSchedule', label: 'Bathing' },
-    { key: 'specializedCareSchedule', label: 'Specialized Care' },
-    { key: 'specialCareSchedule', label: 'Special Care Needs' },
-    { key: 'nailCareSchedule', label: 'Nail/Claw/Hoof Care' },
-    { key: 'beakHoofScaleSchedule', label: 'Beak/Hoof/Scale Maintenance' },
-    { key: 'skinEarCareSchedule', label: 'Skin & Ear Care' },
-    { key: 'dentalCareSchedule', label: 'Dental Care' },
-    { key: 'healthMonitoringSchedule', label: 'Special Observations' },
-    { key: 'exerciseSchedule', label: 'Daily Exercise' },
-    { key: 'crateTrainingSchedule', label: 'Crate Training' },
-    { key: 'litterTrainingSchedule', label: 'Litter Training' },
-    { key: 'leashTrainingSchedule', label: 'Leash Training' },
-    { key: 'freeFlightTrainingSchedule', label: 'Free-Flight Training' },
-    { key: 'workingRoleTrainingSchedule', label: 'Working Role Training' },
-    { key: 'behavioralIssueTrainingSchedule', label: 'Behavioral Issue Training' },
-    { key: 'reactivityTrainingSchedule', label: 'Reactivity Training' },
-    { key: 'flightRiskTrainingSchedule', label: 'Flight Risk Training' },
-];
 import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
@@ -658,7 +634,7 @@ const ParentSearchModal = ({
 
 // Litter Management Component
 
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, initialView = 'list' }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -765,15 +741,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [myAnimalsLoaded, setMyAnimalsLoaded] = useState(false);
     const [litterOffspringMap, setLitterOffspringMap] = useState({}); // litter._id ? offspring array (undefined = not yet loaded)
     const [offspringRefetchToken, setOffspringRefetchToken] = useState(0); // increment to force offspring re-fetch
-    const [viewMode, setViewMode] = useState(initialView === 'calendar' ? 'calendar' : 'list'); // 'list' | 'calendar'
-    const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
-    const [calendarTooltip, setCalendarTooltip] = useState(null); // { litterId, eventType, litter, x, y }
-    const [calendarQuery, setCalendarQuery] = useState('');
-    const [calendarPlannedOnly, setCalendarPlannedOnly] = useState(false);
-    const [calendarEventFilters, setCalendarEventFilters] = useState({ mated: true, due: true, born: true, weaned: true, birthday: true, feeding: true, maintenance: true, caretask: true, supply: true });
-    const [calendarAnimals, setCalendarAnimals] = useState([]);
-    const [calendarSupplies, setCalendarSupplies] = useState([]);
-    const [calendarEnclosures, setCalendarEnclosures] = useState([]);
 
     // Mating quick-add form state
     const [showAddMatingForm, setShowAddMatingForm] = useState(false);
@@ -919,18 +886,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setLoading(false);
         }
     };
-
-    // Fetch animals, supplies, and enclosures for calendar view
-    useEffect(() => {
-        if (viewMode !== 'calendar' || !authToken) return;
-        const headers = { Authorization: `Bearer ${authToken}` };
-        axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers })
-            .then(r => setCalendarAnimals(Array.isArray(r.data) ? r.data : [])).catch(() => {});
-        axios.get(`${API_BASE_URL}/supplies`, { headers })
-            .then(r => setCalendarSupplies(Array.isArray(r.data) ? r.data : [])).catch(() => {});
-        axios.get(`${API_BASE_URL}/enclosures`, { headers })
-            .then(r => setCalendarEnclosures(Array.isArray(r.data) ? r.data : [])).catch(() => {});
-    }, [viewMode, authToken, API_BASE_URL]);
 
     const fetchLitters = async ({ preserveOffspring = false } = {}) => {
         try {
@@ -2339,35 +2294,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         <div className="w-full max-w-7xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
-                    {initialView === 'calendar'
-                        ? <><Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Calendar</>
-                        : <><BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management</>}
+                    <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management
                 </h2>
                 <div className="flex gap-2 flex-wrap">
-                    {/* View Toggle */}
-                    <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                        >
-                            <BookOpen size={14} /> List
-                        </button>
-                        <button
-                            onClick={() => setViewMode('calendar')}
-                            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1.5 transition-colors border-l border-gray-200 ${viewMode === 'calendar' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                        >
-                            <Calendar size={14} /> Calendar
-                        </button>
-                    </div>
-                    {initialView !== 'calendar' && <button
+                    <button
                         onClick={handleRecalculateOffspringCounts}
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
                         title="Recalculate offspring counts for all litters"
                     >
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>}
+                    </button>
                     {/* + Mating / + Litter — grouped so they never split across rows */}
-                    {initialView !== 'calendar' && <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                    <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                         {/* Mating button */}
                         <button
                             onClick={() => {
@@ -2375,7 +2313,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddMatingForm(!showAddMatingForm);
                                 if (showAddMatingForm) resetMatingForm();
                             }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-r border-gray-200 ${showAddMatingForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors border-r border-gray-200 whitespace-nowrap ${showAddMatingForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
                             title="Record a planned mating"
                         >
                             {showAddMatingForm ? <X size={14} /> : <Plus size={14} />}
@@ -2407,27 +2345,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddForm(!showAddForm);
                             }}
                             data-tutorial-target="new-litter-btn"
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${showAddForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
                         >
                             {showAddForm ? <X size={14} /> : <Plus size={14} />}
                             <span>Litter</span>
                         </button>
-                    </div>}
+                    </div>
                 </div>
             </div>
 
-            {/* Stats bar — hidden on standalone calendar page */}
-            {initialView !== 'calendar' && (
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mb-4 sm:mb-6 pl-0.5">
                 <span><span className="font-semibold text-gray-700">{litterStats.litters}</span> Litters</span>
-                <span className="text-gray-300">|</span>
-                <span><span className="font-semibold text-blue-600">{litterStats.males}</span> Males</span>
-                <span className="text-gray-300">|</span>
-                <span><span className="font-semibold text-pink-500">{litterStats.females}</span> Females</span>
-                <span className="text-gray-300">|</span>
-                <span><span className="font-semibold text-gray-500">{litterStats.unknown}</span> Unknown</span>
+                <span className="border-l border-gray-200 pl-4"><span className="font-semibold text-blue-600">{litterStats.males}</span> Males</span>
+                <span className="border-l border-gray-200 pl-4"><span className="font-semibold text-pink-500">{litterStats.females}</span> Females</span>
+                <span className="border-l border-gray-200 pl-4"><span className="font-semibold text-gray-500">{litterStats.unknown}</span> Unknown</span>
             </div>
-            )}
 
             {loading && litters.length === 0 && (
                 /* Skeleton litter cards ? shown only until first fetch completes */
@@ -3648,7 +3580,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             )}
 
             {/* Litter List */}
-            {viewMode === 'list' && (
             <div className="space-y-4">
                 {/* Search Bar */}
                 {litters.length > 0 && (
@@ -3793,12 +3724,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <p className="font-bold text-gray-800 text-sm">
                                                     {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-2">Planned</span>}
                                                     {isMated && <span className="text-[10px] font-semibold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
+                                                    {isPregnant && <span className="text-[10px] font-semibold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded mr-2">Pregnant</span>}
                                                     {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
                                                     {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
                                                 </p>
                                             </div>
-                                            <span className="text-xs font-semibold text-gray-700 ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
+                                            <span className="text-xs font-semibold text-gray-700 ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : isPregnant ? 'Pregnant' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
                                         </div>
                                         <div className="flex gap-3 text-xs text-gray-600">
                                             <span><span className="font-medium">S:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}</span>
@@ -4493,539 +4425,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     })
                 )}
             </div>
-            )} {/* End viewMode === 'list' */}
-
-            {/* Calendar View */}
-            {viewMode === 'calendar' && (() => {
-                const year = calendarMonth.getFullYear();
-                const month = calendarMonth.getMonth();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                const today = new Date();
-                const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-
-                // Locale-aware first day of week (0=Sun, 1=Mon, ... 6=Sat)
-                const localeFirstDay = (() => {
-                    try {
-                        const loc = new Intl.Locale(navigator.language || 'en-US');
-                        const fw = loc.weekInfo?.firstDay ?? (loc.getWeekInfo?.()?.firstDay ?? 7);
-                        return fw % 7; // JS: 7(Sun)?0, 1(Mon)?1, 6(Sat)?6
-                    } catch(e) { return 0; }
-                })();
-
-                // Build event map: 'YYYY-MM-DD' -> [{type, litter}]
-                const eventMap = {};
-                const q = (calendarQuery || '').trim().toLowerCase();
-                const filteredLitters = litters.filter(l => {
-                    if (calendarPlannedOnly && !l.isPlanned) return false;
-                    if (!q) return true;
-                    const text = [
-                        l.breedingPairCodeName,
-                        l.litter_id_public,
-                        l.sire?.name,
-                        l.dam?.name,
-                        l.sireId_public,
-                        l.damId_public
-                    ].filter(Boolean).join(' ').toLowerCase();
-                    return text.includes(q);
-                });
-
-                const addEvent = (dateVal, type, litter) => {
-                    if (!dateVal) return;
-                    if (!calendarEventFilters[type]) return;
-                    let d;
-                    try {
-                        // Parse as local time to avoid UTC-offset date shifting
-                        const s = typeof dateVal === 'string' ? dateVal.substring(0, 10) : null;
-                        d = s ? new Date(s + 'T00:00:00') : new Date(dateVal);
-                        if (isNaN(d.getTime())) return;
-                    } catch(e) { return; }
-                    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                    if (!eventMap[k]) eventMap[k] = [];
-                    // Skip only duplicate same litter + same event type on same day.
-                    if (eventMap[k].some(e => e.litter._id === litter._id && e.type === type)) return;
-                    eventMap[k].push({ type, litter });
-                };
-                filteredLitters.forEach(l => {
-                    addEvent(l.matingDate, 'mated', l);
-                    addEvent(l.expectedDueDate, 'due', l);
-                    addEvent(l.birthDate, 'born', l);
-                    addEvent(l.weaningDate, 'weaned', l);
-                });
-
-                // Animal events
-                const addAnimalEvent = (dateVal, type, animal) => {
-                    if (!dateVal || !calendarEventFilters[type]) return;
-                    let d;
-                    try {
-                        const s = typeof dateVal === 'string' ? dateVal.substring(0, 10) : null;
-                        d = s ? new Date(s + 'T00:00:00') : new Date(dateVal);
-                        if (isNaN(d.getTime())) return;
-                    } catch(e) { return; }
-                    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                    if (!eventMap[k]) eventMap[k] = [];
-                    if (eventMap[k].some(e => e.animal?._id === animal._id && e.type === type)) return;
-                    eventMap[k].push({ type, animal });
-                };
-                // Helper: compute next due date from lastDoneDate + freqDays
-                const nextDueDate = (lastDate, freqDays) => {
-                    if (!freqDays) return null;
-                    const base = lastDate ? new Date(lastDate + 'T00:00:00') : new Date();
-                    if (isNaN(base.getTime())) return null;
-                    const next = new Date(base);
-                    next.setDate(next.getDate() + Number(freqDays));
-                    return `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
-                };
-                // Feeding uses an hours-based interval (supports multiple feedings/day)
-                const nextFeedingDueDate = (lastDate, intervalHours) => {
-                    if (!intervalHours) return null;
-                    const base = lastDate ? new Date(lastDate) : new Date();
-                    if (isNaN(base.getTime())) return null;
-                    const next = new Date(base.getTime() + Number(intervalHours) * 3600000);
-                    return `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
-                };
-                const formatFeedingInterval = (hours) => {
-                    const h = Number(hours);
-                    if (!h) return '';
-                    if (h % 24 === 0) return `Every ${h / 24}d`;
-                    if (h < 24) return `Every ${h}h`;
-                    return `Every ${Math.floor(h / 24)}d ${h % 24}h`;
-                };
-
-                calendarAnimals.forEach(a => {
-                    addAnimalEvent(a.birthDate, 'birthday', a);
-                    // Feeding due
-                    const feedNext = nextFeedingDueDate(a.lastFedDate, a.feedingIntervalHours);
-                    if (feedNext) addAnimalEvent(feedNext, 'feeding', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Feed ${formatFeedingInterval(a.feedingIntervalHours)}` });
-                    // Animal care tasks
-                    (a.animalCareTasks || []).forEach(t => {
-                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
-                        if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.name || 'Animal Task', _calDetail: a.name || a.id_public });
-                    });
-                    // Dedicated Grooming/Special Care & Training schedules (each tracked independently)
-                    CALENDAR_SCHEDULE_FIELD_DEFS.forEach(def => {
-                        const sched = a[def.key];
-                        const dn = nextDueDate(sched?.lastDoneDate?.substring?.(0,10) ?? sched?.lastDoneDate, sched?.frequencyDays);
-                        if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: def.label, _calDetail: a.name || a.id_public });
-                    });
-                });
-
-                // Enclosure cleaning tasks (cleaningTasks store frequency+frequencyUnit, not frequencyDays)
-                calendarEnclosures.forEach(enc => {
-                    (enc.cleaningTasks || []).forEach(t => {
-                        const freqDays = t.frequencyDays || (t.frequency ? t.frequency * (t.frequencyUnit === 'weeks' ? 7 : t.frequencyUnit === 'months' ? 30 : t.frequencyUnit === 'years' ? 365 : 1) : null);
-                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, freqDays);
-                        if (dn && calendarEventFilters.caretask) {
-                            if (!eventMap[dn]) eventMap[dn] = [];
-                            eventMap[dn].push({ type: 'caretask', animal: { _id: enc._id, _calLabel: t.name || 'Cleaning Task', _calDetail: enc.name || 'Enclosure', id_public: enc._id } });
-                        }
-                    });
-                });
-
-                // Supply reorder dates
-                calendarSupplies.forEach(s => {
-                    if (s.nextOrderDate) addAnimalEvent(s.nextOrderDate.substring(0,10), 'supply', { _id: s._id, _calLabel: s.name || 'Supply', _calDetail: s.category || '', id_public: s._id });
-                });
-
-                const monthStart = new Date(year, month, 1);
-                const monthEnd = new Date(year, month + 1, 0);
-                const monthEventList = Object.entries(eventMap)
-                    .flatMap(([dateKey, events]) => events.map(ev => ({ dateKey, ...ev })))
-                    .filter(ev => {
-                        const d = new Date(`${ev.dateKey}T00:00:00`);
-                        return d >= monthStart && d <= monthEnd;
-                    })
-                    .sort((a, b) => {
-                        if (a.dateKey < b.dateKey) return -1;
-                        if (a.dateKey > b.dateKey) return 1;
-                        const order = { mated: 0, due: 1, born: 2, weaned: 3, birthday: 4, feeding: 5, maintenance: 6, caretask: 7, supply: 8 };
-                        return (order[a.type] ?? 99) - (order[b.type] ?? 99);
-                    });
-
-                const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-                const allDayAbbr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-                const dayNames = [...allDayAbbr.slice(localeFirstDay), ...allDayAbbr.slice(0, localeFirstDay)];
-                // true for columns that land on Saturday or Sunday
-                const isWeekendCol = dayNames.map(d => d === 'Sun' || d === 'Sat');
-
-                // Offset of the month's first day relative to the locale week start
-                const rawFirstDay = new Date(year, month, 1).getDay();
-                const firstDayOffset = (rawFirstDay - localeFirstDay + 7) % 7;
-
-                const cells = [];
-                for (let i = 0; i < firstDayOffset; i++) cells.push(null);
-                for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-                while (cells.length % 7 !== 0) cells.push(null);
-
-                const typeStyles = {
-                    mated:       { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Mated' },
-                    due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
-                    born:        { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-500', dot: 'bg-violet-500', label: 'Born' },
-                    weaned:      { bg: 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300', dot: 'bg-blue-400', label: 'Weaned' },
-                    birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthday' },
-                    feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due' },
-                    maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance Due' },
-                    caretask:    { bg: 'bg-cyan-100 hover:bg-cyan-200 text-cyan-800 border border-cyan-300', dot: 'bg-cyan-400', label: 'Care Task' },
-                    supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order' },
-                };
-
-                const getLitterName = (l) => l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
-                const getSireDam = (l) => {
-                    const sn = l.sire?.name || l.sireId_public || '?';
-                    const dn = l.dam?.name || l.damId_public || '?';
-                    return `${sn} · ${dn}`;
-                };
-                // Format a date value as "10 Jan 2026"
-                const fmtD = (v) => {
-                    if (!v) return null;
-                    try { const d = new Date(v); if (isNaN(d)) return null; return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); } catch(e) { return null; }
-                };
-                // Type-specific pill label
-                const getAnimalDisplayName = (a) => [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || a.id_public || 'Unknown';
-
-                const getPillLabel = (ev) => {
-                    if (ev.animal) {
-                        const a = ev.animal;
-                        if (ev.type === 'birthday') return `🎂 ${getAnimalDisplayName(a)}`;
-                        if (ev.type === 'feeding') return `🍽️ ${a._calLabel || getAnimalDisplayName(a)}`;
-                        if (ev.type === 'maintenance') return `🔧 ${a._calLabel || getAnimalDisplayName(a)}`;
-                        if (ev.type === 'caretask') return `✅ ${a._calLabel || 'Task'} · ${a._calDetail || ''}`;
-                        if (ev.type === 'supply') return `📦 ${a._calLabel || 'Supply'}`;
-                        return getAnimalDisplayName(a);
-                    }
-                    const l = ev.litter;
-                    const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed';
-                    const sn = l.sire?.name || l.sireId_public || '?';
-                    const dn = l.dam?.name || l.damId_public || '?';
-                    if (ev.type === 'due') return `${pairName} · ${dn}`;
-                    if (ev.type === 'born') {
-                        const total = l.litterSizeBorn ?? l.numberBorn ?? 0;
-                        const m = l.maleCount ?? 0;
-                        const f = l.femaleCount ?? 0;
-                        return `${pairName} · ${total} born (${m}M/${f}F)`;
-                    }
-                    if (ev.type === 'weaned') {
-                        const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0);
-                        return `${pairName} · ${total} to wean`;
-                    }
-                    // mated
-                    return `${pairName} · ${sn} · ${dn}`;
-                };
-
-                return (
-                    <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm overflow-hidden">
-                        {/* Month Navigation */}
-                        <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
-                            <button
-                                onClick={() => setCalendarMonth(new Date(year, month - 1, 1))}
-                                className="p-1.5 rounded-lg hover:bg-gray-200 transition"
-                            >
-                                <ChevronLeft size={20} className="text-gray-600" />
-                            </button>
-                            <h3 className="text-lg font-bold text-gray-800">{monthNames[month]} {year}</h3>
-                            <button
-                                onClick={() => setCalendarMonth(new Date(year, month + 1, 1))}
-                                className="p-1.5 rounded-lg hover:bg-gray-200 transition"
-                            >
-                                <ChevronRight size={20} className="text-gray-600" />
-                            </button>
-                        </div>
-
-                        <div className="px-4 py-3 bg-white border-b border-gray-200 space-y-3">
-                            <div className="flex flex-col md:flex-row md:items-center gap-2">
-                                <div className="flex items-center gap-2 w-full md:w-auto">
-                                    <Search size={14} className="text-gray-400" />
-                                    <input
-                                        value={calendarQuery}
-                                        onChange={(e) => setCalendarQuery(e.target.value)}
-                                        placeholder="Filter by pair, litter ID, sire or dam"
-                                        className="w-full md:w-80 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <button
-                                        onClick={() => {
-                                            const now = new Date();
-                                            setCalendarMonth(new Date(now.getFullYear(), now.getMonth(), 1));
-                                        }}
-                                        className="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Today
-                                    </button>
-                                    <button
-                                        onClick={() => setCalendarPlannedOnly(v => !v)}
-                                        className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border ${calendarPlannedOnly ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-                                    >
-                                        Planned Only
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                {Object.entries(typeStyles).map(([key, style]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => setCalendarEventFilters(prev => ({ ...prev, [key]: !prev[key] }))}
-                                        className={`px-2.5 py-1 text-xs font-medium rounded-full border transition ${calendarEventFilters[key] ? `${style.bg}` : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'}`}
-                                    >
-                                        {style.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Day-of-week headers */}
-                        <div className="grid grid-cols-7 border-b-2 border-gray-300 bg-gray-50">
-                            {dayNames.map((d, i) => (
-                                <div key={d} className={`py-2 text-center text-xs font-bold uppercase tracking-wide ${isWeekendCol[i] ? 'text-rose-400' : 'text-gray-500'}`}>
-                                    {d}
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Day Cells */}
-                        <div className="grid grid-cols-7 divide-x divide-y divide-gray-300">
-                            {cells.map((day, idx) => {
-                                const colIdx = idx % 7;
-                                const isWeekend = isWeekendCol[colIdx];
-                                if (day === null) return (
-                                    <div key={`blank-${idx}`} className={`min-h-[72px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />
-                                );
-                                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                                const events = eventMap[dateKey] || [];
-                                const isToday = dateKey === todayStr;
-                                return (
-                                    <div key={dateKey} className={`min-h-[72px] p-1 ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
-                                        <span className={`inline-flex items-center justify-center w-6 h-6 text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
-                                            {day}
-                                        </span>
-                                        <div className="mt-0.5 space-y-0.5">
-                                            {events.map((ev, i) => {
-                                                const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                                    ? { bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
-                                                    : (typeStyles[ev.type] || typeStyles.born);
-                                                return (
-                                                    <button
-                                                        key={i}
-                                                        onClick={() => setCalendarTooltip(t => (t && t.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}${ev.litter?.isPlanned ? ' border-dashed opacity-80' : ''}`}
-                                                        title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${ev.litter?.isPlanned ? '[Planned] ' : ''}${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
-                                                    >
-                                                        {ev.litter?.isPlanned && '~ '}{getPillLabel(ev)}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Selected event detail */}
-                        {calendarTooltip && (() => {
-                            // Animal / supply / task event tooltip
-                            if (calendarTooltip.animal) {
-                                const a = calendarTooltip.animal;
-                                const st = typeStyles[calendarTooltip.type] || typeStyles.born;
-                                const TooltipRow = ({ label, value }) => value ? (
-                                    <div className="flex gap-2 text-sm"><span className="text-gray-500 w-36 flex-shrink-0">{label}</span><span className="text-gray-800 font-medium">{value}</span></div>
-                                ) : null;
-                                return (
-                                    <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                                        <div className="flex justify-between items-start gap-2 mb-2">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${st.bg}`}>{st.label}</span>
-                                                <span className="font-bold text-gray-800 text-sm">{a._calLabel || getAnimalDisplayName(a)}</span>
-                                            </div>
-                                            <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={16} /></button>
-                                        </div>
-                                        <div className="space-y-1">
-                                            {calendarTooltip.type === 'birthday' && (<>
-                                                {a.id_public && <TooltipRow label="ID:" value={a.id_public} />}
-                                                {a.species && <TooltipRow label="Species:" value={a.species} />}
-                                                {a.gender && <TooltipRow label="Gender:" value={a.gender} />}
-                                                {a.birthDate && (() => {
-                                                    const born = new Date(a.birthDate + 'T00:00:00');
-                                                    const now = new Date(); now.setHours(0,0,0,0);
-                                                    const ageDays = Math.round((now - born) / 86400000);
-                                                    const years = Math.floor(ageDays / 365);
-                                                    const months = Math.floor((ageDays % 365) / 30);
-                                                    const ageStr = years > 0 ? `${years}y ${months}m` : `${months} month${months !== 1 ? 's' : ''}`;
-                                                    return (<>
-                                                        <TooltipRow label="Birthday:" value={fmtD(a.birthDate)} />
-                                                        <TooltipRow label="Age (today):" value={ageStr} />
-                                                    </>);
-                                                })()}
-                                            </>)}
-                                            {(calendarTooltip.type === 'feeding' || calendarTooltip.type === 'maintenance') && (<>
-                                                {a.id_public && <TooltipRow label="Animal:" value={getAnimalDisplayName(a)} />}
-                                                {a.species && <TooltipRow label="Species:" value={a.species} />}
-                                                <TooltipRow label="Schedule:" value={a._calDetail} />
-                                            </>)}
-                                            {calendarTooltip.type === 'caretask' && (<>
-                                                <TooltipRow label="Task:" value={a._calLabel} />
-                                                <TooltipRow label="Animal / Enclosure:" value={a._calDetail} />
-                                            </>)}
-                                            {calendarTooltip.type === 'supply' && (<>
-                                                <TooltipRow label="Supply:" value={a._calLabel} />
-                                                <TooltipRow label="Category:" value={a._calDetail} />
-                                            </>)}
-                                        </div>
-                                    </div>
-                                );
-                            }
-
-                            const l = calendarTooltip.litter;
-                            const type = calendarTooltip.type;
-                            const sn = l.sire?.name || l.sireId_public || '?';
-                            const dn = l.dam?.name || l.damId_public || '?';
-                            const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
-                            const callId = l.litter_id_public;
-
-                            const daysStatus = (() => {
-                                if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-violet-600 font-semibold' };
-                                if (!l.expectedDueDate) return null;
-                                const due = parseLocalDate(l.expectedDueDate);
-                                if (isNaN(due)) return null;
-                                const now = new Date(); now.setHours(0,0,0,0); due.setHours(0,0,0,0);
-                                const diff = Math.round((due - now) / 86400000);
-                                if (diff > 0) return { text: `${diff} day${diff !== 1 ? 's' : ''} remaining`, cls: 'text-green-600' };
-                                if (diff === 0) return { text: 'Due today', cls: 'text-amber-600 font-semibold' };
-                                return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
-                            })();
-
-                            const Row = ({ label, value, cls }) => {
-                                if (value == null || value === '') return null;
-                                return (
-                                    <div className="flex gap-2 text-sm">
-                                        <span className="text-gray-500 w-32 flex-shrink-0">{label}</span>
-                                        <span className={`text-gray-800 font-medium ${cls || ''}`}>{value}</span>
-                                    </div>
-                                );
-                            };
-
-                            const tooltipPillStyle = (type === 'due' && l.birthDate)
-                                ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
-                                : (typeStyles[type] || typeStyles.born);
-
-                            return (
-                                <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                                    {/* Header */}
-                                    <div className="flex justify-between items-start gap-2 mb-3 pb-2 border-b border-gray-200">
-                                        <div>
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${tooltipPillStyle.bg}`}>
-                                                    {tooltipPillStyle.label}
-                                                </span>
-                                                <span className="font-bold text-gray-800 text-sm">{pairName} · {sn} · {dn}</span>
-                                            </div>
-                                            {callId && <p className="text-xs text-gray-400 mt-0.5">{callId}</p>}
-                                        </div>
-                                        <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0">
-                                            <X size={16} />
-                                        </button>
-                                    </div>
-
-                                    {/* Body */}
-                                    <div className="space-y-1.5">
-                                        {type === 'due' && (<>
-                                            <Row label="Mated:" value={fmtD(l.matingDate)} />
-                                            <Row label="Due:" value={fmtD(l.expectedDueDate)} />
-                                            {daysStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Status:</span><span className={daysStatus.cls}>{daysStatus.text}</span></div>}
-                                            <Row label="Method:" value={l.breedingMethod && l.breedingMethod !== 'Unknown' ? l.breedingMethod : null} />
-                                            <Row label="Condition:" value={l.breedingConditionAtTime || null} />
-                                        </>)}
-                                        {type === 'born' && (<>
-                                            <Row label="Birth Method:" value={l.birthMethod || null} />
-                                            <Row label="Born:" value={fmtD(l.birthDate)} />
-                                            <Row label="Total:" value={l.litterSizeBorn ?? l.numberBorn ?? null} />
-                                            <Row label="Males:" value={l.maleCount ?? null} />
-                                            <Row label="Females:" value={l.femaleCount ?? null} />
-                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Stillborn:</span><span className="text-gray-800 font-medium">{l.stillbornCount ?? 0}</span></div>
-                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Losses:</span><span className="text-gray-800 font-medium">{l.lossesCount ?? 0}</span></div>
-                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Weaned:</span><span className="text-gray-800 font-medium">{l.litterSizeWeaned ?? l.numberWeaned ?? 0}</span></div>
-                                            <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
-                                        </>)}
-                                        {type === 'weaned' && (() => {
-                                            const weanStatus = (() => {
-                                                if (!l.weaningDate) return null;
-                                                const wd = new Date(l.weaningDate); if (isNaN(wd)) return null;
-                                                const now = new Date(); now.setHours(0,0,0,0); wd.setHours(0,0,0,0);
-                                                const diff = Math.round((wd - now) / 86400000);
-                                                if (diff > 0) return { text: `Due in ${diff} day${diff !== 1 ? 's' : ''}`, cls: 'text-violet-600' };
-                                                if (diff === 0) return { text: 'Weaning today', cls: 'text-amber-600 font-semibold' };
-                                                return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
-                                            })();
-                                            const ageInDays = (() => {
-                                                if (!l.birthDate || !l.weaningDate) return null;
-                                                const b = new Date(l.birthDate); const w = new Date(l.weaningDate);
-                                                if (isNaN(b) || isNaN(w)) return null;
-                                                return Math.round((w - b) / 86400000);
-                                            })();
-                                            return (<>
-                                                <Row label="Born:" value={fmtD(l.birthDate)} />
-                                                <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
-                                                {ageInDays != null && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Age:</span><span className="text-gray-800 font-medium">{ageInDays} day{ageInDays !== 1 ? 's' : ''}</span></div>}
-                                                {weanStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Status:</span><span className={weanStatus.cls}>{weanStatus.text}</span></div>}
-                                            </>);
-                                        })()}
-                                        {type === 'mated' && (<>
-                                            <Row label="Mating Date:" value={fmtD(l.matingDate)} />
-                                            <Row label="Expected Due:" value={fmtD(l.expectedDueDate)} />
-                                            <Row label="Method:" value={l.breedingMethod && l.breedingMethod !== 'Unknown' ? l.breedingMethod : null} />
-                                            <Row label="Condition:" value={l.breedingConditionAtTime || null} />
-                                        </>)}
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                        <div className="mx-3 mb-3 p-3 bg-white border border-gray-200 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-sm font-semibold text-gray-800">Month Agenda</h4>
-                                <span className="text-xs text-gray-500">{monthEventList.length} event{monthEventList.length !== 1 ? 's' : ''}</span>
-                            </div>
-                            {monthEventList.length === 0 ? (
-                                <p className="text-xs text-gray-500">No events match the current month/filter selection.</p>
-                            ) : (
-                                <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-                                    {monthEventList.map((ev, idx) => {
-                                        const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                            ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
-                                            : (typeStyles[ev.type] || typeStyles.born);
-                                        return (
-                                            <button
-                                                key={`${ev.dateKey}-${ev.type}-${ev.litter?._id ?? ev.animal?._id ?? idx}-${idx}`}
-                                                onClick={() => setCalendarTooltip({ key: `${ev.dateKey}-${idx}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                                className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:bg-gray-50 transition"
-                                            >
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full ${st.bg}`}>{st.label}</span>
-                                                    <span className="text-[11px] text-gray-500">{fmtD(ev.dateKey)}</span>
-                                                </div>
-                                                <div className="text-xs text-gray-800 font-medium mt-1 truncate">{getPillLabel(ev)}</div>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Legend */}
-                        <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-4 text-xs text-gray-600 items-center">
-                            {Object.entries(typeStyles).map(([k, v]) => (
-                                <span key={k} className="flex items-center gap-1.5">
-                                    <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${v.dot}`} />
-                                    {v.label}
-                                </span>
-                            ))}
-                            {filteredLitters.length === 0 && (
-                                <span className="text-gray-400 italic ml-auto">No litters match current calendar filters</span>
-                            )}
-                            <span className="text-gray-400 ml-auto hidden sm:block">Click a pill for details</span>
-                        </div>
-                    </div>
-                );
-            })()}
 
             {/* Link Animals Modal */}
             {linkingAnimals && (

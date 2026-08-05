@@ -661,14 +661,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             </div>
         )}
         <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
+            <div className="flex justify-between items-start gap-3 mb-6">
                 <button 
                     onClick={handleBackClick}
-                    className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                    className="flex items-center text-gray-600 hover:text-gray-800 transition flex-shrink-0"
                 >
                     <ArrowLeft size={18} className="mr-1" /> Back
                 </button>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap justify-end">
                     {isOwnProfile ? (
                         <button
                             onClick={() => navigate('/settings')}

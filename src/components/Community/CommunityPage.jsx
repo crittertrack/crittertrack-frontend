@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Users, Loader2, User, ScrollText } from 'lucide-react';
+import { Users, Loader2, User, ScrollText, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import MyFeed from './MyFeed'; // Assuming MyFeed is in the same directory
 import BreederDirectory from '../PublicProfile/BreederDirectory';
 import NewsSection from '../NewsSection';
@@ -15,6 +15,8 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
     const [recentActivityUsers, setRecentActivityUsers] = useState([]);
     const [newUsers, setNewUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    // Collapsed by default on mobile so favorites/feed are reachable without scrolling past the full breeder list
+    const [breederDirCollapsed, setBreederDirCollapsed] = useState(true);
 
     // Fetch active community users and new users
     useEffect(() => {
@@ -135,10 +137,21 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
 
                         {/* Breeder Directory Section */}
                         <div className="lg:col-span-1 bg-white rounded-lg shadow-md overflow-hidden">
-                            <BreederDirectory
-                                authToken={authToken}
-                                API_BASE_URL={API_BASE_URL}
-                            />
+                            <button
+                                onClick={() => setBreederDirCollapsed(v => !v)}
+                                className="w-full flex sm:hidden items-center justify-between p-4 border-b border-gray-200"
+                            >
+                                <span className="font-bold text-gray-800 flex items-center gap-2">
+                                    <Star size={18} className="text-primary" /> Breeders Directory
+                                </span>
+                                {breederDirCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                            </button>
+                            <div className={`${breederDirCollapsed ? 'hidden' : 'block'} sm:block`}>
+                                <BreederDirectory
+                                    authToken={authToken}
+                                    API_BASE_URL={API_BASE_URL}
+                                />
+                            </div>
                         </div>
                         {/* My Feed Section */}
                         <div className="md:col-span-2 lg:col-span-1">
