@@ -3817,34 +3817,46 @@ const AnimalFormModalV2 = ({
                                         <div className="mt-4 pt-4 border-t border-gray-200">
                                             <h4 className="text-sm font-semibold text-gray-600 mb-2">Additional Identifiers</h4>
                                             {(formData.identifiers || []).filter(Boolean).map((identifier, index) => (
-                                                <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-white border rounded-md">
-                                                    <div className="flex-1 grid grid-cols-2 gap-2">
-                                                        <input type="text" value={identifier.title} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
-                                                        <input type="text" value={identifier.value} readOnly className="text-sm p-1 bg-gray-100 border-gray-200 rounded" />
+                                                <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-2 p-2 bg-white border rounded-md">
+                                                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                        <div className="border border-gray-300 rounded-md px-2 py-1 bg-gray-50 min-w-0">
+                                                            <span className="block text-[10px] uppercase tracking-wide text-gray-400">Title</span>
+                                                            <span className="block text-sm text-gray-700 truncate">{identifier.title}</span>
+                                                        </div>
+                                                        <div className="border border-gray-300 rounded-md px-2 py-1 bg-gray-50 min-w-0">
+                                                            <span className="block text-[10px] uppercase tracking-wide text-gray-400">Value</span>
+                                                            <span className="block text-sm text-gray-700 truncate">{identifier.value}</span>
+                                                        </div>
                                                     </div>
-                                                    <button type="button" onClick={() => removeIdentifier(index)} className="p-1 text-red-500 hover:text-red-700">
+                                                    <button type="button" onClick={() => removeIdentifier(index)} className="p-1 text-red-500 hover:text-red-700 self-end sm:self-center shrink-0">
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </div>
                                             ))}
-                                            <div className="flex items-center gap-2 p-2 bg-white border border-dashed rounded-md">
-                                                <div className="flex-1 grid grid-cols-2 gap-2">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Identifier Title (e.g., DNA ID)"
-                                                        value={newIdentifier.title}
-                                                        onChange={(e) => setNewIdentifier({ ...newIdentifier, title: e.target.value })}
-                                                        className="text-sm p-1 border-gray-300 rounded"
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Identifier Value"
-                                                        value={newIdentifier.value}
-                                                        onChange={(e) => setNewIdentifier({ ...newIdentifier, value: e.target.value })}
-                                                        className="text-sm p-1 border-gray-300 rounded"
-                                                    />
+                                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 bg-white border border-dashed rounded-md">
+                                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                    <div>
+                                                        <label className="block text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Title</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="e.g., DNA ID"
+                                                            value={newIdentifier.title}
+                                                            onChange={(e) => setNewIdentifier({ ...newIdentifier, title: e.target.value })}
+                                                            className="w-full text-sm p-1.5 border border-gray-300 rounded-md"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Value</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Identifier Value"
+                                                            value={newIdentifier.value}
+                                                            onChange={(e) => setNewIdentifier({ ...newIdentifier, value: e.target.value })}
+                                                            className="w-full text-sm p-1.5 border border-gray-300 rounded-md"
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <button type="button" onClick={addIdentifier} className="p-1 text-green-600 hover:text-green-700">
+                                                <button type="button" onClick={addIdentifier} className="p-1 text-green-600 hover:text-green-700 self-end sm:self-center shrink-0">
                                                     <PlusCircle size={20} />
                                                 </button>
                                             </div>
@@ -4993,7 +5005,7 @@ const AnimalFormModalV2 = ({
                                                 </div>
                                                 {supplementMode === 'manual' ? (
                                                     <div className="space-y-2">
-                                                        <div className="flex gap-2">
+                                                        <div className="flex flex-col sm:flex-row gap-2">
                                                             <input
                                                                 type="text"
                                                                 placeholder="Name (e.g., Vitamin D3)"
@@ -5015,7 +5027,7 @@ const AnimalFormModalV2 = ({
                                                                         setSupplementManualEntry({ name: '', dosage: '' });
                                                                     }
                                                                 }}
-                                                                className="w-32 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                                className="w-full sm:w-32 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
                                                             />
                                                             <button
                                                                 type="button"
@@ -5025,7 +5037,7 @@ const AnimalFormModalV2 = ({
                                                                     setFormData(prev => ({ ...prev, supplementSupplies: [...existing, { name: supplementManualEntry.name.trim(), dosage: supplementManualEntry.dosage.trim() }] }));
                                                                     setSupplementManualEntry({ name: '', dosage: '' });
                                                                 }}
-                                                                className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-black hover:bg-primary-dark flex items-center gap-1 flex-shrink-0"
+                                                                className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-black hover:bg-primary-dark flex items-center justify-center gap-1 flex-shrink-0 w-full sm:w-auto"
                                                             >
                                                                 <PlusCircle size={14} /> Add
                                                             </button>
@@ -5829,7 +5841,21 @@ const AnimalFormModalV2 = ({
                                 </FormSection>
 
                                 {/* Original Breeding Records Section (kept for history) */}
-                                <FormSection title="Add Breeding Record" icon={<Egg size={16} />} initiallyOpen>
+                                <FormSection title="Add Breeding Record (Manual Log)" icon={<Egg size={16} />} initiallyOpen>
+                                    <div className="p-3 bg-red-50 border-2 border-red-400 rounded-lg flex items-start gap-2 mb-1">
+                                        <AlertTriangle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+                                        <div className="text-sm text-red-800">
+                                            <p className="font-bold uppercase tracking-wide">Warning: This section is completely separate from Litters</p>
+                                            <p className="mt-1">This form only saves a manual, free-text note on this animal. It does <b>NOT</b>:</p>
+                                            <ul className="list-disc list-inside mt-1 space-y-0.5">
+                                                <li>Create a Litter</li>
+                                                <li>Link or create offspring</li>
+                                                <li>Affect pedigree/COI calculations</li>
+                                                <li>Update the auto-calculated reproductive state shown above (Planned Mating / In Mating / Pregnant / Nursing)</li>
+                                            </ul>
+                                            <p className="mt-1">To record a real litter with offspring and pedigree links, use <b>Litter Management</b> instead. Use this section only as a plain historical note.</p>
+                                        </div>
+                                    </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Breeding Method</label>
