@@ -1015,4 +1015,42 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
 
 // Notification Panel Component
 
-export { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup };
+// Temporary launch-day announcement — intentionally has no dismiss control; remove this
+// component once the V2 rollout window has passed.
+const V2LaunchBanner = () => (
+    <div className="w-full flex justify-center">
+        <div className="w-full max-w-7xl px-6">
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 sm:p-5 rounded-xl shadow-lg mb-3">
+                <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2 mb-2">
+                    <Sparkles size={20} className="flex-shrink-0" />
+                    CritterTrack V2 is launching tonight! 🎉
+                </h3>
+                <div className="space-y-2 text-sm sm:text-[15px] text-purple-50 leading-relaxed">
+                    <p>
+                        At <strong className="text-white">22:00 CEST (Central European Summer Time)</strong> tonight,{' '}
+                        <strong className="text-white">CritterTrack.net</strong> will officially transition to <strong className="text-white">V2</strong>.
+                    </p>
+                    <p>
+                        V2 introduces a major redesign, improved organization, and many new or expanded features. Please keep in mind that some
+                        larger features are still being developed and are not yet available, including <strong className="text-white">Tutorials, Dark Mode</strong>,
+                        and several other planned improvements. These will be added in future updates.
+                    </p>
+                    <p>
+                        The new <strong className="text-white">Bug Reports</strong> section can be found in the <strong className="text-white">News Bar at the top of the website</strong>,
+                        as well as in the dropdown menu beneath your profile image. Please use it to report any bugs, errors, or unexpected behavior you encounter after the update.
+                    </p>
+                    <p>
+                        Although the migration has been prepared carefully, there is a small possibility that some data connected to older or extended
+                        functionality may not transfer completely. This may include items such as <strong className="text-white">older feeding schedules, maintenance tasks, or other legacy feature data</strong>.
+                        Your core animal, litter, pedigree, and account data should remain unaffected.
+                    </p>
+                    <p className="font-medium">
+                        Thank you for your patience and for helping improve CritterTrack V2! 💚
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+export { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup, V2LaunchBanner };

@@ -36,7 +36,7 @@ import AnimalForm, { PedigreeChart } from './components/AnimalForm';
 import AnimalList from './components/AnimalList';
 import ContactsPage from './components/Contacts';
 import AuthView from './components/Auth/AuthView';
-import { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
+import { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup, V2LaunchBanner } from './components/Notifications/Banners';
 import NotificationsHub from './components/Notifications/NotificationsHub';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
@@ -2081,6 +2081,9 @@ const App = () => {
                     </div>
                 )}
             </header>
+
+            {/* V2 launch announcement — temporary, no dismiss */}
+            <V2LaunchBanner />
 
             {/* Moderator Warning Banner */}
             <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
