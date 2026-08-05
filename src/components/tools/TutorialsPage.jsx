@@ -278,8 +278,8 @@ const TutorialsPage = () => {
                 <div className="h-full flex items-center justify-center">
                   <div className="text-center text-gray-400">
                     <BookOpen size={64} className="mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium">Select a lesson to get started</p>
-                    <p className="text-sm mt-2">Choose from Getting Started, Key Features, or Advanced Features</p>
+                    <p className="text-lg font-medium">Coming Soon</p>
+                    <p className="text-sm mt-2">Tutorials and guides are being reworked — check back soon!</p>
                   </div>
                 </div>
               )}

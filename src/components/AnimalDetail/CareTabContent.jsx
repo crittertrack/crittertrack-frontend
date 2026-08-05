@@ -1,7 +1,7 @@
 import React from 'react';
 import { UtensilsCrossed, Home, Droplets, Thermometer, Scissors, CheckSquare, Sun, Wind, Bug, Activity } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
-import { useDetailFieldTemplate, DetailJsonList, parseJsonField, formatScheduleValue } from './utils';
+import { DetailJsonList, parseJsonField, formatScheduleValue } from './utils';
 import { InfoCard, InfoItem } from './DashboardComponents';
 import { EnclosureCard } from './EnclosureCard';
 
@@ -26,8 +26,7 @@ const TaskList = ({ tasks, label }) => {
     );
 };
 
-export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
-    const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+export const CareTabContent = ({ animal, enclosureInfo }) => {
 
     const animalCareTasks = parseJsonField(animal.animalCareTasks);
     
@@ -96,10 +95,10 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
                 <InfoCard title="Enclosure" icon={<Home size={18} className="text-gray-400" />}>
                     {hasLegacyHousing || hasEnvironment ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {animal.housingType && <InfoItem label={getLabel('housingType', 'Housing Type')} value={animal.housingType} />}
-                            {animal.bedding && <InfoItem label={getLabel('bedding', 'Bedding')} value={animal.bedding} />}
+                            {animal.housingType && <InfoItem label="Housing Type" value={animal.housingType} />}
+                            {animal.bedding && <InfoItem label="Bedding" value={animal.bedding} />}
                             {animal.temperatureRange && <InfoItem label="Temperature Range" value={animal.temperatureRange} icon={<Thermometer size={14} />} />}
-                            {animal.humidity && <InfoItem label={getLabel('humidity', 'Humidity')} value={animal.humidity} icon={<Wind size={14} />} />}
+                            {animal.humidity && <InfoItem label="Humidity" value={animal.humidity} icon={<Wind size={14} />} />}
                         </div>
                     ) : <p className="text-sm text-gray-400">No enclosure assigned. Housing details can be found on the animal record.</p>}
                 </InfoCard>
@@ -154,9 +153,9 @@ export const CareTabContent = ({ animal, enclosureInfo, API_BASE_URL }) => {
             {(animal.groomingNeeds || animal.sheddingLevel || animal.brushingFrequency || animal.bathingFrequency || animal.coatCareNotes || animal.nailCareRequirements || animal.beakHoofScaleMaintenance || animal.skinEarCareNeeds || animal.dentalCareRequirements || animal.groomingNotes || formatScheduleValue(animal.groomingSchedule) || formatScheduleValue(animal.brushingSchedule) || formatScheduleValue(animal.bathingSchedule) || formatScheduleValue(animal.specializedCareSchedule) || formatScheduleValue(animal.nailCareSchedule) || formatScheduleValue(animal.beakHoofScaleSchedule) || formatScheduleValue(animal.skinEarCareSchedule) || formatScheduleValue(animal.dentalCareSchedule)) && (
                 <InfoCard title="Grooming & Personal Care" icon={<Scissors size={18} className="text-gray-400" />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {animal.groomingNeeds && <InfoItem label={getLabel('groomingNeeds', 'Grooming Needs')} value={animal.groomingNeeds} />}
+                        {animal.groomingNeeds && <InfoItem label="Grooming Needs" value={animal.groomingNeeds} />}
                         {formatScheduleValue(animal.groomingSchedule) && <InfoItem label="Grooming Schedule" value={formatScheduleValue(animal.groomingSchedule)} />}
-                        {animal.sheddingLevel && <InfoItem label={getLabel('sheddingLevel', 'Shedding Level')} value={animal.sheddingLevel} />}
+                        {animal.sheddingLevel && <InfoItem label="Shedding Level" value={animal.sheddingLevel} />}
                         {animal.brushingFrequency && <InfoItem label="Brushing Frequency" value={animal.brushingFrequency} />}
                         {formatScheduleValue(animal.brushingSchedule) && <InfoItem label="Brushing Schedule" value={formatScheduleValue(animal.brushingSchedule)} />}
                         {animal.bathingFrequency && <InfoItem label="Bathing Frequency" value={animal.bathingFrequency} />}

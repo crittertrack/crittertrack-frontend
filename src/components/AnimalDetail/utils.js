@@ -5,45 +5,6 @@ import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatte
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 
-// Hook to fetch field template for species
-export const useDetailFieldTemplate = (species, API_BASE_URL) => {
-    const [fieldTemplate, setFieldTemplate] = useState(null);
-    
-    useEffect(() => {
-        if (!species || !API_BASE_URL) {
-            setFieldTemplate(null);
-            return;
-        }
-
-        const fetchTemplate = async () => {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/species/with-template/${species}`);
-                if (response.data && response.data.fieldTemplate) {
-                    setFieldTemplate(response.data.fieldTemplate);
-                }
-            } catch (error) {
-                console.error('Error fetching field template:', error);
-                setFieldTemplate(null);
-            }
-        };
-
-        fetchTemplate();
-    }, [species, API_BASE_URL]);
-
-    const getLabel = useCallback((key, defaultLabel) => {
-        if (!fieldTemplate?.fields || !fieldTemplate.fields[key]) {
-            return defaultLabel;
-        }
-        const field = fieldTemplate.fields[key];
-        if (field.customLabel && field.customLabel.trim()) {
-            return field.customLabel;
-        }
-        return field.label || defaultLabel;
-    }, [fieldTemplate]);
-
-    return { fieldTemplate, getLabel };
-};
-
 // Utility to safely parse JSON fields
 export const parseJsonField = (data) => {
     if (!data) return [];

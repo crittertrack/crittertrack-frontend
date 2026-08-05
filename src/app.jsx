@@ -298,7 +298,6 @@ const App = () => {
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [speciesOptions, setSpeciesOptions] = useState([]);
-    const [speciesConfigs, setSpeciesConfigs] = useState({});
     const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
     const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('All');
     const [locations, setLocations] = useState([]);
@@ -1218,16 +1217,12 @@ const App = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showProfileMenu, showToolsMenu, showFinanceMenu]);
 	
-    // Fetch global species list and configs
+    // Fetch global species list
     useEffect(() => {
         const fetchSpeciesAndConfigs = async () => {
             try {
-                const [speciesResponse, configsResponse] = await Promise.all([
-                    axios.get(`${API_BASE_URL}/species`),
-                    axios.get(`${API_BASE_URL}/species/configs`)
-                ]);
+                const speciesResponse = await axios.get(`${API_BASE_URL}/species`);
                 setSpeciesOptions(speciesResponse.data);
-                setSpeciesConfigs(configsResponse.data || {});
             } catch (error) {
                 console.error('Failed to fetch species:', error);
                 // Fallback to defaults if API fails
@@ -1240,7 +1235,6 @@ const App = () => {
                     { name: 'Syrian Hamster', category: 'Mammal', isDefault: true },
                     { name: 'Guinea Pig', category: 'Mammal', isDefault: true }
                 ]);
-                setSpeciesConfigs({});
             }
         };
         fetchSpeciesAndConfigs();
@@ -2400,7 +2394,6 @@ const App = () => {
                                     showModalMessage={showModalMessage}
                                     API_BASE_URL={API_BASE_URL}
                                     userProfile={userProfile}
-                                    speciesConfigs={speciesConfigs}
                                     GENDER_OPTIONS={[...GENDER_OPTIONS, 'Mixed']}
                                     STATUS_OPTIONS={STATUS_OPTIONS}
                                 />
@@ -2416,7 +2409,6 @@ const App = () => {
                                     showModalMessage={showModalMessage}
                                     API_BASE_URL={API_BASE_URL}
                                     userProfile={userProfile}
-                                    speciesConfigs={speciesConfigs}
                                     X={X} Search={Search} Loader2={Loader2} LoadingSpinner={LoadingSpinner}
                                     PlusCircle={PlusCircle} ArrowLeft={ArrowLeft} Save={Save} Trash2={Trash2} RotateCcw={RotateCcw}
                                     GENDER_OPTIONS={GENDER_OPTIONS}
@@ -2447,7 +2439,6 @@ const App = () => {
                         showModalMessage={showModalMessage}
                         API_BASE_URL={API_BASE_URL}
                         userProfile={userProfile}
-                        speciesConfigs={speciesConfigs}
                         X={X}
                         Search={Search}
                         Loader2={Loader2}
@@ -2516,7 +2507,6 @@ const App = () => {
                   setSpeciesToAdd={setSpeciesToAdd}
                   speciesOptions={speciesOptions}
                   setSpeciesOptions={setSpeciesOptions}
-                  speciesConfigs={speciesConfigs}
                   speciesSearchTerm={speciesSearchTerm}
                   setSpeciesSearchTerm={setSpeciesSearchTerm}
                   speciesCategoryFilter={speciesCategoryFilter}

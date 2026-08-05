@@ -2,7 +2,7 @@ import React from 'react';
 import { Shield, Microscope, HeartPulse, Stethoscope, AlertTriangle, Activity, Scale } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import { computeIsInTreatment, remapLegacyHealthStatus } from '../../utils/medicalStatus';
-import { useDetailFieldTemplate, DetailJsonList } from './utils';
+import { DetailJsonList } from './utils';
 import { InfoCard, InfoItem, StructuredClearanceItem } from './DashboardComponents';
 
 // Helper to parse fields that might be JSON strings or arrays
@@ -38,8 +38,7 @@ const StatusIndicator = ({ status }) => {
     return <span className={`px-2 py-1 text-xs font-bold rounded-full ${style}`}>{status}</span>;
 };
 
-export const HealthTabContent = ({ animal, API_BASE_URL }) => {
-    const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+export const HealthTabContent = ({ animal }) => {
 
     const vaccinations = parseHealthRecords(animal.vaccinations);
     const dewormingRecords = parseHealthRecords(animal.dewormingRecords);
@@ -107,7 +106,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                                     <p className="text-sm text-blue-900">{animal.parasitePreventionSchedule}</p>
                                 </div>
                             )}
-                            {vaccinations.length > 0 && <DetailJsonList label={getLabel('vaccinations', 'Vaccinations')} data={vaccinations} renderItem={v => `${v.name} ${v.date ? `(${formatDate(v.date)})` : ''}`} />}
+                            {vaccinations.length > 0 && <DetailJsonList label="Vaccinations" data={vaccinations} renderItem={v => `${v.name} ${v.date ? `(${formatDate(v.date)})` : ''}`} />}
                             {dewormingRecords.length > 0 && <DetailJsonList label="Deworming Records" data={dewormingRecords} renderItem={r => `${r.medication} ${r.date ? `(${formatDate(r.date)})` : ''}`} />}
                             {parasiteControl.length > 0 && <DetailJsonList label="Parasite Control" data={parasiteControl} renderItem={r => `${r.treatment} ${r.date ? `(${formatDate(r.date)})` : ''}`} />}
                         </>
@@ -219,8 +218,8 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                             {(animal.spayNeuterDate || animal.heartwormStatus || animal.hipElbowScores || animal.eyeClearance || 
                               animal.cardiacClearance || animal.dentalRecords || animal.geneticTestResults || animal.chronicConditions) && (
                                 <div className="pt-2 border-t">
-                                    {animal.spayNeuterDate && <InfoItem label={getLabel('spayNeuterDate', 'Spay/Neuter Date')} value={formatDate(animal.spayNeuterDate)} />}
-                                    {animal.heartwormStatus && <InfoItem label={getLabel('heartwormStatus', 'Heartworm Status')} value={animal.heartwormStatus} />}
+                                    {animal.spayNeuterDate && <InfoItem label="Spay/Neuter Date" value={formatDate(animal.spayNeuterDate)} />}
+                                    {animal.heartwormStatus && <InfoItem label="Heartworm Status" value={animal.heartwormStatus} />}
                                     {animal.hipElbowScores && <InfoItem label="Hip/Elbow Scores" value={animal.hipElbowScores} />}
                                     {animal.eyeClearance && <InfoItem label="Eye Clearance" value={animal.eyeClearance} />}
                                     {animal.cardiacClearance && <InfoItem label="Cardiac Clearance" value={animal.cardiacClearance} />}
@@ -239,7 +238,7 @@ export const HealthTabContent = ({ animal, API_BASE_URL }) => {
                             {animal.deceasedDate && <InfoItem label="Deceased Date" value={formatDate(animal.deceasedDate)} />}
                             {animal.causeOfDeath && <InfoItem label="Cause of Death" value={animal.causeOfDeath} />}
                             {animal.necropsyResults && <InfoItem label="Necropsy Results" value={animal.necropsyResults} />}
-                            {animal.endOfLifeCareNotes && <InfoItem label={getLabel('endOfLifeCareNotes', 'End of Life Care Notes')}>
+                            {animal.endOfLifeCareNotes && <InfoItem label="End of Life Care Notes">
                                 <p className="whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p>
                             </InfoItem>}
                         </div>

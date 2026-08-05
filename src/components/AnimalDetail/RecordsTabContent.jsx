@@ -1,6 +1,5 @@
 import React from 'react';
 import { FileCheck, Key, Ban, Tag, Home, Users, Trophy, Medal, Target, FileText, Download } from 'lucide-react';
-import { useDetailFieldTemplate } from './utils';
 import { formatDate } from '../../utils/dateFormatter';
 import { Link as RouterLink } from 'react-router-dom';
 import { InfoCard, InfoItem } from './DashboardComponents';
@@ -16,8 +15,7 @@ const parseJsonArrayField = (data) => {
     return Array.isArray(data) ? data : [];
 };
 
-export const RecordsTabContent = ({ animal, API_BASE_URL }) => {
-    const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+export const RecordsTabContent = ({ animal }) => {
 
     // From LegalTabContent
     const hasLicensing = animal.licenseNumber || animal.licenseJurisdiction;
@@ -51,16 +49,16 @@ export const RecordsTabContent = ({ animal, API_BASE_URL }) => {
             <InfoCard title="Licensing & Permits" icon={<Key size={18} className="text-gray-400" />}>
                 {hasLicensing
                     ? <dl className="space-y-4">
-                          {animal.licenseNumber && <InfoItem label={getLabel('licenseNumber', 'License Number')} value={animal.licenseNumber} />}
-                          {animal.licenseJurisdiction && <InfoItem label={getLabel('licenseJurisdiction', 'License Jurisdiction')} value={animal.licenseJurisdiction} />}
+                          {animal.licenseNumber && <InfoItem label="License Number" value={animal.licenseNumber} />}
+                          {animal.licenseJurisdiction && <InfoItem label="License Jurisdiction" value={animal.licenseJurisdiction} />}
                       </dl>
                     : <p className="text-sm text-gray-400">No licensing or permit information recorded.</p>}
             </InfoCard>
             <InfoCard title="Legal / Administrative" icon={<FileCheck size={18} className="text-gray-400" />}>
                 {hasLegal
                     ? <dl className="space-y-4">
-                          {animal.insurance && <InfoItem label={getLabel('insurance', 'Insurance')} value={animal.insurance} />}
-                          {animal.legalStatus && <InfoItem label={getLabel('legalStatus', 'Legal Status')} value={animal.legalStatus} />}
+                          {animal.insurance && <InfoItem label="Insurance" value={animal.insurance} />}
+                          {animal.legalStatus && <InfoItem label="Legal Status" value={animal.legalStatus} />}
                       </dl>
                     : <p className="text-sm text-gray-400">No legal or administrative information recorded.</p>}
             </InfoCard>
@@ -88,8 +86,8 @@ export const RecordsTabContent = ({ animal, API_BASE_URL }) => {
             <InfoCard title="Restrictions" icon={<Ban size={18} className="text-gray-400" />}>
                 {hasRestrictions
                     ? <dl className="space-y-4">
-                          {animal.breedingRestrictions && <InfoItem label={getLabel('breedingRestrictions', 'Breeding Restrictions')} value={animal.breedingRestrictions} />}
-                          {animal.exportRestrictions && <InfoItem label={getLabel('exportRestrictions', 'Export Restrictions')} value={animal.exportRestrictions} />}
+                          {animal.breedingRestrictions && <InfoItem label="Breeding Restrictions" value={animal.breedingRestrictions} />}
+                          {animal.exportRestrictions && <InfoItem label="Export Restrictions" value={animal.exportRestrictions} />}
                       </dl>
                     : <p className="text-sm text-gray-400">No restrictions recorded.</p>}
             </InfoCard>

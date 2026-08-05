@@ -437,7 +437,7 @@ const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].f
 /**
  * A dedicated page for the Target Outcome Calculator.
  */
-const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions, speciesConfigs }) => {
+const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions }) => {
   const [mode, setMode] = useState('traits'); // 'traits' or 'genetics'
   const [selectedSpecies, setSelectedSpecies] = useState('');
   const [targetGenetics, setTargetGenetics] = useState('');

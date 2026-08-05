@@ -1,12 +1,9 @@
 import React from 'react';
 import { Leaf, RefreshCw, Mars, Venus } from 'lucide-react';
-import { useDetailFieldTemplate } from './utils';
 import { formatDate } from '../../utils/dateFormatter';
 import { InfoCard, InfoItem } from './DashboardComponents';
 
-export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
-    const { getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
-
+export const BreedingTabContent = ({ animal }) => {
     const isFemale = animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown';
     const isMale = animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown';
 
@@ -35,8 +32,8 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                             <InfoItem label="Infertile" value={animal.isInfertile ? 'Yes' : 'No'} />
                             {!animal.isNeutered && !animal.isInfertile && <InfoItem label="In Mating" value={animal.isInMating ? 'Yes' : 'No'} />}
                             {!animal.isNeutered && !animal.isInfertile && <InfoItem label="Planned Mating" value={animal.isPlannedMating ? 'Yes' : 'No'} />}
-                            {isFemale && !animal.isNeutered && <InfoItem label={getLabel('isPregnant', 'Pregnant')} value={animal.isPregnant ? 'Yes' : 'No'} />}
-                            {isFemale && !animal.isNeutered && <InfoItem label={getLabel('isNursing', 'Nursing')} value={animal.isNursing ? 'Yes' : 'No'} />}
+                            {isFemale && !animal.isNeutered && <InfoItem label="Pregnant" value={animal.isPregnant ? 'Yes' : 'No'} />}
+                            {isFemale && !animal.isNeutered && <InfoItem label="Nursing" value={animal.isNursing ? 'Yes' : 'No'} />}
                             {animal.reproductiveStateOverride && (
                                 <div className="p-2 bg-purple-50 border-l-4 border-purple-400">
                                     <p className="text-xs font-semibold text-purple-700">Reproductive State Override</p>
@@ -52,7 +49,7 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                             {animal.heatStatus && <InfoItem label="Heat Status" value={animal.heatStatus} />}
                             {animal.lastHeatDate && <InfoItem label="Last Heat Date" value={formatDate(animal.lastHeatDate)} />}
                             {animal.lastReproductiveEventDate && <InfoItem label="Last Reproductive Event Date" value={formatDate(animal.lastReproductiveEventDate)} />}
-                            {animal.ovulationDate && <InfoItem label={getLabel('ovulationDate', 'Ovulation Date')} value={formatDate(animal.ovulationDate)} />}
+                            {animal.ovulationDate && <InfoItem label="Ovulation Date" value={formatDate(animal.ovulationDate)} />}
                             {animal.estrusCycleLength && <InfoItem label="Estrus Cycle Length" value={`${animal.estrusCycleLength} days`} />}
                             {animal.currentReproductiveEventPhase && <InfoItem label="Current Reproductive Phase" value={animal.currentReproductiveEventPhase} />}
                             {animal.reproductiveEventCycleLength && <InfoItem label="Reproductive Event Cycle Length" value={`${animal.reproductiveEventCycleLength} days`} />}
@@ -104,7 +101,7 @@ export const BreedingTabContent = ({ animal, API_BASE_URL }) => {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {animal.fertilityStatus && <InfoItem label="Fertility Status" value={animal.fertilityStatus} />}
                                 {animal.lastDeliveryDate && <InfoItem label="Last Delivery Date" value={formatDate(animal.lastDeliveryDate)} />}
-                                {animal.deliveryMethod && <InfoItem label={getLabel('deliveryMethod', 'Delivery Method')} value={animal.deliveryMethod} />}
+                                {animal.deliveryMethod && <InfoItem label="Delivery Method" value={animal.deliveryMethod} />}
                                 {animal.lastReproductiveInterventionDate && <InfoItem label="Last Reproductive Intervention" value={formatDate(animal.lastReproductiveInterventionDate)} />}
                                 {animal.reproductiveHealthNotes && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Health Notes"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveHealthNotes}</p></InfoItem></div>}
                                 {animal.reproductiveClearances && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem></div>}

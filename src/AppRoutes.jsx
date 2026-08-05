@@ -114,7 +114,6 @@ export function AppRoutes({
   setSpeciesToAdd,
   speciesOptions,
   setSpeciesOptions,
-  speciesConfigs,
   speciesSearchTerm,
   setSpeciesSearchTerm,
   speciesCategoryFilter,
@@ -380,7 +379,6 @@ export function AppRoutes({
           userProfile={userProfile}
           // Pass species data for trait selection
           speciesOptions={speciesOptions || []}
-          speciesConfigs={speciesConfigs || {}}
         />
       } />
 
@@ -439,7 +437,6 @@ export function AppRoutes({
             showModalMessage={showModalMessage}
             API_BASE_URL={API_BASE_URL}
             userProfile={userProfile}
-            speciesConfigs={speciesConfigs}
             X={X}
             Search={Search}
             Loader2={Loader2}

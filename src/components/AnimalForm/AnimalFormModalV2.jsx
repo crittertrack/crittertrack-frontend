@@ -1363,7 +1363,6 @@ const AnimalFormModalV2 = ({
     API_BASE_URL,
     showModalMessage,
     userProfile,
-    speciesConfigs,
     speciesOptions = [],
     GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'], // NOSONAR
     STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']

@@ -487,10 +487,19 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
     
     return (
         <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg" data-tutorial-target="species-selector">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                <Cat size={24} className="mr-3 text-primary-dark" />
-                Select Species for New Animal
-            </h2>
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h2 className="text-3xl font-bold text-gray-800 flex items-center">
+                    <Cat size={24} className="mr-3 text-primary-dark" />
+                    Select Species for New Animal
+                </h2>
+                <button
+                    data-tutorial-target="add-species-btn"
+                    onClick={onManageSpecies}
+                    className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center shadow-md shrink-0"
+                >
+                    <Settings size={18} className="mr-2" /> Add New Species
+                </button>
+            </div>
             
             <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
                 <p className="text-sm text-yellow-800">
@@ -578,17 +587,10 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 )}
             </div>
 
-            <div className="mt-8 border-t pt-4 flex justify-between items-center">
+            <div className="mt-8 border-t pt-4">
                 <p className="text-sm text-gray-500">
                     <span className="font-semibold">{sortedSpecies.length}</span> species available{favCount > 0 ? <span className="ml-2 text-amber-600 font-medium">– {favCount} favourited</span> : ''}
                 </p>
-                <button
-                    data-tutorial-target="add-species-btn"
-                    onClick={onManageSpecies}
-                    className="text-primary-dark hover:text-primary transition duration-150 font-medium flex items-center"
-                >
-                    <Settings size={18} className="mr-2" /> Add New Species
-                </button>
             </div>
         </div>
     );
