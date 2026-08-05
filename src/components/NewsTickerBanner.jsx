@@ -62,7 +62,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
     return <Info size={14} className="inline-block mr-1.5 text-blue-300 flex-shrink-0" />;
   };
 
-  const animationDuration = (news.length + 2) * 15; // 15 seconds per item
+  const animationDuration = (news.length + 2) * 20; // Increased to make it slightly slower
 
   return (
     <div className="w-full bg-gradient-to-r from-blue-600 to-purple-700 text-white text-sm py-1 overflow-hidden relative rounded-lg">

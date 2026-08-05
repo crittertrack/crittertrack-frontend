@@ -349,7 +349,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   }
 
   const bgColor = isUrgent ? 'bg-red-600' : 'bg-purple-600';
-  const animationDuration = (items.length + 1) * 8; // ~8 seconds per item
+  const animationDuration = (items.length + 1) * 20; // Match NewsTickerBanner speed
 
   const renderItem = (item) => (
     <button
