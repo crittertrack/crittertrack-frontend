@@ -286,6 +286,23 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
                             {selectedReport?._id === report._id && (
                                 <div className="bug-report-expanded">
                                     <div className="bug-divider"></div>
+
+                                    {report.images && report.images.length > 0 && (
+                                        <div className="bug-report-images-section">
+                                            <strong>Attached Images:</strong>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-2">
+                                                {report.images.map((imageUrl, index) => (
+                                                    <a key={index} href={imageUrl} target="_blank" rel="noopener noreferrer">
+                                                        <img
+                                                            src={imageUrl}
+                                                            alt={`Bug Report Screenshot ${index + 1}`}
+                                                            className="w-full h-24 object-cover rounded-lg shadow-sm"
+                                                        />
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                     
                                     {report.adminNotes && (
                                         <div className="bug-admin-notes-display">
