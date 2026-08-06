@@ -302,9 +302,24 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                                     {r.subjectLabel && (
                                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{r.subjectLabel}</p>
                                     )}
-                                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{r.description}</p>
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">{r.description}</p>
+                                    {r.stepsToReproduce && (
+                                        <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Steps to Reproduce</p>
+                                            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">{r.stepsToReproduce}</p>
+                                        </div>
+                                    )}
+                                    {r.images?.length > 0 && (
+                                        <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                            {r.images.map((url, i) => (
+                                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                                                    <img src={url} alt={`Attachment ${i + 1}`} className="w-full h-20 object-cover" />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
                                     {r.adminNotes && (
-                                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-1.5"><strong>Team note:</strong> {r.adminNotes}</p>
+                                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700"><strong>Team note:</strong> {r.adminNotes}</p>
                                     )}
                                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">{new Date(r.createdAt).toLocaleDateString()}</p>
                                 </div>
