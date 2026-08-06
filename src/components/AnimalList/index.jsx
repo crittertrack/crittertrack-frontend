@@ -3025,7 +3025,7 @@ useEffect(() => {
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <p className="font-semibold text-gray-800 dark:text-dark-text text-sm truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
-                                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species} ? {animal.gender || 'Unknown'}</p>
+                                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species} • {animal.gender || 'Unknown'}</p>
                                                             {animal.breederAssignedId && <p className="text-xs text-gray-400 dark:text-dark-text-muted">ID: {animal.breederAssignedId}</p>}
                                                         </div>
                                                     </div>
@@ -4726,7 +4726,7 @@ useEffect(() => {
                                         </option>
                                     ))}
                                     {supplies.filter(s => s.category === 'Food').length === 0 && (
-                                        <option disabled>No food items in supply ? add some in Supplies & Inventory</option>
+                                        <option disabled>No food items in supply — add some in Supplies & Inventory</option>
                                     )}
                                 </select>
                             </div>

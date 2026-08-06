@@ -1761,7 +1761,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 className={`tab ${editActiveTab === 'records' ? 'active' : ''}`}
                                 onClick={() => setEditActiveTab('records')}
                             >
-                                �📝 Records
+                                📝 Records
                             </button>
                             <button 
                                 className={`tab ${editActiveTab === 'endoflife' ? 'active' : ''}`}
