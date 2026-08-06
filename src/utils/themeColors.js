@@ -18,8 +18,9 @@ module.exports = {
   'dark-primary': '#7eaab3',
   'dark-primary-hover': '#6f949d',
   'dark-accent': '#b46280',
-  'dark-text': '#1B1A20',
-  'dark-text-secondary': '#1B1A20',
+  // Was mistakenly set equal to dark-bg, making text invisible wherever both were used together.
+  'dark-text': '#EDEDF0',
+  'dark-text-secondary': '#C4C3CA',
   'dark-text-muted': '#90909B',
 
   // Consolidated stray colors (see colors.md) — one token per near-duplicate

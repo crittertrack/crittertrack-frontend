@@ -44,9 +44,9 @@ const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclo
 // take priority as the most actionable state, otherwise falls back to the derived health status
 // pill (healthStatusOverride || healthStatus, computed server-side, see medicalStatus.js).
 const renderHealthColumnCell = (animal) => {
-    if (animal.isQuarantine) return <span className="font-medium text-orange-600">Quarantine</span>;
-    if (animal.isInTreatment) return <span className="font-medium text-red-600">Treatment</span>;
-    if (animal.status === 'Deceased') return <span className="text-gray-500">Deceased</span>;
+    if (animal.isQuarantine) return <span className="font-medium text-orange-600 dark:text-orange-400">Quarantine</span>;
+    if (animal.isInTreatment) return <span className="font-medium text-red-600 dark:text-red-400">Treatment</span>;
+    if (animal.status === 'Deceased') return <span className="text-gray-500 dark:text-dark-text-muted">Deceased</span>;
     const status = remapLegacyHealthStatus(animal.healthStatusOverride || animal.healthStatus) || 'Healthy';
     return <span className={`font-medium ${HEALTH_STATUS_TEXT_COLORS[status] || HEALTH_STATUS_TEXT_COLORS.Healthy}`}>{status}</span>;
 };
@@ -188,10 +188,10 @@ const AnimalList = ({
     const coiCacheRef = useRef({});
 
     const TASK_TYPE_STYLES = {
-        Cleaning: { icon: <Wrench size={12} />, color: 'text-amber-700' },
-        Maintenance: { icon: <Settings size={12} />, color: 'text-orange-700' },
-        Feeding: { icon: <Utensils size={12} />, color: 'text-red-700' },
-        Other: { icon: <Info size={12} />, color: 'text-gray-600' },
+        Cleaning: { icon: <Wrench size={12} />, color: 'text-amber-700 dark:text-amber-400' },
+        Maintenance: { icon: <Settings size={12} />, color: 'text-orange-700 dark:text-orange-400' },
+        Feeding: { icon: <Utensils size={12} />, color: 'text-red-700 dark:text-red-400' },
+        Other: { icon: <Info size={12} />, color: 'text-gray-600 dark:text-dark-text-muted' },
     };
 
 
@@ -2703,9 +2703,9 @@ useEffect(() => {
                                     title={animal.isOwned ? "Click to mark as Not Owned" : "Click to mark as Owned"}
                                 >
                                     {animal.isOwned ? (
-                                        <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-600" />
+                                        <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-600 dark:text-red-400" />
                                     ) : (
-                                        <HeartOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                                        <HeartOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 dark:text-dark-text-muted" />
                                     )}
                                 </button>
                                 {/* Privacy toggle */}
@@ -2724,9 +2724,9 @@ useEffect(() => {
                                     title={animal.showOnPublicProfile ? "Click to make Private" : "Click to make Public"}
                                 >
                                     {animal.showOnPublicProfile ? (
-                                        <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                                        <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 dark:text-green-400" />
                                     ) : (
-                                        <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                                        <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 dark:text-dark-text-muted" />
                                     )}
                                 </button>
                             </div>
@@ -3440,7 +3440,7 @@ useEffect(() => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<Home size={32} className="text-blue-800" />}
+                            icon={<Home size={32} className="text-blue-800 dark:text-blue-200" />}
                             label="Total Enclosures"
                             value={enclosures.length}
                             colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
@@ -3473,15 +3473,15 @@ useEffect(() => {
                                         ))}
                                     </ul>
                                 ) : (
-                                    <p className="text-xs text-gray-400 text-center">No enclosures to categorize by location.</p>
+                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center">No enclosures to categorize by location.</p>
                                 )}
                             </div>
                         )}
                     </div>
-                    <StatCard icon={<Package size={32} className="text-green-800" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
+                    <StatCard icon={<Package size={32} className="text-green-800 dark:text-green-200" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<Users size={32} className="text-purple-800" />}
+                            icon={<Users size={32} className="text-purple-800 dark:text-purple-200" />}
                             label="Total Capacity"
                             value={totalCapacity}
                             colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200"
@@ -3502,15 +3502,15 @@ useEffect(() => {
                                         ))}
                                     </ul>
                                 ) : (
-                                    <p className="text-xs text-gray-400 text-center">No enclosures with capacity and suitable species assigned.</p>
+                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center">No enclosures with capacity and suitable species assigned.</p>
                                 )}
                             </div>
                         )}
                     </div>
-                    <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
+                    <StatCard icon={<Cat size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<AlertTriangle size={32} className="text-orange-800" />}
+                            icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={needsAttentionCount}
                             colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
@@ -3555,13 +3555,13 @@ useEffect(() => {
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
-                    <StatCard icon={<Calendar size={32} className="text-indigo-800" />} label="Animals in Planned Mating" value={plannedMatingList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<Hourglass size={32} className="text-sky-800" />} label="Animals In Mating" value={matingList.length} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<ScanHeart size={32} className="text-pink-800" />} label="Animals Pregnant" value={pregnantList.length} colorClass="bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<Droplet size={32} className="text-violet-800" />} label="Animals Nursing" value={nursingList.length} colorClass="bg-violet-100 text-violet-900 dark:bg-violet-900/30 dark:text-violet-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Calendar size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Animals in Planned Mating" value={plannedMatingList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Hourglass size={32} className="text-sky-800 dark:text-sky-200" />} label="Animals In Mating" value={matingList.length} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<ScanHeart size={32} className="text-pink-800 dark:text-pink-200" />} label="Animals Pregnant" value={pregnantList.length} colorClass="bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Droplet size={32} className="text-violet-800 dark:text-violet-200" />} label="Animals Nursing" value={nursingList.length} colorClass="bg-violet-100 text-violet-900 dark:bg-violet-900/30 dark:text-violet-200" onClick={() => setAnimalView('reproduction')} />
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<AlertTriangle size={32} className="text-orange-800" />}
+                            icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={reproNeedsAttentionList.length}
                             colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
@@ -3576,7 +3576,7 @@ useEffect(() => {
                                     {reproNeedsAttentionList.map(({ animal, reason }) => (
                                         <li key={animal.id_public} className="flex flex-col gap-0.5 p-1.5 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
                                             <span className="text-gray-700 dark:text-dark-text-secondary font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
-                                            <span className="font-medium text-orange-700">{reason}</span>
+                                            <span className="font-medium text-orange-700 dark:text-orange-400">{reason}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -3592,13 +3592,13 @@ useEffect(() => {
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
-                    <StatCard icon={<Cat size={32} className="text-indigo-800" />} label="Total in Health Program" value={quarantineList.length + treatmentList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('health')} />
-                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800" />} label="Quarantine" value={quarantineList.length} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" onClick={() => setAnimalView('health')} />
-                    <StatCard icon={<Activity size={32} className="text-red-800" />} label="In Treatment" value={treatmentList.length} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" onClick={() => setAnimalView('health')} />
-                    <StatCard icon={<Droplet size={32} className="text-teal-800" />} label="Active Medications" value={activeMedicationsCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<Cat size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Total in Health Program" value={quarantineList.length + treatmentList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />} label="Quarantine" value={quarantineList.length} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<Activity size={32} className="text-red-800 dark:text-red-200" />} label="In Treatment" value={treatmentList.length} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<Droplet size={32} className="text-teal-800 dark:text-teal-200" />} label="Active Medications" value={activeMedicationsCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('health')} />
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<AlertTriangle size={32} className="text-orange-800" />}
+                            icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={healthNeedsAttentionList.length}
                             colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
@@ -3613,7 +3613,7 @@ useEffect(() => {
                                     {healthNeedsAttentionList.map(({ animal, reason }) => (
                                         <li key={`${animal.id_public}-${reason}`} className="flex flex-col gap-0.5 p-1.5 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
                                             <span className="text-gray-700 dark:text-dark-text-secondary font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
-                                            <span className="font-medium text-orange-700">{reason}</span>
+                                            <span className="font-medium text-orange-700 dark:text-orange-400">{reason}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -3629,13 +3629,13 @@ useEffect(() => {
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
-                    <StatCard icon={<Utensils size={32} className="text-green-800" />} label="Feeding" value={feedingAssignedCount} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" onClick={() => setAnimalView('feeding')} />
-                    <StatCard icon={<Scissors size={32} className="text-teal-800" />} label="Grooming & Special Care" value={groomingAssignedCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('feeding')} />
-                    <StatCard icon={<Dumbbell size={32} className="text-sky-800" />} label="Training" value={trainingAssignedCount} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('feeding')} />
-                    <StatCard icon={<ClipboardList size={32} className="text-indigo-800" />} label="Custom Animal Care" value={scheduledCareAssignedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<Utensils size={32} className="text-green-800 dark:text-green-200" />} label="Feeding" value={feedingAssignedCount} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<Scissors size={32} className="text-teal-800 dark:text-teal-200" />} label="Grooming & Special Care" value={groomingAssignedCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<Dumbbell size={32} className="text-sky-800 dark:text-sky-200" />} label="Training" value={trainingAssignedCount} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<ClipboardList size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Custom Animal Care" value={scheduledCareAssignedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('feeding')} />
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<AlertTriangle size={32} className="text-orange-800" />}
+                            icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={feedingCareNeedsAttentionList.length}
                             colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
@@ -3650,7 +3650,7 @@ useEffect(() => {
                                     {feedingCareNeedsAttentionList.map(({ animal, reason }, idx) => (
                                         <li key={`${animal.id_public}-${reason}-${idx}`} className="flex flex-col gap-0.5 p-1.5 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
                                             <span className="text-gray-700 dark:text-dark-text-secondary font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
-                                            <span className="font-medium text-orange-700">{reason}</span>
+                                            <span className="font-medium text-orange-700 dark:text-orange-400">{reason}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -3756,24 +3756,24 @@ useEffect(() => {
         const meds = parseArrayField(animal.medications).filter(m => !m.status || m.status === 'active');
 
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border-b border-gray-100 sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
-                        <div className="font-semibold text-sm text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
-                        <div className="text-xs text-gray-500 truncate">{animal.species}</div>
+                        <div className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
+                        <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{animal.species}</div>
                     </div>
                 </div>
 
                 {isQuarantine ? (
                     <>
-                        <div className="text-xs text-gray-600 truncate"><span className="sm:hidden font-semibold">Type/Reason: </span>{[details.type, details.reason].filter(Boolean).join(' — ') || '—'}</div>
-                        <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Start: </span>{details.startDate ? formatDateShort(details.startDate) : '—'}</div>
-                        <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">End: </span>{details.endDate ? formatDateShort(details.endDate) : '—'}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary truncate"><span className="sm:hidden font-semibold">Type/Reason: </span>{[details.type, details.reason].filter(Boolean).join(' — ') || '—'}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Start: </span>{details.startDate ? formatDateShort(details.startDate) : '—'}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">End: </span>{details.endDate ? formatDateShort(details.endDate) : '—'}</div>
                     </>
                 ) : (
                     <>
-                        <div className="text-xs text-gray-600 truncate"><span className="sm:hidden font-semibold">Condition: </span>{conds.length > 0 ? conds.map(c => c.condition || c.name).filter(Boolean).join(', ') : '—'}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary truncate"><span className="sm:hidden font-semibold">Condition: </span>{conds.length > 0 ? conds.map(c => c.condition || c.name).filter(Boolean).join(', ') : '—'}</div>
                         <div className="sm:col-span-2 text-xs space-y-0.5">
                             <span className="sm:hidden font-semibold">Medications: </span>
                             {meds.length > 0 ? meds.slice(0, 2).map((m, i) => {
@@ -3783,33 +3783,33 @@ useEffect(() => {
                                 return (
                                     <div key={i} className="leading-tight flex items-center gap-1.5 flex-wrap">
                                         <span>
-                                            <span className="font-medium text-gray-700">{m.name || m.medication}{m.reason ? ` — ${m.reason}` : ''}</span>
-                                            <span className="text-blue-500"> {[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-500 ml-1">· {nextLabel}</span> : null}</span>
+                                            <span className="font-medium text-gray-700 dark:text-dark-text-secondary">{m.name || m.medication}{m.reason ? ` — ${m.reason}` : ''}</span>
+                                            <span className="text-blue-500 dark:text-blue-400"> {[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-500 dark:text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
                                         </span>
                                         {m.intervalValue && (
                                             <span className="flex items-center gap-0.5">
-                                                <button title="Confirm dose given" onClick={(e) => handleMedicationAction(e, animal, m.id, 'confirm')} className="p-0.5 text-green-600 hover:bg-green-100 rounded"><Check size={12} /></button>
-                                                <button title="Prolong stop date" onClick={(e) => handleMedicationAction(e, animal, m.id, 'prolong')} className="p-0.5 text-blue-500 hover:bg-blue-100 rounded"><PlusCircle size={12} /></button>
-                                                <button title="Finish medication (stop date = today)" onClick={(e) => handleMedicationAction(e, animal, m.id, 'finish')} className="p-0.5 text-red-500 hover:bg-red-100 rounded"><X size={12} /></button>
+                                                <button title="Confirm dose given" onClick={(e) => handleMedicationAction(e, animal, m.id, 'confirm')} className="p-0.5 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded"><Check size={12} /></button>
+                                                <button title="Prolong stop date" onClick={(e) => handleMedicationAction(e, animal, m.id, 'prolong')} className="p-0.5 text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded"><PlusCircle size={12} /></button>
+                                                <button title="Finish medication (stop date = today)" onClick={(e) => handleMedicationAction(e, animal, m.id, 'finish')} className="p-0.5 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"><X size={12} /></button>
                                             </span>
                                         )}
                                     </div>
                                 );
-                            }) : <span className="text-gray-400">No active medications</span>}
+                            }) : <span className="text-gray-400 dark:text-dark-text-muted">No active medications</span>}
                         </div>
                     </>
                 )}
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${isQuarantine ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'}`}>{isQuarantine ? 'Quarantine' : 'Treatment'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${isQuarantine ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'}`}>{isQuarantine ? 'Quarantine' : 'Treatment'}</span>
                 </div>
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     {isQuarantine
-                        ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><LockOpen size={12} /> Release</button>
-                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><LockOpen size={12} /> End Treatment</button>
+                        ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> Release</button>
+                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> End Treatment</button>
                     }
-                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
         );
@@ -3818,31 +3818,31 @@ useEffect(() => {
     const FeedingAnimalBar = ({ animal, onViewAnimal, onEditAnimal, handleMarkFed, handleSkipFeeding }) => {
         const due = isFeedingDue(animal.lastFedDate, animal.feedingIntervalHours);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border-b border-gray-100 sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
-                        <div className="font-semibold text-sm text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
-                        <div className="text-xs text-gray-500 truncate">{animal.species}</div>
+                        <div className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
+                        <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{animal.species}</div>
                     </div>
                 </div>
 
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Last Fed: </span>{animal.lastFedDate ? formatDateShort(animal.lastFedDate) : <span className="text-orange-500">Never</span>}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Last Fed: </span>{animal.lastFedDate ? formatDateShort(animal.lastFedDate) : <span className="text-orange-500 dark:text-orange-400">Never</span>}</div>
 
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Frequency: </span>{formatFeedingInterval(animal.feedingIntervalHours)}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{formatFeedingInterval(animal.feedingIntervalHours)}</div>
 
-                <div className="sm:col-span-2 text-xs text-gray-400">
+                <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted">
                     <div>{animal.dietType || ''}</div>
                 </div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
-                    <button onClick={(e) => handleMarkFed(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><Utensils size={12} /> Fed</button>
-                    {due && <button onClick={(e) => handleSkipFeeding(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200"><SkipForward size={12} /> Skip</button>}
-                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
+                    <button onClick={(e) => handleMarkFed(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Utensils size={12} /> Fed</button>
+                    {due && <button onClick={(e) => handleSkipFeeding(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-surface-hover text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-border"><SkipForward size={12} /> Skip</button>}
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
         );
@@ -3854,29 +3854,29 @@ useEffect(() => {
         const sched = animal[fieldName] || {};
         const due = isDue(sched.lastDoneDate, sched.frequencyDays);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border-b border-gray-100 sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
-                        <div className="font-semibold text-sm text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
-                        <div className="text-xs text-gray-500 truncate">{animal.species}</div>
+                        <div className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
+                        <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{animal.species}</div>
                     </div>
                 </div>
 
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Last Done: </span>{sched.lastDoneDate ? formatDateShort(sched.lastDoneDate) : <span className="text-orange-500">Never</span>}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Last Done: </span>{sched.lastDoneDate ? formatDateShort(sched.lastDoneDate) : <span className="text-orange-500 dark:text-orange-400">Never</span>}</div>
 
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Frequency: </span>Every {sched.frequencyDays}d</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>Every {sched.frequencyDays}d</div>
 
-                <div className="sm:col-span-2 text-xs text-gray-400 truncate">{label}</div>
+                <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{label}</div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
-                    <button onClick={(e) => handleMarkScheduleDone(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><Check size={12} /> Done</button>
-                    {due && <button onClick={(e) => handleSkipScheduleTask(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200"><SkipForward size={12} /> Skip</button>}
-                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
+                    <button onClick={(e) => handleMarkScheduleDone(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
+                    {due && <button onClick={(e) => handleSkipScheduleTask(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-surface-hover text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-border"><SkipForward size={12} /> Skip</button>}
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
         );
@@ -3887,29 +3887,29 @@ useEffect(() => {
     const AnimalCareTaskBar = ({ animal, taskIdx, task, onViewAnimal, onEditAnimal, handleMarkAnimalCareTaskDone, handleSkipAnimalCareTask }) => {
         const due = isDue(task.lastDoneDate, task.frequencyDays);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border-b border-gray-100 sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
-                        <div className="font-semibold text-sm text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
-                        <div className="text-xs text-gray-500 truncate">{animal.species}</div>
+                        <div className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
+                        <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{animal.species}</div>
                     </div>
                 </div>
 
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Last Done: </span>{task.lastDoneDate ? formatDateShort(task.lastDoneDate) : <span className="text-orange-500">Never</span>}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Last Done: </span>{task.lastDoneDate ? formatDateShort(task.lastDoneDate) : <span className="text-orange-500 dark:text-orange-400">Never</span>}</div>
 
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Frequency: </span>{task.frequencyDays ? `Every ${task.frequencyDays}d` : '—'}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{task.frequencyDays ? `Every ${task.frequencyDays}d` : '—'}</div>
 
-                <div className="sm:col-span-2 text-xs text-gray-400 truncate">{task.taskName}</div>
+                <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{task.taskName}</div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
-                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"><Check size={12} /> Done</button>
-                    {due && <button onClick={(e) => handleSkipAnimalCareTask(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200"><SkipForward size={12} /> Skip</button>}
-                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
+                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
+                    {due && <button onClick={(e) => handleSkipAnimalCareTask(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-surface-hover text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-border"><SkipForward size={12} /> Skip</button>}
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
         );
@@ -5147,45 +5147,45 @@ useEffect(() => {
                     {/* Column 1: Total Animals */}
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<Cat size={32} className="text-blue-800" />}
+                            icon={<Cat size={32} className="text-blue-800 dark:text-blue-200" />}
                             label="Total Animals"
                             value={totalDashboardAnimalsCount}
-                            colorClass="bg-blue-100 text-blue-900"
+                            colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
                             hasDropdown={true}
                             isDropdownOpen={showCategoryBreakdown}
                             onDropdownToggle={() => setShowCategoryBreakdown(prev => !prev)}
                         />
                         {showCategoryBreakdown && (
-                            <div className="bg-white border border-gray-200 rounded-lg p-3 -mt-1 shadow-sm">
-                                <h4 className="text-sm font-semibold text-gray-700 mb-2">Category Breakdown</h4>
+                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Category Breakdown</h4>
                                 {categoryBreakdown.length > 0 ? (
                                     <ul className="text-xs space-y-1">
                                         {categoryBreakdown.map(cat => (
                                             <li key={cat.name} className="flex justify-between items-center">
-                                                <span className="flex items-center text-gray-600">
+                                                <span className="flex items-center text-gray-600 dark:text-dark-text-secondary">
                                                     {categoryIcons[cat.name]}
                                                     {cat.name}{cat.count !== 1 && cat.name !== 'Fish' ? 's' : ''}
                                                 </span>
-                                                <span className="font-medium text-gray-800">{cat.count} <span className="text-gray-400">({cat.percentage}%)</span></span>
+                                                <span className="font-medium text-gray-800 dark:text-dark-text">{cat.count} <span className="text-gray-400 dark:text-dark-text-muted">({cat.percentage}%)</span></span>
                                             </li>
                                         ))}
                                     </ul>
                                 ) : (
-                                    <p className="text-xs text-gray-400 text-center">No animals to categorize.</p>
+                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted text-center">No animals to categorize.</p>
                                 )}
                             </div>
                         )}
                         <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm w-full" data-tutorial-target="ownership-visibility-filter">
                             <button
                                 onClick={() => setOwnedFilterMode('owned')}
-                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border'}`}
                                 title="Show only animals you own"
                             >
                                 <Heart size={14} /> Owned
                             </button>
                             <button
                                 onClick={() => setOwnedFilterMode('all')}
-                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 border-l border-gray-300 ${ownedFilterMode === 'all' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 border-l border-gray-300 dark:border-dark-border ${ownedFilterMode === 'all' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border'}`}
                                 title="Show all animals (owned and unowned)"
                             >
                                 All
@@ -5199,21 +5199,21 @@ useEffect(() => {
                     {/* Column 2: Owned */}
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<Heart size={32} className="text-red-800" />}
+                            icon={<Heart size={32} className="text-red-800 dark:text-red-200" />}
                             label="Owned"
                             value={ownedDashboardCount}
-                            colorClass="bg-red-100 text-red-900"
+                            colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200"
                         />
                         <button
                             onClick={() => toggleAllAnimalsOwned(true)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-red-100 text-red-700 hover:bg-red-200"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50"
                             title="Mark All Animals as Owned"
                         >
                             <Heart size={14} /> Set All Owned
                         </button>
                         <button
                             onClick={() => toggleAllAnimalsOwned(false)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border"
                             title="Mark All Animals as Unowned"
                         >
                             <HeartOff size={14} /> Set All Unowned
@@ -5223,21 +5223,21 @@ useEffect(() => {
                     {/* Column 3: Public */}
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<Eye size={32} className="text-green-800" />}
+                            icon={<Eye size={32} className="text-green-800 dark:text-green-200" />}
                             label="Public"
                             value={publicDashboardCount}
-                            colorClass="bg-green-100 text-green-900"
+                            colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200"
                         />
                         <button
                             onClick={() => toggleAllAnimalsPrivacy(true)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-green-100 text-green-700 hover:bg-green-200"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"
                             title="Make All Animals Public"
                         >
                             <Eye size={14} /> Set All Public
                         </button>
                         <button
                             onClick={() => toggleAllAnimalsPrivacy(false)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border"
                             title="Make All Animals Private"
                         >
                             <EyeOff size={14} /> Set All Private
@@ -5247,15 +5247,15 @@ useEffect(() => {
                     {/* Column 4: Sold/Archived */}
                     <div className="flex flex-col gap-2">
                         <StatCard
-                            icon={<Archive size={32} className="text-purple-800" />}
+                            icon={<Archive size={32} className="text-purple-800 dark:text-purple-200" />}
                             label="Sold / Archived"
                             value={soldOrArchivedCount}
-                            colorClass="bg-purple-100 text-purple-900"
+                            colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200"
                         />
                         {!showDuplicatesScreen && (
                             <button
                                 onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); }}
-                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${showArchiveScreen ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
+                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${showArchiveScreen ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50'}`}
                                 title="Archive"
                             >
                                 <Archive size={14} className="sm:w-4 sm:h-4" />
@@ -5271,7 +5271,7 @@ useEffect(() => {
                             return (
                                 <>
                                     <StatCard
-                                        icon={<AlertTriangle size={32} className="text-orange-800" />}
+                                        icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                                         label="Needs Attention"
                                         value={totalAttention}
                                         colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"

@@ -54,10 +54,10 @@ export const HEALTH_STATUS_BADGE_COLORS = {
 };
 
 export const HEALTH_STATUS_TEXT_COLORS = {
-    Healthy: 'text-green-600',
-    Monitoring: 'text-blue-600',
-    Concern: 'text-yellow-600',
-    Critical: 'text-red-600',
+    Healthy: 'text-green-600 dark:text-green-400',
+    Monitoring: 'text-blue-600 dark:text-blue-400',
+    Concern: 'text-yellow-600 dark:text-yellow-400',
+    Critical: 'text-red-600 dark:text-red-400',
 };
 
 // Animals saved before the Excellent/Good/Fair/Poor/Critical -> Healthy/Monitoring/Concern/

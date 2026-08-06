@@ -50,7 +50,7 @@ import AnimalImageUpload from './components/AnimalImageUpload';
 import { compressImageFile, compressImageToMaxSize, compressImageWithWorker } from './utils/imageCompression';
 import DonationView from './components/Donation/DonationView';
 import CommunityPage from './components/Community/CommunityPage';
-// import ThemeToggle from './components/ThemeToggle';
+import ThemeToggle from './components/ThemeToggle';
 
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
 import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
@@ -1762,8 +1762,8 @@ const App = () => {
                     </nav>
 
                     <div className="flex items-center space-x-3">
-                        {/* <ThemeToggle /> */}
-                        
+                        <ThemeToggle />
+
                         <button
                             onClick={() => {
                                 setShowNotifications(true);
@@ -1856,6 +1856,8 @@ const App = () => {
                         <CustomAppLogo size="w-8 h-8" className="flex-shrink-0" />
                         
                         <div className="flex items-center space-x-2 flex-shrink-0">
+                            <ThemeToggle />
+
                             <button
                                 onClick={() => {
                                     setShowNotifications(true);
