@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Loader2, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle, Bug, Lightbulb, MessageSquare, ArrowLeft, Clock, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle, Bug, Lightbulb, MessageSquare, ArrowLeft, Clock, XCircle } from 'lucide-react';
 import { compressImageToMaxSize } from '../utils/imageCompression';
 
 const API_BASE_URL = '/api';
@@ -44,7 +44,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
 
     const [myReports, setMyReports] = useState([]);
     const [myReportsLoading, setMyReportsLoading] = useState(true);
-    const [showMyReports, setShowMyReports] = useState(true);
+    const [activeTab, setActiveTab] = useState('new'); // 'new' | 'mine'
 
     const fetchMyReports = useCallback(async () => {
         if (!authToken) return;
@@ -248,23 +248,42 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
         setError('');
     };
 
-    const myReportsSection = (
-        <div className="w-full max-w-2xl mx-auto mb-4">
+    // Tab bar shared by every view - lets users switch between filing a report and checking past ones
+    const tabBar = (
+        <div className="w-full max-w-2xl mx-auto mb-4 flex gap-1 bg-white dark:bg-dark-surface rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-1">
             <button
-                onClick={() => setShowMyReports(prev => !prev)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-dark-surface rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition"
+                onClick={() => setActiveTab('new')}
+                className={`flex-1 px-4 py-2 text-sm font-semibold rounded-lg transition ${
+                    activeTab === 'new'
+                        ? 'bg-purple-600 text-white shadow'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
             >
-                <span className="text-sm font-semibold text-gray-700 dark:text-dark-text">
-                    My Previous Reports {!myReportsLoading && `(${myReports.length})`}
-                </span>
-                {showMyReports ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
+                Report New
             </button>
-            {showMyReports && (
-                <div className="mt-2 space-y-2">
+            <button
+                onClick={() => setActiveTab('mine')}
+                className={`flex-1 px-4 py-2 text-sm font-semibold rounded-lg transition ${
+                    activeTab === 'mine'
+                        ? 'bg-purple-600 text-white shadow'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+            >
+                My Reports {!myReportsLoading && `(${myReports.length})`}
+            </button>
+        </div>
+    );
+
+    // "My Reports" tab - list of the user's past reports across every report type
+    if (activeTab === 'mine') {
+        return (
+            <div className="w-full max-w-2xl mx-auto">
+                {tabBar}
+                <div className="space-y-2">
                     {myReportsLoading ? (
-                        <div className="flex justify-center py-6"><Loader2 size={20} className="animate-spin text-gray-400" /></div>
+                        <div className="flex justify-center py-10"><Loader2 size={20} className="animate-spin text-gray-400" /></div>
                     ) : myReports.length === 0 ? (
-                        <div className="text-center py-6 px-4 bg-white dark:bg-dark-surface rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+                        <div className="text-center py-10 px-4 bg-white dark:bg-dark-surface rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
                             <p className="text-sm text-gray-500 dark:text-gray-400">You haven't submitted any reports yet.</p>
                         </div>
                     ) : (
@@ -293,16 +312,16 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                         })
                     )}
                 </div>
-            )}
-        </div>
-    );
+            </div>
+        );
+    }
 
     // Already submitted - show success
     if (submitted) {
         return (
-            <>
-            {myReportsSection}
-            <div className="w-full max-w-2xl mx-auto bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
+            <div className="w-full max-w-2xl mx-auto">
+            {tabBar}
+            <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
                 <div className="text-center py-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-4">
                         <CheckCircle size={32} className="text-green-600 dark:text-green-400" />
@@ -330,13 +349,13 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                     </div>
                 </div>
             </div>
-            </>
+            </div>
         );
     }
 
     return (
         <div className="w-full max-w-2xl mx-auto">
-            {myReportsSection}
+            {tabBar}
             <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-5">
