@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { BookOpen, Search, ExternalLink, X, Loader2, Tag } from 'lucide-react';
+import { BookOpen, Search, ExternalLink, X, Loader2, Tag, ChevronDown, ChevronUp } from 'lucide-react';
 
 const ResourcesPage = ({ API_BASE_URL }) => {
     const [resources, setResources] = useState([]);
@@ -9,9 +9,10 @@ const ResourcesPage = ({ API_BASE_URL }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [speciesQuery, setSpeciesQuery] = useState('');
     const [selectedSpecies, setSelectedSpecies] = useState([]);
-    const [selectedSubjects, setSelectedSubjects] = useState([]);
-    const [selectedLanguages, setSelectedLanguages] = useState([]);
+    const [selectedSubject, setSelectedSubject] = useState('');
+    const [selectedLanguage, setSelectedLanguage] = useState('');
     const [selectedTags, setSelectedTags] = useState([]);
+    const [expandedIds, setExpandedIds] = useState(new Set());
 
     useEffect(() => {
         const fetchResources = async () => {
@@ -64,14 +65,6 @@ const ResourcesPage = ({ API_BASE_URL }) => {
         setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
     };
 
-    const toggleSubject = (subject) => {
-        setSelectedSubjects(prev => prev.includes(subject) ? prev.filter(s => s !== subject) : [...prev, subject]);
-    };
-
-    const toggleLanguage = (language) => {
-        setSelectedLanguages(prev => prev.includes(language) ? prev.filter(l => l !== language) : [...prev, language]);
-    };
-
     const addSpecies = (species) => {
         setSelectedSpecies(prev => [...prev, species]);
         setSpeciesQuery('');
@@ -79,6 +72,16 @@ const ResourcesPage = ({ API_BASE_URL }) => {
 
     const removeSpecies = (species) => {
         setSelectedSpecies(prev => prev.filter(s => s !== species));
+    };
+
+    const toggleDescription = (id, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setExpandedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            return next;
+        });
     };
 
     const filteredResources = useMemo(() => {
@@ -96,25 +99,23 @@ const ResourcesPage = ({ API_BASE_URL }) => {
             const matchesTags = selectedTags.length === 0 ||
                 (r.tags || []).some(t => selectedTags.includes(t));
 
-            const matchesSubject = selectedSubjects.length === 0 ||
-                (r.subject && selectedSubjects.includes(r.subject));
+            const matchesSubject = !selectedSubject || r.subject === selectedSubject;
 
-            const matchesLanguage = selectedLanguages.length === 0 ||
-                (r.language && selectedLanguages.includes(r.language));
+            const matchesLanguage = !selectedLanguage || r.language === selectedLanguage;
 
             return matchesSearch && matchesSpecies && matchesTags && matchesSubject && matchesLanguage;
         });
-    }, [resources, searchTerm, selectedSpecies, selectedTags, selectedSubjects, selectedLanguages]);
+    }, [resources, searchTerm, selectedSpecies, selectedTags, selectedSubject, selectedLanguage]);
 
-    const hasActiveFilters = searchTerm || selectedSpecies.length > 0 || selectedTags.length > 0 || selectedSubjects.length > 0 || selectedLanguages.length > 0;
+    const hasActiveFilters = searchTerm || selectedSpecies.length > 0 || selectedTags.length > 0 || selectedSubject || selectedLanguage;
 
     const clearFilters = () => {
         setSearchTerm('');
         setSpeciesQuery('');
         setSelectedSpecies([]);
         setSelectedTags([]);
-        setSelectedSubjects([]);
-        setSelectedLanguages([]);
+        setSelectedSubject('');
+        setSelectedLanguage('');
     };
 
     return (
@@ -265,25 +266,37 @@ const ResourcesPage = ({ API_BASE_URL }) => {
                             className="block bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg p-4 hover:shadow-md hover:border-primary/50 transition"
                         >
                             <div className="flex items-start justify-between gap-3">
-                                <h3 className="font-semibold text-gray-800 dark:text-dark-text">
-                                    {r.title}
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                    <h3 className="font-semibold text-gray-800 dark:text-dark-text">{r.title}</h3>
                                     {r.subject && (
-                                        <span className="ml-2 text-xs font-medium text-primary-dark dark:text-dark-primary align-middle">{r.subject}</span>
+                                        <span className="text-xs font-medium text-primary-dark dark:text-dark-primary">{r.subject}</span>
                                     )}
                                     {r.language && (
-                                        <span className="ml-2 text-xs font-medium text-gray-400 dark:text-dark-text-muted align-middle">[{r.language}]</span>
+                                        <span className="text-xs font-medium text-gray-400 dark:text-dark-text-muted">[{r.language}]</span>
                                     )}
-                                </h3>
-                                <ExternalLink size={16} className="text-gray-400 dark:text-dark-text-muted flex-shrink-0 mt-0.5" />
-                            </div>
-                            {r.description && (
-                                <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">{r.description}</p>
-                            )}
-                            {((r.species || []).length > 0 || (r.tags || []).length > 0) && (
-                                <div className="flex flex-wrap gap-1.5 mt-2">
                                     {(r.species || []).map(s => (
                                         <span key={s} className="text-xs px-2 py-0.5 bg-primary/10 dark:bg-dark-primary/10 text-primary-dark dark:text-dark-primary rounded-full">{s}</span>
                                     ))}
+                                </div>
+                                <ExternalLink size={16} className="text-gray-400 dark:text-dark-text-muted flex-shrink-0 mt-0.5" />
+                            </div>
+                            {r.description && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={e => toggleDescription(r._id, e)}
+                                        className="flex items-center gap-1 text-xs text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text mt-1.5"
+                                    >
+                                        {expandedIds.has(r._id) ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                        {expandedIds.has(r._id) ? 'Hide description' : 'Show description'}
+                                    </button>
+                                    {expandedIds.has(r._id) && (
+                                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">{r.description}</p>
+                                    )}
+                                </>
+                            )}
+                            {(r.tags || []).length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mt-2">
                                     {(r.tags || []).map(t => (
                                         <span key={t} className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted rounded-full">{t}</span>
                                     ))}
