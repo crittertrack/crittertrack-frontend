@@ -101,7 +101,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                     </div>
                     <button
                         onClick={() => navigate('/contacts/new')}
-                        className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
+                        className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
                     >
                         <Plus size={18} /> Add Contact
                     </button>
@@ -136,7 +136,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                         <div className="flex items-center gap-2 flex-shrink-0">
                             <button
                                 onClick={() => setFilterType('all')}
-                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filterType === 'all' ? 'bg-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${filterType === 'all' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
                                 All
                             </button>

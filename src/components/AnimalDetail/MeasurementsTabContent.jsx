@@ -108,7 +108,7 @@ export const MeasurementsTabContent = ({ animal, onUpdateAnimal, authToken, API_
                         <input type="number" placeholder={`Weight (${animal.measurementUnits?.weight || 'g'})`} value={newRecord.weight} onChange={e => setNewRecord({...newRecord, weight: e.target.value})} className="w-full p-2 border rounded-md" />
                         <input type="number" placeholder={`Length (${animal.measurementUnits?.length || 'cm'})`} value={newRecord.length} onChange={e => setNewRecord({...newRecord, length: e.target.value})} className="w-full p-2 border rounded-md" />
                         <textarea placeholder="Notes..." value={newRecord.notes} onChange={e => setNewRecord({...newRecord, notes: e.target.value})} className="w-full p-2 border rounded-md h-24"></textarea>
-                        <button onClick={handleSaveGrowthRecord} className="w-full bg-primary text-black font-semibold py-2 rounded-lg">Add Record</button>
+                        <button onClick={handleSaveGrowthRecord} className="w-full bg-primary dark:bg-dark-primary text-black font-semibold py-2 rounded-lg">Add Record</button>
                     </div>
                 </InfoCard>
             </div>

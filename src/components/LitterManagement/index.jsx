@@ -314,7 +314,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                 type="button"
                                 onClick={() => setCat(c)}
                                 className={`px-3 py-1 text-xs font-semibold rounded-full transition ${
-                                    cat === c ? 'bg-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                             >
                                 {c}
@@ -572,7 +572,7 @@ const ParentSearchModal = ({
                         <span className="text-sm font-medium text-gray-600">Search Scope:</span>
                         {['local','global','both'].map(s => (
                             <button key={s} type="button" onClick={() => setScope(s)}
-                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                                 {s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}
                             </button>
                         ))}
@@ -588,7 +588,7 @@ const ParentSearchModal = ({
                         <button
                             onClick={handleSearch}
                             disabled={((scope === 'local' || scope === 'both') && loadingLocal) || ((scope === 'global' || scope === 'both') && loadingGlobal) || searchTerm.trim().length < 1}
-                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
                         >
                             { (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }
                         </button>
@@ -2299,7 +2299,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 <div className="flex gap-2 flex-wrap">
                     <button
                         onClick={handleRecalculateOffspringCounts}
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
+                        className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
                         title="Recalculate offspring counts for all litters"
                     >
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -2313,7 +2313,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddMatingForm(!showAddMatingForm);
                                 if (showAddMatingForm) resetMatingForm();
                             }}
-                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors border-r border-gray-200 whitespace-nowrap ${showAddMatingForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors border-r border-gray-200 whitespace-nowrap ${showAddMatingForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
                             title="Record a planned mating"
                         >
                             {showAddMatingForm ? <X size={14} /> : <Plus size={14} />}
@@ -2345,7 +2345,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddForm(!showAddForm);
                             }}
                             data-tutorial-target="new-litter-btn"
-                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
                         >
                             {showAddForm ? <X size={14} /> : <Plus size={14} />}
                             <span>Litter</span>
@@ -3383,7 +3383,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             type="submit"
                             form="litter-form"
                             data-tutorial-target="create-litter-btn"
-                            className="bg-primary hover:bg-primary/90 text-black font-bold py-2 px-6 rounded-lg"
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-bold py-2 px-6 rounded-lg"
                         >
                             {editingLitter ? 'Update Litter' : 'Create Litter'}
                         </button>
@@ -3609,7 +3609,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             : val === 'mated'   ? 'bg-sky-100 border-sky-300 text-sky-700'
                                             : val === 'pregnant' ? 'bg-pink-100 border-pink-300 text-pink-700'
                                             : val === 'born'    ? 'bg-violet-100 border-violet-300 text-violet-700'
-                                            : 'bg-primary border-primary/50 text-black'
+                                            : 'bg-primary dark:bg-dark-primary border-primary/50 text-black'
                                             : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
                                     }`}
                                 >{label}</button>
@@ -3902,7 +3902,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setCertLitter({ litter_id_public: litter.litter_id_public, vertical: false }); }}
-                                                        className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                        className="flex items-center gap-1 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                                     >
                                                         <ScrollText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                         <span className="hidden sm:inline">Horizontal Pedigree</span>
@@ -4357,7 +4357,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={handleSaveNewOffspring}
-                                                        className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-4 py-2 rounded-lg"
+                                                        className="flex items-center gap-1 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold px-4 py-2 rounded-lg"
                                                     >
                                                         <Plus size={16} />
                                                         Save Offspring
@@ -4398,7 +4398,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             <button
                                                                 onClick={() => handleLinkAnimals(litter)}
                                                                 data-tutorial-target="link-animals-btn"
-                                                                className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-2 rounded-lg text-sm"
+                                                                className="flex items-center gap-1 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold px-3 py-2 rounded-lg text-sm"
                                                             >
                                                                 <Link className="w-4 h-4" />
                                                                 <span>Link Offspring</span>
@@ -4457,7 +4457,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </div>
                                             <button
                                                 onClick={() => handleAddToLitter(animal.id_public)}
-                                                className="bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-1 rounded text-sm"
+                                                className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold px-3 py-1 rounded text-sm"
                                             >
                                                 Add
                                             </button>
@@ -4471,7 +4471,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             {availableToLink.animals && availableToLink.animals.length > 0 && (
                                 <button
                                     onClick={handleAddAllToLitter}
-                                    className="w-full bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
+                                    className="w-full bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
                                 >
                                     Add All ({availableToLink.animals.length})
                                 </button>

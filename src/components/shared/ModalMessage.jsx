@@ -5,7 +5,7 @@ const ModalMessage = ({ title, message, onClose }) => (
       <p className="text-gray-600 dark:text-dark-text-secondary mb-6">{message}</p>
       <button 
         onClick={onClose} 
-        className="w-full bg-primary hover:bg-primary/80 text-black font-semibold py-2 rounded-lg transition duration-150 shadow-md"
+        className="w-full bg-primary dark:bg-dark-primary hover:bg-primary/80 text-black font-semibold py-2 rounded-lg transition duration-150 shadow-md"
       >
         Close
       </button>

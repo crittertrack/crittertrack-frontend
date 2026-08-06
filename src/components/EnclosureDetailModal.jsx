@@ -702,7 +702,7 @@ const EnclosureDetailModal = ({
                                 </h3>
                                 <button
                                     onClick={() => setShowAnimalPicker(true)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-primary dark:bg-dark-primary rounded-lg hover:bg-primary/90"
                                 >
                                     <PlusCircle size={14} />
                                     Assign Animal
@@ -928,7 +928,7 @@ const EnclosureDetailModal = ({
                                 <button
                                     onClick={handleAddNote}
                                     disabled={savingNote || !newNote.trim()}
-                                    className="self-end px-3 py-2 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg text-sm disabled:opacity-50 flex items-center gap-1"
+                                    className="self-end px-3 py-2 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-medium rounded-lg text-sm disabled:opacity-50 flex items-center gap-1"
                                 >
                                     {savingNote ? <Loader2 size={14} className="animate-spin" /> : <PlusCircle size={14} />}
                                     Add

@@ -399,7 +399,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         <button
                             onClick={handleAddTransaction}
                             data-tutorial-target="add-transaction-btn"
-                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-xs sm:text-base"
+                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-xs sm:text-base"
                         >
                             <Plus className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                             <span className="hidden sm:inline">Add Transaction</span>
@@ -902,7 +902,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                             <div className="flex gap-3 pt-4">
                                 <button
                                     type="submit"
-                                    className="flex-1 bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition"
+                                    className="flex-1 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition"
                                 >
                                     {editingTransaction ? 'Update Transaction' : 'Add Transaction'}
                                 </button>

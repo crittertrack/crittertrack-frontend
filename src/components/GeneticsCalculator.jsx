@@ -2395,7 +2395,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               {selectedSpecies === 'Fancy Mouse' && (
                 <button
                   onClick={() => setShowExamples(true)}
-                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary dark:bg-dark-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base"
                 >
                   <Book className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                   <span className="hidden sm:inline">View Examples</span>

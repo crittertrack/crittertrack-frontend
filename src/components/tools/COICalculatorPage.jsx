@@ -175,7 +175,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
             <button
               onClick={handleCalculate}
               disabled={!sire || !dam || isLoading || !isSpeciesSupported}
-              className="px-8 py-3 bg-primary text-black font-semibold rounded-lg shadow-md hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
+              className="px-8 py-3 bg-primary dark:bg-dark-primary text-black font-semibold rounded-lg shadow-md hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
             >
               {isLoading ? (
                 <>

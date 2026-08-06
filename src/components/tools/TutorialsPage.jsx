@@ -255,7 +255,7 @@ const TutorialsPage = () => {
                           <button
                             onClick={() => setCurrentStepIndex(prev => Math.min(totalSteps - 1, prev + 1))}
                             disabled={currentStepIndex === totalSteps - 1}
-                            className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed bg-primary hover:bg-primary/90 text-black border-2 border-primary disabled:hover:bg-primary"
+                            className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black border-2 border-primary disabled:hover:bg-primary"
                             aria-label="Next step"
                           >
                             <span className="hidden sm:inline">Next</span>

@@ -158,7 +158,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap">
-                <button onClick={() => setShowHorizCert(true)} className="px-4 py-2 text-sm rounded-lg bg-primary text-black border border-primary/40 hover:bg-primary/90 transition flex items-center gap-1.5 font-semibold shadow-sm">
+                <button onClick={() => setShowHorizCert(true)} className="px-4 py-2 text-sm rounded-lg bg-primary dark:bg-dark-primary text-black border border-primary/40 hover:bg-primary/90 transition flex items-center gap-1.5 font-semibold shadow-sm">
                     <ScrollText size={16} /> Open Horizontal Certificate
                 </button>
                 <button onClick={() => setShowVertCert(true)} className="px-4 py-2 text-sm rounded-lg bg-accent hover:bg-accent/90 text-white border border-accent/40 transition flex items-center gap-1.5 font-semibold shadow-sm">

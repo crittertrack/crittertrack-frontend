@@ -1880,7 +1880,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 onClick={downloadPDF}
                                 disabled={!imagesLoaded}
                                 data-tutorial-target="download-pdf-btn"
-                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${imagesLoaded ? 'bg-primary hover:bg-primary/90 text-black cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${imagesLoaded ? 'bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
                                 title={!imagesLoaded ? 'Waiting for images to load...' : 'Download PDF'}
                             >
                                 <Download size={16} />

@@ -61,7 +61,7 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
     const navLinkClasses = ({ isActive }) =>
         `px-4 py-2 text-sm font-medium rounded-t-md ${
             isActive
-                ? 'bg-primary text-white border-b-2 border-primary'
+                ? 'bg-primary dark:bg-dark-primary text-white border-b-2 border-primary'
                 : 'text-gray-700 hover:bg-gray-200'
         }`;
 

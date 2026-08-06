@@ -8,7 +8,7 @@ const AnimalImageUpload = ({ imageUrl, onFileChange, onDeleteImage, disabled = f
         </div>
         <div className="flex-1">
             <div className="flex items-center space-x-2">
-                <label className={`inline-flex items-center px-4 py-2 bg-primary text-black rounded-md cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}>
+                <label className={`inline-flex items-center px-4 py-2 bg-primary dark:bg-dark-primary text-black rounded-md cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}>
                     Change Photo
                     <input type="file" accept="image/*" onChange={onFileChange} disabled={disabled} className="hidden" />
                 </label>

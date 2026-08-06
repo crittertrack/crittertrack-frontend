@@ -550,7 +550,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                         {/* View Profile Button */}
                                         <button
                                             onClick={() => navigate(`/user/${breeder.id_public}`)}
-                                            className="px-4 py-2 bg-primary hover:bg-primary/80 text-black text-xs font-medium rounded transition flex-shrink-0 w-full sm:w-auto"
+                                            className="px-4 py-2 bg-primary dark:bg-dark-primary hover:bg-primary/80 text-black text-xs font-medium rounded transition flex-shrink-0 w-full sm:w-auto"
                                         >
                                             View Profile
                                         </button>

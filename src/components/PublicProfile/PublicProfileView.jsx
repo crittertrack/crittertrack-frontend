@@ -240,7 +240,7 @@ const QRModal = ({ url, title, onClose }) => {
                 <p className="text-xs text-gray-400 break-all text-center leading-relaxed">{url}</p>
                 <button
                     onClick={handleCopy}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg text-sm transition"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold rounded-lg text-sm transition"
                 >
                     {copied ? <><CheckCircle size={14} /> Copied!</> : <><Link size={14} /> Copy Link</>}
                 </button>
@@ -672,7 +672,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     {isOwnProfile ? (
                         <button
                             onClick={() => navigate('/settings')}
-                            className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                            className="px-3 py-1.5 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                         >
                             <Settings size={16} />
                             Profile Settings
@@ -706,7 +706,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             )}
                             <button
                                 onClick={() => setShowQR(true)}
-                                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                className="px-3 py-1.5 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                             >
                                 <QrCode size={16} />
                                 Share Profile
@@ -916,7 +916,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <button 
                                     onClick={() => setGenderFilters(prev => ({ ...prev, Male: !prev.Male }))}
                                     className={`p-2 rounded-lg transition duration-150 shadow-sm ${
-                                        genderFilters.Male ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400'
+                                        genderFilters.Male ? 'bg-primary dark:bg-dark-primary' : 'bg-gray-300 hover:bg-gray-400'
                                     }`}
                                     title="Male"
                                 >
@@ -1539,7 +1539,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                         type="button"
                                         onClick={handleSubmitRating}
                                         disabled={!ratingForm.score || submittingRating}
-                                        className="px-4 py-2 bg-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                        className="px-4 py-2 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
                                     >
                                         {submittingRating ? 'Saving?' : (myRating ? 'Update Rating' : 'Submit Rating')}
                                     </button>
@@ -1620,7 +1620,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     <button
                                                         onClick={() => handleReportRating(r._id)}
                                                         disabled={!reportRatingReason.trim() || reportRatingLoading}
-                                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black text-xs font-semibold rounded-lg transition disabled:opacity-40"
+                                                        className="px-3 py-1 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black text-xs font-semibold rounded-lg transition disabled:opacity-40"
                                                     >
                                                         {reportRatingLoading ? 'Submitting?' : 'Submit Report'}
                                                     </button>

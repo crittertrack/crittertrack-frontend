@@ -235,7 +235,7 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
                 {/* Action Buttons */}
                 <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                     <button type="button" onClick={() => navigate(`/contacts/${contactId}/overview`)} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"><X size={18} />Cancel</button>
-                    <button type="submit" disabled={isSaving} className="px-4 py-2 bg-primary text-black rounded-md hover:bg-primary-dark disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center gap-2">
+                    <button type="submit" disabled={isSaving} className="px-4 py-2 bg-primary dark:bg-dark-primary text-black rounded-md hover:bg-primary-dark disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center gap-2">
                         {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                         {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>

@@ -422,7 +422,7 @@ const ViewAnimalModalV2 = ({
                                     {/* Share Button */}
                                     <button 
                                         onClick={() => setShowQR(true)}
-                                        className="px-4 py-2 bg-primary hover:bg-primary-dark text-gray-800 rounded-lg font-semibold transition flex items-center gap-2"
+                                        className="px-4 py-2 bg-primary dark:bg-dark-primary hover:bg-primary-dark text-gray-800 rounded-lg font-semibold transition flex items-center gap-2"
                                         title="Share animal link"
                                     >
                                         <Share size={18} />
@@ -1308,7 +1308,7 @@ const ViewAnimalModalV2 = ({
                                 navigator.clipboard.writeText(`${window.location.origin}/animal/${animal.id_public}`);
                                 alert('Link copied to clipboard!');
                             }}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg text-sm transition"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold rounded-lg text-sm transition"
                         >
                             <Link size={14} /> Copy Link
                         </button>

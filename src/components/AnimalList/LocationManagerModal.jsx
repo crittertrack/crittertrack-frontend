@@ -113,7 +113,7 @@ const LocationManagerModal = ({ isOpen, onClose, locations, onSave, onDelete, sa
                         )}
                         <div className="flex justify-end gap-2 pt-4">
                             <button onClick={handleCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-dark-surface-hover dark:text-dark-text dark:border-dark-border">Cancel</button>
-                            <button onClick={handleSave} disabled={saving} className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+                            <button onClick={handleSave} disabled={saving} className="px-4 py-2 text-sm font-medium text-white bg-primary dark:bg-dark-primary rounded-md hover:bg-primary/90 disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
                         </div>
                     </div>
                 ) : (

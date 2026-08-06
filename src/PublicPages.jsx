@@ -18,7 +18,7 @@ const PrivateAnimalScreen = ({ onBack }) => {
                 </p>
                 <button
                     onClick={onBack}
-                    className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+                    className="w-full px-4 py-2 bg-primary dark:bg-dark-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
                 >
                     Go Back
                 </button>
@@ -147,7 +147,7 @@ const PublicAnimalPage = () => {
                     </p>
                     <button
                         onClick={handleGoBack}
-                        className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+                        className="w-full px-4 py-2 bg-primary dark:bg-dark-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
                     >
                         Login / Register
                     </button>
@@ -283,7 +283,7 @@ const PublicProfilePage = () => {
                     </p>
                     <button
                         onClick={() => navigate('/')}
-                        className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+                        className="w-full px-4 py-2 bg-primary dark:bg-dark-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
                     >
                         {authToken ? 'Go to Dashboard' : 'Login / Register'}
                     </button>

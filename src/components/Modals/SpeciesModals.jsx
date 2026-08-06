@@ -83,7 +83,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X: XIcon, Searc
                                 type="button"
                                 onClick={() => setCat(c)}
                                 className={`px-3 py-1 text-xs font-semibold rounded-full transition ${
-                                    cat === c ? 'bg-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                             >
                                 {c}
@@ -301,7 +301,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
+                        className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin" size={18} /> : <PlusCircle size={18} className="mr-2" />}
                         {loading ? 'Adding...' : 'Add'}
@@ -495,7 +495,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 <button
                     data-tutorial-target="add-species-btn"
                     onClick={onManageSpecies}
-                    className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center shadow-md shrink-0"
+                    className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center shadow-md shrink-0"
                 >
                     <Settings size={18} className="mr-2" /> Add New Species
                 </button>
@@ -558,7 +558,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                                             isFav
                                                 ? 'border-amber-400 bg-amber-50 text-gray-800 hover:bg-amber-100'
                                                 : species.isDefault 
-                                                ? 'border-primary-dark bg-primary text-gray-800 hover:bg-primary/80' 
+                                                ? 'border-primary-dark bg-primary dark:bg-dark-primary text-gray-800 hover:bg-primary/80' 
                                                 : 'border-accent bg-accent text-white hover:bg-accent/80'
                                         }`}
                                     >

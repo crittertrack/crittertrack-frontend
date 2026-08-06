@@ -549,7 +549,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     <button
                         type="submit"
                         disabled={loading || (forgotPasswordStep === 1 && !resetEmail) || (forgotPasswordStep === 2) || (forgotPasswordStep === 3 && (!newPassword || !confirmNewPassword))}
-                        className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                        className="w-full bg-primary dark:bg-dark-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : (
                             forgotPasswordStep === 1 ? 'Send Reset Email' : 
@@ -592,7 +592,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     <button
                         type="submit"
                         disabled={loading || verificationCode.length !== 6}
-                        className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                        className="w-full bg-primary dark:bg-dark-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : 'Verify & Create Account'}
                     </button>
@@ -747,7 +747,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                        className="w-full bg-primary dark:bg-dark-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : (isRegister ? <><UserPlus size={20} className="mr-2" /> Register</> : <><LogIn size={20} className="mr-2" /> Log In</>)}
                     </button>

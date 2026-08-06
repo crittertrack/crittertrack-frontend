@@ -3178,7 +3178,7 @@ useEffect(() => {
                                                     className="flex-grow p-1.5 text-sm border border-gray-300 rounded-lg"
                                                     autoFocus
                                                 />
-                                                <button onClick={() => { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); }} className="text-xs px-2 py-1 bg-primary text-black rounded-lg">Save</button>
+                                                <button onClick={() => { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); }} className="text-xs px-2 py-1 bg-primary dark:bg-dark-primary text-black rounded-lg">Save</button>
                                                 <button onClick={() => setRenamingCollectionId(null)} className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded-lg">Cancel</button>
                                             </>
                                         ) : (
@@ -4904,7 +4904,7 @@ useEffect(() => {
                             <input type="text" placeholder="Search by name or latin name..." value={search} onChange={e => setSearch(e.target.value)} autoFocus className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent" />
                         </div>
                         <div className="flex flex-wrap gap-1.5">
-                            {categories.map(c => ( <button key={c} type="button" onClick={() => setCat(c)} className={`px-3 py-1 text-xs font-semibold rounded-full transition ${ cat === c ? 'bg-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }`}>{c}</button>))}
+                            {categories.map(c => ( <button key={c} type="button" onClick={() => setCat(c)} className={`px-3 py-1 text-xs font-semibold rounded-full transition ${ cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }`}>{c}</button>))}
                         </div>
                     </div>
                     <div className="flex-grow overflow-y-auto p-4">
@@ -5006,8 +5006,8 @@ useEffect(() => {
                 <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                     <div className="flex justify-between items-center border-b pb-3 mb-4"><h3 className="text-xl font-bold text-gray-800">{title} Selector</h3><button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button></div>
                     <div className="mb-3">
-                        <div className="flex items-center space-x-2 mb-2"><span className="text-sm font-medium text-gray-600">Search Scope:</span>{['local','global','both'].map(s => ( <button key={s} type="button" onClick={() => setScope(s)} className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>{s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}</button>))}</div>
-                        <div className="flex space-x-2"><input type="text" placeholder={`Search by Name or ID (e.g., Minnie or CT2468)...`} value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setHasSearched(false); }} className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" /><button onClick={handleSearch} disabled={((scope === 'local' || scope === 'both') && loadingLocal) || ((scope === 'global' || scope === 'both') && loadingGlobal) || searchTerm.trim().length < 1} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50">{ (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }</button></div>
+                        <div className="flex items-center space-x-2 mb-2"><span className="text-sm font-medium text-gray-600">Search Scope:</span>{['local','global','both'].map(s => ( <button key={s} type="button" onClick={() => setScope(s)} className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>{s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}</button>))}</div>
+                        <div className="flex space-x-2"><input type="text" placeholder={`Search by Name or ID (e.g., Minnie or CT2468)...`} value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setHasSearched(false); }} className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" /><button onClick={handleSearch} disabled={((scope === 'local' || scope === 'both') && loadingLocal) || ((scope === 'global' || scope === 'both') && loadingGlobal) || searchTerm.trim().length < 1} className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50">{ (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }</button></div>
                     </div>
                     <div className="flex-grow overflow-y-auto space-y-4">
                         {loadingLocal ? <LoadingSpinner message="Searching your animals..." /> : localAnimals.length > 0 && ( <div className="border p-3 rounded-lg bg-white shadow-sm"><h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>{localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={false} />)}</div>)}
@@ -5452,7 +5452,7 @@ useEffect(() => {
     return (
         <>
             {/* Animal List section */}
-            <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
+            <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
                 <div className="flex items-center justify-between w-full gap-2 min-w-0 mb-4">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                         <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
@@ -5500,7 +5500,7 @@ useEffect(() => {
                         ) : animalView === 'feeding' ? null : (
                             <button
                                 onClick={() => openEnclosureModal()}
-                                className="flex bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                                className="flex bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
                                 title="Add New Enclosure"
                             >
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span><span className="hidden sm:inline">Add </span>Enclosure</span>
@@ -5557,7 +5557,7 @@ useEffect(() => {
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                                                 className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 text-[10px] font-semibold transition ${
-                            animalView === tab.key ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                            animalView === tab.key ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                     >
                         {tab.icon}
@@ -5580,7 +5580,7 @@ useEffect(() => {
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                         className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${
-                            animalView === tab.key ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                            animalView === tab.key ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                     >
                         {tab.icon}
@@ -5610,7 +5610,7 @@ useEffect(() => {
                                     setMyAnimalsViewMode('cards');
                                 }
                             }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${(isCollectionsView ? collectionsViewMode : myAnimalsViewMode) === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 ${(isCollectionsView ? collectionsViewMode : myAnimalsViewMode) === 'cards' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                                 title="Card view"
                             >
                                 <LayoutGrid size={14} />
@@ -5620,7 +5620,7 @@ useEffect(() => {
                                     setMyAnimalsViewMode('list');
                                 }
                             }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${(isCollectionsView ? collectionsViewMode : myAnimalsViewMode) === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${(isCollectionsView ? collectionsViewMode : myAnimalsViewMode) === 'list' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                                 title="List view"
                             >
                                 <ClipboardList size={14} />
@@ -5719,10 +5719,10 @@ useEffect(() => {
                         <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
                         </div>
                         <span className="hidden sm:inline mx-1 text-gray-300">|</span>
-                        <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
+                        <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200'}`}>
                             A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
-                        <button onClick={() => requestSort('birthdate')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'birthdate' ? 'bg-primary text-black' : 'bg-gray-200'}`}>
+                        <button onClick={() => requestSort('birthdate')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'birthdate' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200'}`}>
                             Age {sortConfig.key === 'birthdate' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                         </button>
                     </div>

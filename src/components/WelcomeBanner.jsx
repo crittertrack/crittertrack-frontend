@@ -30,7 +30,7 @@ const WelcomeBanner = ({ onStartTutorial, onDismiss, isMobile }) => {
                         {!isMobile && (
                             <button
                                 onClick={onStartTutorial}
-                                className="px-4 py-2 bg-primary hover:bg-primary-dark text-black text-sm font-semibold rounded-lg transition whitespace-nowrap"
+                                className="px-4 py-2 bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black text-sm font-semibold rounded-lg transition whitespace-nowrap"
                             >
                                 Take the Tour
                             </button>

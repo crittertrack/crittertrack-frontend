@@ -1357,7 +1357,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 setBlSaved(true);
                                 setTimeout(() => setBlSaved(false), 3000);
                             }}
-                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-5 rounded-lg shadow-md transition duration-150 flex items-center gap-2 disabled:opacity-50"
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-5 rounded-lg shadow-md transition duration-150 flex items-center gap-2 disabled:opacity-50"
                         >
                             {blSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                             {blSaving ? 'Saving?' : 'Save Breeding Lines'}
@@ -1374,7 +1374,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={securityLoading} />
                 <div className="flex justify-end pt-2">
                     <button type="submit" disabled={securityLoading} 
-                        className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                        className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
                     >
                         {securityLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Mail size={20} className="mr-2" />}
                         Update Email
@@ -1451,7 +1451,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <button
                         onClick={handleExport}
                         disabled={exportLoading || !Object.values(exportSections).some(Boolean)}
-                        className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                        className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
                     >
                         {exportLoading ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
                         Export Data
@@ -1478,7 +1478,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
                     {importFile && !importPreview && !importResult && (
                         <button onClick={handleImportPreview} disabled={importLoading}
-                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
                         >
                             {importLoading ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
                             Preview Import
@@ -1702,7 +1702,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             }
                                         }
                                     }}
-                                    className="px-3 py-2 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-lg transition disabled:opacity-40"
+                                    className="px-3 py-2 bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black text-xs font-bold rounded-lg transition disabled:opacity-40"
                                 >
                                     Add
                                 </button>
@@ -1777,7 +1777,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 }
                             }}
                             disabled={zeLoading}
-                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
                         >
                             {zeLoading ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
                             Preview Import
@@ -2199,7 +2199,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             }
                                         }
                                     }}
-                                    className="px-3 py-2 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-lg transition disabled:opacity-40"
+                                    className="px-3 py-2 bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black text-xs font-bold rounded-lg transition disabled:opacity-40"
                                 >
                                     Add
                                 </button>
@@ -2264,7 +2264,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 }
                             }}
                             disabled={ktkLoading}
-                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
                         >
                             {ktkLoading ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
                             Preview Import

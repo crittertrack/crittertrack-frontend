@@ -176,7 +176,7 @@ const ParentSearchModal = ({
                         <span className="text-sm font-medium text-gray-600">Search Scope:</span>
                         {['local','global','both'].map(s => (
                             <button key={s} type="button" onClick={() => setScope(s)}
-                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                                 {s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}
                             </button>
                         ))}
@@ -192,7 +192,7 @@ const ParentSearchModal = ({
                         <button
                             onClick={handleSearch}
                             disabled={((scope === 'local' || scope === 'both') && loadingLocal) || ((scope === 'global' || scope === 'both') && loadingGlobal) || searchTerm.trim().length < 1}
-                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
                         >
                             { (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }
                         </button>
@@ -318,7 +318,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
                     <button
                         onClick={handleSearch}
                         disabled={loadingLocal || searchTerm.trim().length < 3}
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
+                        className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
                     >
                         {loadingLocal ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
                     </button>
@@ -541,7 +541,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                             onClick={() => { setSearchType('users'); setUserResults([]); setAnimalResults([]); setHasSearched(false); }}
                             className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
                                 searchType === 'users' 
-                                    ? 'bg-primary text-black' 
+                                    ? 'bg-primary dark:bg-dark-primary text-black' 
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
@@ -552,7 +552,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                             onClick={() => { setSearchType('animals'); setUserResults([]); setAnimalResults([]); setHasSearched(false); }}
                             className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
                                 searchType === 'animals' 
-                                    ? 'bg-primary text-black' 
+                                    ? 'bg-primary dark:bg-dark-primary text-black' 
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
@@ -578,7 +578,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                     <button
                         onClick={handleSearch}
                         disabled={loading || searchTerm.trim().length < 2}
-                        className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
+                        className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
                     </button>

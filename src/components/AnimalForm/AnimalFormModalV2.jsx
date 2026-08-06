@@ -202,16 +202,16 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                     <h3 className="text-lg font-semibold">Assign {target}</h3>
                 </div>
                 <div className="p-4 border-b flex gap-2">
-                    <button type="button" onClick={() => setMode('user')} className={`px-3 py-1 text-sm rounded-full ${mode === 'user' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Search User</button>
-                    <button type="button" onClick={() => setMode('contact')} className={`px-3 py-1 text-sm rounded-full ${mode === 'contact' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Select Contact</button>
-                    <button type="button" onClick={() => setMode('manual')} className={`px-3 py-1 text-sm rounded-full ${mode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200'}`}>Manual Entry</button>
+                    <button type="button" onClick={() => setMode('user')} className={`px-3 py-1 text-sm rounded-full ${mode === 'user' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200'}`}>Search User</button>
+                    <button type="button" onClick={() => setMode('contact')} className={`px-3 py-1 text-sm rounded-full ${mode === 'contact' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200'}`}>Select Contact</button>
+                    <button type="button" onClick={() => setMode('manual')} className={`px-3 py-1 text-sm rounded-full ${mode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200'}`}>Manual Entry</button>
                 </div>
                 <div className="p-4 overflow-y-auto flex-1">
                     {mode === 'user' && (
                         <div className="space-y-2">
                             <div className="flex gap-2">
                                 <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or CTU ID" className="w-full p-2 border rounded-md" onKeyPress={e => e.key === 'Enter' && handleUserSearch()} />
-                                <button type="button" onClick={handleUserSearch} disabled={loading} className="p-2 bg-primary rounded-md disabled:opacity-50">{loading ? <Loader2 className="animate-spin" /> : <Search />}</button>
+                                <button type="button" onClick={handleUserSearch} disabled={loading} className="p-2 bg-primary dark:bg-dark-primary rounded-md disabled:opacity-50">{loading ? <Loader2 className="animate-spin" /> : <Search />}</button>
                             </div>
                             <div className="space-y-1">
                                 {searchResults.map(user => (
@@ -236,7 +236,7 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                     {mode === 'manual' && (
                         <div className="space-y-2">
                             <input type="text" value={manualName} onChange={e => setManualName(e.target.value)} placeholder={`Enter ${target} name`} className="w-full p-2 border rounded-md" />
-                            <button type="button" onClick={() => onSelect({ name: manualName })} className="w-full p-2 bg-primary rounded-md">Assign Name</button>
+                            <button type="button" onClick={() => onSelect({ name: manualName })} className="w-full p-2 bg-primary dark:bg-dark-primary rounded-md">Assign Name</button>
                         </div>
                     )}
                 </div>
@@ -349,7 +349,7 @@ const ParentSearchModal = ({
                         <span className="text-sm font-medium text-gray-600">Search Scope:</span>
                         {['local', 'global', 'both'].map(s => (
                             <button key={s} type="button" onClick={() => setScope(s)}
-                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                                 {s.charAt(0).toUpperCase() + s.slice(1)}
                             </button>
                         ))}
@@ -366,7 +366,7 @@ const ParentSearchModal = ({
                             type="button"
                             onClick={handleSearch}
                             disabled={loadingLocal || loadingGlobal || !searchTerm.trim()}
-                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition flex items-center disabled:opacity-50"
+                            className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition flex items-center disabled:opacity-50"
                         >
                             {loadingLocal || loadingGlobal ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
                         </button>
@@ -761,7 +761,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                                     type="button"
                                     onClick={rotateImage}
                                     disabled={processing}
-                                    className="flex-1 px-3 py-2 bg-primary text-black rounded-md text-sm font-medium hover:bg-primary-dark disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="flex-1 px-3 py-2 bg-primary dark:bg-dark-primary text-black rounded-md text-sm font-medium hover:bg-primary-dark disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     <RotateCcw size={16} />
                                     Rotate 90°
@@ -877,7 +877,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                         type="button"
                         onClick={processCurrentImage}
                         disabled={processing}
-                        className="px-4 py-2 bg-primary text-black rounded-md text-sm font-medium hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
+                        className="px-4 py-2 bg-primary dark:bg-dark-primary text-black rounded-md text-sm font-medium hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
                     >
                         {processing ? (
                             <>
@@ -1008,10 +1008,10 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
 
                 <div className="flex gap-2 p-4 border-b">
                     <button type="button" onClick={() => { setMode('search'); setSearchTerm(''); }}
-                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'search' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'search' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                         Search Existing
                     </button><button type="button" onClick={() => { setMode('create'); setNewEnclosureData({ name: '', enclosureType: '', location: '', capacity: '', dimensions: { length: '', width: '', height: '', unit: 'cm' }, temperatureRange: { min: '', max: '', unit: 'C' }, humidityRange: { min: '', max: '' }, description: '', buildingId: '', roomId: '', purpose: 'general', purposeDescription: '', lightingType: '', bedding: '', enrichment: '', lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h' }); }}
-                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                         Create New
                     </button>
                 </div>
@@ -1300,7 +1300,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             }
                         }}
                         disabled={creatingEnclosure}
-                        className="flex-1 px-3 py-2 text-sm font-medium bg-primary text-black rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        className="flex-1 px-3 py-2 text-sm font-medium bg-primary dark:bg-dark-primary text-black rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         {creatingEnclosure ? (
                             <><Loader2 size={16} className="inline animate-spin mr-1" /> Creating...</>
                         ) : (
@@ -3945,7 +3945,7 @@ const AnimalFormModalV2 = ({
                                             {formData.tags.length > 0 && (
                                                 <div className="mt-2 flex flex-wrap gap-2">
                                                     {formData.tags.map((tag, idx) => (
-                                                        <span key={idx} className="inline-flex items-center bg-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
+                                                        <span key={idx} className="inline-flex items-center bg-primary dark:bg-dark-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
                                                             {tag}
                                                             <button type="button" onClick={() => { const newTags = formData.tags.filter((_, i) => i !== idx); setFormData({ ...formData, tags: newTags }); }} className="ml-2 text-black hover:text-gray-600"><Trash2 size={12} /></button>
                                                         </span>
@@ -4309,7 +4309,7 @@ const AnimalFormModalV2 = ({
                                                     <button
                                                         type="button"
                                                         onClick={() => setAsPrimaryImage(img.id)}
-                                                        className={`p-2 rounded-full transition-colors ${index === 0 ? 'bg-primary text-black' : 'bg-white/20 text-white hover:bg-white/40'}`}
+                                                        className={`p-2 rounded-full transition-colors ${index === 0 ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white/20 text-white hover:bg-white/40'}`}
                                                         title="Set as primary image"
                                                     >
                                                         <Star size={18} fill={index === 0 ? 'currentColor' : 'none'} />
@@ -4495,8 +4495,8 @@ const AnimalFormModalV2 = ({
 
                                             {/* Mode Toggle */}
                                             <div className="flex gap-2">
-                                                <button type="button" onClick={() => setMedicationMode('manual')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
-                                                <button type="button" onClick={() => setMedicationMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                                <button type="button" onClick={() => setMedicationMode('manual')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
+                                                <button type="button" onClick={() => setMedicationMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'supply' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
                                             </div>
 
                                             {medicationMode === 'manual' ? (
@@ -4515,7 +4515,7 @@ const AnimalFormModalV2 = ({
                                                             <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Notes" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                         </div>
                                                     </div>
-                                                    <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Medication</button>
+                                                    <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Medication</button>
                                                 </div>
                                             ) : (
                                                 <div className="space-y-3">
@@ -4545,7 +4545,7 @@ const AnimalFormModalV2 = ({
                                                                             setSelectedMedicationSupply(supply);
                                                                             setMedicationSupplySearch('');
                                                                         }}
-                                                                        className={`w-full text-left px-3 py-2 text-xs rounded-md transition-colors ${selectedMedicationSupply?.id === supply.id || selectedMedicationSupply?._id === supply._id ? 'bg-primary text-black' : 'hover:bg-gray-100'}`}
+                                                                        className={`w-full text-left px-3 py-2 text-xs rounded-md transition-colors ${selectedMedicationSupply?.id === supply.id || selectedMedicationSupply?._id === supply._id ? 'bg-primary dark:bg-dark-primary text-black' : 'hover:bg-gray-100'}`}
                                                                     >
                                                                         <div className="font-medium">{supply.name}</div>
                                                                         {supply.quantity && <div className="text-xs text-gray-600">Stock: {supply.quantity}</div>}
@@ -4620,7 +4620,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newMedicalCondition.name} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, name: e.target.value })} placeholder="Condition Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 <input type="text" value={newMedicalCondition.notes} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                             </div>
-                                            <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Medical Condition</button>
+                                            <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Medical Condition</button>
                                         </div>
                                         {(formData.medicalConditions || []).filter(Boolean).map((rec, i) => (
                                             <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border">
@@ -4638,7 +4638,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newAllergy.name} onChange={(e) => setNewAllergy({ ...newAllergy, name: e.target.value })} placeholder="Allergy Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 <input type="text" value={newAllergy.notes} onChange={(e) => setNewAllergy({ ...newAllergy, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                             </div>
-                                            <button type="button" onClick={addAllergy} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Allergy</button>
+                                            <button type="button" onClick={addAllergy} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Allergy</button>
                                         </div>
                                         {(formData.allergies || []).filter(Boolean).map((rec, i) => (
                                             <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border">
@@ -4659,7 +4659,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newVaccination.name} onChange={(e) => setNewVaccination({ ...newVaccination, name: e.target.value })} placeholder="Vaccination Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 <input type="text" value={newVaccination.notes} onChange={(e) => setNewVaccination({ ...newVaccination, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                             </div>
-                                            <button type="button" onClick={addVaccination} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vaccination</button>
+                                            <button type="button" onClick={addVaccination} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Vaccination</button>
                                         </div>
                                     {(formData.vaccinations || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>}
@@ -4672,7 +4672,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newDeworming.medication} onChange={(e) => setNewDeworming({ ...newDeworming, medication: e.target.value })} placeholder="Medication" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 <input type="text" value={newDeworming.notes} onChange={(e) => setNewDeworming({ ...newDeworming, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                             </div>
-                                            <button type="button" onClick={addDeworming} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Deworming</button>
+                                            <button type="button" onClick={addDeworming} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Deworming</button>
                                         </div>
                                     {(formData.dewormingRecords || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>}
@@ -4685,7 +4685,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newParasiteControl.treatment} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, treatment: e.target.value })} placeholder="e.g., Flea/tick treatment" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 <input type="text" value={newParasiteControl.notes} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                             </div>
-                                            <button type="button" onClick={addParasiteControl} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Parasite Control</button>
+                                            <button type="button" onClick={addParasiteControl} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Parasite Control</button>
                                         </div>
                                     {(formData.parasiteControl || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.treatment} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('parasiteControl', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     
@@ -4712,7 +4712,7 @@ const AnimalFormModalV2 = ({
                                                     </select>
                                                 </div>
                                             </div>
-                                            <button type="button" onClick={addParasiteScheduleEvent} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Schedule Event</button>
+                                            <button type="button" onClick={addParasiteScheduleEvent} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Schedule Event</button>
                                         </div>
                                         {(parseJsonArrayField(formData.parasitePreventionSchedule) || []).filter(Boolean).map((schedule, i) => (
                                             <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-blue-50 rounded border border-blue-200">
@@ -4752,7 +4752,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newHealthClearance.certificateId} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, certificateId: e.target.value })} placeholder="Certificate ID (e.g., XX-12345E24M)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                             </div>
                                             <textarea value={newHealthClearance.notes} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, notes: e.target.value })} placeholder="Additional notes (optional)" rows="2" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                            <button type="button" onClick={addHealthClearance} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Clearance</button>
+                                            <button type="button" onClick={addHealthClearance} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Clearance</button>
                                         </div>
 
                                         {/* Display existing clearances */}
@@ -4821,7 +4821,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newProcedure.name} onChange={(e) => setNewProcedure({ ...newProcedure, name: e.target.value })} placeholder="Procedure Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 <input type="text" value={newProcedure.notes} onChange={(e) => setNewProcedure({ ...newProcedure, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                             </div>
-                                            <button type="button" onClick={addMedicalProcedure} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Procedure</button>
+                                            <button type="button" onClick={addMedicalProcedure} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Procedure</button>
                                         </div>
                                     {(formData.medicalProcedures || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
@@ -4834,7 +4834,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newLabResult.testName} onChange={(e) => setNewLabResult({ ...newLabResult, testName: e.target.value })} placeholder="Test Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 <input type="text" value={newLabResult.result} onChange={(e) => setNewLabResult({ ...newLabResult, result: e.target.value })} placeholder="Result" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                             </div>
-                                            <button type="button" onClick={addLabResult} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Lab Result</button>
+                                            <button type="button" onClick={addLabResult} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Lab Result</button>
                                         </div>
                                     {(formData.labResults || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
@@ -4854,7 +4854,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newVetVisit.reason} onChange={(e) => setNewVetVisit({ ...newVetVisit, reason: e.target.value })} placeholder="Reason for visit" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 <input type="text" value={newVetVisit.notes} onChange={(e) => setNewVetVisit({ ...newVetVisit, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                             </div>
-                                            <button type="button" onClick={addVetVisit} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vet Visit</button>
+                                            <button type="button" onClick={addVetVisit} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Vet Visit</button>
                                         </div>
                                     {(formData.vetVisits || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
@@ -4900,7 +4900,7 @@ const AnimalFormModalV2 = ({
                                                                 key={h}
                                                                 type="button"
                                                                 onClick={() => setFormData(prev => ({ ...prev, feedingIntervalHours: h }))}
-                                                                className={`text-[11px] px-2 py-0.5 rounded-full border ${Number(formData.feedingIntervalHours) === h ? 'bg-primary text-black border-primary' : 'bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100'}`}
+                                                                className={`text-[11px] px-2 py-0.5 rounded-full border ${Number(formData.feedingIntervalHours) === h ? 'bg-primary dark:bg-dark-primary text-black border-primary' : 'bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100'}`}
                                                             >
                                                                 {h < 24 ? `${h}h` : `${h / 24}d`}
                                                             </button>
@@ -4919,8 +4919,8 @@ const AnimalFormModalV2 = ({
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Diet</label>
                                                 <div className="flex gap-1.5 mb-1.5">
-                                                    <button type="button" onClick={() => setDietMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
-                                                    <button type="button" onClick={() => setDietMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                                    <button type="button" onClick={() => setDietMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
+                                                    <button type="button" onClick={() => setDietMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'supply' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
                                                 </div>
                                                 {dietMode === 'manual' ? (
                                                     <div className="space-y-2">
@@ -4949,7 +4949,7 @@ const AnimalFormModalV2 = ({
                                                                     setFormData(prev => ({ ...prev, dietSupplies: [...existing, { name: dietManualEntry.name.trim() }] }));
                                                                     setDietManualEntry({ name: '' });
                                                                 }}
-                                                                className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-black hover:bg-primary-dark flex items-center gap-1 flex-shrink-0"
+                                                                className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark flex items-center gap-1 flex-shrink-0"
                                                             >
                                                                 <PlusCircle size={14} /> Add
                                                             </button>
@@ -5014,8 +5014,8 @@ const AnimalFormModalV2 = ({
                                             <div className="pt-2 border-t">
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Supplements</label>
                                                 <div className="flex gap-1.5 mb-1.5">
-                                                    <button type="button" onClick={() => setSupplementMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
-                                                    <button type="button" onClick={() => setSupplementMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'supply' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                                    <button type="button" onClick={() => setSupplementMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
+                                                    <button type="button" onClick={() => setSupplementMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'supply' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
                                                 </div>
                                                 {supplementMode === 'manual' ? (
                                                     <div className="space-y-2">
@@ -5051,7 +5051,7 @@ const AnimalFormModalV2 = ({
                                                                     setFormData(prev => ({ ...prev, supplementSupplies: [...existing, { name: supplementManualEntry.name.trim(), dosage: supplementManualEntry.dosage.trim() }] }));
                                                                     setSupplementManualEntry({ name: '', dosage: '' });
                                                                 }}
-                                                                className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-black hover:bg-primary-dark flex items-center justify-center gap-1 flex-shrink-0 w-full sm:w-auto"
+                                                                className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark flex items-center justify-center gap-1 flex-shrink-0 w-full sm:w-auto"
                                                             >
                                                                 <PlusCircle size={14} /> Add
                                                             </button>
@@ -5219,7 +5219,7 @@ const AnimalFormModalV2 = ({
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowAssignEnclosureModal(true)}
-                                                    className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium hover:bg-primary/90 transition-colors"
+                                                    className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium hover:bg-primary/90 transition-colors"
                                                 >
                                                     Search & Assign Enclosure
                                                 </button>
@@ -5366,7 +5366,7 @@ const AnimalFormModalV2 = ({
                                                     setNewAnimalCareTaskFreq('');
                                                     setNewAnimalCareTaskNotes('');
                                                 }
-                                            }} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">+ Add Animal Care Task</button>
+                                            }} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">+ Add Animal Care Task</button>
                                         </div>
 
                                         {/* Existing Animal-Specific Care Tasks */}
@@ -5885,7 +5885,7 @@ const AnimalFormModalV2 = ({
                                             ) : (
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <input type="text" value={newBreedingRecord.mate} onChange={(e) => setNewBreedingRecord(p => ({ ...p, mate: e.target.value, mateAnimalId: null }))} placeholder="Enter mate name manually" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                    <button type="button" onClick={() => { setParentSearchModalConfig({ title: 'Select Mate', onSelect: handleSelectMate, requiredGender: formData.gender === 'Male' ? ['Female', 'Intersex', 'Unknown'] : ['Male', 'Intersex', 'Unknown'] }); setParentSearchModalOpen(true); }} className="px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Select from DB</button>
+                                                    <button type="button" onClick={() => { setParentSearchModalConfig({ title: 'Select Mate', onSelect: handleSelectMate, requiredGender: formData.gender === 'Male' ? ['Female', 'Intersex', 'Unknown'] : ['Male', 'Intersex', 'Unknown'] }); setParentSearchModalOpen(true); }} className="px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Select from DB</button>
                                                 </div>
                                             )}
                                         </div>
@@ -5908,7 +5908,7 @@ const AnimalFormModalV2 = ({
                                             <textarea value={newBreedingRecord.notes} onChange={(e) => setNewBreedingRecord(p => ({ ...p, notes: e.target.value }))} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                         </div>
                                     </div>
-                                    <button type="button" onClick={addBreedingRecord} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-sm font-medium mt-2">Add Breeding Record</button>
+                                    <button type="button" onClick={addBreedingRecord} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-sm font-medium mt-2">Add Breeding Record</button>
                                 </FormSection>
                             </div>
                         )}
@@ -5951,7 +5951,7 @@ const AnimalFormModalV2 = ({
                                                 <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'manual')}
                                                     className={`px-2 py-0.5 transition-colors ${!isCTC ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Manual</button>
                                                 <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'ctc')}
-                                                    className={`px-2 py-0.5 transition-colors ${isCTC ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Link CTC</button>
+                                                    className={`px-2 py-0.5 transition-colors ${isCTC ? 'bg-primary dark:bg-dark-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Link CTC</button>
                                             </div>
                                         </div>
 
@@ -6497,7 +6497,7 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" value={newShow.score} onChange={(e) => setNewShow({ ...newShow, score: e.target.value })} placeholder="Score/Placement (e.g., 95/100)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                                 <textarea value={newShow.judgeComments} onChange={(e) => setNewShow({ ...newShow, judgeComments: e.target.value })} placeholder="Judge Comments" rows="2" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md md:col-span-2 lg:col-span-1" />
                                             </div>
-                                            <button type="button" onClick={addShow} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">+ Add Show Event</button>
+                                            <button type="button" onClick={addShow} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">+ Add Show Event</button>
                                         </div>
                                         {(parseJsonArrayField(formData.shows) || []).map((show, i) => (
                                             <div key={i} className="flex justify-between items-start text-xs p-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded border border-purple-200">
@@ -6653,7 +6653,7 @@ const AnimalFormModalV2 = ({
                                 </button>
                             )}
                         </div>
-                        <button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50">
+                        <button type="submit" disabled={loading} className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50">
                             {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                             <span>{loading ? 'Saving...' : 'Save Animal'}</span>
                         </button>

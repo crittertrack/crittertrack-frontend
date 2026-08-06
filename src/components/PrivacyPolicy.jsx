@@ -145,7 +145,7 @@ const PrivacyPolicy = ({ onClose }) => {
         <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 rounded-b-xl flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+            className="px-6 py-2 bg-primary dark:bg-dark-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
           >
             Close
           </button>

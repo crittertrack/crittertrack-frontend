@@ -357,7 +357,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                     <div className="flex gap-3 justify-center">
                         <button
                             onClick={handleReset}
-                            className="px-6 py-2.5 bg-primary dark:bg-primary-dark text-black font-semibold rounded-lg hover:bg-primary/80 transition"
+                            className="px-6 py-2.5 bg-primary dark:bg-dark-primary text-black font-semibold rounded-lg hover:bg-primary/80 transition"
                         >
                             Submit Another Report
                         </button>

@@ -119,7 +119,7 @@ const TransferAnimalModal = ({
                                             type="button"
                                             onClick={onSearchUsers}
                                             disabled={searching || String(userQuery || '').trim().length < 2}
-                                            className="px-4 py-2 bg-primary text-black rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            className="px-4 py-2 bg-primary dark:bg-dark-primary text-black rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                         >
                                             <Search className="w-4 h-4" />
                                             {searching ? 'Searching...' : 'Search'}
@@ -220,7 +220,7 @@ const TransferAnimalModal = ({
                             }
                         }}
                         disabled={!selectedUser}
-                        className="flex-1 bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Send Transfer Request
                     </button>
