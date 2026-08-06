@@ -1163,7 +1163,7 @@ useEffect(() => {
 
         return (
             <div 
-                className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer flex flex-col"
+                className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-text-muted transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer flex flex-col"
                 onClick={() => handleOpenDetail(enclosure)}
             >
                 {/* Banner Image */}
@@ -3224,16 +3224,16 @@ useEffect(() => {
                             const colAnimals = allOwnedAnimals.filter(a => (animalCollections[a.id_public] || []).includes(col.id));
                             const isColCollapsed = collapsedCollections[col.id] || false;
                             return (
-                                <div key={col.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                <div key={col.id} className="border border-gray-200 dark:border-dark-text-muted rounded-xl overflow-hidden shadow-sm">
                                     <div
-                                        className="flex items-center justify-between bg-gray-100 px-4 py-2.5 border-b cursor-pointer"
+                                        className="flex items-center justify-between bg-gray-100 dark:bg-dark-card-bg px-4 py-2.5 border-b dark:border-dark-text-muted cursor-pointer"
                                         onClick={() => setCollapsedCollections(prev => ({ ...prev, [col.id]: !prev[col.id] }))}
                                     >
                                         <div className="flex items-center gap-2">
                                             <FolderOpen size={16} className="text-amber-500" />
-                                            <span className="font-bold text-gray-700">{col.name} ({colAnimals.length})</span>
+                                            <span className="font-bold text-gray-700 dark:text-dark-text">{col.name} ({colAnimals.length})</span>
                                         </div>
-                                        {isColCollapsed ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronUp size={16} className="text-gray-400" />}
+                                        {isColCollapsed ? <ChevronDown size={16} className="text-gray-400 dark:text-dark-text-muted" /> : <ChevronUp size={16} className="text-gray-400 dark:text-dark-text-muted" />}
                                     </div>
                                     {!isColCollapsed && (
                                         <div className="p-1.5 sm:p-4">
@@ -3316,16 +3316,16 @@ useEffect(() => {
                             if (uncategorized.length === 0) return null;
                             const isUncatCollapsed = collapsedCollections['__uncategorized'] || false;
                             return (
-                                <div className="border border-dashed border-gray-300 rounded-xl">
+                                <div className="border border-dashed border-gray-300 dark:border-dark-text-muted rounded-xl">
                                     <div
-                                        className="flex items-center justify-between bg-gray-50 px-4 py-2.5 border-b cursor-pointer"
+                                        className="flex items-center justify-between bg-gray-50 dark:bg-dark-card-bg px-4 py-2.5 border-b dark:border-dark-text-muted cursor-pointer"
                                         onClick={() => setCollapsedCollections(prev => ({ ...prev, __uncategorized: !prev.__uncategorized }))}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <FolderOpen size={16} className="text-gray-400" />
-                                            <span className="font-semibold text-gray-500">Uncategorized ({uncategorized.length})</span>
+                                            <FolderOpen size={16} className="text-gray-400 dark:text-dark-text-muted" />
+                                            <span className="font-semibold text-gray-500 dark:text-dark-text-secondary">Uncategorized ({uncategorized.length})</span>
                                         </div>
-                                        {isUncatCollapsed ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronUp size={16} className="text-gray-400" />}
+                                        {isUncatCollapsed ? <ChevronDown size={16} className="text-gray-400 dark:text-dark-text-muted" /> : <ChevronUp size={16} className="text-gray-400 dark:text-dark-text-muted" />}
                                     </div>
                                     {!isUncatCollapsed && (
                                         <div className="p-1.5 sm:p-4">
@@ -4418,25 +4418,25 @@ useEffect(() => {
                             {(() => {
                                 const feedingCareSections = [
                                     {
-                                        key: 'feeding', title: 'Feeding', icon: <Utensils size={16} className="text-green-700" />, headerClass: 'bg-green-50 border-b border-green-100',
+                                        key: 'feeding', title: 'Feeding', icon: <Utensils size={16} className="text-green-700 dark:text-green-300" />, headerClass: 'bg-green-50 dark:bg-green-900/20 border-b border-green-100 dark:border-green-900/40',
                                         list: [...feedDue, ...feedOk], dueCount: feedDue.length, colLabels: ['Last Fed', 'Diet'],
                                         emptyText: "No animals with a feeding schedule set yet — set one up in the animal's Routine Care tab.",
                                         renderRow: a => <FeedingAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkFed={handleMarkFed} handleSkipFeeding={handleSkipFeeding} />,
                                     },
                                     {
-                                        key: 'grooming', title: 'Grooming & Special Care', icon: <Scissors size={16} className="text-teal-700" />, headerClass: 'bg-teal-50 border-b border-teal-100',
+                                        key: 'grooming', title: 'Grooming & Special Care', icon: <Scissors size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...groomingScheduleDue, ...groomingScheduleOk], dueCount: groomingScheduleDue.length, colLabels: ['Last Done', 'Task'],
                                         emptyText: "No assigned schedules yet — set one up in the animal's Routine Care tab.",
                                         renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />,
                                     },
                                     {
-                                        key: 'training', title: 'Training', icon: <Dumbbell size={16} className="text-teal-700" />, headerClass: 'bg-teal-50 border-b border-teal-100',
+                                        key: 'training', title: 'Training', icon: <Dumbbell size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...trainingScheduleDue, ...trainingScheduleOk], dueCount: trainingScheduleDue.length, colLabels: ['Last Done', 'Task'],
                                         emptyText: "No assigned schedules yet — set one up in the animal's Behavior tab.",
                                         renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />,
                                     },
                                     {
-                                        key: 'animalcare', title: 'Custom Animal Care', icon: <ClipboardList size={16} className="text-teal-700" />, headerClass: 'bg-teal-50 border-b border-teal-100',
+                                        key: 'animalcare', title: 'Custom Animal Care', icon: <ClipboardList size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...animalCareTaskDue, ...animalCareTaskOk], dueCount: animalCareTaskDue.length, colLabels: ['Last Done', 'Task'],
                                         emptyText: "No animal care tasks. Edit an animal and add tasks in the Routine Care tab.",
                                         renderRow: entry => <AnimalCareTaskBar key={`${entry.animal.id_public}_${entry.taskIdx}`} animal={entry.animal} taskIdx={entry.taskIdx} task={entry.task} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkAnimalCareTaskDone={handleMarkAnimalCareTaskDone} handleSkipAnimalCareTask={handleSkipAnimalCareTask} />,
@@ -4446,24 +4446,24 @@ useEffect(() => {
                                 return (
                                     <div className="space-y-4">
                                         {feedingCareSections.map(section => (
-                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
+                                            <div key={section.key} className="border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden">
                                                 <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`feedcare_${section.key}`)}>
                                                     <div className="flex items-center gap-3">
                                                         {section.icon}
-                                                        <span className="font-semibold text-gray-800 text-base">{section.title}</span>
+                                                        <span className="font-semibold text-gray-800 dark:text-dark-text text-base">{section.title}</span>
                                                     </div>
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{section.dueCount > 0 ? `${section.dueCount} due` : section.list.length}</span>
-                                                        {collapsedMgmtGroups[`feedcare_${section.key}`] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
+                                                        <span className="text-sm font-bold text-gray-500 dark:text-dark-text-secondary bg-white/80 dark:bg-black/20 px-2.5 py-1 rounded-full">{section.dueCount > 0 ? `${section.dueCount} due` : section.list.length}</span>
+                                                        {collapsedMgmtGroups[`feedcare_${section.key}`] ? <ChevronDown size={18} className="text-gray-500 dark:text-dark-text-muted" /> : <ChevronUp size={18} className="text-gray-500 dark:text-dark-text-muted" />}
                                                     </div>
                                                 </div>
                                                 {!collapsedMgmtGroups[`feedcare_${section.key}`] && (
-                                                    <div className="p-2 space-y-1 bg-white">
+                                                    <div className="p-2 space-y-1 bg-white dark:bg-dark-card-bg">
                                                         {section.list.length === 0 ? (
-                                                            <div className="text-center text-sm text-gray-400 py-4">{section.emptyText}</div>
+                                                            <div className="text-center text-sm text-gray-400 dark:text-dark-text-muted py-4">{section.emptyText}</div>
                                                         ) : (
                                                             <>
-                                                                <div className="hidden sm:grid grid-cols-8 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                                                <div className="hidden sm:grid grid-cols-8 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-border">
                                                                     <div className="col-span-2">Animal</div>
                                                                     <div>{section.colLabels[0]}</div>
                                                                     <div>Frequency</div>
@@ -4492,20 +4492,20 @@ useEffect(() => {
                         title="Reproduction" count={reproTotal} bgClass="bg-pink-50 dark:bg-pink-900/20" hideHeader={!!view} />
                     {(!collapsedMgmtSections['reproduction'] || !!view) && (
                         <div className="p-3 space-y-4">
-                            <div className="border border-pink-200 rounded-lg overflow-hidden">
-                                <div className="flex items-center justify-between p-3 bg-pink-50/60">
+                            <div className="border border-pink-200 dark:border-pink-900/40 rounded-lg overflow-hidden">
+                                <div className="flex items-center justify-between p-3 bg-pink-50/60 dark:bg-pink-900/20">
                                     <div className="flex items-center gap-3">
-                                        <Home size={16} className="text-pink-600" />
-                                        <span className="font-semibold text-gray-800 text-base">Breeding/Nursery Enclosures</span>
-                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{reproEnclosures.length}</span>
+                                        <Home size={16} className="text-pink-600 dark:text-pink-400" />
+                                        <span className="font-semibold text-gray-800 dark:text-dark-text text-base">Breeding/Nursery Enclosures</span>
+                                        <span className="text-sm font-bold text-gray-500 dark:text-dark-text-secondary bg-white/80 dark:bg-black/20 px-2.5 py-1 rounded-full">{reproEnclosures.length}</span>
                                     </div>
-                                    <button onClick={() => openEnclosureModal(null, { purpose: 'reproduction' })} className="flex items-center gap-1 text-xs font-medium text-pink-600 hover:text-pink-800 bg-white border border-pink-200 px-2 py-1 rounded-lg">
+                                    <button onClick={() => openEnclosureModal(null, { purpose: 'reproduction' })} className="flex items-center gap-1 text-xs font-medium text-pink-600 dark:text-pink-400 hover:text-pink-800 dark:hover:text-pink-300 bg-white dark:bg-dark-card-bg border border-pink-200 dark:border-pink-900/40 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> Add
                                     </button>
                                 </div>
                                 <div className="p-3">
                                     {reproEnclosures.length === 0
-                                        ? <div className="text-xs text-gray-400 text-center py-4">No breeding/nursery enclosures.</div>
+                                        ? <div className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-4">No breeding/nursery enclosures.</div>
                                         : (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                                 {reproEnclosures.map(enclosure => (
@@ -4518,36 +4518,36 @@ useEffect(() => {
                             </div>
                             {(() => {
                                 const reproSections = [
-                                    { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700" />, headerClass: 'bg-indigo-50 border-b border-indigo-100', emptyText: 'No planned matings yet.' },
-                                    { key: 'mating', title: 'Currently In Mating', list: matingList, icon: <Hourglass size={16} className="text-sky-700" />, headerClass: 'bg-sky-50 border-b border-sky-100', emptyText: 'No animals currently mating.' },
-                                    { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={16} className="text-pink-700" />, headerClass: 'bg-pink-50 border-b border-pink-100', emptyText: 'No pregnant animals.' },
-                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Droplet size={16} className="text-violet-700" />, headerClass: 'bg-violet-50 border-b border-violet-100', emptyText: 'No nursing animals.' }
+                                    { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700 dark:text-indigo-300" />, headerClass: 'bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-900/40', emptyText: 'No planned matings yet.' },
+                                    { key: 'mating', title: 'Currently In Mating', list: matingList, icon: <Hourglass size={16} className="text-sky-700 dark:text-sky-300" />, headerClass: 'bg-sky-50 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-900/40', emptyText: 'No animals currently mating.' },
+                                    { key: 'pregnant', title: 'Pregnant', list: pregnantList, icon: <ScanHeart size={16} className="text-pink-700 dark:text-pink-300" />, headerClass: 'bg-pink-50 dark:bg-pink-900/20 border-b border-pink-100 dark:border-pink-900/40', emptyText: 'No pregnant animals.' },
+                                    { key: 'nursing', title: 'Nursing', list: nursingList, icon: <Droplet size={16} className="text-violet-700 dark:text-violet-300" />, headerClass: 'bg-violet-50 dark:bg-violet-900/20 border-b border-violet-100 dark:border-violet-900/40', emptyText: 'No nursing animals.' }
                                 ];
 
                                 return (
                                     <div className="space-y-4">
                                         {reproSections.map(section => (
-                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
+                                            <div key={section.key} className="border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden">
                                                 <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`repro_${section.key}`)}>
                                                     <div className="flex items-center gap-3">
                                                         {section.icon}
-                                                        <span className="font-semibold text-gray-800 text-base">{section.title}</span>
+                                                        <span className="font-semibold text-gray-800 dark:text-dark-text text-base">{section.title}</span>
                                                     </div>
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{section.list.length}</span>
-                                                        {collapsedMgmtGroups[`repro_${section.key}`] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
+                                                        <span className="text-sm font-bold text-gray-500 dark:text-dark-text-secondary bg-white/80 dark:bg-black/20 px-2.5 py-1 rounded-full">{section.list.length}</span>
+                                                        {collapsedMgmtGroups[`repro_${section.key}`] ? <ChevronDown size={18} className="text-gray-500 dark:text-dark-text-muted" /> : <ChevronUp size={18} className="text-gray-500 dark:text-dark-text-muted" />}
                                                     </div>
                                                 </div>
 
                                                 {!collapsedMgmtGroups[`repro_${section.key}`] && (
-                                                    <div className="p-2 space-y-1 bg-white">
+                                                    <div className="p-2 space-y-1 bg-white dark:bg-dark-card-bg">
                                                         {section.list.length === 0 ? (
-                                                            <div className="text-center text-sm text-gray-400 py-4">
+                                                            <div className="text-center text-sm text-gray-400 dark:text-dark-text-muted py-4">
                                                                 {section.emptyText}
                                                             </div>
                                                         ) : (
                                                             <>
-                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-border">
                                                                     <div className="col-span-2">Animal</div>
                                                                     <div>Planned / Mating Date</div>
                                                                     <div>Due Date / Birth Date</div>
@@ -4579,20 +4579,20 @@ useEffect(() => {
                     {(!collapsedMgmtSections['medical'] || !!view) && (
                         <div className="p-3 space-y-4">
                             {/* Enclosures sub-panel */}
-                            <div className="border border-orange-200 rounded-lg overflow-hidden">
-                                <div className="flex items-center justify-between p-3 bg-orange-50/60">
+                            <div className="border border-orange-200 dark:border-orange-900/40 rounded-lg overflow-hidden">
+                                <div className="flex items-center justify-between p-3 bg-orange-50/60 dark:bg-orange-900/20">
                                     <div className="flex items-center gap-3">
-                                        <Home size={16} className="text-orange-600" />
-                                        <span className="font-semibold text-gray-800 text-base">Enclosures</span>
-                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{healthEnclosures.length}</span>
+                                        <Home size={16} className="text-orange-600 dark:text-orange-400" />
+                                        <span className="font-semibold text-gray-800 dark:text-dark-text text-base">Enclosures</span>
+                                        <span className="text-sm font-bold text-gray-500 dark:text-dark-text-secondary bg-white/80 dark:bg-black/20 px-2.5 py-1 rounded-full">{healthEnclosures.length}</span>
                                     </div>
-                                    <button onClick={() => openEnclosureModal(null, { purpose: 'medical' })} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
+                                    <button onClick={() => openEnclosureModal(null, { purpose: 'medical' })} className="flex items-center gap-1 text-xs font-medium text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 bg-white dark:bg-dark-card-bg border border-orange-200 dark:border-orange-900/40 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> Add
                                     </button>
                                 </div>
                                 <div className="p-3">
                                     {healthEnclosures.length === 0
-                                        ? <div className="text-xs text-gray-400 text-center py-4">No medical/quarantine enclosures.</div>
+                                        ? <div className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-4">No medical/quarantine enclosures.</div>
                                         : (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                                 {healthEnclosures.map(enclosure => (
@@ -4605,34 +4605,34 @@ useEffect(() => {
                             </div>
                             {(() => {
                                 const healthSections = [
-                                    { key: 'quarantine', title: 'Quarantine', list: quarantineList, icon: <AlertTriangle size={16} className="text-orange-700" />, headerClass: 'bg-orange-50 border-b border-orange-100', emptyText: 'No animals in quarantine.' },
-                                    { key: 'treatment', title: 'In Treatment', list: treatmentList, icon: <Activity size={16} className="text-red-700" />, headerClass: 'bg-red-50 border-b border-red-100', emptyText: 'No animals currently in treatment.' },
+                                    { key: 'quarantine', title: 'Quarantine', list: quarantineList, icon: <AlertTriangle size={16} className="text-orange-700 dark:text-orange-300" />, headerClass: 'bg-orange-50 dark:bg-orange-900/20 border-b border-orange-100 dark:border-orange-900/40', emptyText: 'No animals in quarantine.' },
+                                    { key: 'treatment', title: 'In Treatment', list: treatmentList, icon: <Activity size={16} className="text-red-700 dark:text-red-300" />, headerClass: 'bg-red-50 dark:bg-red-900/20 border-b border-red-100 dark:border-red-900/40', emptyText: 'No animals currently in treatment.' },
                                 ];
 
                                 return (
                                     <div className="space-y-4">
                                         {healthSections.map(section => (
-                                            <div key={section.key} className="border border-gray-200 rounded-lg overflow-hidden">
+                                            <div key={section.key} className="border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden">
                                                 <div className={`flex items-center justify-between p-3 cursor-pointer ${section.headerClass}`} onClick={() => toggleGroup(`health_${section.key}`)}>
                                                     <div className="flex items-center gap-3">
                                                         {section.icon}
-                                                        <span className="font-semibold text-gray-800 text-base">{section.title}</span>
+                                                        <span className="font-semibold text-gray-800 dark:text-dark-text text-base">{section.title}</span>
                                                     </div>
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-bold text-gray-500 bg-white/80 px-2.5 py-1 rounded-full">{section.list.length}</span>
-                                                        {collapsedMgmtGroups[`health_${section.key}`] ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronUp size={18} className="text-gray-500" />}
+                                                        <span className="text-sm font-bold text-gray-500 dark:text-dark-text-secondary bg-white/80 dark:bg-black/20 px-2.5 py-1 rounded-full">{section.list.length}</span>
+                                                        {collapsedMgmtGroups[`health_${section.key}`] ? <ChevronDown size={18} className="text-gray-500 dark:text-dark-text-muted" /> : <ChevronUp size={18} className="text-gray-500 dark:text-dark-text-muted" />}
                                                     </div>
                                                 </div>
 
                                                 {!collapsedMgmtGroups[`health_${section.key}`] && (
-                                                    <div className="p-2 space-y-1 bg-white">
+                                                    <div className="p-2 space-y-1 bg-white dark:bg-dark-card-bg">
                                                         {section.list.length === 0 ? (
-                                                            <div className="text-center text-sm text-gray-400 py-4">
+                                                            <div className="text-center text-sm text-gray-400 dark:text-dark-text-muted py-4">
                                                                 {section.emptyText}
                                                             </div>
                                                         ) : (
                                                             <>
-                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
+                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-border">
                                                                     <div className="col-span-2">Animal</div>
                                                                     {section.key === 'quarantine' ? (
                                                                         <>
@@ -4809,35 +4809,35 @@ useEffect(() => {
         return (
             <div className="space-y-4">
                 {/* Search/Filter Bar */}
-                <div className="p-2 bg-gray-50 dark:bg-dark-surface rounded-lg flex flex-wrap items-center gap-2">
+                <div className="p-2 bg-gray-50 dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-lg flex flex-wrap items-center gap-2">
                     <div className="relative flex-grow">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                         <input 
                             type="text"
                             placeholder="Search enclosures..."
                             value={enclosureSearch}
                             onChange={e => setEnclosureSearch(e.target.value)}
-                            className="w-full pl-10 p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary"
+                            className="w-full pl-10 p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-primary focus:border-primary"
                         />
                     </div>
-                    <select value={enclosureStatusFilter} onChange={e => setEnclosureStatusFilter(e.target.value)} className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary">
+                    <select value={enclosureStatusFilter} onChange={e => setEnclosureStatusFilter(e.target.value)} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-primary focus:border-primary">
                         <option value="">All Statuses</option>
                         <option value="occupied">Occupied</option>
                         <option value="empty">Empty</option>
                     </select>
-                    <select value={enclosureBuildingFilter} onChange={e => { setEnclosureBuildingFilter(e.target.value); setEnclosureRoomFilter(''); }} className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary">
+                    <select value={enclosureBuildingFilter} onChange={e => { setEnclosureBuildingFilter(e.target.value); setEnclosureRoomFilter(''); }} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-primary focus:border-primary">
                         <option value="">All Buildings</option>
                         {locations.filter(l => l.type === 'building').map(building => ( <option key={building._id} value={building._id}>{building.name}</option> ))}
                     </select>
-                    <select value={enclosureRoomFilter} onChange={e => setEnclosureRoomFilter(e.target.value)} disabled={!enclosureBuildingFilter} className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed">
+                    <select value={enclosureRoomFilter} onChange={e => setEnclosureRoomFilter(e.target.value)} disabled={!enclosureBuildingFilter} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-primary focus:border-primary disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:cursor-not-allowed">
                         <option value="">All Rooms</option>
                         {enclosureBuildingFilter && locations .filter(l => l.type === 'room' && l.parentLocationId === enclosureBuildingFilter) .map(room => ( <option key={room._id} value={room._id}>{room.name}</option> )) }
                     </select>
-                    <select value={enclosureSpeciesFilter} onChange={e => setEnclosureSpeciesFilter(e.target.value)} className="p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-surface-hover focus:ring-primary focus:border-primary">
+                    <select value={enclosureSpeciesFilter} onChange={e => setEnclosureSpeciesFilter(e.target.value)} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-primary focus:border-primary">
                         <option value="">All Suitable Species</option>
                         {enclosureSpeciesLabels.map(species => ( <option key={species} value={species}>{species}</option> ))}
                     </select>
-                    <button onClick={() => setShowLocationManager(true)} className="p-2 text-sm border border-gray-300 rounded-lg flex items-center gap-1.5"> <Settings size={14} /> Manage Locations </button>
+                    <button onClick={() => setShowLocationManager(true)} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text-secondary dark:hover:bg-dark-surface-hover rounded-lg flex items-center gap-1.5"> <Settings size={14} /> Manage Locations </button>
                 </div>
                 {/* Main Content */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -5602,7 +5602,7 @@ useEffect(() => {
 
             {isListLikeView && !showArchiveScreen && (
                 // Filter bar
-                <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 dark:bg-dark-surface rounded-lg">
+                <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-lg">
                     <div className="flex flex-wrap items-center gap-2 flex-grow">
                         <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
                             <button onClick={() => {
@@ -5744,7 +5744,7 @@ useEffect(() => {
                         </div>
                     )}
                     <table className="min-w-full text-xs divide-y divide-gray-200">
-                        <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] sticky top-0 z-10">
+                        <thead className="bg-gray-50 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary uppercase text-[10px] sticky top-0 z-10 border-b dark:border-dark-text-muted">
                             <tr>
                                 <th className="px-4 py-2 text-center">
                                     <input
@@ -5800,27 +5800,27 @@ useEffect(() => {
                                                         <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
                                                     </div>
                                                     <div>
-                                                        <div className="font-medium text-gray-800 flex items-center gap-1.5 text-sm">
+                                                        <div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm">
                                                             <span className="cursor-pointer hover:underline" onClick={(e) => {e.stopPropagation(); onViewAnimal(animal);}}>
                                                                 {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
                                                             </span>
                                                             {animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}
                                                         </div>
-                                                        <div className="text-xs text-gray-500 font-mono">{animal.id_public}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-dark-text font-mono">{animal.id_public}</div>
                                                     </div>
                                                 </div>
                                             </td>
                                         )}
-                                        {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400">{getSpeciesLatinName(animal.species)}</div>}</td>}
-                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 font-mono">{animal.geneticCode}</div>}</td>}
-                                        {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
-                                        {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600">{animal.lifeStage || '—'}</td>}
-                                        {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
+                                        {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text">{getSpeciesLatinName(animal.species)}</div>}</td>}
+                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text font-mono">{animal.geneticCode}</div>}</td>}
+                                        {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
+                                        {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '—'}</td>}
+                                        {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>}
                                         {listViewColumns.health && <td className="px-3 py-1.5 text-gray-600 text-xs">{renderHealthColumnCell(animal)}</td>}
                                         {listViewColumns.birthdateAge && (
-                                            <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">
+                                            <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text whitespace-nowrap">
                                                 <div>{formatLocalDate(animal.birthDate)}</div>
-                                                <div className="text-xs text-gray-400">{ageStr}</div>
+                                                <div className="text-xs text-gray-400 dark:text-dark-text">{ageStr}</div>
                                             </td>
                                         )}
                                         {listViewColumns.breedingLines && (
@@ -5835,7 +5835,7 @@ useEffect(() => {
                                             </td>
                                         )}
                                         {listViewColumns.tags && (
-                                            <td className="px-3 py-1.5 text-gray-500">
+                                            <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">
                                                 {(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}
                                             </td>
                                         )}

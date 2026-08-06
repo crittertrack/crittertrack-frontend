@@ -349,7 +349,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
     return null;
   }
 
-  const bgColor = isUrgent ? 'bg-red-600 dark:bg-red-800' : 'bg-purple-600 dark:bg-dark-accent-purple';
+  const bgColor = isUrgent ? 'bg-red-600 dark:bg-red-800' : 'bg-purple-600 dark:bg-dark-accent-purple/60';
   const animationDuration = items.length * 20; // Match NewsTickerBanner speed
 
   const renderItem = (item) => (
