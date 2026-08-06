@@ -535,7 +535,7 @@ export function AppRoutes({
       } />
 
       {/* Resources Page — public, unauthenticated route */}
-      <Route path="/resources" element={<ResourcesPage API_BASE_URL={API_BASE_URL} />} />
+      <Route path="/resources" element={<ResourcesPage API_BASE_URL={API_BASE_URL} authToken={authToken} />} />
 
     </Routes>
     </Suspense>

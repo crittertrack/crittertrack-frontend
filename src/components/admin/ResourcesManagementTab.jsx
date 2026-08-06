@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { BookOpen, Plus, Trash2, Edit2, X, Loader2, Search, RefreshCw } from 'lucide-react';
+import { BookOpen, Plus, Trash2, Edit2, X, Loader2, Search, RefreshCw, Inbox, ExternalLink } from 'lucide-react';
 
 const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
+    const [activeTab, setActiveTab] = useState('resources'); // 'resources' | 'suggestions'
     const [resources, setResources] = useState([]);
     const [speciesOptions, setSpeciesOptions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+
+    const [suggestions, setSuggestions] = useState([]);
+    const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+    const [errorSuggestions, setErrorSuggestions] = useState(null);
 
     const emptyForm = { title: '', url: '', description: '', subject: '', language: '', species: [], tags: '' };
     const [showAddModal, setShowAddModal] = useState(false);
@@ -40,6 +45,41 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
             .then(res => setSpeciesOptions((res.data || []).map(s => s.name)))
             .catch(err => console.error('Error fetching species for resources form:', err));
     }, [authToken, API_BASE_URL]);
+
+    const fetchSuggestions = async () => {
+        setLoadingSuggestions(true);
+        setErrorSuggestions(null);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/admin/resource-suggestions`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setSuggestions(res.data);
+        } catch (err) {
+            console.error('Error fetching resource suggestions:', err);
+            setErrorSuggestions(err.response?.data?.error || 'Failed to fetch suggestions');
+        } finally {
+            setLoadingSuggestions(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!authToken) return;
+        fetchSuggestions();
+    }, [authToken, API_BASE_URL]);
+
+    const handleDeleteSuggestion = async (suggestion) => {
+        if (!window.confirm('Remove this suggestion from the list?')) return;
+        try {
+            await axios.delete(`${API_BASE_URL}/admin/resource-suggestions/${suggestion._id}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setSuggestions(prev => prev.filter(s => s._id !== suggestion._id));
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to delete suggestion');
+        }
+    };
+
+    const isUrl = (str) => /^https?:\/\//i.test(str.trim());
 
     const openAddModal = () => {
         setForm(emptyForm);
@@ -183,7 +223,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                     <BookOpen size={28} className="text-gray-700" />
                     <div>
@@ -191,16 +231,78 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
                         <p className="text-sm text-gray-500">Manage the external links shown on the public Resources page</p>
                     </div>
                 </div>
-                <div className="flex gap-2">
-                    <button onClick={openAddModal} className="flex items-center gap-1.5 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">
-                        <Plus size={16} /> Add Resource
+                {activeTab === 'resources' && (
+                    <div className="flex gap-2">
+                        <button onClick={openAddModal} className="flex items-center gap-1.5 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">
+                            <Plus size={16} /> Add Resource
+                        </button>
+                        <button onClick={fetchResources} disabled={loading} className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition">
+                            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                        </button>
+                    </div>
+                )}
+                {activeTab === 'suggestions' && (
+                    <button onClick={fetchSuggestions} disabled={loadingSuggestions} className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition">
+                        <RefreshCw size={16} className={loadingSuggestions ? 'animate-spin' : ''} />
                     </button>
-                    <button onClick={fetchResources} disabled={loading} className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition">
-                        <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                    </button>
-                </div>
+                )}
             </div>
 
+            <div className="flex gap-1 border-b border-gray-200 mb-4">
+                <button
+                    onClick={() => setActiveTab('resources')}
+                    className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${activeTab === 'resources' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                >
+                    Resources
+                </button>
+                <button
+                    onClick={() => setActiveTab('suggestions')}
+                    className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition flex items-center gap-1.5 ${activeTab === 'suggestions' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                >
+                    Suggestions
+                    {suggestions.length > 0 && (
+                        <span className="px-1.5 py-0.5 text-xs bg-red-100 text-red-700 rounded-full">{suggestions.length}</span>
+                    )}
+                </button>
+            </div>
+
+            {activeTab === 'suggestions' ? (
+                <div>
+                    {errorSuggestions && <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg">{errorSuggestions}</div>}
+                    {loadingSuggestions ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                            <Loader2 className="animate-spin mb-2" size={32} />
+                            <p>Loading suggestions...</p>
+                        </div>
+                    ) : suggestions.length === 0 ? (
+                        <div className="text-center py-16 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                            <Inbox size={40} className="mx-auto mb-2" />
+                            <p>No suggestions submitted yet.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {suggestions.map(s => (
+                                <div key={s._id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
+                                    <div className="min-w-0 flex-1">
+                                        {isUrl(s.text) ? (
+                                            <a href={s.text} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline break-all flex items-center gap-1">
+                                                {s.text} <ExternalLink size={12} className="flex-shrink-0" />
+                                            </a>
+                                        ) : (
+                                            <p className="text-sm text-gray-800 break-all">{s.text}</p>
+                                        )}
+                                        <p className="text-xs text-gray-400 mt-0.5">{new Date(s.createdAt).toLocaleString()}</p>
+                                    </div>
+                                    <button onClick={() => handleDeleteSuggestion(s)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg flex-shrink-0 ml-3" title="Dismiss">
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ) : (
+            <>
             <div className="relative mb-4 max-w-sm">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -306,6 +408,8 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
                         </div>
                     </div>
                 </div>
+            )}
+            </>
             )}
         </div>
     );

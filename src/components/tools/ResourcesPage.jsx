@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { BookOpen, Search, ExternalLink, X, Loader2, Tag, ChevronDown, ChevronUp, Mail } from 'lucide-react';
+import { BookOpen, Search, ExternalLink, X, Loader2, Tag, ChevronDown, ChevronUp, Send } from 'lucide-react';
 
-const ResourcesPage = ({ API_BASE_URL }) => {
+const ResourcesPage = ({ API_BASE_URL, authToken }) => {
     const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [speciesQuery, setSpeciesQuery] = useState('');
+    const [showSuggestForm, setShowSuggestForm] = useState(false);
+    const [suggestText, setSuggestText] = useState('');
+    const [suggestStatus, setSuggestStatus] = useState(null); // null | 'sending' | 'sent' | 'error'
     const [selectedSpecies, setSelectedSpecies] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState('');
@@ -74,6 +77,21 @@ const ResourcesPage = ({ API_BASE_URL }) => {
         setSelectedSpecies(prev => prev.filter(s => s !== species));
     };
 
+    const submitSuggestion = async () => {
+        if (!suggestText.trim()) return;
+        setSuggestStatus('sending');
+        try {
+            await axios.post(`${API_BASE_URL}/resource-suggestions`, { text: suggestText.trim() }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setSuggestText('');
+            setSuggestStatus('sent');
+        } catch (err) {
+            console.error('Failed to submit resource suggestion:', err);
+            setSuggestStatus('error');
+        }
+    };
+
     const toggleDescription = (id, e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -129,14 +147,44 @@ const ResourcesPage = ({ API_BASE_URL }) => {
                     </h1>
                     <p className="text-gray-600 dark:text-dark-text-secondary mt-1">A curated directory of external links for care, health, genetics, and more.</p>
                 </div>
-                <a
-                    href="mailto:CrittertrackOwner@gmail.com?subject=Resource%20Suggestion&body=I'd%20like%20to%20suggest%20a%20resource%20to%20add%3A%0D%0A%0D%0ATitle%3A%0D%0AURL%3A%0D%0ANotes%3A"
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-accent dark:bg-dark-accent hover:bg-accent/80 dark:hover:bg-dark-accent/80 text-white rounded-lg text-sm font-medium transition whitespace-nowrap"
-                >
-                    <Mail size={16} />
-                    Suggest a Resource
-                </a>
+                {authToken && (
+                    <button
+                        type="button"
+                        onClick={() => { setShowSuggestForm(v => !v); setSuggestStatus(null); }}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-accent dark:bg-dark-accent hover:bg-accent/80 dark:hover:bg-dark-accent/80 text-white rounded-lg text-sm font-medium transition whitespace-nowrap"
+                    >
+                        <Send size={16} />
+                        Suggest a Resource
+                    </button>
+                )}
             </div>
+
+            {authToken && showSuggestForm && (
+                <div className="mb-6 -mt-3 p-3 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface">
+                    <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1.5">
+                        Paste a link (or describe a resource) and we'll review it for the directory.
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                        <input
+                            type="text"
+                            value={suggestText}
+                            onChange={e => setSuggestText(e.target.value)}
+                            placeholder="https://..."
+                            className="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-sm bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                        />
+                        <button
+                            type="button"
+                            onClick={submitSuggestion}
+                            disabled={!suggestText.trim() || suggestStatus === 'sending'}
+                            className="px-4 py-2 bg-primary hover:bg-primary-dark dark:bg-dark-primary dark:hover:bg-dark-primary-hover text-white rounded-lg text-sm font-medium transition disabled:opacity-50 whitespace-nowrap"
+                        >
+                            {suggestStatus === 'sending' ? <Loader2 size={16} className="animate-spin" /> : 'Send'}
+                        </button>
+                    </div>
+                    {suggestStatus === 'sent' && <p className="text-xs text-green-600 mt-1.5">Thanks! Your suggestion was submitted.</p>}
+                    {suggestStatus === 'error' && <p className="text-xs text-red-500 mt-1.5">Something went wrong. Please try again.</p>}
+                </div>
+            )}
 
             {/* Search */}
             <div className="relative mb-3">
