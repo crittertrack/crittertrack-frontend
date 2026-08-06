@@ -87,8 +87,10 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
 
             // Some entry points (e.g. Archive) pass a slim projection that omits most fields —
             // fetch the full record in the background so the detail view isn't missing data.
+            // Use /any/ since this is also the entry point for viewing pedigree ancestors
+            // and other public animals the current user doesn't own.
             if (animal.id_public && authToken) {
-                axios.get(`${API_BASE_URL}/animals/${animal.id_public}`, {
+                axios.get(`${API_BASE_URL}/animals/any/${animal.id_public}`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 }).then(res => {
                     setAnimalToView(prev => (prev && prev.id_public === animal.id_public) ? res.data : prev);
@@ -400,7 +402,9 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         // Skip if we already fetched full data for this animal id
         if (lastFetchedIdRef.current === animalToView.id_public) return;
         lastFetchedIdRef.current = animalToView.id_public; // Update ref before fetch
-        axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
+        // Use /any/ since animalToView is often a pedigree ancestor owned by someone else —
+        // the ownership-only endpoint would 404 for those and skip the refresh entirely.
+        axios.get(`${API_BASE_URL}/animals/any/${animalToView.id_public}`, {
             headers: { Authorization: `Bearer ${authToken}` }
         }).then(res => {
             setAnimalToView(res.data);
