@@ -15,8 +15,6 @@ module.exports = {
   'dark-card-bg': '#2A2830', // Elevated card/container surface — kept distinct from dark-bg so cards don't turn pitch black too.
   'dark-surface': '#66666b',
   'dark-surface-hover': '#2D2B34',
-  // Raised/interactive surface (cards, inputs, dropdowns) sitting on top of dark-surface bars — a touch lighter for layering.
-  'dark-card-surface': '#7a7a7f',
   'dark-border': '#35343D',
   'dark-primary': '#7eaab3',
   'dark-primary-hover': '#6f949d',
