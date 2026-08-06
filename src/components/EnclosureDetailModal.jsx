@@ -471,14 +471,14 @@ const EnclosureDetailModal = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex-shrink-0 flex flex-wrap gap-0.5 px-4 pt-2 pb-0 bg-gray-50 dark:bg-dark-surface border-b dark:border-dark-border">
+                <div className="flex-shrink-0 flex flex-wrap gap-0.5 px-4 pt-2 pb-0 bg-gray-50 dark:bg-dark-card-bg border-b dark:border-dark-text-muted">
                     {TABS.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg border-t border-l border-r transition-colors whitespace-nowrap ${
                                 activeTab === tab.id
-                                    ? 'bg-white dark:bg-dark-surface text-primary border-gray-200 dark:border-dark-border -mb-[1px]'
+                                    ? 'bg-white dark:bg-dark-card-bg text-primary dark:text-dark-text border-gray-200 dark:border-dark-text-muted -mb-[1px]'
                                     : 'bg-transparent text-gray-500 dark:text-dark-text-muted border-transparent hover:text-gray-700 dark:hover:text-dark-text'
                             }`}
                         >

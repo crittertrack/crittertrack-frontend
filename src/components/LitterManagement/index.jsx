@@ -18,7 +18,7 @@ const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-co
     const [imageError, setImageError] = React.useState(false);
     const [imageSrc, setImageSrc] = React.useState(src);
     React.useEffect(() => { setImageSrc(src); setImageError(false); }, [src]);
-    if (!imageSrc || imageError) return <Cat size={iconSize} className="text-gray-400" />;
+    if (!imageSrc || imageError) return <Cat size={iconSize} className="text-gray-400 dark:text-dark-text-muted" />;
     return <img src={imageSrc} alt={alt} className={className} onError={() => setImageError(true)} loading="lazy" />;
 };
 
@@ -56,7 +56,7 @@ const litterAge = (birthDate) => {
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-8">
     <Loader2 className="animate-spin text-primary-dark mr-2" size={24} />
-    <span className="text-gray-600">Loading...</span>
+    <span className="text-gray-600 dark:text-dark-text-secondary">Loading...</span>
   </div>
 );
 
@@ -287,24 +287,24 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-center border-b p-4 flex-shrink-0">
-                    <h3 className="text-lg font-bold text-gray-800">Select Species</h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={22} /></button>
+                <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">Select Species</h3>
+                    <button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={22} /></button>
                 </div>
 
                 {/* Search + Category */}
-                <div className="p-4 border-b flex-shrink-0 space-y-3">
+                <div className="p-4 border-b dark:border-dark-text-muted flex-shrink-0 space-y-3">
                     <div className="relative">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                         <input
                             type="text"
                             placeholder="Search by name or latin name..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             autoFocus
-                            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-sm bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                         />
                     </div>
                     <div className="flex flex-wrap gap-1.5">
@@ -314,7 +314,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                 type="button"
                                 onClick={() => setCat(c)}
                                 className={`px-3 py-1 text-xs font-semibold rounded-full transition ${
-                                    cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                                 }`}
                             >
                                 {c}
@@ -331,7 +331,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                         </p>
                     )}
                     {filtered.length === 0 ? (
-                        <p className="text-center text-gray-500 py-8">No species found.</p>
+                        <p className="text-center text-gray-500 dark:text-dark-text-muted py-8">No species found.</p>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {filtered.map((s, idx) => {
@@ -341,7 +341,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                 return (
                                     <React.Fragment key={s._id || s.name}>
                                         {showDivider && (
-                                            <div className="col-span-full border-t border-gray-200 my-1" />
+                                            <div className="col-span-full border-t border-gray-200 dark:border-dark-text-muted my-1" />
                                         )}
                                         <div className="relative group">
                                             <button
@@ -352,17 +352,17 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                                         ? 'border-amber-300 bg-amber-50 hover:bg-amber-100'
                                                         : s.isDefault
                                                         ? 'border-primary bg-primary/10 hover:bg-primary/20'
-                                                        : 'border-gray-200 bg-white hover:border-primary/50 hover:bg-gray-50'
+                                                        : 'border-gray-200 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg hover:border-primary/50 hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
                                                 }`}
                                             >
-                                                <span className="font-medium text-sm text-gray-800 leading-tight pr-5 line-clamp-1">
+                                                <span className="font-medium text-sm text-gray-800 dark:text-dark-text leading-tight pr-5 line-clamp-1">
                                                     {s.name}
                                                 </span>
                                                 {s.latinName && (
-                                                    <span className="text-xs italic text-gray-500 mt-0.5 leading-tight line-clamp-1">{s.latinName}</span>
+                                                    <span className="text-xs italic text-gray-500 dark:text-dark-text-muted mt-0.5 leading-tight line-clamp-1">{s.latinName}</span>
                                                 )}
                                                 {s.category && (
-                                                    <span className="absolute bottom-1 left-2 text-gray-400">
+                                                    <span className="absolute bottom-1 left-2 text-gray-400 dark:text-dark-text-muted">
                                                         {s.category === 'Mammal' && <Cat size={12} />}
                                                         {s.category === 'Reptile' && <Turtle size={12} />}
                                                         {s.category === 'Bird' && <Bird size={12} />}
@@ -390,9 +390,9 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                 </div>
 
                 {/* Footer */}
-                <div className="border-t p-3 flex-shrink-0 flex justify-between items-center">
-                    <span className="text-xs text-gray-400">{filtered.length} species{favCount > 0 ? ` · ${favCount} favourited` : ''}</span>
-                    <button onClick={onClose} className="text-sm text-gray-500 hover:text-gray-800 transition">Cancel</button>
+                <div className="border-t dark:border-dark-text-muted p-3 flex-shrink-0 flex justify-between items-center">
+                    <span className="text-xs text-gray-400 dark:text-dark-text-muted">{filtered.length} species{favCount > 0 ? ` · ${favCount} favourited` : ''}</span>
+                    <button onClick={onClose} className="text-sm text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text transition">Cancel</button>
                 </div>
             </div>
         </div>
@@ -432,25 +432,25 @@ const ParentSearchModal = ({
         
         return (
             <div 
-                className="flex items-center space-x-3 p-3 border-b hover:bg-gray-50 cursor-pointer" 
+                className="flex items-center space-x-3 p-3 border-b dark:border-dark-text-muted hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" 
                 onClick={() => onSelect(animal)}
             >
                 {/* Thumbnail */}
-                <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} />
                 </div>
                 
                 {/* Info */}
                 <div className="flex-grow">
-                    <p className="font-semibold text-gray-800">
+                    <p className="font-semibold text-gray-800 dark:text-dark-text">
                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                     </p>
-                    <p className="text-xs text-gray-500">{animal.id_public}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</p>
+                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                         {animal.species} &bull; {animal.gender} &bull; {animal.status || 'Unknown'}
                     </p>
                     {getSpeciesLatinName(animal.species) && (
-                        <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
+                        <p className="text-xs italic text-gray-500 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</p>
                     )}
                 </div>
                 
@@ -560,19 +560,19 @@ const ParentSearchModal = ({
 
         return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
-                <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">{title} Selector</h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+            <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
+                <div className="flex justify-between items-center border-b dark:border-dark-text-muted pb-3 mb-4">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">{title} Selector</h3>
+                    <button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={24} /></button>
                 </div>
 
                 {/* Scope Toggle + Search Bar (Manual Search) */}
                 <div className="mb-3">
                     <div className="flex items-center space-x-2 mb-2">
-                        <span className="text-sm font-medium text-gray-600">Search Scope:</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Search Scope:</span>
                         {['local','global','both'].map(s => (
                             <button key={s} type="button" onClick={() => setScope(s)}
-                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>
                                 {s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}
                             </button>
                         ))}
@@ -583,7 +583,7 @@ const ParentSearchModal = ({
                             placeholder={`Search by Name or ID (e.g., Minnie or CT2468)...`}
                             value={searchTerm}
                             onChange={(e) => { setSearchTerm(e.target.value); setHasSearched(false); }}
-                            className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                            className="flex-grow p-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-primary focus:border-primary transition"
                         />
                         <button
                             onClick={handleSearch}
@@ -599,30 +599,30 @@ const ParentSearchModal = ({
                 <div className="flex-grow overflow-y-auto space-y-4">
                     {/* Local Results */}
                     {loadingLocal ? <LoadingSpinner message="Searching your animals..." /> : localAnimals.length > 0 && (
-                        <div className="border p-3 rounded-lg bg-white shadow-sm">
-                            <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>
+                        <div className="border dark:border-dark-text-muted p-3 rounded-lg bg-white dark:bg-dark-card-bg shadow-sm">
+                            <h4 className="font-bold text-gray-700 dark:text-dark-text-secondary mb-2 border-b dark:border-dark-text-muted pb-1">Your Animals ({localAnimals.length})</h4>
                             {localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={false} />)}
                         </div>
                     )}
                     
                     {/* Global Results */}
                     {loadingGlobal ? <LoadingSpinner message="Searching global animals..." /> : globalAnimals.length > 0 && (
-                        <div className="border p-3 rounded-lg bg-white shadow-sm">
-                            <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Global Display Animals ({globalAnimals.length})</h4>
+                        <div className="border dark:border-dark-text-muted p-3 rounded-lg bg-white dark:bg-dark-card-bg shadow-sm">
+                            <h4 className="font-bold text-gray-700 dark:text-dark-text-secondary mb-2 border-b dark:border-dark-text-muted pb-1">Global Display Animals ({globalAnimals.length})</h4>
                             {globalAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={true} />)}
                         </div>
                     )}
                     
                     {/* Updated no results check */}
                     {hasSearched && searchTerm.trim().length >= 1 && localAnimals.length === 0 && globalAnimals.length === 0 && !loadingLocal && !loadingGlobal && (
-                        <p className="text-center text-gray-500 py-4">No animals found matching your search term or filters.</p>
+                        <p className="text-center text-gray-500 dark:text-dark-text-muted py-4">No animals found matching your search term or filters.</p>
                     )}
                 </div>
 
-                <div className="mt-4 pt-4 border-t">
+                <div className="mt-4 pt-4 border-t dark:border-dark-text-muted">
                     <button 
                         onClick={() => onSelect(null)} 
-                        className="w-full text-sm text-gray-500 hover:text-red-500 transition"
+                        className="w-full text-sm text-gray-500 dark:text-dark-text-muted hover:text-red-500 transition"
                     >
                         Clear {title} ID
                     </button>
@@ -2291,9 +2291,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     }, { litters: 0, males: 0, females: 0, unknown: 0 });
 
     return (
-        <div className="w-full max-w-7xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted p-3 sm:p-6 rounded-xl shadow-lg">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
+                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center">
                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management
                 </h2>
                 <div className="flex gap-2 flex-wrap">
@@ -2305,7 +2305,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                     {/* + Mating / + Litter — grouped so they never split across rows */}
-                    <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                    <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted shadow-sm">
                         {/* Mating button */}
                         <button
                             onClick={() => {
@@ -2313,7 +2313,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddMatingForm(!showAddMatingForm);
                                 if (showAddMatingForm) resetMatingForm();
                             }}
-                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors border-r border-gray-200 whitespace-nowrap ${showAddMatingForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors border-r border-gray-200 dark:border-dark-text-muted whitespace-nowrap ${showAddMatingForm ? 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
                             title="Record a planned mating"
                         >
                             {showAddMatingForm ? <X size={14} /> : <Plus size={14} />}
@@ -2345,7 +2345,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddForm(!showAddForm);
                             }}
                             data-tutorial-target="new-litter-btn"
-                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
                         >
                             {showAddForm ? <X size={14} /> : <Plus size={14} />}
                             <span>Litter</span>
@@ -2354,26 +2354,26 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 </div>
             </div>
 
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mb-4 sm:mb-6 pl-0.5">
-                <span><span className="font-semibold text-gray-700">{litterStats.litters}</span> Litters</span>
-                <span className="border-l border-gray-200 pl-4"><span className="font-semibold text-blue-600">{litterStats.males}</span> Males</span>
-                <span className="border-l border-gray-200 pl-4"><span className="font-semibold text-pink-500">{litterStats.females}</span> Females</span>
-                <span className="border-l border-gray-200 pl-4"><span className="font-semibold text-gray-500">{litterStats.unknown}</span> Unknown</span>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-dark-text-muted mb-4 sm:mb-6 pl-0.5">
+                <span><span className="font-semibold text-gray-700 dark:text-dark-text-secondary">{litterStats.litters}</span> Litters</span>
+                <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-blue-600 dark:text-blue-400">{litterStats.males}</span> Males</span>
+                <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-pink-500 dark:text-pink-400">{litterStats.females}</span> Females</span>
+                <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-gray-500 dark:text-dark-text-muted">{litterStats.unknown}</span> Unknown</span>
             </div>
 
             {loading && litters.length === 0 && (
                 /* Skeleton litter cards ? shown only until first fetch completes */
                 <div className="space-y-3 animate-pulse mt-2">
                     {[0,1,2,3].map(i => (
-                        <div key={i} className="border border-gray-200 rounded-xl p-4">
+                        <div key={i} className="border border-gray-200 dark:border-dark-text-muted rounded-xl p-4">
                             <div className="flex items-center justify-between mb-3">
-                                <div className="h-5 w-40 bg-gray-200 rounded" />
-                                <div className="h-5 w-20 bg-gray-200 rounded" />
+                                <div className="h-5 w-40 bg-gray-200 dark:bg-dark-surface rounded" />
+                                <div className="h-5 w-20 bg-gray-200 dark:bg-dark-surface rounded" />
                             </div>
                             <div className="grid grid-cols-3 gap-3">
-                                <div className="h-4 bg-gray-100 rounded" />
-                                <div className="h-4 bg-gray-100 rounded" />
-                                <div className="h-4 bg-gray-100 rounded" />
+                                <div className="h-4 bg-gray-100 dark:bg-dark-surface-hover rounded" />
+                                <div className="h-4 bg-gray-100 dark:bg-dark-surface-hover rounded" />
+                                <div className="h-4 bg-gray-100 dark:bg-dark-surface-hover rounded" />
                             </div>
                         </div>
                     ))}
@@ -2383,9 +2383,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             {/* Create/Edit Litter Modal */}
             {showAddForm && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-                        <div className="flex justify-between items-center border-b p-4">
-                            <h3 className="text-xl font-bold text-gray-800">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
+                    <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+                        <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4">
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
                             <button 
                                 onClick={() => {
                                     setShowAddForm(false);
@@ -2395,7 +2395,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     setSelectedDamAnimal(null);
                                     setShowSpeciesPicker(false);
                                 }}
-                                className="text-gray-500 hover:text-gray-800"
+                                className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"
                             >
                                 <X size={24} />
                             </button>
@@ -2405,10 +2405,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} id="litter-form" className="space-y-4">
                                 {/* Litter Photos ? top of form, always visible for born litters */}
                                 {(editingLitter ? (() => { const tl = litters.find(l => l._id === editingLitter || l.litterId_backend === editingLitter); return tl && !tl.isPlanned; })() : true) && (
-                                    <div className="mb-2 p-4 border border-amber-200 rounded-lg bg-amber-50">
-                                        <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <div className="mb-2 p-4 border border-amber-200 dark:border-amber-800/40 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                                        <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2">
                                             <Camera size={16} className="inline-block align-middle mr-1" /> Litter Photos
-                                            <span className="text-xs font-normal text-gray-400">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
+                                            <span className="text-xs font-normal text-gray-400 dark:text-dark-text-muted">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
                                         </h4>
 
                                         {/* Thumbnail grid */}
@@ -2416,7 +2416,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             litterImages.length > 0 && (
                                                 <div className="flex flex-wrap gap-2 mb-3">
                                                     {litterImages.map((img, idx) => (
-                                                        <div key={img.r2Key || idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                                                        <div key={img.r2Key || idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted group">
                                                             <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
                                                             {img.r2Key === '__uploading__' ? (
                                                                 <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
@@ -2438,7 +2438,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             pendingLitterImages.length > 0 && (
                                                 <div className="flex flex-wrap gap-2 mb-3">
                                                     {pendingLitterImages.map((item, idx) => (
-                                                        <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                                                        <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted group">
                                                             <img src={item.previewUrl} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
                                                             <button
                                                                 type="button"
@@ -2478,79 +2478,79 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 {litterImageUploading ? <><Loader2 size={14} className="inline-block align-middle animate-spin mr-1" />Uploading?</> : '+ Add Photo'}
                                             </label>
                                         )}
-                                        <p className="text-xs text-gray-400 mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : 'Photos will be uploaded when you save the litter.'}</p>
+                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : 'Photos will be uploaded when you save the litter.'}</p>
                                     </div>
                                 )}
 
                                 {/* Auto-assigned CTL-ID (read-only) */}
                                 {editingLitter && editingLitter.litter_id_public && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                             System Litter ID (CTL-ID)
                                         </label>
                                         <input
                                             type="text"
                                             value={editingLitter.litter_id_public}
                                             disabled
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-mono"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary font-mono"
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">Auto-assigned for system linkage</p>
+                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Auto-assigned for system linkage</p>
                                     </div>
                                 )}
                                 
                                 {/* Litter Name - Full Width */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                         Litter Name/ID
                                     </label>
                                     <input
                                         type="text"
                                         value={formData.breedingPairCodeName}
                                         onChange={(e) => setFormData({...formData, breedingPairCodeName: e.target.value})}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                                         placeholder="e.g., Summer 2025 Litter A, Disney's Hakuna Matata"
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">Your custom name for this breeding pair</p>
+                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Your custom name for this breeding pair</p>
                                 </div>
 
                                 {/* Species Selection */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                         Species {!editingLitter && <span className="text-red-500">*</span>}
-                                        {editingLitter && <span className="ml-1 text-xs text-gray-400 font-normal">(locked ? cannot change on edit)</span>}
+                                        {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked ? cannot change on edit)</span>}
                                     </label>
                                     <button
                                         type="button"
                                         onClick={() => !editingLitter && setShowSpeciesPicker(true)}
                                         disabled={!!editingLitter}
-                                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-left transition focus:ring-2 focus:ring-primary focus:border-transparent ${
+                                        className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-left transition focus:ring-2 focus:ring-primary focus:border-transparent ${
                                             editingLitter
-                                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed opacity-75'
-                                                : 'bg-white hover:bg-gray-50'
+                                                ? 'bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted cursor-not-allowed opacity-75'
+                                                : 'bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
                                         }`}
                                     >
                                         {formData.species ? (
-                                            <span className="font-medium text-gray-800">{formData.species}</span>
+                                            <span className="font-medium text-gray-800 dark:text-dark-text">{formData.species}</span>
                                         ) : (
-                                            <span className="text-gray-400">Click to select species...</span>
+                                            <span className="text-gray-400 dark:text-dark-text-muted">Click to select species...</span>
                                         )}
                                     </button>
-                                    {!editingLitter && <p className="text-xs text-gray-500 mt-1">Choose species to filter the sire &amp; dam search</p>}
+                                    {!editingLitter && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Choose species to filter the sire &amp; dam search</p>}
                                 </div>
 
                                 {/* Sire & Dam Selection */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* Sire Selection */}
                                     <div data-tutorial-target="sire-dam-section">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                             Sire (Father) {!editingLitter && <span className="text-red-500">*</span>}
-                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 font-normal">(locked)</span>}
+                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked)</span>}
                                         </label>
                                         <button
                                             type="button"
                                             onClick={() => !editingLitter && setModalTarget('sire-litter')}
                                             disabled={!!editingLitter || !formData.species}
-                                            className={`w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50'}`}
+                                            className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
                                         >
                                             {formData.sireId_public ? (
                                                 <div className="flex items-center justify-between">
@@ -2558,31 +2558,31 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         <div className="font-medium">
                                                             {myAnimals.find(a => a.id_public === formData.sireId_public)?.name || selectedSireAnimal?.name || 'Unknown'}
                                                         </div>
-                                                        <div className="text-xs text-gray-500">
+                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">
                                                             {formData.sireId_public}
                                                         </div>
                                                     </div>
                                                     {!myAnimals.find(a => a.id_public === formData.sireId_public) && selectedSireAnimal && (
-                                                        <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
+                                                        <span className="text-xs text-black bg-primary dark:bg-dark-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
                                                     )}
                                                 </div>
                                             ) : (
-                                                <div className="text-gray-400">{formData.species ? 'Select Sire...' : 'Select species first'}</div>
+                                                <div className="text-gray-400 dark:text-dark-text-muted">{formData.species ? 'Select Sire...' : 'Select species first'}</div>
                                             )}
                                         </button>
                                     </div>
 
                                     {/* Dam Selection */}
                                     <div data-tutorial-target="sire-dam-section">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                             Dam (Mother) {!editingLitter && <span className="text-red-500">*</span>}
-                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 font-normal">(locked)</span>}
+                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked)</span>}
                                         </label>
                                         <button
                                             type="button"
                                             onClick={() => !editingLitter && setModalTarget('dam-litter')}
                                             disabled={!!editingLitter || !formData.species}
-                                            className={`w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50'}`}
+                                            className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
                                         >
                                             {formData.damId_public ? (
                                                 <div className="flex items-center justify-between">
@@ -2590,24 +2590,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         <div className="font-medium">
                                                             {myAnimals.find(a => a.id_public === formData.damId_public)?.name || selectedDamAnimal?.name || 'Unknown'}
                                                         </div>
-                                                        <div className="text-xs text-gray-500">
+                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted">
                                                             {formData.damId_public}
                                                         </div>
                                                     </div>
                                                     {!myAnimals.find(a => a.id_public === formData.damId_public) && selectedDamAnimal && (
-                                                        <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
+                                                        <span className="text-xs text-black bg-primary dark:bg-dark-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
                                                     )}
                                                 </div>
                                             ) : (
-                                                <div className="text-gray-400">{formData.species ? 'Select Dam...' : 'Select species first'}</div>
+                                                <div className="text-gray-400 dark:text-dark-text-muted">{formData.species ? 'Select Dam...' : 'Select species first'}</div>
                                             )}
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* Breeding Information */}
-                                <div className="mb-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
-                                    <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
+                                <div className="mb-6 p-4 border border-purple-200 dark:border-purple-800/40 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                                    <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-4 flex items-center">
                                         <Dna size={18} className="inline-block align-middle text-purple-600 mr-2 flex-shrink-0" />Breeding Information
                                     </h4>
                                     
@@ -2620,7 +2620,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <select
                                                 value={formData.breedingMethod || 'Unknown'}
                                                 onChange={(e) => setFormData({...formData, breedingMethod: e.target.value})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                             >
                                                 <option value="Natural">Natural</option>
                                                 <option value="AI">Artificial Insemination</option>
@@ -2631,13 +2631,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* Breeding Condition */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                 Breeding Condition
                                             </label>
                                             <select
                                                 value={formData.breedingConditionAtTime || ''}
                                                 onChange={(e) => setFormData({...formData, breedingConditionAtTime: e.target.value})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                             >
                                                 <option value="">Select Condition...</option>
                                                 <option value="Good">Good</option>
@@ -2648,13 +2648,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* Outcome Status */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                 Breeding Outcome
                                             </label>
                                             <select
                                                 value={formData.outcome || 'Unknown'}
                                                 onChange={(e) => setFormData({...formData, outcome: e.target.value})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                             >
                                                 <option value="Successful">Successful</option>
                                                 <option value="Unsuccessful">Unsuccessful</option>
@@ -2665,7 +2665,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* Pregnancy Lost Checkbox - only show for mated litters without birth date */}
                                         {formData.matingDate && !formData.birthDate && (
                                             <div className="col-span-full">
-                                                <label className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition">
+                                                <label className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-lg cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition">
                                                     <input
                                                         type="checkbox"
                                                         checked={formData.pregnancyLost || false}
@@ -2677,7 +2677,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         })}
                                                         className="form-checkbox h-5 w-5 text-amber-600 rounded focus:ring-amber-500"
                                                     />
-                                                    <span className="text-sm font-medium text-gray-700">
+                                                    <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
                                                         Pregnancy confirmed but no litter produced
                                                     </span>
                                                 </label>
@@ -2685,13 +2685,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 {formData.pregnancyLost && (
                                                     <div className="mt-3 space-y-3 pl-7">
                                                         <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                                 Reason
                                                             </label>
                                                             <select
                                                                 value={formData.pregnancyLostReason || 'Unknown'}
                                                                 onChange={(e) => setFormData({...formData, pregnancyLostReason: e.target.value})}
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                                                             >
                                                                 <option value="Cannibalized">Cannibalized (mom ate litter)</option>
                                                                 <option value="All Stillborn">All Stillborn</option>
@@ -2700,7 +2700,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             </select>
                                                         </div>
                                                         <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                                 Notes (optional)
                                                             </label>
                                                             <textarea
@@ -2708,7 +2708,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 onChange={(e) => setFormData({...formData, pregnancyLostNotes: e.target.value})}
                                                                 placeholder="Additional details about the pregnancy loss..."
                                                                 rows={2}
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
                                                             />
                                                         </div>
                                                     </div>
@@ -2720,7 +2720,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         {/* Mating Date */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                 Mating Date
                                             </label>
                                             <DatePicker
@@ -2729,12 +2729,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 maxDate={new Date()}
                                                 className="px-3 py-2"
                                             />
-                                            <p className="text-xs text-gray-400 mt-1">Use + Mating to schedule a future mating</p>
+                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Use + Mating to schedule a future mating</p>
                                         </div>
 
                                         {/* Expected Due Date */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                 Expected Due Date
                                             </label>
                                             <DatePicker
@@ -2742,18 +2742,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 onChange={(e) => setFormData({...formData, expectedDueDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">Optional — shows on calendar</p>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Optional — shows on calendar</p>
                                         </div>
 
                                         {/* Birth Method */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                 Birth Method
                                             </label>
                                             <select
                                                 value={formData.birthMethod || ''}
                                                 onChange={(e) => setFormData({...formData, birthMethod: e.target.value})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                             >
                                                 <option value="">Select Method...</option>
                                                 <option value="Natural">Natural</option>
@@ -2767,16 +2767,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 </div>
 
                                 {/* Birth Date & Offspring Counts */}
-                                <div className="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
-                                    <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
+                                <div className="mb-6 p-4 border border-blue-200 dark:border-blue-800/40 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                                    <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-4 flex items-center">
                                         <Baby size={18} className="inline-block align-middle text-blue-600 mr-2 flex-shrink-0" />Birth & Offspring Details
                                     </h4>
 
                                     {/* Row 1: Dates */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Birth Date <span className="text-xs text-gray-400 font-normal">(optional)</span>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                Birth Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(optional)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.birthDate}
@@ -2786,8 +2786,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Weaning Date <span className="text-xs text-gray-400 font-normal">(optional — shows on calendar)</span>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+                                                Weaning Date <span className="text-xs text-gray-400 dark:text-dark-text-muted font-normal">(optional — shows on calendar)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.weaningDate || ''}
@@ -2802,22 +2802,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                                         {/* Total Born - read-only, summed from M+F+U */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                 Total Born
                                             </label>
                                             <input
                                                 type="number"
                                                 value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
                                                 readOnly
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-not-allowed font-semibold"
+                                                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
                                                 placeholder="0"
                                             />
-                                            <p className="text-xs text-gray-400 mt-1">Auto-calculated from M + F + U</p>
+                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
                                         </div>
 
                                         {/* Male Count */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Males</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Males</label>
                                             <input
                                                 type="number"
                                                 value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
@@ -2827,16 +2827,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     const u = formData.unknownCount || 0;
                                                     setFormData({...formData, maleCount: v, litterSizeBorn: (v || 0) + f + u || null});
                                                 }}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                 placeholder="0"
                                                 min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length || 0}
                                             />
-                                            {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">⚠ {lm} male{lm > 1 ? 's' : ''} linked — can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
+                                            {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">⚠ {lm} male{lm > 1 ? 's' : ''} linked — can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
                                         </div>
 
                                         {/* Female Count */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Females</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Females</label>
                                             <input
                                                 type="number"
                                                 value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
@@ -2846,16 +2846,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     const u = formData.unknownCount || 0;
                                                     setFormData({...formData, femaleCount: v, litterSizeBorn: m + (v || 0) + u || null});
                                                 }}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                 placeholder="0"
                                                 min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length || 0}
                                             />
-                                            {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">⚠ {lf} female{lf > 1 ? 's' : ''} linked — can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
+                                            {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">⚠ {lf} female{lf > 1 ? 's' : ''} linked — can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
                                         </div>
 
                                         {/* Unknown/Intersex Count */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Unknown / Intersex</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unknown / Intersex</label>
                                             <input
                                                 type="number"
                                                 value={typeof formData.unknownCount === 'number' ? formData.unknownCount : (formData.unknownCount || '')}
@@ -2865,11 +2865,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     const f = formData.femaleCount || 0;
                                                     setFormData({...formData, unknownCount: v, litterSizeBorn: m + f + (v || 0) || null});
                                                 }}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                 placeholder="0"
                                                 min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length || 0}
                                             />
-                                            {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">⚠ {lu} unknown linked — can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 mt-1">{lu} unknown linked</p>) : null; })()}
+                                            {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">⚠ {lu} unknown linked — can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{lu} unknown linked</p>) : null; })()}
                                         </div>
                                     </div>
 
@@ -2877,13 +2877,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <div className="space-y-4">
                                         {/* Stillborn - matching Total Born layout */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                                                 Stillborn (Born dead)
                                             </label>
                                             
                                             {/* Checkbox to extract from total counts */}
                                             <div className="mb-3">
-                                                <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
+                                                <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary cursor-pointer">
                                                     <input
                                                         type="checkbox"
                                                         checked={formData.extractStillbornFromTotal || false}
@@ -2919,11 +2919,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 }
                                                             });
                                                         }}
-                                                        className="rounded border-gray-300 text-primary focus:ring-primary"
+className="rounded border-gray-300 dark:border-dark-text-muted text-primary focus:ring-primary"
                                                     />
                                                     <span>Extract stillborn from total counts (reduce M/F/U counts by stillborn amounts)</span>
                                                 </label>
-                                                <p className="text-xs text-gray-400 mt-1 ml-6">
+                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1 ml-6">
                                                     When enabled, stillborn will be subtracted from the gender counts above, showing only live-born offspring.
                                                 </p>
                                             </div>
@@ -2931,22 +2931,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                                 {/* Total Stillborn - read-only, summed from M+F+U */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                         Total Stillborn
                                                     </label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
                                                         readOnly
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-not-allowed font-semibold"
+                                                        className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
                                                         placeholder="0"
                                                     />
-                                                    <p className="text-xs text-gray-400 mt-1">Auto-calculated from M + F + U</p>
+                                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
                                                 </div>
 
                                                 {/* Male Stillborn */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Male Stillborn</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Male Stillborn</label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.maleStillborn === 'number' ? formData.maleStillborn : (formData.maleStillborn || '')}
@@ -2956,7 +2956,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             const u = formData.unknownStillborn || 0;
                                                             setFormData({...formData, maleStillborn: v, stillbornCount: (v || 0) + f + u || null});
                                                         }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                         placeholder="0"
                                                         min="0"
                                                     />
@@ -2964,7 +2964,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                                 {/* Female Stillborn */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Female Stillborn</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Female Stillborn</label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.femaleStillborn === 'number' ? formData.femaleStillborn : (formData.femaleStillborn || '')}
@@ -2974,7 +2974,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             const u = formData.unknownStillborn || 0;
                                                             setFormData({...formData, femaleStillborn: v, stillbornCount: m + (v || 0) + u || null});
                                                         }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                         placeholder="0"
                                                         min="0"
                                                     />
@@ -2982,7 +2982,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                                 {/* Unknown Stillborn */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Unknown Stillborn</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unknown Stillborn</label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.unknownStillborn === 'number' ? formData.unknownStillborn : (formData.unknownStillborn || '')}
@@ -2992,7 +2992,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             const f = formData.femaleStillborn || 0;
                                                             setFormData({...formData, unknownStillborn: v, stillbornCount: m + f + (v || 0) || null});
                                                         }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                         placeholder="0"
                                                         min="0"
                                                     />
@@ -3002,13 +3002,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* Losses - matching Total Born layout */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                                                 Losses (Died after birth)
                                             </label>
                                             
                                             {/* Checkbox to extract from total counts */}
                                             <div className="mb-3">
-                                                <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
+                                                <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary cursor-pointer">
                                                     <input
                                                         type="checkbox"
                                                         checked={formData.extractLossesFromTotal || false}
@@ -3044,11 +3044,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 }
                                                             });
                                                         }}
-                                                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                                                        className="rounded border-gray-300 dark:border-dark-text-muted text-primary focus:ring-primary"
                                                     />
                                                     <span>Extract losses from total counts (reduce M/F/U counts by loss amounts)</span>
                                                 </label>
-                                                <p className="text-xs text-gray-400 mt-1 ml-6">
+                                                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1 ml-6">
                                                     When enabled, losses will be subtracted from the gender counts above, showing only surviving offspring.
                                                 </p>
                                             </div>
@@ -3056,22 +3056,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                                 {/* Total Losses - read-only, summed from M+F+U */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                         Total Losses
                                                     </label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
                                                         readOnly
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-not-allowed font-semibold"
+                                                        className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
                                                         placeholder="0"
                                                     />
-                                                    <p className="text-xs text-gray-400 mt-1">Auto-calculated from M + F + U</p>
+                                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
                                                 </div>
 
                                                 {/* Male Losses */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Male Losses</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Male Losses</label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.maleLosses === 'number' ? formData.maleLosses : (formData.maleLosses || '')}
@@ -3081,7 +3081,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             const u = formData.unknownLosses || 0;
                                                             setFormData({...formData, maleLosses: v, lossesCount: (v || 0) + f + u || null});
                                                         }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                         placeholder="0"
                                                         min="0"
                                                     />
@@ -3089,7 +3089,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                                 {/* Female Losses */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Female Losses</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Female Losses</label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.femaleLosses === 'number' ? formData.femaleLosses : (formData.femaleLosses || '')}
@@ -3099,7 +3099,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             const u = formData.unknownLosses || 0;
                                                             setFormData({...formData, femaleLosses: v, lossesCount: m + (v || 0) + u || null});
                                                         }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                         placeholder="0"
                                                         min="0"
                                                     />
@@ -3107,7 +3107,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                                 {/* Unknown Losses */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Unknown Losses</label>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unknown Losses</label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.unknownLosses === 'number' ? formData.unknownLosses : (formData.unknownLosses || '')}
@@ -3117,7 +3117,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             const f = formData.femaleLosses || 0;
                                                             setFormData({...formData, unknownLosses: v, lossesCount: m + f + (v || 0) || null});
                                                         }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                         placeholder="0"
                                                         min="0"
                                                     />
@@ -3127,30 +3127,30 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* Total Weaned */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                                 Total Weaned
                                             </label>
                                             <input
                                                 type="number"
                                                 value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
                                                 onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                                 placeholder="0"
                                                 min="0"
                                             />
-                                            <p className="text-xs text-gray-400 mt-1">Survived to weaning</p>
+                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Survived to weaning</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Link Existing Offspring */}
                                 {formData.sireId_public && formData.damId_public && (
-                                    <div className="mb-4 border-t pt-4" data-tutorial-target="litter-offspring-sections">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <div className="mb-4 border-t dark:border-dark-text-muted pt-4" data-tutorial-target="litter-offspring-sections">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                                             Link Existing Animals as Offspring
                                         </label>
-                                        <div className="bg-gray-50 p-3 rounded-lg">
-                                            <p className="text-xs text-gray-600 mb-3">
+                                        <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg">
+                                            <p className="text-xs text-gray-600 dark:text-dark-text-secondary mb-3">
                                                 Select animals with matching parents to link them to this litter. {formData.birthDate ? 'Only animals with matching birth date are shown.' : 'Birth date will be filled automatically from selected animals.'}
                                             </p>
                                             <div className="space-y-2">
@@ -3169,7 +3169,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         return matchesSire && matchesDam;
                                                     })
                                                     .map(animal => (
-                                                        <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                                        <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded cursor-pointer">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={formData.linkedOffspringIds?.includes(animal.id_public)}
@@ -3217,9 +3217,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                         setFormData({ ...formData, linkedOffspringIds: newLinked });
                                                                     }
                                                                 }}
-                                                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
+                                                                className="h-4 w-4 text-primary rounded border-gray-300 dark:border-dark-text-muted focus:ring-primary"
                                                             />
-                                                            <span className="text-sm text-gray-800">
+                                                            <span className="text-sm text-gray-800 dark:text-dark-text">
                                                                 {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`} - {animal.id_public} ({animal.gender}{animal.birthDate ? `, ${new Date(animal.birthDate).toLocaleDateString()}` : ''})
                                                             </span>
                                                         </label>
@@ -3238,7 +3238,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     
                                                     return matchesSire && matchesDam;
                                                 }).length === 0 && (
-                                                    <p className="text-xs text-gray-500 italic">No matching animals found</p>
+                                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">No matching animals found</p>
                                                 )}
                                                 {formData.linkedOffspringIds?.length > 0 && (
                                                     <p className="text-xs text-green-600 font-semibold mt-2">
@@ -3252,12 +3252,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                 {/* Create New Offspring */}
                                 {formData.sireId_public && formData.damId_public && formData.birthDate && (
-                                    <div className="mb-4 border-t pt-4" data-tutorial-target="litter-offspring-sections">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <div className="mb-4 border-t dark:border-dark-text-muted pt-4" data-tutorial-target="litter-offspring-sections">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                                             Create New Offspring Animals
                                         </label>
-                                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                            <p className="text-xs text-blue-800 mb-3">
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800/40">
+                                            <p className="text-xs text-blue-800 dark:text-blue-300 mb-3">
                                                 <strong>Create placeholder animals:</strong> Created with names M1, M2? / F1, F2? You can edit names and details after saving.
                                             </p>
                                             {(() => {
@@ -3276,12 +3276,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         {hasCountInfo && (
                                                             <div className="grid grid-cols-2 gap-3 mb-3">
                                                                 {totalMales > 0 && (
-                                                                    <div className="bg-white rounded-lg border border-blue-200 p-3">
+                                                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-blue-200 dark:border-blue-800/40 p-3">
                                                                         <div className="flex items-center gap-1 mb-1">
                                                                             <Mars size={13} className="text-blue-500" />
-                                                                            <span className="text-blue-600 font-bold text-sm">Males</span>
+                                                                            <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">Males</span>
                                                                         </div>
-                                                                        <div className="text-xs text-gray-600 space-y-0.5">
+                                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary space-y-0.5">
                                                                             <div>Total set: <span className="font-semibold">{totalMales}</span></div>
                                                                             <div>Already linked: <span className="font-semibold">{linkedMales}</span></div>
                                                                             <div>Remaining: <span className={`font-bold ${remainingMales > 0 ? 'text-blue-600' : 'text-green-600'}`}>{remainingMales}</span></div>
@@ -3298,12 +3298,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                     </div>
                                                                 )}
                                                                 {totalFemales > 0 && (
-                                                                    <div className="bg-white rounded-lg border border-pink-200 p-3">
+                                                                    <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-pink-200 dark:border-pink-800/40 p-3">
                                                                         <div className="flex items-center gap-1 mb-1">
                                                                             <Venus size={13} className="text-pink-500" />
-                                                                            <span className="text-pink-600 font-bold text-sm">Females</span>
+                                                                            <span className="text-pink-600 dark:text-pink-400 font-bold text-sm">Females</span>
                                                                         </div>
-                                                                        <div className="text-xs text-gray-600 space-y-0.5">
+                                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary space-y-0.5">
                                                                             <div>Total set: <span className="font-semibold">{totalFemales}</span></div>
                                                                             <div>Already linked: <span className="font-semibold">{linkedFemales}</span></div>
                                                                             <div>Remaining: <span className={`font-bold ${remainingFemales > 0 ? 'text-pink-600' : 'text-green-600'}`}>{remainingFemales}</span></div>
@@ -3331,7 +3331,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             </button>
                                                         )}
                                                         {!hasCountInfo && (
-                                                            <p className="text-xs text-gray-500 italic">Set the male, female, and unknown counts above to see smart creation options.</p>
+                                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">Set the male, female, and unknown counts above to see smart creation options.</p>
                                                         )}
                                                         {hasCountInfo && remainingMales === 0 && remainingFemales === 0 && remainingUnknown === 0 && (
                                                             <p className="text-xs text-green-600 font-semibold flex items-center gap-1"><CheckCircle size={13} /> All offspring are accounted for via linked animals.</p>
@@ -3350,13 +3350,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                 {/* Notes */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                         Notes
                                     </label>
                                     <textarea
                                         value={formData.notes}
                                         onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                                         rows="3"
                                         placeholder="Additional notes about this litter..."
                                     />
@@ -3365,7 +3365,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </form>
                     </div>
 
-                    <div className="border-t p-4 flex gap-3 justify-end">
+                    <div className="border-t dark:border-dark-text-muted p-4 flex gap-3 justify-end">
                         <button
                             type="button"
                             onClick={() => {
@@ -3376,7 +3376,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 pendingLitterImages.forEach(item => URL.revokeObjectURL(item.previewUrl));
                                 setPendingLitterImages([]);
                             }}
-                            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
+                            className="px-4 py-2 border border-gray-300 dark:border-dark-text-muted text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover font-semibold"
                         >
                             Cancel</button>
                         <button
@@ -3395,74 +3395,74 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             {/* Planned Mating Quick-Add Modal */}
             {showAddMatingForm && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
-                        <div className="flex justify-between items-center border-b p-4">
-                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-lg">
+                        <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4">
+                            <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                                 <Heart size={18} className="text-indigo-500" />
                                 {editingMatingId ? 'Edit Planned Mating' : 'Record Planned Mating'}
                             </h3>
-                            <button onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text">
                                 <X size={22} />
                             </button>
                         </div>
                         <form onSubmit={handleSubmitMating} className="p-4 space-y-4 overflow-y-auto max-h-[75vh]">
                             {/* Species */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Species <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Species <span className="text-red-500">*</span></label>
                                 <button
                                     type="button"
                                     onClick={() => setShowMatingSpeciesPicker(true)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left hover:bg-gray-50 transition focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
                                     {matingData.species
-                                        ? <span className="font-medium text-gray-800">{matingData.species}</span>
-                                        : <span className="text-gray-400">Click to select species...</span>}
+                                        ? <span className="font-medium text-gray-800 dark:text-dark-text">{matingData.species}</span>
+                                        : <span className="text-gray-400 dark:text-dark-text-muted">Click to select species...</span>}
                                 </button>
-                                <p className="text-xs text-gray-500 mt-1">Choose species to filter the sire &amp; dam search</p>
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Choose species to filter the sire &amp; dam search</p>
                             </div>
                             {/* Sire */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father) <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Sire (Father) <span className="text-red-500">*</span></label>
                                 <button
                                     type="button"
                                     onClick={() => setModalTarget('sire-mating')}
                                     disabled={!matingData.species}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left hover:bg-gray-50 transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:opacity-75 disabled:cursor-not-allowed"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed"
                                 >
                                     {matingData.sireId_public ? (
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <div className="font-medium">{(myAnimals.find(a => a.id_public === matingData.sireId_public) || selectedMatingSire)?.name || 'Unknown'}</div>
-                                                <div className="text-xs text-gray-500">{matingData.sireId_public}</div>
+                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{matingData.sireId_public}</div>
                                             </div>
                                         </div>
-                                    ) : <span className="text-gray-400">{matingData.species ? 'Select Sire...' : 'Select species first'}</span>}
+                                    ) : <span className="text-gray-400 dark:text-dark-text-muted">{matingData.species ? 'Select Sire...' : 'Select species first'}</span>}
                                 </button>
                             </div>
                             {/* Dam */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Dam (Mother) <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Dam (Mother) <span className="text-red-500">*</span></label>
                                 <button
                                     type="button"
                                     onClick={() => setModalTarget('dam-mating')}
                                     disabled={!matingData.species}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left hover:bg-gray-50 transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:opacity-75 disabled:cursor-not-allowed"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed"
                                 >
                                     {matingData.damId_public ? (
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <div className="font-medium">{(myAnimals.find(a => a.id_public === matingData.damId_public) || selectedMatingDam)?.name || 'Unknown'}</div>
-                                                <div className="text-xs text-gray-500">{matingData.damId_public}</div>
+                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{matingData.damId_public}</div>
                                             </div>
                                         </div>
-                                    ) : <span className="text-gray-400">{matingData.species ? 'Select Dam...' : 'Select species first'}</span>}
+                                    ) : <span className="text-gray-400 dark:text-dark-text-muted">{matingData.species ? 'Select Dam...' : 'Select species first'}</span>}
                                 </button>
                             </div>
                             {/* COI display */}
                             {(matingCalcCOI || matingCOI != null) && (
-                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 text-gray-500' : 'bg-gray-50 text-gray-700'}`}>
+                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted' : 'bg-gray-50 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary'}`}>
                                     {matingCalcCOI
-                                        ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin" /> Calculating COI...</>
+                                        ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 dark:border-dark-text-muted border-t-gray-600 dark:border-t-dark-text animate-spin" /> Calculating COI...</>
                                         : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%
                                             {matingCOI === 0 && <span className="text-xs ml-1">(unrelated)</span>}
                                           </>
@@ -3471,15 +3471,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             )}
                             {/* Mating Date */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Mating Date</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Mating Date</label>
                                 <DatePicker value={matingData.matingDate} onChange={(e) => setMatingData({...matingData, matingDate: e.target.value})} minDate={new Date()} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 mt-1">Today or future — shows on calendar as "Mated"</p>
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Today or future — shows on calendar as "Mated"</p>
                             </div>
                             {/* Expected Due Date */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Expected Due Date</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Expected Due Date</label>
                                 <DatePicker value={matingData.expectedDueDate} onChange={(e) => setMatingData({...matingData, expectedDueDate: e.target.value})} minDate={matingData.matingDate ? new Date(matingData.matingDate) : new Date()} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 mt-1">Must be on or after mating date — shows on calendar as "Due"</p>
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Must be on or after mating date — shows on calendar as "Due"</p>
                             </div>
                             {/* Expandable breeding details */}
                             <button
@@ -3491,13 +3491,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 {showMatingBreedingDetails ? 'Hide breeding details' : '+ Breeding details (optional)'}
                             </button>
                             {showMatingBreedingDetails && (
-                                <div className="space-y-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+                                <div className="space-y-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/40 rounded-lg">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Breeding Method</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Breeding Method</label>
                                         <select
                                             value={matingData.breedingMethod}
                                             onChange={(e) => setMatingData({...matingData, breedingMethod: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"
                                         >
                                             <option value="Natural">Natural</option>
                                             <option value="AI">Artificial Insemination</option>
@@ -3506,11 +3506,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Breeding Condition</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Breeding Condition</label>
                                         <select
                                             value={matingData.breedingConditionAtTime}
                                             onChange={(e) => setMatingData({...matingData, breedingConditionAtTime: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"
                                         >
                                             <option value="">Select Condition...</option>
                                             <option value="Good">Good</option>
@@ -3522,18 +3522,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             )}
                             {/* Notes */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Notes</label>
                                 <textarea
                                     value={matingData.notes}
                                     onChange={(e) => setMatingData({...matingData, notes: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-indigo-400 text-sm"
                                     rows="2"
                                     placeholder="Any notes about this mating..."
                                 />
                             </div>
-                            <p className="text-xs text-gray-500">The entry will appear as <span className="font-semibold text-indigo-600">Planned</span> until you edit it and add a birth date.</p>
-                            <div className="flex gap-3 justify-end border-t pt-3">
-                                <button type="button" onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold text-sm">Cancel</button>
+                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">The entry will appear as <span className="font-semibold text-indigo-600 dark:text-indigo-400">Planned</span> until you edit it and add a birth date.</p>
+                            <div className="flex gap-3 justify-end border-t dark:border-dark-text-muted pt-3">
+                                <button type="button" onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="px-4 py-2 border border-gray-300 dark:border-dark-text-muted text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover font-semibold text-sm">Cancel</button>
                                 <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg text-sm">Save Mating</button>
                             </div>
                         </form>
@@ -3544,10 +3544,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             {/* Mating Edit Choice Modal */}
             {matingEditChoice && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
-                        <h3 className="text-lg font-bold text-gray-800 mb-1">Planned Mating</h3>
-                        <p className="text-sm text-gray-500 mb-5">
-                            {matingEditChoice.litter_id_public && <span className="font-mono bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-xs mr-2">{matingEditChoice.litter_id_public}</span>}
+                    <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-sm p-6">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text mb-1">Planned Mating</h3>
+                        <p className="text-sm text-gray-500 dark:text-dark-text-muted mb-5">
+                            {matingEditChoice.litter_id_public && <span className="font-mono bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded text-xs mr-2">{matingEditChoice.litter_id_public}</span>}
                             {[matingEditChoice.sire?.prefix, matingEditChoice.sire?.name].filter(Boolean).join(' ') || matingEditChoice.sireId_public || '?'}
                             {' x '}
                             {[matingEditChoice.dam?.prefix, matingEditChoice.dam?.name].filter(Boolean).join(' ') || matingEditChoice.damId_public || '?'}
@@ -3555,26 +3555,26 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <div className="space-y-3">
                             <button
                                 onClick={() => handleEditMating(matingEditChoice)}
-                                className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition text-left"
+                                className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition text-left"
                             >
                                 <Heart size={18} className="text-indigo-500 flex-shrink-0" />
                                 <div>
-                                    <div className="font-semibold text-indigo-800 text-sm">Edit Mating</div>
-                                    <div className="text-xs text-indigo-500">Update sire, dam, dates or notes</div>
+                                    <div className="font-semibold text-indigo-800 dark:text-indigo-300 text-sm">Edit Mating</div>
+                                    <div className="text-xs text-indigo-500 dark:text-indigo-400">Update sire, dam, dates or notes</div>
                                 </div>
                             </button>
                             <button
                                 onClick={() => { handleEditLitter(matingEditChoice); setMatingEditChoice(null); }}
-                                className="w-full flex items-center gap-3 px-4 py-3 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition text-left"
+                                className="w-full flex items-center gap-3 px-4 py-3 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/40 rounded-lg hover:bg-violet-100 dark:hover:bg-violet-900/30 transition text-left"
                             >
                                 <ClipboardList size={18} className="text-violet-600 flex-shrink-0" />
                                 <div>
-                                    <div className="font-semibold text-violet-800 text-sm">Convert to Litter</div>
-                                    <div className="text-xs text-violet-600">Record birth date and offspring details</div>
+                                    <div className="font-semibold text-violet-800 dark:text-violet-300 text-sm">Convert to Litter</div>
+                                    <div className="text-xs text-violet-600 dark:text-violet-400">Record birth date and offspring details</div>
                                 </div>
                             </button>
                         </div>
-                        <button onClick={() => setMatingEditChoice(null)} className="mt-4 w-full text-center text-sm text-gray-400 hover:text-gray-600">Cancel</button>
+                        <button onClick={() => setMatingEditChoice(null)} className="mt-4 w-full text-center text-sm text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary">Cancel</button>
                     </div>
                 </div>
             )}
@@ -3583,21 +3583,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             <div className="space-y-4">
                 {/* Search Bar */}
                 {litters.length > 0 && (
-                    <div className="bg-gray-50 p-2 sm:p-4 rounded-lg border-2 border-gray-200 space-y-2 sm:space-y-3">
+                    <div className="bg-gray-50 dark:bg-dark-card-bg p-2 sm:p-4 rounded-lg border-2 border-gray-200 dark:border-dark-text-muted space-y-2 sm:space-y-3">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted w-4 h-4 sm:w-5 sm:h-5" />
                             <input
                                 type="text"
                                 placeholder="Search litters..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                             />
                         </div>
                         
                         {/* Status filter */}
                         <div className="flex flex-wrap gap-1.5 items-center">
-                            <span className="text-xs font-medium text-gray-500 mr-0.5">Show:</span>
+                            <span className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mr-0.5">Show:</span>
                             {[['all','All'],['pregnant','Pregnant'],['mated','Mated'],['planned','Planned'],['born','Born']].map(([val, label]) => (
                                 <button
                                     key={val}
@@ -3605,26 +3605,26 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     onClick={() => setLitterStatusFilter(val)}
                                     className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                                         litterStatusFilter === val
-                                            ? val === 'planned' ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
-                                            : val === 'mated'   ? 'bg-sky-100 border-sky-300 text-sky-700'
-                                            : val === 'pregnant' ? 'bg-pink-100 border-pink-300 text-pink-700'
-                                            : val === 'born'    ? 'bg-violet-100 border-violet-300 text-violet-700'
+                                            ? val === 'planned' ? 'bg-indigo-100 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300'
+                                            : val === 'mated'   ? 'bg-sky-100 dark:bg-sky-900/30 border-sky-300 dark:border-sky-700 text-sky-700 dark:text-sky-300'
+                                            : val === 'pregnant' ? 'bg-pink-100 dark:bg-pink-900/30 border-pink-300 dark:border-pink-700 text-pink-700 dark:text-pink-300'
+                                            : val === 'born'    ? 'bg-violet-100 dark:bg-violet-900/30 border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300'
                                             : 'bg-primary dark:bg-dark-primary border-primary/50 text-black'
-                                            : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                                            : 'bg-white dark:bg-dark-card-bg border-gray-200 dark:border-dark-text-muted text-gray-500 dark:text-dark-text-muted hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
                                     }`}
                                 >{label}</button>
                             ))}
                         </div>
 
                         {/* Species filter */}
-                        <div className="flex flex-wrap gap-3 items-center pt-2 border-t border-gray-200">
+                        <div className="flex flex-wrap gap-3 items-center pt-2 border-t border-gray-200 dark:border-dark-text-muted">
                             <div className="flex items-center gap-2">
-                                <label htmlFor="litter-species-filter" className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</label>
+                                <label htmlFor="litter-species-filter" className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Species:</label>
                                 <select
                                     id="litter-species-filter"
                                     value={speciesFilter}
                                     onChange={(e) => setSpeciesFilter(e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                    className="px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                                 >
                                     <option value="">All Species</option>
                                     {DEFAULT_SPECIES_OPTIONS.map(species => (
@@ -3640,8 +3640,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         onClick={toggleAllPublic}
                                         className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition ${
                                             filteredLitters.every(l => l.showOnPublicProfile)
-                                                ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
-                                                : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
+                                                ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-800/40 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
+                                                : 'bg-gray-100 dark:bg-dark-surface border-gray-300 dark:border-dark-text-muted text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                                         }`}
                                         title={filteredLitters.every(l => l.showOnPublicProfile) ? 'Hide all from public profile' : 'Show all on public profile'}
                                     >
@@ -3651,12 +3651,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 )}
                             </div>
                             <div className="flex items-center gap-2">
-                                <label htmlFor="litter-year-filter" className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Year:</label>
+                                <label htmlFor="litter-year-filter" className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Year:</label>
                                 <select
                                     id="litter-year-filter"
                                     value={yearFilter}
                                     onChange={(e) => setYearFilter(e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                    className="px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                                     disabled={availableYears.length === 0}
                                 >
                                     <option value="">All Years</option>
@@ -3672,14 +3672,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 )}
 
                 {filteredLitters.length === 0 && litters.length > 0 ? (
-                    <div className="text-center py-12 bg-gray-50 rounded-lg">
-                        <Search size={48} className="text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">No litters match your search.</p>
+                    <div className="text-center py-12 bg-gray-50 dark:bg-dark-card-bg rounded-lg">
+                        <Search size={48} className="text-gray-400 dark:text-dark-text-muted mx-auto mb-4" />
+                        <p className="text-gray-600 dark:text-dark-text-secondary">No litters match your search.</p>
                     </div>
                 ) : filteredLitters.length === 0 && !loading ? (
-                    <div className="text-center py-12 bg-gray-50 rounded-lg">
-                        <BookOpen size={48} className="text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">No litters yet. Create your first litter above!</p>
+                    <div className="text-center py-12 bg-gray-50 dark:bg-dark-card-bg rounded-lg">
+                        <BookOpen size={48} className="text-gray-400 dark:text-dark-text-muted mx-auto mb-4" />
+                        <p className="text-gray-600 dark:text-dark-text-secondary">No litters yet. Create your first litter above!</p>
                     </div>
                 ) : (
                     filteredLitters.map(litter => {
@@ -3702,18 +3702,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const isNursing = hasBirth && (dam ? !!dam.isNursing : !litter.weaningConfirmed);
                         
                         return (
-                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-sky-300 bg-sky-50/20' : isPregnant ? 'border-dashed border-pink-300 bg-pink-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
+                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 dark:border-indigo-800/60 bg-indigo-50/20 dark:bg-indigo-900/10' : isMated ? 'border-dashed border-sky-300 dark:border-sky-800/60 bg-sky-50/20 dark:bg-sky-900/10' : isPregnant ? 'border-dashed border-pink-300 dark:border-pink-800/60 bg-pink-50/20 dark:bg-pink-900/10' : 'border-gray-200 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
-                                    className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
+                                    className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80 dark:hover:bg-dark-surface-hover/60"
                                     onClick={() => setExpandedLitter(isExpanded ? null : litter._id)}
                                 >
-                                    {/* Public profile toggle ? before litter name */}
+                                    {/* Public profile toggle — before litter name */}
                                     <button
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); toggleLitterPublic(litter); }}
                                         title={litter.showOnPublicProfile ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
-                                        className={`flex-shrink-0 mr-2 p-1 rounded transition ${litter.showOnPublicProfile ? 'text-green-500 hover:text-green-600' : 'text-gray-400 hover:text-gray-600'}`}
+                                        className={`flex-shrink-0 mr-2 p-1 rounded transition ${litter.showOnPublicProfile ? 'text-green-500 hover:text-green-600' : 'text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary'}`}
                                     >
                                         {litter.showOnPublicProfile ? <Eye size={15} /> : <EyeOff size={15} />}
                                     </button>
@@ -3721,30 +3721,30 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <div className="flex-1 sm:hidden">
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
-                                                <p className="font-bold text-gray-800 text-sm">
-                                                    {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-2">Planned</span>}
-                                                    {isMated && <span className="text-[10px] font-semibold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
-                                                    {isPregnant && <span className="text-[10px] font-semibold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded mr-2">Pregnant</span>}
-                                                    {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
+                                                <p className="font-bold text-gray-800 dark:text-dark-text text-sm">
+                                                    {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded mr-2">Planned</span>}
+                                                    {isMated && <span className="text-[10px] font-semibold bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded mr-2">Mated</span>}
+                                                    {isPregnant && <span className="text-[10px] font-semibold bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-1.5 py-0.5 rounded mr-2">Pregnant</span>}
+                                                    {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
                                                     {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
                                                 </p>
                                             </div>
-                                            <span className="text-xs font-semibold text-gray-700 ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : isPregnant ? 'Pregnant' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
+                                            <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : isPregnant ? 'Pregnant' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
                                         </div>
-                                        <div className="flex gap-3 text-xs text-gray-600">
+                                        <div className="flex gap-3 text-xs text-gray-600 dark:text-dark-text-secondary">
                                             <span><span className="font-medium">S:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}</span>
                                             <span><span className="font-medium">D:</span> {dam ? `${dam.prefix ? `${dam.prefix} ` : ''}${dam.name}${dam.suffix ? ` ${dam.suffix}` : ''}` : litter.damId_public}</span>
                                         </div>
-                                        <p className="text-[10px] text-gray-500 mt-0.5">
+                                        <p className="text-[10px] text-gray-500 dark:text-dark-text-muted mt-0.5">
                                             {formatDate(litter.birthDate)}
-                                            {!litter.isPlanned && litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}
+                                            {!litter.isPlanned && litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600 dark:text-blue-400">~ {litterAge(litter.birthDate)}</span>}
                                         </p>
                                         {(litter.inbreedingCoefficient != null || coiCalculating.has(litter._id)) && (
-                                            <p className="text-[10px] text-gray-500 mt-0.5">
+                                            <p className="text-[10px] text-gray-500 dark:text-dark-text-muted mt-0.5">
                                                 <span className="font-medium">COI:</span>{' '}
                                                 {coiCalculating.has(litter._id)
-                                                    ? <span className="inline-block w-12 h-2.5 bg-gray-200 rounded animate-pulse align-middle" />
+                                                    ? <span className="inline-block w-12 h-2.5 bg-gray-200 dark:bg-dark-surface rounded animate-pulse align-middle" />
                                                     : `${litter.inbreedingCoefficient.toFixed(2)}%`}
                                             </p>
                                         )}
@@ -3754,51 +3754,51 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
                                         {/* Col 1: Litter name */}
                                         <div className="min-w-0">
-                                            <p className="font-bold text-gray-800 text-sm truncate">{litter.breedingPairCodeName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
+                                            <p className="font-bold text-gray-800 dark:text-dark-text text-sm truncate">{litter.breedingPairCodeName || <span className="text-gray-400 dark:text-dark-text-muted font-normal text-xs">Unnamed</span>}</p>
                                         </div>
                                         {/* Col 2: CTL + date / planned status */}
                                         <div className="min-w-0">
                                             {litter.litter_id_public
-                                                ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block mb-0.5 w-fit">{litter.litter_id_public}</span>
-                                                : <span className="text-xs text-gray-400">?</span>}
+                                                ? <span className="text-xs font-mono bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded text-purple-700 dark:text-purple-300 block mb-0.5 w-fit">{litter.litter_id_public}</span>
+                                                : <span className="text-xs text-gray-400 dark:text-dark-text-muted">—</span>}
                                             {isPlannedOnly
-                                                ? <span className="text-xs font-semibold text-indigo-600"><Calendar size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
+                                                ? <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400"><Calendar size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
                                                 : isMated
-                                                ? <span className="text-xs font-semibold text-sky-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
+                                                ? <span className="text-xs font-semibold text-sky-600 dark:text-sky-400"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Awaiting pregnancy</span>
                                                 : isPregnant
-                                                ? <span className="text-xs font-semibold text-pink-600"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
-                                                : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}</span>}
+                                                ? <span className="text-xs font-semibold text-pink-600 dark:text-pink-400"><ScanHeart size={12} className="inline-block align-middle mr-0.5 fill-current" /> Awaiting birth</span>
+                                                : <span className="text-xs text-gray-500 dark:text-dark-text-muted">{formatDate(litter.birthDate) || '—'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-blue-600 dark:text-blue-400">~ {litterAge(litter.birthDate)}</span>}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
                                         <div className="min-w-0">
-                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Sire</span>
-                                            <span className="text-sm font-semibold text-gray-800 truncate block">{sire ? [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') : (litter.sireId_public || '?')}</span>
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Sire</span>
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{sire ? [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') : (litter.sireId_public || '—')}</span>
                                         </div>
                                         {/* Col 4: Dam */}
                                         <div className="min-w-0">
-                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Dam</span>
-                                            <span className="text-sm font-semibold text-gray-800 truncate block">{dam ? [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') : (litter.damId_public || '?')}</span>
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">Dam</span>
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate block">{dam ? [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') : (litter.damId_public || '—')}</span>
                                         </div>
                                         {/* Col 5: COI */}
                                         <div>
-                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">COI</span>
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">COI</span>
                                             {coiCalculating.has(litter._id)
-                                                ? <span className="inline-block w-10 h-3 bg-gray-200 rounded animate-pulse mt-0.5" />
-                                                : <span className="text-sm font-semibold text-gray-800">
-                                                    {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '?'}
+                                                ? <span className="inline-block w-10 h-3 bg-gray-200 dark:bg-dark-surface rounded animate-pulse mt-0.5" />
+                                                : <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
+                                                    {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}
                                                   </span>}
                                         </div>
                                         {/* Col 6: Born with M/F/U */}
                                         <div>
-                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">{litter.isPlanned ? 'Status' : 'Born'}</span>
+                                            <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">{litter.isPlanned ? 'Status' : 'Born'}</span>
                                             {isPlannedOnly
-                                                ? <span className="text-xs font-semibold text-indigo-500">Awaiting mating</span>
+                                                ? <span className="text-xs font-semibold text-indigo-500 dark:text-indigo-400">Awaiting mating</span>
                                                 : isMated
                                                 ? <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); handleMarkAsPregnant(litter); }}
                                                     title="Mark dam as pregnant"
-                                                    className="text-[11px] font-semibold text-pink-700 bg-pink-50 border border-pink-200 rounded-lg px-2 py-1 hover:bg-pink-100 transition flex items-center gap-1"
+                                                    className="text-[11px] font-semibold text-pink-700 dark:text-pink-300 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800/40 rounded-lg px-2 py-1 hover:bg-pink-100 dark:hover:bg-pink-900/30 transition flex items-center gap-1"
                                                   >
                                                     <ScanHeart size={12} className="fill-current" /> Assign Pregnant
                                                   </button>
@@ -3807,19 +3807,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); handleBornToday(litter); }}
                                                     title="Mark litter as born today"
-                                                    className="text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 rounded-lg px-2 py-1 hover:bg-violet-100 transition flex items-center gap-1"
+                                                    className="text-[11px] font-semibold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/40 rounded-lg px-2 py-1 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition flex items-center gap-1"
                                                   >
                                                     <Droplet size={12} /> Born today
                                                   </button>
                                                 : <div className="flex items-center gap-1.5">
-                                                    <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
+                                                    <span className="text-sm font-bold text-gray-800 dark:text-dark-text">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                                     {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                         <span className="text-xs ml-1">
-                                                            <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
-                                                            <span className="text-gray-400 mx-0.5">/</span>
-                                                            <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
-                                                            <span className="text-gray-400 mx-0.5">/</span>
-                                                            <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
+                                                            <span className="text-blue-500 dark:text-blue-400 font-semibold">{litter.maleCount ?? 0}M</span>
+                                                            <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">/</span>
+                                                            <span className="text-pink-500 dark:text-pink-400 font-semibold">{litter.femaleCount ?? 0}F</span>
+                                                            <span className="text-gray-400 dark:text-dark-text-muted mx-0.5">/</span>
+                                                            <span className="text-purple-500 dark:text-purple-400 font-semibold">{litter.unknownCount ?? 0}U</span>
                                                         </span>
                                                     )}
                                                   </div>
@@ -3847,20 +3847,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </button>
                                     )}
                                     {(litter.images?.length > 0) && (
-                                        <span className="flex items-center gap-0.5 text-[11px] text-gray-400 mr-1 flex-shrink-0">
+                                        <span className="flex items-center gap-0.5 text-[11px] text-gray-400 dark:text-dark-text-muted mr-1 flex-shrink-0">
                                             <Images size={12} />
                                             <span>{litter.images.length}</span>
                                         </span>
                                     )}
                                     <ChevronDown
                                         size={18}
-                                        className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`}
+                                        className={`text-gray-400 dark:text-dark-text-muted transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`}
                                     />
                                 </div>
 
                                 {/* Expanded Details */}
                                 {isExpanded && (
-                                    <div className="border-t-2 border-gray-200 p-2 sm:p-4 bg-gray-50">
+                                    <div className="border-t-2 border-gray-200 dark:border-dark-text-muted p-2 sm:p-4 bg-gray-50 dark:bg-dark-surface">
                                         <div className="flex flex-wrap justify-end gap-1 sm:gap-2 mb-3 sm:mb-4">
                                             {isPlannedOnly && (
                                                 <button
@@ -3931,58 +3931,58 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* -- 1. Parents + COI ------------------------------------- */}
                                         {(sire || dam) && (
                                             <div className="mb-4">
-                                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Parents</h4>
+                                                <h4 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-2">Parents</h4>
                                                 <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-center">
                                                     {/* Sire */}
                                                     {sire ? (
                                                         <div
                                                             onClick={sire.isTransferred ? undefined : () => onViewAnimal(sire)}
-                                                            className={`bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-3 ${sire.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition shadow-sm`}
+                                                            className={`bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-3 flex items-center gap-3 ${sire.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition shadow-sm`}
                                                         >
-                                                            <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                            <div className="w-14 h-14 bg-gray-100 dark:bg-dark-surface rounded-lg overflow-hidden flex-shrink-0">
                                                                 {sire.imageUrl || sire.photoUrl
                                                                     ? <img src={sire.imageUrl || sire.photoUrl} alt={sire.name} className="w-full h-full object-cover" />
-                                                                    : <div className="w-full h-full flex items-center justify-center text-gray-400"><Cat size={24} /></div>}
+                                                                    : <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted"><Cat size={24} /></div>}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center gap-1 mb-0.5">
                                                                     <Mars size={12} className="text-primary flex-shrink-0" />
-                                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Sire</span>
+                                                                    <span className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide">Sire</span>
                                                                 </div>
-                                                                <p className="font-bold text-gray-800 truncate text-sm">{sire.prefix ? `${sire.prefix} ` : ''}{sire.name}{sire.suffix ? ` ${sire.suffix}` : ''}</p>
-                                                                <p className="text-xs text-gray-500">{sire.species}</p>
-                                                                <p className="text-[10px] text-gray-400 font-mono">{sire.id_public}</p>
+                                                                <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">{sire.prefix ? `${sire.prefix} ` : ''}{sire.name}{sire.suffix ? ` ${sire.suffix}` : ''}</p>
+                                                                <p className="text-xs text-gray-500 dark:text-dark-text-muted">{sire.species}</p>
+                                                                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted font-mono">{sire.id_public}</p>
                                                             </div>
                                                         </div>
                                                     ) : <div />}
                                                     {/* COI badge between parents */}
                                                     <div className="flex flex-col items-center px-2">
-                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">COI</div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">COI</div>
                                                         {coiCalculating.has(litter._id)
-                                                            ? <div className="w-14 h-5 bg-gray-200 rounded animate-pulse" />
+                                                            ? <div className="w-14 h-5 bg-gray-200 dark:bg-dark-surface rounded animate-pulse" />
                                                             : litter.inbreedingCoefficient != null
-                                                                ? <div className="text-base font-medium text-gray-800">{litter.inbreedingCoefficient.toFixed(2)}%</div>
-                                                                : <div className="text-base font-medium text-gray-300">?</div>}
+                                                                ? <div className="text-base font-medium text-gray-800 dark:text-dark-text">{litter.inbreedingCoefficient.toFixed(2)}%</div>
+                                                                : <div className="text-base font-medium text-gray-300 dark:text-dark-text-muted">—</div>}
                                                     </div>
                                                     {/* Dam */}
                                                     {dam ? (
                                                         <div
                                                             onClick={dam.isTransferred ? undefined : () => onViewAnimal(dam)}
-                                                            className={`bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-3 ${dam.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition shadow-sm`}
+                                                            className={`bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-3 flex items-center gap-3 ${dam.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition shadow-sm`}
                                                         >
-                                                            <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                            <div className="w-14 h-14 bg-gray-100 dark:bg-dark-surface rounded-lg overflow-hidden flex-shrink-0">
                                                                 {dam.imageUrl || dam.photoUrl
                                                                     ? <img src={dam.imageUrl || dam.photoUrl} alt={dam.name} className="w-full h-full object-cover" />
-                                                                    : <div className="w-full h-full flex items-center justify-center text-gray-400"><Cat size={24} /></div>}
+                                                                    : <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted"><Cat size={24} /></div>}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center gap-1 mb-0.5">
                                                                     <Venus size={12} className="text-accent flex-shrink-0" />
-                                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Dam</span>
+                                                                    <span className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide">Dam</span>
                                                                 </div>
-                                                                <p className="font-bold text-gray-800 truncate text-sm">{dam.prefix ? `${dam.prefix} ` : ''}{dam.name}{dam.suffix ? ` ${dam.suffix}` : ''}</p>
-                                                                <p className="text-xs text-gray-500">{dam.species}</p>
-                                                                <p className="text-[10px] text-gray-400 font-mono">{dam.id_public}</p>
+                                                                <p className="font-bold text-gray-800 dark:text-dark-text truncate text-sm">{dam.prefix ? `${dam.prefix} ` : ''}{dam.name}{dam.suffix ? ` ${dam.suffix}` : ''}</p>
+                                                                <p className="text-xs text-gray-500 dark:text-dark-text-muted">{dam.species}</p>
+                                                                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted font-mono">{dam.id_public}</p>
                                                             </div>
                                                         </div>
                                                     ) : <div />}
@@ -3992,55 +3992,55 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* -- 2. Breeding info -------------------------------------- */}
                                         {((litter.matingDate || litter.pairingDate) || litter.breedingMethod || litter.breedingCondition || litter.breedingConditionAtTime || litter.outcome || litter.birthMethod || litter.birthDate || litter.expectedDueDate || litter.weaningDate) && (
-                                            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
-                                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Breeding &amp; Birth</h4>
+                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-4 mb-4 shadow-sm">
+                                                <h4 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-3">Breeding &amp; Birth</h4>
                                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3 text-sm">
                                                     {(litter.matingDate || litter.pairingDate) && (
                                                         <div>
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Mating Date</div>
-                                                            <div className="font-semibold text-gray-800">{formatDate(litter.matingDate || litter.pairingDate)}</div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Mating Date</div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.matingDate || litter.pairingDate)}</div>
                                                         </div>
                                                     )}
                                                     {litter.expectedDueDate && (
                                                         <div>
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Expected Due Date</div>
-                                                            <div className="font-semibold text-gray-800">{formatDate(litter.expectedDueDate)}</div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Expected Due Date</div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.expectedDueDate)}</div>
                                                         </div>
                                                     )}
                                                     {litter.breedingMethod && (
                                                         <div>
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Method</div>
-                                                            <div className="font-semibold text-gray-800">{litter.breedingMethod}</div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Breeding Method</div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">{litter.breedingMethod}</div>
                                                         </div>
                                                     )}
                                                     {(litter.breedingCondition || litter.breedingConditionAtTime) && (
                                                         <div>
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Condition</div>
-                                                            <div className="font-semibold text-gray-800">{litter.breedingCondition || litter.breedingConditionAtTime}</div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Breeding Condition</div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">{litter.breedingCondition || litter.breedingConditionAtTime}</div>
                                                         </div>
                                                     )}
                                                     {litter.outcome && !(litter.isPlanned && litter.outcome === 'Unknown') && (
                                                         <div>
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Outcome</div>
-                                                            <div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-500' : 'text-gray-800'}`}>{litter.outcome}</div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Outcome</div>
+                                                            <div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600 dark:text-green-400' : litter.outcome === 'Unsuccessful' ? 'text-red-500 dark:text-red-400' : 'text-gray-800 dark:text-dark-text'}`}>{litter.outcome}</div>
                                                         </div>
                                                     )}
                                                     {litter.birthMethod && (
                                                         <div>
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Method</div>
-                                                            <div className="font-semibold text-gray-800">{litter.birthMethod}</div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Birth Method</div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">{litter.birthMethod}</div>
                                                         </div>
                                                     )}
                                                     {litter.birthDate && (
                                                         <div>
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div>
-                                                            <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-blue-600">~ {litterAge(litter.birthDate)}</span>}</div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Birth Date</div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-blue-600 dark:text-blue-400">~ {litterAge(litter.birthDate)}</span>}</div>
                                                         </div>
                                                     )}
                                                     {litter.weaningDate && (
                                                         <div>
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaning Date</div>
-                                                            <div className="font-semibold text-gray-800">{formatDate(litter.weaningDate)}</div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Weaning Date</div>
+                                                            <div className="font-semibold text-gray-800 dark:text-dark-text">{formatDate(litter.weaningDate)}</div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -4048,40 +4048,40 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         )}
 
                                         {/* -- 3. Litter Stats: left = counts, right = sex ------------ */}
-                                        {!litter.isPlanned && <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
-                                            <div className="flex flex-col sm:grid sm:grid-cols-2 sm:divide-x divide-gray-200 gap-3 sm:gap-0">
+                                        {!litter.isPlanned && <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-4 mb-4 shadow-sm">
+                                            <div className="flex flex-col sm:grid sm:grid-cols-2 sm:divide-x divide-gray-200 dark:divide-dark-border gap-3 sm:gap-0">
                                                 {/* Left: Born / Stillborn / Weaned / Losses */}
                                                 <div className="grid grid-cols-4 sm:pr-4">
                                                     <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div>
-                                                        <div className="text-xl font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Born</div>
+                                                        <div className="text-xl font-bold text-gray-800 dark:text-dark-text">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div>
-                                                        <div className="text-xl font-bold text-gray-400">{litter.stillbornCount ?? litter.stillborn ?? '0'}</div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Stillborn</div>
+                                                        <div className="text-xl font-bold text-gray-400 dark:text-dark-text-muted">{litter.stillbornCount ?? litter.stillborn ?? '0'}</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div>
-                                                        <div className="text-xl font-bold text-blue-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Weaned</div>
+                                                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Losses</div>
-                                                        <div className="text-xl font-bold text-red-500">{litter.lossesCount ?? litter.losses ?? 0}</div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Losses</div>
+                                                        <div className="text-xl font-bold text-red-500 dark:text-red-400">{litter.lossesCount ?? litter.losses ?? 0}</div>
                                                     </div>
                                                 </div>
                                                 {/* Right: Males / Females / Unknown */}
-                                                <div className="grid grid-cols-3 sm:pl-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-200">
+                                                <div className="grid grid-cols-3 sm:pl-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-dark-border">
                                                     <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div>
-                                                        <div className="text-xl font-bold text-blue-500">{litter.maleCount ?? 0}</div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Males</div>
+                                                        <div className="text-xl font-bold text-blue-500 dark:text-blue-400">{litter.maleCount ?? 0}</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div>
-                                                        <div className="text-xl font-bold text-pink-500">{litter.femaleCount ?? 0}</div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Females</div>
+                                                        <div className="text-xl font-bold text-pink-500 dark:text-pink-400">{litter.femaleCount ?? 0}</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div>
-                                                        <div className="text-xl font-bold text-purple-500">{litter.unknownCount ?? 0}</div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Unknown</div>
+                                                        <div className="text-xl font-bold text-purple-500 dark:text-purple-400">{litter.unknownCount ?? 0}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -4089,14 +4089,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* -- 4. Photos -------------------------------------------- */}
                                         {!litter.isPlanned && litter.images?.length > 0 && (
-                                            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
-                                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Photos</h4>
+                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-4 mb-4 shadow-sm">
+                                                <h4 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-3">Photos</h4>
                                                 <div className="flex gap-2 flex-wrap">
                                                     {litter.images.map((img, idx) => (
                                                         <button
                                                             key={img.r2Key || idx}
                                                             onClick={(e) => { e.stopPropagation(); setEnlargedLitterImageUrl(img.url); setShowLitterImageModal(true); }}
-                                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 hover:shadow-md transition flex-shrink-0 focus:outline-none"
+                                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md transition flex-shrink-0 focus:outline-none"
                                                         >
                                                             <img src={img.url} alt={`Litter photo ${idx + 1}`} className="w-full h-full object-cover" />
                                                         </button>
@@ -4107,9 +4107,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* -- 5. Notes ---------------------------------------------- */}
                                         {litter.notes && (
-                                            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
-                                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4>
-                                                <p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p>
+                                            <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-4 mb-4 shadow-sm">
+                                                <h4 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide mb-1">Notes</h4>
+                                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary italic leading-relaxed">{litter.notes}</p>
                                             </div>
                                         )}
 
@@ -4118,16 +4118,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <div className="mb-4">
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                                     {[0, 1, 2].map((i) => (
-                                                        <div key={i} className="bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden border-2 border-gray-200 animate-pulse">
+                                                        <div key={i} className="bg-white dark:bg-dark-card-bg rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden border-2 border-gray-200 dark:border-dark-text-muted animate-pulse">
                                                             <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
-                                                                <div className="w-20 h-20 bg-gray-200 rounded-md" />
+                                                                <div className="w-20 h-20 bg-gray-200 dark:bg-dark-surface rounded-md" />
                                                             </div>
                                                             <div className="w-full px-4 pb-3 space-y-1.5">
-                                                                <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto" />
-                                                                <div className="h-2 bg-gray-200 rounded w-1/2 mx-auto" />
+                                                                <div className="h-3 bg-gray-200 dark:bg-dark-surface rounded w-3/4 mx-auto" />
+                                                                <div className="h-2 bg-gray-200 dark:bg-dark-surface rounded w-1/2 mx-auto" />
                                                             </div>
-                                                            <div className="w-full bg-gray-100 py-1 border-t border-gray-200">
-                                                                <div className="h-3 bg-gray-200 rounded w-1/3 mx-auto" />
+                                                            <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 border-t border-gray-200 dark:border-dark-border">
+                                                                <div className="h-3 bg-gray-200 dark:bg-dark-surface rounded w-1/3 mx-auto" />
                                                             </div>
                                                         </div>
                                                     ))}
@@ -4138,11 +4138,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {offspringList.length > 0 && (
                                             <div className="mb-4">
                                                 <div className="flex items-center justify-between mb-2">
-                                                    <h4 className="text-sm font-bold text-gray-700">Offspring ({offspringList.length})</h4>
+                                                    <h4 className="text-sm font-bold text-gray-700 dark:text-dark-text-secondary">Offspring ({offspringList.length})</h4>
                                                     <div className="flex items-center gap-2">
                                                         {bulkDeleteMode[litter._id] && (
                                                             <>
-                                                                <span className="text-sm text-gray-600">
+                                                                <span className="text-sm text-gray-600 dark:text-dark-text-secondary">
                                                                     {(selectedOffspring[litter._id] || []).length} selected
                                                                 </span>
                                                                 <button
@@ -4154,7 +4154,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 </button>
                                                                 <button
                                                                     onClick={() => toggleBulkDeleteMode(litter._id)}
-                                                                    className="px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-semibold rounded-lg transition"
+                                                                    className="px-3 py-1 bg-gray-300 dark:bg-dark-surface hover:bg-gray-400 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text text-sm font-semibold rounded-lg transition"
                                                                 >
                                                                     Cancel
                                                                 </button>
@@ -4163,7 +4163,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         {!bulkDeleteMode[litter._id] && (
                                                             <button
                                                                 onClick={() => toggleBulkDeleteMode(litter._id)}
-                                                                className="p-2 hover:bg-gray-200 rounded-lg transition"
+                                                                className="p-2 hover:bg-gray-200 dark:hover:bg-dark-surface-hover rounded-lg transition"
                                                                 title="Delete Multiple"
                                                             >
                                                                 <Trash2 size={18} className="text-red-500" />
@@ -4199,8 +4199,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                     }
                                                                 }
                                                             }}
-                                                            className={`relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden transition border-2 pt-2 ${
-                                                                isSelected ? 'border-red-500 cursor-pointer hover:shadow-md' : 'border-gray-300 cursor-pointer hover:shadow-md'
+                                                            className={`relative bg-white dark:bg-dark-card-bg rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden transition border-2 pt-2 ${
+                                                                isSelected ? 'border-red-500 cursor-pointer hover:shadow-md' : 'border-gray-300 dark:border-dark-text-muted cursor-pointer hover:shadow-md'
                                                             }`}
                                                         >
                                                             {isBulkMode && (
@@ -4240,7 +4240,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                         className="w-20 h-20 object-cover rounded-md" 
                                                                     />
                                                                 ) : (
-                                                                    <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                                    <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                                         <Cat size={32} />
                                                                     </div>
                                                                 )}
@@ -4265,19 +4265,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             
                                                             {/* Name */}
                                                             <div className="w-full text-center px-2 pb-1">
-                                                                <div className="text-sm font-semibold text-gray-800 truncate">
+                                                                <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
                                                                     {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
                                                                 </div>
                                                             </div>
 
                                                             {/* ID bottom-right */}
                                                             <div className="w-full px-2 pb-2 flex justify-end">
-                                                                <div className="text-xs text-gray-500">{animal.id_public}</div>
+                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</div>
                                                             </div>
                                                             
                                                             {/* Status bar */}
-                                                            <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
-                                                                <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                                                            <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                                                                <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{animal.status || 'Unknown'}</div>
                                                             </div>
                                                         </div>
                                                         );
@@ -4289,25 +4289,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* Add Offspring Section */}
                                         {!litter.isPlanned && addingOffspring && addingOffspring._id === litter._id ? (
                                             <>
-                                            <div className="bg-white rounded-lg border-2 border-primary p-4">
-                                                <h4 className="text-sm font-bold text-gray-700 mb-3">Add New Offspring</h4>
+                                            <div className="bg-white dark:bg-dark-card-bg rounded-lg border-2 border-primary p-4">
+                                                <h4 className="text-sm font-bold text-gray-700 dark:text-dark-text-secondary mb-3">Add New Offspring</h4>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Name *</label>
+                                                        <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">Name *</label>
                                                         <input
                                                             type="text"
                                                             value={newOffspringData.name}
                                                             onChange={(e) => setNewOffspringData({...newOffspringData, name: e.target.value})}
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
                                                             placeholder="Enter name"
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Gender *</label>
+                                                        <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">Gender *</label>
                                                         <select
                                                             value={newOffspringData.gender}
                                                             onChange={(e) => setNewOffspringData({...newOffspringData, gender: e.target.value})}
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
                                                         >
                                                             <option value="">Select gender</option>
                                                             <option value="Male">Male</option>
@@ -4315,39 +4315,39 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         </select>
                                                     </div>
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Color</label>
+                                                        <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">Color</label>
                                                         <input
                                                             type="text"
                                                             value={newOffspringData.color}
                                                             onChange={(e) => setNewOffspringData({...newOffspringData, color: e.target.value})}
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
                                                             placeholder="Optional"
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Coat</label>
+                                                        <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">Coat</label>
                                                         <input
                                                             type="text"
                                                             value={newOffspringData.coat}
                                                             onChange={(e) => setNewOffspringData({...newOffspringData, coat: e.target.value})}
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
                                                             placeholder="Optional"
                                                         />
                                                     </div>
                                                     <div className="md:col-span-2">
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Remarks</label>
+                                                        <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">Remarks</label>
                                                         <textarea
                                                             value={newOffspringData.remarks}
                                                             onChange={(e) => setNewOffspringData({...newOffspringData, remarks: e.target.value})}
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
                                                             rows="2"
                                                             placeholder="Optional notes"
                                                         />
                                                     </div>
                                                 </div>
-                                                <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4 rounded">
-                                                    <div className="text-sm font-semibold text-blue-900 mb-2">Auto-Assigned Parent Information</div>
-                                                    <div className="text-xs text-blue-800 space-y-1">
+                                                <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-700 p-3 mb-4 rounded">
+                                                    <div className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">Auto-Assigned Parent Information</div>
+                                                    <div className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
                                                         <div><span className="font-semibold">Species:</span> {sire?.species || addingOffspring.sire?.species || addingOffspring.dam?.species || 'Unknown'}</div>
                                                         <div><span className="font-semibold">Birth Date:</span> {formatDate(litter.birthDate)}</div>
                                                         <div><span className="font-semibold">Sire (Father):</span> {litter.sirePrefixName ? `${litter.sirePrefixName}` : litter.sireId_public || 'Not set'}</div>
@@ -4364,7 +4364,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </button>
                                                     <button
                                                         onClick={() => setAddingOffspring(null)}
-                                                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded-lg"
+                                                        className="bg-gray-300 dark:bg-dark-surface hover:bg-gray-400 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text font-semibold px-4 py-2 rounded-lg"
                                                     >
                                                         Cancel
                                                     </button>
@@ -4429,29 +4429,29 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             {/* Link Animals Modal */}
             {linkingAnimals && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                        <div className="flex justify-between items-center border-b p-4">
-                            <h3 className="text-xl font-bold text-gray-800">Link Animals to Litter</h3>
-                            <button onClick={() => setLinkingAnimals(false)} className="text-gray-500 hover:text-gray-800">
+                    <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                        <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4">
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">Link Animals to Litter</h3>
+                            <button onClick={() => setLinkingAnimals(false)} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text">
                                 <X size={24} />
                             </button>
                         </div>
 
                         <div className="flex-grow overflow-y-auto p-4">
                             {availableToLink.animals && availableToLink.animals.length === 0 ? (
-                                <p className="text-center text-gray-500 py-8">No unlinked animals found with matching parents and birth date.</p>
+                                <p className="text-center text-gray-500 dark:text-dark-text-muted py-8">No unlinked animals found with matching parents and birth date.</p>
                             ) : (
                                 <div className="space-y-2">
-                                    <p className="text-sm text-gray-600 mb-4">
+                                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
                                         Found {availableToLink.animals?.length || 0} unlinked animal(s) with matching parents and birth date:
                                     </p>
                                     {availableToLink.animals?.map(animal => (
-                                        <div key={animal.id_public} className="border rounded-lg p-3 flex justify-between items-center">
+                                        <div key={animal.id_public} className="border dark:border-dark-text-muted rounded-lg p-3 flex justify-between items-center">
                                             <div>
-                                                <p className="font-semibold">
+                                                <p className="font-semibold text-gray-800 dark:text-dark-text">
                                                     {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                 </p>
-                                                <p className="text-sm text-gray-600">
+                                                <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                                                     {animal.id_public} &bull; {animal.gender} &bull; {animal.species}
                                                 </p>
                                             </div>
@@ -4467,7 +4467,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             )}
                         </div>
 
-                        <div className="border-t p-4 space-y-2">
+                        <div className="border-t dark:border-dark-text-muted p-4 space-y-2">
                             {availableToLink.animals && availableToLink.animals.length > 0 && (
                                 <button
                                     onClick={handleAddAllToLitter}
@@ -4478,7 +4478,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             )}
                             <button
                                 onClick={() => setLinkingAnimals(false)}
-                                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg"
+                                className="w-full bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text font-semibold py-2 px-4 rounded-lg"
                             >
                                 Close
                             </button>

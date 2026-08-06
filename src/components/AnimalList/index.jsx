@@ -2659,13 +2659,13 @@ useEffect(() => {
                             // Determine reproductive state to display (prioritized)
                             let state = null;
                             if (animal.isPregnant) {
-                                state = { label: 'Pregnant', color: 'bg-pink-100 text-pink-800', icon: <ScanHeart size={14} className="fill-current" /> };
+                                state = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300', icon: <ScanHeart size={14} className="fill-current" /> };
                             } else if (animal.isNursing) {
-                                state = { label: 'Nursing', color: 'bg-violet-100 text-violet-800', icon: <Droplet size={14} /> };
+                                state = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300', icon: <Droplet size={14} /> };
                             } else if (animal.isInMating) {
-                                state = { label: 'In Mating', color: 'bg-sky-100 text-sky-800', icon: <Hourglass size={14} /> };
+                                state = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300', icon: <Hourglass size={14} /> };
                             } else if (animal.isPlannedMating) {
-                                state = { label: 'Planned Mating', color: 'bg-indigo-100 text-indigo-800', icon: <Calendar size={14} /> };
+                                state = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300', icon: <Calendar size={14} /> };
                             }
                             return state ? (
                                 <span className={`text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
@@ -3146,7 +3146,7 @@ useEffect(() => {
 
                 {/* Collection Manager Panel */}
                 {showCollectionManager && (
-                    <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
+                    <div className="border border-gray-200 dark:border-dark-text-muted rounded-xl p-4 bg-gray-50 dark:bg-dark-card-bg space-y-3">
                         <div className="flex gap-2">
                             <input
                                 type="text"
@@ -3154,7 +3154,7 @@ useEffect(() => {
                                 value={newCollectionName}
                                 onChange={e => setNewCollectionName(e.target.value)}
                                 onKeyPress={e => { if (e.key === 'Enter' && newCollectionName.trim()) { createCollection(newCollectionName); setNewCollectionName(''); } }}
-                                className="flex-grow p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                className="flex-grow p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-primary focus:border-primary"
                             />
                             <button
                                 onClick={() => { createCollection(newCollectionName); setNewCollectionName(''); }}
@@ -3175,25 +3175,25 @@ useEffect(() => {
                                                     value={renamingCollectionName}
                                                     onChange={e => setRenamingCollectionName(e.target.value)}
                                                     onKeyPress={e => { if (e.key === 'Enter') { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); } }}
-                                                    className="flex-grow p-1.5 text-sm border border-gray-300 rounded-lg"
+                                                    className="flex-grow p-1.5 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text"
                                                     autoFocus
                                                 />
                                                 <button onClick={() => { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); }} className="text-xs px-2 py-1 bg-primary dark:bg-dark-primary text-black rounded-lg">Save</button>
-                                                <button onClick={() => setRenamingCollectionId(null)} className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded-lg">Cancel</button>
+                                                <button onClick={() => setRenamingCollectionId(null)} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-surface dark:text-dark-text-secondary text-gray-700 rounded-lg">Cancel</button>
                                             </>
                                         ) : (
                                             <>
-                                                <span className="flex-grow text-sm font-medium text-gray-700">{col.name}</span>
-                                                <span className="text-xs text-gray-400">{Object.values(animalCollections).filter(ids => Array.isArray(ids) && ids.includes(col.id)).length} animals</span>
-                                                <button onClick={() => { setRenamingCollectionId(col.id); setRenamingCollectionName(col.name); }} className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg">Rename</button>
-                                                <button onClick={() => deleteCollection(col.id)} className="text-xs px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg">Delete</button>
+                                                <span className="flex-grow text-sm font-medium text-gray-700 dark:text-dark-text">{col.name}</span>
+                                                <span className="text-xs text-gray-400 dark:text-dark-text-muted">{Object.values(animalCollections).filter(ids => Array.isArray(ids) && ids.includes(col.id)).length} animals</span>
+                                                <button onClick={() => { setRenamingCollectionId(col.id); setRenamingCollectionName(col.name); }} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-surface dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 rounded-lg">Rename</button>
+                                                <button onClick={() => deleteCollection(col.id)} className="text-xs px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg">Delete</button>
                                             </>
                                         )}
                                     </li>
                                 ))}
                             </ul>
                         ) : (
-                            <p className="text-sm text-gray-500 text-center py-2">No collections yet. Create one above.</p>
+                            <p className="text-sm text-gray-500 dark:text-dark-text-muted text-center py-2">No collections yet. Create one above.</p>
                         )}
                     </div>
                 )}
@@ -3246,7 +3246,7 @@ useEffect(() => {
                                                             <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
                                                             <button
                                                                 onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }}
-                                                                className="absolute top-1 right-1 z-20 bg-white/90 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-0.5 shadow-sm border border-gray-200"
+                                                                className="absolute top-1 left-1 z-20 bg-white/90 dark:bg-dark-card-bg/90 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-400 hover:text-red-600 dark:hover:text-red-400 rounded-full p-0.5 shadow-sm border border-gray-200 dark:border-dark-text-muted"
                                                                 title="Remove from this collection"
                                                             >
                                                                 <X size={11} />
@@ -3288,7 +3288,7 @@ useEffect(() => {
                                                                         <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 text-xs">{renderHealthColumnCell(animal)}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400">{ageStr}</div></td>
-                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : '—'}</td>
+                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-500">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-right">
                                                                             <button onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }} className="bg-white hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-1 shadow-sm border border-gray-200" title="Remove from this collection"><X size={11} /></button>
@@ -3382,7 +3382,7 @@ useEffect(() => {
                                                                         <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 text-xs">{renderHealthColumnCell(animal)}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400">{ageStr}</div></td>
-                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : '—'}</td>
+                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-500">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-right"><div className="relative inline-block text-left"><button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Plus size={16} /></button>{assigningCollectionAnimalId === animal.id_public && (<div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-30" onClick={e => e.stopPropagation()}><div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"><p className="text-xs font-semibold text-gray-600 px-3 py-1">Add to collection:</p>{userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-3 py-2 hover:bg-gray-100 flex items-center gap-1.5 text-gray-700"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}</div></div>)}</div></td>
                                                                     </tr>
@@ -3700,40 +3700,40 @@ useEffect(() => {
         }
 
         let statusLabel = 'Unknown';
-        let statusColor = 'bg-gray-100 text-gray-800';
+        let statusColor = 'bg-gray-100 dark:bg-dark-surface text-gray-800 dark:text-dark-text-secondary';
         if (animal.isPlannedMating) {
             statusLabel = 'Planned';
-            statusColor = 'bg-indigo-100 text-indigo-800';
+            statusColor = 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300';
         } else if (animal.isInMating) {
             statusLabel = 'Mating';
-            statusColor = 'bg-sky-100 text-sky-800';
+            statusColor = 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300';
         } else if (animal.isPregnant) {
             statusLabel = 'Pregnant';
-            statusColor = 'bg-pink-100 text-pink-800';
+            statusColor = 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300';
         } else if (animal.isNursing) {
             statusLabel = 'Nursing';
-            statusColor = 'bg-violet-100 text-violet-800';
+            statusColor = 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300';
         }
 
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 border-b border-gray-100 sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 {/* Animal Info (col-span-2 on sm+) */}
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
-                        <div className="font-semibold text-sm text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
-                        <div className="text-xs text-gray-500 truncate">{animal.species}</div>
+                        <div className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
+                        <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{animal.species}</div>
                     </div>
                 </div>
 
                 {/* Mating Date */}
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Mating: </span>{matingDate}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Mating: </span>{matingDate}</div>
 
                 {/* Due/Birth Date */}
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Due/Born: </span>{animal.isPregnant ? dueDate : birthDate}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Due/Born: </span>{animal.isPregnant ? dueDate : birthDate}</div>
 
                 {/* Weaning Date */}
-                <div className="text-xs text-gray-600"><span className="sm:hidden font-semibold">Weaning: </span>{weaningDate}</div>
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Weaning: </span>{weaningDate}</div>
 
                 {/* Status */}
                 <div className="text-center">
@@ -3742,8 +3742,8 @@ useEffect(() => {
 
                 {/* Actions */}
                 <div className="sm:text-right flex items-center gap-1 justify-end">
-                    {animal.isPlannedMating && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-sky-100 text-sky-700 hover:bg-sky-200"><Hourglass size={12} /> Mated today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )} {animal.isInMating && ( <> {animal.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-pink-100 text-pink-700 hover:bg-pink-200"><ScanHeart size={12} /> Assign Pregnant</button>} <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button> </>)} {animal.isPregnant && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-violet-100 text-violet-700 hover:bg-violet-200"><Droplet size={12} /> Born today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isInMating: false, isNursing: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )} {animal.isNursing && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"><Check size={12} /> Mark Weaned</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, isPregnant: false, isInMating: false })} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" title="Clear Status"><X size={12} /></button></> )}
-                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200"><Edit size={14} /></button>
+                    {animal.isPlannedMating && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: true, matingDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50"><Hourglass size={12} /> Mated today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPlannedMating: false, isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isInMating && ( <> {animal.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: true, pregnancyDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 hover:bg-pink-200 dark:hover:bg-pink-900/50"><ScanHeart size={12} /> Assign Pregnant</button>} <button onClick={(e) => handleReproStatusUpdate(e, animal, { isInMating: false, isPregnant: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button> </>)} {animal.isPregnant && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isNursing: true, birthDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50"><Droplet size={12} /> Born today</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isPregnant: false, isInMating: false, isNursing: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )} {animal.isNursing && animal.gender !== 'Male' && ( <><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, weaningDate: new Date().toISOString().slice(0,10) })} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"><Check size={12} /> Mark Weaned</button><button onClick={(e) => handleReproStatusUpdate(e, animal, { isNursing: false, isPregnant: false, isInMating: false })} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Clear Status"><X size={12} /></button></> )}
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
         );
@@ -6086,59 +6086,59 @@ useEffect(() => {
             />
             {showAddMatingForm && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
-                        <div className="flex justify-between items-center border-b p-4">
-                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2"><Heart size={18} className="text-indigo-500" />Record Planned Mating</h3>
-                            <button onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="text-gray-500 hover:text-gray-800"><X size={22} /></button>
+                    <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-lg">
+                        <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4">
+                            <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text flex items-center gap-2"><Heart size={18} className="text-indigo-500" />Record Planned Mating</h3>
+                            <button onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={22} /></button>
                         </div>
                         <form onSubmit={handleSubmitMating} className="p-4 space-y-4 overflow-y-auto max-h-[75vh]">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Species <span className="text-red-500">*</span></label>
-                                <button type="button" onClick={() => setShowMatingSpeciesPicker(true)} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left hover:bg-gray-50 transition focus:ring-2 focus:ring-primary focus:border-transparent">
-                                    {matingData.species ? <span className="font-medium text-gray-800">{matingData.species}</span> : <span className="text-gray-400">Click to select species...</span>}
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Species <span className="text-red-500">*</span></label>
+                                <button type="button" onClick={() => setShowMatingSpeciesPicker(true)} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    {matingData.species ? <span className="font-medium text-gray-800 dark:text-dark-text">{matingData.species}</span> : <span className="text-gray-400 dark:text-dark-text-muted">Click to select species...</span>}
                                 </button>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father) <span className="text-red-500">*</span></label>
-                                <button type="button" onClick={() => setModalTarget('sire-mating')} disabled={!matingData.species} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left hover:bg-gray-50 transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:opacity-75 disabled:cursor-not-allowed">
-                                    {matingData.sireId_public ? (<div className="flex items-center justify-between"><div><div className="font-medium">{(allAnimalsRaw.find(a => a.id_public === matingData.sireId_public) || selectedMatingSire)?.name || 'Unknown'}</div><div className="text-xs text-gray-500">{matingData.sireId_public}</div></div></div>) : <span className="text-gray-400">{matingData.species ? 'Select Sire...' : 'Select species first'}</span>}
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Sire (Father) <span className="text-red-500">*</span></label>
+                                <button type="button" onClick={() => setModalTarget('sire-mating')} disabled={!matingData.species} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed">
+                                    {matingData.sireId_public ? (<div className="flex items-center justify-between"><div><div className="font-medium">{(allAnimalsRaw.find(a => a.id_public === matingData.sireId_public) || selectedMatingSire)?.name || 'Unknown'}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted">{matingData.sireId_public}</div></div></div>) : <span className="text-gray-400 dark:text-dark-text-muted">{matingData.species ? 'Select Sire...' : 'Select species first'}</span>}
                                 </button>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Dam (Mother) <span className="text-red-500">*</span></label>
-                                <button type="button" onClick={() => setModalTarget('dam-mating')} disabled={!matingData.species} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left hover:bg-gray-50 transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:opacity-75 disabled:cursor-not-allowed">
-                                    {matingData.damId_public ? (<div className="flex items-center justify-between"><div><div className="font-medium">{(allAnimalsRaw.find(a => a.id_public === matingData.damId_public) || selectedMatingDam)?.name || 'Unknown'}</div><div className="text-xs text-gray-500">{matingData.damId_public}</div></div></div>) : <span className="text-gray-400">{matingData.species ? 'Select Dam...' : 'Select species first'}</span>}
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Dam (Mother) <span className="text-red-500">*</span></label>
+                                <button type="button" onClick={() => setModalTarget('dam-mating')} disabled={!matingData.species} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-dark-surface disabled:opacity-75 disabled:cursor-not-allowed">
+                                    {matingData.damId_public ? (<div className="flex items-center justify-between"><div><div className="font-medium">{(allAnimalsRaw.find(a => a.id_public === matingData.damId_public) || selectedMatingDam)?.name || 'Unknown'}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted">{matingData.damId_public}</div></div></div>) : <span className="text-gray-400 dark:text-dark-text-muted">{matingData.species ? 'Select Dam...' : 'Select species first'}</span>}
                                 </button>
                             </div>
                             {(matingCalcCOI || matingCOI != null) && (
-                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 text-gray-500' : 'bg-gray-50 text-gray-700'}`}>
-                                    {matingCalcCOI ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin" /> Calculating COI...</> : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%{matingCOI === 0 && <span className="text-xs ml-1">(unrelated)</span>}</>}
+                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted' : 'bg-gray-50 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary'}`}>
+                                    {matingCalcCOI ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 dark:border-dark-text-muted border-t-gray-600 dark:border-t-dark-text animate-spin" /> Calculating COI...</> : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%{matingCOI === 0 && <span className="text-xs ml-1">(unrelated)</span>}</>}
                                 </div>
                             )}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Mating Date</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Mating Date</label>
                                 <DatePicker value={matingData.matingDate} onChange={(e) => setMatingData({...matingData, matingDate: e.target.value})} minDate={new Date()} className="px-3 py-2" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Expected Due Date</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Expected Due Date</label>
                                 <DatePicker value={matingData.expectedDueDate} onChange={(e) => setMatingData({...matingData, expectedDueDate: e.target.value})} minDate={matingData.matingDate ? new Date(matingData.matingDate) : new Date()} className="px-3 py-2" />
                             </div>
-                            <button type="button" onClick={() => setShowMatingBreedingDetails(p => !p)} className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                            <button type="button" onClick={() => setShowMatingBreedingDetails(p => !p)} className="flex items-center gap-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium">
                                 {showMatingBreedingDetails ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                                 {showMatingBreedingDetails ? 'Hide breeding details' : '+ Breeding details (optional)'}
                             </button>
                             {showMatingBreedingDetails && (
-                                <div className="space-y-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
-                                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Breeding Method</label><select value={matingData.breedingMethod} onChange={(e) => setMatingData({...matingData, breedingMethod: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"><option value="Natural">Natural</option><option value="AI">Artificial Insemination</option><option value="Assisted">Assisted</option><option value="Unknown">Unknown</option></select></div>
-                                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Breeding Condition</label><select value={matingData.breedingConditionAtTime} onChange={(e) => setMatingData({...matingData, breedingConditionAtTime: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"><option value="">Select Condition...</option><option value="Good">Good</option><option value="Okay">Okay</option><option value="Poor">Poor</option></select></div>
+                                <div className="space-y-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/40 rounded-lg">
+                                    <div><label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Breeding Method</label><select value={matingData.breedingMethod} onChange={(e) => setMatingData({...matingData, breedingMethod: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"><option value="Natural">Natural</option><option value="AI">Artificial Insemination</option><option value="Assisted">Assisted</option><option value="Unknown">Unknown</option></select></div>
+                                    <div><label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Breeding Condition</label><select value={matingData.breedingConditionAtTime} onChange={(e) => setMatingData({...matingData, breedingConditionAtTime: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"><option value="">Select Condition...</option><option value="Good">Good</option><option value="Okay">Okay</option><option value="Poor">Poor</option></select></div>
                                 </div>
                             )}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                                <textarea value={matingData.notes} onChange={(e) => setMatingData({...matingData, notes: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm" rows="2" placeholder="Any notes about this mating..." />
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Notes</label>
+                                <textarea value={matingData.notes} onChange={(e) => setMatingData({...matingData, notes: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-indigo-400 text-sm" rows="2" placeholder="Any notes about this mating..." />
                             </div>
-                            <div className="flex gap-3 justify-end border-t pt-3">
-                                <button type="button" onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold text-sm">Cancel</button>
+                            <div className="flex gap-3 justify-end border-t dark:border-dark-text-muted pt-3">
+                                <button type="button" onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="px-4 py-2 border border-gray-300 dark:border-dark-text-muted text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover font-semibold text-sm">Cancel</button>
                                 <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg text-sm">Save Mating</button>
                             </div>
                         </form>
