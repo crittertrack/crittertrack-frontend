@@ -27,11 +27,63 @@ const MAPPING = {
     'page-bg': {
         hex: '#F1D1DC',
         absorbs: [
-            '#F2E4E9', '#f3e5f5', '#f3e8ff', '#f5c6cb', '#f8d7da', '#fcc',
+            '#F2E4E9', '#f3e5f5', '#f5c6cb', '#f8d7da', '#fcc',
             '#fce4ec', '#fce7f3', '#fdecea', '#fdeef6', '#fecaca', '#fee',
             '#fee2e2', '#ffcdd2', '#ffebee',
         ],
     },
+    // Not dark-mode tokens — these light-mode grays only *look* close to the
+    // dark-* palette by coincidence. Route them to Tailwind's built-in gray
+    // scale instead so they stay independent of the dark theme.
+    'gray-900': { hex: '#111827', absorbs: ['#000', '#000000', '#0f172a', '#1a1a1a'] },
+    'gray-800': { hex: '#1f2937', absorbs: ['#1e293b', '#2c2c2c', '#333'] },
+    'gray-700': { hex: '#374151', absorbs: ['#334155', '#424242'] },
+    'gray-600': { hex: '#4b5563', absorbs: ['#495057', '#555', '#5a6268', '#616161'] },
+    'gray-500': { hex: '#6b7280', absorbs: ['#666', '#6c757d', '#757575', '#888'] },
+    'gray-400': { hex: '#9ca3af', absorbs: ['#8ea0ba', '#94a3b8', '#999'] },
+    // Also absorbs several near-white "card background/divider" grays (colors.md §3)
+    // that were mis-clustered near pedigree-female-bg/pedigree-male-bg purely by
+    // Delta-E-near-white coincidence — they're plain neutral grays, not pink/blue washes.
+    'gray-300': { hex: '#d1d5db', absorbs: ['#ccc', '#d0d0d0', '#bbb', '#ddd', '#cbd5e1'] },
+    'gray-200': { hex: '#e5e7eb', absorbs: ['#e0e0e0', '#e8e8e8', '#e2e8f0', '#dee2e6', '#e9ecef'] },
+    'gray-100': { hex: '#f3f4f6', absorbs: ['#eee', '#f0f0f0', '#f5f5f5', '#f1f5f9'] },
+    'gray-50': { hex: '#f9fafb', absorbs: ['#f8f9fa', '#fafafa', '#f9f9f9', '#fafbfc', '#f8fafc', '#f8f8f8'] },
+    // Semantic status-color clusters (colors.md §4) — all canonical values below are
+    // Tailwind's own built-in shades, reused instead of inventing new tokens.
+    'red-700': { hex: '#b91c1c', absorbs: ['#c62828', '#b71c1c', '#c33', '#c82333'] },
+    'red-600': { hex: '#dc2626', absorbs: ['#d32f2f', '#f44336'] },
+    'red-500': { hex: '#ef4444', absorbs: ['#dc3545', '#ef5350'] },
+    // Pale red/danger background (colors.md §3) — was mis-clustered near
+    // pedigree-female-bg, but actually pairs with text-red-600 (error states).
+    'red-50': { hex: '#fef2f2', absorbs: [] },
+    'green-600': { hex: '#16a34a', absorbs: ['#28a745', '#4caf50', '#4CAF50', '#45a049'] },
+    'green-800': { hex: '#166534', absorbs: ['#1b5e20'] },
+    'amber-500': { hex: '#f59e0b', absorbs: ['#ff9800'] },
+    'amber-800': { hex: '#92400e', absorbs: ['#9a3412'] },
+    'amber-400': { hex: '#fbbf24', absorbs: ['#ffc107', '#ffb300', '#FFBB28'] },
+    'orange-600': { hex: '#ea580c', absorbs: ['#e65100'] },
+    // Absorbs #ff6f00 (colors.md §4 Group 2) — same orange-500 family, hand-typed drift.
+    'orange-500': { hex: '#f97316', absorbs: ['#f57c00', '#ff7300', '#ff6f00'] },
+    // Pale success/warning/danger "chip background" families (colors.md §4 groups
+    // 1/3/4/5 + related §3 false-positives). These were mis-clustered together (or
+    // against pedigree-*-bg) purely because Delta-E compresses perceptual distance
+    // near white — verified via actual usage context (paired text/border colors)
+    // that each family below is genuinely distinct.
+    'green-50': { hex: '#f0fdf4', absorbs: ['#e8f5e9', '#efe', '#e8f5e8', '#ecfdf5', '#f9fdf9'] },
+    'green-100': { hex: '#dcfce7', absorbs: [] },
+    'green-200': { hex: '#bbf7d0', absorbs: ['#cfc'] },
+    'amber-50': { hex: '#fffbeb', absorbs: ['#fff3e0', '#fff3cd', '#fff8e1'] },
+    'amber-100': { hex: '#fef3c7', absorbs: [] },
+    'yellow-50': { hex: '#fefce8', absorbs: [] },
+    'yellow-100': { hex: '#fef9c3', absorbs: [] },
+    'orange-50': { hex: '#fff7ed', absorbs: [] },
+    'orange-200': { hex: '#ffe0b2', absorbs: [] },
+    // Custom token companions (src/utils/themeColors.js) — absorbing the pale
+    // purple/blue/green washes that got mis-clustered near pedigree-*-bg.
+    'accent-purple-bg': { hex: '#f3e8ff', absorbs: ['#ede9fe', '#f5f3ff', '#e9d5ff', '#faf5ff'] },
+    'info-bg': { hex: '#e3f2fd', absorbs: ['#dbeafe', '#e0e7ff', '#eef2ff', '#eff6ff'] },
+    'pedigree-neutral-bg': { hex: '#eef2f7', absorbs: ['#f3f6fb'] },
+    'success-green-dark': { hex: '#388e3c', absorbs: ['#218838', '#2e7d32'] },
 };
 
 const PROPERTY_PREFIX = {

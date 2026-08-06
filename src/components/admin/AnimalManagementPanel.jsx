@@ -716,7 +716,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                             onClick={() => setShowOwnerFilterDropdown(!showOwnerFilterDropdown)}
                             style={{
                                 padding: '8px 12px',
-                                border: '1px solid #ccc',
+                                border: '1px solid #d1d5db',
                                 borderRadius: '4px',
                                 backgroundColor: '#fff',
                                 cursor: 'pointer',
@@ -726,7 +726,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 fontSize: '14px'
                             }}
                         >
-                            <span style={{ color: ownerFilter ? '#000' : '#666' }}>
+                            <span style={{ color: ownerFilter ? '#111827' : '#6b7280' }}>
                                 {getOwnerFilterDisplay()}
                             </span>
                             {ownerFilter && (
@@ -744,7 +744,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 left: 0,
                                 right: 0,
                                 backgroundColor: '#fff',
-                                border: '1px solid #ccc',
+                                border: '1px solid #d1d5db',
                                 borderRadius: '4px',
                                 marginTop: '4px',
                                 maxHeight: '300px',
@@ -764,7 +764,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         width: '100%',
                                         padding: '8px',
                                         border: 'none',
-                                        borderBottom: '1px solid #eee',
+                                        borderBottom: '1px solid #f3f4f6',
                                         outline: 'none',
                                         fontSize: '14px'
                                     }}
@@ -779,7 +779,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             style={{
                                                 padding: '8px 12px',
                                                 cursor: 'pointer',
-                                                borderBottom: '1px solid #eee',
+                                                borderBottom: '1px solid #f3f4f6',
                                                 backgroundColor: ownerFilter === user.id_public ? '#f3f4f6' : '#fff',
                                                 fontSize: '14px'
                                             }}
@@ -789,7 +789,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             <div style={{ fontWeight: '500' }}>
                                                 {user.personalName || user.username || user.email}
                                             </div>
-                                            <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                                            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
                                                 {user.id_public}
                                             </div>
                                         </div>
@@ -1583,14 +1583,14 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         <div className="animal-detail-section">
                                             <h4>Photo Gallery ({(selectedAnimal.extraImages || []).length} / 20 photos)</h4>
                                             {(selectedAnimal.extraImages || []).length === 0 ? (
-                                                <div style={{textAlign: 'center', padding: '40px', color: '#999'}}>
+                                                <div style={{textAlign: 'center', padding: '40px', color: '#9ca3af'}}>
                                                     <div style={{fontSize: '48px', marginBottom: '10px'}}>📷</div>
                                                     <p>No extra photos yet. Add photos in Edit mode.</p>
                                                 </div>
                                             ) : (
                                                 <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px'}}>
                                                     {(selectedAnimal.extraImages || []).map((url, idx) => (
-                                                        <div key={idx} style={{position: 'relative', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd'}}>
+                                                        <div key={idx} style={{position: 'relative', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', border: '1px solid #d1d5db'}}>
                                                             <img src={url} alt={`Gallery ${idx + 1}`} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                                                             <span style={{position: 'absolute', bottom: '4px', left: '4px', background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '3px'}}>#{idx + 1}</span>
                                                         </div>
@@ -1606,10 +1606,10 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     <div className="tab-panel">
                                         <div className="animal-detail-section">
                                             <h4>Activity Logs</h4>
-                                            <p style={{color: '#666', fontSize: '14px', marginBottom: '10px'}}>
+                                            <p style={{color: '#6b7280', fontSize: '14px', marginBottom: '10px'}}>
                                                 Logs show feeding, care updates, and field edits for this animal.
                                             </p>
-                                            <div style={{textAlign: 'center', padding: '40px', color: '#999'}}>
+                                            <div style={{textAlign: 'center', padding: '40px', color: '#9ca3af'}}>
                                                 <div style={{fontSize: '48px', marginBottom: '10px'}}>📜</div>
                                                 <p>Activity logs are available in the user's private animal detail view.</p>
                                                 <p style={{fontSize: '12px', marginTop: '10px'}}>Moderators see animal data but not owner-specific activity logs.</p>
@@ -2977,14 +2977,14 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     <div className="edit-form">
                                         <div className="form-section">
                                             <h4 className="section-title">Photo Gallery</h4>
-                                            <p style={{fontSize: '14px', color: '#666', marginBottom: '15px'}}>
+                                            <p style={{fontSize: '14px', color: '#6b7280', marginBottom: '15px'}}>
                                                 Extra images for this animal. Currently {(editForm.extraImages || []).length} / 20 photos.
                                             </p>
-                                            <div style={{background: '#f9f9f9', border: '1px solid #ddd', borderRadius: '8px', padding: '20px', textAlign: 'center'}}>
-                                                <p style={{color: '#999', fontSize: '14px'}}>
+                                            <div style={{background: '#f9fafb', border: '1px solid #d1d5db', borderRadius: '8px', padding: '20px', textAlign: 'center'}}>
+                                                <p style={{color: '#9ca3af', fontSize: '14px'}}>
                                                     📷 Gallery management (add/remove photos) is handled through the standard animal edit interface.
                                                 </p>
-                                                <p style={{color: '#999', fontSize: '12px', marginTop: '10px'}}>
+                                                <p style={{color: '#9ca3af', fontSize: '12px', marginTop: '10px'}}>
                                                     Moderators can view gallery photos in the View tab but cannot modify them here.
                                                 </p>
                                             </div>

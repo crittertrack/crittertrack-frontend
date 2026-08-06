@@ -1031,7 +1031,7 @@ const FamilyTreeView = ({
                             const active = graphData.focusId === id;
                             const isMale = animal.gender === 'Male';
                             const isFemale = animal.gender === 'Female';
-                            const borderColor = isMale ? themeColors['info-blue'] : isFemale ? '#ec4899' : '#94a3b8';
+                            const borderColor = isMale ? themeColors['info-blue'] : isFemale ? '#ec4899' : '#9ca3af';
                             const bgColor = isMale ? themeColors['pedigree-male-bg'] : isFemale ? themeColors['pedigree-female-bg'] : '#eef2f7';
                             const displayName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed';
                             const imageSrc = animal.imageUrl || animal.photoUrl || null;

@@ -3,8 +3,8 @@
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: #fff3cd;
-    border: 1px solid #ffc107;
+    @apply bg-amber-50;
+    border: 1px solid #fbbf24 /* consolidated: amber-400 */;
     color: #856404;
     border-radius: 0.5rem;
     font-size: 14px;
@@ -16,7 +16,7 @@
 
 .report-button:hover {
     background: #ffe69c;
-    border-color: #ffb300;
+    @apply border-amber-400;
     transform: translateY(-1px);
 }
 

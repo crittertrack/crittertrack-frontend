@@ -32,7 +32,7 @@
 }
 
 .mod-auth-header {
-    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    background: linear-gradient(135deg, #dc2626 /* consolidated: red-600 */ 0%, #b91c1c /* consolidated: red-700 */ 100%);
     color: white;
     padding: 30px;
     text-align: center;
@@ -70,11 +70,11 @@
     align-items: flex-start;
     gap: 12px;
     @apply bg-page-bg;
-    border: 1px solid #ef5350;
+    border: 1px solid #ef4444 /* consolidated: red-500 */;
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 20px;
-    color: #c62828;
+    @apply text-red-700;
     font-size: 14px;
 }
 
@@ -90,7 +90,7 @@
 .form-group label {
     display: block;
     font-weight: 500;
-    color: #333;
+    @apply text-gray-800;
     margin-bottom: 8px;
     font-size: 14px;
 }
@@ -98,7 +98,7 @@
 .form-group input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #d1d5db /* consolidated: gray-300 */;
     border-radius: 8px;
     font-size: 14px;
     transition: all 0.2s;
@@ -106,13 +106,13 @@
 
 .form-group input:focus {
     outline: none;
-    border-color: #d32f2f;
+    @apply border-red-600;
     box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
 }
 
 .form-group input:disabled {
-    background: #f5f5f5;
-    color: #999;
+    @apply bg-gray-100;
+    @apply text-gray-400;
     cursor: not-allowed;
 }
 
@@ -126,7 +126,7 @@
 
 .mod-auth-2fa-info {
     text-align: center;
-    color: #666;
+    @apply text-gray-500;
     font-size: 14px;
     margin-bottom: 20px;
 }
@@ -134,7 +134,7 @@
 .mod-auth-submit {
     width: 100%;
     padding: 12px;
-    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    background: linear-gradient(135deg, #dc2626 /* consolidated: red-600 */ 0%, #b91c1c /* consolidated: red-700 */ 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -158,8 +158,8 @@
     width: 100%;
     padding: 10px;
     background: transparent;
-    color: #d32f2f;
-    border: 1px solid #e0e0e0;
+    @apply text-red-600;
+    border: 1px solid #e5e7eb /* consolidated: gray-200 */;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
@@ -168,8 +168,8 @@
 }
 
 .mod-auth-back:hover:not(:disabled) {
-    background: #f5f5f5;
-    border-color: #d32f2f;
+    @apply bg-gray-100;
+    @apply border-red-600;
 }
 
 .mod-auth-back:disabled {
@@ -213,7 +213,7 @@
 
 .mod-auth-message {
     text-align: center;
-    color: #666;
+    @apply text-gray-500;
     font-size: 15px;
     margin-bottom: 25px;
     line-height: 1.5;
@@ -223,8 +223,8 @@
     width: 100%;
     padding: 10px;
     background: transparent;
-    color: #d32f2f;
-    border: 1px solid #e0e0e0;
+    @apply text-red-600;
+    border: 1px solid #e5e7eb /* consolidated: gray-200 */;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
@@ -234,12 +234,12 @@
 }
 
 .mod-auth-resend:hover:not(:disabled) {
-    background: #fff3e0;
-    border-color: #d32f2f;
+    @apply bg-amber-50;
+    @apply border-red-600;
 }
 
 .mod-auth-resend:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    color: #999;
+    @apply text-gray-400;
 }

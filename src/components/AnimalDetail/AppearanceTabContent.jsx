@@ -112,15 +112,15 @@ export const AppearanceTabContent = ({ animal }) => {
                                         return (
                                             <g key={`grid-${i}`}>
                                                 <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
-                                                <text x={margin.left - 12} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#666">{axisLabel}</text>
+                                                <text x={margin.left - 12} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#6b7280">{axisLabel}</text>
                                             </g>
                                         );
                                     })}
-                                    <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
-                                    <text x={margin.left + graphWidth / 2} y={height - 8} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600">Date</text>
+                                    <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#1f2937" strokeWidth="2" />
+                                    <text x={margin.left + graphWidth / 2} y={height - 8} textAnchor="middle" fontSize="12" fill="#1f2937" fontWeight="600">Date</text>
                                     {weightPoints.map((p, i) => (
                                         i % Math.max(1, Math.floor(weightPoints.length / 5)) === 0 && (
-                                            <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 25} textAnchor="middle" fontSize="10" fill="#666">
+                                            <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 25} textAnchor="middle" fontSize="10" fill="#6b7280">
                                                 {formatDate(p.date)}
                                             </text>
                                         )

@@ -23,12 +23,12 @@
 .feedback-title h2 {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #1f2937;
+    @apply text-gray-800;
     margin: 0;
 }
 
 .feedback-title p {
-    color: #6b7280;
+    @apply text-gray-500;
     margin: 4px 0 0;
     font-size: 0.875rem;
 }
@@ -42,7 +42,7 @@
     border: 2px solid #e5e7eb;
     border-radius: 8px;
     font-weight: 600;
-    color: #374151;
+    @apply text-gray-700;
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -76,17 +76,17 @@
 .feedback-stat-value {
     font-size: 2rem;
     font-weight: 700;
-    color: #1f2937;
+    @apply text-gray-800;
 }
 
 .feedback-stat-label {
     font-size: 0.875rem;
-    color: #6b7280;
+    @apply text-gray-500;
     margin-top: 4px;
 }
 
 .feedback-stat-yellow {
-    background: #fefce8;
+    @apply bg-yellow-50;
     border-color: #fde047;
 }
 
@@ -95,7 +95,7 @@
 }
 
 .feedback-stat-blue {
-    background: #eff6ff;
+    @apply bg-info-bg;
     border-color: #93c5fd;
 }
 
@@ -104,12 +104,12 @@
 }
 
 .feedback-stat-green {
-    background: #f0fdf4;
+    @apply bg-green-50;
     border-color: #86efac;
 }
 
 .feedback-stat-green .feedback-stat-value {
-    color: #16a34a;
+    @apply text-green-600;
 }
 
 /* Filters */
@@ -141,7 +141,7 @@
 }
 
 .feedback-search-box svg {
-    color: #9ca3af;
+    @apply text-gray-400;
 }
 
 .feedback-filter-group {
@@ -155,7 +155,7 @@
 }
 
 .feedback-filter-group svg {
-    color: #9ca3af;
+    @apply text-gray-400;
 }
 
 .feedback-filter-group select {
@@ -172,9 +172,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #fef2f2;
+    @apply bg-red-50;
     border: 1px solid #F1D1DC /* consolidated: page-bg */;
-    color: #dc2626;
+    @apply text-red-600;
     padding: 12px 16px;
     border-radius: 8px;
     margin-bottom: 16px;
@@ -230,30 +230,30 @@
 }
 
 .feedback-status-yellow {
-    background: #fef9c3;
+    @apply bg-yellow-100;
     color: #ca8a04;
 }
 
 .feedback-status-blue {
-    background: #dbeafe;
+    @apply bg-info-bg;
     @apply text-info-indigo;
 }
 
 .feedback-status-green {
-    background: #dcfce7;
-    color: #16a34a;
+    @apply bg-green-100;
+    @apply text-green-600;
 }
 
 .feedback-status-gray {
-    background: #f3f4f6;
-    color: #6b7280;
+    @apply bg-gray-100;
+    @apply text-gray-500;
 }
 
 .feedback-date {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #6b7280;
+    @apply text-gray-500;
     font-size: 0.875rem;
 }
 
@@ -262,8 +262,8 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    background: #faf5ff;
-    border: 1px solid #e9d5ff;
+    @apply bg-accent-purple-bg;
+    border: 1px solid #f3e8ff /* consolidated: accent-purple-bg */;
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 16px;
@@ -284,7 +284,7 @@
     display: block;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #6b7280;
+    @apply text-gray-500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -292,7 +292,7 @@
 .genetics-value {
     display: block;
     font-size: 0.9375rem;
-    color: #1f2937;
+    @apply text-gray-800;
     font-weight: 500;
     margin-top: 2px;
 }
@@ -308,13 +308,13 @@
 }
 
 .feedback-content svg {
-    color: #9ca3af;
+    @apply text-gray-400;
     margin-top: 2px;
     flex-shrink: 0;
 }
 
 .feedback-content p {
-    color: #374151;
+    @apply text-gray-700;
     line-height: 1.6;
     margin: 0;
 }
@@ -331,12 +331,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #6b7280;
+    @apply text-gray-500;
     font-size: 0.875rem;
 }
 
 .feedback-user-email {
-    color: #9ca3af;
+    @apply text-gray-400;
 }
 
 /* Expanded Section */
@@ -346,12 +346,12 @@
 
 .feedback-divider {
     height: 1px;
-    background: #e5e7eb;
+    @apply bg-gray-200;
     margin-bottom: 16px;
 }
 
 .feedback-admin-notes-display {
-    background: #f9fafb;
+    @apply bg-gray-50;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     padding: 12px;
@@ -359,13 +359,13 @@
 }
 
 .feedback-admin-notes-display strong {
-    color: #374151;
+    @apply text-gray-700;
     display: block;
     margin-bottom: 4px;
 }
 
 .feedback-admin-notes-display p {
-    color: #6b7280;
+    @apply text-gray-500;
     margin: 0;
 }
 
@@ -373,7 +373,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #6b7280;
+    @apply text-gray-500;
     font-size: 0.875rem;
     margin-bottom: 16px;
 }
@@ -385,7 +385,7 @@
 .feedback-action-section label {
     display: block;
     font-weight: 600;
-    color: #374151;
+    @apply text-gray-700;
     margin-bottom: 8px;
 }
 
@@ -429,7 +429,7 @@
 }
 
 .feedback-btn-review {
-    background: #dbeafe;
+    @apply bg-info-bg;
     @apply text-info-indigo;
 }
 
@@ -438,45 +438,45 @@
 }
 
 .feedback-btn-resolve {
-    background: #dcfce7;
-    color: #16a34a;
+    @apply bg-green-100;
+    @apply text-green-600;
 }
 
 .feedback-btn-resolve:hover:not(:disabled) {
-    background: #bbf7d0;
+    @apply bg-green-200;
 }
 
 .feedback-btn-dismiss {
-    background: #f3f4f6;
-    color: #6b7280;
+    @apply bg-gray-100;
+    @apply text-gray-500;
 }
 
 .feedback-btn-dismiss:hover:not(:disabled) {
-    background: #e5e7eb;
+    @apply bg-gray-200;
 }
 
 /* Empty State */
 .feedback-empty-state {
     text-align: center;
     padding: 60px 20px;
-    background: #f9fafb;
+    @apply bg-gray-50;
     border-radius: 12px;
     border: 1px dashed #d1d5db;
 }
 
 .feedback-empty-state svg {
-    color: #d1d5db;
+    @apply text-gray-300;
     margin-bottom: 16px;
 }
 
 .feedback-empty-state h3 {
     font-size: 1.25rem;
-    color: #374151;
+    @apply text-gray-700;
     margin: 0 0 8px;
 }
 
 .feedback-empty-state p {
-    color: #6b7280;
+    @apply text-gray-500;
     margin: 0;
 }
 
@@ -488,7 +488,7 @@
     justify-content: center;
     padding: 60px 20px;
     gap: 16px;
-    color: #6b7280;
+    @apply text-gray-500;
 }
 
 /* Animations */

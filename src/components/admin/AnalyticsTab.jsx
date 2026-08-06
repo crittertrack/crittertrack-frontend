@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import themeColors from '../../utils/themeColors';
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#f97316', '#00C49F', '#fbbf24', '#FF8042'];
 
 const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
     const [loading, setLoading] = useState(true);
@@ -276,8 +276,8 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
                                     type="monotone" 
                                     dataKey="suspensions" 
                                     stackId="1"
-                                    stroke="#ff7300" 
-                                    fill="#ff7300" 
+                                    stroke="#f97316"
+                                    fill="#f97316"
                                     fillOpacity={0.6}
                                     name="Suspensions"
                                 />

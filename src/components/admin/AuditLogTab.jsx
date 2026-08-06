@@ -100,13 +100,13 @@ export default function AuditLogTab({ API_BASE_URL, authToken }) {
 
     const getActionBadgeColor = (action) => {
         if (action.includes('deleted') || action.includes('banned') || action.includes('removed')) {
-            return '#f44336'; // Red
+            return '#dc2626'; // Red
         }
         if (action.includes('suspended') || action.includes('warned') || action.includes('hidden')) {
-            return '#ff9800'; // Orange
+            return '#f59e0b'; // Orange
         }
         if (action.includes('activated') || action.includes('restored') || action.includes('resolved')) {
-            return '#4caf50'; // Green
+            return '#16a34a'; // Green
         }
         return '#2196f3'; // Blue
     };

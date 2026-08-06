@@ -282,7 +282,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
     const _savedPrefs = (() => { try { return JSON.parse(localStorage.getItem('ct_cert_prefs') || '{}'); } catch { return {}; } })();
     const [certTextTopRight, setCertTextTopRight] = useState(_savedPrefs.certTextTopRight ?? 'Certificate of Origin');
     const [certTextBottomLeft, setCertTextBottomLeft] = useState(_savedPrefs.certTextBottomLeft ?? 'This pedigree is not recognized by the state');
-    const [certFontColor, setCertFontColor] = useState(_savedPrefs.certFontColor ?? '#1a1a1a');
+    const [certFontColor, setCertFontColor] = useState(_savedPrefs.certFontColor ?? '#111827');
     const [certBorderColor, setCertBorderColor] = useState(_savedPrefs.certBorderColor ?? '#374151');
     const [certBgColor, setCertBgColor] = useState(_savedPrefs.certBgColor ?? '#ffffff');
     const [certBgImage, setCertBgImage] = useState(_savedPrefs.certBgImage ?? null);
@@ -954,10 +954,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
           iconSize = genIndex === 2 ? 18 : 16;
         }
         const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
-        const borderColor = (!animal || animal.isHidden) ? (isSire ? '#76a7ff' : '#f48abf')
+        const borderColor = (!animal || animal.isHidden) ? (isSire ? '#79a9ff' : '#f48abf')
             : animal.gender === 'Male' ? themeColors['info-blue']
             : animal.gender === 'Female' ? '#f48abf'
-            : (inlineMode ? '#94a3b8' : certBorderColor);
+            : (inlineMode ? '#9ca3af' : certBorderColor);
 
         const bgColor = (!animal || animal.isHidden) ? (isSire ? themeColors['pedigree-male-bg'] : themeColors['pedigree-female-bg'])
             : (!animal.isHidden && !animal.gender) ? (isSire ? themeColors['pedigree-male-bg'] : themeColors['pedigree-female-bg'])
@@ -1202,27 +1202,27 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         <table style={{ borderCollapse: 'collapse', fontSize: '0.7rem' }}>
                             <tbody>
                                 <tr>
-                                    <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
+                                    <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
                                     <td style={{ color: certFontColor }}>{litter.birthDate ? formatDate(litter.birthDate) : '—'}</td>
                                 </tr>
                                 {litter.birthMethod && litter.birthMethod !== 'Unknown' && (
                                     <tr>
-                                        <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth Method:</td>
+                                        <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth Method:</td>
                                         <td style={{ color: certFontColor }}>{litter.birthMethod}</td>
                                     </tr>
                                 )}
                                 {litter.matingDate && (
                                     <tr>
-                                        <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Mated:</td>
+                                        <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Mated:</td>
                                         <td style={{ color: certFontColor }}>{formatDate(litter.matingDate)}</td>
                                     </tr>
                                 )}
                                 <tr>
-                                    <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>COI:</td>
+                                    <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>COI:</td>
                                     <td style={{ color: certFontColor }}>{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</td>
                                 </tr>
                                 <tr>
-                                    <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Born:</td>
+                                    <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Born:</td>
                                     <td style={{ color: certFontColor }}>
                                         {totalBorn != null ? totalBorn : '—'}
                                         {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
@@ -1238,7 +1238,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 </tr>
                                 {(litter.litterSizeWeaned != null || litter.lossesCount != null || litter.stillbornCount != null) && (
                                     <tr>
-                                        <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Weaned:</td>
+                                        <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Weaned:</td>
                                         <td style={{ color: certFontColor }}>
                                             {litter.litterSizeWeaned ?? '—'}
                                             {litter.stillbornCount != null && (
@@ -1252,7 +1252,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 )}
                                 {litter.breedingMethod && litter.breedingMethod !== 'Unknown' && (
                                     <tr>
-                                        <td style={{ color: '#000000', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Method:</td>
+                                        <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Method:</td>
                                         <td style={{ color: certFontColor }}>{litter.breedingMethod}</td>
                                     </tr>
                                 )}
@@ -1330,25 +1330,25 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         const isMale = animal.gender === 'Male';
         const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;
-        const cardBg = isMale ? themeColors['pedigree-male-bg'] : isFemale ? themeColors['pedigree-female-bg'] : '#f3f6fb';
+        const cardBg = isMale ? themeColors['pedigree-male-bg'] : isFemale ? themeColors['pedigree-female-bg'] : '#eef2f7';
         const cardBorder = isMale ? '#79a9ff' : isFemale ? '#f48abf' : '#b9c7db';
 
         return (
             <div style={{ backgroundColor: cardBg, border: `1.5px solid ${cardBorder}`, borderRadius: 10, padding: '10px', boxSizing: 'border-box', position: 'relative' }}>
                 <div style={{ position: 'absolute', top: 8, right: 8 }}><GenderIcon size={18} color={isMale ? themeColors['info-blue'] : isFemale ? '#934E69' : '#64748b'} /></div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <div style={{ width: 86, height: 86, flexShrink: 0, overflow: 'hidden', borderRadius: 10, border: '1px solid #c9d5e6', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 86, height: 86, flexShrink: 0, overflow: 'hidden', borderRadius: 10, border: '1px solid #c9d5e6', backgroundColor: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {imgSrc ? (
                             <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={34} />
                         ) : (
-                            <Cat size={34} style={{ color: '#94a3b8' }} />
+                            <Cat size={34} style={{ color: '#9ca3af' }} />
                         )}
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.15, overflowWrap: 'anywhere', paddingRight: 20 }}>{fullName || 'Unknown'}</div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#111827', lineHeight: 1.15, overflowWrap: 'anywhere', paddingRight: 20 }}>{fullName || 'Unknown'}</div>
                         {variety && <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: 2, lineHeight: 1.2, overflowWrap: 'anywhere' }}>{variety}</div>}
                         {animal.birthDate && <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 3 }}>{formatDate(animal.birthDate)}</div>}
-                        {animal.id_public && <div style={{ fontSize: '0.7rem', color: '#334155', fontFamily: 'monospace', marginTop: 4 }}>{animal.id_public}</div>}
+                        {animal.id_public && <div style={{ fontSize: '0.7rem', color: '#374151', fontFamily: 'monospace', marginTop: 4 }}>{animal.id_public}</div>}
                     </div>
                 </div>
             </div>
@@ -1452,7 +1452,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             <div style={{ position: 'relative', width: worldW, height: worldH }}>
                 <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
                     {edgePaths.map((d, i) => (
-                        <path key={i} d={d} fill="none" stroke="#8ea0ba" strokeWidth="2" strokeLinecap="round" />
+                        <path key={i} d={d} fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" />
                     ))}
                 </svg>
 
@@ -1464,8 +1464,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     const imgSrc = a && !a.isHidden ? (a.imageUrl || a.photoUrl || null) : null;
                     const isMale = a?.gender === 'Male' || (a?.gender !== 'Female' && n.isSire === true);
                     const isFemale = a?.gender === 'Female' || (a?.gender !== 'Male' && n.isSire === false);
-                    const borderColor = isUnknown ? '#94a3b8' : isMale ? themeColors['info-blue'] : isFemale ? '#934E69' : '#64748b';
-                    const bgColor = isUnknown ? '#e5e7eb' : '#f8fafc';
+                    const borderColor = isUnknown ? '#9ca3af' : isMale ? themeColors['info-blue'] : isFemale ? '#934E69' : '#64748b';
+                    const bgColor = isUnknown ? '#e5e7eb' : '#f9fafb';
                     const fullName = a && !a.isHidden ? [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') : 'Unknown';
                     const clickable = !!(a && !a.isHidden && a.id_public);
 
@@ -1487,14 +1487,14 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 }}
                                 title={fullName}
                             >
-                                <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#f1f5f9' }}>
+                                <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#f3f4f6' }}>
                                     {imgSrc ? (
                                         <AnimalImage src={imgSrc} alt={fullName} className="w-full h-full object-cover" iconSize={24} />
                                     ) : (
-                                        <Cat size={32} style={{ color: '#94a3b8' }} />
+                                        <Cat size={32} style={{ color: '#9ca3af' }} />
                                     )}
                                 </div>
-                                <div style={{ width: '100%', background: 'rgba(255,255,255,0.95)', borderTop: '1px solid #cbd5e1', fontSize: '0.60rem', color: '#0f172a', fontWeight: 700, textAlign: 'center', padding: '2px 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ width: '100%', background: 'rgba(255,255,255,0.95)', borderTop: '1px solid #d1d5db', fontSize: '0.60rem', color: '#111827', fontWeight: 700, textAlign: 'center', padding: '2px 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {fullName}
                                 </div>
                             </div>

@@ -134,7 +134,7 @@ export const buildTreeGraph = (animals, relationships = [], config = {}) => {
                 target: rel.to,
                 markerEnd: { type: 'arrowclosed' },
                 animated: false,
-                style: { stroke: '#cbd5e1' }
+                style: { stroke: '#d1d5db' }
             });
             addedEdges.add(edgeKey);
         }

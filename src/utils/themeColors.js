@@ -33,10 +33,29 @@ module.exports = {
   // Male pedigree/family-tree card background — was #e8f1ff / #dbeafe.
   'pedigree-male-bg': '#e8f1ff',
   // Pale purple wash paired with accent-purple text/borders (litter cards, species badges).
+  // Also absorbs #ede9fe / #f5f3ff / #e9d5ff / #faf5ff (colors.md §3) — all pale
+  // purple/violet washes that were mis-clustered near pedigree-female-bg/pedigree-male-bg
+  // purely by Delta-E-near-white coincidence; they actually pair with accent-purple text.
   'accent-purple-bg': '#f3e8ff',
 
   // Blue family (status badges, buttons, links across admin/moderation panels).
   'info-indigo': '#6366f1', // was #6366f1 / #2563eb
   'info-blue': '#3b82f6', // was #3b82f6 / #007bff / #667eea
   'info-blue-dark': '#1976d2', // was #1976d2 / #1565c0 / #0056b3 / #0d47a1
+  // Pale blue/indigo "info" background paired with info-indigo/info-blue-dark text —
+  // was #dbeafe / #e0e7ff / #eef2ff / #eff6ff. Kept separate from pedigree-male-bg
+  // (which is specifically for gender-based pedigree/family-tree cards) even though
+  // Delta-E flagged them as close, since these serve a different semantic purpose
+  // (status badges, hover states) in completely unrelated components.
+  'info-bg': '#e3f2fd',
+
+  // Neutral (unknown-gender) pedigree/family-tree card background — the third
+  // fallback color alongside pedigree-male-bg/pedigree-female-bg. Two different
+  // files independently hand-typed the same intent as slightly different hexes.
+  'pedigree-neutral-bg': '#eef2f7',
+
+  // Darker green accent for "resolved"/"unhide" status text and borders — close to
+  // but not an exact match for Tailwind's green-700, so it gets its own token
+  // rather than being folded into the built-in scale. Was #388e3c / #218838 / #2e7d32.
+  'success-green-dark': '#388e3c',
 };

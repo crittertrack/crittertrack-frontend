@@ -4142,15 +4142,15 @@ const AnimalFormModalV2 = ({
                                                             return (
                                                                 <g key={`weight-grid-${i}`}>
                                                                     <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
-                                                                    <text x={margin.left - 10} y={y} textAnchor="end" dy="0.3em" fontSize="10" fill="#666">{axisLabel}</text>
+                                                                    <text x={margin.left - 10} y={y} textAnchor="end" dy="0.3em" fontSize="10" fill="#6b7280">{axisLabel}</text>
                                                                 </g>
                                                             );
                                                         })}
                                                         <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke={themeColors['info-blue']} strokeWidth="2" />
-                                                        <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                                        <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#1f2937" strokeWidth="2" />
                                                         {points.map((p, i) => (
                                                             i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
-                                                                <text key={`weight-date-${i}`} x={p.x} y={height - margin.bottom + 16} textAnchor="middle" fontSize="9" fill="#666">
+                                                                <text key={`weight-date-${i}`} x={p.x} y={height - margin.bottom + 16} textAnchor="middle" fontSize="9" fill="#6b7280">
                                                                     {new Date(p.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                                 </text>
                                                             )

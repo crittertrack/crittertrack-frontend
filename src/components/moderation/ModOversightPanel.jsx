@@ -33,23 +33,23 @@ const DATE_PRESETS = [
 ];
 
 const STATUS_BADGE_COLORS = {
-    pending: '#ff6f00',
+    pending: '#f97316',
     in_progress: themeColors['accent-purple-dark'],
     reviewed: themeColors['info-blue-dark'],
     resolved: '#388e3c',
-    dismissed: '#757575'
+    dismissed: '#6b7280'
 };
 
 const CATEGORY_BADGE_COLORS = {
-    'Inappropriate/Offensive Content': '#f44336',
+    'Inappropriate/Offensive Content': '#dc2626',
     'Harassment or Bullying': '#e91e63',
-    'Spam': '#ff9800',
+    'Spam': '#f59e0b',
     'Copyright/Licensing Violation': themeColors['accent-purple-dark'],
     'Community Guidelines Violation': '#2196f3',
-    Bug: '#d32f2f',
+    Bug: '#dc2626',
     'Feature Request': '#00897b',
     'General Feedback': '#5c6bc0',
-    Other: '#757575'
+    Other: '#6b7280'
 };
 
 const parseReason = (reason = '') => {
@@ -621,7 +621,7 @@ export default function ModOversightPanel({
     };
 
     const getCategoryBadgeColor = (label) => CATEGORY_BADGE_COLORS[label] || CATEGORY_BADGE_COLORS.Other;
-    const getStatusBadgeColor = (status) => STATUS_BADGE_COLORS[status] || '#666';
+    const getStatusBadgeColor = (status) => STATUS_BADGE_COLORS[status] || '#6b7280';
 
     const handleSelectReport = (report) => {
         setSelectedReport(report);
@@ -896,7 +896,7 @@ export default function ModOversightPanel({
                                                         objectFit: 'cover', 
                                                         borderRadius: '8px',
                                                         flexShrink: 0,
-                                                        border: '1px solid #e0e0e0'
+                                                        border: '1px solid #e5e7eb'
                                                     }} 
                                                 />
                                             )}
@@ -936,7 +936,7 @@ export default function ModOversightPanel({
                                                 {getContentOwnerDetails(selectedReport).bio && (
                                                     <div className="mod-detail-item" style={{ marginTop: '8px' }}>
                                                         <span className="mod-detail-label">Bio:</span>
-                                                        <p style={{ margin: '4px 0 0', padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px', whiteSpace: 'pre-wrap', fontSize: '13px' }}>
+                                                        <p style={{ margin: '4px 0 0', padding: '8px', backgroundColor: '#f3f4f6', borderRadius: '4px', whiteSpace: 'pre-wrap', fontSize: '13px' }}>
                                                             {getContentOwnerDetails(selectedReport).bio}
                                                         </p>
                                                     </div>
@@ -953,11 +953,11 @@ export default function ModOversightPanel({
                                     <div className="mod-detail-section">
                                         <strong>Reported Animal:</strong>
                                         <div style={{ 
-                                            backgroundColor: '#f5f5f5', 
+                                            backgroundColor: '#f3f4f6', 
                                             padding: '12px', 
                                             borderRadius: '8px', 
                                             marginTop: '8px',
-                                            border: '1px solid #e0e0e0'
+                                            border: '1px solid #e5e7eb'
                                         }}>
                                             {/* Header with image and basic info */}
                                             <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', marginBottom: '12px' }}>
@@ -976,11 +976,11 @@ export default function ModOversightPanel({
                                                 )}
                                                 <div style={{ flex: 1 }}>
                                                     <p style={{ margin: 0, fontWeight: 'bold', fontSize: '16px' }}>
-                                                        {animal.prefix && <span style={{ color: '#666' }}>{animal.prefix} </span>}
+                                                        {animal.prefix && <span style={{ color: '#6b7280' }}>{animal.prefix} </span>}
                                                         {animal.name || 'Unnamed'}
-                                                        {animal.suffix && <span style={{ color: '#666' }}> {animal.suffix}</span>}
+                                                        {animal.suffix && <span style={{ color: '#6b7280' }}> {animal.suffix}</span>}
                                                     </p>
-                                                    <p style={{ margin: '4px 0', fontSize: '13px', color: '#666' }}>
+                                                    <p style={{ margin: '4px 0', fontSize: '13px', color: '#6b7280' }}>
                                                         ID: <span style={{ fontFamily: 'monospace' }}>{animal.id_public || 'N/A'}</span>
                                                         {animal.breederAssignedId && <span> · Breedery: {animal.breederAssignedId}</span>}
                                                     </p>
@@ -996,7 +996,7 @@ export default function ModOversightPanel({
                                                             </span>
                                                         )}
                                                         {animal.status && (
-                                                            <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#fff3e0', borderRadius: '4px' }}>
+                                                            <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#fffbeb', borderRadius: '4px' }}>
                                                                 {animal.status}
                                                             </span>
                                                         )}
@@ -1097,17 +1097,17 @@ export default function ModOversightPanel({
                                     <div className="mod-detail-section">
                                         <strong>Feedback Details:</strong>
                                         <div style={{
-                                            backgroundColor: '#f5f5f5',
+                                            backgroundColor: '#f3f4f6',
                                             padding: '12px',
                                             borderRadius: '8px',
                                             marginTop: '8px',
-                                            border: '1px solid #e0e0e0'
+                                            border: '1px solid #e5e7eb'
                                         }}>
                                             {selectedReport.page && (
                                                 <p style={{ margin: '0 0 8px', fontSize: '13px' }}><strong>Page:</strong> {selectedReport.page}</p>
                                             )}
                                             {selectedReport.referenceId && (
-                                                <p style={{ margin: '0 0 8px', fontSize: '13px' }}><strong>Reference ID:</strong> {selectedReport.referenceId} <span style={{ color: '#888' }}>(user marked this as a follow-up)</span></p>
+                                                <p style={{ margin: '0 0 8px', fontSize: '13px' }}><strong>Reference ID:</strong> {selectedReport.referenceId} <span style={{ color: '#9ca3af' }}>(user marked this as a follow-up)</span></p>
                                             )}
                                             {selectedReport.stepsToReproduce && (
                                                 <div style={{ marginBottom: '8px', fontSize: '13px' }}>
@@ -1126,7 +1126,7 @@ export default function ModOversightPanel({
                                                                 <img
                                                                     src={url}
                                                                     alt={`Attachment ${idx + 1}`}
-                                                                    style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0e0e0' }}
+                                                                    style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e5e7eb' }}
                                                                 />
                                                             </a>
                                                         ))}
@@ -1134,7 +1134,7 @@ export default function ModOversightPanel({
                                                 </div>
                                             )}
                                             {selectedReport.browserInfo && (
-                                                <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                                                <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>
                                                     {[selectedReport.browserInfo.platform, selectedReport.browserInfo.language, selectedReport.browserInfo.screenResolution].filter(Boolean).join(' · ')}
                                                 </p>
                                             )}
@@ -1147,16 +1147,16 @@ export default function ModOversightPanel({
                                     <div className="mod-detail-section">
                                         <strong>Reported Message:</strong>
                                         <div className="mod-message-content" style={{ 
-                                            backgroundColor: '#f5f5f5', 
+                                            backgroundColor: '#f3f4f6', 
                                             padding: '12px', 
                                             borderRadius: '8px', 
                                             marginTop: '8px',
-                                            border: '1px solid #e0e0e0'
+                                            border: '1px solid #e5e7eb'
                                         }}>
                                             <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
                                                 {selectedReport.messageId?.message || 'Message content unavailable'}
                                             </p>
-                                            <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#666' }}>
+                                            <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#6b7280' }}>
                                                 Sent: {selectedReport.messageId?.createdAt ? new Date(selectedReport.messageId.createdAt).toLocaleString() : 'Unknown'}
                                             </p>
                                         </div>
@@ -1174,15 +1174,15 @@ export default function ModOversightPanel({
                                                     padding: '10px', 
                                                     borderRadius: '8px', 
                                                     marginBottom: '8px',
-                                                    border: '1px solid #e0e0e0'
+                                                    border: '1px solid #e5e7eb'
                                                 }}>
-                                                    <p style={{ margin: 0, fontSize: '11px', color: '#666', fontWeight: 'bold' }}>
+                                                    <p style={{ margin: 0, fontSize: '11px', color: '#6b7280', fontWeight: 'bold' }}>
                                                         {msg.senderId?.toString() === selectedReport.reportedUserId?._id?.toString() ? '⚠️ Reported User' : 'Reporter'}
                                                     </p>
                                                     <p style={{ margin: '4px 0', whiteSpace: 'pre-wrap' }}>
                                                         {msg.message}
                                                     </p>
-                                                    <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#888' }}>
+                                                    <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#9ca3af' }}>
                                                         {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : 'Unknown time'}
                                                     </p>
                                                 </div>
@@ -1198,11 +1198,11 @@ export default function ModOversightPanel({
                                         <div className="mod-detail-section">
                                             <strong>Reported Rating:</strong>
                                             <div style={{
-                                                backgroundColor: '#f5f5f5',
+                                                backgroundColor: '#f3f4f6',
                                                 padding: '12px',
                                                 borderRadius: '8px',
                                                 marginTop: '8px',
-                                                border: '1px solid #e0e0e0'
+                                                border: '1px solid #e5e7eb'
                                             }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                                                     <div style={{ display: 'flex', gap: '2px' }}>
@@ -1212,14 +1212,14 @@ export default function ModOversightPanel({
                                                     </div>
                                                     <span style={{ fontWeight: 'bold', fontSize: '14px' }}>{r.score}/5</span>
                                                 </div>
-                                                <div style={{ fontSize: '13px', color: '#555', marginBottom: '4px' }}>
+                                                <div style={{ fontSize: '13px', color: '#4b5563', marginBottom: '4px' }}>
                                                     <strong>Rated by:</strong> {r.raterName || r.raterId_public || 'Unknown'}
                                                 </div>
-                                                <div style={{ fontSize: '13px', color: '#555', marginBottom: '8px' }}>
+                                                <div style={{ fontSize: '13px', color: '#4b5563', marginBottom: '8px' }}>
                                                     <strong>Target breeder:</strong> {selectedReport.targetId_public || r.targetId_public || 'Unknown'}
                                                 </div>
                                                 {r.comment?.trim() && (
-                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', fontSize: '13px', whiteSpace: 'pre-wrap', border: '1px solid #e0e0e0' }}>
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', fontSize: '13px', whiteSpace: 'pre-wrap', border: '1px solid #e5e7eb' }}>
                                                         {r.comment}
                                                     </div>
                                                 )}
@@ -1274,14 +1274,14 @@ export default function ModOversightPanel({
                                             </button>
                                             <button
                                                 className="mod-action-btn"
-                                                style={{ backgroundColor: '#fff3e0', borderColor: '#f57c00', color: '#e65100' }}
+                                                style={{ backgroundColor: '#fffbeb', borderColor: '#f97316', color: '#ea580c' }}
                                                 onClick={() => openUserActionModal('warn')}
                                                 disabled={actionLoading}
                                             >
                                                 ⚠️ Warn User
                                             </button>
                                         </div>
-                                        <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>
+                                        <p style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>
                                             Targeting: <strong>{getContentOwnerUserInfo(selectedReport)?.userName}</strong>
                                         </p>
                                     </div>
@@ -1289,12 +1289,12 @@ export default function ModOversightPanel({
 
                                 {/* Warn/Inform Modal */}
                                 {userActionModal && (
-                                    <div style={{ margin: '12px 0', padding: '14px', backgroundColor: userActionModal.mode === 'warn' ? '#fff8e1' : '#e3f2fd', border: `1px solid ${userActionModal.mode === 'warn' ? '#f57c00' : themeColors['info-blue-dark']}`, borderRadius: '8px' }}>
+                                    <div style={{ margin: '12px 0', padding: '14px', backgroundColor: userActionModal.mode === 'warn' ? '#fffbeb' : '#e3f2fd', border: `1px solid ${userActionModal.mode === 'warn' ? '#f97316' : themeColors['info-blue-dark']}`, borderRadius: '8px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                             <strong style={{ fontSize: '14px' }}>
                                                 {userActionModal.mode === 'warn' ? '⚠️ Issue Warning' : '💬 Inform User'} — {userActionModal.userName}
                                             </strong>
-                                            <button onClick={() => setUserActionModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', color: '#666' }}>✕</button>
+                                            <button onClick={() => setUserActionModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', color: '#6b7280' }}>✕</button>
                                         </div>
                                         <textarea
                                             value={userActionText}
@@ -1302,18 +1302,18 @@ export default function ModOversightPanel({
                                             placeholder={userActionModal.mode === 'warn' ? 'Reason for warning...' : 'Message to send to the user...'}
                                             rows={4}
                                             maxLength={1000}
-                                            style={{ width: '100%', boxSizing: 'border-box', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '13px', resize: 'vertical' }}
+                                            style={{ width: '100%', boxSizing: 'border-box', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '13px', resize: 'vertical' }}
                                         />
                                         {userActionSuccess && <p style={{ color: '#388e3c', fontSize: '13px', margin: '6px 0 0' }}>{userActionSuccess}</p>}
                                         <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                                             <button
                                                 onClick={handleUserAction}
                                                 disabled={userActionLoading || !userActionText.trim()}
-                                                style={{ padding: '6px 16px', backgroundColor: userActionModal.mode === 'warn' ? '#f57c00' : themeColors['info-blue-dark'], color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', opacity: (!userActionText.trim() || userActionLoading) ? 0.6 : 1 }}
+                                                style={{ padding: '6px 16px', backgroundColor: userActionModal.mode === 'warn' ? '#f97316' : themeColors['info-blue-dark'], color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', opacity: (!userActionText.trim() || userActionLoading) ? 0.6 : 1 }}
                                             >
                                                 {userActionLoading ? 'Sending...' : (userActionModal.mode === 'warn' ? 'Issue Warning' : 'Send Message')}
                                             </button>
-                                            <button onClick={() => setUserActionModal(null)} style={{ padding: '6px 14px', background: 'none', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>Cancel</button>
+                                            <button onClick={() => setUserActionModal(null)} style={{ padding: '6px 14px', background: 'none', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>Cancel</button>
                                         </div>
                                     </div>
                                 )}
@@ -1348,11 +1348,11 @@ export default function ModOversightPanel({
                                         {STATUS_FILTERS.filter((status) => status.value !== 'all').map((status) => {
                                             const isActive = selectedReport.status === status.value;
                                             const statusColors = {
-                                                pending: { bg: '#fff3e0', border: '#ff6f00', text: '#e65100' },
+                                                pending: { bg: '#fffbeb', border: '#f97316', text: '#ea580c' },
                                                 in_progress: { bg: themeColors['page-bg'], border: themeColors['accent-purple-dark'], text: themeColors['accent-purple-dark'] },
                                                 reviewed: { bg: '#e3f2fd', border: themeColors['info-blue-dark'], text: themeColors['info-blue-dark'] },
-                                                resolved: { bg: '#e8f5e9', border: '#388e3c', text: '#1b5e20' },
-                                                dismissed: { bg: '#f5f5f5', border: '#757575', text: '#424242' }
+                                                resolved: { bg: '#f0fdf4', border: '#388e3c', text: '#166534' },
+                                                dismissed: { bg: '#f3f4f6', border: '#6b7280', text: '#374151' }
                                             };
                                             const colors = statusColors[status.value] || statusColors.pending;
                                             
