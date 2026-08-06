@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { BookOpen, Search, ExternalLink, X, Loader2, Tag, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookOpen, Search, ExternalLink, X, Loader2, Tag, ChevronDown, ChevronUp, Mail } from 'lucide-react';
 
 const ResourcesPage = ({ API_BASE_URL }) => {
     const [resources, setResources] = useState([]);
@@ -120,12 +120,21 @@ const ResourcesPage = ({ API_BASE_URL }) => {
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-6 dark:bg-dark-bg min-h-screen">
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
-                    <BookOpen className="text-accent" />
-                    Helpful Resources
-                </h1>
-                <p className="text-gray-600 dark:text-dark-text-secondary mt-1">A curated directory of external links for care, health, genetics, and more.</p>
+            <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
+                        <BookOpen className="text-accent" />
+                        Helpful Resources
+                    </h1>
+                    <p className="text-gray-600 dark:text-dark-text-secondary mt-1">A curated directory of external links for care, health, genetics, and more.</p>
+                </div>
+                <a
+                    href="mailto:CrittertrackOwner@gmail.com?subject=Resource%20Suggestion&body=I'd%20like%20to%20suggest%20a%20resource%20to%20add%3A%0D%0A%0D%0ATitle%3A%0D%0AURL%3A%0D%0ANotes%3A"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 border border-primary text-primary dark:text-accent dark:border-accent rounded-lg text-sm font-medium hover:bg-primary hover:text-white dark:hover:bg-accent dark:hover:text-dark-bg transition whitespace-nowrap"
+                >
+                    <Mail size={16} />
+                    Suggest a Resource
+                </a>
             </div>
 
             {/* Search */}
