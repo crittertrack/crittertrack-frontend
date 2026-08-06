@@ -233,7 +233,7 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
 ﻿const ProfileImagePlaceholder = ({ url, onFileChange, disabled }) => (
     <div className="flex flex-col items-center space-y-3">
         <div 
-            className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner cursor-pointer" 
+            className="w-24 h-24 bg-gray-200 dark:bg-dark-surface rounded-lg flex items-center justify-center text-gray-500 dark:text-dark-text-muted overflow-hidden shadow-inner cursor-pointer" 
             onClick={() => !disabled && document.getElementById('profileImageInput').click()}
         >
             {url ? (
@@ -282,12 +282,12 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
             <div className="flex gap-1 mb-1.5">
                 <button type="button" disabled={disabled}
                     onMouseDown={(e) => { e.preventDefault(); applyFormat('**', '**'); }}
-                    className="px-2 py-0.5 text-xs font-bold border border-gray-300 rounded bg-white hover:bg-gray-100 disabled:opacity-40 transition leading-5"
+                    className="px-2 py-0.5 text-xs font-bold border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text disabled:opacity-40 transition leading-5"
                     title="Bold (**text**)"
                 >B</button>
                 <button type="button" disabled={disabled}
                     onMouseDown={(e) => { e.preventDefault(); applyFormat('*', '*'); }}
-                    className="px-2 py-0.5 text-xs italic border border-gray-300 rounded bg-white hover:bg-gray-100 disabled:opacity-40 transition leading-5"
+                    className="px-2 py-0.5 text-xs italic border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text disabled:opacity-40 transition leading-5"
                     title="Italic (*text*)"
                 >I</button>
             </div>
@@ -861,15 +861,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     };
 
     return (
-        <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-                <h2 className="text-3xl font-bold text-gray-800 flex items-center">
+        <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg">
+            <div className="flex justify-between items-center mb-6 border-b dark:border-dark-text pb-4">
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center">
                     <Settings size={24} className="mr-3 text-primary-dark" />
                     Edit Profile
                 </h2>
                 <button 
                     onClick={onCancel} 
-                    className="flex items-center text-gray-600 hover:text-gray-800 transition" 
+                    className="flex items-center text-gray-600 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text transition" 
                     disabled={profileLoading || securityLoading || passwordLoading}
                 >
                     <ArrowLeft size={18} className="mr-1" /> Back to Profile
@@ -877,7 +877,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
             
             {/* Settings Tabs */}
-            <div className="flex flex-wrap border-b border-gray-200 mb-6">
+            <div className="flex flex-wrap border-b border-gray-200 dark:border-dark-border mb-6">
                 {[
                     { id: 'profile',         label: 'Profile' },
                     { id: 'info-adoption',   label: 'Info & Adoption' },
@@ -891,7 +891,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         key={tab.id} 
                         to={tab.id === 'profile' ? '' : tab.id}
                         end={tab.id === 'profile'}
-                        className={({ isActive }) => `px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={({ isActive }) => `px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-accent text-accent' : 'border-transparent text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:border-gray-300 dark:hover:border-dark-border'}`}
                     >
                         {tab.label}
                     </NavLink>
@@ -899,8 +899,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
 
             {activeTab === 'profile' && <>
-            <form id="profile-info-form" onSubmit={handleProfileUpdate} className="space-y-6 mb-4 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
-                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Public Profile Information</h3>
+            <form id="profile-info-form" onSubmit={handleProfileUpdate} className="space-y-6 mb-4 p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface overflow-x-hidden">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2">Public Profile Information</h3>
                 
                 <div data-tutorial-target="profile-image-upload">
                     <ProfileImagePlaceholder 
@@ -913,15 +913,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 <div className="space-y-4 min-w-0">
                     <div data-tutorial-target="name-fields" className="space-y-4">
                         <input type="text" name="personalName" placeholder="Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                         <input type="text" name="breederName" placeholder="Breeder Name (Optional)" value={breederName} onChange={(e) => setBreederName(e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     </div>
                     <div data-tutorial-target="website-country-fields" className="space-y-4">
                         <input type="url" name="websiteURL" placeholder="Website URL (Optional) e.g., https://example.com" value={websiteURL} onChange={(e) => setWebsiteURL(e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                         <input type="url" name="socialMediaURL" placeholder="Social Media Link (Optional) e.g., https://instagram.com/yourpage" value={socialMediaURL} onChange={(e) => setSocialMediaURL(e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     
                         <textarea 
                             name="bio" 
@@ -934,13 +934,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 setBio(val);
                             }}
                             rows="4"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none" 
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none" 
                             disabled={profileLoading}
                         />
-                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/1000 characters ? {bio.split('\n').length}/15 lines</p>}
+                        {bio && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{bio.length}/1000 characters ? {bio.split('\n').length}/15 lines</p>}
 
                         <select value={country} onChange={(e) => { setCountry(e.target.value); if (e.target.value !== 'US') setUsState(''); }}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
+                        className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
                         <option value="">Select Country (Optional)</option>
                         <option value="US">United States</option>
                         <option value="CA">Canada</option>
@@ -980,7 +980,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
                         {country === 'US' && (
                             <select value={usState} onChange={(e) => setUsState(e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border mt-2" disabled={profileLoading}>
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition box-border mt-2" disabled={profileLoading}>
                                 <option value="">Select State (Optional)</option>
                                 {US_STATES.map(s => (
                                     <option key={s.code} value={s.code}>{s.name}</option>
@@ -990,37 +990,37 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </div>
 
                     <div data-tutorial-target="public-visibility-checkboxes" className="pt-2 space-y-2">
-                        <h4 className="text-base font-medium text-gray-800 pt-2 border-t border-gray-200">Public Profile Visibility:</h4>
+                        <h4 className="text-base font-medium text-gray-800 dark:text-dark-text pt-2 border-t border-gray-200 dark:border-dark-border">Public Profile Visibility:</h4>
                         
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                        <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                             <input type="checkbox" checked={showPersonalName} onChange={(e) => setShowPersonalName(e.target.checked)} 
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                             <span>Display **Personal Name** on your public profile card.</span>
                         </label>
                         
                         {breederName && (
-                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input type="checkbox" checked={showBreederName} onChange={(e) => setShowBreederName(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                                 <span>Display **Breeder Name** on your public profile card.</span>
                             </label>
                         )}
                         
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                        <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                             <input type="checkbox" checked={showEmailPublic} onChange={(e) => setShowEmailPublic(e.target.checked)} 
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                             <span>Display **Email Address** on your public profile card.</span>
                         </label>
                         
                         {websiteURL && (
-                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input type="checkbox" checked={showWebsiteURL} onChange={(e) => setShowWebsiteURL(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                                 <span>Display **Website URL** on your public profile card.</span>
                             </label>
                         )}
                         {socialMediaURL && (
-                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input type="checkbox" checked={showSocialMediaURL} onChange={(e) => setShowSocialMediaURL(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                                 <span>Display **Social Media Link** on your public profile card.</span>
@@ -1028,35 +1028,35 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         )}
                         
                         {bio && (
-                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input type="checkbox" checked={showBio} onChange={(e) => setShowBio(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                                 <span>Display **Bio** on your public profile card.</span>
                             </label>
                         )}
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                        <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                             <input type="checkbox" checked={showStatsTab} onChange={(e) => setShowStatsTab(e.target.checked)} 
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                             <span>Show **Stats** tab on your public profile.</span>
                         </label>
                     </div>
 
-                    <div data-tutorial-target="messaging-preferences" className="pt-4 space-y-2 border-t border-gray-200">
-                        <h4 className="text-base font-medium text-gray-800">Messaging Preferences:</h4>
+                    <div data-tutorial-target="messaging-preferences" className="pt-4 space-y-2 border-t border-gray-200 dark:border-dark-border">
+                        <h4 className="text-base font-medium text-gray-800 dark:text-dark-text">Messaging Preferences:</h4>
                         
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                        <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                             <input type="checkbox" checked={allowMessages} onChange={(e) => setAllowMessages(e.target.checked)} 
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                             <span>Allow other breeders to message me</span>
                         </label>
                     </div>
 
-                    <div data-tutorial-target="email-notifications" className="pt-4 space-y-3 border-t border-gray-200">
-                        <h4 className="text-base font-medium text-gray-800">Email Notifications:</h4>
-                        <p className="text-sm text-gray-600">Choose what types of notifications to receive via email:</p>
+                    <div data-tutorial-target="email-notifications" className="pt-4 space-y-3 border-t border-gray-200 dark:border-dark-border">
+                        <h4 className="text-base font-medium text-gray-800 dark:text-dark-text">Email Notifications:</h4>
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Choose what types of notifications to receive via email:</p>
                         
                         <div className="space-y-2 pl-2">
-                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input 
                                     type="radio" 
                                     name="emailNotificationPreference" 
@@ -1069,7 +1069,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <span><strong>None</strong> - Don't send me email notifications</span>
                             </label>
                             
-                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input 
                                     type="radio" 
                                     name="emailNotificationPreference" 
@@ -1082,7 +1082,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <span><strong>Requests Only</strong> - Send breeder requests, transfers, and breeding requests</span>
                             </label>
                             
-                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                 <input 
                                     type="radio" 
                                     name="emailNotificationPreference" 
@@ -1095,7 +1095,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <span><strong>Messages Only</strong> - Send new messages from other breeders</span>
                             </label>
                             
-                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary dark:text-dark-text-secondary">
                                 <input 
                                     type="radio" 
                                     name="emailNotificationPreference" 
@@ -1123,9 +1123,9 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </>}
 
             {activeTab === 'info-adoption' && <>
-            <form onSubmit={handleBreederInfoSave} className="space-y-4 p-4 sm:p-6 border rounded-lg bg-gray-50">
-                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Info &amp; Adoption</h3>
-                <p className="text-sm text-gray-500">Shown on your public profile under the <strong>Info &amp; Adoption</strong> tab. Leave fields blank to hide them.</p>
+            <form onSubmit={handleBreederInfoSave} className="space-y-4 p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2">Info &amp; Adoption</h3>
+                <p className="text-sm text-gray-500 dark:text-dark-text-muted">Shown on your public profile under the <strong>Info &amp; Adoption</strong> tab. Leave fields blank to hide them.</p>
                 {[
                     { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
                     { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
@@ -1137,26 +1137,26 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { key: 'contactPreferences', label: 'Contact Preferences' },
                 ].map(({ key, label }) => (
                     <div key={key}>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">{label}</label>
                         <FormattedTextarea
                             value={breederInfo[key]}
                             onChange={(e) => setBreederInfo(v => ({ ...v, [key]: e.target.value }))}
                             rows={3}
                             maxLength={2000}
                             placeholder={`Enter ${label.toLowerCase()}\u2026`}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
                             disabled={breederInfoLoading}
                         />
-                        {breederInfo[key] && <p className="text-xs text-gray-400 mt-0.5 text-right">{breederInfo[key].length}/2000</p>}
+                        {breederInfo[key] && <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-0.5 text-right">{breederInfo[key].length}/2000</p>}
                     </div>
                 ))}
 
                 {/* Custom Fields */}
-                <div className="border-t border-gray-200 pt-4">
+                <div className="border-t border-gray-200 dark:border-dark-border pt-4">
                     <div className="flex items-center justify-between mb-3">
                         <div>
-                            <h4 className="text-sm font-semibold text-gray-700">Custom Fields</h4>
-                            <p className="text-xs text-gray-400 mt-0.5">Add your own sections with custom titles. Up to 10 fields.</p>
+                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Custom Fields</h4>
+                            <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-0.5">Add your own sections with custom titles. Up to 10 fields.</p>
                         </div>
                         {breederInfo.customFields.length < 10 && (
                             <button
@@ -1170,11 +1170,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         )}
                     </div>
                     {breederInfo.customFields.length === 0 && (
-                        <p className="text-sm text-gray-400 italic">No custom fields yet. Click &ldquo;Add Field&rdquo; to create one.</p>
+                        <p className="text-sm text-gray-400 dark:text-dark-text-muted italic">No custom fields yet. Click &ldquo;Add Field&rdquo; to create one.</p>
                     )}
                     <div className="space-y-4">
                         {breederInfo.customFields.map((cf, idx) => (
-                            <div key={idx} className="border border-gray-200 rounded-lg p-3 bg-white">
+                            <div key={idx} className="border border-gray-200 dark:border-dark-border rounded-lg p-3 bg-white dark:bg-dark-card-bg">
                                 <div className="flex items-center gap-2 mb-2">
                                     <input
                                         type="text"
@@ -1185,7 +1185,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         }}
                                         maxLength="100"
                                         placeholder="Section title (e.g. Transport Policy)"
-                                        className="flex-1 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border"
+                                        className="flex-1 p-2 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition box-border"
                                         disabled={breederInfoLoading}
                                     />
                                     <button
@@ -1195,7 +1195,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             const updated = breederInfo.customFields.filter((_, i) => i !== idx);
                                             setBreederInfo(v => ({ ...v, customFields: updated }));
                                         }}
-                                        className="p-1.5 text-gray-400 hover:text-red-500 transition rounded"
+                                        className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 transition rounded"
                                         title="Remove field"
                                     >
                                         <X size={16} />
@@ -1210,10 +1210,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     rows={3}
                                     maxLength={2000}
                                     placeholder={"Enter content\u2026"}
-                                    className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
+                                    className="w-full p-2 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
                                     disabled={breederInfoLoading}
                                 />
-                                {cf.value && <p className="text-xs text-gray-400 mt-0.5 text-right">{cf.value.length}/2000</p>}
+                                {cf.value && <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-0.5 text-right">{cf.value.length}/2000</p>}
                             </div>
                         ))}
                     </div>
@@ -1240,46 +1240,46 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </>}
 
             {activeTab === 'ratings' && <>
-            <div className="p-4 sm:p-6 border rounded-lg bg-gray-50">
-                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Ratings Received</h3>
+            <div className="p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2 mb-4">Ratings Received</h3>
                 {myReceivedRatingsLoading ? (
                     <div className="flex justify-center py-8"><Loader2 className="animate-spin" size={28} /></div>
                 ) : !myReceivedRatings || myReceivedRatings.count === 0 ? (
-                    <p className="text-gray-500 text-sm py-4 text-center">No ratings yet.</p>
+                    <p className="text-gray-500 dark:text-dark-text-muted text-sm py-4 text-center">No ratings yet.</p>
                 ) : (
                     <>
-                        <div className="flex items-center gap-4 mb-6 p-4 bg-white rounded-lg border">
+                        <div className="flex items-center gap-4 mb-6 p-4 bg-white dark:bg-dark-card-bg rounded-lg border dark:border-dark-text">
                             <div className="text-center">
-                                <div className="text-3xl font-bold text-gray-800">{myReceivedRatings.average.toFixed(1)}</div>
+                                <div className="text-3xl font-bold text-gray-800 dark:text-dark-text">{myReceivedRatings.average.toFixed(1)}</div>
                                 <div className="text-yellow-400 text-xl">
-                                    {[1,2,3,4,5].map(n => <span key={n}>{n <= Math.round(myReceivedRatings.average) ? <Star size={16} className="inline-block align-middle fill-current text-amber-400" /> : <Star size={16} className="inline-block align-middle text-gray-200" />}</span>)}
+                                    {[1,2,3,4,5].map(n => <span key={n}>{n <= Math.round(myReceivedRatings.average) ? <Star size={16} className="inline-block align-middle fill-current text-amber-400" /> : <Star size={16} className="inline-block align-middle text-gray-200 dark:text-dark-border" />}</span>)}
                                 </div>
-                                <div className="text-xs text-gray-500">{myReceivedRatings.count} rating{myReceivedRatings.count !== 1 ? 's' : ''}</div>
+                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{myReceivedRatings.count} rating{myReceivedRatings.count !== 1 ? 's' : ''}</div>
                             </div>
                             <div className="flex-1 space-y-1">
                                 {[5,4,3,2,1].map(star => (
                                     <div key={star} className="flex items-center gap-2 text-xs">
-                                        <span className="w-4 text-right text-gray-500">{star}</span>
+                                        <span className="w-4 text-right text-gray-500 dark:text-dark-text-muted">{star}</span>
                                         <Star size={14} className="inline-block align-middle fill-current text-yellow-400" />
-                                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                        <div className="flex-1 bg-gray-200 dark:bg-dark-surface rounded-full h-2">
                                             <div className="bg-yellow-400 h-2 rounded-full" style={{ width: `${myReceivedRatings.count > 0 ? ((myReceivedRatings.distribution?.[star] || 0) / myReceivedRatings.count) * 100 : 0}%` }} />
                                         </div>
-                                        <span className="w-4 text-gray-500">{myReceivedRatings.distribution?.[star] || 0}</span>
+                                        <span className="w-4 text-gray-500 dark:text-dark-text-muted">{myReceivedRatings.distribution?.[star] || 0}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
                         <div className="space-y-3">
                             {myReceivedRatings.ratings.map(r => (
-                                <div key={r._id} className="bg-white rounded-lg border p-4">
+                                <div key={r._id} className="bg-white dark:bg-dark-card-bg rounded-lg border dark:border-dark-text p-4">
                                     <div className="flex items-center justify-between mb-1">
-                                        <span className="font-semibold text-gray-800 text-sm">{r.raterName || r.raterId_public}</span>
+                                        <span className="font-semibold text-gray-800 dark:text-dark-text text-sm">{r.raterName || r.raterId_public}</span>
                                         <span className="text-yellow-400 text-sm">
-                                            {[1,2,3,4,5].map(n => <span key={n}>{n <= r.score ? <Star size={14} className="inline-block align-middle fill-current text-amber-400" /> : <Star size={14} className="inline-block align-middle text-gray-200" />}</span>)}
+                                            {[1,2,3,4,5].map(n => <span key={n}>{n <= r.score ? <Star size={14} className="inline-block align-middle fill-current text-amber-400" /> : <Star size={14} className="inline-block align-middle text-gray-200 dark:text-dark-border" />}</span>)}
                                         </span>
                                     </div>
-                                    {r.comment && <p className="text-gray-600 text-sm mt-1">{r.comment}</p>}
-                                    <p className="text-xs text-gray-400 mt-2">{new Date(r.createdAt).toLocaleDateString()}</p>
+                                    {r.comment && <p className="text-gray-600 dark:text-dark-text-secondary text-sm mt-1">{r.comment}</p>}
+                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-2">{new Date(r.createdAt).toLocaleDateString()}</p>
                                 </div>
                             ))}
                         </div>
@@ -1289,16 +1289,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </>}
 
             {activeTab === 'breeding-lines' && (
-                <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 space-y-5">
-                    <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
-                    <p className="text-sm text-gray-600">Define up to 10 personal breeding lines. These are private and only visible to you. Assign them to animals in the animal&apos;s detail view under the Identification tab.</p>
-                    <p className="text-xs text-gray-500">Toggle a line off to hide it everywhere without losing its assignments, or delete it to permanently remove it and unassign it from every animal.</p>
+                <div className="p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface space-y-5">
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400 dark:text-dark-text-muted" /> Breeding Lines</h3>
+                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Define up to 10 personal breeding lines. These are private and only visible to you. Assign them to animals in the animal&apos;s detail view under the Identification tab.</p>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted">Toggle a line off to hide it everywhere without losing its assignments, or delete it to permanently remove it and unassign it from every animal.</p>
                     <div className="space-y-3">
                         {localBLDefs.map((line, idx) => {
                             const isEnabled = line.enabled !== false;
                             return (
                             <div key={line.id} className={`flex items-center gap-3 flex-wrap ${(!isEnabled && line.name) ? 'opacity-50' : ''}`}>
-                                <span className="text-sm text-gray-400 w-4 text-right">{idx + 1}</span>
+                                <span className="text-sm text-gray-400 dark:text-dark-text-muted w-4 text-right">{idx + 1}</span>
                                 <div className="flex gap-1">
                                     {BL_PRESETS_APP.map(color => (
                                         <button
@@ -1317,7 +1317,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     value={line.name}
                                     maxLength={30}
                                     onChange={(e) => setLocalBLDefs(localBLDefs.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
-                                    className="flex-1 min-w-[120px] p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                    className="flex-1 min-w-[120px] p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary"
                                 />
                                 <span style={{ color: line.color }} className="text-xl leading-none" title={line.name || `Line ${idx + 1}`}>&#x25C6;</span>
                                 {line.name && (
@@ -1325,7 +1325,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         <button
                                             type="button"
                                             onClick={() => setLocalBLDefs(localBLDefs.map((l, i) => i === idx ? { ...l, enabled: !isEnabled } : l))}
-                                            className={`p-1.5 rounded-full hover:bg-gray-200 flex-shrink-0 ${isEnabled ? 'text-gray-500' : 'text-gray-400'}`}
+                                            className={`p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover flex-shrink-0 ${isEnabled ? 'text-gray-500 dark:text-dark-text-muted' : 'text-gray-400 dark:text-dark-text-muted'}`}
                                             title={isEnabled ? 'Active - visible throughout the site. Click to hide.' : 'Hidden - not shown anywhere. Click to show.'}
                                         >
                                             {isEnabled ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -1334,7 +1334,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             type="button"
                                             disabled={blDeletingId === line.id}
                                             onClick={() => handleDeleteBreedingLine(line.id, idx)}
-                                            className="p-1.5 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 disabled:opacity-50"
+                                            className="p-1.5 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0 disabled:opacity-50"
                                             title="Delete line and unassign from all animals"
                                         >
                                             {blDeletingId === line.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
@@ -1368,10 +1368,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             )}
 
             {activeTab === 'account' && <>
-            <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
-                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Email Address</h3>
+            <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface overflow-x-hidden">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2">Change Email Address</h3>
                 <input type="email" placeholder="New Email Address *" value={email} onChange={(e) => setEmail(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={securityLoading} />
+                    className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={securityLoading} />
                 <div className="flex justify-end pt-2">
                     <button type="submit" disabled={securityLoading} 
                         className="bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
@@ -1382,14 +1382,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
             </form>
 
-            <form onSubmit={handlePasswordUpdate} className="space-y-4 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
-                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Password</h3>
+            <form onSubmit={handlePasswordUpdate} className="space-y-4 p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface overflow-x-hidden">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2">Change Password</h3>
                 <input type="password" placeholder="Current Password *" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={passwordLoading} />
+                    className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={passwordLoading} />
                 <input type="password" placeholder="New Password *" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={passwordLoading} />
+                    className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={passwordLoading} />
                 <input type="password" placeholder="Confirm New Password *" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={passwordLoading} />
+                    className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={passwordLoading} />
                 <div className="flex justify-end pt-2">
                     <button type="submit" disabled={passwordLoading}
                         className="bg-primary-dark hover:bg-primary text-black font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
@@ -1402,18 +1402,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </>}
 
             {activeTab === 'data' && <>
-            <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden space-y-6">
-                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Data Portability</h3>
-                <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export or another service.</p>
+            <div className="p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface overflow-x-hidden space-y-6">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2">Data Portability</h3>
+                <p className="text-sm text-gray-500 dark:text-dark-text-muted -mt-2">Export your records as a backup, or import data from a previous CritterTrack export or another service.</p>
 
                 {/* -- Export -------------------------------------------------- */}
                 <div>
-                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2"><Download size={16} /> Export</h4>
+                    <h4 className="font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2"><Download size={16} /> Export</h4>
 
-                    <p className="text-xs text-gray-500 mb-3">Select which sections to include:</p>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-3">Select which sections to include:</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4">
                         {['animals','litters','enclosures','supplies','budget'].map(s => (
-                            <label key={s} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                            <label key={s} className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-dark-text-secondary cursor-pointer">
                                 <input type="checkbox" checked={exportSections[s]} onChange={() => setExportSections(prev => ({ ...prev, [s]: !prev[s] }))}
                                     className="rounded" />
                                 <span className="capitalize">{s}</span>
@@ -1421,17 +1421,17 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         ))}
                     </div>
 
-                    <p className="text-xs text-gray-500 mb-2">Format:</p>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2">Format:</p>
                     <div className="flex gap-5 mb-4">
                         {[['json','JSON (single file)'],['csv','CSV (zip bundle)']].map(([val, label]) => (
-                            <label key={val} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                            <label key={val} className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-dark-text-secondary cursor-pointer">
                                 <input type="radio" name="exportFmt" value={val} checked={exportFormat === val} onChange={() => setExportFormat(val)} />
                                 {label}
                             </label>
                         ))}
                     </div>
 
-                    <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm">
+                    <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm text-gray-700 dark:text-dark-text-secondary">
                         <label className="flex items-center gap-1.5 cursor-pointer">
                             <input type="checkbox" checked={exportIncludeArchived} onChange={e => setExportIncludeArchived(e.target.checked)} className="rounded" />
                             Include archived
@@ -1459,19 +1459,19 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
 
                 {/* -- Import -------------------------------------------------- */}
-                <div className="border-t pt-5">
-                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2"><Upload size={16} /> Import</h4>
-                    <p className="text-xs text-gray-500 mb-3">Upload a <code>.json</code> or <code>.zip</code> (CSV bundle) previously exported from CritterTrack.</p>
+                <div className="border-t dark:border-dark-border pt-5">
+                    <h4 className="font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2"><Upload size={16} /> Import</h4>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-3">Upload a <code>.json</code> or <code>.zip</code> (CSV bundle) previously exported from CritterTrack.</p>
 
                     {/* File picker */}
-                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition mb-4 relative">
+                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition mb-4 relative">
                         <input type="file" accept=".json,.zip" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                             onChange={e => { setImportFile(e.target.files?.[0] || null); setImportPreview(null); setImportResult(null); }} />
                         {importFile
-                            ? <p className="text-sm font-medium text-gray-700 flex items-center gap-1.5"><FileText size={16} />{importFile.name}</p>
+                            ? <p className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><FileText size={16} />{importFile.name}</p>
                             : <>
-                                <Upload size={22} className="text-gray-400 mb-1" />
-                                <p className="text-sm text-gray-500">Click or drag to upload .json / .zip</p>
+                                <Upload size={22} className="text-gray-400 dark:text-dark-text-muted mb-1" />
+                                <p className="text-sm text-gray-500 dark:text-dark-text-muted">Click or drag to upload .json / .zip</p>
                               </>
                         }
                     </label>
@@ -1488,24 +1488,24 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     {/* Import preview */}
                     {importPreview && (
                         <div className="space-y-4 mt-2">
-                            <h5 className="font-semibold text-gray-700">Preview</h5>
-                            <div className="overflow-x-auto rounded border">
+                            <h5 className="font-semibold text-gray-700 dark:text-dark-text-secondary">Preview</h5>
+                            <div className="overflow-x-auto rounded border dark:border-dark-border">
                                 <table className="min-w-full text-sm">
-                                    <thead className="bg-gray-100">
+                                    <thead className="bg-gray-100 dark:bg-dark-surface">
                                         <tr>
-                                            <th className="px-3 py-2 text-left font-medium text-gray-600">Section</th>
-                                            <th className="px-3 py-2 text-left font-medium text-gray-600">Records</th>
-                                            <th className="px-3 py-2 text-left font-medium text-gray-600">New</th>
-                                            <th className="px-3 py-2 text-left font-medium text-gray-600">Conflicts</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Section</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Records</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">New</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Conflicts</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y">
+                                    <tbody className="divide-y dark:divide-dark-border">
                                         {Object.entries(importPreview).map(([section, info]) => (
-                                            <tr key={section} className="hover:bg-gray-50">
+                                            <tr key={section} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover dark:text-dark-text">
                                                 <td className="px-3 py-2 capitalize font-medium">{section}</td>
                                                 <td className="px-3 py-2">{info.total}</td>
-                                                <td className="px-3 py-2 text-green-700">{info.new}</td>
-                                                <td className="px-3 py-2 text-amber-600">{info.conflicts?.length || 0}</td>
+                                                <td className="px-3 py-2 text-green-700 dark:text-green-400">{info.new}</td>
+                                                <td className="px-3 py-2 text-amber-600 dark:text-amber-400">{info.conflicts?.length || 0}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -1515,7 +1515,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             {/* Conflict resolution */}
                             {Object.entries(importPreview).some(([_s, info]) => info.conflicts?.length > 0) && (
                                 <div className="space-y-3">
-                                    <p className="text-sm font-semibold text-amber-700 flex items-center gap-1.5">
+                                    <p className="text-sm font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                                         <AlertTriangle size={15} /> Duplicate records found ? choose how to handle each section:
                                     </p>
                                     {Object.entries(importPreview).map(([section, info]) => {
@@ -1523,17 +1523,17 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         const bulkAction = importSectionActions[section] || 'skip';
                                         const expanded = importConflictsExpanded[section] || false;
                                         return (
-                                            <div key={section} className="rounded border bg-amber-50 overflow-hidden">
+                                            <div key={section} className="rounded border dark:border-amber-700/60 bg-amber-50 dark:bg-amber-900/20 overflow-hidden">
                                                 {/* Section header: bulk action */}
                                                 <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
-                                                    <span className="text-xs font-semibold text-gray-700 uppercase capitalize flex-1">{section}</span>
-                                                    <span className="text-xs text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 font-medium">
+                                                    <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary uppercase capitalize flex-1">{section}</span>
+                                                    <span className="text-xs text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 rounded-full px-2 py-0.5 font-medium">
                                                         {info.conflicts.length} duplicate{info.conflicts.length !== 1 ? 's' : ''}
                                                     </span>
                                                     <select
                                                         value={bulkAction}
                                                         onChange={e => handleSectionBulkAction(section, e.target.value, info.conflicts)}
-                                                        className="text-xs border rounded px-2 py-1 bg-white font-medium"
+                                                        className="text-xs border dark:border-dark-text rounded px-2 py-1 bg-white dark:bg-dark-card-bg dark:text-dark-text font-medium"
                                                     >
                                                         <option value="skip">Skip all</option>
                                                         <option value="overwrite">Overwrite all</option>
@@ -1542,7 +1542,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                     <button
                                                         type="button"
                                                         onClick={() => setImportConflictsExpanded(prev => ({ ...prev, [section]: !prev[section] }))}
-                                                        className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-0.5 whitespace-nowrap"
+                                                        className="text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text flex items-center gap-0.5 whitespace-nowrap"
                                                     >
                                                         {expanded ? 'Hide' : 'Override individually'}
                                                         {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -1550,7 +1550,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 </div>
                                                 {/* Per-item overrides (collapsed by default) */}
                                                 {expanded && (
-                                                    <div className="border-t bg-white px-3 pb-3 pt-2 space-y-1 max-h-52 overflow-y-auto">
+                                                    <div className="border-t dark:border-amber-700/60 bg-white dark:bg-dark-card-bg px-3 pb-3 pt-2 space-y-1 max-h-52 overflow-y-auto">
                                                         {info.conflicts.map(conflict => {
                                                             const key = conflict.id_public || conflict.litter_id_public || conflict.name || '';
                                                             const displayName = conflict.name || conflict.litter_id_public || conflict.id_public || key;
@@ -1558,12 +1558,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                             const isOverridden = currentAction !== bulkAction;
                                                             return (
                                                                 <div key={key} className="flex flex-wrap items-center gap-2 text-xs py-0.5">
-                                                                    <span className="font-mono bg-gray-100 border rounded px-1.5 py-0.5">{key}</span>
-                                                                    <span className="text-gray-500 flex-1 min-w-0 truncate">{displayName !== key ? displayName : ''}</span>
+                                                                    <span className="font-mono bg-gray-100 dark:bg-dark-surface border dark:border-dark-border rounded px-1.5 py-0.5 dark:text-dark-text">{key}</span>
+                                                                    <span className="text-gray-500 dark:text-dark-text-muted flex-1 min-w-0 truncate">{displayName !== key ? displayName : ''}</span>
                                                                     <select
                                                                         value={currentAction}
                                                                         onChange={e => setConflictResolution(section, key, e.target.value)}
-                                                                        className={`text-xs border rounded px-2 py-0.5 ${isOverridden ? 'bg-blue-50 border-blue-300 font-semibold' : 'bg-white'}`}
+                                                                        className={`text-xs border rounded px-2 py-0.5 ${isOverridden ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700/60 font-semibold dark:text-dark-text' : 'bg-white dark:bg-dark-card-bg dark:border-dark-text dark:text-dark-text'}`}
                                                                     >
                                                                         <option value="skip">Skip</option>
                                                                         <option value="overwrite">Overwrite</option>
@@ -1588,7 +1588,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     Confirm Import
                                 </button>
                                 <button onClick={() => { setImportPreview(null); setImportFile(null); }}
-                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                                    className="px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-medium rounded-lg transition"
                                 >
                                     Cancel
                                 </button>
@@ -1598,10 +1598,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
                     {/* Import result */}
                     {importResult && (
-                        <div className="mt-3 p-4 rounded-lg border bg-green-50 border-green-200">
-                            <p className="font-semibold text-green-800 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> Import complete</p>
+                        <div className="mt-3 p-4 rounded-lg border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/60">
+                            <p className="font-semibold text-green-800 dark:text-green-300 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> Import complete</p>
                             {importResult.written && (
-                                <div className="text-sm text-gray-700 space-y-0.5 mb-2">
+                                <div className="text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5 mb-2">
                                     {Object.entries(importResult.written).map(([s, n]) => (
                                         <p key={s}><span className="capitalize font-medium">{s}</span>: {n} written{importResult.skipped?.[s] ? `, ${importResult.skipped[s]} skipped` : ''}</p>
                                     ))}
@@ -1609,24 +1609,24 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             )}
                             {importResult.errors?.length > 0 && (
                                 <div className="mt-2">
-                                    <p className="text-sm font-semibold text-red-700 flex items-center gap-1"><AlertTriangle size={13} /> {importResult.errors.length} error(s):</p>
-                                    <ul className="text-xs text-red-600 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                                    <p className="text-sm font-semibold text-red-700 dark:text-red-400 flex items-center gap-1"><AlertTriangle size={13} /> {importResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-600 dark:text-red-300 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
                                         {importResult.errors.map((e, i) => (
                                             <li key={i}>[{e.section}] {e.id}: {e.error}</li>
                                         ))}
                                     </ul>
                                 </div>
                             )}
-                            <button onClick={() => setImportResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                            <button onClick={() => setImportResult(null)} className="mt-3 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text underline">Dismiss</button>
                         </div>
                     )}
                 </div>
 
                 {/* -- Third-party import disclaimer ---------------------------- */}
-                <div className="border-t pt-5">
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5 flex gap-2.5">
+                <div className="border-t dark:border-dark-border pt-5">
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-lg p-3 mb-5 flex gap-2.5">
                         <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                        <div className="text-xs text-amber-800 space-y-1">
+                        <div className="text-xs text-amber-800 dark:text-amber-300 space-y-1">
                             <p className="font-semibold">Important ? please read before importing</p>
                             <ul className="list-disc list-inside space-y-0.5">
                                 <li><strong>Images are not imported</strong> ? ZooEasy, Kintraks, and SimpleBreed imports do not transfer any animal photos. You will need to upload images manually after importing.</li>
@@ -1638,18 +1638,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
 
                 {/* -- ZooEasy Import ------------------------------------------- */}
-                <div className="border-t pt-5">
-                    <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2"><Upload size={16} /> Import from ZooEasy</h4>
-                    <p className="text-xs text-gray-500 mb-4">Export your animals and/or breeding pairs from ZooEasy as CSV, then upload them here. Duplicates are detected across all CritterTrack users by registration number and name + birth date.</p>
+                <div className="border-t dark:border-dark-border pt-5">
+                    <h4 className="font-semibold text-gray-700 dark:text-dark-text-secondary mb-1 flex items-center gap-2"><Upload size={16} /> Import from ZooEasy</h4>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-4">Export your animals and/or breeding pairs from ZooEasy as CSV, then upload them here. Duplicates are detected across all CritterTrack users by registration number and name + birth date.</p>
 
                     {/* Species */}
                     <div className="mb-4">
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Species <span className="text-red-500">*</span> (required when importing animals)</label>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Species <span className="text-red-500">*</span> (required when importing animals)</label>
                         <div className="flex items-center gap-2 max-w-xs">
                             <select
                                 value={zeSpecies}
                                 onChange={e => setZeSpecies(e.target.value)}
-                                className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
+                                className="flex-1 p-2 border border-gray-300 dark:border-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary bg-white dark:bg-dark-card-bg dark:text-dark-text"
                             >
                                 <option value="">? select species ?</option>
                                 {(zeSpeciesList || []).map(s => (
@@ -1660,7 +1660,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 type="button"
                                 title="Add new species"
                                 onClick={() => { setZeAddingSpecies(v => !v); setZeNewSpeciesName(''); }}
-                                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-600 transition"
+                                className="p-2 rounded-lg border border-gray-300 dark:border-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary transition"
                             >
                                 <Plus size={15} />
                             </button>
@@ -1672,7 +1672,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     placeholder="New species name"
                                     value={zeNewSpeciesName}
                                     onChange={e => setZeNewSpeciesName(e.target.value)}
-                                    className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                    className="flex-1 p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary"
                                     onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
                                 />
                                 <button
@@ -1709,7 +1709,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <button
                                     type="button"
                                     onClick={() => setZeAddingSpecies(false)}
-                                    className="p-2 text-gray-400 hover:text-gray-600 transition"
+                                    className="p-2 text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text transition"
                                 >
                                     <X size={14} />
                                 </button>
@@ -1722,14 +1722,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         {[['animals', zeAnimalsFile, setZeAnimalsFile, 'Animals CSV (animals.csv)'],
                           ['breedingpairs', zePairsFile, setZePairsFile, 'Breeding Pairs CSV (breedingpairs.csv)']].map(
                             ([key, file, setter, label]) => (
-                                <label key={key} className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition relative">
+                                <label key={key} className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition relative">
                                     <input type="file" accept=".csv" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                                         onChange={e => { setter(e.target.files?.[0] || null); setZePreview(null); setZeResult(null); }} />
                                     {file
-                                        ? <p className="text-xs font-medium text-gray-700 flex items-center gap-1"><FileText size={13} />{file.name}</p>
+                                        ? <p className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary flex items-center gap-1"><FileText size={13} />{file.name}</p>
                                         : <>
-                                            <Upload size={16} className="text-gray-400 mb-1" />
-                                            <p className="text-xs text-gray-500 text-center px-2">{label}</p>
+                                            <Upload size={16} className="text-gray-400 dark:text-dark-text-muted mb-1" />
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted text-center px-2">{label}</p>
                                           </>
                                     }
                                 </label>
@@ -1792,15 +1792,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             {zePreview.animals && (
                                 <div>
                                     <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                                        <h5 className="font-semibold text-gray-700">
+                                        <h5 className="font-semibold text-gray-700 dark:text-dark-text-secondary">
                                             Animals &mdash; {zePreview.animals.total} total
                                             {zePreview.animals.conflicts?.length > 0 && (() => {
                                                 const high = zePreview.animals.conflicts.filter(c => c.confidence !== 'possible').length;
                                                 const possible = zePreview.animals.conflicts.filter(c => c.confidence === 'possible').length;
                                                 return (
                                                     <span className="ml-2 text-xs font-normal">
-                                                        {high > 0 && <span className="text-amber-600">{high} duplicate{high !== 1 ? 's' : ''}</span>}
-                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> ? </span>}
+                                                        {high > 0 && <span className="text-amber-600 dark:text-amber-400">{high} duplicate{high !== 1 ? 's' : ''}</span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400 dark:text-dark-text-muted"> ? </span>}
                                                         {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
                                                     </span>
                                                 );
@@ -1809,47 +1809,47 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         <div className="flex gap-2 text-xs flex-wrap">
                                             <button type="button"
                                                 onClick={() => setZeSelectedAnimals(new Set((zePreview.animals.items || []).map(a => a.zeRegNum).filter(Boolean)))}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary">Select all</button>
                                             <button type="button"
                                                 onClick={() => setZeSelectedAnimals(new Set())}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
-                                            <span className="border-l mx-1"></span>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary">Deselect all</button>
+                                            <span className="border-l dark:border-dark-border mx-1"></span>
                                             <button type="button"
                                                 onClick={() => { const conflictRegs = new Set((zePreview.animals.conflicts || []).map(c => c.zeRegNum)); setZeSelectedAnimals(new Set((zePreview.animals.items || []).filter(a => !conflictRegs.has(a.zeRegNum)).map(a => a.zeRegNum).filter(Boolean))); }}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-green-700">New only</button>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-green-700 dark:text-green-400">New only</button>
                                             <button type="button"
                                                 onClick={() => { const dupRegs = new Set((zePreview.animals.conflicts || []).filter(c => c.confidence !== 'possible').map(c => c.zeRegNum)); setZeSelectedAnimals(new Set((zePreview.animals.items || []).filter(a => dupRegs.has(a.zeRegNum)).map(a => a.zeRegNum).filter(Boolean))); }}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-amber-700">Duplicates only</button>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-amber-700 dark:text-amber-400">Duplicates only</button>
                                             <button type="button"
                                                 onClick={() => { const possRegs = new Set((zePreview.animals.conflicts || []).filter(c => c.confidence === 'possible').map(c => c.zeRegNum)); setZeSelectedAnimals(new Set((zePreview.animals.items || []).filter(a => possRegs.has(a.zeRegNum)).map(a => a.zeRegNum).filter(Boolean))); }}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-orange-700">Possible only</button>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-orange-700 dark:text-orange-400">Possible only</button>
                                         </div>
                                     </div>
-                                    <div className="border rounded-lg overflow-hidden">
+                                    <div className="border dark:border-dark-border rounded-lg overflow-hidden">
                                         <div className="overflow-x-auto max-h-96 overflow-y-auto">
                                             <table className="min-w-full text-xs">
-                                                <thead className="bg-gray-100 sticky top-0 z-10">
+                                                <thead className="bg-gray-100 dark:bg-dark-surface sticky top-0 z-10">
                                                     <tr>
                                                         <th className="px-2 py-2 w-8"></th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Gender</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Reg #</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire #</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam #</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Color</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Coat</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Name</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Gender</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Born</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Reg #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Sire #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Dam #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Color</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Coat</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Status</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y bg-white">
+                                                <tbody className="divide-y dark:divide-dark-border bg-white dark:bg-dark-card-bg">
                                                     {(zePreview.animals.items || []).map(a => {
                                                         const isSelected = zeSelectedAnimals.has(a.zeRegNum);
                                                         const conflict = zePreview.animals.conflicts?.find(c => c.zeRegNum === a.zeRegNum);
                                                         const resolution = zeConflictResolutions[a.zeRegNum] || 'use_existing';
                                                         return (
                                                             <React.Fragment key={a.zeRegNum || a.name}>
-                                                                <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? 'bg-amber-50' : ''}`}>
+                                                                <tr className={`transition dark:text-dark-text ${!isSelected ? 'opacity-40 bg-gray-50 dark:bg-dark-surface' : conflict ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}>
                                                                     <td className="px-2 py-1.5 text-center">
                                                                         <input type="checkbox" checked={isSelected}
                                                                             onChange={e => setZeSelectedAnimals(prev => {
@@ -1859,34 +1859,34 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             })}
                                                                             className="rounded" />
                                                                     </td>
-                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ')}</td>
-                                                                    <td className="px-2 py-1.5 text-gray-600">{a.gender || '?'}</td>
-                                                                    <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate || '?'}</td>
-                                                                    <td className="px-2 py-1.5 font-mono text-gray-500">{a.zeRegNum || '?'}</td>
-                                                                    <td className="px-2 py-1.5 font-mono text-gray-400">{a.sireRegNum || '?'}</td>
-                                                                    <td className="px-2 py-1.5 font-mono text-gray-400">{a.damRegNum || '?'}</td>
-                                                                    <td className="px-2 py-1.5 text-gray-600">{a.color || '?'}</td>
-                                                                    <td className="px-2 py-1.5 text-gray-600">{a.coat || '?'}</td>
+                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 dark:text-dark-text whitespace-nowrap">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ')}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{a.gender || '?'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary whitespace-nowrap">{a.birthDate || '?'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-500 dark:text-dark-text-muted">{a.zeRegNum || '?'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-400 dark:text-dark-text-muted">{a.sireRegNum || '?'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-400 dark:text-dark-text-muted">{a.damRegNum || '?'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{a.color || '?'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{a.coat || '?'}</td>
                                                                     <td className="px-2 py-1.5">
                                                                         {conflict
                                                                             ? conflict.confidence === 'possible'
-                                                                                ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
-                                                                                : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                                ? <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded text-xs font-medium">Possible match</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium">Duplicate</span>
                                                                             : zeManualMappings[a.zeRegNum]
-                                                                                ? <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Mapped</span>
-                                                                                : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                                ? <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">Mapped</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs font-medium">New</span>}
                                                                     </td>
                                                                 </tr>
                                                                 {/* Manual mapping sub-row for New/Mapped rows */}
                                                                 {!conflict && isSelected && (
-                                                                    <tr className={zeManualMappings[a.zeRegNum] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                    <tr className={zeManualMappings[a.zeRegNum] ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-gray-50 dark:bg-dark-surface'}>
                                                                         <td></td>
                                                                         <td colSpan="9" className="px-3 pb-2 pt-0">
                                                                             {zeManualMappings[a.zeRegNum] ? (
                                                                                 <div className="flex items-center gap-2 text-xs pt-1">
-                                                                                    <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{zeManualMappings[a.zeRegNum].id_public}</span> &mdash; {zeManualMappings[a.zeRegNum].name}</span>
+                                                                                    <span className="text-blue-700 dark:text-blue-400">&#x21AA; Mapped to <span className="font-mono font-semibold">{zeManualMappings[a.zeRegNum].id_public}</span> &mdash; {zeManualMappings[a.zeRegNum].name}</span>
                                                                                     <button type="button" onClick={() => setZeManualMappings(prev => { const n = { ...prev }; delete n[a.zeRegNum]; return n; })}
-                                                                                        className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
+                                                                                        className="text-gray-400 dark:text-dark-text-muted hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
                                                                                 </div>
                                                                             ) : (
                                                                                 <div className="pt-1">
@@ -1911,27 +1911,27 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                             setZeMappingSearch(prev => ({ ...prev, results: merged.slice(0, 10), loading: false }));
                                                                                                         } catch { setZeMappingSearch(prev => ({ ...prev, loading: false })); }
                                                                                                     }}
-                                                                                                    className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                                                                                    className="flex-1 max-w-xs text-xs border dark:border-dark-border dark:bg-dark-card-bg dark:text-dark-text rounded px-2 py-1 focus:ring-primary focus:border-primary"
                                                                                                 />
-                                                                                                {zeMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                {zeMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400 dark:text-dark-text-muted" />}
                                                                                                 <button type="button" onClick={() => setZeMappingSearch({ regNum: null, query: '', results: [], loading: false })}
-                                                                                                    className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                                    className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text"><X size={11} /></button>
                                                                                             </div>
                                                                                             {zeMappingSearch.results.length > 0 && (
-                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-sm max-h-40 overflow-y-auto">
+                                                                                                <div className="border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg shadow-sm divide-y dark:divide-dark-border max-w-sm max-h-40 overflow-y-auto">
                                                                                                     {zeMappingSearch.results.map(r => (
                                                                                                         <button key={r.id_public} type="button"
                                                                                                             onClick={() => {
                                                                                                                 setZeManualMappings(prev => ({ ...prev, [a.zeRegNum]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
                                                                                                                 setZeMappingSearch({ regNum: null, query: '', results: [], loading: false });
                                                                                                             }}
-                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition text-xs"
                                                                                                         >
-                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
-                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
-                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
-                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
-                                                                                                            {r.breederName && <span className="text-gray-300 ml-1">&middot; {r.breederName}</span>}
+                                                                                                            <span className="font-medium text-gray-800 dark:text-dark-text">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 dark:text-dark-text-muted ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {r.gender}</span>}
+                                                                                                            {r.breederName && <span className="text-gray-300 dark:text-dark-text-muted ml-1">&middot; {r.breederName}</span>}
                                                                                                         </button>
                                                                                                     ))}
                                                                                                 </div>
@@ -1940,7 +1940,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                     ) : (
                                                                                         <button type="button"
                                                                                             onClick={() => setZeMappingSearch({ regNum: a.zeRegNum, query: '', results: [], loading: false })}
-                                                                                            className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                                                                            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline"
                                                                                         >
                                                                                             + Map to existing CT animal (for parent links)
                                                                                         </button>
@@ -1951,10 +1951,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                     </tr>
                                                                 )}
                                                                 {conflict && isSelected && (
-                                                                    <tr className={`bg-${conflict.confidence === 'possible' ? 'orange' : 'amber'}-50`}>
+                                                                    <tr className={`${conflict.confidence === 'possible' ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
                                                                         <td></td>
                                                                         <td colSpan="9" className="px-3 pb-2 pt-0">
-                                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
+                                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 dark:text-amber-300 pt-1">
                                                                                 <AlertTriangle size={11} className="shrink-0 text-amber-500" />
                                                                                 <span>
                                                                                     {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
@@ -1967,7 +1967,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 <select
                                                                                     value={resolution}
                                                                                     onChange={e => setZeConflictResolutions(prev => ({ ...prev, [a.zeRegNum]: e.target.value }))}
-                                                                                    className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
+                                                                                    className="border dark:border-dark-border rounded px-2 py-0.5 bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text font-medium text-xs"
                                                                                 >
                                                                                     <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
                                                                                     <option value="import_anyway">Import anyway as new entry</option>
@@ -1983,7 +1983,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             </table>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-1">
+                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">
                                         {zeSelectedAnimals.size} of {zePreview.animals.total} selected
                                         {(() => {
                                             const dupeLinks = [...zeSelectedAnimals].filter(r => {
@@ -2000,32 +2000,32 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             {zePreview.litters?.items?.length > 0 && (
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
-                                        <h5 className="font-semibold text-gray-700">Litters &mdash; {zePreview.litters.total} total</h5>
+                                        <h5 className="font-semibold text-gray-700 dark:text-dark-text-secondary">Litters &mdash; {zePreview.litters.total} total</h5>
                                         <div className="flex gap-2 text-xs">
                                             <button type="button" onClick={() => setZeSelectedLitters(new Set(zePreview.litters.items.map(l => l.litterIndex)))} className="text-primary hover:underline">Select all</button>
-                                            <button type="button" onClick={() => setZeSelectedLitters(new Set())} className="text-gray-400 hover:underline">Deselect all</button>
+                                            <button type="button" onClick={() => setZeSelectedLitters(new Set())} className="text-gray-400 dark:text-dark-text-muted hover:underline">Deselect all</button>
                                         </div>
                                     </div>
-                                    <div className="border rounded-lg overflow-hidden">
+                                    <div className="border dark:border-dark-border rounded-lg overflow-hidden">
                                         <div className="overflow-x-auto max-h-48 overflow-y-auto">
                                             <table className="min-w-full text-xs">
-                                                <thead className="bg-gray-100 sticky top-0">
+                                                <thead className="bg-gray-100 dark:bg-dark-surface sticky top-0">
                                                     <tr>
                                                         <th className="px-2 py-2"></th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Nest letter</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Mating date</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Birth date</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born count</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Nest letter</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Mating date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Birth date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Sire</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Dam</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Born count</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Status</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y bg-white">
+                                                <tbody className="divide-y dark:divide-dark-border bg-white dark:bg-dark-card-bg">
                                                     {zePreview.litters.items.map((l, i) => {
                                                         const isSelected = zeSelectedLitters.has(l.litterIndex);
                                                         return (
-                                                            <tr key={i} className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : l.isDuplicate ? 'bg-amber-50' : ''}`}>
+                                                            <tr key={i} className={`transition dark:text-dark-text ${!isSelected ? 'opacity-40 bg-gray-50 dark:bg-dark-surface' : l.isDuplicate ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}>
                                                                 <td className="px-2 py-1.5 text-center">
                                                                     <input type="checkbox" checked={isSelected}
                                                                         onChange={e => setZeSelectedLitters(prev => {
@@ -2035,24 +2035,24 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                         })}
                                                                         className="rounded" />
                                                                 </td>
-                                                                <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '?'}</td>
-                                                                <td className="px-2 py-1.5 text-gray-600">{l.matingDate ? String(l.matingDate).slice(0,10) : '?'}</td>
-                                                                <td className="px-2 py-1.5 text-gray-600">{l.birthDate ? String(l.birthDate).slice(0,10) : '?'}</td>
-                                                                <td className="px-2 py-1.5 text-gray-700" title={l.maleRegNum || ''}>
+                                                                <td className="px-2 py-1.5 font-medium text-gray-700 dark:text-dark-text-secondary">{l.nestLetter || '?'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{l.matingDate ? String(l.matingDate).slice(0,10) : '?'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{l.birthDate ? String(l.birthDate).slice(0,10) : '?'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-700 dark:text-dark-text-secondary" title={l.maleRegNum || ''}>
                                                                     {l.maleName || l.maleRegNum || '?'}
-                                                                    {l.maleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.maleCtId}</span>}
-                                                                    {!l.maleCtId && l.maleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                    {l.maleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">{l.maleCtId}</span>}
+                                                                    {!l.maleCtId && l.maleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted rounded">no CT match</span>}
                                                                 </td>
-                                                                <td className="px-2 py-1.5 text-gray-700" title={l.femaleRegNum || ''}>
+                                                                <td className="px-2 py-1.5 text-gray-700 dark:text-dark-text-secondary" title={l.femaleRegNum || ''}>
                                                                     {l.femaleName || l.femaleRegNum || '?'}
-                                                                    {l.femaleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.femaleCtId}</span>}
-                                                                    {!l.femaleCtId && l.femaleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                    {l.femaleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">{l.femaleCtId}</span>}
+                                                                    {!l.femaleCtId && l.femaleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted rounded">no CT match</span>}
                                                                 </td>
-                                                                <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '?'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{l.litterSizeBorn != null ? l.litterSizeBorn : '?'}</td>
                                                                 <td className="px-2 py-1.5">
                                                                     {l.isDuplicate
-                                                                        ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium" title={l.existingLitterId || ''}>Duplicate</span>
-                                                                        : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                        ? <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium" title={l.existingLitterId || ''}>Duplicate</span>
+                                                                        : <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs font-medium">New</span>}
                                                                 </td>
                                                             </tr>
                                                         );
@@ -2103,7 +2103,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 </button>
                                 <button
                                     onClick={() => { setZePreview(null); setZeAnimalsFile(null); setZePairsFile(null); setZeManualMappings({}); setZeMappingSearch({ regNum: null, query: '', results: [], loading: false }); setZeSelectedLitters(new Set()); }}
-                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                                    className="px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-medium rounded-lg transition"
                                 >
                                     Cancel
                                 </button>
@@ -2113,41 +2113,41 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
                     {/* Result */}
                     {zeResult && (
-                        <div className="mt-3 p-4 rounded-lg border bg-green-50 border-green-200">
-                            <p className="font-semibold text-green-800 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> ZooEasy import complete</p>
-                            <div className="text-sm text-gray-700 space-y-0.5 mb-2">
+                        <div className="mt-3 p-4 rounded-lg border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/60">
+                            <p className="font-semibold text-green-800 dark:text-green-300 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> ZooEasy import complete</p>
+                            <div className="text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5 mb-2">
                                 {zeResult.written && Object.entries(zeResult.written).map(([s, n]) => (
                                     <p key={s}><span className="capitalize font-medium">{s}</span>: {n} imported{zeResult.skipped?.[s] ? `, ${zeResult.skipped[s]} skipped (duplicates)` : ''}</p>
                                 ))}
                             </div>
                             {zeResult.errors?.length > 0 && (
                                 <div className="mt-2">
-                                    <p className="text-sm font-semibold text-red-700 flex items-center gap-1"><AlertTriangle size={13} /> {zeResult.errors.length} error(s):</p>
-                                    <ul className="text-xs text-red-600 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                                    <p className="text-sm font-semibold text-red-700 dark:text-red-400 flex items-center gap-1"><AlertTriangle size={13} /> {zeResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-600 dark:text-red-300 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
                                         {zeResult.errors.map((e, i) => (
                                             <li key={i}>[{e.section}] {e.id}: {e.error}</li>
                                         ))}
                                     </ul>
                                 </div>
                             )}
-                            <button onClick={() => setZeResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                            <button onClick={() => setZeResult(null)} className="mt-3 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text underline">Dismiss</button>
                         </div>
                     )}
                 </div>
 
                 {/* -- Kintraks Import --------------------------------------- */}
-                <div className="border-t pt-5">
-                    <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2"><Upload size={16} /> Import from Kintraks</h4>
-                    <p className="text-xs text-gray-500 mb-4">Export your animals (Export) and breeding records (Breeding Record - All Records) from Kintraks as CSV, then upload them here.</p>
+                <div className="border-t dark:border-dark-border pt-5">
+                    <h4 className="font-semibold text-gray-700 dark:text-dark-text-secondary mb-1 flex items-center gap-2"><Upload size={16} /> Import from Kintraks</h4>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-4">Export your animals (Export) and breeding records (Breeding Record - All Records) from Kintraks as CSV, then upload them here.</p>
 
                     {/* Species */}
                     <div className="mb-4">
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Species <span className="text-red-500">*</span> (required when importing animals)</label>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Species <span className="text-red-500">*</span> (required when importing animals)</label>
                         <div className="flex items-center gap-2 max-w-xs">
                             <select
                                 value={ktkSpecies}
                                 onChange={e => setKtkSpecies(e.target.value)}
-                                className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
+                                className="flex-1 p-2 border border-gray-300 dark:border-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary bg-white dark:bg-dark-card-bg dark:text-dark-text"
                             >
                                 <option value="">? select species ?</option>
                                 {(zeSpeciesList || []).map(s => (
@@ -2158,7 +2158,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 type="button"
                                 title="Add new species"
                                 onClick={() => { setKtkAddingSpecies(v => !v); setKtkNewSpeciesName(''); }}
-                                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-600 transition"
+                                className="p-2 rounded-lg border border-gray-300 dark:border-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary transition"
                             >
                                 <Plus size={15} />
                             </button>
@@ -2170,7 +2170,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     placeholder="New species name"
                                     value={ktkNewSpeciesName}
                                     onChange={e => setKtkNewSpeciesName(e.target.value)}
-                                    className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                    className="flex-1 p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary"
                                     onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
                                 />
                                 <button
@@ -2203,7 +2203,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 >
                                     Add
                                 </button>
-                                <button type="button" onClick={() => setKtkAddingSpecies(false)} className="p-2 text-gray-400 hover:text-gray-600 transition">
+                                <button type="button" onClick={() => setKtkAddingSpecies(false)} className="p-2 text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text transition">
                                     <X size={14} />
                                 </button>
                             </div>
@@ -2215,12 +2215,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         {[['animals', ktkAnimalsFile, setKtkAnimalsFile, 'Animals CSV (Export_*.csv)'],
                           ['breedingrecords', ktkBreedingFile, setKtkBreedingFile, 'Breeding Records CSV']].map(
                             ([key, file, setter, label]) => (
-                                <label key={key} className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition relative">
+                                <label key={key} className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition relative">
                                     <input type="file" accept=".csv" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                                         onChange={e => { setter(e.target.files?.[0] || null); setKtkPreview(null); setKtkResult(null); }} />
                                     {file
-                                        ? <p className="text-xs font-medium text-gray-700 flex items-center gap-1"><FileText size={13} />{file.name}</p>
-                                        : <><Upload size={16} className="text-gray-400 mb-1" /><p className="text-xs text-gray-500 text-center px-2">{label}</p></>
+                                        ? <p className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary flex items-center gap-1"><FileText size={13} />{file.name}</p>
+                                        : <><Upload size={16} className="text-gray-400 dark:text-dark-text-muted mb-1" /><p className="text-xs text-gray-500 dark:text-dark-text-muted text-center px-2">{label}</p></>
                                     }
                                 </label>
                             )
@@ -2279,15 +2279,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             {ktkPreview.animals && (
                                 <div>
                                     <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                                        <h5 className="font-semibold text-gray-700">
+                                        <h5 className="font-semibold text-gray-700 dark:text-dark-text-secondary">
                                             Animals &mdash; {ktkPreview.animals.total} total
                                             {ktkPreview.animals.conflicts?.length > 0 && (() => {
                                                 const high     = ktkPreview.animals.conflicts.filter(c => c.confidence !== 'possible').length;
                                                 const possible = ktkPreview.animals.conflicts.filter(c => c.confidence === 'possible').length;
                                                 return (
                                                     <span className="ml-2 text-xs font-normal">
-                                                        {high > 0 && <span className="text-amber-600">{high} duplicate{high !== 1 ? 's' : ''}</span>}
-                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> ? </span>}
+                                                        {high > 0 && <span className="text-amber-600 dark:text-amber-400">{high} duplicate{high !== 1 ? 's' : ''}</span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400 dark:text-dark-text-muted"> ? </span>}
                                                         {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
                                                     </span>
                                                 );
@@ -2296,38 +2296,38 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         <div className="flex gap-2 text-xs flex-wrap">
                                             <button type="button"
                                                 onClick={() => setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).map(a => a.registration || a.kintrakId).filter(Boolean)))}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary">Select all</button>
                                             <button type="button"
                                                 onClick={() => setKtkSelectedAnimals(new Set())}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
-                                            <span className="border-l mx-1"></span>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary">Deselect all</button>
+                                            <span className="border-l dark:border-dark-border mx-1"></span>
                                             <button type="button"
                                                 onClick={() => { const conflictKtIds = new Set((ktkPreview.animals.conflicts || []).map(c => c.kintrakId)); setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).filter(a => !conflictKtIds.has(a.kintrakId)).map(a => a.registration || a.kintrakId).filter(Boolean))); }}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-green-700">New only</button>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-green-700 dark:text-green-400">New only</button>
                                             <button type="button"
                                                 onClick={() => { const dupKtIds = new Set((ktkPreview.animals.conflicts || []).filter(c => c.confidence !== 'possible').map(c => c.kintrakId)); setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).filter(a => dupKtIds.has(a.kintrakId)).map(a => a.registration || a.kintrakId).filter(Boolean))); }}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-amber-700">Duplicates only</button>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-amber-700 dark:text-amber-400">Duplicates only</button>
                                             <button type="button"
                                                 onClick={() => { const possKtIds = new Set((ktkPreview.animals.conflicts || []).filter(c => c.confidence === 'possible').map(c => c.kintrakId)); setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).filter(a => possKtIds.has(a.kintrakId)).map(a => a.registration || a.kintrakId).filter(Boolean))); }}
-                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-orange-700">Possible only</button>
+                                                className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-orange-700 dark:text-orange-400">Possible only</button>
                                         </div>
                                     </div>
-                                    <div className="border rounded-lg overflow-hidden">
+                                    <div className="border dark:border-dark-border rounded-lg overflow-hidden">
                                         <div className="overflow-x-auto max-h-96 overflow-y-auto">
                                             <table className="min-w-full text-xs">
-                                                <thead className="bg-gray-100 sticky top-0 z-10">
+                                                <thead className="bg-gray-100 dark:bg-dark-surface sticky top-0 z-10">
                                                     <tr>
                                                         <th className="px-2 py-2 w-8"></th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Gender</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Reg #</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Color</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Coat</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Name</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Gender</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Born</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Reg #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Color</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Coat</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Status</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y bg-white">
+                                                <tbody className="divide-y dark:divide-dark-border bg-white dark:bg-dark-card-bg">
                                                     {(ktkPreview.animals.items || []).map(a => {
                                                         const aKey = a.registration || a.kintrakId;
                                                         const isSelected = ktkSelectedAnimals.has(aKey);
@@ -2335,7 +2335,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                         const resolution = ktkConflictResolutions[aKey] || 'use_existing';
                                                         return (
                                                             <React.Fragment key={aKey}>
-                                                                <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50') : ''}`}>
+                                                                <tr className={`transition dark:text-dark-text ${!isSelected ? 'opacity-40 bg-gray-50 dark:bg-dark-surface' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-amber-50 dark:bg-amber-900/20') : ''}`}>
                                                                     <td className="px-2 py-1.5 text-center">
                                                                         <input type="checkbox" checked={isSelected}
                                                                             onChange={e => setKtkSelectedAnimals(prev => {
@@ -2345,32 +2345,32 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             })}
                                                                             className="rounded" />
                                                                     </td>
-                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ')}</td>
-                                                                    <td className="px-2 py-1.5 text-gray-600">{a.gender || '?'}</td>
-                                                                    <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate ? String(a.birthDate).slice(0,10) : '?'}</td>
-                                                                    <td className="px-2 py-1.5 font-mono text-gray-500">{a.registration || '?'}</td>
-                                                                    <td className="px-2 py-1.5 text-gray-600">{a.color || '?'}</td>
-                                                                    <td className="px-2 py-1.5 text-gray-600">{a.coat || '?'}</td>
+                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 dark:text-dark-text whitespace-nowrap">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ')}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{a.gender || '?'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary whitespace-nowrap">{a.birthDate ? String(a.birthDate).slice(0,10) : '?'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-500 dark:text-dark-text-muted">{a.registration || '?'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{a.color || '?'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{a.coat || '?'}</td>
                                                                     <td className="px-2 py-1.5">
                                                                         {conflict
                                                                             ? conflict.confidence === 'possible'
-                                                                                ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
-                                                                                : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                                ? <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded text-xs font-medium">Possible match</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium">Duplicate</span>
                                                                             : ktkManualMappings[aKey]
-                                                                                ? <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Mapped</span>
-                                                                                : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                                ? <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">Mapped</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs font-medium">New</span>}
                                                                     </td>
                                                                 </tr>
                                                                 {/* Manual mapping sub-row for New/Mapped rows */}
                                                                 {!conflict && isSelected && (
-                                                                    <tr className={ktkManualMappings[aKey] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                    <tr className={ktkManualMappings[aKey] ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-gray-50 dark:bg-dark-surface'}>
                                                                         <td></td>
                                                                         <td colSpan="7" className="px-3 pb-2 pt-0">
                                                                             {ktkManualMappings[aKey] ? (
                                                                                 <div className="flex items-center gap-2 text-xs pt-1">
-                                                                                    <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{ktkManualMappings[aKey].id_public}</span> &mdash; {ktkManualMappings[aKey].name}</span>
+                                                                                    <span className="text-blue-700 dark:text-blue-400">&#x21AA; Mapped to <span className="font-mono font-semibold">{ktkManualMappings[aKey].id_public}</span> &mdash; {ktkManualMappings[aKey].name}</span>
                                                                                     <button type="button" onClick={() => setKtkManualMappings(prev => { const n = { ...prev }; delete n[aKey]; return n; })}
-                                                                                        className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
+                                                                                        className="text-gray-400 dark:text-dark-text-muted hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
                                                                                 </div>
                                                                             ) : (
                                                                                 <div className="pt-1">
@@ -2395,27 +2395,27 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                             setKtkMappingSearch(prev => ({ ...prev, results: merged.slice(0, 10), loading: false }));
                                                                                                         } catch { setKtkMappingSearch(prev => ({ ...prev, loading: false })); }
                                                                                                     }}
-                                                                                                    className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                                                                                    className="flex-1 max-w-xs text-xs border dark:border-dark-border dark:bg-dark-card-bg dark:text-dark-text rounded px-2 py-1 focus:ring-primary focus:border-primary"
                                                                                                 />
-                                                                                                {ktkMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                {ktkMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400 dark:text-dark-text-muted" />}
                                                                                                 <button type="button" onClick={() => setKtkMappingSearch({ registration: null, query: '', results: [], loading: false })}
-                                                                                                    className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                                    className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text"><X size={11} /></button>
                                                                                             </div>
                                                                                             {ktkMappingSearch.results.length > 0 && (
-                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-sm max-h-40 overflow-y-auto">
+                                                                                                <div className="border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg shadow-sm divide-y dark:divide-dark-border max-w-sm max-h-40 overflow-y-auto">
                                                                                                     {ktkMappingSearch.results.map(r => (
                                                                                                         <button key={r.id_public} type="button"
                                                                                                             onClick={() => {
                                                                                                                 setKtkManualMappings(prev => ({ ...prev, [aKey]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
                                                                                                                 setKtkMappingSearch({ registration: null, query: '', results: [], loading: false });
                                                                                                             }}
-                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition text-xs"
                                                                                                         >
-                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
-                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
-                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
-                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
-                                                                                                            {r.breederName && <span className="text-gray-300 ml-1">&middot; {r.breederName}</span>}
+                                                                                                            <span className="font-medium text-gray-800 dark:text-dark-text">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 dark:text-dark-text-muted ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {r.gender}</span>}
+                                                                                                            {r.breederName && <span className="text-gray-300 dark:text-dark-text-muted ml-1">&middot; {r.breederName}</span>}
                                                                                                         </button>
                                                                                                     ))}
                                                                                                 </div>
@@ -2424,7 +2424,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                     ) : (
                                                                                         <button type="button"
                                                                                             onClick={() => setKtkMappingSearch({ registration: aKey, query: '', results: [], loading: false })}
-                                                                                            className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                                                                            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline"
                                                                                         >
                                                                                             + Map to existing CT animal (for parent links)
                                                                                         </button>
@@ -2435,10 +2435,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                     </tr>
                                                                 )}
                                                                 {conflict && isSelected && (
-                                                                    <tr className={`bg-${conflict.confidence === 'possible' ? 'orange' : 'amber'}-50`}>
+                                                                    <tr className={`${conflict.confidence === 'possible' ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
                                                                         <td></td>
                                                                         <td colSpan="7" className="px-3 pb-2 pt-0">
-                                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
+                                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 dark:text-amber-300 pt-1">
                                                                                 <AlertTriangle size={11} className="shrink-0 text-amber-500" />
                                                                                 <span>
                                                                                     {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
@@ -2451,7 +2451,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 <select
                                                                                     value={resolution}
                                                                                     onChange={e => setKtkConflictResolutions(prev => ({ ...prev, [aKey]: e.target.value }))}
-                                                                                    className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
+                                                                                    className="border dark:border-dark-border rounded px-2 py-0.5 bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text font-medium text-xs"
                                                                                 >
                                                                                     <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
                                                                                     <option value="import_anyway">Import anyway as new entry</option>
@@ -2467,7 +2467,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             </table>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-1">
+                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">
                                         {ktkSelectedAnimals.size} of {ktkPreview.animals.total} selected
                                         {(() => {
                                             const dupeLinks = [...ktkSelectedAnimals].filter(r => {
@@ -2484,29 +2484,29 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             {ktkPreview.litters?.items?.length > 0 && (
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
-                                        <h5 className="font-semibold text-gray-700">Breeding Records &mdash; {ktkPreview.litters.total} total</h5>
+                                        <h5 className="font-semibold text-gray-700 dark:text-dark-text-secondary">Breeding Records &mdash; {ktkPreview.litters.total} total</h5>
                                         <div className="flex gap-2 text-xs">
                                             <button type="button" onClick={() => setKtkSelectedLitters(new Set(ktkPreview.litters.items.map(l => l.litterIndex)))} className="text-primary hover:underline">Select all</button>
-                                            <button type="button" onClick={() => setKtkSelectedLitters(new Set())} className="text-gray-400 hover:underline">Deselect all</button>
+                                            <button type="button" onClick={() => setKtkSelectedLitters(new Set())} className="text-gray-400 dark:text-dark-text-muted hover:underline">Deselect all</button>
                                         </div>
                                     </div>
-                                    <div className="border rounded-lg overflow-hidden">
+                                    <div className="border dark:border-dark-border rounded-lg overflow-hidden">
                                         <div className="overflow-x-auto max-h-48 overflow-y-auto">
                                             <table className="min-w-full text-xs">
-                                                <thead className="bg-gray-100 sticky top-0">
+                                                <thead className="bg-gray-100 dark:bg-dark-surface sticky top-0">
                                                     <tr>
                                                         <th className="px-2 py-2"></th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Nest letter</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Mating date</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Birth date</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Weaning date</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born count</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Nest letter</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Mating date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Birth date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Weaning date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Sire</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Dam</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Born count</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Status</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y bg-white">
+                                                <tbody className="divide-y dark:divide-dark-border bg-white dark:bg-dark-card-bg">
                                                     {ktkPreview.litters.items.map((l, i) => {
                                                         const isSelected = ktkSelectedLitters.has(l.litterIndex);
                                                         const lm = ktkLitterMappings[l.litterIndex] || {};
@@ -2515,7 +2515,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                         const showSubRow = isSelected && ((!l.maleCtId && !l.sireInThisImport && l.sireName) || (!l.femaleCtId && !l.damInThisImport && l.damName) || lm.sire || lm.dam);
                                                         return (
                                                             <React.Fragment key={i}>
-                                                            <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : l.isDuplicate ? 'bg-amber-50' : ''}`}>
+                                                            <tr className={`transition dark:text-dark-text ${!isSelected ? 'opacity-40 bg-gray-50 dark:bg-dark-surface' : l.isDuplicate ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}>
                                                                 <td className="px-2 py-1.5 text-center">
                                                                     <input type="checkbox" checked={isSelected}
                                                                         onChange={e => setKtkSelectedLitters(prev => {
@@ -2525,41 +2525,41 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                         })}
                                                                         className="rounded" />
                                                                 </td>
-                                                                <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '?'}</td>
-                                                                <td className="px-2 py-1.5 text-gray-600">{l.matingDate ? String(l.matingDate).slice(0,10) : '?'}</td>
-                                                                <td className="px-2 py-1.5 text-gray-600">{l.birthDate ? String(l.birthDate).slice(0,10) : '?'}</td>
-                                                                <td className="px-2 py-1.5 text-gray-600">{l.weaningDate ? String(l.weaningDate).slice(0,10) : '?'}</td>
-                                                                <td className="px-2 py-1.5 text-gray-700">
-                                                                    {l.sirePrefix && <span className="text-gray-400 mr-0.5">({l.sirePrefix})</span>}{l.sireName || '?'}
-                                                                    {effectiveSireId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{effectiveSireId}</span>}
-                                                                    {!effectiveSireId && l.sireInThisImport && <span className="ml-1.5 px-1 py-0.5 text-xs bg-blue-100 text-blue-600 rounded" title="Will be linked after import">in this import</span>}
-                                                                    {!effectiveSireId && !l.sireInThisImport && l.sireName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                <td className="px-2 py-1.5 font-medium text-gray-700 dark:text-dark-text-secondary">{l.nestLetter || '?'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{l.matingDate ? String(l.matingDate).slice(0,10) : '?'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{l.birthDate ? String(l.birthDate).slice(0,10) : '?'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{l.weaningDate ? String(l.weaningDate).slice(0,10) : '?'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-700 dark:text-dark-text-secondary">
+                                                                    {l.sirePrefix && <span className="text-gray-400 dark:text-dark-text-muted mr-0.5">({l.sirePrefix})</span>}{l.sireName || '?'}
+                                                                    {effectiveSireId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">{effectiveSireId}</span>}
+                                                                    {!effectiveSireId && l.sireInThisImport && <span className="ml-1.5 px-1 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded" title="Will be linked after import">in this import</span>}
+                                                                    {!effectiveSireId && !l.sireInThisImport && l.sireName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted rounded">no CT match</span>}
                                                                 </td>
-                                                                <td className="px-2 py-1.5 text-gray-700">
-                                                                    {l.damPrefix && <span className="text-gray-400 mr-0.5">({l.damPrefix})</span>}{l.damName || '?'}
-                                                                    {effectiveDamId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{effectiveDamId}</span>}
-                                                                    {!effectiveDamId && l.damInThisImport && <span className="ml-1.5 px-1 py-0.5 text-xs bg-blue-100 text-blue-600 rounded" title="Will be linked after import">in this import</span>}
-                                                                    {!effectiveDamId && !l.damInThisImport && l.damName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                <td className="px-2 py-1.5 text-gray-700 dark:text-dark-text-secondary">
+                                                                    {l.damPrefix && <span className="text-gray-400 dark:text-dark-text-muted mr-0.5">({l.damPrefix})</span>}{l.damName || '?'}
+                                                                    {effectiveDamId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">{effectiveDamId}</span>}
+                                                                    {!effectiveDamId && l.damInThisImport && <span className="ml-1.5 px-1 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded" title="Will be linked after import">in this import</span>}
+                                                                    {!effectiveDamId && !l.damInThisImport && l.damName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 dark:bg-dark-surface text-gray-400 dark:text-dark-text-muted rounded">no CT match</span>}
                                                                 </td>
-                                                                <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '?'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary">{l.litterSizeBorn != null ? l.litterSizeBorn : '?'}</td>
                                                                 <td className="px-2 py-1.5">
                                                                     {l.isDuplicate
-                                                                        ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium" title={l.existingLitterId || ''}>Duplicate</span>
-                                                                        : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                        ? <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium" title={l.existingLitterId || ''}>Duplicate</span>
+                                                                        : <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs font-medium">New</span>}
                                                                 </td>
                                                             </tr>
                                                             {showSubRow && (
-                                                                <tr className="bg-blue-50 border-b">
+                                                                <tr className="bg-blue-50 dark:bg-blue-900/20 border-b dark:border-dark-border">
                                                                     <td colSpan="9" className="px-4 pb-2 pt-1">
                                                                         <div className="flex flex-wrap gap-4">
                                                                             {/* Sire mapping */}
                                                                             {((!l.maleCtId && !l.sireInThisImport && l.sireName) || lm.sire) && (
                                                                                 <div className="flex items-center gap-1.5 text-xs">
-                                                                                    <span className="font-medium text-gray-500 min-w-[28px]">Sire:</span>
+                                                                                    <span className="font-medium text-gray-500 dark:text-dark-text-muted min-w-[28px]">Sire:</span>
                                                                                     {lm.sire ? (
                                                                                         <>
-                                                                                            <span className="text-blue-700">&#x21AA; <span className="font-mono font-semibold">{lm.sire.id_public}</span> &mdash; {lm.sire.name}</span>
-                                                                                            <button type="button" onClick={() => setKtkLitterMappings(prev => { const n = { ...prev }; const e = { ...n[l.litterIndex] }; delete e.sire; n[l.litterIndex] = e; return n; })} className="text-gray-400 hover:text-red-500 transition" title="Remove mapping"><X size={11} /></button>
+                                                                                            <span className="text-blue-700 dark:text-blue-400">&#x21AA; <span className="font-mono font-semibold">{lm.sire.id_public}</span> &mdash; {lm.sire.name}</span>
+                                                                                            <button type="button" onClick={() => setKtkLitterMappings(prev => { const n = { ...prev }; const e = { ...n[l.litterIndex] }; delete e.sire; n[l.litterIndex] = e; return n; })} className="text-gray-400 dark:text-dark-text-muted hover:text-red-500 transition" title="Remove mapping"><X size={11} /></button>
                                                                                         </>
                                                                                     ) : ktkLitterMappingSearch.litterIndex === l.litterIndex && ktkLitterMappingSearch.side === 'sire' ? (
                                                                                         <div className="flex flex-col gap-1">
@@ -2581,43 +2581,43 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                             setKtkLitterMappingSearch(prev => ({ ...prev, results: [...own, ...pub2.filter(x => !seen.has(x.id_public))].slice(0, 10), loading: false }));
                                                                                                         } catch { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); }
                                                                                                     }}
-                                                                                                    className="text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary w-48"
+                                                                                                    className="text-xs border dark:border-dark-border dark:bg-dark-card-bg dark:text-dark-text rounded px-2 py-1 focus:ring-primary focus:border-primary w-48"
                                                                                                 />
-                                                                                                {ktkLitterMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
-                                                                                                <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false })} className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                                {ktkLitterMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400 dark:text-dark-text-muted" />}
+                                                                                                <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false })} className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text"><X size={11} /></button>
                                                                                             </div>
                                                                                             {ktkLitterMappingSearch.results.length > 0 && (
-                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-xs max-h-36 overflow-y-auto">
+                                                                                                <div className="border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg shadow-sm divide-y dark:divide-dark-border max-w-xs max-h-36 overflow-y-auto">
                                                                                                     {ktkLitterMappingSearch.results.map(r => (
                                                                                                         <button key={r.id_public} type="button"
                                                                                                             onClick={() => {
                                                                                                                 setKtkLitterMappings(prev => ({ ...prev, [l.litterIndex]: { ...prev[l.litterIndex], sire: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } } }));
                                                                                                                 setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false });
                                                                                                             }}
-                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 text-xs"
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-dark-surface-hover text-xs"
                                                                                                         >
-                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
-                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
-                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
-                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                            <span className="font-medium text-gray-800 dark:text-dark-text">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 dark:text-dark-text-muted ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {r.gender}</span>}
                                                                                                         </button>
                                                                                                     ))}
                                                                                                 </div>
                                                                                             )}
                                                                                         </div>
                                                                                     ) : (
-                                                                                        <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: l.litterIndex, side: 'sire', query: '', results: [], loading: false })} className="text-xs text-blue-600 hover:text-blue-800 hover:underline">+ Map to CT animal</button>
+                                                                                        <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: l.litterIndex, side: 'sire', query: '', results: [], loading: false })} className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">+ Map to CT animal</button>
                                                                                     )}
                                                                                 </div>
                                                                             )}
                                                                             {/* Dam mapping */}
                                                                             {((!l.femaleCtId && !l.damInThisImport && l.damName) || lm.dam) && (
                                                                                 <div className="flex items-center gap-1.5 text-xs">
-                                                                                    <span className="font-medium text-gray-500 min-w-[28px]">Dam:</span>
+                                                                                    <span className="font-medium text-gray-500 dark:text-dark-text-muted min-w-[28px]">Dam:</span>
                                                                                     {lm.dam ? (
                                                                                         <>
-                                                                                            <span className="text-blue-700">&#x21AA; <span className="font-mono font-semibold">{lm.dam.id_public}</span> &mdash; {lm.dam.name}</span>
-                                                                                            <button type="button" onClick={() => setKtkLitterMappings(prev => { const n = { ...prev }; const e = { ...n[l.litterIndex] }; delete e.dam; n[l.litterIndex] = e; return n; })} className="text-gray-400 hover:text-red-500 transition" title="Remove mapping"><X size={11} /></button>
+                                                                                            <span className="text-blue-700 dark:text-blue-400">&#x21AA; <span className="font-mono font-semibold">{lm.dam.id_public}</span> &mdash; {lm.dam.name}</span>
+                                                                                            <button type="button" onClick={() => setKtkLitterMappings(prev => { const n = { ...prev }; const e = { ...n[l.litterIndex] }; delete e.dam; n[l.litterIndex] = e; return n; })} className="text-gray-400 dark:text-dark-text-muted hover:text-red-500 transition" title="Remove mapping"><X size={11} /></button>
                                                                                         </>
                                                                                     ) : ktkLitterMappingSearch.litterIndex === l.litterIndex && ktkLitterMappingSearch.side === 'dam' ? (
                                                                                         <div className="flex flex-col gap-1">
@@ -2639,32 +2639,32 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                             setKtkLitterMappingSearch(prev => ({ ...prev, results: [...own, ...pub2.filter(x => !seen.has(x.id_public))].slice(0, 10), loading: false }));
                                                                                                         } catch { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); }
                                                                                                     }}
-                                                                                                    className="text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary w-48"
+                                                                                                    className="text-xs border dark:border-dark-border dark:bg-dark-card-bg dark:text-dark-text rounded px-2 py-1 focus:ring-primary focus:border-primary w-48"
                                                                                                 />
-                                                                                                {ktkLitterMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
-                                                                                                <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false })} className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                                {ktkLitterMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400 dark:text-dark-text-muted" />}
+                                                                                                <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false })} className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text"><X size={11} /></button>
                                                                                             </div>
                                                                                             {ktkLitterMappingSearch.results.length > 0 && (
-                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-xs max-h-36 overflow-y-auto">
+                                                                                                <div className="border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg shadow-sm divide-y dark:divide-dark-border max-w-xs max-h-36 overflow-y-auto">
                                                                                                     {ktkLitterMappingSearch.results.map(r => (
                                                                                                         <button key={r.id_public} type="button"
                                                                                                             onClick={() => {
                                                                                                                 setKtkLitterMappings(prev => ({ ...prev, [l.litterIndex]: { ...prev[l.litterIndex], dam: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } } }));
                                                                                                                 setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false });
                                                                                                             }}
-                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 text-xs"
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-dark-surface-hover text-xs"
                                                                                                         >
-                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
-                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
-                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
-                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                            <span className="font-medium text-gray-800 dark:text-dark-text">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 dark:text-dark-text-muted ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {r.gender}</span>}
                                                                                                         </button>
                                                                                                     ))}
                                                                                                 </div>
                                                                                             )}
                                                                                         </div>
                                                                                     ) : (
-                                                                                        <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: l.litterIndex, side: 'dam', query: '', results: [], loading: false })} className="text-xs text-blue-600 hover:text-blue-800 hover:underline">+ Map to CT animal</button>
+                                                                                        <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: l.litterIndex, side: 'dam', query: '', results: [], loading: false })} className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">+ Map to CT animal</button>
                                                                                     )}
                                                                                 </div>
                                                                             )}
@@ -2721,7 +2721,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 </button>
                                 <button
                                     onClick={() => { setKtkPreview(null); setKtkAnimalsFile(null); setKtkBreedingFile(null); setKtkManualMappings({}); setKtkMappingSearch({ registration: null, query: '', results: [], loading: false }); setKtkLitterMappings({}); setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false }); setKtkSelectedLitters(new Set()); }}
-                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                                    className="px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-medium rounded-lg transition"
                                 >
                                     Cancel
                                 </button>
@@ -2731,50 +2731,50 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
                     {/* Result */}
                     {ktkResult && (
-                        <div className="mt-3 p-4 rounded-lg border bg-green-50 border-green-200">
-                            <p className="font-semibold text-green-800 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> Kintraks import complete</p>
-                            <div className="text-sm text-gray-700 space-y-0.5 mb-2">
+                        <div className="mt-3 p-4 rounded-lg border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/60">
+                            <p className="font-semibold text-green-800 dark:text-green-300 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> Kintraks import complete</p>
+                            <div className="text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5 mb-2">
                                 {ktkResult.written && Object.entries(ktkResult.written).map(([s, n]) => (
                                     <p key={s}><span className="capitalize font-medium">{s}</span>: {n} imported{ktkResult.skipped?.[s] ? `, ${ktkResult.skipped[s]} skipped (duplicates)` : ''}</p>
                                 ))}
                             </div>
                             {ktkResult.errors?.length > 0 && (
                                 <div className="mt-2">
-                                    <p className="text-sm font-semibold text-red-700 flex items-center gap-1"><AlertTriangle size={13} /> {ktkResult.errors.length} error(s):</p>
-                                    <ul className="text-xs text-red-600 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                                    <p className="text-sm font-semibold text-red-700 dark:text-red-400 flex items-center gap-1"><AlertTriangle size={13} /> {ktkResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-600 dark:text-red-300 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
                                         {ktkResult.errors.map((e, i) => (
                                             <li key={i}>[{e.section}] {e.id}: {e.error}</li>
                                         ))}
                                     </ul>
                                 </div>
                             )}
-                            <button onClick={() => setKtkResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                            <button onClick={() => setKtkResult(null)} className="mt-3 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text underline">Dismiss</button>
                         </div>
                     )}
                 </div>
             </div>
 
             {/* -- SimpleBreed Import --------------------------------------- */}
-            <div className="mt-4 border border-sky-200 rounded-xl bg-white overflow-hidden">
-                <div className="flex items-center gap-3 px-4 py-3 bg-sky-50 border-b border-sky-200">
-                    <Globe size={18} className="text-sky-600 flex-shrink-0" />
+            <div className="mt-4 border border-sky-200 dark:border-sky-700/60 rounded-xl bg-white dark:bg-dark-card-bg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 bg-sky-50 dark:bg-sky-900/20 border-b border-sky-200 dark:border-sky-700/60">
+                    <Globe size={18} className="text-sky-600 dark:text-sky-400 flex-shrink-0" />
                     <div>
-                        <h3 className="font-semibold text-sky-800 text-sm">Import from SimpleBreed</h3>
-                        <p className="text-xs text-sky-600">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date. If a species can't be detected, you'll be prompted to pick one ? the dropdown shows <span className="font-medium">only your starred species</span> (star them via the species selector when adding an animal).</p>
+                        <h3 className="font-semibold text-sky-800 dark:text-sky-300 text-sm">Import from SimpleBreed</h3>
+                        <p className="text-xs text-sky-600 dark:text-sky-400">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date. If a species can't be detected, you'll be prompted to pick one ? the dropdown shows <span className="font-medium">only your starred species</span> (star them via the species selector when adding an animal).</p>
                     </div>
                 </div>
                 <div className="p-4 space-y-3">
                     {/* URL input */}
                     {!sbPreview && !sbResult && (
                         <div className="space-y-2">
-                            <label className="text-xs font-medium text-gray-600">SimpleBreed profile URL or username</label>
+                            <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary">SimpleBreed profile URL or username</label>
                             <div className="flex gap-2">
                                 <input
                                     type="text"
                                     value={sbUrl}
                                     onChange={e => setSbUrl(e.target.value)}
                                     placeholder="https://www.simplebreed.com/morningstardb"
-                                    className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                                    className="flex-1 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400"
                                     onKeyDown={async e => {
                                         if (e.key !== 'Enter' || sbPreviewLoading || !sbUrl.trim()) return;
                                         setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({});
@@ -2831,12 +2831,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         return (
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between flex-wrap gap-2">
-                                    <h5 className="font-semibold text-gray-700">
+                                    <h5 className="font-semibold text-gray-700 dark:text-dark-text-secondary">
                                         {sbPreview.total} animal{sbPreview.total !== 1 ? 's' : ''} found
                                         {(highConflictCount > 0 || possibleConflictCount > 0) && (
                                             <span className="ml-2 text-xs font-normal">
-                                                {highConflictCount > 0 && <span className="text-amber-600">{highConflictCount} duplicate{highConflictCount !== 1 ? 's' : ''}</span>}
-                                                {highConflictCount > 0 && possibleConflictCount > 0 && <span className="text-gray-400"> ? </span>}
+                                                {highConflictCount > 0 && <span className="text-amber-600 dark:text-amber-400">{highConflictCount} duplicate{highConflictCount !== 1 ? 's' : ''}</span>}
+                                                {highConflictCount > 0 && possibleConflictCount > 0 && <span className="text-gray-400 dark:text-dark-text-muted"> ? </span>}
                                                 {possibleConflictCount > 0 && <span className="text-orange-500">{possibleConflictCount} possible match{possibleConflictCount !== 1 ? 'es' : ''}</span>}
                                             </span>
                                         )}
@@ -2844,18 +2844,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     <div className="flex gap-2 text-xs flex-wrap">
                                         <button type="button"
                                             onClick={() => setSbSelectedIds(new Set(sbItems.filter(isNewAnimal).map(a => a.sbId)))}
-                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all new</button>
+                                            className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary">Select all new</button>
                                         <button type="button"
                                             onClick={() => setSbSelectedIds(new Set())}
-                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
+                                            className="px-2 py-1 border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover text-gray-600 dark:text-dark-text-secondary">Deselect all</button>
                                     </div>
                                 </div>
 
                                 {/* Bulk species assign ? shown when any animal has no detected species */}
                                 {sbItems.some(a => !a.species || a.species === 'Unknown') && (
-                                    <div className="flex items-center gap-2 text-xs bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
-                                        <span className="text-orange-700 font-medium shrink-0">Species not detected for some animals.</span>
-                                        <span className="text-orange-600 shrink-0">Set all to:</span>
+                                    <div className="flex items-center gap-2 text-xs bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/60 rounded-lg px-3 py-2">
+                                        <span className="text-orange-700 dark:text-orange-300 font-medium shrink-0">Species not detected for some animals.</span>
+                                        <span className="text-orange-600 dark:text-orange-400 shrink-0">Set all to:</span>
                                         <select
                                             defaultValue=""
                                             onChange={e => {
@@ -2866,7 +2866,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 }
                                                 setSbSpeciesOverrides(prev => ({ ...prev, ...overrides }));
                                             }}
-                                            className="border border-orange-300 rounded px-2 py-0.5 bg-white text-gray-700 font-medium"
+                                            className="border border-orange-300 dark:border-orange-700/60 rounded px-2 py-0.5 bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text font-medium"
                                         >
                                             <option value="">? pick species ?</option>
                                             {(sbFavoriteSpecies.length > 0 ? sbFavoriteSpecies : DEFAULT_SPECIES_OPTIONS).map(s => <option key={s} value={s}>{s}</option>)}
@@ -2877,20 +2877,20 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     </div>
                                 )}
 
-                                <div className="border rounded-lg overflow-hidden">
+                                <div className="border dark:border-dark-border rounded-lg overflow-hidden">
                                     <div className="overflow-x-auto max-h-96 overflow-y-auto">
                                         <table className="min-w-full text-xs">
-                                            <thead className="bg-gray-100 sticky top-0 z-10">
+                                            <thead className="bg-gray-100 dark:bg-dark-surface sticky top-0 z-10">
                                                 <tr>
                                                     <th className="px-2 py-2 w-8"></th>
-                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
-                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
-                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">SB ID</th>
-                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Species</th>
-                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Name</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Born</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">SB ID</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Species</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600 dark:text-dark-text-secondary">Status</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y bg-white">
+                                            <tbody className="divide-y dark:divide-dark-border bg-white dark:bg-dark-card-bg">
                                                 {sbItems.map(a => {
                                                     const conflict = sbConflicts.find(c => c.sbId === a.sbId);
                                                     const resolution = sbConflictResolutions[a.sbId] || 'use_existing';
@@ -2899,7 +2899,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                     const isSelected = isSelectable && (sbSelectedIds.has(a.sbId) || (!!conflict && resolution === 'import_anyway'));
                                                     return (
                                                         <React.Fragment key={a.sbId}>
-                                                            <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50') : ''}`}>
+                                                            <tr className={`transition dark:text-dark-text ${!isSelected ? 'opacity-40 bg-gray-50 dark:bg-dark-surface' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-amber-50 dark:bg-amber-900/20') : ''}`}>
                                                                 <td className="px-2 py-1.5 text-center">
                                                                     <input type="checkbox" checked={isSelected}
                                                                         disabled={!isSelectable}
@@ -2913,36 +2913,36 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                         }}
                                                                         className="rounded" />
                                                                 </td>
-                                                                <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{a.name}</td>
-                                                                <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate || '?'}</td>
-                                                                <td className="px-2 py-1.5 font-mono text-gray-500">{a.sbIdKey || a.sbId}</td>
+                                                                <td className="px-2 py-1.5 font-medium text-gray-800 dark:text-dark-text whitespace-nowrap">{a.name}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 dark:text-dark-text-secondary whitespace-nowrap">{a.birthDate || '?'}</td>
+                                                                <td className="px-2 py-1.5 font-mono text-gray-500 dark:text-dark-text-muted">{a.sbIdKey || a.sbId}</td>
                                                                 <td className="px-2 py-1.5">
                                                                     {(!a.species || a.species === 'Unknown')
                                                                         ? <select
                                                                             value={sbSpeciesOverrides[a.sbId] || ''}
                                                                             onChange={e => setSbSpeciesOverrides(prev => ({ ...prev, [a.sbId]: e.target.value }))}
-                                                                            className={`border rounded px-1 py-0.5 text-xs font-medium ${sbSpeciesOverrides[a.sbId] ? 'bg-white text-gray-700 border-gray-300' : 'bg-orange-50 text-orange-600 border-orange-300'}`}
+                                                                            className={`border rounded px-1 py-0.5 text-xs font-medium ${sbSpeciesOverrides[a.sbId] ? 'bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text border-gray-300 dark:border-dark-text' : 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700/60'}`}
                                                                           >
                                                                             <option value="">? pick ?</option>
                                                                             {(sbFavoriteSpecies.length > 0 ? sbFavoriteSpecies : DEFAULT_SPECIES_OPTIONS).map(s => <option key={s} value={s}>{s}</option>)}
                                                                           </select>
-                                                                        : <span className="text-gray-500">{a.species}</span>}
+                                                                        : <span className="text-gray-500 dark:text-dark-text-muted">{a.species}</span>}
                                                                 </td>
                                                                 <td className="px-2 py-1.5">
                                                                     {conflict
                                                                         ? conflict.confidence === 'possible'
-                                                                            ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
-                                                                            : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                            ? <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded text-xs font-medium">Possible match</span>
+                                                                            : <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium">Duplicate</span>
                                                                         : sbManualMappings[a.sbId]
-                                                                            ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
-                                                                            : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                            ? <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium">Duplicate</span>
+                                                                            : <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs font-medium">New</span>}
                                                                 </td>
                                                             </tr>
                                                             {conflict && (
-                                                                <tr className={conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50'}>
+                                                                <tr className={conflict.confidence === 'possible' ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}>
                                                                     <td></td>
                                                                     <td colSpan="5" className="px-3 pb-2 pt-0">
-                                                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
+                                                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 dark:text-amber-300 pt-1">
                                                                             <AlertTriangle size={11} className="shrink-0 text-amber-500" />
                                                                             <span>
                                                                                 {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
@@ -2964,7 +2964,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                         return next;
                                                                                     });
                                                                                 }}
-                                                                                className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
+                                                                                className="border dark:border-dark-border rounded px-2 py-0.5 bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text font-medium text-xs"
                                                                             >
                                                                                 <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
                                                                                 <option value="import_anyway">Import anyway as new entry</option>
@@ -2975,16 +2975,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                             )}
                                                             {/* Manual mapping sub-row for New/Mapped rows */}
                                                             {!conflict && (isSelected || sbManualMappings[a.sbId]) && (
-                                                                <tr className={sbManualMappings[a.sbId] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                <tr className={sbManualMappings[a.sbId] ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-gray-50 dark:bg-dark-surface'}>
                                                                     <td></td>
                                                                     <td colSpan="5" className="px-3 pb-2 pt-0">
                                                                         {sbManualMappings[a.sbId] ? (
                                                                             <div className="flex items-center gap-2 text-xs pt-1">
-                                                                                <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{sbManualMappings[a.sbId].id_public}</span> &mdash; {sbManualMappings[a.sbId].name}</span>
+                                                                                <span className="text-blue-700 dark:text-blue-400">&#x21AA; Mapped to <span className="font-mono font-semibold">{sbManualMappings[a.sbId].id_public}</span> &mdash; {sbManualMappings[a.sbId].name}</span>
                                                                                 <button type="button" onClick={() => setSbMappingSearch({ sbId: a.sbId, query: '', results: [], loading: false })}
-                                                                                    className="text-xs text-blue-500 hover:text-blue-700 hover:underline ml-1">Change</button>
+                                                                                    className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline ml-1">Change</button>
                                                                                 <button type="button" onClick={() => { setSbManualMappings(prev => { const n = { ...prev }; delete n[a.sbId]; return n; }); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); }}
-                                                                                    className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
+                                                                                    className="text-gray-400 dark:text-dark-text-muted hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
                                                                             </div>
                                                                         ) : (
                                                                             <div className="pt-1">
@@ -3010,27 +3010,27 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                         setSbMappingSearch(prev => prev.query !== q ? prev : { ...prev, results: merged.slice(0, 10), loading: false });
                                                                                                     } catch { setSbMappingSearch(prev => ({ ...prev, loading: false })); }
                                                                                                 }}
-                                                                                                className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                                                                                className="flex-1 max-w-xs text-xs border dark:border-dark-border dark:bg-dark-card-bg dark:text-dark-text rounded px-2 py-1 focus:ring-primary focus:border-primary"
                                                                                             />
-                                                                                            {sbMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                            {sbMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400 dark:text-dark-text-muted" />}
                                                                                             <button type="button" onClick={() => setSbMappingSearch({ sbId: null, query: '', results: [], loading: false })}
-                                                                                                className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                                className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text"><X size={11} /></button>
                                                                                         </div>
                                                                                         {sbMappingSearch.results.length > 0 && (
-                                                                                            <div className="border rounded bg-white shadow-sm divide-y max-w-sm max-h-40 overflow-y-auto">
+                                                                                            <div className="border dark:border-dark-border rounded bg-white dark:bg-dark-card-bg shadow-sm divide-y dark:divide-dark-border max-w-sm max-h-40 overflow-y-auto">
                                                                                                 {sbMappingSearch.results.map(r => (
                                                                                                     <button key={r.id_public} type="button"
                                                                                                         onClick={() => {
                                                                                                             setSbManualMappings(prev => ({ ...prev, [a.sbId]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
                                                                                                             setSbMappingSearch({ sbId: null, query: '', results: [], loading: false });
                                                                                                         }}
-                                                                                                        className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
+                                                                                                        className="w-full text-left px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition text-xs"
                                                                                                     >
-                                                                                                        <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
-                                                                                                        <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
-                                                                                                        {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
-                                                                                                        {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
-                                                                                                        {r.breederName && <span className="text-gray-300 ml-1">&middot; {r.breederName}</span>}
+                                                                                                        <span className="font-medium text-gray-800 dark:text-dark-text">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                        <span className="text-gray-400 dark:text-dark-text-muted ml-2 font-mono">{r.id_public}</span>
+                                                                                                        {r.birthDate && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                        {r.gender && <span className="text-gray-400 dark:text-dark-text-muted ml-1">&middot; {r.gender}</span>}
+                                                                                                        {r.breederName && <span className="text-gray-300 dark:text-dark-text-muted ml-1">&middot; {r.breederName}</span>}
                                                                                                     </button>
                                                                                                 ))}
                                                                                             </div>
@@ -3057,7 +3057,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     </div>
                                 </div>
 
-                                <p className="text-xs text-gray-400">
+                                <p className="text-xs text-gray-400 dark:text-dark-text-muted">
                                     {selectedNewCount} of {sbItems.filter(isNewAnimal).length} new animal{sbItems.filter(isNewAnimal).length !== 1 ? 's' : ''} selected
                                     {(() => {
                                         const dupeLinks = [...sbSelectedIds].filter(id => {
@@ -3124,7 +3124,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         {sbImportLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                                         {sbImportLoading ? 'Importing?' : selectedNewCount > 0 ? `Import ${selectedNewCount} Animal${selectedNewCount !== 1 ? 's' : ''}` : 'Confirm Stubs'}
                                     </button>
-                                    <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({}); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
+                                    <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({}); }} className="text-xs text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text underline">Cancel</button>
                                 </div>
                             </div>
                         );
@@ -3132,18 +3132,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
                     {/* Result */}
                     {sbResult && (
-                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm space-y-1">
-                            <p className="font-semibold text-green-800 flex items-center gap-1"><CheckCircle size={14} /> Import complete!</p>
-                            <p className="text-green-700">{sbResult.written?.animals ?? 0} animal{sbResult.written?.animals !== 1 ? 's' : ''} imported · {sbResult.skipped?.animals ?? 0} skipped · {sbResult.parentLinked ?? 0} parent link{sbResult.parentLinked !== 1 ? 's' : ''} set{sbResult.stubsLinked > 0 ? ` · ${sbResult.stubsLinked} stub${sbResult.stubsLinked !== 1 ? 's' : ''} linked` : ''}{sbResult.imagesUploaded > 0 ? ` · ${sbResult.imagesUploaded} image${sbResult.imagesUploaded !== 1 ? 's' : ''} uploaded` : ''}</p>
+                        <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/60 rounded-lg text-sm space-y-1">
+                            <p className="font-semibold text-green-800 dark:text-green-300 flex items-center gap-1"><CheckCircle size={14} /> Import complete!</p>
+                            <p className="text-green-700 dark:text-green-400">{sbResult.written?.animals ?? 0} animal{sbResult.written?.animals !== 1 ? 's' : ''} imported · {sbResult.skipped?.animals ?? 0} skipped · {sbResult.parentLinked ?? 0} parent link{sbResult.parentLinked !== 1 ? 's' : ''} set{sbResult.stubsLinked > 0 ? ` · ${sbResult.stubsLinked} stub${sbResult.stubsLinked !== 1 ? 's' : ''} linked` : ''}{sbResult.imagesUploaded > 0 ? ` · ${sbResult.imagesUploaded} image${sbResult.imagesUploaded !== 1 ? 's' : ''} uploaded` : ''}</p>
                             {sbResult.errors?.length > 0 && (
                                 <div>
-                                    <p className="text-xs font-semibold text-red-600">{sbResult.errors.length} error(s):</p>
-                                    <ul className="text-xs text-red-500 list-disc list-inside max-h-24 overflow-y-auto">
+                                    <p className="text-xs font-semibold text-red-600 dark:text-red-400">{sbResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-500 dark:text-red-300 list-disc list-inside max-h-24 overflow-y-auto">
                                         {sbResult.errors.map((e, i) => <li key={i}>#{e.sbId}: {e.error}</li>)}
                                     </ul>
                                 </div>
                             )}
-                            <button onClick={() => { setSbResult(null); setSbUrl(''); }} className="mt-2 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                            <button onClick={() => { setSbResult(null); setSbUrl(''); }} className="mt-2 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text underline">Dismiss</button>
                         </div>
                     )}
                 </div>
@@ -3151,15 +3151,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </>}
 
             {activeTab === 'account' && <>
-            <div className="mt-2 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
+            <div className="mt-2 border-2 border-red-300 dark:border-red-700/60 rounded-lg bg-red-50 dark:bg-red-900/20 overflow-x-hidden">
                 <button type="button" onClick={() => setDangerZoneOpen(v => !v)}
-                    className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 transition"
+                    className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 dark:hover:bg-red-900/40 transition"
                 >
-                    <h3 className="text-xl font-semibold text-red-800">Danger Zone</h3>
+                    <h3 className="text-xl font-semibold text-red-800 dark:text-red-300">Danger Zone</h3>
                     {dangerZoneOpen ? <ChevronUp size={20} className="text-red-400" /> : <ChevronDown size={20} className="text-red-400" />}
                 </button>
                 {dangerZoneOpen && <div className="px-4 sm:px-6 pb-6">
-                <p className="text-sm text-gray-700 mb-4">
+                <p className="text-sm text-gray-700 dark:text-dark-text-secondary mb-4">
                     Deleting your account is permanent and cannot be undone. All your animals, litters, and profile data will be permanently deleted.
                 </p>
                 {!showDeleteConfirm ? (
@@ -3172,7 +3172,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 ) : (
                     <div className="space-y-3">
-                        <p className="text-red-700 font-semibold">Are you absolutely sure? This cannot be undone!</p>
+                        <p className="text-red-700 dark:text-red-400 font-semibold">Are you absolutely sure? This cannot be undone!</p>
                         <div className="flex gap-3">
                             <button
                                 onClick={handleDeleteAccount}
@@ -3185,7 +3185,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             <button
                                 onClick={() => setShowDeleteConfirm(false)}
                                 disabled={deleteLoading}
-                                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition"
+                                className="px-4 py-2 bg-gray-300 dark:bg-dark-surface hover:bg-gray-400 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text font-semibold rounded-lg transition"
                             >
                                 Cancel
                             </button>

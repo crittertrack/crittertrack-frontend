@@ -2743,14 +2743,14 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           {/* Animal Selector Modal */}
           {showAnimalSelector && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+              <div className="bg-white dark:bg-dark-card-bg rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold text-gray-800">
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text">
                     Select Animal for {selectingForParent === 'parent1' ? 'Sire' : 'Dam'}
                   </h3>
                   <button
                     onClick={closeAnimalSelector}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text"
                   >
                     <X size={24} />
                   </button>
@@ -2759,13 +2759,13 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 {/* Search */}
                 <div className="mb-4">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" size={18} />
                     <input
                       type="text"
                       placeholder="Search animals by name or ID..."
                       value={animalSearch}
                       onChange={(e) => setAnimalSearch(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -2798,13 +2798,13 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                         key={animal.id_public}
                         className={`flex items-center gap-3 p-3 rounded-lg border-2 transition cursor-pointer ${
                           animal.geneticCode
-                            ? 'border-gray-200 hover:border-blue-400 hover:bg-blue-50'
-                            : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                            ? 'border-gray-200 dark:border-dark-text hover:border-blue-400 dark:hover:border-dark-info-blue hover:bg-blue-50 dark:hover:bg-dark-surface-hover'
+                            : 'border-gray-100 dark:border-dark-border bg-gray-50 dark:bg-dark-surface opacity-60 cursor-not-allowed'
                         }`}
                         onClick={() => animal.geneticCode && selectAnimal(animal)}
                       >
                         {/* Animal Image */}
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                        <div className="w-16 h-16 bg-gray-200 dark:bg-dark-surface rounded-lg flex-shrink-0 overflow-hidden">
                           {animal.imageUrl || animal.photoUrl ? (
                             <img 
                               src={animal.imageUrl || animal.photoUrl} 
@@ -2812,7 +2812,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                               <User size={32} />
                             </div>
                           )}
@@ -2820,18 +2820,18 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
                         {/* Animal Info */}
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-gray-800 truncate">
+                          <p className="font-semibold text-gray-800 dark:text-dark-text truncate">
                             {animal.prefix && `${animal.prefix} `}
                             {animal.name}
                             {animal.suffix && ` ${animal.suffix}`}
                           </p>
-                          <p className="text-sm text-gray-600">{animal.id_public} • {animal.species}</p>
+                          <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{animal.id_public} • {animal.species}</p>
                           {animal.geneticCode ? (
-                            <p className="text-xs text-gray-500 font-mono mt-1 truncate">
+                            <p className="text-xs text-gray-500 dark:text-dark-text-muted font-mono mt-1 truncate">
                               {animal.geneticCode}
                             </p>
                           ) : (
-                            <p className="text-xs text-red-600 italic mt-1">
+                            <p className="text-xs text-red-600 dark:text-red-400 italic mt-1">
                               No genetic code set
                             </p>
                           )}
@@ -2840,7 +2840,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                         {/* Select Button */}
                         {animal.geneticCode && (
                           <button
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex-shrink-0"
+                            className="px-4 py-2 bg-blue-600 dark:bg-dark-info-blue hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover text-white rounded-lg transition flex-shrink-0"
                           >
                             Select
                           </button>
@@ -2852,7 +2852,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                     (selectingForParent === 'parent1' ? a.gender === 'Male' : a.gender === 'Female') &&
                     a.species === selectedSpecies
                   ).length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-gray-500 dark:text-dark-text-muted">
                       <p>No {selectingForParent === 'parent1' ? 'male' : 'female'} {selectedSpecies} found in your collection.</p>
                     </div>
                   )}

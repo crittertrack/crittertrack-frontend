@@ -64,10 +64,10 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     const CATEGORIES = ['Food', 'Bedding', 'Medication', 'Other'];
     const CATEGORY_COLORS = {
-        Food: 'bg-green-100 text-green-700',
-        Bedding: 'bg-yellow-100 text-yellow-700',
-        Medication: 'bg-red-100 text-red-700',
-        Other: 'bg-gray-100 text-gray-600',
+        Food: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
+        Bedding: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
+        Medication: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+        Other: 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary',
     };
     const BUDGET_CATEGORY_MAP = { Food: 'food', Bedding: 'housing', Medication: 'medical', Other: 'other' };
     const isLow = (item) => item.reorderThreshold != null && item.currentStock <= item.reorderThreshold;
@@ -178,14 +178,14 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     return (
         <div className="w-full max-w-7xl mx-auto p-2 sm:p-4">
-            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 space-y-4">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-4 sm:p-6 space-y-4">
                 <div className="flex items-center justify-end gap-2">
-                    <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
+                    <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-dark-text-secondary">
                         Currency:
                         <select
                             value={currency}
                             onChange={e => handleCurrencyChange(e.target.value)}
-                            className="border border-gray-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+                            className="border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
                             title="Sets the currency symbol shown across this page"
                         >
                             {currencyOptions.map(curr => (
@@ -194,29 +194,29 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                         </select>
                     </label>
                     <button onClick={fetchSupplies} disabled={suppliesLoading}
-                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50">
+                        className="flex items-center gap-1 text-xs text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text transition disabled:opacity-50">
                         <RefreshCw size={12} /> Refresh
                     </button>
                 </div>
 
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Package size={18} className="text-blue-600" />
-                        <h3 className="text-lg font-semibold text-gray-800">Supplies &amp; Inventory</h3>
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{supplies.length} item{supplies.length !== 1 ? 's' : ''}</span>
+                        <Package size={18} className="text-blue-600 dark:text-dark-info-blue-hover" />
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Supplies &amp; Inventory</h3>
+                        <span className="text-xs bg-blue-100 dark:bg-dark-info-blue/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">{supplies.length} item{supplies.length !== 1 ? 's' : ''}</span>
                     </div>
                     <button
                         onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(v => !v); }}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition"
+                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 dark:bg-dark-info-blue hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover text-white text-sm rounded-lg font-medium transition"
                     >
                         <Plus size={14} /> Add Item
                     </button>
                 </div>
 
                 {attentionItems.length > 0 && (
-                    <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                        <AlertTriangle size={16} className="text-amber-500 mt-0.5 shrink-0" />
-                        <div className="text-sm text-amber-700 space-y-0.5">
+                    <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-xl p-3">
+                        <AlertTriangle size={16} className="text-amber-500 dark:text-amber-400 mt-0.5 shrink-0" />
+                        <div className="text-sm text-amber-700 dark:text-amber-300 space-y-0.5">
                             {lowStockItems.length > 0 && <div><span className="font-semibold">Low stock:</span> {lowStockItems.map(i => i.name).join(', ')}</div>}
                             {overdueItems.length > 0 && <div><span className="font-semibold">Order overdue:</span> {overdueItems.map(i => i.name).join(', ')}</div>}
                         </div>
@@ -224,55 +224,55 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                 )}
 
                 {supplyFormVisible && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
-                        <h4 className="text-sm font-semibold text-blue-800">{editingSupplyId ? 'Edit Item' : 'New Supply Item'}</h4>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-xl p-4 space-y-3">
+                        <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300">{editingSupplyId ? 'Edit Item' : 'New Supply Item'}</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Name *</label>
-                                <input type="text" value={supplyForm.name} onChange={e => setSupplyForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Rat blocks" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
+                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Name *</label>
+                                <input type="text" value={supplyForm.name} onChange={e => setSupplyForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Rat blocks" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Category</label>
-                                <select value={supplyForm.category} onChange={e => setSupplyForm(f => ({ ...f, category: e.target.value, isFeederAnimal: e.target.value === 'Food' ? f.isFeederAnimal : false }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400">
+                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Category</label>
+                                <select value={supplyForm.category} onChange={e => setSupplyForm(f => ({ ...f, category: e.target.value, isFeederAnimal: e.target.value === 'Food' ? f.isFeederAnimal : false }))} className="w-full text-sm border border-gray-300 dark:border-dark-text rounded-lg px-3 py-1.5 bg-white dark:bg-dark-surface dark:text-dark-text focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400">
                                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Current Stock</label>
-                                <input type="number" min="0" value={supplyForm.currentStock} onChange={e => setSupplyForm(f => ({ ...f, currentStock: e.target.value }))} placeholder="0" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
+                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Current Stock</label>
+                                <input type="number" min="0" value={supplyForm.currentStock} onChange={e => setSupplyForm(f => ({ ...f, currentStock: e.target.value }))} placeholder="0" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Unit (e.g. bags, kg, boxes)</label>
-                                <input type="text" value={supplyForm.unit} onChange={e => setSupplyForm(f => ({ ...f, unit: e.target.value }))} placeholder="bags" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
+                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Unit (e.g. bags, kg, boxes)</label>
+                                <input type="text" value={supplyForm.unit} onChange={e => setSupplyForm(f => ({ ...f, unit: e.target.value }))} placeholder="bags" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Cost per unit ({getCurrencySymbol()})</label>
-                                <input type="number" min="0" step="0.01" value={supplyForm.costPerUnit} onChange={e => setSupplyForm(f => ({ ...f, costPerUnit: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
+                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Cost per unit ({getCurrencySymbol()})</label>
+                                <input type="number" min="0" step="0.01" value={supplyForm.costPerUnit} onChange={e => setSupplyForm(f => ({ ...f, costPerUnit: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Reorder when stock reaches</label>
-                                <input type="number" min="0" value={supplyForm.reorderThreshold} onChange={e => setSupplyForm(f => ({ ...f, reorderThreshold: e.target.value }))} placeholder="e.g. 2" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
+                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Reorder when stock reaches</label>
+                                <input type="number" min="0" value={supplyForm.reorderThreshold} onChange={e => setSupplyForm(f => ({ ...f, reorderThreshold: e.target.value }))} placeholder="e.g. 2" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Notes</label>
-                                    <input type="text" value={supplyForm.notes} onChange={e => setSupplyForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
+                                <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Notes</label>
+                                    <input type="text" value={supplyForm.notes} onChange={e => setSupplyForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400" />
                             </div>
                         </div>
-                        <div className="border-t border-blue-200 pt-3 space-y-2">
-                            <p className="text-xs font-semibold text-gray-600">Reorder Schedule <span className="font-normal text-gray-400">(optional ? for bulk or timed items)</span></p>
-                            <p className="text-[11px] text-gray-400">Set a date &amp; repeat frequency for items ordered on a schedule, regardless of stock count ? e.g. a 650 L bedding pallet every 3 months.</p>
+                        <div className="border-t border-blue-200 dark:border-blue-700/60 pt-3 space-y-2">
+                            <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary">Reorder Schedule <span className="font-normal text-gray-400 dark:text-dark-text-muted">(optional ? for bulk or timed items)</span></p>
+                            <p className="text-[11px] text-gray-400 dark:text-dark-text-muted">Set a date &amp; repeat frequency for items ordered on a schedule, regardless of stock count ? e.g. a 650 L bedding pallet every 3 months.</p>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Next order date</label>
-                                    <input type="date" value={supplyForm.nextOrderDate} onChange={e => setSupplyForm(f => ({ ...f, nextOrderDate: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                    <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Next order date</label>
+                                    <input type="date" value={supplyForm.nextOrderDate} onChange={e => setSupplyForm(f => ({ ...f, nextOrderDate: e.target.value }))} className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Repeat every</label>
-                                    <input type="number" min="1" value={supplyForm.orderFrequency} onChange={e => setSupplyForm(f => ({ ...f, orderFrequency: e.target.value }))} placeholder="e.g. 3" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                    <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Repeat every</label>
+                                    <input type="number" min="1" value={supplyForm.orderFrequency} onChange={e => setSupplyForm(f => ({ ...f, orderFrequency: e.target.value }))} placeholder="e.g. 3" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Frequency unit</label>
-                                    <select value={supplyForm.orderFrequencyUnit} onChange={e => setSupplyForm(f => ({ ...f, orderFrequencyUnit: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400">
+                                    <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Frequency unit</label>
+                                    <select value={supplyForm.orderFrequencyUnit} onChange={e => setSupplyForm(f => ({ ...f, orderFrequencyUnit: e.target.value }))} className="w-full text-sm border border-gray-300 dark:border-dark-text rounded-lg px-3 py-1.5 bg-white dark:bg-dark-surface dark:text-dark-text focus:outline-none focus:ring-1 focus:ring-blue-400">
                                         <option value="days">Days</option>
                                         <option value="weeks">Weeks</option>
                                         <option value="months">Months</option>
@@ -284,27 +284,27 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             <div className="col-span-2">
                                 <label className="flex items-center gap-2 cursor-pointer select-none">
                                     <input type="checkbox" checked={supplyForm.isFeederAnimal} onChange={e => setSupplyForm(f => ({ ...f, isFeederAnimal: e.target.checked }))} className="w-4 h-4 accent-blue-600" />
-                                    <span className="text-sm font-medium text-gray-700">This is a feeder animal (mice, rats, crickets, etc.)</span>
+                                    <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">This is a feeder animal (mice, rats, crickets, etc.)</span>
                                 </label>
                             </div>
                         )}
                         {supplyForm.category === 'Food' && supplyForm.isFeederAnimal && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/60 rounded-lg p-3">
                                 <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Feeder Type</label>
-                                    <input type="text" value={supplyForm.feederType} onChange={e => setSupplyForm(f => ({ ...f, feederType: e.target.value }))} list="feeder-type-list" placeholder="e.g. Mice, Rats" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                    <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Feeder Type</label>
+                                    <input type="text" value={supplyForm.feederType} onChange={e => setSupplyForm(f => ({ ...f, feederType: e.target.value }))} list="feeder-type-list" placeholder="e.g. Mice, Rats" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                     <datalist id="feeder-type-list"><option value="Mice" /><option value="Rats" /><option value="Gerbils" /><option value="Crickets" /><option value="Dubia Roaches" /><option value="Mealworms" /><option value="Superworms" /><option value="Waxworms" /><option value="Hornworms" /><option value="Fish" /></datalist>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Size</label>
-                                    <input type="text" value={supplyForm.feederSize} onChange={e => setSupplyForm(f => ({ ...f, feederSize: e.target.value }))} list="feeder-size-list" placeholder="e.g. Pinky, Adult" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                    <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Size</label>
+                                    <input type="text" value={supplyForm.feederSize} onChange={e => setSupplyForm(f => ({ ...f, feederSize: e.target.value }))} list="feeder-size-list" placeholder="e.g. Pinky, Adult" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                     <datalist id="feeder-size-list"><option value="Pinky" /><option value="Fuzzy" /><option value="Hopper" /><option value="Weaned" /><option value="Adult" /><option value="Small" /><option value="Medium" /><option value="Large" /><option value="XL" /></datalist>
                                 </div>
                             </div>
                         )}
                         <div className="flex gap-2 justify-end pt-1">
-                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); }} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
-                            <button onClick={handleSupplySubmit} disabled={supplySaving || !supplyForm.name.trim()} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1.5">
+                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); }} className="px-3 py-1.5 text-sm text-gray-600 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition">Cancel</button>
+                            <button onClick={handleSupplySubmit} disabled={supplySaving || !supplyForm.name.trim()} className="px-3 py-1.5 bg-blue-600 dark:bg-dark-info-blue hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover text-white text-sm rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1.5">
                                 {supplySaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
                                 {editingSupplyId ? 'Save Changes' : 'Add Item'}
                             </button>
@@ -315,45 +315,45 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                 <div className="flex gap-1.5 flex-wrap">
                     {['All', ...CATEGORIES].map(cat => (
                         <button key={cat} onClick={() => setSupplyCategoryFilter(cat)}
-                            className={`px-3 py-1 text-xs rounded-full font-medium transition ${supplyCategoryFilter === cat ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                            className={`px-3 py-1 text-xs rounded-full font-medium transition ${supplyCategoryFilter === cat ? 'bg-blue-600 dark:bg-dark-info-blue text-white' : 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                         >{cat}</button>
                     ))}
                 </div>
 
                 {suppliesLoading ? (
-                    <div className="flex items-center justify-center py-12 text-gray-400 gap-2"><Loader2 size={20} className="animate-spin" /> Loading...</div>
+                    <div className="flex items-center justify-center py-12 text-gray-400 dark:text-dark-text-muted gap-2"><Loader2 size={20} className="animate-spin" /> Loading...</div>
                 ) : filtered.length === 0 ? (
-                    <div className="text-center py-12 text-gray-400 text-sm">
+                    <div className="text-center py-12 text-gray-400 dark:text-dark-text-muted text-sm">
                         {supplies.length === 0 ? 'No supplies added yet. Click "Add Item" to get started.' : `No ${supplyCategoryFilter} items.`}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {filtered.map(item => (
-                            <div key={item._id} className={`border rounded-xl p-3 bg-white flex flex-col gap-1.5 shadow-sm ${isLow(item) ? 'border-amber-300' : 'border-gray-200'}`}>
+                            <div key={item._id} className={`border rounded-xl p-3 bg-white dark:bg-dark-card-bg flex flex-col gap-1.5 shadow-sm ${isLow(item) ? 'border-amber-300 dark:border-amber-700/60' : 'border-gray-200 dark:border-dark-text'}`}>
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                                        <span className="font-semibold text-sm text-gray-800 truncate">{item.name}</span>
-                                        {isLow(item) && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Low Stock</span>}
-                                        {isOverdue(item) && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Due</span>}
-                                        {!isOverdue(item) && isDueSoon(item) && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Soon</span>}
+                                        <span className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{item.name}</span>
+                                        {isLow(item) && <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-medium shrink-0">Low Stock</span>}
+                                        {isOverdue(item) && <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Due</span>}
+                                        {!isOverdue(item) && isDueSoon(item) && <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Soon</span>}
                                     </div>
                                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${CATEGORY_COLORS[item.category] || CATEGORY_COLORS.Other}`}>{item.category}</span>
                                 </div>
                                 <div className="flex items-baseline gap-2">
-                                    <span className={`text-lg font-bold ${isLow(item) ? 'text-amber-600' : 'text-gray-800'}`}>{item.currentStock}</span>
-                                    {item.unit && <span className="text-gray-500 text-xs">{item.unit}</span>}
-                                    {item.reorderThreshold != null && <span className="text-gray-400 text-xs ml-auto">Reorder at {item.reorderThreshold}</span>}
+                                    <span className={`text-lg font-bold ${isLow(item) ? 'text-amber-600 dark:text-amber-400' : 'text-gray-800 dark:text-dark-text'}`}>{item.currentStock}</span>
+                                    {item.unit && <span className="text-gray-500 dark:text-dark-text-muted text-xs">{item.unit}</span>}
+                                    {item.reorderThreshold != null && <span className="text-gray-400 dark:text-dark-text-muted text-xs ml-auto">Reorder at {item.reorderThreshold}</span>}
                                 </div>
-                                {item.notes && <p className="text-xs text-gray-400 truncate">{item.notes}</p>}
+                                {item.notes && <p className="text-xs text-gray-400 dark:text-dark-text-muted truncate">{item.notes}</p>}
                                 {(item.isFeederAnimal || item.costPerUnit != null) && (
                                     <div className="flex flex-wrap gap-1.5 mt-0.5">
-                                        {item.isFeederAnimal && item.feederType && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederType}</span>}
-                                        {item.isFeederAnimal && item.feederSize && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederSize}</span>}
-                                        {item.costPerUnit != null && <span className="text-xs text-gray-400">{getCurrencySymbol()}{Number(item.costPerUnit).toFixed(2)} / {item.unit || 'unit'}</span>}
+                                        {item.isFeederAnimal && item.feederType && <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">{item.feederType}</span>}
+                                        {item.isFeederAnimal && item.feederSize && <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">{item.feederSize}</span>}
+                                        {item.costPerUnit != null && <span className="text-xs text-gray-400 dark:text-dark-text-muted">{getCurrencySymbol()}{Number(item.costPerUnit).toFixed(2)} / {item.unit || 'unit'}</span>}
                                     </div>
                                 )}
                                 {item.nextOrderDate && (
-                                    <div className={`flex items-center gap-1.5 text-xs rounded-lg px-2 py-1.5 mt-0.5 ${isOverdue(item) ? 'bg-red-50 text-red-600' : isDueSoon(item) ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-500'}`}>
+                                    <div className={`flex items-center gap-1.5 text-xs rounded-lg px-2 py-1.5 mt-0.5 ${isOverdue(item) ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300' : isDueSoon(item) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300' : 'bg-gray-50 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted'}`}>
                                         <Calendar size={11} className="shrink-0" />
                                         <span>Next order: {new Date(item.nextOrderDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                         {item.orderFrequency && <span className="opacity-60"> <RefreshCw size={12} className="inline-block align-middle mr-0.5" /> every {item.orderFrequency} {item.orderFrequencyUnit}</span>}
@@ -361,36 +361,36 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 )}
 
                                 {restockingSupplyId === item._id && (
-                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 mt-1 space-y-2">
-                                        <p className="text-xs font-semibold text-blue-700">Restock · logs an expense in Budget{item.isFeederAnimal ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}` : ''}</p>
+                                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg p-2.5 mt-1 space-y-2">
+                                        <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">Restock · logs an expense in Budget{item.isFeederAnimal ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}` : ''}</p>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Qty received *</label>
+                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-0.5">Qty received *</label>
                                                 <input type="number" min="0.01" step="any" value={restockForm.qty} onChange={e => {
                                                     const q = e.target.value;
                                                     const autoCost = item.costPerUnit && q ? (parseFloat(q) * item.costPerUnit).toFixed(2) : restockForm.cost;
                                                     setRestockForm(f => ({ ...f, qty: q, cost: autoCost }));
-                                                }} placeholder="e.g. 5" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                                }} placeholder="e.g. 5" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                             </div>
                                             <div>
-                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Cost paid ({getCurrencySymbol()}) *</label>
-                                                <input type="number" min="0" step="0.01" value={restockForm.cost} onChange={e => setRestockForm(f => ({ ...f, cost: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-0.5">Cost paid ({getCurrencySymbol()}) *</label>
+                                                <input type="number" min="0" step="0.01" value={restockForm.cost} onChange={e => setRestockForm(f => ({ ...f, cost: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                             </div>
                                             <div>
-                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Date</label>
-                                                <input type="date" value={restockForm.date} onChange={e => setRestockForm(f => ({ ...f, date: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-0.5">Date</label>
+                                                <input type="date" value={restockForm.date} onChange={e => setRestockForm(f => ({ ...f, date: e.target.value }))} className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                             </div>
                                             <div>
-                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Notes</label>
-                                                <input type="text" value={restockForm.notes} onChange={e => setRestockForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                                <label className="text-[10px] font-medium text-gray-500 dark:text-dark-text-muted block mb-0.5">Notes</label>
+                                                <input type="text" value={restockForm.notes} onChange={e => setRestockForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes" className="w-full text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                             </div>
                                         </div>
                                         <div className="flex gap-2 justify-end">
-                                            <button onClick={() => setRestockingSupplyId(null)} className="px-2.5 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
+                                            <button onClick={() => setRestockingSupplyId(null)} className="px-2.5 py-1 text-xs text-gray-600 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition">Cancel</button>
                                             <button
                                                 onClick={() => handleRestockSubmit(item)}
                                                 disabled={restockSaving || !restockForm.qty || !restockForm.cost}
-                                                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1"
+                                                className="px-2.5 py-1 bg-blue-600 dark:bg-dark-info-blue hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover text-white text-xs rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1"
                                             >
                                                 {restockSaving ? <Loader2 size={11} className="animate-spin" /> : <ShoppingBag size={11} />}
                                                 Log Restock
@@ -400,9 +400,9 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 )}
 
                                 <div className="flex gap-2 justify-end mt-0.5">
-                                    <button onClick={() => openRestock(item)} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded-lg transition font-medium"><ShoppingBag size={11} /> Restock</button>
-                                    <button onClick={() => handleSupplyEdit(item)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded-lg transition"><Edit size={11} /> Edit</button>
-                                    <button onClick={() => handleSupplyDelete(item._id)} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
+                                    <button onClick={() => openRestock(item)} className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-lg transition font-medium"><ShoppingBag size={11} /> Restock</button>
+                                    <button onClick={() => handleSupplyEdit(item)} className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-lg transition"><Edit size={11} /> Edit</button>
+                                    <button onClick={() => handleSupplyDelete(item._id)} className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
                                 </div>
                             </div>
                         ))}
