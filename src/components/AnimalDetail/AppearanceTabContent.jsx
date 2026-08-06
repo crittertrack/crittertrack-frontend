@@ -42,7 +42,7 @@ export const AppearanceTabContent = ({ animal }) => {
                     <p className="text-gray-700 dark:text-dark-text-secondary font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
                 </InfoCard>
                 <InfoCard title={label('lifeStage', 'Life Stage')} icon={<Sprout size={18} />}>
-                    <p>{animal.lifeStage || 'Not specified'}</p>
+                    <p className="text-gray-700 dark:text-dark-text">{animal.lifeStage || 'Not specified'}</p>
                 </InfoCard>
                 {(() => {
                     const growthRecords = parseJsonArrayField(animal.growthRecords);

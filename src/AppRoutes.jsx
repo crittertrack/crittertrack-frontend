@@ -39,6 +39,62 @@ const PageLoader = () => (
     </div>
 );
 
+// Catches errors thrown while rendering/lazy-loading a route (e.g. a page component
+// failing to download after a new deployment shipped a fresh chunk hash). Without this,
+// a failed chunk load throws uncaught and the page just hangs/stays blank forever —
+// the user has to know to manually refresh. Most of these errors are a stale cached
+// bundle referencing an old chunk that no longer exists on the server, so we try one
+// automatic reload first (guarded by sessionStorage so we don't reload-loop), then fall
+// back to a friendly retry screen for anything else.
+class RouteErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        console.error('Route failed to load:', error, errorInfo);
+
+        const isChunkLoadError = /Loading chunk|dynamically imported module|ChunkLoadError/i.test(
+            `${error?.name || ''} ${error?.message || ''}`
+        );
+
+        // Guard by timestamp rather than a one-time flag, so a *new* chunk error later in the
+        // same session (e.g. another deploy went out while the tab was still open) can still
+        // trigger one more automatic reload, while back-to-back failures within a few seconds
+        // don't cause a reload loop.
+        const lastAttempt = Number(sessionStorage.getItem('ct_chunk_reload_attempted') || 0);
+        if (isChunkLoadError && Date.now() - lastAttempt > 10000) {
+            sessionStorage.setItem('ct_chunk_reload_attempted', String(Date.now()));
+            window.location.reload();
+        }
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="w-full flex flex-col items-center justify-center py-24 px-4 text-center gap-3">
+                    <p className="text-gray-700 dark:text-dark-text font-semibold">This page failed to load.</p>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted max-w-sm">
+                        This can happen after an app update. Reloading usually fixes it.
+                    </p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-primary dark:bg-dark-primary text-black rounded-lg font-semibold hover:bg-primary-dark transition"
+                    >
+                        Reload Page
+                    </button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 /**
  * AppRoutes Component
  * Centralizes all route definitions (21 routes) previously scattered in app.jsx
@@ -160,6 +216,7 @@ export function AppRoutes({
   };
 
   return (
+    <RouteErrorBoundary>
     <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* Home / List */}
@@ -478,6 +535,7 @@ export function AppRoutes({
 
     </Routes>
     </Suspense>
+    </RouteErrorBoundary>
   );
 }
 

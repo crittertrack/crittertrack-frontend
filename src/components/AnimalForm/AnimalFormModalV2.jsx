@@ -6193,7 +6193,7 @@ const AnimalFormModalV2 = ({
                                                 setNewMilestoneDate(new Date().toISOString().split('T')[0]);
                                                 setNewMilestoneInterval('');
                                             }}
-                                            className="w-full py-1.5 px-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-1"
+                                            className="w-full py-1.5 px-2 bg-blue-600 dark:bg-dark-info-blue text-white text-sm font-medium rounded-md hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover transition flex items-center justify-center gap-1"
                                         >
                                             <Plus size={16} /> Add Milestone
                                         </button>
@@ -6312,7 +6312,7 @@ const AnimalFormModalV2 = ({
                                         <button
                                             type="button"
                                             onClick={() => setShowNoteForm(true)}
-                                            className="w-full py-2 px-3 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-1"
+                                            className="w-full py-2 px-3 bg-blue-600 dark:bg-dark-info-blue text-white text-sm font-medium rounded-md hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover transition flex items-center justify-center gap-1"
                                         >
                                             <Plus size={16} /> Add Note to Event
                                         </button>
@@ -6343,7 +6343,7 @@ const AnimalFormModalV2 = ({
                                                 <button
                                                     type="button"
                                                     onClick={addTimelineNote}
-                                                    className="flex-1 py-1.5 px-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
+                                                    className="flex-1 py-1.5 px-2 bg-blue-600 dark:bg-dark-info-blue text-white text-sm font-medium rounded-md hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover transition"
                                                 >
                                                     Save Note
                                                 </button>

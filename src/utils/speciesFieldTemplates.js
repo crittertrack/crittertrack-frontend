@@ -134,7 +134,6 @@ export const FIELD_LABEL_OVERRIDES = {
     coat: { Reptile: 'Scalation', Bird: 'Plumage', Amphibian: 'Skin', Fish: 'Skin', Invertebrate: 'Coloring' },
     coatPattern: { Reptile: 'Scale Pattern', Bird: 'Plumage Pattern', Amphibian: 'Skin Pattern', Fish: 'Skin Pattern', Invertebrate: 'Skin Pattern' },
     breed: { Amphibian: 'Subspecies', Invertebrate: 'Subspecies', Reptile: 'Subspecies' },
-    lifeStage: { Fish: 'Fry', Reptile: 'Hatchling', Bird: 'Hatchling', Invertebrate: 'Larva/Nymph/Instar', Amphibian: 'Tadpole/Froglet', Mammal: 'Pup/Kit/Juvenile' },
     chestGirth: { Fish: 'Body Girth', Invertebrate: 'Body Girth' },
     colonyId: { Invertebrate: 'Colony ID' },
     expectedDueDate: forCategories(EGG_LAYING, 'Expected Hatch Date'),

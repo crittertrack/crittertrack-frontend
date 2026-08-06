@@ -358,7 +358,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     if (loading) {
         return (
             <div className="flex items-center justify-center p-8">
-                <div className="text-gray-600">Loading transactions...</div>
+                <div className="text-gray-600 dark:text-dark-text-secondary">Loading transactions...</div>
             </div>
         );
     }
@@ -366,19 +366,19 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     return (
         <div className="w-full max-w-7xl mx-auto p-2 sm:p-4">
             {/* Header */}
-            <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6 mb-4 sm:mb-6">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-3 sm:p-6 mb-4 sm:mb-6">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <DollarSign className="w-5 h-5 sm:w-7 sm:h-7 text-green-600" />
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
+                        <DollarSign className="w-5 h-5 sm:w-7 sm:h-7 text-green-600 dark:text-green-400" />
                         Budget Tracker
                     </h1>
                     <div className="flex flex-wrap items-center gap-2">
-                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600">
+                        <label className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 dark:text-dark-text-secondary">
                             Currency:
                             <select
                                 value={currency}
                                 onChange={(e) => handleCurrencyChange(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs sm:text-sm focus:ring-primary focus:border-primary"
+                                className="border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg px-2 py-1.5 text-xs sm:text-sm focus:ring-primary focus:border-primary"
                                 title="Sets the currency symbol shown across this entire page"
                             >
                                 {currencyOptions.map(curr => (
@@ -390,7 +390,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         </label>
                         <button
                             onClick={exportToCSV}
-                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-xs sm:text-base"
+                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-600 dark:bg-dark-surface hover:bg-gray-700 dark:hover:bg-dark-surface-hover text-white rounded-lg transition text-xs sm:text-base"
                             disabled={filteredTransactions.length === 0}
                         >
                             <Download className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
@@ -410,63 +410,58 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
                 {/* Statistics Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4" data-tutorial-target="budget-overview">
-                    <div className="bg-green-50 border-2 border-green-300 rounded-lg p-2 sm:p-4">
-                        <div className="text-green-600 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
+                    <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700/60 rounded-lg p-2 sm:p-4">
+                        <div className="text-green-600 dark:text-green-400 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
                             <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             <span className="hidden sm:inline">Total Sales</span>
                             <span className="sm:hidden">Sales</span>
                         </div>
-                        <div className="text-lg sm:text-2xl font-bold text-green-700">
+                        <div className="text-lg sm:text-2xl font-bold text-green-700 dark:text-green-300">
                             {getCurrencySymbol()}{stats.totalSales.toFixed(2)}
                         </div>
-                        <div className="text-[10px] sm:text-xs text-green-600 mt-0.5 sm:mt-1">
-                            {stats.salesCount} <span className="hidden sm:inline">transaction{stats.salesCount !== 1 ? 's' : ''}</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-red-50 border-2 border-red-300 rounded-lg p-2 sm:p-4">
-                        <div className="text-red-600 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
+                    <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700/60 rounded-lg p-2 sm:p-4">
+                        <div className="text-red-600 dark:text-red-400 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
                             <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             <span className="hidden sm:inline">Total Purchases</span>
                             <span className="sm:hidden">Purch.</span>
                         </div>
-                        <div className="text-lg sm:text-2xl font-bold text-red-700">
+                        <div className="text-lg sm:text-2xl font-bold text-red-700 dark:text-red-300">
                             {getCurrencySymbol()}{stats.totalPurchases.toFixed(2)}
                         </div>
-                        <div className="text-[10px] sm:text-xs text-red-600 mt-0.5 sm:mt-1">
+                        <div className="text-[10px] sm:text-xs text-red-600 dark:text-red-400 mt-0.5 sm:mt-1">
                             {stats.purchasesCount} <span className="hidden sm:inline">transaction{stats.purchasesCount !== 1 ? 's' : ''}</span>
                         </div>
                     </div>
 
-                    <div className={`${netProfit >= 0 ? 'bg-blue-50 border-blue-300' : 'bg-orange-50 border-orange-300'} border-2 rounded-lg p-2 sm:p-4`}>
-                        <div className={`${netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'} text-xs sm:text-sm font-medium mb-0.5 sm:mb-1`}>
+                    <div className={`${netProfit >= 0 ? 'bg-blue-50 dark:bg-dark-info-blue/20 border-blue-300 dark:border-dark-info-blue/60' : 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700/60'} border-2 rounded-lg p-2 sm:p-4`}>
+                        <div className={`${netProfit >= 0 ? 'text-blue-600 dark:text-dark-info-blue' : 'text-orange-600 dark:text-orange-400'} text-xs sm:text-sm font-medium mb-0.5 sm:mb-1`}>
                             <span className="hidden sm:inline">Net Profit/Loss</span>
                             <span className="sm:hidden">Net</span>
                         </div>
-                        <div className={`text-lg sm:text-2xl font-bold ${netProfit >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
+                        <div className={`text-lg sm:text-2xl font-bold ${netProfit >= 0 ? 'text-blue-700 dark:text-dark-info-blue' : 'text-orange-700 dark:text-orange-300'}`}>
                             {netProfit >= 0 ? '+' : ''}{getCurrencySymbol()}{Math.abs(netProfit).toFixed(2)}
                         </div>
-                        <div className={`text-[10px] sm:text-xs ${netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'} mt-0.5 sm:mt-1`}>
+                        <div className={`text-[10px] sm:text-xs ${netProfit >= 0 ? 'text-blue-600 dark:text-dark-info-blue' : 'text-orange-600 dark:text-orange-400'} mt-0.5 sm:mt-1`}>
                             {filteredTransactions.length} total
                         </div>
                     </div>
 
-                    <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-2 sm:p-4">
-                        <div className="text-purple-600 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
+                    <div className="bg-purple-50 dark:bg-dark-accent-purple-bg border-2 border-purple-300 dark:border-dark-accent-purple/60 rounded-lg p-2 sm:p-4">
+                        <div className="text-purple-600 dark:text-dark-accent-purple text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
                             <span className="hidden sm:inline">Average Sale</span>
                             <span className="sm:hidden">Avg</span>
                             <div className="relative group">
-                                <Info size={14} className="text-purple-400 cursor-help" />
-                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                                <Info size={14} className="text-purple-400 dark:text-dark-accent-purple cursor-help" />
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 dark:bg-dark-surface text-white dark:text-dark-text text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
                                     Total sales ÷ number of animals sold
-                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800 dark:border-t-dark-surface"></div>
                                 </div>
                             </div>
                         </div>
-                        <div className="text-2xl font-bold text-purple-700">
+                        <div className="text-2xl font-bold text-purple-700 dark:text-dark-accent-purple">
                             {getCurrencySymbol()}{stats.salesCount > 0 ? (stats.totalSales / stats.salesCount).toFixed(2) : '0.00'}
                         </div>
-                        <div className="text-xs text-purple-600 mt-1">
+                        <div className="text-xs text-purple-600 dark:text-dark-accent-purple mt-1">
                             Per animal sold
                         </div>
                     </div>
@@ -474,25 +469,25 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-xl shadow-lg p-2 sm:p-4 mb-4 sm:mb-6">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-2 sm:p-4 mb-4 sm:mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
                     <div className="relative col-span-2 md:col-span-1">
-                        <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                        <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         <input
                             type="text"
                             placeholder="Search..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary"
                         />
                     </div>
 
                     <div className="relative">
-                        <Filter className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                        <Filter className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         <select
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value)}
-                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary"
                         >
                             <option value="all">All Types</option>
                             <option value="animal-sale">Sales</option>
@@ -503,11 +498,11 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                     </div>
 
                     <div className="relative">
-                        <Calendar className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                        <Calendar className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         <select
                             value={filterYear}
                             onChange={(e) => setFilterYear(e.target.value)}
-                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary"
                         >
                             <option value="all">All Years</option>
                             {availableYears.map(year => (
@@ -519,42 +514,42 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             </div>
 
             {/* Transactions List */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg overflow-hidden">
                 {filteredTransactions.length === 0 ? (
-                    <div className="text-center py-8 sm:py-12 text-gray-500">
-                        <DollarSign className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-300" />
+                    <div className="text-center py-8 sm:py-12 text-gray-500 dark:text-dark-text-muted">
+                        <DollarSign className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-300 dark:text-dark-border" />
                         <p className="text-base sm:text-lg font-medium">No transactions yet</p>
                         <p className="text-xs sm:text-sm mt-1 sm:mt-2">Start tracking your sales and purchases</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-xs sm:text-sm">
-                            <thead className="bg-gray-50 border-b border-gray-200">
+                            <thead className="bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
                                 <tr>
-                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Date</th>
-                                    <th className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Type</th>
-                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Animal</th>
-                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Price</th>
-                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Contact</th>
-                                    <th className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Notes</th>
-                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 dark:text-dark-text-muted uppercase">Date</th>
+                                    <th className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 dark:text-dark-text-muted uppercase">Type</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 dark:text-dark-text-muted uppercase">Animal</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 dark:text-dark-text-muted uppercase">Price</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 dark:text-dark-text-muted uppercase">Contact</th>
+                                    <th className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 dark:text-dark-text-muted uppercase">Notes</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 dark:text-dark-text-muted uppercase">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-gray-200 dark:divide-dark-border">
                                 {filteredTransactions.map((transaction) => (
-                                    <tr key={transaction._id} className="hover:bg-gray-50">
-                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
+                                    <tr key={transaction._id} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700 dark:text-dark-text-secondary">
                                             {new Date(transaction.date).toLocaleDateString()}
                                         </td>
                                         <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                                 (transaction.type === 'animal-sale' || transaction.type === 'sale')
-                                                    ? 'bg-green-100 text-green-800' 
+                                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' 
                                                     : (transaction.type === 'animal-purchase' || transaction.type === 'purchase')
-                                                    ? 'bg-red-100 text-red-800'
+                                                    ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                                                     : transaction.type === 'expense'
-                                                    ? 'bg-orange-100 text-orange-800'
-                                                    : 'bg-blue-100 text-blue-800'
+                                                    ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
+                                                    : 'bg-blue-100 dark:bg-dark-info-blue/20 text-blue-800 dark:text-dark-info-blue'
                                             }`}>
                                                 {(transaction.type === 'animal-sale' || transaction.type === 'sale')
                                                     ? 'Animal Sale' 
@@ -565,7 +560,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                     : 'Income'}
                                             </span>
                                         </td>
-                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700 w-28 sm:w-auto">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700 dark:text-dark-text-secondary w-28 sm:w-auto">
                                             {(transaction.type === 'animal-sale' || transaction.type === 'sale' || transaction.type === 'animal-purchase' || transaction.type === 'purchase') ? (
                                                 <>
                                                     <div className="hidden sm:block font-medium truncate">{transaction.animalName || 'N/A'}</div>
@@ -575,31 +570,31 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                 <>
                                                     <div className="font-medium break-words">{transaction.description || 'N/A'}</div>
                                                     {transaction.category && (
-                                                        <div className="text-[9px] text-gray-500 break-words">{transaction.category}</div>
+                                                        <div className="text-[9px] text-gray-500 dark:text-dark-text-muted break-words">{transaction.category}</div>
                                                     )}
                                                 </>
                                             )}
                                         </td>
-                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-semibold text-gray-900 whitespace-nowrap">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-semibold text-gray-900 dark:text-dark-text whitespace-nowrap">
                                             {getCurrencySymbol()}{transaction.price.toFixed(2)}
                                         </td>
-                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700 dark:text-dark-text-secondary">
                                             {(transaction.type === 'animal-sale' || transaction.type === 'sale') ? transaction.buyer : (transaction.type === 'animal-purchase' || transaction.type === 'purchase') ? transaction.seller : '-'}
                                         </td>
-                                        <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-500 max-w-xs truncate">
+                                        <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-500 dark:text-dark-text-muted max-w-xs truncate">
                                             {transaction.notes || '-'}
                                         </td>
                                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-right">
                                             <button
                                                 onClick={() => handleEditTransaction(transaction)}
-                                                className="text-blue-600 hover:text-blue-800 mr-3"
+                                                className="text-blue-600 dark:text-dark-info-blue hover:text-blue-800 dark:hover:text-blue-300 mr-3"
                                                 title="Edit"
                                             >
                                                 <Edit size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteTransaction(transaction._id)}
-                                                className="text-red-600 hover:text-red-800"
+                                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                                                 title="Delete"
                                             >
                                                 <Trash2 size={16} />

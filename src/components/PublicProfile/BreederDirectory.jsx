@@ -191,8 +191,8 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
 
     if (loadingStatus) {
         return (
-            <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50">
-                <div className="flex items-center justify-center py-8">
+            <div className="mb-8 p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface">
+                <div className="flex items-center justify-center py-8 text-gray-700 dark:text-dark-text-secondary">
                     <Loader2 className="animate-spin mr-2" size={24} />
                     <span>Loading breeding status...</span>
                 </div>
@@ -202,9 +202,9 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
 
     if (displaySpecies.length === 0) {
         return (
-            <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
-                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
-                <p className="text-sm text-gray-600">
+            <div className="mb-8 p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface overflow-x-hidden">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2 mb-4">Species & Breeding Status</h3>
+                <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                     Add some animals to your collection to manage your breeding status and appear in the Breeders Registry.
                 </p>
             </div>
@@ -212,12 +212,12 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
     }
 
     return (
-        <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden" data-tutorial-target="breeding-status-section">
-            <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
-            <p className="text-sm text-gray-600 mb-1">
+        <div className="mb-8 p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface overflow-x-hidden" data-tutorial-target="breeding-status-section">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2 mb-4">Species & Breeding Status</h3>
+            <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-1">
                 Set your breeding status for each species. Marking yourself as an <strong>Active Breeder</strong> or <strong>Retired Breeder</strong> will make you visible in the Breeders Registry.
             </p>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-4">
                 Note: Species marked as Active or Retired will remain in your list even if you have no animals of that species.
             </p>
 
@@ -227,15 +227,15 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
                     const currentStatus = breedingStatus[species] || 'owner';
                     
                     return (
-                        <div key={species} className="flex items-center justify-between py-2 border-b border-gray-200">
+                        <div key={species} className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-dark-border">
                             <div className="flex flex-col">
-                                <span className="text-sm font-medium text-gray-700">{species}</span>
-                                <span className="text-xs text-gray-500">{animalCount} animal{animalCount !== 1 ? 's' : ''}</span>
+                                <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">{species}</span>
+                                <span className="text-xs text-gray-500 dark:text-dark-text-muted">{animalCount} animal{animalCount !== 1 ? 's' : ''}</span>
                             </div>
                             <select
                                 value={currentStatus}
                                 onChange={(e) => handleStatusChange(species, e.target.value)}
-                                className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
+                                className="px-3 py-1.5 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary text-sm"
                                 disabled={loading}
                             >
                                 <option value="owner">🏠 Owner</option>

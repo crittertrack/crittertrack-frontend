@@ -137,14 +137,14 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
             Genetic Code
           </label>
           
           {/* Display current value + button */}
           <div className="flex gap-2">
-            <div className="flex-1 p-2 border border-gray-300 rounded bg-gray-50 font-mono text-sm min-h-[42px] flex items-center">
-              {value || <span className="text-gray-400">Not set</span>}
+            <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
+              {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
             </div>
             <div data-tutorial-target="genetic-code-add-btn">
               <button
@@ -157,7 +157,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             </div>
           </div>
           
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-dark-text-muted">
             Click the button to use the visual gene selector
           </p>
         </div>
@@ -165,10 +165,10 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
         {/* Full-Screen Builder Modal */}
         {showBuilderModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
               {/* Header */}
-              <div className="flex justify-between items-center border-b p-6">
-                <h2 className="text-2xl font-bold text-gray-800">
+              <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">
                   Genetic Code Builder - {species}
                 </h2>
                 <div className="flex gap-2">
@@ -176,7 +176,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <button
                       type="button"
                       onClick={() => setMode(mode === 'visual' ? 'manual' : 'visual')}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition"
+                      className="px-4 py-2 bg-gray-100 dark:bg-dark-surface hover:bg-gray-200 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
                     >
                     {mode === 'visual' ? 'Switch to Manual' : 'Switch to Visual'}
                   </button>
@@ -185,7 +185,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <button
                       type="button"
                       onClick={() => setShowBuilderModal(false)}
-                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition"
+                      className="px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
                     >
                       Cancel
                     </button>
@@ -204,7 +204,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
               <div className="flex-1 overflow-y-auto p-6">{mode === 'visual' ? (
                 <div className="space-y-4">
                   {/* Preview of generated code */}
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
+                  <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-3">
                     {(() => {
                       const geneticCode = buildGeneticCode(genotype);
                       const result = geneticCode ? calculatePhenotype(genotype, genotype) : { phenotype: '', carriers: [], hidden: [], notes: [] };
@@ -212,28 +212,28 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                         <>
                           {result.phenotype && (
                             <div>
-                              <div className="text-sm font-medium text-blue-900">Phenotype:</div>
-                              <div className="text-base font-semibold text-blue-800">
+                              <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                              <div className="text-base font-semibold text-blue-800 dark:text-blue-200">
                                 {result.phenotype}
                               </div>
                             </div>
                           )}
                           {result.carriers && result.carriers.length > 0 && (
                             <div>
-                              <div className="text-sm font-medium text-blue-900">Carries:</div>
-                              <div className="text-sm text-blue-700">
+                              <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                              <div className="text-sm text-blue-700 dark:text-blue-300">
                                 {result.carriers.join(', ')}
                               </div>
                             </div>
                           )}
                           <div>
-                            <div className="text-sm font-medium text-blue-900">Genotype:</div>
-                            <div className="font-mono text-base text-blue-800">
+                            <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Genotype:</div>
+                            <div className="font-mono text-base text-blue-800 dark:text-blue-200">
                               {geneticCode || 'Select genes below...'}
                             </div>
                           </div>
                           {result.notes && result.notes.length > 0 && (
-                            <div className="text-xs text-orange-600 italic">
+                            <div className="text-xs text-orange-600 dark:text-orange-400 italic">
                               Note: {result.notes.join('; ')}
                             </div>
                           )}
@@ -244,20 +244,20 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                   
                   {/* All Genes (Color, Markings, Coat, etc.) */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">All Genes</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-3">All Genes</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {['A', 'B', 'C', 'D', 'E', 'Ln', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].map(locus => (
-                        <div key={locus} className="bg-white p-3 rounded border border-gray-200 h-48 flex flex-col">
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        <div key={locus} className="bg-white dark:bg-dark-surface p-3 rounded border border-gray-200 dark:border-dark-border h-48 flex flex-col">
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">
                             {GENE_LOCI[locus].name} ({locus})
                           </label>
                           {GENE_LOCI[locus].description && (
-                            <p className="text-xs text-gray-500 mb-2 leading-snug flex-1 overflow-hidden">{GENE_LOCI[locus].description}</p>
+                            <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2 leading-snug flex-1 overflow-hidden">{GENE_LOCI[locus].description}</p>
                           )}
                           <select
                             value={genotype[locus] || ''}
                             onChange={(e) => handleGeneChange(locus, e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded focus:ring-accent focus:border-accent mt-auto"
+                            className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
                           >
                             <option value="">-</option>
                             {getValidCombinations(locus).map(combo => (
@@ -269,7 +269,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     </div>
                   </div>
                   
-                  <div className="bg-blue-50 p-4 rounded text-sm text-blue-800">
+                  <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded text-sm text-blue-800 dark:text-blue-300">
                     <div className="flex items-start gap-2">
                       <Info size={18} className="flex-shrink-0 mt-0.5" />
                       <div>
@@ -282,22 +282,22 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                       Manual Entry
                     </label>
                     <textarea
                       value={buildGeneticCode(genotype)}
                       onChange={handleManualChange}
                       placeholder="e.g., A/A B/b C/C D/D E/E P/P"
-                      className="w-full p-3 border border-gray-300 rounded focus:ring-accent focus:border-accent font-mono text-sm"
+                      className="w-full p-3 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent font-mono text-sm"
                       rows="4"
                     />
                   </div>
-                  <div className="bg-amber-50 p-4 rounded text-sm text-amber-800">
+                  <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded text-sm text-amber-800 dark:text-amber-300">
                     <div className="flex items-start gap-2">
                       <Info size={18} className="flex-shrink-0 mt-0.5" />
                       <div>
-                        Enter genetic code manually in format: <code className="bg-white px-1 rounded">A/A B/b C/C</code>
+                        Enter genetic code manually in format: <code className="bg-white dark:bg-dark-card-bg px-1 rounded">A/A B/b C/C</code>
                         <br />Use the Visual mode for easier selection with dropdowns.
                       </div>
                     </div>
@@ -337,10 +337,10 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Genetic Code</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
           <div className="flex gap-2">
-            <div className="flex-1 p-2 border border-gray-300 rounded bg-gray-50 font-mono text-sm min-h-[42px] flex items-center">
-              {value || <span className="text-gray-400">Not set</span>}
+            <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
+              {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
             </div>
             <button
               type="button"
@@ -350,28 +350,28 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
               {value ? 'Edit Genes' : 'Add'}
             </button>
           </div>
-          <p className="text-xs text-gray-500">Click the button to use the visual gene selector</p>
+          <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
 
         {showRatBuilderModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
 
               {/* Header */}
-              <div className="flex justify-between items-center border-b p-6">
-                <h2 className="text-2xl font-bold text-gray-800">Genetic Code Builder — Fancy Rat</h2>
+              <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder — Fancy Rat</h2>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setRatMode(ratMode === 'visual' ? 'manual' : 'visual')}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition"
+                    className="px-4 py-2 bg-gray-100 dark:bg-dark-surface hover:bg-gray-200 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
                   >
                     {ratMode === 'visual' ? 'Switch to Manual' : 'Switch to Visual'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowRatBuilderModal(false)}
-                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition"
+                    className="px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
                   >
                     Cancel
                   </button>
@@ -391,7 +391,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                   <div className="space-y-6">
 
                     {/* Phenotype preview */}
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-2">
+                    <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-2">
                       {(() => {
                         const ratCode = buildRatGeneticCode(ratGenotype);
                         const result = ratCode ? matchFancyRatPhenotype(ratGenotype) : null;
@@ -399,16 +399,16 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                           <>
                             {result?.phenotype && (
                               <div>
-                                <div className="text-sm font-medium text-blue-900">Phenotype:</div>
-                                <div className="text-base font-semibold text-blue-800">{result.phenotype}</div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                                <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{result.phenotype}</div>
                               </div>
                             )}
                             <div>
-                              <div className="text-sm font-medium text-blue-900">Genotype:</div>
-                              <div className="font-mono text-base text-blue-800">{ratCode || 'Select genes below…'}</div>
+                              <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Genotype:</div>
+                              <div className="font-mono text-base text-blue-800 dark:text-blue-200">{ratCode || 'Select genes below…'}</div>
                             </div>
                             {result?.notes && (
-                              <div className="text-xs text-orange-600 italic">Note: {result.notes}</div>
+                              <div className="text-xs text-orange-600 dark:text-orange-400 italic">Note: {result.notes}</div>
                             )}
                           </>
                         );
@@ -418,22 +418,22 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     {/* Gene groups */}
                     {RAT_GENE_GROUPS.map(group => (
                       <div key={group.label}>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-3">{group.label}</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-3">{group.label}</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                           {group.loci.map(locus => (
-                            <div key={locus} className="bg-white p-3 rounded border border-gray-200 h-48 flex flex-col">
-                              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                            <div key={locus} className="bg-white dark:bg-dark-surface p-3 rounded border border-gray-200 dark:border-dark-border h-48 flex flex-col">
+                              <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">
                                 {RAT_GENE_LOCI[locus].name} ({locus})
                               </label>
                               {RAT_GENE_LOCI[locus].description && (
-                                <p className="text-xs text-gray-500 mb-2 leading-snug flex-1 overflow-hidden">
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2 leading-snug flex-1 overflow-hidden">
                                   {RAT_GENE_LOCI[locus].description}
                                 </p>
                               )}
                               <select
                                 value={ratGenotype[locus] || ''}
                                 onChange={(e) => handleRatGeneChange(locus, e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded focus:ring-accent focus:border-accent mt-auto"
+                                className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
                               >
                                 <option value="">—</option>
                                 {RAT_GENE_LOCI[locus].combinations.map(combo => (
@@ -446,7 +446,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                       </div>
                     ))}
 
-                    <div className="bg-blue-50 p-4 rounded text-sm text-blue-800">
+                    <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded text-sm text-blue-800 dark:text-blue-300">
                       <div className="flex items-start gap-2">
                         <Info size={18} className="flex-shrink-0 mt-0.5" />
                         <div>
@@ -459,20 +459,20 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Manual Entry</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">Manual Entry</label>
                       <textarea
                         value={buildRatGeneticCode(ratGenotype)}
                         onChange={handleRatManualChange}
                         placeholder="e.g., a/a m/m h/h Re/re du/du"
-                        className="w-full p-3 border border-gray-300 rounded focus:ring-accent focus:border-accent font-mono text-sm"
+                        className="w-full p-3 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent font-mono text-sm"
                         rows="4"
                       />
                     </div>
-                    <div className="bg-amber-50 p-4 rounded text-sm text-amber-800">
+                    <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded text-sm text-amber-800 dark:text-amber-300">
                       <div className="flex items-start gap-2">
                         <Info size={18} className="flex-shrink-0 mt-0.5" />
                         <div>
-                          Enter genetic code manually in format: <code className="bg-white px-1 rounded">a/a m/m h/h</code>
+                          Enter genetic code manually in format: <code className="bg-white dark:bg-dark-card-bg px-1 rounded">a/a m/m h/h</code>
                           <br />Use the Visual mode for easier selection with dropdowns.
                         </div>
                       </div>
@@ -490,7 +490,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   // For other species: simple manual entry + community button
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
         Genetic Code
       </label>
       
@@ -499,10 +499,10 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="e.g., A/A B/b C/C or custom format for your species"
-        className="w-full p-2 border border-gray-300 rounded focus:ring-primary focus:border-primary font-mono text-sm"
+        className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary font-mono text-sm"
       />
       
-      <div className="bg-purple-50 p-3 rounded text-xs text-purple-800">
+      <div className="bg-purple-50 dark:bg-dark-accent-purple-bg p-3 rounded text-xs text-purple-800 dark:text-dark-accent-purple">
         <div className="flex items-start gap-2">
           <HelpCircle size={16} className="flex-shrink-0 mt-0.5" />
           <div className="flex-1">

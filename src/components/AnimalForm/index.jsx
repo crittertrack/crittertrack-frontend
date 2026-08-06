@@ -1269,7 +1269,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;
         const cardBg = isMale ? themeColors['pedigree-male-bg'] : isFemale ? themeColors['pedigree-female-bg'] : '#f3f4f6';
-        const cardBorder = isMale ? themeColors['info-blue'] : isFemale ? '#934E69' : certBorderColor;
+        const cardBorder = isMale ? themeColors['info-blue'] : isFemale ? '#f48abf' : certBorderColor;
 
         return (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
@@ -1716,7 +1716,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
 
         return (
             <>
-                <div className="w-full rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                <div className="w-full rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card-bg overflow-hidden shadow-sm">
                     <div className="px-4 pt-3 pb-2">
                         <div className="flex items-center gap-3 mb-2">
                             <input
@@ -1728,12 +1728,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 onChange={(e) => setInlineZoomPct(Number(e.target.value))}
                                 className="flex-1 accent-primary"
                             />
-                            <span className="text-white bg-primary rounded px-2 py-0.5 text-sm font-bold min-w-[48px] text-center">{inlineZoomPct}%</span>
+                            <span className="text-white bg-primary dark:bg-dark-primary rounded px-2 py-0.5 text-sm font-bold min-w-[48px] text-center">{inlineZoomPct}%</span>
                         </div>
 
                         <div
                             ref={inlineViewportRef}
-                            className="border border-gray-200 bg-slate-50 overflow-hidden"
+                            className="border border-gray-200 dark:border-dark-border bg-slate-50 dark:bg-dark-surface overflow-hidden"
                             style={{ height: previewHeight, cursor: inlineDragging ? 'grabbing' : 'grab' }}
                             onMouseDown={handleInlineMouseDown}
                             onMouseMove={handleInlineMouseMove}
@@ -1755,7 +1755,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         <button
                             type="button"
                             onClick={() => { setInlineEnlarged(true); setEnlargedZoomPct(60); setEnlargedPan({ x: 12, y: 12 }); }}
-                            className="mt-2 text-2xl text-gray-800 hover:underline"
+                            className="mt-2 text-2xl text-gray-800 dark:text-dark-text hover:underline"
                         >
                             View it enlarged
                         </button>

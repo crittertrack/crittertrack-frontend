@@ -220,7 +220,7 @@ const PublicAnimalPage = () => {
 };
 
 // Public Profile Page Component
-const PublicProfilePage = () => {
+const PublicProfilePage = ({ onOpenMessages }) => {
     const { userId } = useParams();
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
@@ -313,8 +313,24 @@ const PublicProfilePage = () => {
                 currentUserIdPublic={userProfile?.id_public}
                 currentUserRole={userProfile?.role}
                 onStartMessage={authToken ? () => {
-                    // Navigate to dashboard with message param to open conversation
-                    navigate(`/?message=${profile.id_public}`);
+                    // Open the Messages modal directly with this profile's conversation,
+                    // without navigating away from the public profile page.
+                    if (onOpenMessages) {
+                        onOpenMessages({
+                            otherUserId: profile.userId_backend || profile.id_public,
+                            otherUser: {
+                                id_public: profile.id_public,
+                                personalName: profile.personalName,
+                                breederName: profile.breederName,
+                                showPersonalName: profile.showPersonalName,
+                                showBreederName: profile.showBreederName,
+                                profileImage: profile.profileImage
+                            }
+                        });
+                    } else {
+                        // Fallback for contexts where the modal can't be opened directly
+                        navigate(`/?message=${profile.id_public}`);
+                    }
                 } : null}
             />
         </div>

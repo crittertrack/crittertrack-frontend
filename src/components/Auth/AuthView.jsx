@@ -473,30 +473,30 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     };
 
     return (
-        <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
+        <div className="max-w-md w-full bg-white dark:bg-dark-card-bg p-8 rounded-xl shadow-2xl">
             {maintenanceInfo && (
-                <div className="mb-6 p-4 rounded-lg bg-amber-50 border-l-4 border-amber-500 flex items-start gap-3">
-                    <Wrench size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="mb-6 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 dark:border-amber-600 flex items-start gap-3">
+                    <Wrench size={20} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                     <div>
-                        <p className="text-sm font-bold text-amber-900">System Maintenance in Progress</p>
-                        <p className="text-sm text-amber-800 mt-1">{maintenanceInfo.message}</p>
+                        <p className="text-sm font-bold text-amber-900 dark:text-amber-300">System Maintenance in Progress</p>
+                        <p className="text-sm text-amber-800 dark:text-amber-400 mt-1">{maintenanceInfo.message}</p>
                     </div>
                 </div>
             )}
             {!forgotPasswordStep && !verificationStep && (
-                <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 flex items-center gap-4 shadow">
-                    <Users size={32} className="text-primary-dark" />
+                <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 dark:from-dark-info-blue/20 dark:to-dark-accent-purple-bg flex items-center gap-4 shadow">
+                    <Users size={32} className="text-primary-dark dark:text-dark-primary" />
                     <div>
-                        <div className="text-lg font-bold text-gray-800">
+                        <div className="text-lg font-bold text-gray-800 dark:text-dark-text">
                             Join {userCount} breeders & keepers!
                         </div>
-                        <div className="text-sm text-gray-700">
+                        <div className="text-sm text-gray-700 dark:text-dark-text-secondary">
                             Be part of a growing community. Register now and connect with passionate breeders and keepers worldwide!
                         </div>
                     </div>
                 </div>
             )}
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-dark-text mb-6 text-center">
                 {forgotPasswordStep > 0 ? 'Reset Password' : (verificationStep ? 'Verify Your Email' : mainTitle)}
             </h2>
 
@@ -505,35 +505,35 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 <form onSubmit={handleForgotPassword} className="space-y-4">
                     {forgotPasswordStep === 1 && (
                         <div>
-                            <p className="text-sm text-gray-600 mb-4">Enter the email address associated with your account.</p>
+                            <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">Enter the email address associated with your account.</p>
                             <input
                                 type="email"
                                 placeholder="Email Address *"
                                 value={resetEmail}
                                 onChange={(e) => setResetEmail(e.target.value)}
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                                className="w-full p-3 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition"
                             />
                         </div>
                     )}
                     
                     {forgotPasswordStep === 2 && (
                         <div>
-                            <p className="text-sm text-gray-600 mb-4"><Mail size={14} className="inline-block align-middle mr-1" /> Check your email for a password reset button. Click it to proceed with resetting your password.</p>
-                            <p className="text-xs text-gray-500 bg-blue-50 p-3 rounded border border-blue-200">The reset link will expire in 1 hour.</p>
+                            <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4"><Mail size={14} className="inline-block align-middle mr-1" /> Check your email for a password reset button. Click it to proceed with resetting your password.</p>
+                            <p className="text-xs text-gray-500 dark:text-dark-text-muted bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded border border-blue-200 dark:border-dark-info-blue/60">The reset link will expire in 1 hour.</p>
                         </div>
                     )}
                     
                     {forgotPasswordStep === 3 && (
                         <div className="space-y-3">
-                            <p className="text-sm text-gray-600 mb-4">Enter your new password.</p>
+                            <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">Enter your new password.</p>
                             <input
                                 type="password"
                                 placeholder="New Password *"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                                className="w-full p-3 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition"
                             />
                             <input
                                 type="password"
@@ -541,7 +541,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                 value={confirmNewPassword}
                                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                                className="w-full p-3 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition"
                             />
                         </div>
                     )}
@@ -561,7 +561,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     <button
                         type="button"
                         onClick={closeForgotPassword}
-                        className="w-full text-sm text-gray-600 hover:text-gray-800 transition py-2"
+                        className="w-full text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text transition py-2"
                     >
                         ? Back to Login
                     </button>
@@ -570,10 +570,10 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 // Step 2: Verification Code Form
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="text-center mb-4">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                             We sent a 6-digit code to <strong>{email}</strong>
                         </p>
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-2">
                             Code expires in 10 minutes
                         </p>
                     </div>
@@ -586,7 +586,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         required 
                         maxLength={6}
                         pattern="[0-9]{6}"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition text-center text-2xl tracking-widest font-mono"
+                        className="w-full p-3 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition text-center text-2xl tracking-widest font-mono"
                     />
                     
                     <button
@@ -597,12 +597,12 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : 'Verify & Create Account'}
                     </button>
 
-                    <div className="flex flex-col space-y-2 mt-4 border-t pt-4">
+                    <div className="flex flex-col space-y-2 mt-4 border-t dark:border-dark-border pt-4">
                         <button 
                             type="button" 
                             onClick={handleClearCode}
                             disabled={loading}
-                            className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium py-1"
+                            className="text-sm text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 transition duration-150 font-medium py-1"
                         >
                             Clear Code & Try Again
                         </button>
@@ -610,14 +610,14 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                             type="button" 
                             onClick={handleResendCode}
                             disabled={loading}
-                            className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium py-1"
+                            className="text-sm text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 transition duration-150 font-medium py-1"
                         >
                             Resend Code
                         </button>
                         <button 
                             type="button" 
                             onClick={handleBackToRegistration}
-                            className="text-sm text-gray-600 hover:text-gray-800 transition duration-150 py-1"
+                            className="text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text transition duration-150 py-1"
                         >
                             ? Change Email or Start Over
                         </button>
@@ -628,37 +628,37 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 <form onSubmit={handleSubmit} className="space-y-4">
                     
                     {suspensionLiftedNotification && (
-                        <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded">
+                        <div className="bg-green-100 dark:bg-green-900/20 border-l-4 border-green-500 dark:border-green-600 p-4 rounded">
                             <div className="flex items-start">
                                 <div className="flex-shrink-0">
-                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                    <CheckCircle className="h-5 w-5 text-green-500 dark:text-green-400" />
                                 </div>
                                 <div className="ml-3 w-full">
-                                    <p className="text-sm font-bold text-green-900">Good News! ??</p>
-                                    <p className="text-sm text-green-800 mt-2">Your suspension has been lifted. You can now log in to your account.</p>
-                                    <p className="text-xs text-green-600 mt-2">This message will disappear in 24 hours.</p>
+                                    <p className="text-sm font-bold text-green-900 dark:text-green-300">Good News! ??</p>
+                                    <p className="text-sm text-green-800 dark:text-green-400 mt-2">Your suspension has been lifted. You can now log in to your account.</p>
+                                    <p className="text-xs text-green-600 dark:text-green-400 mt-2">This message will disappear in 24 hours.</p>
                                 </div>
                             </div>
                         </div>
                     )}
                     
                     {suspensionInfo && (
-                        <div className="bg-red-100 border-l-4 border-red-500 p-4 rounded">
+                        <div className="bg-red-100 dark:bg-red-900/20 border-l-4 border-red-500 dark:border-red-600 p-4 rounded">
                             <div className="flex items-start">
                                 <div className="flex-shrink-0">
-                                    <AlertCircle className="h-5 w-5 text-red-500" />
+                                    <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400" />
                                 </div>
                                 <div className="ml-3 w-full">
-                                    <p className="text-sm font-bold text-red-900">Account Suspended</p>
-                                    <p className="text-sm text-red-800 mt-2 font-semibold">Reason:</p>
-                                    <p className="text-sm text-red-700 mt-1 bg-red-50 p-2 rounded border border-red-200">{suspensionInfo.reason}</p>
+                                    <p className="text-sm font-bold text-red-900 dark:text-red-300">Account Suspended</p>
+                                    <p className="text-sm text-red-800 dark:text-red-400 mt-2 font-semibold">Reason:</p>
+                                    <p className="text-sm text-red-700 dark:text-red-300 mt-1 bg-red-50 dark:bg-red-900/30 p-2 rounded border border-red-200 dark:border-red-700/60">{suspensionInfo.reason}</p>
                                     {suspensionTimeRemaining && (
-                                        <p className="text-sm text-red-700 mt-3 font-semibold">
-                                            Time remaining: <span className="text-lg text-red-900">{suspensionTimeRemaining}</span>
+                                        <p className="text-sm text-red-700 dark:text-red-300 mt-3 font-semibold">
+                                            Time remaining: <span className="text-lg text-red-900 dark:text-red-200">{suspensionTimeRemaining}</span>
                                         </p>
                                     )}
-                                    <p className="text-xs text-red-600 mt-3">
-                                        <a href={`mailto:CrittertrackOwner@gmail.com?subject=Suspension Appeal&body=I would like to appeal my account suspension.%0D%0A%0D%0AReason for suspension: ${encodeURIComponent(suspensionInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-800 font-semibold">
+                                    <p className="text-xs text-red-600 dark:text-red-400 mt-3">
+                                        <a href={`mailto:CrittertrackOwner@gmail.com?subject=Suspension Appeal&body=I would like to appeal my account suspension.%0D%0A%0D%0AReason for suspension: ${encodeURIComponent(suspensionInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-800 dark:hover:text-red-200 font-semibold">
                                             Submit an appeal
                                         </a>
                                     </p>
@@ -695,13 +695,13 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     {isRegister && (
                         <input type="text" placeholder="Your Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition" />
                     )}
                     
                     <input type="email" placeholder="Email Address *" value={email} onChange={(e) => setEmail(e.target.value)} required 
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
+                        className="w-full p-3 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition" />
                     <input type="password" placeholder="Password *" value={password} onChange={(e) => setPassword(e.target.value)} required 
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
+                        className="w-full p-3 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition" />
                     
                     {isRegister && (
                         <input 
@@ -710,25 +710,25 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                             value={confirmPassword} 
                             onChange={(e) => setConfirmPassword(e.target.value)} 
                             required 
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" 
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition" 
                         />
                     )}
                     
                     {isRegister && (
-                        <label className="flex items-start space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <label className="flex items-start space-x-2 p-3 border border-gray-300 dark:border-dark-text-muted rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer">
                             <input
                                 type="checkbox"
                                 checked={agreedToTerms}
                                 onChange={(e) => setAgreedToTerms(e.target.checked)}
                                 required
-                                className="mt-1 h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary cursor-pointer"
+                                className="mt-1 h-4 w-4 text-primary rounded border-gray-300 dark:border-dark-text-muted focus:ring-primary cursor-pointer"
                             />
-                            <span className="text-sm text-gray-700">
+                            <span className="text-sm text-gray-700 dark:text-dark-text-secondary">
                                 I agree to the{' '}
                                 <button
                                     type="button"
                                     onClick={onShowTerms}
-                                    className="text-accent hover:text-accent/80 underline font-medium"
+                                    className="text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 underline font-medium"
                                 >
                                     Terms of Service
                                 </button>
@@ -736,7 +736,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                 <button
                                     type="button"
                                     onClick={onShowPrivacy}
-                                    className="text-accent hover:text-accent/80 underline font-medium"
+                                    className="text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 underline font-medium"
                                 >
                                     Privacy Policy
                                 </button>
@@ -759,13 +759,13 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     <div className="mt-6 text-center space-y-3">
                         {!isRegister && (
                             <button type="button" onClick={() => setForgotPasswordStep(1)}
-                                className="block w-full text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
+                                className="block w-full text-sm text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 transition duration-150 font-medium"
                             >
                                 Forgot Password?
                             </button>
                         )}
                         <button type="button" onClick={() => setIsRegister(prev => !prev)}
-                            className="block w-full text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
+                            className="block w-full text-sm text-accent dark:text-dark-accent hover:text-accent/80 dark:hover:text-dark-accent/80 transition duration-150 font-medium"
                         >
                             {isRegister ? 'Already have an account? Log In' : "Don't have an account? Register Here"}
                         </button>
@@ -777,12 +777,12 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 </>
             )}
             
-            <div className="mt-6 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 space-x-4">
-                <button onClick={onShowTerms} className="hover:text-primary transition">
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-dark-border text-center text-xs text-gray-500 dark:text-dark-text-muted space-x-4">
+                <button onClick={onShowTerms} className="hover:text-primary dark:hover:text-dark-primary transition">
                     Terms of Service
                 </button>
                 <span>|</span>
-                <button onClick={onShowPrivacy} className="hover:text-primary transition">
+                <button onClick={onShowPrivacy} className="hover:text-primary dark:hover:text-dark-primary transition">
                     Privacy Policy
                 </button>
             </div>

@@ -889,7 +889,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 ].map(tab => (
                     <NavLink 
                         key={tab.id} 
-                        to={tab.id === 'profile' ? '' : tab.id}
+                        to={tab.id === 'profile' ? '/settings' : `/settings/${tab.id}`}
                         end={tab.id === 'profile'}
                         className={({ isActive }) => `px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${isActive ? 'border-accent text-accent' : 'border-transparent text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text hover:border-gray-300 dark:hover:border-dark-border'}`}
                     >

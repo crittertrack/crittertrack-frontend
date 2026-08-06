@@ -1441,14 +1441,17 @@ const App = () => {
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                 
                 {/* Public navigation header */}
-                <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
-                    <button 
-                        onClick={() => navigate('/calculator')}
-                        className="px-3 py-2 bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
-                    >
-                        <Cat size={18} className="mr-1" /> Offspring Calculator
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <ThemeToggle />
+                        <button 
+                            onClick={() => navigate('/calculator')}
+                            className="px-3 py-2 bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                        >
+                            <Cat size={18} className="mr-1" /> Offspring Calculator
+                        </button>
+                    </div>
                 </header>
                 
                 {showUserSearchModal && (
@@ -1485,20 +1488,20 @@ const App = () => {
                 {/* 3-Column Layout: Donation | Auth Form | Features */}
                 <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                     {/* LEFT: Donation Section */}
-                    <div className="bg-white p-6 rounded-xl shadow-lg">
+                    <div className="bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="bg-gradient-to-r from-pink-500 to-red-500 p-2.5 rounded-full">
                                 <Heart size={24} className="text-white fill-current" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-800">Support CritterTrack</h3>
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">Support CritterTrack</h3>
                         </div>
                         
-                        <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                        <p className="text-sm text-gray-700 dark:text-dark-text-secondary leading-relaxed mb-4">
                             CritterTrack is <strong>completely free</strong> and developed by a single independent developer 
                             passionate about helping breeders and keepers manage their animals.
                         </p>
                         
-                        <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-6">
                             Your support helps cover server costs and enables continuous improvements. Every contribution, 
                             no matter the size, makes a difference!
                         </p>
@@ -1537,57 +1540,57 @@ const App = () => {
                     </div>
                     
                     {/* RIGHT: Features Summary */}
-                    <div className="bg-white p-6 rounded-xl shadow-lg">
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">What's Included</h3>
+                    <div className="bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg">
+                        <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4">What's Included</h3>
                         
                         <div className="space-y-3">
                             <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
-                                    <Cat size={18} className="text-primary-dark" />
+                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                    <Cat size={18} className="text-primary-dark dark:text-dark-primary" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-800 text-sm">Animal Management</h4>
-                                    <p className="text-xs text-gray-600">Track your animals with detailed records, photos, and genetic codes</p>
+                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Animal Management</h4>
+                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Track your animals with detailed records, photos, and genetic codes</p>
                                 </div>
                             </div>
                             
                             <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
-                                    <BookOpen size={18} className="text-primary-dark" />
+                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                    <BookOpen size={18} className="text-primary-dark dark:text-dark-primary" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-800 text-sm">Litter Tracking</h4>
-                                    <p className="text-xs text-gray-600">Manage breeding pairs, track litters, and monitor offspring</p>
+                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Litter Tracking</h4>
+                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Manage breeding pairs, track litters, and monitor offspring</p>
                                 </div>
                             </div>
                             
                             <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
-                                    <Calculator size={18} className="text-primary-dark" />
+                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                    <Calculator size={18} className="text-primary-dark dark:text-dark-primary" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-800 text-sm">Genetics Calculator</h4>
-                                    <p className="text-xs text-gray-600">Predict offspring outcomes and calculate inbreeding coefficients</p>
+                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Genetics Calculator</h4>
+                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Predict offspring outcomes and calculate inbreeding coefficients</p>
                                 </div>
                             </div>
                             
                             <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
-                                    <DollarSign size={18} className="text-primary-dark" />
+                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                    <DollarSign size={18} className="text-primary-dark dark:text-dark-primary" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-800 text-sm">Budget Tracking</h4>
-                                    <p className="text-xs text-gray-600">Monitor expenses and income for your breeding program</p>
+                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Budget Tracking</h4>
+                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Monitor expenses and income for your breeding program</p>
                                 </div>
                             </div>
                             
                             <div className="flex items-start gap-3">
-                                <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
-                                    <Search size={18} className="text-primary-dark" />
+                                <div className="bg-primary/20 dark:bg-dark-primary/20 p-2 rounded-lg mt-0.5">
+                                    <Search size={18} className="text-primary-dark dark:text-dark-primary" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-800 text-sm">Public Profiles</h4>
-                                    <p className="text-xs text-gray-600">Share your animals and connect with other breeders</p>
+                                    <h4 className="font-semibold text-gray-800 dark:text-dark-text text-sm">Public Profiles</h4>
+                                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary">Share your animals and connect with other breeders</p>
                                 </div>
                             </div>
                         </div>
@@ -2378,7 +2381,14 @@ const AppRouter = () => {
         <>
             <Routes>
                 <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
-                <Route path="/user/:userId/*" element={<PublicProfilePage />} />
+                <Route path="/user/:userId/*" element={
+                    <PublicProfilePage
+                        onOpenMessages={(conversation) => {
+                            setSelectedConversation(conversation);
+                            setShowMessages(true);
+                        }}
+                    />
+                } />
                 <Route path="/*" element={<App />} />
             </Routes>
         </>

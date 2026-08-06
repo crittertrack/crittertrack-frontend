@@ -235,28 +235,28 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition text-sm"
                 />
                 {loading && (
-                    <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 animate-spin" />
+                    <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted animate-spin" />
                 )}
             </div>
 
             {/* Results dropdown */}
             {showResults && searchTerm.trim().length >= 2 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-dark-card-bg rounded-lg shadow-xl border border-gray-200 dark:border-dark-border max-h-96 overflow-y-auto z-50">
                     {loading ? (
-                        <div className="p-4 text-center text-gray-500">
+                        <div className="p-4 text-center text-gray-500 dark:text-dark-text-muted">
                             <Loader2 size={24} className="animate-spin mx-auto mb-2" />
                             <p className="text-sm">Searching...</p>
                         </div>
                     ) : totalResults === 0 ? (
-                        <div className="p-4 text-center text-gray-500">
+                        <div className="p-4 text-center text-gray-500 dark:text-dark-text-muted">
                             <p className="text-sm">No results found for "{searchTerm}"</p>
                         </div>
                     ) : (
                         <>
                             {/* User results */}
                             {userResults.length > 0 && (
-                                <div className="border-b border-gray-100">
-                                    <div className="px-3 py-2 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                                <div className="border-b border-gray-100 dark:border-dark-border">
+                                    <div className="px-3 py-2 bg-gray-50 dark:bg-dark-surface text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wide">
                                         Users ({userResults.length})
                                     </div>
                                     {userResults.map(user => {
@@ -277,22 +277,22 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                                         return (
                                             <div
                                                 key={user.id_public}
-                                                className="px-3 py-2 hover:bg-gray-50 cursor-pointer transition flex items-center gap-3"
+                                                className="px-3 py-2 hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer transition flex items-center gap-3"
                                                 onClick={() => handleUserClick(user)}
                                             >
                                                 {user.profileImage ? (
                                                     <img src={user.profileImage} alt={displayName} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                                                 ) : (
-                                                    <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                        <User size={20} className="text-gray-400" />
+                                                    <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-lg flex items-center justify-center flex-shrink-0">
+                                                        <User size={20} className="text-gray-400 dark:text-dark-text-muted" />
                                                     </div>
                                                 )}
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-gray-800 truncate flex items-center gap-2">
+                                                    <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate flex items-center gap-2">
                                                         {displayName}
                                                         {getDonationBadge(user) && <DonationBadge badge={getDonationBadge(user)} size="xs" />}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 font-mono">{user.id_public}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{user.id_public}</p>
                                                 </div>
                                             </div>
                                         );
@@ -303,16 +303,16 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                             {/* Animal results */}
                             {animalResults.length > 0 && (
                                 <div>
-                                    <div className="px-3 py-2 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                                    <div className="px-3 py-2 bg-gray-50 dark:bg-dark-surface text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wide">
                                         Animals ({animalResults.length})
                                     </div>
                                     {animalResults.map(animal => (
                                         <div
                                             key={animal.id_public}
-                                            className="px-3 py-2 hover:bg-gray-50 cursor-pointer transition flex items-center gap-3"
+                                            className="px-3 py-2 hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer transition flex items-center gap-3"
                                             onClick={() => handleAnimalClick(animal)}
                                         >
-                                            <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                            <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-lg overflow-hidden flex-shrink-0">
                                                 <AnimalImage 
                                                     src={animal.imageUrl || animal.photoUrl} 
                                                     alt={animal.name} 
@@ -321,10 +321,10 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                                                 />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-gray-800 truncate">
+                                                <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
                                                     {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                                                 </p>
-                                                <p className="text-xs text-gray-500 truncate">
+                                                <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
                                                     {animal.species} · {animal.gender} · {animal.id_public}
                                                 </p>
                                             </div>

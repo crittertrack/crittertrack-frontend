@@ -19,7 +19,7 @@
 }
 
 .report-modal {
-    background: white;
+    @apply bg-white dark:bg-dark-card-bg;
     border-radius: 8px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     width: 90%;
@@ -45,22 +45,21 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    border-bottom: 1px solid #e5e7eb /* consolidated: gray-200 */;
-    @apply bg-gray-50;
+    @apply border-b border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface;
 }
 
 .report-modal-header h2 {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
-    @apply text-gray-800;
+    @apply text-gray-800 dark:text-dark-text;
 }
 
 .report-modal-close {
     background: none;
     border: none;
     font-size: 28px;
-    @apply text-gray-400;
+    @apply text-gray-400 dark:text-dark-text-muted;
     cursor: pointer;
     padding: 0;
     width: 32px;
@@ -72,7 +71,7 @@
 }
 
 .report-modal-close:hover {
-    @apply text-gray-800;
+    @apply text-gray-800 dark:text-dark-text;
 }
 
 .report-modal-content {
@@ -87,38 +86,38 @@
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    @apply text-gray-800;
+    @apply text-gray-800 dark:text-dark-text;
     font-size: 14px;
 }
 
 .report-language-hint {
     margin: -4px 0 8px 0;
     font-size: 12px;
-    @apply text-gray-500;
+    @apply text-gray-500 dark:text-dark-text-muted;
 }
 
 .form-group select,
 .form-group textarea {
     width: 100%;
     padding: 10px;
-    border: 1px solid #d1d5db /* consolidated: gray-300 */;
     border-radius: 4px;
     font-family: inherit;
     font-size: 14px;
     transition: border-color 0.2s ease;
+    @apply border border-gray-300 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text;
 }
 
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    @apply border-green-600;
+    @apply border-green-600 dark:border-green-500;
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
 .form-group select:disabled,
 .form-group textarea:disabled {
-    @apply bg-gray-100;
-    @apply text-gray-400;
+    @apply bg-gray-100 dark:bg-dark-surface;
+    @apply text-gray-400 dark:text-dark-text-muted;
 }
 
 .form-group textarea {
@@ -126,8 +125,8 @@
 }
 
 .report-error {
-    @apply bg-page-bg;
-    @apply text-red-700;
+    @apply bg-page-bg dark:bg-red-900/20;
+    @apply text-red-700 dark:text-red-300;
     padding: 12px;
     border-radius: 4px;
     margin-bottom: 16px;
@@ -142,18 +141,18 @@
 
 .success-icon {
     font-size: 48px;
-    @apply text-green-600;
+    @apply text-green-600 dark:text-green-400;
     margin-bottom: 16px;
 }
 
 .report-success-message p {
     margin: 8px 0;
-    @apply text-gray-800;
+    @apply text-gray-800 dark:text-dark-text;
     font-size: 16px;
 }
 
 .report-success-message .success-detail {
-    @apply text-gray-400;
+    @apply text-gray-400 dark:text-dark-text-muted;
     font-size: 14px;
 }
 
@@ -176,12 +175,12 @@
 }
 
 .btn-cancel {
-    @apply bg-gray-100;
-    @apply text-gray-800;
+    @apply bg-gray-100 dark:bg-dark-surface;
+    @apply text-gray-800 dark:text-dark-text;
 }
 
 .btn-cancel:hover:not(:disabled) {
-    @apply bg-gray-200;
+    @apply bg-gray-200 dark:bg-dark-surface-hover;
 }
 
 .btn-submit {
