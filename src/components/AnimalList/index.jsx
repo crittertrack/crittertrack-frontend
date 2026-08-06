@@ -2609,7 +2609,7 @@ useEffect(() => {
             <div className="w-full flex justify-center">
                     <div
                         onClick={handleClick}
-                        className={`relative bg-white dark:bg-dark-card-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-border'}`}
+                        className={`relative bg-white dark:bg-dark-card-bg rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${isSelected ? 'border-red-500' : 'border-gray-300 dark:border-dark-text-muted'}`}
                     >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
@@ -3117,18 +3117,18 @@ useEffect(() => {
         if (hideHeader) return null;
         return (
             <div
-                className={`relative flex items-center justify-between ${bgClass} px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer`}
+                className={`relative flex items-center justify-between ${bgClass} px-3 py-2.5 sm:px-4 sm:py-3 border-b dark:border-dark-border cursor-pointer`}
                 onClick={onClick || (() => setCollapsedMgmtSections(prev => ({ ...prev, [sectionKey]: !prev[sectionKey] })))}
             >
                 <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                     {collapsed
-                        ? <ChevronDown className="w-4 h-4 text-gray-400" />
-                        : <ChevronUp className="w-4 h-4 text-gray-400" />}
+                        ? <ChevronDown className="w-4 h-4 text-gray-400 dark:text-dark-text-muted" />
+                        : <ChevronUp className="w-4 h-4 text-gray-400 dark:text-dark-text-muted" />}
                 </div>
                 <div className="flex items-center gap-2">
                     {icon}
-                    <span className="font-semibold text-gray-800">{title}</span>
-                    <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{count}</span>
+                    <span className="font-semibold text-gray-800 dark:text-dark-text">{title}</span>
+                    <span className="text-xs text-gray-500 dark:text-dark-text-secondary bg-white/70 dark:bg-black/20 px-2 py-0.5 rounded-full">{count}</span>
                 </div>
                 <div />
             </div>
@@ -3930,9 +3930,9 @@ useEffect(() => {
         return (
             <div className="space-y-4 mt-4">
                 <div className="flex items-center gap-2 mb-2">
-                    <ShoppingBag size={18} className="text-purple-600" />
-                    <h3 className="text-base font-semibold text-gray-800">For Sale / Available</h3>
-                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">{availableList.length}</span>
+                    <ShoppingBag size={18} className="text-purple-600 dark:text-purple-400" />
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-dark-text">For Sale / Available</h3>
+                    <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">{availableList.length}</span>
                 </div>
                 {availableList.length === 0
                     ? <div className="text-sm text-gray-400 text-center py-8">No animals currently marked as Available.</div>
@@ -3943,7 +3943,7 @@ useEffect(() => {
                                 hideControls hideBreedingLines
                                 cardActions={<>
                                     {a.isForSale && a.salePriceAmount && (
-                                        <div className="text-[10px] text-purple-600 font-medium truncate w-full text-center">
+                                        <div className="text-[10px] text-purple-600 dark:text-purple-400 font-medium truncate w-full text-center">
                                             {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
                                         </div>
                                     )}
@@ -4412,7 +4412,7 @@ useEffect(() => {
                         count={(feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount) > 0
                             ? `${feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount} due`
                             : (feedDue.length + feedOk.length + groomingScheduleDue.length + groomingScheduleOk.length + trainingScheduleDue.length + trainingScheduleOk.length + animalsWithAnimalTasks.length)}
-                        bgClass="bg-green-50" hideHeader={!!view} />
+                        bgClass="bg-green-50 dark:bg-green-900/20" hideHeader={!!view} />
                     {(!collapsedMgmtSections['feedingCare'] || !!view) && (
                         <div className="p-3 space-y-4">
                             {(() => {
@@ -4489,7 +4489,7 @@ useEffect(() => {
                 {(!view || view === 'reproduction') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="reproduction"
                         icon={<Heart size={18} className="text-pink-600" />}
-                        title="Reproduction" count={reproTotal} bgClass="bg-pink-50" hideHeader={!!view} />
+                        title="Reproduction" count={reproTotal} bgClass="bg-pink-50 dark:bg-pink-900/20" hideHeader={!!view} />
                     {(!collapsedMgmtSections['reproduction'] || !!view) && (
                         <div className="p-3 space-y-4">
                             <div className="border border-pink-200 rounded-lg overflow-hidden">
@@ -4575,7 +4575,7 @@ useEffect(() => {
                 {(!view || view === 'health') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="medical"
                         icon={<Activity size={18} className="text-red-600" />}
-                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" hideHeader={!!view} />
+                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50 dark:bg-red-900/20" hideHeader={!!view} />
                     {(!collapsedMgmtSections['medical'] || !!view) && (
                         <div className="p-3 space-y-4">
                             {/* Enclosures sub-panel */}
@@ -4668,8 +4668,8 @@ useEffect(() => {
                 {/* -- 5. FOR SALE / AVAILABLE (moved to top-bar button) ------ */}
                 {!view && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="available"
-                        icon={<ShoppingBag size={18} className="text-purple-600" />}
-                        title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
+                        icon={<ShoppingBag size={18} className="text-purple-600 dark:text-purple-400" />}
+                        title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50 dark:bg-purple-900/20" />
                     {!collapsedMgmtSections['available'] && (
                         <div className="p-3">
                             {availableList.length === 0
@@ -4680,7 +4680,7 @@ useEffect(() => {
                                             hideControls hideBreedingLines
                                             cardActions={<>
                                                 {a.isForSale && a.salePriceAmount && (
-                                                    <div className="text-[10px] text-purple-600 font-medium truncate w-full text-center">
+                                                    <div className="text-[10px] text-purple-600 dark:text-purple-400 font-medium truncate w-full text-center">
                                                         {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
                                                     </div>
                                                 )}
