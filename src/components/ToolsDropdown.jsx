@@ -40,7 +40,7 @@ const ToolsDropdown = ({ onLinkClick }) => {
           onClick={onLinkClick}
           className={({ isActive }) =>
             `flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-dark-surface ${
-              isActive ? 'bg-gray-100 dark:bg-dark-surface font-semibold' : ''
+              isActive ? 'bg-gray-100 dark:bg-dark-card-bg font-semibold' : ''
             }`
           }
         >

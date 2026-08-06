@@ -327,7 +327,7 @@ const EnclosureModal = ({
                                                             const type = task.type || 'Other';
                                                             const Icon = TASK_TYPE_STYLES[type]?.icon;
                                                             return (
-                                                                <span className="flex items-center gap-1 font-semibold bg-gray-200 dark:bg-dark-surface dark:text-dark-text-secondary px-1.5 py-0.5 rounded">
+                                                                <span className="flex items-center gap-1 font-semibold bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary px-1.5 py-0.5 rounded">
                                                                     {Icon}
                                                                     {type}
                                                                 </span>

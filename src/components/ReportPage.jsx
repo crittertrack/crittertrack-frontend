@@ -20,7 +20,7 @@ const STATUS_CONFIG = {
     in_progress: { icon: Loader2, label: 'In Progress', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
     reviewed: { icon: CheckCircle, label: 'Reviewed', className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
     resolved: { icon: CheckCircle, label: 'Resolved', className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-    dismissed: { icon: XCircle, label: 'Dismissed', className: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+    dismissed: { icon: XCircle, label: 'Dismissed', className: 'bg-gray-100 text-gray-600 dark:bg-dark-card-bg dark:text-gray-400' },
 };
 
 const getBrowserInfo = () => ({
@@ -253,7 +253,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
 
     // Tab bar shared by every view - lets users switch between filing a report and checking past ones
     const tabBar = (
-        <div className="w-full max-w-2xl mx-auto mb-4 flex gap-1 bg-white dark:bg-dark-surface rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-1">
+        <div className="w-full max-w-2xl mx-auto mb-4 flex gap-1 bg-white dark:bg-dark-card-bg rounded-xl shadow-sm border border-gray-200 dark:border-dark-text-muted p-1">
             <button
                 onClick={() => setActiveTab('new')}
                 className={`flex-1 px-4 py-2 text-sm font-semibold rounded-lg transition ${
@@ -286,7 +286,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                     {myReportsLoading ? (
                         <div className="flex justify-center py-10"><Loader2 size={20} className="animate-spin text-gray-400" /></div>
                     ) : myReports.length === 0 ? (
-                        <div className="text-center py-10 px-4 bg-white dark:bg-dark-surface rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+                        <div className="text-center py-10 px-4 bg-white dark:bg-dark-card-bg rounded-lg border border-dashed border-gray-200 dark:border-dark-text-muted">
                             <p className="text-sm text-gray-500 dark:text-gray-400">You haven't submitted any reports yet.</p>
                         </div>
                     ) : (
@@ -294,7 +294,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                             const status = STATUS_CONFIG[r.status] || STATUS_CONFIG.pending;
                             const StatusIcon = status.icon;
                             return (
-                                <div key={r._id} className="bg-white dark:bg-dark-surface rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                                <div key={r._id} className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-text-muted p-3">
                                     <div className="flex items-center justify-between gap-2 mb-1">
                                         <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{r.category} <span className="font-normal text-gray-400 dark:text-gray-500">#{r._id.slice(-6).toUpperCase()}</span></span>
                                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${status.className}`}>
@@ -310,22 +310,22 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                                     )}
                                     <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">{r.description}</p>
                                     {r.stepsToReproduce && (
-                                        <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                        <div className="mt-2 pt-2 border-t border-gray-100 dark:border-dark-text-muted">
                                             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Steps to Reproduce</p>
                                             <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">{r.stepsToReproduce}</p>
                                         </div>
                                     )}
                                     {r.images?.length > 0 && (
-                                        <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                        <div className="mt-2 pt-2 border-t border-gray-100 dark:border-dark-text-muted grid grid-cols-3 sm:grid-cols-4 gap-2">
                                             {r.images.map((url, i) => (
-                                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted">
                                                     <img src={url} alt={`Attachment ${i + 1}`} className="w-full h-20 object-cover" />
                                                 </a>
                                             ))}
                                         </div>
                                     )}
                                     {r.adminNotes && (
-                                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700"><strong>Response from Moderator:</strong> {r.adminNotes}</p>
+                                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-2 pt-2 border-t border-gray-100 dark:border-dark-text-muted"><strong>Response from Moderator:</strong> {r.adminNotes}</p>
                                     )}
                                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">{new Date(r.createdAt).toLocaleDateString()}</p>
                                 </div>
@@ -342,7 +342,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
         return (
             <div className="w-full max-w-2xl mx-auto">
             {tabBar}
-            <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-8">
                 <div className="text-center py-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-4">
                         <CheckCircle size={32} className="text-green-600 dark:text-green-400" />
@@ -377,7 +377,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
     return (
         <div className="w-full max-w-2xl mx-auto">
             {tabBar}
-            <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-5">
                     <div className="flex items-center justify-between">
@@ -415,7 +415,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                                     className={`p-4 rounded-xl border-2 text-left transition-all ${
                                         category === opt.value
                                             ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 shadow-md'
-                                            : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:border-gray-300 dark:hover:border-gray-600'
+                                            : 'border-gray-200 dark:border-dark-text-muted bg-gray-50 dark:bg-dark-card-bg/50 hover:border-gray-300 dark:hover:border-gray-600'
                                     }`}
                                 >
                                     <div className={`flex items-center gap-2 mb-1.5 ${
@@ -449,7 +449,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                             }
                             rows={6}
                             maxLength={5000}
-                            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition bg-white dark:bg-gray-800 text-gray-800 dark:text-dark-text resize-none"
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition bg-white dark:bg-dark-card-bg text-gray-800 dark:text-dark-text resize-none"
                             disabled={submitting}
                         />
                         <p className="text-xs text-gray-400 mt-1 text-right">{description.length}/5000</p>
@@ -468,7 +468,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                                 placeholder="1. Go to...&#10;2. Click on...&#10;3. Scroll down to...&#10;4. See error..."
                                 rows={4}
                                 maxLength={2000}
-                                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition bg-white dark:bg-gray-800 text-gray-800 dark:text-dark-text resize-none"
+                                className="w-full p-3 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition bg-white dark:bg-dark-card-bg text-gray-800 dark:text-dark-text resize-none"
                                 disabled={submitting}
                             />
                             <p className="text-xs text-gray-400 mt-1 text-right">{stepsToReproduce.length}/2000</p>
@@ -487,7 +487,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                             onChange={(e) => setReferenceId(e.target.value)}
                             placeholder="e.g. A1B3F2"
                             maxLength={50}
-                            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition bg-white dark:bg-gray-800 text-gray-800 dark:text-dark-text"
+                            className="w-full p-3 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition bg-white dark:bg-dark-card-bg text-gray-800 dark:text-dark-text"
                             disabled={submitting}
                         />
                     </div>
@@ -506,7 +506,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                         {images.length > 0 && (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-3">
                                 {images.map((img, index) => (
-                                    <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+                                    <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-dark-text-muted bg-gray-100 dark:bg-dark-card-bg">
                                         <img
                                             src={img.preview}
                                             alt={`Screenshot ${index + 1}`}
@@ -542,7 +542,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
                                         disabled={submitting}
-                                        className="h-24 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition group"
+                                        className="h-24 rounded-lg border-2 border-dashed border-gray-300 dark:border-dark-text-muted flex items-center justify-center hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition group"
                                     >
                                         <div className="text-center">
                                             <ImageIcon size={20} className="mx-auto text-gray-400 group-hover:text-purple-500 mb-1" />
@@ -557,7 +557,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                         {(images.length === 0 || images.length < MAX_IMAGES) && (
                             <div
                                 onClick={() => fileInputRef.current?.click()}
-                                className="flex items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition"
+                                className="flex items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 dark:border-dark-text-muted rounded-lg cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition"
                             >
                                 <div className="text-center">
                                     <Upload size={24} className="mx-auto text-gray-400 mb-1" />

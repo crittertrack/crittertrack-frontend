@@ -40,15 +40,15 @@ const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => 
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[450]">
-            <div className="bg-white dark:bg-dark-surface rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-center border-b dark:border-dark-border p-4 flex-shrink-0">
+                <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4 flex-shrink-0">
                     <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">{title || 'Select Animal'}</h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800 dark:text-dark-text-muted dark:hover:text-dark-text"><X size={22} /></button>
                 </div>
 
                 {/* Search & Filters */}
-                <div className="p-4 border-b dark:border-dark-border flex-shrink-0">
+                <div className="p-4 border-b dark:border-dark-text-muted flex-shrink-0">
                     <div className="flex flex-col sm:flex-row gap-2">
                         <div className="relative flex-grow">
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -58,11 +58,11 @@ const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => 
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 autoFocus
-                                className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-sm bg-white dark:bg-dark-surface-hover focus:ring-2 focus:ring-primary focus:border-transparent"
+                                className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-sm bg-white dark:bg-dark-card-bg focus:ring-2 focus:ring-primary focus:border-transparent"
                             />
                         </div>
                         <div className="flex gap-2">
-                            <select value={genderFilter} onChange={e => setGenderFilter(e.target.value)} className="w-full sm:w-32 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-sm bg-white dark:bg-dark-surface-hover focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <select value={genderFilter} onChange={e => setGenderFilter(e.target.value)} className="w-full sm:w-32 px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-sm bg-white dark:bg-dark-card-bg focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="">All Genders</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
@@ -70,7 +70,7 @@ const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => 
                                 <option value="Mixed">Mixed</option>
                                 <option value="Unknown">Unknown</option>
                             </select>
-                            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full sm:w-32 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-sm bg-white dark:bg-dark-surface-hover focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full sm:w-32 px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-sm bg-white dark:bg-dark-card-bg focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="">All Statuses</option>
                                 <option value="Available">Available</option>
                                 <option value="Pet">Pet</option>
@@ -96,7 +96,7 @@ const AnimalPickerModal = ({ animals, onSelect, onClose, title, X, Search }) => 
                                     onClick={() => onSelect(animal)}
                                     className="w-full flex items-center gap-3 p-2 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-dark-surface-hover"
                                 >
-                                    <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-gray-200 dark:bg-dark-card-bg rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
                                         <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -238,7 +238,7 @@ const EnclosureDetailModal = ({
             content = ( <div className="flex-1"> <p className="text-sm text-gray-700 dark:text-dark-text">{actionText}</p> </div> );
         }
     
-        return ( <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-100 dark:border-dark-border"> <div className="mt-1">{icon}</div> {content} <div className="text-xs text-gray-400 dark:text-dark-text-muted flex-shrink-0 mt-1">{formatDate(timestamp)}</div> </div> );
+        return ( <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-dark-card-bg rounded-lg border border-gray-100 dark:border-dark-text-muted"> <div className="mt-1">{icon}</div> {content} <div className="text-xs text-gray-400 dark:text-dark-text-muted flex-shrink-0 mt-1">{formatDate(timestamp)}</div> </div> );
     };
 
     const sortedCleaningTasks = useMemo(() => {
@@ -435,11 +435,11 @@ const EnclosureDetailModal = ({
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/60" onClick={onClose}>
             <div
                 ref={modalRef}
-                className="bg-white dark:bg-dark-surface rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+                className="bg-white dark:bg-dark-card-bg rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="h-56 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center relative rounded-t-xl overflow-hidden">
+                <div className="h-56 bg-gray-200 dark:bg-dark-card-bg flex items-center justify-center relative rounded-t-xl overflow-hidden">
                     {enclosure.imageUrl ? (
                         <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" />
                     ) : (
@@ -495,7 +495,7 @@ const EnclosureDetailModal = ({
                         <div className="space-y-3">
                             {/* Summary Cards */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-2 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-2 border border-gray-100 dark:border-dark-text-muted">
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">Status</p>
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                         <div className={`w-2.5 h-2.5 rounded-full ${currentAnimals > 0 ? 'bg-green-500' : 'bg-gray-400'}`} />
@@ -504,7 +504,7 @@ const EnclosureDetailModal = ({
                                         </span>
                                     </div>
                                 </div>
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-2 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-2 border border-gray-100 dark:border-dark-text-muted">
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">Occupancy</p>
                                     <p className={`text-base font-bold ${
                                         occupancyPct > 90 ? 'text-red-600' : occupancyPct > 70 ? 'text-yellow-600' : 'text-green-600'
@@ -512,13 +512,13 @@ const EnclosureDetailModal = ({
                                         {currentAnimals}/{capacity} ({occupancyPct}%)
                                     </p>
                                 </div>
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-2 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-2 border border-gray-100 dark:border-dark-text-muted">
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">Temperature</p>
                                     <p className="text-lg font-bold mt-0.5 text-gray-800 dark:text-dark-text">
                                         {enclosure.tempMin ? `${enclosure.tempMin}°` : '?'} - {enclosure.tempMax ? `${enclosure.tempMax}°` : '?'}
                                     </p>
                                 </div>
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-2 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-2 border border-gray-100 dark:border-dark-text-muted">
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted">Humidity</p>
                                     <p className="text-lg font-bold mt-0.5 text-gray-800 dark:text-dark-text">
                                         {enclosure.humidityMin ? `${enclosure.humidityMin}%` : '?'} - {enclosure.humidityMax ? `${enclosure.humidityMax}%` : '?'}
@@ -527,7 +527,7 @@ const EnclosureDetailModal = ({
                             </div>
 
                             {/* Occupancy Bar */}
-                            <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                            <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-3 border border-gray-100 dark:border-dark-text-muted">
                                 <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Occupancy</h4>
                                 <div className="flex justify-between text-xs mb-1">
                                     <span className="text-gray-600 dark:text-dark-text"><Cat size={12} className="inline mr-1" />{currentAnimals} / {capacity} animals</span>
@@ -547,36 +547,36 @@ const EnclosureDetailModal = ({
 
                             {/* General Info */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-3 border border-gray-100 dark:border-dark-text-muted">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Details</h4>
                                       <div className="text-xs">
                                         <div className="flex justify-between">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Type</span>
                                             <span className="text-gray-800 dark:text-dark-text">{enclosure.enclosureType || '—'}</span>
                                         </div>
-                                         <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-border">
+                                         <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-text-muted">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Purpose</span>
                                             <span className="text-gray-800 dark:text-dark-text capitalize">{enclosure.purpose || 'General'}</span>
                                         </div>
                                         {enclosure.purposeDescription && (
-                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border">
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-text-muted">
                                                 <span className="text-gray-500 dark:text-dark-text-muted">Description</span>
                                                 <span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.purposeDescription}</span>
                                             </div>
                                         )}
-                                         <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-border">
+                                         <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-text-muted">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Location</span>
                                               <span className="text-gray-800 dark:text-dark-text">{enclosure.locationName || enclosure.location || '—'}</span>
                                         </div>
                                         {enclosure.location?.address && (
-                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border">
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-text-muted">
                                                 <span className="text-gray-500 dark:text-dark-text-muted">Address</span>
                                                 <span className="text-gray-800 dark:text-dark-text text-right ml-2 text-xs">
                                                     {Object.values(enclosure.location.address).filter(Boolean).join(', ')}
                                                 </span>
                                             </div>
                                         )}
-                                        <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-border">
+                                        <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-text-muted">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Dimensions</span>
                                             <span className="text-gray-800 dark:text-dark-text">
                                                 {(() => {
@@ -588,7 +588,7 @@ const EnclosureDetailModal = ({
                                                 })()}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-border">
+                                        <div className="flex justify-between pt-1 mt-1 border-t dark:border-dark-text-muted">
                                             <span className="text-gray-500 dark:text-dark-text-muted">Lighting</span>
                                                <span className="text-gray-800 dark:text-dark-text">
                                                 {enclosure.lightsOnTime && enclosure.lightsOffTime ? (
@@ -599,25 +599,25 @@ const EnclosureDetailModal = ({
                                                 </span>
                                         </div>
                                         {enclosure.lightingType && (
-                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border">
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-text-muted">
                                                 <span className="text-gray-500 dark:text-dark-text-muted">Lighting Type</span>
                                                 <span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.lightingType}</span>
                                             </div>
                                         )}
                                         {enclosure.bedding && (
-                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border">
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-text-muted">
                                                 <span className="text-gray-500 dark:text-dark-text-muted">Bedding</span>
                                                 <span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.bedding}</span>
                                             </div>
                                         )}
                                         {enclosure.enrichment && (
-                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-border"><span className="text-gray-500 dark:text-dark-text-muted">Enrichment</span><span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.enrichment}</span></div>
+                                            <div className="flex justify-between items-start pt-1 mt-1 border-t dark:border-dark-text-muted"><span className="text-gray-500 dark:text-dark-text-muted">Enrichment</span><span className="text-gray-800 dark:text-dark-text text-right ml-2">{enclosure.enrichment}</span></div>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Cleaning Schedule */}
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border col-span-1 sm:col-span-1">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-3 border border-gray-100 dark:border-dark-text-muted col-span-1 sm:col-span-1">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2">Upcoming Tasks</h4>
                                     <div className="space-y-3">
                                         {sortedCleaningTasks.length > 0 ? sortedCleaningTasks.slice(0, 3).map((task, idx) => {
@@ -671,7 +671,7 @@ const EnclosureDetailModal = ({
 
                             {/* Species */}
                             {speciesLabels.length > 0 && (
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-3 border border-gray-100 dark:border-dark-text-muted">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Suitable Species</h4>
                                     <div className="flex flex-wrap gap-1.5">
                                         {speciesLabels.map(label => (
@@ -685,7 +685,7 @@ const EnclosureDetailModal = ({
 
                             {/* Description */}
                             {enclosure.notes && (
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-3 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-3 border border-gray-100 dark:border-dark-text-muted">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-1">Description</h4>
                                     <p className="text-xs text-gray-700 dark:text-dark-text leading-relaxed">{enclosure.notes}</p>
                                 </div>
@@ -722,9 +722,9 @@ const EnclosureDetailModal = ({
                                     {animals.map(animal => (
                                         <div
                                             key={animal._id || animal.id_public}
-                                            className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-100 dark:border-dark-border group"
+                                            className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-card-bg rounded-lg border border-gray-100 dark:border-dark-text-muted group"
                                         >
-                                            <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center cursor-pointer" onClick={() => onViewAnimal?.(animal)}>
+                                            <div className="w-10 h-10 bg-gray-200 dark:bg-dark-card-bg rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center cursor-pointer" onClick={() => onViewAnimal?.(animal)}>
                                                 <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
                                             </div>
                                             <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onViewAnimal?.(animal)}>
@@ -755,7 +755,7 @@ const EnclosureDetailModal = ({
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {/* Temperature */}
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-4 border border-gray-100 dark:border-dark-text-muted">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-3 flex items-center gap-1.5">
                                         <Thermometer size={14} /> Temperature Range
                                     </h4>
@@ -773,7 +773,7 @@ const EnclosureDetailModal = ({
                                 </div>
 
                                 {/* Humidity */}
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-4 border border-gray-100 dark:border-dark-text-muted">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-3 flex items-center gap-1.5">
                                         <Droplets size={14} /> Humidity Range
                                     </h4>
@@ -792,7 +792,7 @@ const EnclosureDetailModal = ({
                             </div>
 
                             {/* Lighting */}
-                            <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
+                            <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-4 border border-gray-100 dark:border-dark-text-muted">
                                 <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                     <Lightbulb size={14} /> Lighting
                                 </h4>
@@ -813,7 +813,7 @@ const EnclosureDetailModal = ({
 
                             {/* Bedding / Substrate */}
                             {enclosure.bedding && (
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-4 border border-gray-100 dark:border-dark-text-muted">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5"><Package size={14} /> Bedding / Substrate</h4>
                                     <p className="text-sm text-gray-700 dark:text-dark-text">{enclosure.bedding}</p>
                                 </div>
@@ -821,7 +821,7 @@ const EnclosureDetailModal = ({
 
                             {/* Enrichment */}
                             {enclosure.enrichment && (
-                                <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg p-4 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-4 border border-gray-100 dark:border-dark-text-muted">
                                     <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5"><Activity size={14} /> Enrichment</h4>
                                     <p className="text-sm text-gray-700 dark:text-dark-text">{enclosure.enrichment}</p>
                                 </div>
@@ -849,7 +849,7 @@ const EnclosureDetailModal = ({
                                                 className={`flex items-center gap-3 p-3 rounded-lg border ${
                                                     status.overdue
                                                         ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                                                        : 'bg-gray-50 dark:bg-dark-surface-hover border-gray-100 dark:border-dark-border'
+                                                        : 'bg-gray-50 dark:bg-dark-card-bg border-gray-100 dark:border-dark-text-muted'
                                                 }`}
                                             >
                                                 <div className="flex-1 min-w-0">
@@ -923,7 +923,7 @@ const EnclosureDetailModal = ({
                                     onChange={e => setNewNote(e.target.value)}
                                     placeholder="Add a note about this enclosure..."
                                     rows={2}
-                                    className="flex-1 p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg resize-none bg-white dark:bg-dark-surface text-gray-800 dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    className="flex-1 p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg resize-none bg-white dark:bg-dark-card-bg text-gray-800 dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                                 />
                                 <button
                                     onClick={handleAddNote}
@@ -946,7 +946,7 @@ const EnclosureDetailModal = ({
                                     {[...notes].reverse().map((note, idx) => (
                                         <div
                                             key={note.id || idx}
-                                            className="p-3 bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-100 dark:border-dark-border group"
+                                            className="p-3 bg-gray-50 dark:bg-dark-card-bg rounded-lg border border-gray-100 dark:border-dark-text-muted group"
                                         >
                                             <div className="flex justify-between items-start mb-1">
                                                 <span className="text-[11px] font-medium text-gray-500 dark:text-dark-text-muted bg-gray-200 dark:bg-dark-border px-1.5 py-0.5 rounded">
@@ -995,17 +995,17 @@ const EnclosureDetailModal = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-3 border-t dark:border-dark-border flex justify-between items-center bg-gray-50 dark:bg-dark-surface">
+                <div className="p-3 border-t dark:border-dark-text-muted flex justify-between items-center bg-gray-50 dark:bg-dark-card-bg">
                     <button
                         onClick={() => { onEditEnclosure(enclosure); onClose(); }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-dark-text-muted bg-white dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-dark-text-muted bg-white dark:bg-dark-card-bg border border-gray-300 dark:border-dark-text-muted rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover"
                     >
                         <Edit size={14} />
                         Edit Enclosure
                     </button>
                     <button
                         onClick={onClose}
-                        className="px-4 py-1.5 text-xs font-medium bg-gray-200 dark:bg-dark-surface-hover text-gray-600 dark:text-dark-text rounded-lg hover:bg-gray-300 dark:hover:bg-dark-border"
+                        className="px-4 py-1.5 text-xs font-medium bg-gray-200 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text rounded-lg hover:bg-gray-300 dark:hover:bg-dark-border"
                     >
                         Close
                     </button>

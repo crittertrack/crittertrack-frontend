@@ -112,16 +112,16 @@ const formatDateDisplay = (dateStr) => {
 const BreedingLineManagerModal = ({ lines, onClose, onClearLine }) => {
     return (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={onClose}>
-            <div className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-4 w-full max-w-md" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center mb-3 pb-3 border-b dark:border-dark-border">
+            <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-xl p-4 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-3 pb-3 border-b dark:border-dark-text-muted">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Manage Breeding Lines</h3>
                     <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface-hover"><X size={20} /></button>
                 </div>
                 <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
                     {(lines || []).filter(l => l.name).map(line => (
-                        <div key={line.id} className="flex items-center justify-between p-2 border rounded-md hover:bg-gray-50 dark:border-dark-border dark:hover:bg-dark-surface-hover">
+                        <div key={line.id} className="flex items-center justify-between p-2 border rounded-md hover:bg-gray-50 dark:border-dark-text-muted dark:hover:bg-dark-surface-hover">
                             <div className="flex items-center gap-3">
-                                <span style={{ backgroundColor: line.color }} className="w-4 h-4 rounded-full border border-gray-300 dark:border-dark-border"></span>
+                                <span style={{ backgroundColor: line.color }} className="w-4 h-4 rounded-full border border-gray-300 dark:border-dark-text-muted"></span>
                                 <span className="font-medium text-gray-800 dark:text-dark-text">{line.name}</span>
                             </div>
                             <button onClick={() => onClearLine(line.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Clear line name and unassign from all animals">
@@ -1163,17 +1163,17 @@ useEffect(() => {
 
         return (
             <div 
-                className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-text-muted transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer flex flex-col"
+                className="bg-white dark:bg-dark-card-bg rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-dark-text-muted transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer flex flex-col"
                 onClick={() => handleOpenDetail(enclosure)}
             >
                 {/* Banner Image */}
-                <div className="h-28 bg-gray-200 dark:bg-dark-surface-hover flex items-center justify-center relative">
+                <div className="h-28 bg-gray-200 dark:bg-dark-card-bg flex items-center justify-center relative">
                     {enclosure.imageUrl ? (
                         <img src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" />
                     ) : (
                         <Home size={40} className="text-gray-400 dark:text-dark-text-muted" />
                     )}
-                    <span className={`absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-dark-surface-hover dark:text-dark-text-secondary'}`}>
+                    <span className={`absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-dark-card-bg dark:text-dark-text-secondary'}`}>
                         {occupancyStatus}
                     </span>
                 </div>
@@ -1190,7 +1190,7 @@ useEffect(() => {
                     </div>
 
                     {/* Stats Row */}
-                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-border grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-text-muted grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
                         <div className="flex items-center gap-1.5" title="Animals Housed">
                             <Cat size={14} className="text-gray-400" />
                             <span className="font-medium text-gray-700 dark:text-dark-text">{occupants.length} {occupants.length === 1 ? 'Animal' : 'Animals'}</span>
@@ -2630,7 +2630,7 @@ useEffect(() => {
 
                     {/* Birthdate center-top - only show if not in selection mode */}
                     {birth && !isSelectable && (
-                        <div className="absolute top-1 sm:top-2 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-surface/80 px-1 sm:px-2 py-0.5 rounded">
+                        <div className="absolute top-1 sm:top-2 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-card-bg/80 px-1 sm:px-2 py-0.5 rounded">
                             {birth}
                         </div>
                     )}
@@ -2647,7 +2647,7 @@ useEffect(() => {
                         {imgSrc ? (
                             <img src={imgSrc} alt={animal.name} className="max-w-20 max-h-20 sm:max-w-20 sm:max-h-20 md:max-w-24 md:max-h-24 w-auto h-auto object-contain rounded-md" />
                         ) : (
-                            <div className="w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 dark:bg-dark-surface-hover rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                            <div className="w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                 <Cat className="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9" />
                             </div>
                         )}
@@ -2698,7 +2698,7 @@ useEffect(() => {
                                     className={`p-0.5 sm:p-1 rounded transition-colors ${
                                         animal.isOwned 
                                             ? 'bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50' 
-                                            : 'bg-gray-100 dark:bg-dark-surface-hover hover:bg-gray-200 dark:hover:bg-dark-border'
+                                            : 'bg-gray-100 dark:bg-dark-card-bg hover:bg-gray-200 dark:hover:bg-dark-border'
                                     }`}
                                     title={animal.isOwned ? "Click to mark as Not Owned" : "Click to mark as Owned"}
                                 >
@@ -2719,7 +2719,7 @@ useEffect(() => {
                                     className={`p-0.5 sm:p-1 rounded transition-colors ${
                                         animal.showOnPublicProfile 
                                             ? 'bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50' 
-                                            : 'bg-gray-100 dark:bg-dark-surface-hover hover:bg-gray-200 dark:hover:bg-dark-border'
+                                            : 'bg-gray-100 dark:bg-dark-card-bg hover:bg-gray-200 dark:hover:bg-dark-border'
                                     }`}
                                     title={animal.showOnPublicProfile ? "Click to make Private" : "Click to make Public"}
                                 >
@@ -2755,7 +2755,7 @@ useEffect(() => {
                         </div>
                     )}
                     {/* Status bar at bottom */}
-                    <div className="w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto bg-gray-100 dark:bg-dark-surface-hover">
+                    <div className="w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-text-muted mt-auto bg-gray-100 dark:bg-dark-card-bg">
                         <div className="text-[10px] sm:text-xs font-medium capitalize text-gray-700 dark:text-dark-text-secondary">
                             {animal.status || 'Unknown'}
                         </div>
@@ -3179,13 +3179,13 @@ useEffect(() => {
                                                     autoFocus
                                                 />
                                                 <button onClick={() => { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); }} className="text-xs px-2 py-1 bg-primary dark:bg-dark-primary text-black rounded-lg">Save</button>
-                                                <button onClick={() => setRenamingCollectionId(null)} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-surface dark:text-dark-text-secondary text-gray-700 rounded-lg">Cancel</button>
+                                                <button onClick={() => setRenamingCollectionId(null)} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary text-gray-700 rounded-lg">Cancel</button>
                                             </>
                                         ) : (
                                             <>
                                                 <span className="flex-grow text-sm font-medium text-gray-700 dark:text-dark-text">{col.name}</span>
                                                 <span className="text-xs text-gray-400 dark:text-dark-text-muted">{Object.values(animalCollections).filter(ids => Array.isArray(ids) && ids.includes(col.id)).length} animals</span>
-                                                <button onClick={() => { setRenamingCollectionId(col.id); setRenamingCollectionName(col.name); }} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-surface dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 rounded-lg">Rename</button>
+                                                <button onClick={() => { setRenamingCollectionId(col.id); setRenamingCollectionName(col.name); }} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 rounded-lg">Rename</button>
                                                 <button onClick={() => deleteCollection(col.id)} className="text-xs px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg">Delete</button>
                                             </>
                                         )}
@@ -3449,7 +3449,7 @@ useEffect(() => {
                             onDropdownToggle={() => setShowEnclosureBreakdown(prev => !prev)}
                         />
                         {showEnclosureBreakdown && (
-                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
+                            <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm">
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Enclosure Breakdown</h4>
                                 {enclosureBreakdown.length > 0 ? (
                                     <ul className="text-xs space-y-2">
@@ -3490,7 +3490,7 @@ useEffect(() => {
                             onDropdownToggle={() => setShowCapacityBreakdown(prev => !prev)}
                         />
                         {showCapacityBreakdown && (
-                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto pr-2">
+                            <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto pr-2">
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Capacity by Species</h4>
                                 {enclosureSpeciesCapacityBreakdown.length > 0 ? (
                                     <ul className="text-xs space-y-1">
@@ -3519,7 +3519,7 @@ useEffect(() => {
                             onDropdownToggle={() => setShowNeedsAttentionBreakdown(prev => !prev)}
                         />
                         {showNeedsAttentionBreakdown && enclosuresNeedingAttention.length > 0 && (
-                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
+                            <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">
                                     Due Tasks ({totalDueEnclosureTasks} total)
                                 </h4>
@@ -3570,7 +3570,7 @@ useEffect(() => {
                             onDropdownToggle={() => setShowReproNeedsAttentionBreakdown(prev => !prev)}
                         />
                         {showReproNeedsAttentionBreakdown && reproNeedsAttentionList.length > 0 && (
-                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
+                            <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Today</h4>
                                 <ul className="text-xs space-y-1.5">
                                     {reproNeedsAttentionList.map(({ animal, reason }) => (
@@ -3607,7 +3607,7 @@ useEffect(() => {
                             onDropdownToggle={() => setShowHealthNeedsAttentionBreakdown(prev => !prev)}
                         />
                         {showHealthNeedsAttentionBreakdown && healthNeedsAttentionList.length > 0 && (
-                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
+                            <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Now</h4>
                                 <ul className="text-xs space-y-1.5">
                                     {healthNeedsAttentionList.map(({ animal, reason }) => (
@@ -3644,7 +3644,7 @@ useEffect(() => {
                             onDropdownToggle={() => setShowFeedingCareNeedsAttentionBreakdown(prev => !prev)}
                         />
                         {showFeedingCareNeedsAttentionBreakdown && feedingCareNeedsAttentionList.length > 0 && (
-                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
+                            <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Now</h4>
                                 <ul className="text-xs space-y-1.5">
                                     {feedingCareNeedsAttentionList.map(({ animal, reason }, idx) => (
@@ -3700,7 +3700,7 @@ useEffect(() => {
         }
 
         let statusLabel = 'Unknown';
-        let statusColor = 'bg-gray-100 dark:bg-dark-surface text-gray-800 dark:text-dark-text-secondary';
+        let statusColor = 'bg-gray-100 dark:bg-dark-card-bg text-gray-800 dark:text-dark-text-secondary';
         if (animal.isPlannedMating) {
             statusLabel = 'Planned';
             statusColor = 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300';
@@ -3716,7 +3716,7 @@ useEffect(() => {
         }
 
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 {/* Animal Info (col-span-2 on sm+) */}
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
@@ -3756,7 +3756,7 @@ useEffect(() => {
         const meds = parseArrayField(animal.medications).filter(m => !m.status || m.status === 'active');
 
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
@@ -3818,7 +3818,7 @@ useEffect(() => {
     const FeedingAnimalBar = ({ animal, onViewAnimal, onEditAnimal, handleMarkFed, handleSkipFeeding }) => {
         const due = isFeedingDue(animal.lastFedDate, animal.feedingIntervalHours);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
@@ -3841,7 +3841,7 @@ useEffect(() => {
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     <button onClick={(e) => handleMarkFed(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Utensils size={12} /> Fed</button>
-                    {due && <button onClick={(e) => handleSkipFeeding(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-surface-hover text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-border"><SkipForward size={12} /> Skip</button>}
+                    {due && <button onClick={(e) => handleSkipFeeding(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
@@ -3854,7 +3854,7 @@ useEffect(() => {
         const sched = animal[fieldName] || {};
         const due = isDue(sched.lastDoneDate, sched.frequencyDays);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
@@ -3875,7 +3875,7 @@ useEffect(() => {
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     <button onClick={(e) => handleMarkScheduleDone(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
-                    {due && <button onClick={(e) => handleSkipScheduleTask(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-surface-hover text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-border"><SkipForward size={12} /> Skip</button>}
+                    {due && <button onClick={(e) => handleSkipScheduleTask(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
@@ -3887,7 +3887,7 @@ useEffect(() => {
     const AnimalCareTaskBar = ({ animal, taskIdx, task, onViewAnimal, onEditAnimal, handleMarkAnimalCareTaskDone, handleSkipAnimalCareTask }) => {
         const due = isDue(task.lastDoneDate, task.frequencyDays);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-border sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
                     <div className="min-w-0">
@@ -3908,7 +3908,7 @@ useEffect(() => {
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     <button onClick={(e) => handleMarkAnimalCareTaskDone(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
-                    {due && <button onClick={(e) => handleSkipAnimalCareTask(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-surface-hover text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-border"><SkipForward size={12} /> Skip</button>}
+                    {due && <button onClick={(e) => handleSkipAnimalCareTask(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
@@ -4463,7 +4463,7 @@ useEffect(() => {
                                                             <div className="text-center text-sm text-gray-400 dark:text-dark-text-muted py-4">{section.emptyText}</div>
                                                         ) : (
                                                             <>
-                                                                <div className="hidden sm:grid grid-cols-8 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-border">
+                                                                <div className="hidden sm:grid grid-cols-8 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted">
                                                                     <div className="col-span-2">Animal</div>
                                                                     <div>{section.colLabels[0]}</div>
                                                                     <div>Frequency</div>
@@ -4547,7 +4547,7 @@ useEffect(() => {
                                                             </div>
                                                         ) : (
                                                             <>
-                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-border">
+                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted">
                                                                     <div className="col-span-2">Animal</div>
                                                                     <div>Planned / Mating Date</div>
                                                                     <div>Due Date / Birth Date</div>
@@ -4632,7 +4632,7 @@ useEffect(() => {
                                                             </div>
                                                         ) : (
                                                             <>
-                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-border">
+                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted">
                                                                     <div className="col-span-2">Animal</div>
                                                                     {section.key === 'quarantine' ? (
                                                                         <>
@@ -5156,7 +5156,7 @@ useEffect(() => {
                             onDropdownToggle={() => setShowCategoryBreakdown(prev => !prev)}
                         />
                         {showCategoryBreakdown && (
-                            <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
+                            <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm">
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Category Breakdown</h4>
                                 {categoryBreakdown.length > 0 ? (
                                     <ul className="text-xs space-y-1">
@@ -5178,14 +5178,14 @@ useEffect(() => {
                         <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm w-full" data-tutorial-target="ownership-visibility-filter">
                             <button
                                 onClick={() => setOwnedFilterMode('owned')}
-                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
+                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                                 title="Show only animals you own"
                             >
                                 <Heart size={14} /> Owned
                             </button>
                             <button
                                 onClick={() => setOwnedFilterMode('all')}
-                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 border-l border-gray-300 dark:border-dark-border ${ownedFilterMode === 'all' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
+                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 border-l border-gray-300 dark:border-dark-text-muted ${ownedFilterMode === 'all' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                                 title="Show all animals (owned and unowned)"
                             >
                                 All
@@ -5213,7 +5213,7 @@ useEffect(() => {
                         </button>
                         <button
                             onClick={() => toggleAllAnimalsOwned(false)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
                             title="Mark All Animals as Unowned"
                         >
                             <HeartOff size={14} /> Set All Unowned
@@ -5237,7 +5237,7 @@ useEffect(() => {
                         </button>
                         <button
                             onClick={() => toggleAllAnimalsPrivacy(false)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
                             title="Make All Animals Private"
                         >
                             <EyeOff size={14} /> Set All Private
@@ -5280,7 +5280,7 @@ useEffect(() => {
                                         onDropdownToggle={() => setShowMainAlertsBreakdown(prev => !prev)}
                                     />
                                     {showMainAlertsBreakdown && totalAttention > 0 && (
-                                        <div className="bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3 -mt-1 shadow-sm">
+                                        <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm">
                                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Needs Attention Breakdown</h4>
                                             <ul className="text-sm space-y-1">
                                                 {feedingCareDueDashboard.length > 0 && (
@@ -5357,15 +5357,15 @@ useEffect(() => {
                             <button
                                 onClick={() => setShowAlertsDropdown(prev => !prev)}
                                 title="Configure alerts"
-                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${Object.values(alertSettings).some(Boolean) ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/60' : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
+                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${Object.values(alertSettings).some(Boolean) ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/60' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                             >
                                 <Bell size={14} className="sm:w-4 sm:h-4" />
                                 <span>Alerts {Object.values(alertSettings).some(Boolean) ? 'On' : 'Off'}</span>
                                 <ChevronDown size={14} className={`ml-1 transition-transform ${showAlertsDropdown ? 'rotate-180' : ''}`} />
                             </button>
                             {showAlertsDropdown && (
-                                <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg shadow-xl z-10">
-                                    <div className="p-3 border-b dark:border-dark-border">
+                                <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg shadow-xl z-10">
+                                    <div className="p-3 border-b dark:border-dark-text-muted">
                                         <h4 className="font-semibold text-sm text-gray-800 dark:text-dark-text">Notification Settings</h4>
                                         <p className="text-xs text-gray-500 dark:text-dark-text-muted">Select which alerts to show.</p>
                                     </div>
@@ -5648,7 +5648,7 @@ useEffect(() => {
                         {isCollectionsView && (
                             <button
                                 onClick={() => setShowCollectionManager(prev => !prev)}
-                                className={`p-2 text-xs border rounded-lg flex items-center gap-1 transition ${showCollectionManager ? 'bg-gray-200 dark:bg-dark-surface-hover border-gray-300 dark:border-dark-text-muted text-gray-800 dark:text-dark-text' : 'bg-white dark:bg-dark-card-bg border-gray-300 dark:border-dark-text-muted text-gray-600 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                                className={`p-2 text-xs border rounded-lg flex items-center gap-1 transition ${showCollectionManager ? 'bg-gray-200 dark:bg-dark-card-bg border-gray-300 dark:border-dark-text-muted text-gray-800 dark:text-dark-text' : 'bg-white dark:bg-dark-card-bg border-gray-300 dark:border-dark-text-muted text-gray-600 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
                             >
                                 <Wrench size={14} />
                                 <span>{showCollectionManager ? 'Close Collections' : 'Manage Collections'}</span>
@@ -6111,7 +6111,7 @@ useEffect(() => {
                                 </button>
                             </div>
                             {(matingCalcCOI || matingCOI != null) && (
-                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted' : 'bg-gray-50 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary'}`}>
+                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted' : 'bg-gray-50 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary'}`}>
                                     {matingCalcCOI ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 dark:border-dark-text-muted border-t-gray-600 dark:border-t-dark-text animate-spin" /> Calculating COI...</> : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%{matingCOI === 0 && <span className="text-xs ml-1">(unrelated)</span>}</>}
                                 </div>
                             )}
