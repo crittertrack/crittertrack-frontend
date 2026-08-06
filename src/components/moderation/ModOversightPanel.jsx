@@ -1105,6 +1105,9 @@ export default function ModOversightPanel({
                                             {selectedReport.page && (
                                                 <p style={{ margin: '0 0 8px', fontSize: '13px' }}><strong>Page:</strong> {selectedReport.page}</p>
                                             )}
+                                            {selectedReport.referenceId && (
+                                                <p style={{ margin: '0 0 8px', fontSize: '13px' }}><strong>Reference ID:</strong> {selectedReport.referenceId} <span style={{ color: '#888' }}>(user marked this as a follow-up)</span></p>
+                                            )}
                                             {selectedReport.stepsToReproduce && (
                                                 <div style={{ marginBottom: '8px', fontSize: '13px' }}>
                                                     <strong>Steps to Reproduce:</strong>

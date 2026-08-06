@@ -37,6 +37,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
     const [stepsToReproduce, setStepsToReproduce] = useState('');
+    const [referenceId, setReferenceId] = useState('');
     const [images, setImages] = useState([]); // Array of { file: File, preview: string, uploading: boolean, url: string | null }
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -206,6 +207,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                 category: category,
                 description: description.trim(),
                 stepsToReproduce: stepsToReproduce.trim() || null,
+                referenceId: referenceId.trim() || null,
                 images: uploadedUrls,
                 page: window.location.pathname,
                 browserInfo: getBrowserInfo(),
@@ -240,6 +242,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
         setCategory('');
         setDescription('');
         setStepsToReproduce('');
+        setReferenceId('');
         images.forEach(img => {
             if (img.preview) URL.revokeObjectURL(img.preview);
         });
@@ -293,7 +296,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                             return (
                                 <div key={r._id} className="bg-white dark:bg-dark-surface rounded-lg border border-gray-200 dark:border-gray-700 p-3">
                                     <div className="flex items-center justify-between gap-2 mb-1">
-                                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{r.category}</span>
+                                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{r.category} <span className="font-normal text-gray-400 dark:text-gray-500">#{r._id.slice(-6).toUpperCase()}</span></span>
                                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${status.className}`}>
                                             <StatusIcon size={11} className={r.status === 'in-progress' || r.status === 'in_progress' ? 'animate-spin' : ''} />
                                             {status.label}
@@ -301,6 +304,9 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                                     </div>
                                     {r.subjectLabel && (
                                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{r.subjectLabel}</p>
+                                    )}
+                                    {r.referenceId && (
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">Ref: {r.referenceId}</p>
                                     )}
                                     <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">{r.description}</p>
                                     {r.stepsToReproduce && (
@@ -468,6 +474,23 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                             <p className="text-xs text-gray-400 mt-1 text-right">{stepsToReproduce.length}/2000</p>
                         </div>
                     )}
+
+                    {/* Reference ID (for follow-up reports) */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">
+                            Reference ID
+                            <span className="text-gray-400 font-normal ml-1">(optional — include the code from a previous report if this is a follow-up)</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={referenceId}
+                            onChange={(e) => setReferenceId(e.target.value)}
+                            placeholder="e.g. A1B3F2"
+                            maxLength={50}
+                            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition bg-white dark:bg-gray-800 text-gray-800 dark:text-dark-text"
+                            disabled={submitting}
+                        />
+                    </div>
 
                     {/* Image Upload */}
                     <div>
