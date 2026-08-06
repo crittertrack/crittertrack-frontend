@@ -37,7 +37,7 @@ const ThemeToggle = () => {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-dark-card-bg dark:hover:bg-dark-surface-hover transition-colors"
+                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-dark-surface dark:hover:bg-dark-surface-hover transition-colors"
                 title="Change theme"
                 aria-label="Theme selector"
             >
@@ -45,7 +45,7 @@ const ThemeToggle = () => {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg shadow-lg z-50">
+                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg shadow-lg z-50">
                     {themeOptions.map((option) => {
                         const Icon = option.icon;
                         const isSelected = theme === option.value;

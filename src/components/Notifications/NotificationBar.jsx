@@ -384,7 +384,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
 
       {/* Expanded detail popover for warnings / moderator notices (need full text + explicit ack) */}
       {(expandedWarnings || expandedModMessage) && (
-        <div className="absolute left-0 right-0 top-full mt-2 z-20 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg shadow-xl p-4 text-sm">
+        <div className="absolute left-0 right-0 top-full mt-2 z-20 bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-4 text-sm">
           <button onClick={() => setExpandedId(null)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
             <X size={16} />
           </button>

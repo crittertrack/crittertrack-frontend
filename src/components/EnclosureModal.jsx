@@ -228,8 +228,8 @@ const EnclosureModal = ({
                                 <div className="flex justify-between items-center mb-1">
                                     <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary">Lights On/Off Time</label>
                                     <div className="flex items-center gap-1 text-xs">
-                                        <button type="button" onClick={() => setNewEnclosureForm(p => ({ ...p, lightTimeFormat: '12h' }))} className={`px-2 py-0.5 rounded ${enclosureFormData.lightTimeFormat === '12h' ? 'bg-blue-600 dark:bg-blue-800 text-white' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary dark:border dark:border-dark-text-muted'}`}>12h</button>
-                                        <button type="button" onClick={() => setNewEnclosureForm(p => ({ ...p, lightTimeFormat: '24h' }))} className={`px-2 py-0.5 rounded ${enclosureFormData.lightTimeFormat === '24h' ? 'bg-blue-600 dark:bg-blue-800 text-white' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary dark:border dark:border-dark-text-muted'}`}>24h</button>
+                                        <button type="button" onClick={() => setNewEnclosureForm(p => ({ ...p, lightTimeFormat: '12h' }))} className={`px-2 py-0.5 rounded ${enclosureFormData.lightTimeFormat === '12h' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary dark:border dark:border-dark-text-muted'}`}>12h</button>
+                                        <button type="button" onClick={() => setNewEnclosureForm(p => ({ ...p, lightTimeFormat: '24h' }))} className={`px-2 py-0.5 rounded ${enclosureFormData.lightTimeFormat === '24h' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary dark:border dark:border-dark-text-muted'}`}>24h</button>
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
@@ -327,7 +327,7 @@ const EnclosureModal = ({
                                                             const type = task.type || 'Other';
                                                             const Icon = TASK_TYPE_STYLES[type]?.icon;
                                                             return (
-                                                                <span className="flex items-center gap-1 font-semibold bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary px-1.5 py-0.5 rounded">
+                                                                <span className="flex items-center gap-1 font-semibold bg-gray-200 dark:bg-dark-surface dark:text-dark-text-secondary px-1.5 py-0.5 rounded">
                                                                     {Icon}
                                                                     {type}
                                                                 </span>
@@ -403,7 +403,7 @@ const EnclosureModal = ({
                                         const newTask = { taskName: newCleaningTaskName.trim(), type: newCleaningTaskType, frequency: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, frequencyUnit: newCleaningTaskFreq ? newCleaningTaskFreqUnit : null, notes: newCleaningTaskNotes.trim() || null, assignedSupplies: newCleaningTaskSupplies, lastDoneDate: null };
                                         setNewEnclosureForm(p => ({ ...p, cleaningTasks: [...(p.cleaningTasks || []), newTask] }));
                                         setNewCleaningTaskName(''); setNewCleaningTaskFreq(''); setNewCleaningTaskFreqUnit('days'); setNewCleaningTaskNotes(''); setNewCleaningTaskSupplies([]); setNewCleaningTaskType('Cleaning');
-                                    }} className="w-full px-2 py-1.5 text-xs bg-blue-600 dark:bg-blue-800 text-white rounded font-medium hover:bg-blue-700 dark:hover:bg-blue-700">+ Add Task</button>
+                                    }} className="w-full px-2 py-1.5 text-xs bg-blue-600 text-white rounded font-medium hover:bg-blue-700">+ Add Task</button>
                                 </div>
                             </div>
                         </div>
@@ -428,7 +428,7 @@ const EnclosureModal = ({
                                 Cancel
                             </button>
                             <button onClick={handleSaveEnclosure} disabled={enclosureSaving || !enclosureFormData.name.trim()}
-                                className="text-xs px-3 py-1.5 bg-blue-600 dark:bg-blue-800 hover:bg-blue-700 dark:hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-1.5">
+                                className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-1.5">
                                 {enclosureSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                                 {editingEnclosureId ? 'Save Changes' : 'Create Enclosure'}
                             </button>

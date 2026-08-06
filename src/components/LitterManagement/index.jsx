@@ -314,7 +314,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                 type="button"
                                 onClick={() => setCat(c)}
                                 className={`px-3 py-1 text-xs font-semibold rounded-full transition ${
-                                    cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
+                                    cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                                 }`}
                             >
                                 {c}
@@ -349,9 +349,9 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                                 onClick={() => onSelect(s.name)}
                                                 className={`w-full h-20 flex flex-col items-start justify-center p-2 border-2 rounded-lg text-left transition hover:shadow-md relative ${
                                                     isFav
-                                                        ? 'border-amber-300 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50'
+                                                        ? 'border-amber-300 bg-amber-50 hover:bg-amber-100'
                                                         : s.isDefault
-                                                        ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 hover:bg-primary/20 dark:hover:bg-dark-primary/20'
+                                                        ? 'border-primary bg-primary/10 hover:bg-primary/20'
                                                         : 'border-gray-200 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg hover:border-primary/50 hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
                                                 }`}
                                             >
@@ -436,7 +436,7 @@ const ParentSearchModal = ({
                 onClick={() => onSelect(animal)}
             >
                 {/* Thumbnail */}
-                <div className="w-16 h-16 bg-gray-100 dark:bg-dark-card-bg rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} />
                 </div>
                 
@@ -572,7 +572,7 @@ const ParentSearchModal = ({
                         <span className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Search Scope:</span>
                         {['local','global','both'].map(s => (
                             <button key={s} type="button" onClick={() => setScope(s)}
-                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>
+                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>
                                 {s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}
                             </button>
                         ))}
@@ -2313,7 +2313,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddMatingForm(!showAddMatingForm);
                                 if (showAddMatingForm) resetMatingForm();
                             }}
-                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors border-r border-gray-200 dark:border-dark-text-muted whitespace-nowrap ${showAddMatingForm ? 'bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors border-r border-gray-200 dark:border-dark-text-muted whitespace-nowrap ${showAddMatingForm ? 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
                             title="Record a planned mating"
                         >
                             {showAddMatingForm ? <X size={14} /> : <Plus size={14} />}
@@ -2345,7 +2345,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddForm(!showAddForm);
                             }}
                             data-tutorial-target="new-litter-btn"
-                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${showAddForm ? 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' : 'bg-primary dark:bg-dark-primary text-black hover:bg-primary-dark'}`}
                         >
                             {showAddForm ? <X size={14} /> : <Plus size={14} />}
                             <span>Litter</span>
@@ -2367,13 +2367,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     {[0,1,2,3].map(i => (
                         <div key={i} className="border border-gray-200 dark:border-dark-text-muted rounded-xl p-4">
                             <div className="flex items-center justify-between mb-3">
-                                <div className="h-5 w-40 bg-gray-200 dark:bg-dark-card-bg rounded" />
-                                <div className="h-5 w-20 bg-gray-200 dark:bg-dark-card-bg rounded" />
+                                <div className="h-5 w-40 bg-gray-200 dark:bg-dark-surface rounded" />
+                                <div className="h-5 w-20 bg-gray-200 dark:bg-dark-surface rounded" />
                             </div>
                             <div className="grid grid-cols-3 gap-3">
-                                <div className="h-4 bg-gray-100 dark:bg-dark-card-bg rounded" />
-                                <div className="h-4 bg-gray-100 dark:bg-dark-card-bg rounded" />
-                                <div className="h-4 bg-gray-100 dark:bg-dark-card-bg rounded" />
+                                <div className="h-4 bg-gray-100 dark:bg-dark-surface-hover rounded" />
+                                <div className="h-4 bg-gray-100 dark:bg-dark-surface-hover rounded" />
+                                <div className="h-4 bg-gray-100 dark:bg-dark-surface-hover rounded" />
                             </div>
                         </div>
                     ))}
@@ -2492,7 +2492,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             type="text"
                                             value={editingLitter.litter_id_public}
                                             disabled
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary font-mono"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary font-mono"
                                         />
                                         <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Auto-assigned for system linkage</p>
                                     </div>
@@ -2525,7 +2525,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         disabled={!!editingLitter}
                                         className={`w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-left transition focus:ring-2 focus:ring-primary focus:border-transparent ${
                                             editingLitter
-                                                ? 'bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted cursor-not-allowed opacity-75'
+                                                ? 'bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted cursor-not-allowed opacity-75'
                                                 : 'bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
                                         }`}
                                     >
@@ -2809,7 +2809,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 type="number"
                                                 value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
                                                 readOnly
-                                                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
+                                                className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
                                                 placeholder="0"
                                             />
                                             <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
@@ -2938,7 +2938,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                         type="number"
                                                         value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
                                                         readOnly
-                                                        className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
+                                                        className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
                                                         placeholder="0"
                                                     />
                                                     <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
@@ -3063,7 +3063,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                         type="number"
                                                         value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
                                                         readOnly
-                                                        className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
+                                                        className="w-full px-3 py-2 border border-gray-200 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary cursor-not-allowed font-semibold"
                                                         placeholder="0"
                                                     />
                                                     <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-1">Auto-calculated from M + F + U</p>
@@ -3149,7 +3149,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                         <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                                             Link Existing Animals as Offspring
                                         </label>
-                                        <div className="bg-gray-50 dark:bg-dark-card-bg p-3 rounded-lg">
+                                        <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg">
                                             <p className="text-xs text-gray-600 dark:text-dark-text-secondary mb-3">
                                                 Select animals with matching parents to link them to this litter. {formData.birthDate ? 'Only animals with matching birth date are shown.' : 'Birth date will be filled automatically from selected animals.'}
                                             </p>
@@ -3460,7 +3460,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                             </div>
                             {/* COI display */}
                             {(matingCalcCOI || matingCOI != null) && (
-                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted' : 'bg-gray-50 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary'}`}>
+                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted' : 'bg-gray-50 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary'}`}>
                                     {matingCalcCOI
                                         ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 dark:border-dark-text-muted border-t-gray-600 dark:border-t-dark-text animate-spin" /> Calculating COI...</>
                                         : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%
@@ -3641,7 +3641,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                         className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition ${
                                             filteredLitters.every(l => l.showOnPublicProfile)
                                                 ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-800/40 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
-                                                : 'bg-gray-100 dark:bg-dark-card-bg border-gray-300 dark:border-dark-text-muted text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
+                                                : 'bg-gray-100 dark:bg-dark-surface border-gray-300 dark:border-dark-text-muted text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                                         }`}
                                         title={filteredLitters.every(l => l.showOnPublicProfile) ? 'Hide all from public profile' : 'Show all on public profile'}
                                     >
@@ -3725,7 +3725,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                     {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded mr-2">Planned</span>}
                                                     {isMated && <span className="text-[10px] font-semibold bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded mr-2">Mated</span>}
                                                     {isPregnant && <span className="text-[10px] font-semibold bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-1.5 py-0.5 rounded mr-2">Pregnant</span>}
-                                                    {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
+                                                    {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
                                                     {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
                                                 </p>
@@ -3744,7 +3744,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                             <p className="text-[10px] text-gray-500 dark:text-dark-text-muted mt-0.5">
                                                 <span className="font-medium">COI:</span>{' '}
                                                 {coiCalculating.has(litter._id)
-                                                    ? <span className="inline-block w-12 h-2.5 bg-gray-200 dark:bg-dark-card-bg rounded animate-pulse align-middle" />
+                                                    ? <span className="inline-block w-12 h-2.5 bg-gray-200 dark:bg-dark-surface rounded animate-pulse align-middle" />
                                                     : `${litter.inbreedingCoefficient.toFixed(2)}%`}
                                             </p>
                                         )}
@@ -3783,7 +3783,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                         <div>
                                             <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">COI</span>
                                             {coiCalculating.has(litter._id)
-                                                ? <span className="inline-block w-10 h-3 bg-gray-200 dark:bg-dark-card-bg rounded animate-pulse mt-0.5" />
+                                                ? <span className="inline-block w-10 h-3 bg-gray-200 dark:bg-dark-surface rounded animate-pulse mt-0.5" />
                                                 : <span className="text-sm font-semibold text-gray-800 dark:text-dark-text">
                                                     {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}
                                                   </span>}
@@ -3860,7 +3860,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
 
                                 {/* Expanded Details */}
                                 {isExpanded && (
-                                    <div className="border-t-2 border-gray-200 dark:border-dark-text-muted p-2 sm:p-4 bg-gray-50 dark:bg-dark-card-bg">
+                                    <div className="border-t-2 border-gray-200 dark:border-dark-text-muted p-2 sm:p-4 bg-gray-50 dark:bg-dark-surface">
                                         <div className="flex flex-wrap justify-end gap-1 sm:gap-2 mb-3 sm:mb-4">
                                             {isPlannedOnly && (
                                                 <button
@@ -3939,7 +3939,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                             onClick={sire.isTransferred ? undefined : () => onViewAnimal(sire)}
                                                             className={`bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-3 flex items-center gap-3 ${sire.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition shadow-sm`}
                                                         >
-                                                            <div className="w-14 h-14 bg-gray-100 dark:bg-dark-card-bg rounded-lg overflow-hidden flex-shrink-0">
+                                                            <div className="w-14 h-14 bg-gray-100 dark:bg-dark-surface rounded-lg overflow-hidden flex-shrink-0">
                                                                 {sire.imageUrl || sire.photoUrl
                                                                     ? <img src={sire.imageUrl || sire.photoUrl} alt={sire.name} className="w-full h-full object-cover" />
                                                                     : <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted"><Cat size={24} /></div>}
@@ -3959,7 +3959,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                     <div className="flex flex-col items-center px-2">
                                                         <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-1">COI</div>
                                                         {coiCalculating.has(litter._id)
-                                                            ? <div className="w-14 h-5 bg-gray-200 dark:bg-dark-card-bg rounded animate-pulse" />
+                                                            ? <div className="w-14 h-5 bg-gray-200 dark:bg-dark-surface rounded animate-pulse" />
                                                             : litter.inbreedingCoefficient != null
                                                                 ? <div className="text-base font-medium text-gray-800 dark:text-dark-text">{litter.inbreedingCoefficient.toFixed(2)}%</div>
                                                                 : <div className="text-base font-medium text-gray-300 dark:text-dark-text-muted">—</div>}
@@ -3970,7 +3970,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                             onClick={dam.isTransferred ? undefined : () => onViewAnimal(dam)}
                                                             className={`bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-3 flex items-center gap-3 ${dam.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition shadow-sm`}
                                                         >
-                                                            <div className="w-14 h-14 bg-gray-100 dark:bg-dark-card-bg rounded-lg overflow-hidden flex-shrink-0">
+                                                            <div className="w-14 h-14 bg-gray-100 dark:bg-dark-surface rounded-lg overflow-hidden flex-shrink-0">
                                                                 {dam.imageUrl || dam.photoUrl
                                                                     ? <img src={dam.imageUrl || dam.photoUrl} alt={dam.name} className="w-full h-full object-cover" />
                                                                     : <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted"><Cat size={24} /></div>}
@@ -4049,7 +4049,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
 
                                         {/* -- 3. Litter Stats: left = counts, right = sex ------------ */}
                                         {!litter.isPlanned && <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-text-muted p-4 mb-4 shadow-sm">
-                                            <div className="flex flex-col sm:grid sm:grid-cols-2 sm:divide-x divide-gray-200 dark:divide-dark-text-muted gap-3 sm:gap-0">
+                                            <div className="flex flex-col sm:grid sm:grid-cols-2 sm:divide-x divide-gray-200 dark:divide-dark-border gap-3 sm:gap-0">
                                                 {/* Left: Born / Stillborn / Weaned / Losses */}
                                                 <div className="grid grid-cols-4 sm:pr-4">
                                                     <div>
@@ -4070,7 +4070,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                     </div>
                                                 </div>
                                                 {/* Right: Males / Females / Unknown */}
-                                                <div className="grid grid-cols-3 sm:pl-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-dark-text-muted">
+                                                <div className="grid grid-cols-3 sm:pl-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-dark-border">
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-wide mb-0.5">Males</div>
                                                         <div className="text-xl font-bold text-blue-500 dark:text-blue-400">{litter.maleCount ?? 0}</div>
@@ -4120,14 +4120,14 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                     {[0, 1, 2].map((i) => (
                                                         <div key={i} className="bg-white dark:bg-dark-card-bg rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden border-2 border-gray-200 dark:border-dark-text-muted animate-pulse">
                                                             <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
-                                                                <div className="w-20 h-20 bg-gray-200 dark:bg-dark-card-bg rounded-md" />
+                                                                <div className="w-20 h-20 bg-gray-200 dark:bg-dark-surface rounded-md" />
                                                             </div>
                                                             <div className="w-full px-4 pb-3 space-y-1.5">
-                                                                <div className="h-3 bg-gray-200 dark:bg-dark-card-bg rounded w-3/4 mx-auto" />
-                                                                <div className="h-2 bg-gray-200 dark:bg-dark-card-bg rounded w-1/2 mx-auto" />
+                                                                <div className="h-3 bg-gray-200 dark:bg-dark-surface rounded w-3/4 mx-auto" />
+                                                                <div className="h-2 bg-gray-200 dark:bg-dark-surface rounded w-1/2 mx-auto" />
                                                             </div>
-                                                            <div className="w-full bg-gray-100 dark:bg-dark-card-bg py-1 border-t border-gray-200 dark:border-dark-text-muted">
-                                                                <div className="h-3 bg-gray-200 dark:bg-dark-card-bg rounded w-1/3 mx-auto" />
+                                                            <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 border-t border-gray-200 dark:border-dark-border">
+                                                                <div className="h-3 bg-gray-200 dark:bg-dark-surface rounded w-1/3 mx-auto" />
                                                             </div>
                                                         </div>
                                                     ))}
@@ -4154,7 +4154,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                                 </button>
                                                                 <button
                                                                     onClick={() => toggleBulkDeleteMode(litter._id)}
-                                                                    className="px-3 py-1 bg-gray-300 dark:bg-dark-card-bg hover:bg-gray-400 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text text-sm font-semibold rounded-lg transition"
+                                                                    className="px-3 py-1 bg-gray-300 dark:bg-dark-surface hover:bg-gray-400 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text text-sm font-semibold rounded-lg transition"
                                                                 >
                                                                     Cancel
                                                                 </button>
@@ -4240,7 +4240,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                                         className="w-20 h-20 object-cover rounded-md" 
                                                                     />
                                                                 ) : (
-                                                                    <div className="w-20 h-20 bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+                                                                    <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                                         <Cat size={32} />
                                                                     </div>
                                                                 )}
@@ -4276,7 +4276,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                             </div>
                                                             
                                                             {/* Status bar */}
-                                                            <div className="w-full bg-gray-100 dark:bg-dark-card-bg py-1 text-center border-t border-gray-300 dark:border-dark-text-muted mt-auto">
+                                                            <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
                                                                 <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{animal.status || 'Unknown'}</div>
                                                             </div>
                                                         </div>
@@ -4364,7 +4364,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                     </button>
                                                     <button
                                                         onClick={() => setAddingOffspring(null)}
-                                                        className="bg-gray-300 dark:bg-dark-card-bg hover:bg-gray-400 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text font-semibold px-4 py-2 rounded-lg"
+                                                        className="bg-gray-300 dark:bg-dark-surface hover:bg-gray-400 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text font-semibold px-4 py-2 rounded-lg"
                                                     >
                                                         Cancel
                                                     </button>
@@ -4478,7 +4478,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                             )}
                             <button
                                 onClick={() => setLinkingAnimals(false)}
-                                className="w-full bg-gray-200 dark:bg-dark-card-bg hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text font-semibold py-2 px-4 rounded-lg"
+                                className="w-full bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text font-semibold py-2 px-4 rounded-lg"
                             >
                                 Close
                             </button>

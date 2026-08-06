@@ -93,8 +93,8 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
 
     return (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={handleClose}>
-            <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center p-4 sm:p-6 pb-4 border-b dark:border-dark-text-muted">
+            <div className="bg-white dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center p-4 sm:p-6 pb-4 border-b dark:border-dark-border">
                     <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                         <ShieldAlert size={20} className="text-orange-600" /> Assign Quarantine / Treatment
                     </h3>
@@ -106,21 +106,21 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                         <button
                             type="button"
                             onClick={() => toggleType('quarantine')}
-                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm font-semibold transition ${statusType === 'quarantine' ? 'bg-orange-100 border-orange-400 text-orange-800' : 'border-gray-200 dark:border-dark-text-muted text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm font-semibold transition ${statusType === 'quarantine' ? 'bg-orange-100 border-orange-400 text-orange-800' : 'border-gray-200 dark:border-dark-border text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
                         >
                             <ShieldAlert size={15} /> Quarantine
                         </button>
                         <button
                             type="button"
                             onClick={() => toggleType('treatment')}
-                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm font-semibold transition ${statusType === 'treatment' ? 'bg-red-100 border-red-400 text-red-800' : 'border-gray-200 dark:border-dark-text-muted text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm font-semibold transition ${statusType === 'treatment' ? 'bg-red-100 border-red-400 text-red-800' : 'border-gray-200 dark:border-dark-border text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
                         >
                             <Stethoscope size={15} /> Treatment
                         </button>
                     </div>
 
                     {statusType === 'quarantine' ? (
-                        <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-text-muted p-3 space-y-3">
+                        <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-200 dark:border-dark-border p-3 space-y-3">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Status</label>
@@ -151,7 +151,7 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-text-muted p-3 space-y-3">
+                        <div className="bg-gray-50 dark:bg-dark-surface-hover rounded-lg border border-gray-200 dark:border-dark-border p-3 space-y-3">
                             <div className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
                                 <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
                                 <span>Treatment is defined by an active medication — it's what marks the animal as "In Treatment" and factors into its health status.</span>
@@ -221,7 +221,7 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                                 className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md"
                             />
                         </div>
-                        <div className="border border-gray-200 dark:border-dark-text-muted rounded-lg max-h-56 overflow-y-auto divide-y divide-gray-100 dark:divide-dark-text-muted">
+                        <div className="border border-gray-200 dark:border-dark-border rounded-lg max-h-56 overflow-y-auto divide-y divide-gray-100 dark:divide-dark-border">
                             {filteredAnimals.length === 0 && (
                                 <div className="p-3 text-sm text-gray-400 text-center">No animals found.</div>
                             )}
@@ -241,7 +241,7 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-2 p-4 sm:p-6 pt-4 border-t dark:border-dark-text-muted">
+                <div className="flex justify-end gap-2 p-4 sm:p-6 pt-4 border-t dark:border-dark-border">
                     <button onClick={handleClose} className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg">Cancel</button>
                     <button
                         onClick={handleSubmit}

@@ -9,7 +9,7 @@ const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-co
 
     if (imageError || !imageSrc) {
         return (
-            <div className="w-full h-full bg-gray-100 dark:bg-dark-card-bg rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
+            <div className="w-full h-full bg-gray-100 dark:bg-dark-surface-hover rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                 <Cat size={iconSize} />
             </div>
         );

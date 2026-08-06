@@ -1124,7 +1124,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                 <select
                                     value={newEnclosureData.purpose || 'general'}
                                     onChange={e => setNewEnclosureData(p => ({ ...p, purpose: e.target.value }))}
-                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-card-bg">
+                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
                                     <option value="general">General</option>
                                     <option value="reproduction">Nursery / Breeding</option>
                                     <option value="medical">Medical</option>
@@ -1143,7 +1143,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                     <select
                                         value={newEnclosureData.buildingId || ''}
                                         onChange={e => setNewEnclosureData(p => ({ ...p, buildingId: e.target.value, roomId: '' }))}
-                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-card-bg">
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface">
                                         <option value="">No Building</option>
                                         {Array.isArray(locations) && locations.filter(l => l.type === 'building').map(building => (
                                             <option key={building._id} value={building._id}>{building.name}</option>
@@ -1158,7 +1158,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                     value={newEnclosureData.roomId || ''}
                                     onChange={e => setNewEnclosureData(p => ({ ...p, roomId: e.target.value }))}
                                     disabled={!newEnclosureData.buildingId}
-                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-card-bg disabled:bg-gray-100 dark:disabled:bg-dark-border"
+                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-surface disabled:bg-gray-100 dark:disabled:bg-dark-border"
                                 >
                                     <option value="">No Room</option>
                                     {newEnclosureData.buildingId && Array.isArray(locations) && locations
