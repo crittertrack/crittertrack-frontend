@@ -1320,7 +1320,7 @@ export default function ModOversightPanel({
                                 <div className="mod-actions">
                                     <h5>Feedback to User</h5>
                                     <p className="feedback-notes-hint">
-                                        Shown to the reporting user on their "My Reports" page. Saved when you click a status button below.
+                                        Shown to the reporting user on their "My Reports" page.
                                     </p>
                                     <textarea
                                         className="feedback-notes-textarea"
@@ -1330,6 +1330,15 @@ export default function ModOversightPanel({
                                         rows={3}
                                         maxLength={2000}
                                     />
+                                    <button
+                                        type="button"
+                                        className="mod-action-btn"
+                                        onClick={() => handleUpdateStatus(selectedReport.status)}
+                                        disabled={actionLoading || !adminNotes.trim()}
+                                        style={{ marginTop: '8px' }}
+                                    >
+                                        {actionLoading ? 'Sending...' : 'Send Feedback'}
+                                    </button>
                                 </div>
 
                                 <div className="mod-actions">
