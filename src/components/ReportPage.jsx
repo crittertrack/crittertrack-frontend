@@ -429,6 +429,9 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                         <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">
                             Description *
                         </label>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                            Please write your report in English — our team can only review reports written in English.
+                        </p>
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
