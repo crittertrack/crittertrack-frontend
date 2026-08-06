@@ -419,6 +419,11 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         <div className="text-lg sm:text-2xl font-bold text-green-700 dark:text-green-300">
                             {getCurrencySymbol()}{stats.totalSales.toFixed(2)}
                         </div>
+                        <div className="text-[10px] sm:text-xs text-green-600 dark:text-green-400 mt-0.5 sm:mt-1">
+                            {stats.salesCount} <span className="hidden sm:inline">transaction{stats.salesCount !== 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+
                     <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700/60 rounded-lg p-2 sm:p-4">
                         <div className="text-red-600 dark:text-red-400 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
                             <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
