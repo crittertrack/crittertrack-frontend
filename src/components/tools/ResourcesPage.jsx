@@ -120,6 +120,7 @@ const ResourcesPage = ({ API_BASE_URL }) => {
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-6 dark:bg-dark-bg min-h-screen">
+            <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg shadow-sm p-4 sm:p-6">
             <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
@@ -306,6 +307,7 @@ const ResourcesPage = ({ API_BASE_URL }) => {
                     ))}
                 </div>
             )}
+            </div>
         </div>
     );
 };
