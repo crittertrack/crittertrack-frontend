@@ -1308,7 +1308,7 @@ const App = () => {
                         />
                     )}
 
-                    <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6">
+                    <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6">
                         <div className="mb-3">
                             <GlobalSearchBar 
                                 API_BASE_URL={API_BASE_URL}
@@ -1321,7 +1321,7 @@ const App = () => {
                             <div className="flex items-center space-x-3">
                                 <button 
                                     onClick={() => { setViewingPublicProfile(null); navigate('/'); }}
-                                    className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
+                                    className="px-3 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-semibold rounded-lg transition flex items-center"
                                 >
                                     <LogIn size={18} className="mr-1" /> Login
                                 </button>
@@ -1368,7 +1368,7 @@ const App = () => {
                 <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
-                    <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6">
+                    <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6">
                         <div className="mb-3">
                             <GlobalSearchBar 
                                 API_BASE_URL={API_BASE_URL}
@@ -1381,7 +1381,7 @@ const App = () => {
                             <div className="flex items-center space-x-3">
                                 <button 
                                     onClick={() => navigate('/')}
-                                    className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
+                                    className="px-3 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-semibold rounded-lg transition flex items-center"
                                 >
                                     <LogIn size={18} className="mr-1" /> Login
                                 </button>
@@ -2349,6 +2349,17 @@ const App = () => {
 // Router Wrapper Component
 const AppRouter = () => {
     const [clientIp, setClientIp] = useState(null);
+    // The /user/:userId route renders outside of <App>, so it needs its own
+    // Messages modal state/overlay rather than reaching into App's (out of scope there).
+    const authToken = localStorage.getItem('authToken');
+    const [showMessages, setShowMessages] = useState(false);
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
+    const [showModal, setShowModal] = useState(false);
+    const showModalMessage = useCallback((title, message) => {
+        setModalMessage({ title, message });
+        setShowModal(true);
+    }, []);
 
     useEffect(() => {
         const getClientIp = async () => {
@@ -2391,6 +2402,20 @@ const AppRouter = () => {
                 } />
                 <Route path="/*" element={<App />} />
             </Routes>
+            {showMessages && (
+                <MessagesView
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    onClose={() => {
+                        setShowMessages(false);
+                        setSelectedConversation(null);
+                    }}
+                    showModalMessage={showModalMessage}
+                    selectedConversation={selectedConversation}
+                    setSelectedConversation={setSelectedConversation}
+                />
+            )}
+            {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
         </>
     );
 };

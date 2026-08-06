@@ -25,14 +25,29 @@ export const ThemeProvider = ({ children }) => {
     // Determine the actual theme to apply (resolves 'auto' to 'light' or 'dark')
     const [resolvedTheme, setResolvedTheme] = useState('light');
 
-    // Detect system preference
+    // Detect system preference, and keep it live-updated while in 'auto' mode
     useEffect(() => {
-        if (theme === 'auto') {
-            // When auto-detection is disabled, default 'auto' to 'light'.
-            setResolvedTheme('light');
-        } else {
+        if (theme !== 'auto') {
             setResolvedTheme(theme);
+            return;
         }
+        // matchMedia is unsupported only on ancient browsers; fall back to light rather than crash.
+        if (!window.matchMedia) {
+            setResolvedTheme('light');
+            return;
+        }
+
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        setResolvedTheme(mediaQuery.matches ? 'dark' : 'light');
+
+        const handleChange = (e) => setResolvedTheme(e.matches ? 'dark' : 'light');
+        // Older Safari (iOS < 14) only supports the deprecated addListener/removeListener API.
+        if (mediaQuery.addEventListener) {
+            mediaQuery.addEventListener('change', handleChange);
+            return () => mediaQuery.removeEventListener('change', handleChange);
+        }
+        mediaQuery.addListener(handleChange);
+        return () => mediaQuery.removeListener(handleChange);
     }, [theme]);
 
     // Apply theme class to document root
