@@ -29,7 +29,7 @@ export const IdentificationTabContent = ({
     const label = (field, def) => getFieldLabel(field, species, def);
     return (
         <div className="space-y-6">
-            <InfoCard title="Identification Numbers" icon={<Hash size={18} className="text-gray-400" />}>
+            <InfoCard title="Identification Numbers" icon={<Hash size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="CritterTrack ID" value={animal.id_public} />
                         {animal.breederAssignedId && <InfoItem label="Breeder Assigned ID" value={animal.breederAssignedId} />}
@@ -44,7 +44,7 @@ export const IdentificationTabContent = ({
                         ))}
                     </dl>
             </InfoCard>
-            <InfoCard title="Classification" icon={<FolderOpen size={18} className="text-gray-400" />}>
+            <InfoCard title="Classification" icon={<FolderOpen size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="Species" value={animal.species} />
                         {animal.breed && !hidden('breed') && <InfoItem label={label('breed', 'Breed')} value={animal.breed} />}
@@ -52,29 +52,29 @@ export const IdentificationTabContent = ({
                     </dl>
             </InfoCard>
             {!hidden('origin') && (
-            <InfoCard title="Origin" icon={<Globe size={18} className="text-gray-400" />}>
+            <InfoCard title="Origin" icon={<Globe size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem label="Origin" value={animal.origin} />
                     </dl>
             </InfoCard>
             )}
-            <InfoCard title="Tags" icon={<Tag size={18} className="text-gray-400" />}>
+            <InfoCard title="Tags" icon={<Tag size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {animal.tags && animal.tags.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                             {animal.tags.map(tag => (
-                                <span key={tag} className="bg-gray-200 text-gray-800 text-xs font-medium px-2.5 py-1 rounded-full">{tag}</span>
+                                <span key={tag} className="bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text text-xs font-medium px-2.5 py-1 rounded-full">{tag}</span>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-sm text-gray-400">No tags recorded.</p>
+                        <p className="text-sm text-gray-400 dark:text-dark-text-muted">No tags recorded.</p>
                     )}
             </InfoCard>
             {isEditable && (
-            <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400" />}>
+            <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                 {(() => {
                     const namedLines = breedingLineDefs.filter(l => l.name && l.enabled !== false);
                     if (namedLines.length === 0) {
-                        return <p className="text-sm text-gray-400">No breeding lines available.</p>;
+                        return <p className="text-sm text-gray-400 dark:text-dark-text-muted">No breeding lines available.</p>;
                     }
 
                     const assignedIds = animalBreedingLines[animal.id_public] || [];
@@ -104,7 +104,7 @@ export const IdentificationTabContent = ({
                                             ])];
                                             setAnimalBreedingLinesDirect(animal.id_public, merged);
                                         }}
-                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-400 text-purple-700 bg-purple-50 hover:bg-purple-100 text-xs font-medium transition"
+                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-400 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 text-xs font-medium transition"
                                         title={`Inherit: ${inheritedLineNames.join(', ')}`}
                                     >
                                         <span>↑</span> Inherit from parents
@@ -133,7 +133,7 @@ export const IdentificationTabContent = ({
                                 })}
                             </div>
                             {assignedIds.length === 0 && parentLineIds.length === 0 && (
-                                <p className="text-sm text-gray-400 mt-2">No breeding lines assigned.</p>
+                                <p className="text-sm text-gray-400 dark:text-dark-text-muted mt-2">No breeding lines assigned.</p>
                             )}
                         </div>
                     );

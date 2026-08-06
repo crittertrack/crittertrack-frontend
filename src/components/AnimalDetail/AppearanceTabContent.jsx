@@ -38,8 +38,8 @@ export const AppearanceTabContent = ({ animal }) => {
                         {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
                     </div>
                 </InfoCard>
-                <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400" />}>
-                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
+                <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
+                    <p className="text-gray-700 dark:text-dark-text-secondary font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
                 </InfoCard>
                 <InfoCard title={label('lifeStage', 'Life Stage')} icon={<Sprout size={18} />}>
                     <p>{animal.lifeStage || 'Not specified'}</p>
@@ -73,12 +73,12 @@ export const AppearanceTabContent = ({ animal }) => {
 
                     return (
                         <>
-                            <InfoCard title="Measurement History" icon={<Ruler size={18} className="text-gray-400" />}>
+                            <InfoCard title="Measurement History" icon={<Ruler size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                                 <div className="space-y-3 max-h-96 overflow-y-auto">
                                     {growthRecords.length > 0 ? growthRecords.map((rec, i) => (
-                                        <div key={i} className="p-3 bg-gray-50 rounded-md border-l-4 border-blue-300">
-                                            <p className="font-semibold text-gray-900 mb-2">{formatDate(rec.date)}</p>
-                                            <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                                        <div key={i} className="p-3 bg-gray-50 dark:bg-dark-surface rounded-md border-l-4 border-blue-300">
+                                            <p className="font-semibold text-gray-900 dark:text-dark-text mb-2">{formatDate(rec.date)}</p>
+                                            <div className="grid grid-cols-2 gap-2 text-sm text-gray-700 dark:text-dark-text-secondary">
                                                 {rec.weight && (
                                                     <div><span className="font-medium">Weight:</span> {rec.weight}{animal.measurementUnits?.weight || 'g'}</div>
                                                 )}
@@ -96,15 +96,15 @@ export const AppearanceTabContent = ({ animal }) => {
                                                 )}
                                             </div>
                                             {rec.notes && (
-                                                <p className="mt-2 text-xs text-gray-600 italic">Note: {rec.notes}</p>
+                                                <p className="mt-2 text-xs text-gray-600 dark:text-dark-text-secondary italic">Note: {rec.notes}</p>
                                             )}
                                         </div>
                                     )) : (
-                                        <p className="text-sm text-gray-400">No measurements recorded.</p>
+                                        <p className="text-sm text-gray-400 dark:text-dark-text-muted">No measurements recorded.</p>
                                     )}
                                 </div>
                             </InfoCard>
-                            <InfoCard title="Weight Growth Curve" icon={<Ruler size={18} className="text-gray-400" />}>
+                            <InfoCard title="Weight Growth Curve" icon={<Ruler size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                                 <svg width="100%" height="300" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
                                     {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
                                         const y = margin.top + graphHeight * (1 - ratio);

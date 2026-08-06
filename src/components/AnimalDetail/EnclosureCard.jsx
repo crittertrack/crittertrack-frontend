@@ -17,26 +17,26 @@ export const EnclosureCard = ({ enclosureInfo }) => {
     const dimensions = formatDimensions(enclosureInfo.dimensions);
 
     return (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-3">
                 {/* Image */}
-                <div className="md:col-span-1 bg-gray-100 flex items-center justify-center aspect-video md:aspect-auto">
+                <div className="md:col-span-1 bg-gray-100 dark:bg-dark-surface flex items-center justify-center aspect-video md:aspect-auto">
                     {enclosureInfo.imageUrl ? (
                         <img src={enclosureInfo.imageUrl} alt={enclosureInfo.name} className="w-full h-full object-cover" />
                     ) : (
-                        <Home size={48} className="text-gray-300" />
+                        <Home size={48} className="text-gray-300 dark:text-dark-border" />
                     )}
                 </div>
 
                 {/* Details */}
                 <div className="md:col-span-2 p-4">
-                    <h3 className="text-lg font-bold text-gray-800">{enclosureInfo.name}</h3>
-                    <p className="text-sm text-gray-500 mb-3">{enclosureInfo.enclosureType}{dimensions ? ` • ${dimensions}` : ''}</p>
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">{enclosureInfo.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted mb-3">{enclosureInfo.enclosureType}{dimensions ? ` • ${dimensions}` : ''}</p>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                         <InfoItem label="Purpose">
-                            <p className="text-xs font-medium text-gray-900 capitalize">{enclosureInfo.purpose || 'General'}</p>
-                            {enclosureInfo.purposeDescription && <p className="text-xs text-gray-500 mt-0.5">{enclosureInfo.purposeDescription}</p>}
+                            <p className="text-xs font-medium text-gray-900 dark:text-dark-text capitalize">{enclosureInfo.purpose || 'General'}</p>
+                            {enclosureInfo.purposeDescription && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">{enclosureInfo.purposeDescription}</p>}
                         </InfoItem>
                         
                         <InfoItem label="Environment">
@@ -49,7 +49,7 @@ export const EnclosureCard = ({ enclosureInfo }) => {
                         <InfoItem label="Lighting">
                             <div className="space-y-1">
                                 {enclosureInfo.lightingType && <div className="flex items-center gap-1.5"><Sun size={12} /> {enclosureInfo.lightingType}</div>}
-                                {enclosureInfo.lightsOnTime && <div className="text-xs text-gray-500">Schedule: {enclosureInfo.lightsOnTime} - {enclosureInfo.lightsOffTime}</div>}
+                                {enclosureInfo.lightsOnTime && <div className="text-xs text-gray-500 dark:text-dark-text-muted">Schedule: {enclosureInfo.lightsOnTime} - {enclosureInfo.lightsOffTime}</div>}
                             </div>
                         </InfoItem>
 

@@ -35,7 +35,7 @@ const GrowthChart = ({ records, animal }) => {
     const weightPathData = weightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
     return (
-        <InfoCard title="Weight Growth Curve" icon={<Ruler size={18} className="text-gray-400" />}>
+        <InfoCard title="Weight Growth Curve" icon={<Ruler size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
             <svg width="100%" height="300" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
                 {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
                     const y = margin.top + graphHeight * (1 - ratio);
@@ -102,7 +102,7 @@ export const MeasurementsTabContent = ({ animal, onUpdateAnimal, authToken, API_
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
-                <InfoCard title="Add Measurement" icon={<Plus size={18} className="text-gray-400" />}>
+                <InfoCard title="Add Measurement" icon={<Plus size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     <div className="space-y-4">
                         <input type="date" value={newRecord.date} onChange={e => setNewRecord({...newRecord, date: e.target.value})} className="w-full p-2 border rounded-md" />
                         <input type="number" placeholder={`Weight (${animal.measurementUnits?.weight || 'g'})`} value={newRecord.weight} onChange={e => setNewRecord({...newRecord, weight: e.target.value})} className="w-full p-2 border rounded-md" />
@@ -116,20 +116,20 @@ export const MeasurementsTabContent = ({ animal, onUpdateAnimal, authToken, API_
                 <GrowthChart records={growthRecords} animal={animal} />
             </div>
             <div className="lg:col-span-3">
-                <InfoCard title="Measurement History" icon={<Ruler size={18} className="text-gray-400" />}>
+                <InfoCard title="Measurement History" icon={<Ruler size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                         {growthRecords.length > 0 ? growthRecords.map((rec, i) => (
-                            <div key={i} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
+                            <div key={i} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-dark-surface rounded-md">
                                 <div>
                                     <p className="font-semibold">{formatDate(rec.date)}</p>
-                                    <p className="text-sm text-gray-600">
+                                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                                         {rec.weight && `${rec.weight}${animal.measurementUnits?.weight || 'g'}`}
                                         {rec.length && `, ${rec.length}${animal.measurementUnits?.length || 'cm'}`}
                                     </p>
                                 </div>
                                 <button onClick={() => handleDeleteRecord(i)} className="text-red-500 hover:text-red-700"><Trash2 size={16} /></button>
                             </div>
-                        )) : <p className="text-sm text-gray-400">No measurements recorded.</p>}
+                        )) : <p className="text-sm text-gray-400 dark:text-dark-text-muted">No measurements recorded.</p>}
                     </div>
                 </InfoCard>
             </div>

@@ -99,8 +99,8 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
 
     if (mpLoading) {
         return (
-            <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-2 text-gray-400">
+            <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-dark-surface rounded-lg">
+                <div className="flex items-center gap-2 text-gray-400 dark:text-dark-text-muted">
                     <Loader2 size={18} className="animate-spin" />
                     <span className="text-sm">Loading Ancestry...</span>
                 </div>
@@ -126,31 +126,31 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
             } catch { /* not accessible */ }
         } : undefined;
         return (
-            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 h-full relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 h-full relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 dark:border-blue-700/60 bg-blue-50/40' : 'border-pink-200 dark:border-pink-700/60 bg-pink-50/40') : 'border-dashed border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface'}`}>
                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
                 </div>
                 {hasData ? (
                     <div className="flex gap-2.5">
-                        {d.imageUrl && <img src={d.imageUrl} alt={fullName} className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />}
+                        {d.imageUrl && <img src={d.imageUrl} alt={fullName} className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 dark:border-dark-border self-start" />}
                         <div className="flex-1 min-w-0 space-y-0.5 pb-4">
-                            {fullName && <p className="text-[10px] sm:text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
-                            {d.variety && <p className="text-[9px] sm:text-[11px] text-gray-500">{d.variety}</p>}
-                            {d.genCode && <p className="text-[9px] sm:text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
-                            {d.birthDate && <p className="text-[9px] sm:text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
-                            {d.deceasedDate && <p className="text-[9px] sm:text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
-                            {d.breederName && <p className="text-[9px] sm:text-[11px] text-gray-500 italic">{d.breederName}</p>}
+                            {fullName && <p className="text-[10px] sm:text-xs font-semibold text-gray-800 dark:text-dark-text leading-tight">{fullName}</p>}
+                            {d.variety && <p className="text-[9px] sm:text-[11px] text-gray-500 dark:text-dark-text-muted">{d.variety}</p>}
+                            {d.genCode && <p className="text-[9px] sm:text-[11px] font-mono text-indigo-600 dark:text-indigo-400">{d.genCode}</p>}
+                            {d.birthDate && <p className="text-[9px] sm:text-[11px] text-gray-400 dark:text-dark-text-muted">{formatDate(d.birthDate)}</p>}
+                            {d.deceasedDate && <p className="text-[9px] sm:text-[11px] text-red-600 dark:text-red-400 font-semibold">† {formatDate(d.deceasedDate)}</p>}
+                            {d.breederName && <p className="text-[9px] sm:text-[11px] text-gray-500 dark:text-dark-text-muted italic">{d.breederName}</p>}
                         </div>
                     </div>
                 ) : (
                     <div className="flex gap-2.5">
                         <div className="flex-1 min-w-0 space-y-0.5 pb-4">
-                            <p className="text-[11px] text-gray-300 italic">•</p>
+                            <p className="text-[11px] text-gray-300 dark:text-dark-border italic">•</p>
                         </div>
                     </div>
                 )}
-                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
+                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800 dark:text-dark-text">{d.ctcId}</p>}
             </div>
         );
     };
@@ -169,14 +169,14 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
             {showVertCert && <PedigreeChart vertical animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowVertCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
             <div className="mt-6 space-y-4">
                 <div>
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Parents (Gen 1)</p>
+                    <p className="text-sm font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wider mb-2">Parents (Gen 1)</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {renderSlot('sire', 'Sire')}
                         {renderSlot('dam', 'Dam')}
                     </div>
                 </div>
                 <div>
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Grandparents (Gen 2)</p>
+                    <p className="text-sm font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wider mb-2">Grandparents (Gen 2)</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                         {renderSlot('sireSire', 'Paternal Grandsire')}
                         {renderSlot('sireDam', 'Paternal Granddam')}
@@ -185,7 +185,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
                     </div>
                 </div>
                 <div>
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Great-Grandparents (Gen 3)</p>
+                    <p className="text-sm font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wider mb-2">Great-Grandparents (Gen 3)</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             {renderSlot('sireSireSire', 'PGS Great Grandsire')}
                             {renderSlot('sireDamSire', 'PGD Great Grandsire')}

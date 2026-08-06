@@ -22,12 +22,12 @@ export const getEventIcon = (type) => {
         'keeper': <User size={14} className="text-slate-500" />,
         'show': <Trophy size={14} className="text-amber-500" />,
         'milestones': <Target size={14} className="text-purple-500" />,
-        'status': <Calendar size={14} className="text-gray-600" />,
-        'feeding': <UtensilsCrossed size={14} className="text-green-600" />,
-        'care': <Droplets size={14} className="text-blue-600" />,
-        'field': <FileEdit size={14} className="text-gray-500" />
+        'status': <Calendar size={14} className="text-gray-600 dark:text-dark-text-secondary" />,
+        'feeding': <UtensilsCrossed size={14} className="text-green-600 dark:text-green-400" />,
+        'care': <Droplets size={14} className="text-blue-600 dark:text-blue-400" />,
+        'field': <FileEdit size={14} className="text-gray-500 dark:text-dark-text-muted" />
     };
-    return icons[type] || <Calendar size={14} className="text-gray-400" />;
+    return icons[type] || <Calendar size={14} className="text-gray-400 dark:text-dark-text-muted" />;
 };
 
 // Turns a raw AnimalLog value into readable text for timeline descriptions.
@@ -79,31 +79,31 @@ const TimelineEvent = ({ event, notes, isPinned }) => (
         {/* Icon */}
         <div className="flex items-center absolute top-0 left-0">
             <div className={`rounded-full h-9 w-9 flex items-center justify-center ring-4 shadow-sm ${
-                isPinned ? 'bg-yellow-300 text-yellow-800 ring-yellow-100' : 'bg-white text-gray-700 ring-gray-100 border border-gray-300'
+                isPinned ? 'bg-yellow-300 text-yellow-800 dark:text-yellow-300 ring-yellow-100 dark:ring-yellow-800/40' : 'bg-white dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary ring-gray-100 dark:ring-dark-border border border-gray-300 dark:border-dark-border'
             }`}>
                 {isPinned ? <Star size={14} fill="currentColor" /> : getEventIcon(event.type)}
             </div>
         </div>
         {/* Content */}
-        <div className="ml-2 bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+        <div className="ml-2 bg-white dark:bg-dark-card-bg rounded-lg p-3 shadow-sm border border-gray-200 dark:border-dark-border hover:shadow-md transition-shadow">
             <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2 mb-1">
-                <p className={`font-semibold text-sm ${isPinned ? 'text-yellow-800' : 'text-gray-900'}`}>
+                <p className={`font-semibold text-sm ${isPinned ? 'text-yellow-800 dark:text-yellow-300' : 'text-gray-900 dark:text-dark-text'}`}>
                     {event.title}
                     {isPinned && <Star size={12} className="inline ml-1" fill="currentColor" />}
                 </p>
-                <time className="text-xs font-medium text-gray-600 whitespace-nowrap">{formatDate(event.date)}</time>
+                <time className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary whitespace-nowrap">{formatDate(event.date)}</time>
             </div>
-            {event.description && <p className="text-xs text-gray-700 mb-2">{renderBoldText(event.description)}</p>}
+            {event.description && <p className="text-xs text-gray-700 dark:text-dark-text-secondary mb-2">{renderBoldText(event.description)}</p>}
             {notes && notes.length > 0 && (
                 <div className="mt-2 space-y-1">
                     {notes.map(note => (
-                        <div key={note.id} className="text-xs bg-blue-50 p-2 rounded border border-blue-300">
-                            <div className="flex gap-1 mb-1 items-center text-blue-800 font-medium">
+                        <div key={note.id} className="text-xs bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-300">
+                            <div className="flex gap-1 mb-1 items-center text-blue-800 dark:text-blue-300 font-medium">
                                 <MessageSquare size={12} />
                                 <span>Note</span>
                             </div>
-                            <p className="text-gray-800">{note.noteText}</p>
-                            <p className="text-gray-600 text-[10px] mt-1">{formatDate(note.dateAdded)}</p>
+                            <p className="text-gray-800 dark:text-dark-text">{note.noteText}</p>
+                            <p className="text-gray-600 dark:text-dark-text-secondary text-[10px] mt-1">{formatDate(note.dateAdded)}</p>
                         </div>
                     ))}
                 </div>
@@ -498,7 +498,7 @@ export const TimelineTabContent = ({ animal, API_BASE_URL, authToken }) => {
 
     if (allEvents.length === 0) {
         return (
-            <div className="bg-white rounded-lg p-6 flex flex-col items-center justify-center h-64 text-gray-400">
+            <div className="bg-white dark:bg-dark-card-bg rounded-lg p-6 flex flex-col items-center justify-center h-64 text-gray-400 dark:text-dark-text-muted">
                 <Calendar size={48} className="mb-2" />
                 <p className="text-sm">No timeline events recorded.</p>
             </div>
@@ -506,8 +506,8 @@ export const TimelineTabContent = ({ animal, API_BASE_URL, authToken }) => {
     }
 
     return (
-        <div className="bg-white rounded-lg p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white dark:bg-dark-card-bg rounded-lg p-6 space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-4">
                 <Clock size={18} className="inline-block align-middle mr-2" /> 
                 Animal Timeline
             </h3>
@@ -515,7 +515,7 @@ export const TimelineTabContent = ({ animal, API_BASE_URL, authToken }) => {
             <div className="max-w-3xl mx-auto space-y-4">
                 {/* Pinned Events */}
                 {pinnedEventsList.length > 0 && (
-                    <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-700/60">
                         <h4 className="text-sm font-semibold text-yellow-900 uppercase mb-4 flex items-center gap-2">
                             <Star size={14} fill="currentColor" /> Pinned Events
                         </h4>
@@ -536,7 +536,7 @@ export const TimelineTabContent = ({ animal, API_BASE_URL, authToken }) => {
                 {regularEventsList.length > 0 && (
                     <div>
                         {pinnedEventsList.length > 0 && (
-                            <h4 className="text-sm font-semibold text-gray-800 uppercase mb-4">All Events</h4>
+                            <h4 className="text-sm font-semibold text-gray-800 dark:text-dark-text uppercase mb-4">All Events</h4>
                         )}
                         <div className="space-y-3">
                             {regularEventsList.map((event) => (

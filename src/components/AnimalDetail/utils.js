@@ -33,10 +33,10 @@ export const DetailJsonList = ({ label, data, renderItem }) => {
     
     return (
         <div>
-            <span className="text-gray-600 text-sm font-semibold">{label}:</span>
+            <span className="text-gray-600 dark:text-dark-text-secondary text-sm font-semibold">{label}:</span>
             <ul className="text-sm mt-1 list-disc list-inside space-y-1">
                 {parsed.map((item, i) => (
-                    <li key={i} className="text-gray-700">
+                    <li key={i} className="text-gray-700 dark:text-dark-text-secondary">
                         {renderItem(item)}
                     </li>
                 ))}
@@ -160,36 +160,36 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
 
     if (!parentId) {
         return (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                <p className="text-gray-500 text-sm">No {parentType.toLowerCase()} recorded</p>
+            <div className="border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg p-4 text-center">
+                <p className="text-gray-500 dark:text-dark-text-muted text-sm">No {parentType.toLowerCase()} recorded</p>
             </div>
         );
     }
 
     if (loading) {
         return (
-            <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
-                <Loader2 size={24} className="animate-spin text-gray-400" />
+            <div className="border-2 border-gray-300 dark:border-dark-border rounded-lg p-4 flex justify-center items-center">
+                <Loader2 size={24} className="animate-spin text-gray-400 dark:text-dark-text-muted" />
             </div>
         );
     }
 
     if (notFound || (!foundViaOwned && !parentData?.isDisplay)) {
         return (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <EyeOff size={24} className="text-gray-400" />
+            <div className="border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg p-4 text-center">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-dark-surface rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <EyeOff size={24} className="text-gray-400 dark:text-dark-text-muted" />
                 </div>
-                <p className="text-gray-600 text-sm font-semibold">Private {parentType}</p>
-                <p className="text-xs text-gray-400 mt-0.5">This animal is not public</p>
+                <p className="text-gray-600 dark:text-dark-text-secondary text-sm font-semibold">Private {parentType}</p>
+                <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-0.5">This animal is not public</p>
             </div>
         );
     }
 
     if (!parentData) {
         return (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                <p className="text-gray-500 text-sm">Loading {parentType.toLowerCase()} data...</p>
+            <div className="border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg p-4 text-center">
+                <p className="text-gray-500 dark:text-dark-text-muted text-sm">Loading {parentType.toLowerCase()} data...</p>
             </div>
         );
     }
@@ -198,29 +198,29 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
 
     return (
         <div 
-            className="border-2 border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+            className="border-2 border-gray-300 dark:border-dark-border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => onViewAnimal && onViewAnimal(parentData)}
         >
-            <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
-                <p className="text-xs font-semibold text-gray-600">{parentType}</p>
+            <div className="bg-gray-50 dark:bg-dark-surface px-3 py-2 border-b border-gray-300 dark:border-dark-border">
+                <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary">{parentType}</p>
             </div>
             <div className="p-4">
                 <div className="flex items-center space-x-3">
                     {imgSrc ? (
                         <img src={imgSrc} alt={parentData.name} className="w-16 h-16 rounded-lg object-cover" />
                     ) : (
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                            <Cat size={32} className="text-gray-400" />
+                        <div className="w-16 h-16 bg-gray-200 dark:bg-dark-surface rounded-lg flex items-center justify-center">
+                            <Cat size={32} className="text-gray-400 dark:text-dark-text-muted" />
                         </div>
                     )}
                     <div className="flex-grow">
-                        <p className="font-semibold text-gray-800">
+                        <p className="font-semibold text-gray-800 dark:text-dark-text">
                             {parentData.prefix && `${parentData.prefix} `}{parentData.name}{parentData.suffix && ` ${parentData.suffix}`}
                         </p>
                         {[parentData.color, parentData.coatPattern, parentData.coat, parentData.earset].filter(Boolean).join(' ') && (
-                            <p className="text-xs text-gray-500 mt-0.5">{[parentData.color, parentData.coatPattern, parentData.coat, parentData.earset].filter(Boolean).join(' ')}</p>
+                            <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">{[parentData.color, parentData.coatPattern, parentData.coat, parentData.earset].filter(Boolean).join(' ')}</p>
                         )}
-                        <p className="text-xs text-gray-600 font-mono mt-0.5">{parentData.id_public}</p>
+                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary font-mono mt-0.5">{parentData.id_public}</p>
                     </div>
                 </div>
             </div>
@@ -232,12 +232,12 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
 export const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
     if (!parent) {
         return (
-            <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200" style={{ width: 'auto', minWidth: '180px' }}>
-                <div className="w-10 h-10 bg-gray-200 rounded-md flex items-center justify-center flex-shrink-0">
-                    <Cat size={20} className="text-gray-400" />
+            <div className="flex items-center space-x-2 bg-gray-50 dark:bg-dark-surface rounded-lg p-2 border border-gray-200 dark:border-dark-border" style={{ width: 'auto', minWidth: '180px' }}>
+                <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-md flex items-center justify-center flex-shrink-0">
+                    <Cat size={20} className="text-gray-400 dark:text-dark-text-muted" />
                 </div>
                 <div className="flex-grow">
-                    <p className="text-xs text-gray-500 italic">{label} unknown</p>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted italic">{label} unknown</p>
                 </div>
             </div>
         );
@@ -248,11 +248,11 @@ export const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
 
     return (
         <div 
-            className={`flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200 ${isClickable ? 'cursor-pointer hover:bg-gray-100' : 'opacity-75'} transition`}
+            className={`flex items-center space-x-2 bg-gray-50 dark:bg-dark-surface rounded-lg p-2 border border-gray-200 dark:border-dark-border ${isClickable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover' : 'opacity-75'} transition`}
             style={{ width: 'auto', minWidth: '180px' }}
             onClick={isClickable ? (() => onViewAnimal && onViewAnimal(parent)) : undefined}
         >
-            <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
                 {parent.imageUrl || parent.photoUrl ? (
                     <img 
                         src={parent.imageUrl || parent.photoUrl} 
@@ -260,7 +260,7 @@ export const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
                         className="w-full h-full object-cover"
                     />
                 ) : (
-                    <Cat size={20} className="text-gray-400" />
+                    <Cat size={20} className="text-gray-400 dark:text-dark-text-muted" />
                 )}
             </div>
             <div className="flex items-center space-x-1 flex-grow">
@@ -273,11 +273,11 @@ export const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
                     </div>
                 )}
                 <div className="flex-grow min-w-0">
-                    <p className="text-xs font-semibold text-gray-800 truncate">
+                    <p className="text-xs font-semibold text-gray-800 dark:text-dark-text truncate">
                         {parent.prefix && `${parent.prefix} `}
                         {parent.name}
                     </p>
-                    <p className="text-xs text-gray-600 font-mono">
+                    <p className="text-xs text-gray-600 dark:text-dark-text-secondary font-mono">
                         {parent.id_public}
                     </p>
                 </div>
@@ -357,18 +357,18 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
     }, [fetchOffspringData]);
 
     return (
-        <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Offspring</h3>
+        <div className="bg-white dark:bg-dark-card-bg border-2 border-gray-300 dark:border-dark-border rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-4">Offspring</h3>
             {loading ? (
                 <div className="flex justify-center py-8">
-                    <Loader2 size={24} className="animate-spin text-gray-400" />
+                    <Loader2 size={24} className="animate-spin text-gray-400 dark:text-dark-text-muted" />
                 </div>
             ) : (!offspring || offspring.length === 0) ? (
-                <p className="text-gray-500 text-sm italic">Offspring are not public or no offspring recorded.</p>
+                <p className="text-gray-500 dark:text-dark-text-muted text-sm italic">Offspring are not public or no offspring recorded.</p>
             ) : (
                 <div className="space-y-6">
                     {offspring.map((litter, index) => (
-                    <div key={litter.litterId || index} className="border-2 border-gray-200 rounded-lg p-4">
+                    <div key={litter.litterId || index} className="border-2 border-gray-200 dark:border-dark-border rounded-lg p-4">
                         {/* Parent Cards at Top - Centered on desktop, stacked on mobile */}
                         <div className="flex flex-col sm:flex-row items-center gap-3 mb-3 justify-center">
                             {/* Father Card */}
@@ -392,18 +392,18 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
 
                         {/* Litter Info - Centered */}
                         <div className="flex justify-center mb-4">
-                            <div className="bg-gray-50 rounded-lg px-4 py-2 border border-gray-200 inline-block">
+                            <div className="bg-gray-50 dark:bg-dark-surface rounded-lg px-4 py-2 border border-gray-200 dark:border-dark-border inline-block">
                                 {litter.litter_id_public && (
-                                    <p className="text-xs font-mono bg-gray-300 text-gray-800 px-2 py-1 rounded mb-2 text-center">
+                                    <p className="text-xs font-mono bg-gray-300 text-gray-800 dark:text-dark-text px-2 py-1 rounded mb-2 text-center">
                                         {litter.litter_id_public}
                                     </p>
                                 )}
                                 {litter.litterName && (
-                                    <p className="text-sm font-semibold text-gray-800 text-center mb-1">
+                                    <p className="text-sm font-semibold text-gray-800 dark:text-dark-text text-center mb-1">
                                         {litter.litterName}
                                     </p>
                                 )}
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
+                                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                     <span>Born: {formatDate(litter.birthDate)}</span>
                                     {litter.numberBorn && (
                                         <>
@@ -422,11 +422,11 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                                     <div
                                         key={animal.id_public}
                                         onClick={() => onViewAnimal && onViewAnimal(animal)}
-                                        className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-2"
+                                        className="relative bg-white dark:bg-dark-card-bg rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 dark:border-dark-border pt-2"
                                     >
                                         {/* Birthdate top-left */}
                                         {animal.birthDate && (
-                                            <div className="absolute top-1.5 left-1.5 text-xs text-gray-600 bg-white/80 px-1.5 py-0.5 rounded">
+                                            <div className="absolute top-1.5 left-1.5 text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-card-bg/80 px-1.5 py-0.5 rounded">
                                                 {formatDate(animal.birthDate)}
                                             </div>
                                         )}
@@ -450,7 +450,7 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                                                     className="w-20 h-20 object-cover rounded-md" 
                                                 />
                                             ) : (
-                                                <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                     <Cat size={32} />
                                                 </div>
                                             )}
@@ -477,25 +477,25 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                                         
                                         {/* Name */}
                                         <div className="w-full text-center px-2 pb-1">
-                                            <div className="text-sm font-semibold text-gray-800 truncate">
+                                            <div className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">
                                                 {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                             </div>
                                         </div>
 
                                         {/* ID bottom-right */}
                                         <div className="w-full px-2 pb-2 flex justify-end">
-                                            <div className="text-xs text-gray-500">{animal.id_public}</div>
+                                            <div className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</div>
                                         </div>
                                         
                                         {/* Status bar */}
-                                        <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
-                                            <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                                        <div className="w-full bg-gray-100 dark:bg-dark-surface py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto">
+                                            <div className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{animal.status || 'Unknown'}</div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm text-gray-500 italic">No offspring recorded in this litter.</p>
+                            <p className="text-sm text-gray-500 dark:text-dark-text-muted italic">No offspring recorded in this litter.</p>
                         )}
                     </div>
                 ))}

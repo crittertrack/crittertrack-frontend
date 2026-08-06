@@ -20,7 +20,7 @@ export const BreedingTabContent = ({ animal }) => {
 
     if (!hasAnyData) {
         return (
-            <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg text-gray-400">
+            <div className="flex flex-col items-center justify-center h-64 bg-gray-50 dark:bg-dark-surface rounded-lg text-gray-400 dark:text-dark-text-muted">
                 <Leaf size={48} className="mb-2" />
                 <p className="text-sm">No fertility information recorded.</p>
             </div>
@@ -29,7 +29,7 @@ export const BreedingTabContent = ({ animal }) => {
 
     return (
         <div className="space-y-6">
-                <InfoCard title="Reproductive Status" icon={<Leaf size={18} className="text-gray-400" />}>
+                <InfoCard title="Reproductive Status" icon={<Leaf size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {hasReproStatus ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {!hidden('isNeutered') && <InfoItem label="Neutered/Spayed" value={animal.isNeutered ? 'Yes' : 'No'} />}
@@ -39,15 +39,15 @@ export const BreedingTabContent = ({ animal }) => {
                             {isFemale && !animal.isNeutered && <InfoItem label={label('isPregnant', 'Pregnant')} value={animal.isPregnant ? 'Yes' : 'No'} />}
                             {isFemale && !animal.isNeutered && !hidden('isNursing') && <InfoItem label="Nursing" value={animal.isNursing ? 'Yes' : 'No'} />}
                             {animal.reproductiveStateOverride && (
-                                <div className="p-2 bg-purple-50 border-l-4 border-purple-400">
-                                    <p className="text-xs font-semibold text-purple-700">Reproductive State Override</p>
+                                <div className="p-2 bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-400">
+                                    <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">Reproductive State Override</p>
                                     {animal.reproductiveStateOverrideReason && <p className="text-sm text-purple-900">{animal.reproductiveStateOverrideReason}</p>}
                                 </div>
                             )}
                         </div>
-                    ) : <p className="text-sm text-gray-400">No reproductive status information recorded.</p>}
+                    ) : <p className="text-sm text-gray-400 dark:text-dark-text-muted">No reproductive status information recorded.</p>}
                 </InfoCard>
-                <InfoCard title="Estrus/Cycle Information" icon={<RefreshCw size={18} className="text-gray-400" />}>
+                <InfoCard title="Estrus/Cycle Information" icon={<RefreshCw size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {!hidden('heatStatus') && (hasCycleInfo || isFemale) ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.heatStatus && <InfoItem label="Heat Status" value={animal.heatStatus} />}
@@ -58,11 +58,11 @@ export const BreedingTabContent = ({ animal }) => {
                             {animal.currentReproductiveEventPhase && <InfoItem label="Current Reproductive Phase" value={animal.currentReproductiveEventPhase} />}
                             {animal.reproductiveEventCycleLength && <InfoItem label="Reproductive Event Cycle Length" value={`${animal.reproductiveEventCycleLength} days`} />}
                         </div>
-                    ) : <p className="text-sm text-gray-400">No estrus or cycle information recorded.</p>}
+                    ) : <p className="text-sm text-gray-400 dark:text-dark-text-muted">No estrus or cycle information recorded.</p>}
                 </InfoCard>
                 {/* Mating & Conception */}
                 {(animal.matingDate || animal.lastMatingDate || animal.lastConceptionDate || animal.successfulConceptionCount) && (
-                    <InfoCard title="Mating & Conception History" icon={<RefreshCw size={18} className="text-gray-400" />}>
+                    <InfoCard title="Mating & Conception History" icon={<RefreshCw size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.matingDate && <InfoItem label="Mating Date" value={formatDate(animal.matingDate)} />}
                             {animal.lastMatingDate && <InfoItem label="Last Mating Date" value={formatDate(animal.lastMatingDate)} />}
@@ -74,7 +74,7 @@ export const BreedingTabContent = ({ animal }) => {
                 )}
                 {/* Pregnancy & Development */}
                 {(animal.expectedDueDate || animal.developmentPeriodStart || animal.developmentPeriodLength || animal.expectedDeliveryDate || animal.developmentMethod) && (
-                    <InfoCard title="Pregnancy & Development" icon={<Leaf size={18} className="text-gray-400" />}>
+                    <InfoCard title="Pregnancy & Development" icon={<Leaf size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.expectedDueDate && <InfoItem label={label('expectedDueDate', 'Expected Due Date')} value={formatDate(animal.expectedDueDate)} />}
                             {animal.developmentPeriodStart && <InfoItem label="Development Period Start" value={formatDate(animal.developmentPeriodStart)} />}
@@ -86,7 +86,7 @@ export const BreedingTabContent = ({ animal }) => {
                 )}
                 {/* Sire/Male Information - Only show for Male or Intersex/Unknown */}
                 {isMale && (
-                    <InfoCard title="Sire/Male Information" icon={<Mars size={18} className="text-gray-400" />}>
+                    <InfoCard title="Sire/Male Information" icon={<Mars size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         {hasSireInfo ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {animal.fertilityStatus && <InfoItem label="Fertility Status" value={animal.fertilityStatus} />}
@@ -95,12 +95,12 @@ export const BreedingTabContent = ({ animal }) => {
                                 {animal.reproductiveClearances && !hidden('reproductiveClearances') && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem></div>}
                                 {animal.reproductiveComplications && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem></div>}
                             </div>
-                        ) : <p className="text-sm text-gray-400">No sire-specific fertility information recorded.</p>}
+                        ) : <p className="text-sm text-gray-400 dark:text-dark-text-muted">No sire-specific fertility information recorded.</p>}
                     </InfoCard>
                 )}
                 {/* Dam/Female Information - Only show for Female or Intersex/Unknown */}
                 {isFemale && (
-                    <InfoCard title="Dam/Female Information" icon={<Venus size={18} className="text-gray-400" />}>
+                    <InfoCard title="Dam/Female Information" icon={<Venus size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         {hasDamInfo ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {animal.fertilityStatus && <InfoItem label="Fertility Status" value={animal.fertilityStatus} />}
@@ -111,12 +111,12 @@ export const BreedingTabContent = ({ animal }) => {
                                 {animal.reproductiveClearances && !hidden('reproductiveClearances') && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Clearances"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveClearances}</p></InfoItem></div>}
                                 {animal.reproductiveComplications && <div className="md:col-span-2 lg:col-span-3"><InfoItem label="Reproductive Complications"><p className="whitespace-pre-wrap text-sm">{animal.reproductiveComplications}</p></InfoItem></div>}
                             </div>
-                        ) : <p className="text-sm text-gray-400">No dam-specific fertility information recorded.</p>}
+                        ) : <p className="text-sm text-gray-400 dark:text-dark-text-muted">No dam-specific fertility information recorded.</p>}
                     </InfoCard>
                 )}
                 {/* Offspring & Litter Information */}
                 {(animal.litterCount || animal.litterSizeBorn || animal.litterSizeWeaned || animal.totalOffspringProduced || animal.viableOffspringCount || animal.offspringCount) && (
-                    <InfoCard title="Offspring & Litter Information" icon={<Leaf size={18} className="text-gray-400" />}>
+                    <InfoCard title="Offspring & Litter Information" icon={<Leaf size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.litterCount && <InfoItem label={label('litterCount', 'Litter Count')} value={animal.litterCount} />}
                             {animal.litterSizeBorn && <InfoItem label={label('litterSizeBorn', 'Litter Size (Born)')} value={animal.litterSizeBorn} />}
@@ -131,10 +131,10 @@ export const BreedingTabContent = ({ animal }) => {
                 )}
                 {/* Breeding Records */}
                 {animal.breedingRecords && Array.isArray(animal.breedingRecords) && animal.breedingRecords.length > 0 && (
-                    <InfoCard title="Breeding Records" icon={<RefreshCw size={18} className="text-gray-400" />}>
+                    <InfoCard title="Breeding Records" icon={<RefreshCw size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         <div className="space-y-3">
                             {animal.breedingRecords.map((record, idx) => (
-                                <div key={record.id || idx} className="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
+                                <div key={record.id || idx} className="p-3 bg-gray-50 dark:bg-dark-surface rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                                         {record.breedingMethod && <div><span className="font-semibold">Method:</span> {record.breedingMethod}</div>}
                                         {record.matingDate && <div><span className="font-semibold">Mating Date:</span> {formatDate(record.matingDate)}</div>}
@@ -143,7 +143,7 @@ export const BreedingTabContent = ({ animal }) => {
                                         {record.birthEventDate && <div><span className="font-semibold">Birth Date:</span> {formatDate(record.birthEventDate)}</div>}
                                         {record.litterSizeBorn && <div><span className="font-semibold">Litter Size:</span> {record.litterSizeBorn}</div>}
                                     </div>
-                                    {record.notes && <p className="text-xs text-gray-600 whitespace-pre-wrap">{record.notes}</p>}
+                                    {record.notes && <p className="text-xs text-gray-600 dark:text-dark-text-secondary whitespace-pre-wrap">{record.notes}</p>}
                                 </div>
                             ))}
                         </div>
@@ -151,12 +151,12 @@ export const BreedingTabContent = ({ animal }) => {
                 )}
                 {/* Pregnancy History */}
                 {animal.pregnancyHistory && Array.isArray(animal.pregnancyHistory) && animal.pregnancyHistory.length > 0 && (
-                    <InfoCard title="Pregnancy History" icon={<Leaf size={18} className="text-gray-400" />}>
+                    <InfoCard title="Pregnancy History" icon={<Leaf size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         <div className="space-y-2">
-                            <p className="text-sm text-gray-600">Total confirmations: {animal.pregnancyHistory.length}</p>
+                            <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Total confirmations: {animal.pregnancyHistory.length}</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 {animal.pregnancyHistory.map((date, idx) => (
-                                    <div key={idx} className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
+                                    <div key={idx} className="p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded text-sm">
                                         <span className="font-semibold">🤰 Confirmed:</span> {formatDate(date)}
                                     </div>
                                 ))}
@@ -166,7 +166,7 @@ export const BreedingTabContent = ({ animal }) => {
                 )}
                 {/* Nursing & Dependency */}
                 {(animal.nursingStartDate || animal.weaningDate || animal.dependentCareRequired || animal.dependentCareEndDate) && !hidden('nursingStartDate') && (
-                    <InfoCard title="Nursing & Dependency" icon={<Leaf size={18} className="text-gray-400" />}>
+                    <InfoCard title="Nursing & Dependency" icon={<Leaf size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.nursingStartDate && <InfoItem label="Nursing Start Date" value={formatDate(animal.nursingStartDate)} />}
                             {animal.weaningDate && <InfoItem label="Weaning Date" value={formatDate(animal.weaningDate)} />}
@@ -177,7 +177,7 @@ export const BreedingTabContent = ({ animal }) => {
                 )}
                 {/* Artificial Reproduction */}
                 {(animal.artificialInseminationUsed || animal.artificialReproductionMethod) && !hidden('artificialInseminationUsed') && (
-                    <InfoCard title="Artificial Reproduction Methods" icon={<Leaf size={18} className="text-gray-400" />}>
+                    <InfoCard title="Artificial Reproduction Methods" icon={<Leaf size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {animal.artificialInseminationUsed !== undefined && <InfoItem label="Artificial Insemination Used" value={animal.artificialInseminationUsed ? 'Yes' : 'No'} />}
                             {animal.artificialReproductionMethod && <InfoItem label="Artificial Reproduction Method" value={animal.artificialReproductionMethod} />}

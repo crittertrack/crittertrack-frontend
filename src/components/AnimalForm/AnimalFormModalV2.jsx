@@ -46,7 +46,7 @@ const getSpeciesCategory = (species) => {
 const LoadingSpinner = ({ message = 'Loading...' }) => (
     <div className="flex items-center justify-center p-8">
         <Loader2 className="animate-spin text-primary-dark mr-2" size={24} />
-        <span className="text-gray-600">{message}</span>
+        <span className="text-gray-600 dark:text-dark-text-secondary">{message}</span>
     </div>
 );
 
@@ -84,7 +84,7 @@ const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-co
     };
 
     if (!imageSrc || imageError) {
-        return <Cat size={iconSize} className="text-gray-400" />;
+        return <Cat size={iconSize} className="text-gray-400 dark:text-dark-text-muted" />;
     }
 
     return (
@@ -153,13 +153,13 @@ const getContactInfoString = (contact) => {
 
 const ContactDisplayField = ({ label, value, onEdit }) => (
     <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600">{label}</label>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-dark-text-secondary">{label}</label>
         <div
             onClick={onEdit}
-            className="mt-1 flex justify-between items-center p-2.5 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer hover:border-primary"
+            className="mt-1 flex justify-between items-center p-2.5 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg cursor-pointer hover:border-primary"
         >
-            <span className={`text-sm ${value ? "text-gray-900" : "text-gray-400"}`}>{value || `Click to assign ${label}`}</span>
-            <Edit size={16} className="text-gray-400" />
+            <span className={`text-sm ${value ? "text-gray-900 dark:text-dark-text" : "text-gray-400 dark:text-dark-text-muted"}`}>{value || `Click to assign ${label}`}</span>
+            <Edit size={16} className="text-gray-400 dark:text-dark-text-muted" />
         </div>
     </div>
 );
@@ -197,14 +197,14 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
 
     return (
         <div className="fixed inset-0 bg-black/50 z-[90] flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
                 <div className="p-4 border-b">
                     <h3 className="text-lg font-semibold">Assign {target}</h3>
                 </div>
                 <div className="p-4 border-b flex gap-2">
-                    <button type="button" onClick={() => setMode('user')} className={`px-3 py-1 text-sm rounded-full ${mode === 'user' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200'}`}>Search User</button>
-                    <button type="button" onClick={() => setMode('contact')} className={`px-3 py-1 text-sm rounded-full ${mode === 'contact' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200'}`}>Select Contact</button>
-                    <button type="button" onClick={() => setMode('manual')} className={`px-3 py-1 text-sm rounded-full ${mode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200'}`}>Manual Entry</button>
+                    <button type="button" onClick={() => setMode('user')} className={`px-3 py-1 text-sm rounded-full ${mode === 'user' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Search User</button>
+                    <button type="button" onClick={() => setMode('contact')} className={`px-3 py-1 text-sm rounded-full ${mode === 'contact' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Select Contact</button>
+                    <button type="button" onClick={() => setMode('manual')} className={`px-3 py-1 text-sm rounded-full ${mode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Manual Entry</button>
                 </div>
                 <div className="p-4 overflow-y-auto flex-1">
                     {mode === 'user' && (
@@ -215,9 +215,9 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                             </div>
                             <div className="space-y-1">
                                 {searchResults.map(user => (
-                                    <div key={user.id_public} onClick={() => onSelect({ name: user.breederName || user.personalName, userId: user.id_public })} className="p-2 border rounded-md hover:bg-gray-100 cursor-pointer">
+                                    <div key={user.id_public} onClick={() => onSelect({ name: user.breederName || user.personalName, userId: user.id_public })} className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer">
                                         <p className="font-semibold">{user.breederName || user.personalName}</p>
-                                        <p className="text-xs text-gray-500">{user.id_public}</p>
+                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">{user.id_public}</p>
                                     </div>
                                 ))}
                             </div>
@@ -226,9 +226,9 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                     {mode === 'contact' && (
                         <div className="space-y-1">
                             {loadingContacts ? <Loader2 className="animate-spin" /> : contacts.map(contact => (
-                                <div key={contact._id} onClick={() => onSelect({ name: getContactDisplayName(contact), userId: contact.linkedCTUID, contactInfo: getContactInfoString(contact) })} className="p-2 border rounded-md hover:bg-gray-100 cursor-pointer">
+                                <div key={contact._id} onClick={() => onSelect({ name: getContactDisplayName(contact), userId: contact.linkedCTUID, contactInfo: getContactInfoString(contact) })} className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer">
                                     <p className="font-semibold">{getContactDisplayName(contact)}</p>
-                                    {contact.linkedCTUID && <p className="text-xs text-gray-500">{contact.linkedCTUID}</p>}
+                                    {contact.linkedCTUID && <p className="text-xs text-gray-500 dark:text-dark-text-muted">{contact.linkedCTUID}</p>}
                                 </div>
                             ))}
                         </div>
@@ -241,7 +241,7 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                     )}
                 </div>
                 <div className="p-4 border-t">
-                    <button type="button" onClick={onClose} className="w-full p-2 bg-gray-200 rounded-md">Cancel</button>
+                    <button type="button" onClick={onClose} className="w-full p-2 bg-gray-200 dark:bg-dark-surface rounded-md">Cancel</button>
                 </div>
             </div>
         </div>
@@ -272,18 +272,18 @@ const ParentSearchModal = ({
 
         return (
             <div
-                className="flex items-center space-x-3 p-3 border-b hover:bg-gray-50 cursor-pointer"
+                className="flex items-center space-x-3 p-3 border-b hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer"
                 onClick={() => onSelect(animal)}
             >
-                <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} />
                 </div>
                 <div className="flex-grow">
-                    <p className="font-semibold text-gray-800">
+                    <p className="font-semibold text-gray-800 dark:text-dark-text">
                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                     </p>
-                    <p className="text-xs text-gray-500">{animal.id_public}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</p>
+                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                         {animal.species} &bull; {animal.gender} &bull; {animal.status || 'Unknown'}
                     </p>
                 </div>
@@ -339,17 +339,17 @@ const ParentSearchModal = ({
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[100]">
-            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">{title} Selector</h3>
-                    <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">{title} Selector</h3>
+                    <button type="button" onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={24} /></button>
                 </div>
                 <div className="mb-3">
                     <div className="flex items-center space-x-2 mb-2">
-                        <span className="text-sm font-medium text-gray-600">Search Scope:</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Search Scope:</span>
                         {['local', 'global', 'both'].map(s => (
                             <button key={s} type="button" onClick={() => setScope(s)}
-                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>
                                 {s.charAt(0).toUpperCase() + s.slice(1)}
                             </button>
                         ))}
@@ -360,7 +360,7 @@ const ParentSearchModal = ({
                             placeholder="Search by Name or ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="flex-grow p-2 border border-gray-300 rounded-lg"
+                            className="flex-grow p-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                         />
                         <button
                             type="button"
@@ -374,26 +374,26 @@ const ParentSearchModal = ({
                 </div>
                 <div className="flex-grow overflow-y-auto space-y-4">
                     {loadingLocal ? <LoadingSpinner message="Searching your animals..." /> : localAnimals.length > 0 && (
-                        <div className="border p-3 rounded-lg bg-white shadow-sm">
-                            <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>
+                        <div className="border p-3 rounded-lg bg-white dark:bg-dark-card-bg shadow-sm">
+                            <h4 className="font-bold text-gray-700 dark:text-dark-text-secondary mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>
                             {localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={false} />)}
                         </div>
                     )}
                     {loadingGlobal ? <LoadingSpinner message="Searching global animals..." /> : globalAnimals.length > 0 && (
-                        <div className="border p-3 rounded-lg bg-white shadow-sm">
-                            <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Global Animals ({globalAnimals.length})</h4>
+                        <div className="border p-3 rounded-lg bg-white dark:bg-dark-card-bg shadow-sm">
+                            <h4 className="font-bold text-gray-700 dark:text-dark-text-secondary mb-2 border-b pb-1">Global Animals ({globalAnimals.length})</h4>
                             {globalAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={true} />)}
                         </div>
                     )}
                     {hasSearched && !loadingLocal && !loadingGlobal && localAnimals.length === 0 && globalAnimals.length === 0 && (
-                        <p className="text-center text-gray-500 py-4">No animals found.</p>
+                        <p className="text-center text-gray-500 dark:text-dark-text-muted py-4">No animals found.</p>
                     )}
                 </div>
                 <div className="mt-4 pt-4 border-t">
                     <button
                         type="button"
                         onClick={() => onSelect(null)}
-                        className="w-full text-sm text-gray-500 hover:text-red-500 transition"
+                        className="w-full text-sm text-gray-500 dark:text-dark-text-muted hover:text-red-500 transition"
                     >
                         Clear Selection
                     </button>
@@ -698,11 +698,11 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="sticky top-0 bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-gray-800">Edit Image ({progress})</h2>
-                    <button type="button" onClick={onCancel} className="text-gray-400 hover:text-gray-600">
+                <div className="sticky top-0 bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border px-6 py-4 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Edit Image ({progress})</h2>
+                    <button type="button" onClick={onCancel} className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary">
                         <X size={24} />
                     </button>
                 </div>
@@ -710,7 +710,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                 {/* Content */}
                 <div className="p-6 space-y-4">
                     {/* Preview */}
-                    <div ref={previewContainerRef} className="relative bg-gray-100 rounded-lg p-4 flex items-center justify-center h-96 overflow-hidden">
+                    <div ref={previewContainerRef} className="relative bg-gray-100 dark:bg-dark-surface rounded-lg p-4 flex items-center justify-center h-96 overflow-hidden">
                         <img
                             ref={imgRef}
                             style={getRotationStyle()}
@@ -750,10 +750,10 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                     </div>
 
                     {/* Controls */}
-                    <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                    <div className="space-y-3 bg-gray-50 dark:bg-dark-surface p-4 rounded-lg">
                         {/* Rotate */}
                         <div>
-                            <label className="text-xs font-medium text-gray-700 block mb-2">
+                            <label className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary block mb-2">
                                 Rotation: {rotation}°
                             </label>
                             <div className="flex gap-2">
@@ -769,7 +769,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                                 <select
                                     value={rotation}
                                     onChange={(e) => setRotation(parseInt(e.target.value))}
-                                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    className="px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-sm"
                                 >
                                     <option value={0}>0°</option>
                                     <option value={90}>90°</option>
@@ -789,57 +789,57 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                                     disabled={processing}
                                     className="form-checkbox h-4 w-4 text-primary rounded"
                                 />
-                                <span className="text-xs font-medium text-gray-700">Enable Crop</span>
+                                <span className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Enable Crop</span>
                             </label>
                         </div>
 
                         {/* Crop Controls */}
                         {cropMode && (
-                            <div className="bg-white p-3 rounded border border-gray-200 space-y-2">
-                                <p className="text-xs text-gray-500">Drag the corners or adjust dimensions:</p>
+                            <div className="bg-white dark:bg-dark-card-bg p-3 rounded border border-gray-200 dark:border-dark-border space-y-2">
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted">Drag the corners or adjust dimensions:</p>
                                 <div className="grid grid-cols-4 gap-2">
                                     <div>
-                                        <label className="text-xs font-medium text-gray-600">X</label>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary">X</label>
                                         <input
                                             type="number"
                                             value={cropBox.x}
                                             onChange={(e) => setCropBox({ ...cropBox, x: Math.max(0, parseInt(e.target.value)) })}
                                             min="0"
                                             max="100"
-                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                            className="w-full px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs"
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-gray-600">Y</label>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary">Y</label>
                                         <input
                                             type="number"
                                             value={cropBox.y}
                                             onChange={(e) => setCropBox({ ...cropBox, y: Math.max(0, parseInt(e.target.value)) })}
                                             min="0"
                                             max="100"
-                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                            className="w-full px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs"
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-gray-600">Width</label>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary">Width</label>
                                         <input
                                             type="number"
                                             value={cropBox.width}
                                             onChange={(e) => setCropBox({ ...cropBox, width: Math.min(100, parseInt(e.target.value)) })}
                                             min="10"
                                             max="100"
-                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                            className="w-full px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs"
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-gray-600">Height</label>
+                                        <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary">Height</label>
                                         <input
                                             type="number"
                                             value={cropBox.height}
                                             onChange={(e) => setCropBox({ ...cropBox, height: Math.min(100, parseInt(e.target.value)) })}
                                             min="10"
                                             max="100"
-                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                            className="w-full px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs"
                                         />
                                     </div>
                                 </div>
@@ -849,13 +849,13 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
 
                     {/* File Size Info */}
                     {current && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <p className="text-xs text-blue-800">
+                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg p-3">
+                            <p className="text-xs text-blue-800 dark:text-blue-300">
                                 <strong>Original:</strong> {(current.size / 1024).toFixed(1)}KB →{' '}
                                 <strong>After compression:</strong> ~100-150KB (estimated)
                             </p>
                             {fileSizeWarning && (
-                                <p className="text-xs text-amber-700 mt-2 flex items-center gap-1">
+                                <p className="text-xs text-amber-700 dark:text-amber-300 mt-2 flex items-center gap-1">
                                     <AlertTriangle size={14} />
                                     {fileSizeWarning}
                                 </p>
@@ -865,11 +865,11 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex gap-2 justify-end">
+                <div className="sticky bottom-0 bg-gray-50 dark:bg-dark-surface border-t border-gray-200 dark:border-dark-border px-6 py-4 flex gap-2 justify-end">
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50"
+                        className="px-4 py-2 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-dark-surface-hover"
                     >
                         Cancel
                     </button>
@@ -1000,18 +1000,18 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
 
     return (
         <div className="fixed inset-0 bg-black/50 z-[95] flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
                 <div className="p-4 border-b flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Assign Enclosure</h3>
-                    <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
+                    <button type="button" onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-700"><X size={20} /></button>
                 </div>
 
                 <div className="flex gap-2 p-4 border-b">
                     <button type="button" onClick={() => { setMode('search'); setSearchTerm(''); }}
-                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'search' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'search' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>
                         Search Existing
                     </button><button type="button" onClick={() => { setMode('create'); setNewEnclosureData({ name: '', enclosureType: '', location: '', capacity: '', dimensions: { length: '', width: '', height: '', unit: 'cm' }, temperatureRange: { min: '', max: '', unit: 'C' }, humidityRange: { min: '', max: '' }, description: '', buildingId: '', roomId: '', purpose: 'general', purposeDescription: '', lightingType: '', bedding: '', enrichment: '', lightsOnTime: '', lightsOffTime: '', lightTimeFormat: '24h' }); }}
-                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${mode === 'create' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>
                         Create New
                     </button>
                 </div>
@@ -1021,21 +1021,21 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                         <> 
                             <input type="text" placeholder="Search by name or location..." value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full py-2 px-3 text-sm border border-gray-300 rounded-md" />
-                            {loadingEnclosures && <p className="text-center text-gray-500 py-4">Loading enclosures...</p>}
-                            {!loadingEnclosures && filteredEnclosures.length === 0 && <p className="text-center text-gray-500 py-4">No enclosures found</p>}
+                                className="w-full py-2 px-3 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                            {loadingEnclosures && <p className="text-center text-gray-500 dark:text-dark-text-muted py-4">Loading enclosures...</p>}
+                            {!loadingEnclosures && filteredEnclosures.length === 0 && <p className="text-center text-gray-500 dark:text-dark-text-muted py-4">No enclosures found</p>}
                             <div className="space-y-2">
                                 {filteredEnclosures.map(enclosure => (
                                     <div key={enclosure._id}
-                                        className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                                        className="p-3 border border-gray-200 dark:border-dark-border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer transition-colors"
                                         onClick={() => { onSelect(enclosure); onClose(); }}>
                                         <div className="flex items-start gap-4">
-                                            <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                            <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
                                                 <AnimalImage src={enclosure.imageUrl} alt={enclosure.name} className="w-full h-full object-cover" iconSize={32} />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-gray-800 truncate">{enclosure.name}</p>
-                                                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
+                                                <p className="font-semibold text-gray-800 dark:text-dark-text truncate">{enclosure.name}</p>
+                                                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-dark-text-secondary">
                                                     <div className="flex items-center gap-1">
                                                         <Users size={12} />
                                                         <span>{enclosure.currentAnimals || 0} / {enclosure.capacity || '?'}</span>
@@ -1111,20 +1111,20 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                         <div className="sm:col-span-2 pt-2">
                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text border-b pb-1 mb-2">General</h4>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
-                                <input type="text" value={newEnclosureData.name} onChange={e => setNewEnclosureData(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Tank 1, Vivarium A" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Name *</label>
+                                <input type="text" value={newEnclosureData.name} onChange={e => setNewEnclosureData(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Tank 1, Vivarium A" className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
-                                <input type="text" value={newEnclosureData.enclosureType} onChange={e => setNewEnclosureData(p => ({ ...p, enclosureType: e.target.value }))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Type</label>
+                                <input type="text" value={newEnclosureData.enclosureType} onChange={e => setNewEnclosureData(p => ({ ...p, enclosureType: e.target.value }))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Purpose</label>
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Purpose</label>
                                 <select
                                     value={newEnclosureData.purpose || 'general'}
                                     onChange={e => setNewEnclosureData(p => ({ ...p, purpose: e.target.value }))}
-                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-card-bg">
+                                    className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg">
                                     <option value="general">General</option>
                                     <option value="reproduction">Nursery / Breeding</option>
                                     <option value="medical">Medical</option>
@@ -1134,31 +1134,31 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Purpose Description</label>
-                                <input type="text" value={newEnclosureData.purposeDescription || ''} onChange={e => setNewEnclosureData(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Purpose Description</label>
+                                <input type="text" value={newEnclosureData.purposeDescription || ''} onChange={e => setNewEnclosureData(p => ({ ...p, purposeDescription: e.target.value }))} placeholder="e.g. Pet-only, Geriatric care" className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Building</label>
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Building</label>
                                 <div className="flex items-center gap-2">
                                     <select
                                         value={newEnclosureData.buildingId || ''}
                                         onChange={e => setNewEnclosureData(p => ({ ...p, buildingId: e.target.value, roomId: '' }))}
-                                        className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-card-bg">
+                                        className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg">
                                         <option value="">No Building</option>
                                         {Array.isArray(locations) && locations.filter(l => l.type === 'building').map(building => (
                                             <option key={building._id} value={building._id}>{building.name}</option>
                                         ))}
                                     </select>
-                                    <button type="button" onClick={onManageLocations} className="p-2 text-sm bg-gray-200 rounded-lg" title="Manage Locations">...</button>
+                                    <button type="button" onClick={onManageLocations} className="p-2 text-sm bg-gray-200 dark:bg-dark-surface rounded-lg" title="Manage Locations">...</button>
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Room</label>
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Room</label>
                                 <select
                                     value={newEnclosureData.roomId || ''}
                                     onChange={e => setNewEnclosureData(p => ({ ...p, roomId: e.target.value }))}
                                     disabled={!newEnclosureData.buildingId}
-                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-dark-card-bg disabled:bg-gray-100 dark:disabled:bg-dark-border"
+                                    className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg disabled:bg-gray-100 dark:disabled:bg-dark-border"
                                 >
                                     <option value="">No Room</option>
                                     {newEnclosureData.buildingId && Array.isArray(locations) && locations
@@ -1170,49 +1170,49 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Dimensions (L x W x H)</label>
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Dimensions (L x W x H)</label>
                                 <div className="grid grid-cols-4 gap-2 items-end">
                                     <input type="number" value={newEnclosureData.dimensions.length}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, dimensions: { ...p.dimensions, length: e.target.value } }))}
-                                        placeholder="Length" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        placeholder="Length" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                     <input type="number" value={newEnclosureData.dimensions.width}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, dimensions: { ...p.dimensions, width: e.target.value } }))}
-                                        placeholder="Width" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        placeholder="Width" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                     <input type="number" value={newEnclosureData.dimensions.height}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, dimensions: { ...p.dimensions, height: e.target.value } }))}
-                                        placeholder="Height" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        placeholder="Height" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                     <select value={newEnclosureData.dimensions.unit}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, dimensions: { ...p.dimensions, unit: e.target.value } }))}
-                                        className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                        className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                         <option value="cm">cm</option>
                                         <option value="in">in</option>
                                     </select>
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Capacity</label>
-                                <input type="number" value={newEnclosureData.capacity} onChange={e => setNewEnclosureData(p => ({ ...p, capacity: e.target.value }))} placeholder="Max animals" className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Capacity</label>
+                                <input type="number" value={newEnclosureData.capacity} onChange={e => setNewEnclosureData(p => ({ ...p, capacity: e.target.value }))} placeholder="Max animals" className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                             </div>
                             </div>
                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text border-b pb-1 mb-2 mt-4">Environment</h4>
                             <div className="grid grid-cols-3 gap-2">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Temp Min</label>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Temp Min</label>
                                     <input type="number" value={newEnclosureData.temperatureRange.min}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, temperatureRange: { ...p.temperatureRange, min: e.target.value } }))}
-                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Temp Max</label>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Temp Max</label>
                                     <input type="number" value={newEnclosureData.temperatureRange.max}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, temperatureRange: { ...p.temperatureRange, max: e.target.value } }))}
-                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Unit</label>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Unit</label>
                                     <select value={newEnclosureData.temperatureRange.unit}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, temperatureRange: { ...p.temperatureRange, unit: e.target.value } }))}
-                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                         <option value="C">°C</option>
                                         <option value="F">°F</option>
                                     </select>
@@ -1220,49 +1220,49 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Humidity Min (%)</label>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Humidity Min (%)</label>
                                     <input type="number" value={newEnclosureData.humidityRange.min}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, humidityRange: { ...p.humidityRange, min: e.target.value } }))}
-                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Humidity Max (%)</label>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Humidity Max (%)</label>
                                     <input type="number" value={newEnclosureData.humidityRange.max}
                                         onChange={(e) => setNewEnclosureData(p => ({ ...p, humidityRange: { ...p.humidityRange, max: e.target.value } }))}
-                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                 </div>
                             </div>
                             <div className="sm:col-span-2">
                                 <div className="flex justify-between items-center mb-1">
-                                    <label className="block text-xs font-medium text-gray-600">Lights On/Off Time</label>
-                                    <div className="flex items-center gap-1 text-xs"><button type="button" onClick={() => setNewEnclosureData(p => ({ ...p, lightTimeFormat: '12h' }))} className={`px-2 py-0.5 rounded ${newEnclosureData.lightTimeFormat === '12h' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>12h</button>
-                                        <button type="button" onClick={() => setNewEnclosureData(p => ({ ...p, lightTimeFormat: '24h' }))} className={`px-2 py-0.5 rounded ${newEnclosureData.lightTimeFormat === '24h' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>24h</button>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary">Lights On/Off Time</label>
+                                    <div className="flex items-center gap-1 text-xs"><button type="button" onClick={() => setNewEnclosureData(p => ({ ...p, lightTimeFormat: '12h' }))} className={`px-2 py-0.5 rounded ${newEnclosureData.lightTimeFormat === '12h' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-dark-surface'}`}>12h</button>
+                                        <button type="button" onClick={() => setNewEnclosureData(p => ({ ...p, lightTimeFormat: '24h' }))} className={`px-2 py-0.5 rounded ${newEnclosureData.lightTimeFormat === '24h' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-dark-surface'}`}>24h</button>
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
-                                    <input type="time" value={newEnclosureData.lightsOnTime} onChange={e => setNewEnclosureData(p => ({ ...p, lightsOnTime: e.target.value }))} className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
-                                    <input type="time" value={newEnclosureData.lightsOffTime} onChange={e => setNewEnclosureData(p => ({ ...p, lightsOffTime: e.target.value }))} className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    <input type="time" value={newEnclosureData.lightsOnTime} onChange={e => setNewEnclosureData(p => ({ ...p, lightsOnTime: e.target.value }))} className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                    <input type="time" value={newEnclosureData.lightsOffTime} onChange={e => setNewEnclosureData(p => ({ ...p, lightsOffTime: e.target.value }))} className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Lighting Type(s)</label>
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Lighting Type(s)</label>
                                 <input
                                     type="text"
                                     value={newEnclosureData.lightingType || ''}
                                     onChange={e => setNewEnclosureData(p => ({ ...p, lightingType: e.target.value }))}
                                     placeholder="e.g. LED, UVB, Infrared"
-                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg"
+                                    className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Bedding / Substrate</label>
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Bedding / Substrate</label>
                                 <input
                                     type="text"
                                     list="bedding-supplies"
                                     value={newEnclosureData.bedding || ''}
                                     onChange={e => setNewEnclosureData(p => ({ ...p, bedding: e.target.value }))}
                                     placeholder="e.g. Aspen shavings, Coco fiber"
-                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg"
+                                    className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                 />
                                 <datalist id="bedding-supplies">
                                     {supplies.filter(s => s.category === 'Bedding').map(s => (
@@ -1271,16 +1271,16 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                                 </datalist>
                             </div>
                             <div className="sm:col-span-2">
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Enrichment</label>
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Enrichment</label>
                                 <textarea value={newEnclosureData.enrichment || ''} onChange={e => setNewEnclosureData(p => ({ ...p, enrichment: e.target.value }))}
                                     placeholder="e.g. Wheels, hides, climbing branches" rows="2"
-                                    className="block w-full p-2 text-sm border border-gray-300 rounded-lg" />
+                                    className="block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
+                                <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1">Description</label>
                                 <textarea value={newEnclosureData.description}
                                     onChange={(e) => setNewEnclosureData(p => ({ ...p, description: e.target.value }))}
-                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none"
+                                    className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text resize-none"
                                     rows="2" placeholder="Any notes about this enclosure..." />
                             </div>
                         </div>
@@ -1290,7 +1290,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
 
                 <div className="p-4 border-t flex gap-2">
                     <button type="button" onClick={onClose}
-                        className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                        className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-dark-text-secondary bg-gray-200 dark:bg-dark-surface rounded-md hover:bg-gray-300 dark:hover:bg-dark-surface-hover transition-colors">
                         Cancel
                     </button>
                     <button type="button"
@@ -1316,9 +1316,9 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
 const FormSection = ({ title, icon, children, initiallyOpen = false }) => {
     const [isOpen, setIsOpen] = useState(initiallyOpen);
     return (
-        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+        <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
             <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center text-left">
-                <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5">{icon}{title}</h3>
+                <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5">{icon}{title}</h3>
                 {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </button>
             {isOpen && <div className="mt-3 pt-3 border-t space-y-3">{children}</div>}
@@ -1339,14 +1339,14 @@ const ScheduleFieldControl = ({ label, value, onChange }) => {
     const lastDoneDate = value?.lastDoneDate;
     return (
         <div className="flex items-center gap-2 flex-wrap pt-1">
-            <span className="text-xs font-medium text-gray-500">{label ? `${label} schedule:` : 'Optional schedule:'}</span>
+            <span className="text-xs font-medium text-gray-500 dark:text-dark-text-muted">{label ? `${label} schedule:` : 'Optional schedule:'}</span>
             <input
                 type="number" min="1" value={frequencyDays}
                 onChange={e => onChange({ ...(value || {}), frequencyDays: e.target.value ? Number(e.target.value) : null })}
                 placeholder="Every N days"
-                className="w-28 py-1 px-2 text-xs border border-gray-300 rounded-md"
+                className="w-28 py-1 px-2 text-xs border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
             />
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400 dark:text-dark-text-muted">
                 {lastDoneDate ? `Last done ${formatDate(lastDoneDate)}` : 'Not started — mark done in Feeding & Care'}
             </span>
         </div>
@@ -3526,29 +3526,29 @@ const AnimalFormModalV2 = ({
                 authToken={authToken}
                 userProfile={userProfile}
             />
-            <form onSubmit={handleSubmit} className="bg-[#e1f2f5] rounded-none sm:rounded-xl shadow-2xl w-full max-w-7xl h-full sm:h-[95vh] flex flex-col">
+            <form onSubmit={handleSubmit} className="bg-[#e1f2f5] dark:bg-dark-card-bg rounded-none sm:rounded-xl shadow-2xl w-full max-w-7xl h-full sm:h-[95vh] flex flex-col">
                 {/* Header */}
-                <div className="p-3 sm:p-6 border-b border-gray-300 flex-shrink-0">
-                    <h2 className="text-lg sm:text-3xl font-bold text-gray-800 flex items-center justify-between">
+                <div className="p-3 sm:p-6 border-b border-gray-300 dark:border-dark-border flex-shrink-0">
+                    <h2 className="text-lg sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center justify-between">
                         <span>
                             <PlusCircle size={20} className="inline mr-2 text-primary" />
                             {formTitle}
                         </span>
-                        <button type="button" onClick={onCancel} className="text-gray-500 hover:text-gray-700 transition duration-150 p-2 rounded-lg" title="Cancel">
+                        <button type="button" onClick={onCancel} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-700 transition duration-150 p-2 rounded-lg" title="Cancel">
                             <X size={22} />
                         </button>
                     </h2>
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-[#e1f2f5] z-10 border-b border-gray-300 px-3 sm:px-6 py-2">
+                <div className="bg-[#e1f2f5] dark:bg-dark-card-bg z-10 border-b border-gray-300 dark:border-dark-border px-3 sm:px-6 py-2">
                     <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {TABS.map(tab => (
                             <button
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex-shrink-0 px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded border-2 transition-colors ${activeTab === tab.id ? 'bg-page-bg text-black border-gray-300' : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'}`}
+                                className={`flex-shrink-0 px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded border-2 transition-colors ${activeTab === tab.id ? 'bg-page-bg text-black border-gray-300 dark:border-dark-border' : 'bg-white dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text border-gray-300 dark:border-dark-border'}`}
                                 title={tab.label}
                             >
                                 {React.createElement(tab.icon, { size: 15, className: `inline-block align-middle flex-shrink-0 mr-1 ${tab.color || ''}` })}
@@ -3570,11 +3570,11 @@ const AnimalFormModalV2 = ({
                                         const thumbnailImages = galleryImages.slice(1, 4);
                                         return (
                                             <>
-                                                <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-300 relative group">
+                                                <div className="aspect-square bg-gray-100 dark:bg-dark-surface rounded-lg flex items-center justify-center overflow-hidden border border-gray-300 dark:border-dark-border relative group">
                                                     {mainImage ? (
                                                         <img src={mainImage.url} alt="Main animal" className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <div className="text-gray-400 flex flex-col items-center gap-2">
+                                                        <div className="text-gray-400 dark:text-dark-text-muted flex flex-col items-center gap-2">
                                                             <Camera size={48} />
                                                             <span className="text-sm">No Image</span>
                                                         </div>
@@ -3587,7 +3587,7 @@ const AnimalFormModalV2 = ({
                                                 </div>
                                                 <div className="grid grid-cols-4 gap-2">
                                                     {thumbnailImages.map(img => (
-                                                        <button key={img.id} type="button" onClick={() => setAsPrimaryImage(img.id)} className="aspect-square rounded-md overflow-hidden border-2 border-gray-300 relative group focus:outline-none focus:ring-2 focus:ring-primary">
+                                                        <button key={img.id} type="button" onClick={() => setAsPrimaryImage(img.id)} className="aspect-square rounded-md overflow-hidden border-2 border-gray-300 dark:border-dark-border relative group focus:outline-none focus:ring-2 focus:ring-primary">
                                                             <img src={img.url} alt="thumbnail" className="w-full h-full object-cover" />
                                                             <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" title="Set as primary">
                                                                 <Star size={20} className="text-white" />
@@ -3595,9 +3595,9 @@ const AnimalFormModalV2 = ({
                                                         </button>
                                                     ))}
                                                     {Array.from({ length: Math.max(0, 3 - thumbnailImages.length) }).map((_, i) => (
-                                                        <div key={`placeholder-${i}`} className="aspect-square bg-gray-100 rounded-md border-2 border-gray-300" />
+                                                        <div key={`placeholder-${i}`} className="aspect-square bg-gray-100 dark:bg-dark-surface rounded-md border-2 border-gray-300 dark:border-dark-border" />
                                                     ))}
-                                                    <label className="aspect-square bg-gray-100 rounded-md flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-200 hover:border-gray-400 transition">
+                                                    <label className="aspect-square bg-gray-100 dark:bg-dark-surface rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted border-2 border-dashed border-gray-300 dark:border-dark-border cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-surface-hover hover:border-gray-400 dark:hover:border-dark-text-muted transition">
                                                         <PlusCircle size={24} />
                                                         <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
                                                     </label>
@@ -3609,10 +3609,10 @@ const AnimalFormModalV2 = ({
 
                                 {/* Right Column: Identity Fields */}
                                 <div className="w-full md:w-3/4 flex-1 flex flex-col gap-4">
-                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                        <button type="button" onClick={() => toggleSection('identity')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
-                                            <h3 className="text-base font-semibold text-gray-700">Identity</h3>
-                                            <div className="text-gray-700 flex-shrink-0">
+                                    <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                        <button type="button" onClick={() => toggleSection('identity')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
+                                            <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary">Identity</h3>
+                                            <div className="text-gray-700 dark:text-dark-text-secondary flex-shrink-0">
                                                 {sectionsCollapsed.identity ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                             </div>
                                         </button>
@@ -3620,53 +3620,53 @@ const AnimalFormModalV2 = ({
                                             <div className="mt-3 pt-3 border-t space-y-3">
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                                     <div>
-                                                        <label className="block text-xs font-medium text-gray-700">Prefix</label>
+                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Prefix</label>
                                                         <input type="text" name="prefix" value={formData.prefix} onChange={handleChange}
-                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-xs font-medium text-gray-700">Name*</label>
+                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Name*</label>
                                                         <input type="text" name="name" value={formData.name} onChange={handleChange} required
-                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-xs font-medium text-gray-700">Suffix</label>
+                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Suffix</label>
                                                         <input type="text" name="suffix" value={formData.suffix} onChange={handleChange}
-                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     <div>
-                                                        <label className="block text-xs font-medium text-gray-700">Gender*</label>
+                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Gender*</label>
                                                         <select name="gender" value={formData.gender} onChange={handleChange} required
-                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary">
                                                             {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
                                                         </select>
                                                     </div>
                                                     <div>
-                                                        <label className="block text-xs font-medium text-gray-700">Date of Birth</label>
+                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Date of Birth</label>
                                                         <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()}
-                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-xs font-medium text-gray-700">Status*</label>
+                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Status*</label>
                                                         <select name="status" value={formData.status} onChange={handleChange} required
-                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary">
                                                             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                                                         </select>
                                                     </div>
                                                     {formData.status === 'Deceased' && (
                                                         <div>
-                                                            <label className="block text-xs font-medium text-gray-700">Deceased Date</label>
+                                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Deceased Date</label>
                                                             <input type="date" name="deceasedDate" value={formData.deceasedDate} onChange={handleChange}
-                                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                         </div>
                                                     )}
                                                 </div>
                                                 <div className="md:col-span-3">
-                                                    <label className="block text-xs font-medium text-gray-700">Remarks</label>
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Remarks</label>
                                                     <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="3"
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                         placeholder="General notes, observations, and records..." />
                                                 </div>
                                             </div>
@@ -3674,10 +3674,10 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                     {/* Breeder & Keeper */}
-                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                        <button type="button" onClick={() => toggleSection('breederOwner')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
-                                            <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><User size={16} />Breeder & Owner</h3>
-                                            <div className="text-gray-700 flex-shrink-0">
+                                    <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                        <button type="button" onClick={() => toggleSection('breederOwner')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
+                                            <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><User size={16} />Breeder & Owner</h3>
+                                            <div className="text-gray-700 dark:text-dark-text-secondary flex-shrink-0">
                                                 {sectionsCollapsed.breederOwner ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                             </div>
                                         </button>
@@ -3693,7 +3693,7 @@ const AnimalFormModalV2 = ({
                                                             />
                                                         </div>
                                                         {(breederInfo || formData.manualBreederName) && (
-                                                            <button type="button" onClick={() => clearContactSelection('breeder')} className="text-gray-500 hover:text-red-500 transition p-1 mb-1" title="Clear Breeder">
+                                                            <button type="button" onClick={() => clearContactSelection('breeder')} className="text-gray-500 dark:text-dark-text-muted hover:text-red-500 transition p-1 mb-1" title="Clear Breeder">
                                                                 <X size={16} />
                                                             </button>
                                                         )}
@@ -3707,15 +3707,15 @@ const AnimalFormModalV2 = ({
                                                             />
                                                         </div>
                                                         {(ownerInfo || formData.manualownerName) && (
-                                                            <button type="button" onClick={() => clearContactSelection('owner')} className="text-gray-500 hover:text-red-500 transition p-1 mb-1" title="Clear Owner">
+                                                            <button type="button" onClick={() => clearContactSelection('owner')} className="text-gray-500 dark:text-dark-text-muted hover:text-red-500 transition p-1 mb-1" title="Clear Owner">
                                                                 <X size={16} />
                                                             </button>
                                                         )}
                                                     </div>
                                                     <div className="md:col-span-2">
-                                                        <label className="block text-xs font-medium text-gray-700">Co-Ownership Details</label>
+                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Co-Ownership Details</label>
                                                         <textarea name="coOwnership" value={formData.coOwnership} onChange={handleChange} rows="2"
-                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                            className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                             placeholder="Co-owner name, terms, breeding rights, etc." />
                                                     </div>
                                                 </div>
@@ -3724,45 +3724,45 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                     {/* Availability */}
-                                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                        <button type="button" onClick={() => toggleSection('availability')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
-                                            <h3 className="text-base font-semibold text-gray-700">Availability</h3>
-                                            <div className="text-gray-700 flex-shrink-0">
+                                    <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                        <button type="button" onClick={() => toggleSection('availability')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
+                                            <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary">Availability</h3>
+                                            <div className="text-gray-700 dark:text-dark-text-secondary flex-shrink-0">
                                                 {sectionsCollapsed.availability ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                             </div>
                                         </button>
                                         {!sectionsCollapsed.availability && (
                                             <div className="mt-3 pt-3 border-t space-y-3">
                                                 {/* For Sale */}
-                                                <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                                <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                                     <label className="flex items-center space-x-2">
                                                         <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} className="form-checkbox h-4 w-4 text-primary rounded" />
-                                                        <span className="text-xs font-medium text-gray-700">Available for Sale</span>
+                                                        <span className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Available for Sale</span>
                                                     </label>
                                                     {formData.isForSale && (
                                                         <div className="flex gap-2 pl-6">
-                                                            <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 rounded-md text-xs">
+                                                            <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs">
                                                                 <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="Negotiable">Negotiable</option>
                                                             </select>
-                                                            <input type="number" name="salePriceAmount" value={formData.salePriceAmount} onChange={handleChange} disabled={formData.salePriceCurrency === 'Negotiable'} placeholder="Price" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
+                                                            <input type="number" name="salePriceAmount" value={formData.salePriceAmount} onChange={handleChange} disabled={formData.salePriceCurrency === 'Negotiable'} placeholder="Price" className="flex-1 py-1.5 px-2 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs" />
                                                         </div>
                                                     )}
-                                                    <p className="text-xs text-gray-500 mt-1">
+                                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">
                                                         This animal will appear in the public Marketplace if its profile is also set to Public (Eye toggle in the top right of the detail view).
                                                     </p>
                                                 </div>
                                                 {/* For Stud */}
-                                                {!hiddenField('studFeeCurrency') && <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                                {!hiddenField('studFeeCurrency') && <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                                     <label className="flex items-center space-x-2">
                                                         <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} className="form-checkbox h-4 w-4 text-primary rounded" />
-                                                        <span className="text-xs font-medium text-gray-700">Available for Stud/Breeding</span>
+                                                        <span className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Available for Stud/Breeding</span>
                                                     </label>
                                                     {formData.availableForBreeding && (
                                                         <div className="flex gap-2 pl-6">
-                                                            <select name="studFeeCurrency" value={formData.studFeeCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 rounded-md text-xs">
+                                                            <select name="studFeeCurrency" value={formData.studFeeCurrency} onChange={handleChange} className="py-1.5 px-2 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs">
                                                                 <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="Negotiable">Negotiable</option>
                                                             </select>
-                                                            <input type="number" name="studFeeAmount" value={formData.studFeeAmount} onChange={handleChange} disabled={formData.studFeeCurrency === 'Negotiable'} placeholder="Fee" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
+                                                            <input type="number" name="studFeeAmount" value={formData.studFeeAmount} onChange={handleChange} disabled={formData.studFeeCurrency === 'Negotiable'} placeholder="Fee" className="flex-1 py-1.5 px-2 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs" />
                                                         </div>
                                                     )}
                                                 </div>}
@@ -3775,10 +3775,10 @@ const AnimalFormModalV2 = ({
                         {activeTab === 'identification' && (
                             <div className="space-y-4">
                                 {/* Identification Numbers */}
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                    <button type="button" onClick={() => toggleSection('identificationNumbers')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
-                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><Hash size={16} className="flex-shrink-0" /> Identification Numbers</h3>
-                                        <div className="text-gray-700 flex-shrink-0">
+                                <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                    <button type="button" onClick={() => toggleSection('identificationNumbers')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
+                                        <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><Hash size={16} className="flex-shrink-0" /> Identification Numbers</h3>
+                                        <div className="text-gray-700 dark:text-dark-text-secondary flex-shrink-0">
                                             {sectionsCollapsed.identificationNumbers ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                         </div>
                                     </button>
@@ -3786,54 +3786,54 @@ const AnimalFormModalV2 = ({
                                         <div className="mt-3 pt-3 border-t space-y-3">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Breeder Assigned ID</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Breeder Assigned ID</label>
                                                 <input type="text" name="breederAssignedId" value={formData.breederAssignedId || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             </div>
                                             {!hiddenField('microchipNumber') && <div>
-                                                <label className="block text-xs font-medium text-gray-700">Microchip Number</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Microchip Number</label>
                                                 <input type="text" name="microchipNumber" value={formData.microchipNumber || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             </div>}
                                             {!hiddenField('pedigreeRegistrationId') && <div>
-                                                <label className="block text-xs font-medium text-gray-700">Pedigree Registration ID</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Pedigree Registration ID</label>
                                                 <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             </div>}
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">{fieldLabel('colonyId', 'Colony ID')}</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('colonyId', 'Colony ID')}</label>
                                                 <input type="text" name="colonyId" value={formData.colonyId || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             </div>
                                             {!hiddenField('tattooId') && <div>
-                                                <label className="block text-xs font-medium text-gray-700">Tattoo ID</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Tattoo ID</label>
                                                 <input type="text" name="tattooId" value={formData.tattooId || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             </div>}
                                             {!hiddenField('ringId') && <div>
-                                                <label className="block text-xs font-medium text-gray-700">Ring ID</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Ring ID</label>
                                                 <input type="text" name="ringId" value={formData.ringId || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             </div>}
                                             {!hiddenField('eartagNumber') && <div>
-                                                <label className="block text-xs font-medium text-gray-700">Ear Tag</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Ear Tag</label>
                                                 <input type="text" name="eartagNumber" value={formData.eartagNumber || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             </div>}
                                         </div>
                                         {/* Additional Identifiers */}
-                                        <div className="mt-4 pt-4 border-t border-gray-200">
-                                            <h4 className="text-sm font-semibold text-gray-600 mb-2">Additional Identifiers</h4>
+                                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-border">
+                                            <h4 className="text-sm font-semibold text-gray-600 dark:text-dark-text-secondary mb-2">Additional Identifiers</h4>
                                             {(formData.identifiers || []).filter(Boolean).map((identifier, index) => (
-                                                <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-2 p-2 bg-white border rounded-md">
+                                                <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-2 p-2 bg-white dark:bg-dark-card-bg border rounded-md">
                                                     <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                        <div className="border border-gray-300 rounded-md px-2 py-1 bg-gray-50 min-w-0">
-                                                            <span className="block text-[10px] uppercase tracking-wide text-gray-400">Title</span>
-                                                            <span className="block text-sm text-gray-700 truncate">{identifier.title}</span>
+                                                        <div className="border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text px-2 py-1 bg-gray-50 dark:bg-dark-surface min-w-0">
+                                                            <span className="block text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted">Title</span>
+                                                            <span className="block text-sm text-gray-700 dark:text-dark-text-secondary truncate">{identifier.title}</span>
                                                         </div>
-                                                        <div className="border border-gray-300 rounded-md px-2 py-1 bg-gray-50 min-w-0">
-                                                            <span className="block text-[10px] uppercase tracking-wide text-gray-400">Value</span>
-                                                            <span className="block text-sm text-gray-700 truncate">{identifier.value}</span>
+                                                        <div className="border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text px-2 py-1 bg-gray-50 dark:bg-dark-surface min-w-0">
+                                                            <span className="block text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted">Value</span>
+                                                            <span className="block text-sm text-gray-700 dark:text-dark-text-secondary truncate">{identifier.value}</span>
                                                         </div>
                                                     </div>
                                                     <button type="button" onClick={() => removeIdentifier(index)} className="p-1 text-red-500 hover:text-red-700 self-end sm:self-center shrink-0">
@@ -3841,30 +3841,30 @@ const AnimalFormModalV2 = ({
                                                     </button>
                                                 </div>
                                             ))}
-                                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 bg-white border border-dashed rounded-md">
+                                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 bg-white dark:bg-dark-card-bg border border-dashed rounded-md">
                                                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                     <div>
-                                                        <label className="block text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Title</label>
+                                                        <label className="block text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted mb-0.5">Title</label>
                                                         <input
                                                             type="text"
                                                             placeholder="e.g., DNA ID"
                                                             value={newIdentifier.title}
                                                             onChange={(e) => setNewIdentifier({ ...newIdentifier, title: e.target.value })}
-                                                            className="w-full text-sm p-1.5 border border-gray-300 rounded-md"
+                                                            className="w-full text-sm p-1.5 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Value</label>
+                                                        <label className="block text-[10px] uppercase tracking-wide text-gray-400 dark:text-dark-text-muted mb-0.5">Value</label>
                                                         <input
                                                             type="text"
                                                             placeholder="Identifier Value"
                                                             value={newIdentifier.value}
                                                             onChange={(e) => setNewIdentifier({ ...newIdentifier, value: e.target.value })}
-                                                            className="w-full text-sm p-1.5 border border-gray-300 rounded-md"
+                                                            className="w-full text-sm p-1.5 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                         />
                                                     </div>
                                                 </div>
-                                                <button type="button" onClick={addIdentifier} className="p-1 text-green-600 hover:text-green-700 self-end sm:self-center shrink-0">
+                                                <button type="button" onClick={addIdentifier} className="p-1 text-green-600 dark:text-green-400 hover:text-green-700 self-end sm:self-center shrink-0">
                                                     <PlusCircle size={20} />
                                                 </button>
                                             </div>
@@ -3874,10 +3874,10 @@ const AnimalFormModalV2 = ({
                                 </div>
 
                                 {/* Classification */}
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                    <button type="button" onClick={() => toggleSection('classification')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
-                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><FolderOpen size={16} className="flex-shrink-0" /> Classification</h3>
-                                        <div className="text-gray-700 flex-shrink-0">
+                                <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                    <button type="button" onClick={() => toggleSection('classification')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
+                                        <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><FolderOpen size={16} className="flex-shrink-0" /> Classification</h3>
+                                        <div className="text-gray-700 dark:text-dark-text-secondary flex-shrink-0">
                                             {sectionsCollapsed.classification ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                         </div>
                                     </button>
@@ -3885,20 +3885,20 @@ const AnimalFormModalV2 = ({
                                         <div className="mt-3 pt-3 border-t space-y-3">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Species</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Species</label>
                                                 <input type="text" value={formData.species} disabled
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600" />
-                                                <p className="text-xs text-gray-500 mt-1">Cannot be changed after creation</p>
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary" />
+                                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Cannot be changed after creation</p>
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">{fieldLabel('breed', 'Breed')}</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('breed', 'Breed')}</label>
                                                 <input type="text" name="breed" value={formData.breed || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             </div>
                                             {!hiddenField('strain') && <div className="md:col-span-2">
-                                                <label className="block text-xs font-medium text-gray-700">Strain</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Strain</label>
                                                 <input type="text" name="strain" value={formData.strain || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                     placeholder="e.g., C57BL/6, Wistar, Syrian" />
                                             </div>}
                                         </div>
@@ -3908,18 +3908,18 @@ const AnimalFormModalV2 = ({
 
                                 {/* Origin */}
                                 {!hiddenField('origin') && (
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                    <button type="button" onClick={() => toggleSection('origin')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
-                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><Globe size={16} className="flex-shrink-0" /> Origin</h3>
-                                        <div className="text-gray-700 flex-shrink-0">
+                                <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                    <button type="button" onClick={() => toggleSection('origin')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
+                                        <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><Globe size={16} className="flex-shrink-0" /> Origin</h3>
+                                        <div className="text-gray-700 dark:text-dark-text-secondary flex-shrink-0">
                                             {sectionsCollapsed.origin ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                         </div>
                                     </button>
                                     {!sectionsCollapsed.origin && (
                                         <div className="mt-3 pt-3 border-t space-y-3">
-                                            <label className="block text-xs font-medium text-gray-700">Origin</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Origin</label>
                                             <select name="origin" value={formData.origin || ''} onChange={handleChange}
-                                                className="block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                className="block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary">
                                                 <option value="">Select Origin</option>
                                                 <option value="Captive-bred">Captive-bred</option>
                                                 <option value="Wild-caught">Wild-caught</option>
@@ -3931,23 +3931,23 @@ const AnimalFormModalV2 = ({
                                 )}
 
                                 {/* Tags */}
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                    <button type="button" onClick={() => toggleSection('tags')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
-                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><Tag size={16} className="flex-shrink-0" /> Tags</h3>
-                                        <div className="text-gray-700 flex-shrink-0">
+                                <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                    <button type="button" onClick={() => toggleSection('tags')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
+                                        <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><Tag size={16} className="flex-shrink-0" /> Tags</h3>
+                                        <div className="text-gray-700 dark:text-dark-text-secondary flex-shrink-0">
                                             {sectionsCollapsed.tags ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
                                         </div>
                                     </button>
                                     {!sectionsCollapsed.tags && (
                                         <div className="mt-3 pt-3 border-t space-y-3">
-                                            <label className="block text-xs font-medium text-gray-700 mb-1">Tags (Lines, Enclosures, etc)</label>
-                                            <input type="text" placeholder="Type and press Enter or comma to add tags" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } } else if (e.key === 'Backspace' && !tagInput && formData.tags.length > 0) { setFormData({ ...formData, tags: formData.tags.slice(0, -1) }); } }} onBlur={() => { const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } }} className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Tags (Lines, Enclosures, etc)</label>
+                                            <input type="text" placeholder="Type and press Enter or comma to add tags" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } } else if (e.key === 'Backspace' && !tagInput && formData.tags.length > 0) { setFormData({ ...formData, tags: formData.tags.slice(0, -1) }); } }} onBlur={() => { const trimmed = tagInput.trim(); if (trimmed && !formData.tags.includes(trimmed)) { setFormData({ ...formData, tags: [...formData.tags, trimmed] }); setTagInput(''); } }} className="block w-full p-2 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             {formData.tags.length > 0 && (
                                                 <div className="mt-2 flex flex-wrap gap-2">
                                                     {formData.tags.map((tag, idx) => (
                                                         <span key={idx} className="inline-flex items-center bg-primary dark:bg-dark-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
                                                             {tag}
-                                                            <button type="button" onClick={() => { const newTags = formData.tags.filter((_, i) => i !== idx); setFormData({ ...formData, tags: newTags }); }} className="ml-2 text-black hover:text-gray-600"><Trash2 size={12} /></button>
+                                                            <button type="button" onClick={() => { const newTags = formData.tags.filter((_, i) => i !== idx); setFormData({ ...formData, tags: newTags }); }} className="ml-2 text-black hover:text-gray-600 dark:hover:text-dark-text-secondary"><Trash2 size={12} /></button>
                                                         </span>
                                                     ))}
                                                 </div>
@@ -3963,65 +3963,65 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Appearance" icon={<Palette size={16} />} initiallyOpen>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Color</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Color</label>
                                             <input type="text" name="color" value={formData.color} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">{fieldLabel('coatPattern', 'Pattern')}</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('coatPattern', 'Pattern')}</label>
                                             <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                 placeholder="e.g., Solid, Hooded, Brindle" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">{fieldLabel('coat', 'Coat Type')}</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('coat', 'Coat Type')}</label>
                                             <input type="text" name="coat" value={formData.coat} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                 placeholder="e.g., Short, Long, Rex" />
                                         </div>
                                         {(formData.species === 'Rat' || formData.species === 'Fancy Rat') && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Earset</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Earset</label>
                                                 <input type="text" name="earset" value={formData.earset} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                     placeholder="e.g., Standard, Dumbo" />
                                             </div>
                                         )}
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Morph</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Morph</label>
                                             <input type="text" name="morph" value={formData.morph || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                 placeholder="Mutation/Morph" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Markings</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Markings</label>
                                             <input type="text" name="markings" value={formData.markings || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                 placeholder="Body markings/patterns" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Eye Color</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Eye Color</label>
                                             <input type="text" name="eyeColor" value={formData.eyeColor || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                 placeholder="Eye color" />
                                         </div>
                                         {!hiddenField('nailColor') && <div>
-                                            <label className="block text-xs font-medium text-gray-700">Nail Color</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Nail Color</label>
                                             <input type="text" name="nailColor" value={formData.nailColor || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                 placeholder="Nail/claw color" />
                                         </div>}
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Size</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Size</label>
                                             <input type="text" name="size" value={formData.size || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                 placeholder="e.g., Standard, Dwarf" />
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Carrier Traits</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Carrier Traits</label>
                                             <input type="text" name="carrierTraits" value={formData.carrierTraits || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
                                                 placeholder="Genetic traits carried" />
                                         </div>
                                     </div>
@@ -4032,9 +4032,9 @@ const AnimalFormModalV2 = ({
                                 <FormSection title={fieldLabel('lifeStage', 'Life Stage')} icon={<Sprout size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">{fieldLabel('lifeStage', 'Life Stage')}</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('lifeStage', 'Life Stage')}</label>
                                             <select name="lifeStage" value={formData.lifeStage} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary">
                                                 <option value="">Unknown</option>
                                                 <option value="Newborn">Newborn</option>
                                                 <option value="Juvenile">Juvenile</option>
@@ -4057,39 +4057,39 @@ const AnimalFormModalV2 = ({
                                             const mostRecentGirth = sorted.find(r => r.chestGirth);
                                             
                                             return (
-                                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Current Measurements</h4>
+                                                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700/60">
+                                                    <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-2">Current Measurements</h4>
                                                     <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-sm">
                                                         <div>
-                                                            <span className="text-xs text-gray-600">Weight:</span>
+                                                            <span className="text-xs text-gray-600 dark:text-dark-text-secondary">Weight:</span>
                                                             <p className="font-medium">{mostRecentWeight.weight} {measurementUnits.weight}</p>
                                                         </div>
                                                         {mostRecentLength && mostRecentLength.length && (
                                                             <div>
-                                                                <span className="text-xs text-gray-600">Body Length:</span>
+                                                                <span className="text-xs text-gray-600 dark:text-dark-text-secondary">Body Length:</span>
                                                                 <p className="font-medium">{mostRecentLength.length} {measurementUnits.length}</p>
                                                             </div>
                                                         )}
                                                         {mostRecentHeight && mostRecentHeight.height && (
                                                             <div>
-                                                                <span className="text-xs text-gray-600">Height:</span>
+                                                                <span className="text-xs text-gray-600 dark:text-dark-text-secondary">Height:</span>
                                                                 <p className="font-medium">{mostRecentHeight.height} {measurementUnits.length}</p>
                                                             </div>
                                                         )}
                                                         {mostRecentGirth && mostRecentGirth.chestGirth && (
                                                             <div>
-                                                                <span className="text-xs text-gray-600">Chest Girth:</span>
+                                                                <span className="text-xs text-gray-600 dark:text-dark-text-secondary">Chest Girth:</span>
                                                                 <p className="font-medium">{mostRecentGirth.chestGirth} {measurementUnits.length}</p>
                                                             </div>
                                                         )}
                                                         {mostRecentWeight.bcs && (
                                                             <div>
-                                                                <span className="text-xs text-gray-600">BCS:</span>
+                                                                <span className="text-xs text-gray-600 dark:text-dark-text-secondary">BCS:</span>
                                                                 <p className="font-medium">{mostRecentWeight.bcs}</p>
                                                             </div>
                                                         )}
                                                         <div>
-                                                            <span className="text-xs text-gray-600">Date:</span>
+                                                            <span className="text-xs text-gray-600 dark:text-dark-text-secondary">Date:</span>
                                                             <p className="font-medium">{mostRecentWeight.date}</p>
                                                         </div>
                                                     </div>
@@ -4130,8 +4130,8 @@ const AnimalFormModalV2 = ({
                                             const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
                                             return (
-                                                <div className="bg-white p-3 rounded-lg border border-gray-200">
-                                                    <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                                <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border">
+                                                    <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-2 flex items-center gap-2">
                                                         <span className="inline-block w-3 h-1 bg-blue-500 rounded"></span>
                                                         Weight Growth Curve
                                                     </h4>
@@ -4162,18 +4162,18 @@ const AnimalFormModalV2 = ({
                                                             </circle>
                                                         ))}
                                                     </svg>
-                                                    <p className="text-xs text-gray-500 mt-1">Hover over points to see exact values.</p>
+                                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">Hover over points to see exact values.</p>
                                                 </div>
                                             );
                                         })()}
 
                                         {/* Measurement Units */}
-                                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                            <p className="text-xs font-medium text-gray-700 mb-2">Measurement Units</p>
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700/60">
+                                            <p className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-2">Measurement Units</p>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-600">Weight Unit</label>
-                                                    <select value={measurementUnits.weight} onChange={(e) => setMeasurementUnits({...measurementUnits, weight: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white">
+                                                    <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary">Weight Unit</label>
+                                                    <select value={measurementUnits.weight} onChange={(e) => setMeasurementUnits({...measurementUnits, weight: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary bg-white dark:bg-dark-card-bg">
                                                         <option value="g">Grams (g)</option>
                                                         <option value="kg">Kilograms (kg)</option>
                                                         <option value="lb">Pounds (lb)</option>
@@ -4181,8 +4181,8 @@ const AnimalFormModalV2 = ({
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-600">Length Unit</label>
-                                                    <select value={measurementUnits.length} onChange={(e) => setMeasurementUnits({...measurementUnits, length: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white">
+                                                    <label className="block text-xs font-medium text-gray-600 dark:text-dark-text-secondary">Length Unit</label>
+                                                    <select value={measurementUnits.length} onChange={(e) => setMeasurementUnits({...measurementUnits, length: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary bg-white dark:bg-dark-card-bg">
                                                         <option value="cm">Centimeters (cm)</option>
                                                         <option value="m">Meters (m)</option>
                                                         <option value="in">Inches (in)</option>
@@ -4193,34 +4193,34 @@ const AnimalFormModalV2 = ({
                                         </div>
 
                                         {/* Add New Measurement */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
-                                            <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-300 dark:border-dark-border space-y-3">
+                                            <p className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary">Add New Measurement</p>
                                             <div className="grid gap-3 grid-cols-1 md:grid-cols-4">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Date</label>
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Date</label>
                                                     <DatePicker value={newMeasurement.date} onChange={(e) => setNewMeasurement({...newMeasurement, date: e.target.value})} className="mt-1 p-2 text-sm" />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Weight ({measurementUnits.weight})</label>
-                                                    <input type="number" step="0.1" value={newMeasurement.weight} onChange={(e) => setNewMeasurement({...newMeasurement, weight: e.target.value})} placeholder={`e.g., ${measurementUnits.weight === 'g' ? '450' : measurementUnits.weight === 'kg' ? '0.45' : measurementUnits.weight === 'lb' ? '1' : '16'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Weight ({measurementUnits.weight})</label>
+                                                    <input type="number" step="0.1" value={newMeasurement.weight} onChange={(e) => setNewMeasurement({...newMeasurement, weight: e.target.value})} placeholder={`e.g., ${measurementUnits.weight === 'g' ? '450' : measurementUnits.weight === 'kg' ? '0.45' : measurementUnits.weight === 'lb' ? '1' : '16'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Body Length ({measurementUnits.length})</label>
-                                                    <input type="number" step="0.1" value={newMeasurement.length} onChange={(e) => setNewMeasurement({...newMeasurement, length: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '20' : measurementUnits.length === 'm' ? '0.2' : measurementUnits.length === 'in' ? '8' : '0.66'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Body Length ({measurementUnits.length})</label>
+                                                    <input type="number" step="0.1" value={newMeasurement.length} onChange={(e) => setNewMeasurement({...newMeasurement, length: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '20' : measurementUnits.length === 'm' ? '0.2' : measurementUnits.length === 'in' ? '8' : '0.66'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Height at Withers ({measurementUnits.length})</label>
-                                                    <input type="number" step="0.1" value={newMeasurement.height} onChange={(e) => setNewMeasurement({...newMeasurement, height: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '25' : measurementUnits.length === 'm' ? '0.25' : measurementUnits.length === 'in' ? '10' : '0.83'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Height at Withers ({measurementUnits.length})</label>
+                                                    <input type="number" step="0.1" value={newMeasurement.height} onChange={(e) => setNewMeasurement({...newMeasurement, height: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '25' : measurementUnits.length === 'm' ? '0.25' : measurementUnits.length === 'in' ? '10' : '0.83'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                 </div>
                                             </div>
                                             <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Chest Girth ({measurementUnits.length})</label>
-                                                    <input type="number" step="0.1" value={newMeasurement.chestGirth} onChange={(e) => setNewMeasurement({...newMeasurement, chestGirth: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '30' : measurementUnits.length === 'm' ? '0.3' : measurementUnits.length === 'in' ? '12' : '1'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Chest Girth ({measurementUnits.length})</label>
+                                                    <input type="number" step="0.1" value={newMeasurement.chestGirth} onChange={(e) => setNewMeasurement({...newMeasurement, chestGirth: e.target.value})} placeholder={`e.g., ${measurementUnits.length === 'cm' ? '30' : measurementUnits.length === 'm' ? '0.3' : measurementUnits.length === 'in' ? '12' : '1'}`} className="mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Body Condition Score</label>
-                                                    <select value={newMeasurement.bcs} onChange={(e) => setNewMeasurement({...newMeasurement, bcs: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Body Condition Score</label>
+                                                    <select value={newMeasurement.bcs} onChange={(e) => setNewMeasurement({...newMeasurement, bcs: e.target.value})} className="mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary">
                                                         <option value="">Select BCS</option>
                                                         {formData.species === 'Dog' ? (
                                                             <>
@@ -4254,8 +4254,8 @@ const AnimalFormModalV2 = ({
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Notes</label>
-                                                    <input type="text" value={newMeasurement.notes} onChange={(e) => setNewMeasurement({...newMeasurement, notes: e.target.value})} placeholder="e.g., pregnant, sick" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Notes</label>
+                                                    <input type="text" value={newMeasurement.notes} onChange={(e) => setNewMeasurement({...newMeasurement, notes: e.target.value})} placeholder="e.g., pregnant, sick" className="mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                                 </div>
                                             </div>
                                             <button type="button" onClick={addMeasurement} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">Add Measurement</button>
@@ -4263,17 +4263,17 @@ const AnimalFormModalV2 = ({
 
                                         {/* Measurements List */}
                                         {(parseJsonArrayField(formData.growthRecords) || []).length > 0 && (
-                                            <div className="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
+                                            <div className="space-y-2 bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border max-h-64 overflow-y-auto">
                                                 {(parseJsonArrayField(formData.growthRecords) || []).map((record) => (
-                                                    <div key={record.id} className="flex items-center justify-between p-2 bg-white rounded border border-gray-100 text-sm">
-                                                        <div className="flex gap-4 text-gray-700 flex-1 flex-wrap">
+                                                    <div key={record.id} className="flex items-center justify-between p-2 bg-white dark:bg-dark-card-bg rounded border border-gray-100 text-sm">
+                                                        <div className="flex gap-4 text-gray-700 dark:text-dark-text-secondary flex-1 flex-wrap">
                                                             <span className="font-medium">{record.date}</span>
                                                             <span>{record.weight} {measurementUnits.weight}</span>
                                                             {record.length && (<span>L: {record.length} {measurementUnits.length}</span>)}
                                                             {record.height && (<span>H: {record.height} {measurementUnits.length}</span>)}
                                                             {record.chestGirth && (<span>G: {record.chestGirth} {measurementUnits.length}</span>)}
-                                                            {record.bcs && (<><span className="mx-2"></span><span className="text-gray-700">BCS: {record.bcs}</span></>)}
-                                                            {record.notes && (<span className="ml-2 text-xs text-gray-500 italic">({record.notes})</span>)}
+                                                            {record.bcs && (<><span className="mx-2"></span><span className="text-gray-700 dark:text-dark-text-secondary">BCS: {record.bcs}</span></>)}
+                                                            {record.notes && (<span className="ml-2 text-xs text-gray-500 dark:text-dark-text-muted italic">({record.notes})</span>)}
                                                         </div>
                                                         <button type="button" onClick={() => setFormData(prev => ({ ...prev, growthRecords: (parseJsonArrayField(prev.growthRecords) || []).filter(r => r.id !== record.id) }))} className="text-red-500 hover:text-red-700 p-1" title="Delete measurement">
                                                             <Trash2 size={14} />
@@ -4289,21 +4289,21 @@ const AnimalFormModalV2 = ({
 
                         {activeTab === 'gallery' && (
                             <div className="space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Gallery Management</h3>
-                                <p className="text-sm text-gray-500">
+                                <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-text-secondary">Gallery Management</h3>
+                                <p className="text-sm text-gray-500 dark:text-dark-text-muted">
                                     Use the arrows to reorder images. The first image is the primary one. Click the star to move an image to the first position.
                                 </p>
                                 {galleryImages.length === 0 ? (
-                                    <div className="text-center py-16 text-gray-400">
-                                        <Camera size={48} className="text-gray-300 mx-auto mb-3" />
+                                    <div className="text-center py-16 text-gray-400 dark:text-dark-text-muted">
+                                        <Camera size={48} className="text-gray-300 dark:text-dark-border mx-auto mb-3" />
                                         <p className="text-sm font-medium">No images yet</p>
                                         <p className="text-xs mt-1">Add images using the uploader in the main section.</p>
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                         {galleryImages.map((img, index) => (
-                                            <div key={img.id} className={`relative group aspect-square rounded-lg overflow-hidden border-2 bg-gray-100
-                                                ${index === 0 ? 'border-primary' : 'border-gray-200'}`}>
+                                            <div key={img.id} className={`relative group aspect-square rounded-lg overflow-hidden border-2 bg-gray-100 dark:bg-dark-surface
+                                                ${index === 0 ? 'border-primary' : 'border-gray-200 dark:border-dark-border'}`}>
                                                 <img src={img.url} alt={`Gallery item ${index + 1}`} className="w-full h-full object-cover" />
                                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                                     <button
@@ -4363,14 +4363,14 @@ const AnimalFormModalV2 = ({
                                                             {status}
                                                         </div>
                                                         {isOverridden && (
-                                                            <div className="text-xs text-gray-500 mt-0.5">
+                                                            <div className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">
                                                                 (calculated: {calculatedStatus})
                                                             </div>
                                                         )}
                                                     </div>
                                                     {factors.length > 0 && (
                                                         <div className="group relative">
-                                                            <Info size={16} className="text-gray-500 cursor-help" />
+                                                            <Info size={16} className="text-gray-500 dark:text-dark-text-muted cursor-help" />
                                                             <div className="hidden group-hover:block absolute right-0 bg-gray-800 text-white text-xs p-2 rounded-md whitespace-nowrap z-10 -mr-2">
                                                                 <p className="font-semibold mb-1">Factors:</p>
                                                                 {factors.map((f, i) => <p key={i}>• {f}</p>)}
@@ -4383,9 +4383,9 @@ const AnimalFormModalV2 = ({
                                     })()
                                 } icon={<Pill size={16} />}>
                                     {/* Health Status Override */}
-                                    <div className="space-y-2 mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div className="space-y-2 mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg">
                                         <div className="flex items-center justify-between">
-                                            <label className="text-sm font-semibold text-gray-700">Manual Override</label>
+                                            <label className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Manual Override</label>
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -4406,14 +4406,14 @@ const AnimalFormModalV2 = ({
                                         {healthStatusOverride && (
                                             <div className="space-y-3 mt-2">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Status</label>
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Status</label>
                                                     <select 
                                                         value={healthStatusOverride} 
                                                         onChange={(e) => {
                                                             setHealthStatusOverride(e.target.value);
                                                             setFormData(prev => ({ ...prev, healthStatusOverride: e.target.value }));
                                                         }}
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                     >
                                                         <option value="Healthy">Healthy</option>
                                                         <option value="Monitoring">Monitoring</option>
@@ -4422,7 +4422,7 @@ const AnimalFormModalV2 = ({
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Reason for Override</label>
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reason for Override</label>
                                                     <textarea 
                                                         value={healthStatusOverrideNotes}
                                                         onChange={(e) => {
@@ -4430,7 +4430,7 @@ const AnimalFormModalV2 = ({
                                                             setFormData(prev => ({ ...prev, healthStatusOverrideNotes: e.target.value }));
                                                         }}
                                                         placeholder="e.g., Well-managed chronic condition, good prognosis, owner very attentive..."
-                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none"
+                                                        className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text resize-none"
                                                         rows="2"
                                                     />
                                                 </div>
@@ -4440,12 +4440,12 @@ const AnimalFormModalV2 = ({
 
                                     {/* Quarantine Status */}
                                     <div className="space-y-2">
-                                        <h4 className="text-sm font-semibold text-gray-700">Quarantine Status</h4>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Quarantine Status</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-3">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Status</label>
-                                                    <select name="status" value={formData.quarantineDetails?.status || 'None'} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Status</label>
+                                                    <select name="status" value={formData.quarantineDetails?.status || 'None'} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                         <option value="None">None</option>
                                                         <option value="Quarantine">Quarantine</option>
                                                         <option value="Isolation">Isolation</option>
@@ -4453,8 +4453,8 @@ const AnimalFormModalV2 = ({
                                                 </div>
                                                 {(formData.quarantineDetails?.status === 'Quarantine' || formData.quarantineDetails?.status === 'Isolation') && (
                                                     <div>
-                                                        <label className="block text-xs font-medium text-gray-700">Type/Reason</label>
-                                                        <select name="type" value={formData.quarantineDetails?.type || ''} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Type/Reason</label>
+                                                        <select name="type" value={formData.quarantineDetails?.type || ''} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                             <option value="">Select type...</option>
                                                             <option value="Preventive - New Arrival">Preventive - New Arrival</option>
                                                             <option value="Preventive - Intake">Preventive - Intake</option>
@@ -4468,17 +4468,17 @@ const AnimalFormModalV2 = ({
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Additional Notes</label>
-                                                    <input type="text" name="reason" value={formData.quarantineDetails?.reason || ''} onChange={handleQuarantineChange} placeholder="e.g., Specific illness, concerns, observations" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Additional Notes</label>
+                                                    <input type="text" name="reason" value={formData.quarantineDetails?.reason || ''} onChange={handleQuarantineChange} placeholder="e.g., Specific illness, concerns, observations" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Start Date {(formData.quarantineDetails?.status === 'Quarantine' || formData.quarantineDetails?.status === 'Isolation') && <span className="text-red-500">*</span>}</label>
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Start Date {(formData.quarantineDetails?.status === 'Quarantine' || formData.quarantineDetails?.status === 'Isolation') && <span className="text-red-500">*</span>}</label>
                                                     <DatePicker name="startDate" value={formData.quarantineDetails?.startDate || ''} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">End Date (Optional)</label>
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">End Date (Optional)</label>
                                                     <DatePicker name="endDate" value={formData.quarantineDetails?.endDate || ''} onChange={handleQuarantineChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
-                                                    <p className="text-[11px] text-gray-400 mt-0.5">A past/today end date automatically ends this status.</p>
+                                                    <p className="text-[11px] text-gray-400 dark:text-dark-text-muted mt-0.5">A past/today end date automatically ends this status.</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -4486,33 +4486,33 @@ const AnimalFormModalV2 = ({
 
                                     {/* Treatment is defined entirely by medications — an active one is what drives the "In Treatment" flag/health score. */}
                                     <div className="space-y-2 pt-3 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Treatment</h4>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                            <div className="flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 rounded-md p-2">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Treatment</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-3">
+                                            <div className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
                                                 <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
                                                 <span>Adding an active medication below marks this animal as "In Treatment" and factors into its health status.</span>
                                             </div>
 
                                             {/* Mode Toggle */}
                                             <div className="flex gap-2">
-                                                <button type="button" onClick={() => setMedicationMode('manual')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
-                                                <button type="button" onClick={() => setMedicationMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'supply' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                                <button type="button" onClick={() => setMedicationMode('manual')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>Manual Entry</button>
+                                                <button type="button" onClick={() => setMedicationMode('supply')} className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${medicationMode === 'supply' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>From Supplies</button>
                                             </div>
 
                                             {medicationMode === 'manual' ? (
                                                 <div className="space-y-3">
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                        <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({ ...newMedication, name: e.target.value })} placeholder="Medication Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                        <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="Dose (e.g., 0.1ml)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                        <input type="text" value={newMedication.reason} onChange={(e) => setNewMedication({ ...newMedication, reason: e.target.value })} placeholder="Reason (e.g., Post-surgical recovery, illness)" className="col-span-2 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                        <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({ ...newMedication, name: e.target.value })} placeholder="Medication Name" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                        <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="Dose (e.g., 0.1ml)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                        <input type="text" value={newMedication.reason} onChange={(e) => setNewMedication({ ...newMedication, reason: e.target.value })} placeholder="Reason (e.g., Post-surgical recovery, illness)" className="col-span-2 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                         <DatePicker value={newMedication.startDate} onChange={(e) => setNewMedication({ ...newMedication, startDate: e.target.value })} placeholder="Start Date" className="py-1.5 px-2 text-sm" />
                                                         <DatePicker value={newMedication.stopDate} onChange={(e) => setNewMedication({ ...newMedication, stopDate: e.target.value })} placeholder="Stop Date" className="py-1.5 px-2 text-sm" />
                                                         <div className="col-span-2 flex gap-2 items-center">
-                                                            <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="Interval" className="w-20 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                            <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                            <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="Interval" className="w-20 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                            <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                                 <option value="hours">Hours</option><option value="days">Days</option><option value="weeks">Weeks</option>
                                                             </select>
-                                                            <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Notes" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                            <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Notes" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                         </div>
                                                     </div>
                                                     <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Medication</button>
@@ -4520,16 +4520,16 @@ const AnimalFormModalV2 = ({
                                             ) : (
                                                 <div className="space-y-3">
                                                     <div className="space-y-2">
-                                                        <label className="block text-xs font-medium text-gray-700">Search & Select Medication Supply</label>
-                                                        <input type="text" value={medicationSupplySearch} onChange={(e) => setMedicationSupplySearch(e.target.value)} placeholder="Search for medication supplies..." className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Search & Select Medication Supply</label>
+                                                        <input type="text" value={medicationSupplySearch} onChange={(e) => setMedicationSupplySearch(e.target.value)} placeholder="Search for medication supplies..." className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                     </div>
 
                                                     {loadingMedicationSupplies && (
-                                                        <div className="text-xs text-gray-500 py-2">Loading supplies...</div>
+                                                        <div className="text-xs text-gray-500 dark:text-dark-text-muted py-2">Loading supplies...</div>
                                                     )}
 
                                                     {!loadingMedicationSupplies && (
-                                                        <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md">
+                                                        <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-dark-border rounded-md">
                                                             {availableMedicationSupplies.filter(supply =>
                                                                 supply.name?.toLowerCase().includes(medicationSupplySearch.toLowerCase()) ||
                                                                 supply.category?.toLowerCase().includes(medicationSupplySearch.toLowerCase())
@@ -4545,46 +4545,46 @@ const AnimalFormModalV2 = ({
                                                                             setSelectedMedicationSupply(supply);
                                                                             setMedicationSupplySearch('');
                                                                         }}
-                                                                        className={`w-full text-left px-3 py-2 text-xs rounded-md transition-colors ${selectedMedicationSupply?.id === supply.id || selectedMedicationSupply?._id === supply._id ? 'bg-primary dark:bg-dark-primary text-black' : 'hover:bg-gray-100'}`}
+                                                                        className={`w-full text-left px-3 py-2 text-xs rounded-md transition-colors ${selectedMedicationSupply?.id === supply.id || selectedMedicationSupply?._id === supply._id ? 'bg-primary dark:bg-dark-primary text-black' : 'hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}
                                                                     >
                                                                         <div className="font-medium">{supply.name}</div>
-                                                                        {supply.quantity && <div className="text-xs text-gray-600">Stock: {supply.quantity}</div>}
+                                                                        {supply.quantity && <div className="text-xs text-gray-600 dark:text-dark-text-secondary">Stock: {supply.quantity}</div>}
                                                                     </button>
                                                                 ))
                                                             ) : (
-                                                                <div className="px-3 py-2 text-xs text-gray-500 text-center">No medication supplies found</div>
+                                                                <div className="px-3 py-2 text-xs text-gray-500 dark:text-dark-text-muted text-center">No medication supplies found</div>
                                                             )}
                                                         </div>
                                                     )}
 
                                                     {selectedMedicationSupply && (
-                                                        <div className="p-2 bg-blue-50 border border-blue-200 rounded-md">
-                                                            <p className="text-xs text-gray-600 mb-2"><strong>Selected:</strong> {selectedMedicationSupply.name}</p>
+                                                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-md">
+                                                            <p className="text-xs text-gray-600 dark:text-dark-text-secondary mb-2"><strong>Selected:</strong> {selectedMedicationSupply.name}</p>
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                                 <div>
-                                                                    <label className="block text-xs font-medium text-gray-700">Dose</label>
-                                                                    <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="e.g., 0.1ml" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dose</label>
+                                                                    <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({ ...newMedication, dose: e.target.value })} placeholder="e.g., 0.1ml" className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                                 </div>
                                                                 <div className="col-span-2">
-                                                                    <label className="block text-xs font-medium text-gray-700">Reason</label>
-                                                                    <input type="text" value={newMedication.reason} onChange={(e) => setNewMedication({ ...newMedication, reason: e.target.value })} placeholder="e.g., Post-surgical recovery, illness" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reason</label>
+                                                                    <input type="text" value={newMedication.reason} onChange={(e) => setNewMedication({ ...newMedication, reason: e.target.value })} placeholder="e.g., Post-surgical recovery, illness" className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                                 </div>
                                                                 <div>
-                                                                    <label className="block text-xs font-medium text-gray-700">Start Date</label>
+                                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Start Date</label>
                                                                     <DatePicker value={newMedication.startDate} onChange={(e) => setNewMedication({ ...newMedication, startDate: e.target.value })} className="w-full py-1.5 px-2 text-sm" />
                                                                 </div>
                                                                 <div>
-                                                                    <label className="block text-xs font-medium text-gray-700">Stop Date</label>
+                                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Stop Date</label>
                                                                     <DatePicker value={newMedication.stopDate} onChange={(e) => setNewMedication({ ...newMedication, stopDate: e.target.value })} className="w-full py-1.5 px-2 text-sm" />
                                                                 </div>
                                                                 <div className="flex gap-2 items-end">
                                                                     <div className="flex-1">
-                                                                        <label className="block text-xs font-medium text-gray-700">Interval</label>
-                                                                        <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="e.g., 12" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Interval</label>
+                                                                        <input type="number" value={newMedication.intervalValue} onChange={(e) => setNewMedication({ ...newMedication, intervalValue: e.target.value })} placeholder="e.g., 12" className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                                     </div>
                                                                     <div className="flex-1">
-                                                                        <label className="block text-xs font-medium text-gray-700">Unit</label>
-                                                                        <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Unit</label>
+                                                                        <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({ ...newMedication, intervalUnit: e.target.value })} className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                                             <option value="hours">Hours</option>
                                                                             <option value="days">Days</option>
                                                                             <option value="weeks">Weeks</option>
@@ -4592,8 +4592,8 @@ const AnimalFormModalV2 = ({
                                                                     </div>
                                                                 </div>
                                                                 <div className="col-span-2">
-                                                                    <label className="block text-xs font-medium text-gray-700">Notes</label>
-                                                                    <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Additional notes" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Notes</label>
+                                                                    <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({ ...newMedication, notes: e.target.value })} placeholder="Additional notes" className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                                 </div>
                                                             </div>
                                                             <button type="button" onClick={addMedication} className="w-full px-3 py-1.5 mt-2 bg-green-500 text-white rounded-md text-xs font-medium hover:bg-green-600">Add from Supply</button>
@@ -4603,9 +4603,9 @@ const AnimalFormModalV2 = ({
                                             )}
                                         </div>
                                         {(formData.medications || []).filter(Boolean).map((rec, i) => (
-                                            <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border">
+                                            <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border">
                                                 <span className="flex-1 min-w-0 break-words">
-                                                    {rec.name} {rec.dose} {rec.source === 'supply' && <span className="text-xs text-blue-600 font-medium">(from supply)</span>} {rec.reason && `— ${rec.reason}`} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})
+                                                    {rec.name} {rec.dose} {rec.source === 'supply' && <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">(from supply)</span>} {rec.reason && `— ${rec.reason}`} (From: {rec.startDate || 'N/A'} To: {rec.stopDate || 'N/A'})
                                                 </span>
                                                 <button type="button" onClick={() => removeArrayItem('medications', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
@@ -4614,16 +4614,16 @@ const AnimalFormModalV2 = ({
 
                                     {/* Medical Conditions */}
                                     <div className="space-y-2 pt-3 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Medical Conditions</h4>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Medical Conditions</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-3">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <input type="text" value={newMedicalCondition.name} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, name: e.target.value })} placeholder="Condition Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newMedicalCondition.notes} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newMedicalCondition.name} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, name: e.target.value })} placeholder="Condition Name" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newMedicalCondition.notes} onChange={(e) => setNewMedicalCondition({ ...newMedicalCondition, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <button type="button" onClick={addMedicalCondition} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Medical Condition</button>
                                         </div>
                                         {(formData.medicalConditions || []).filter(Boolean).map((rec, i) => (
-                                            <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border">
+                                            <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border">
                                                 <span className="flex-1 min-w-0 break-words">{rec.name} {rec.notes && `(${rec.notes})`}</span>
                                                 <button type="button" onClick={() => removeArrayItem('medicalConditions', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
@@ -4632,16 +4632,16 @@ const AnimalFormModalV2 = ({
 
                                     {/* Allergies */}
                                     {!hiddenField('allergies') && <div className="space-y-2 pt-3 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Allergies</h4>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Allergies</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-3">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <input type="text" value={newAllergy.name} onChange={(e) => setNewAllergy({ ...newAllergy, name: e.target.value })} placeholder="Allergy Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newAllergy.notes} onChange={(e) => setNewAllergy({ ...newAllergy, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newAllergy.name} onChange={(e) => setNewAllergy({ ...newAllergy, name: e.target.value })} placeholder="Allergy Name" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newAllergy.notes} onChange={(e) => setNewAllergy({ ...newAllergy, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <button type="button" onClick={addAllergy} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Allergy</button>
                                         </div>
                                         {(formData.allergies || []).filter(Boolean).map((rec, i) => (
-                                            <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border">
+                                            <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border">
                                                 <span className="flex-1 min-w-0 break-words">{rec.name} {rec.notes && `(${rec.notes})`}</span>
                                                 <button type="button" onClick={() => removeArrayItem('allergies', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
@@ -4652,59 +4652,59 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Preventive Care" icon={<Shield size={16} />} initiallyOpen>
                                     {/* Vaccinations */}
                                     {!hiddenField('vaccinations') && <div className="space-y-2">
-                                        <h4 className="text-sm font-semibold text-gray-700">Vaccinations</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Vaccinations</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                 <DatePicker value={newVaccination.date} onChange={(e) => setNewVaccination({ ...newVaccination, date: e.target.value })} className="py-1.5 px-2 text-sm" />
-                                                <input type="text" value={newVaccination.name} onChange={(e) => setNewVaccination({ ...newVaccination, name: e.target.value })} placeholder="Vaccination Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newVaccination.notes} onChange={(e) => setNewVaccination({ ...newVaccination, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newVaccination.name} onChange={(e) => setNewVaccination({ ...newVaccination, name: e.target.value })} placeholder="Vaccination Name" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newVaccination.notes} onChange={(e) => setNewVaccination({ ...newVaccination, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <button type="button" onClick={addVaccination} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Vaccination</button>
                                         </div>
-                                    {(formData.vaccinations || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.vaccinations || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>}
                                     {/* Deworming */}
                                     {!hiddenField('dewormingRecords') && <div className="space-y-2 pt-2 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Deworming</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Deworming</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                 <DatePicker value={newDeworming.date} onChange={(e) => setNewDeworming({ ...newDeworming, date: e.target.value })} className="py-1.5 px-2 text-sm" />
-                                                <input type="text" value={newDeworming.medication} onChange={(e) => setNewDeworming({ ...newDeworming, medication: e.target.value })} placeholder="Medication" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newDeworming.notes} onChange={(e) => setNewDeworming({ ...newDeworming, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newDeworming.medication} onChange={(e) => setNewDeworming({ ...newDeworming, medication: e.target.value })} placeholder="Medication" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newDeworming.notes} onChange={(e) => setNewDeworming({ ...newDeworming, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <button type="button" onClick={addDeworming} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Deworming</button>
                                         </div>
-                                    {(formData.dewormingRecords || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.dewormingRecords || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>}
                                     {/* Parasite Control */}
                                     <div className="space-y-2 pt-2 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Parasite Control</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Parasite Control</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                 <DatePicker value={newParasiteControl.date} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, date: e.target.value })} className="py-1.5 px-2 text-sm" />
-                                                <input type="text" value={newParasiteControl.treatment} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, treatment: e.target.value })} placeholder="e.g., Flea/tick treatment" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newParasiteControl.notes} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newParasiteControl.treatment} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, treatment: e.target.value })} placeholder="e.g., Flea/tick treatment" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newParasiteControl.notes} onChange={(e) => setNewParasiteControl({ ...newParasiteControl, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <button type="button" onClick={addParasiteControl} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Parasite Control</button>
                                         </div>
-                                    {(formData.parasiteControl || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.treatment} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('parasiteControl', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.parasiteControl || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.treatment} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('parasiteControl', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     
                                     {/* Parasite Prevention Schedule - Timeline Events */}
                                     <div className="space-y-2 pt-2 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Prevention Schedule (Recurring Events)</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Prevention Schedule (Recurring Events)</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                <input type="text" value={newParasiteScheduleTreatment} onChange={(e) => setNewParasiteScheduleTreatment(e.target.value)} placeholder="e.g., Flea/Tick Prevention, Deworming" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newParasiteScheduleTreatment} onChange={(e) => setNewParasiteScheduleTreatment(e.target.value)} placeholder="e.g., Flea/Tick Prevention, Deworming" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                 <DatePicker value={newParasiteScheduleDate} onChange={(e) => setNewParasiteScheduleDate(e.target.value)} className="py-1.5 px-2 text-sm" />
                                             </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Interval</label>
-                                                    <input type="number" value={newParasiteScheduleInterval} onChange={(e) => setNewParasiteScheduleInterval(e.target.value)} placeholder="e.g., 1, 30, 90" min="1" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Interval</label>
+                                                    <input type="number" value={newParasiteScheduleInterval} onChange={(e) => setNewParasiteScheduleInterval(e.target.value)} placeholder="e.g., 1, 30, 90" min="1" className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Unit</label>
-                                                    <select value={newParasiteScheduleUnit} onChange={(e) => setNewParasiteScheduleUnit(e.target.value)} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Unit</label>
+                                                    <select value={newParasiteScheduleUnit} onChange={(e) => setNewParasiteScheduleUnit(e.target.value)} className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                         <option value="day">Days</option>
                                                         <option value="week">Weeks</option>
                                                         <option value="month">Months</option>
@@ -4715,7 +4715,7 @@ const AnimalFormModalV2 = ({
                                             <button type="button" onClick={addParasiteScheduleEvent} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Schedule Event</button>
                                         </div>
                                         {(parseJsonArrayField(formData.parasitePreventionSchedule) || []).filter(Boolean).map((schedule, i) => (
-                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-blue-50 rounded border border-blue-200">
+                                            <div key={i} className="flex justify-between items-center text-xs p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-700/60">
                                                 <span>
                                                     <strong>{schedule.treatment}</strong> starting {schedule.startDate}
                                                     {schedule.interval && schedule.intervalUnit ? ` (every ${schedule.interval} ${schedule.intervalUnit}s)` : ''}
@@ -4732,10 +4732,10 @@ const AnimalFormModalV2 = ({
                                         {!hiddenField('hipElbowScores') && (
                                         <>
                                         {/* Structured Health Clearances */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                            <h4 className="text-sm font-semibold text-gray-700">Add Health Clearance</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-3">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Add Health Clearance</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                <select value={newHealthClearance.clearanceType} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, clearanceType: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <select value={newHealthClearance.clearanceType} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, clearanceType: e.target.value })} className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                     <option value="">Select Clearance Type...</option>
                                                     <option value="OFA Hips">OFA Hips</option>
                                                     <option value="OFA Elbows">OFA Elbows</option>
@@ -4747,27 +4747,27 @@ const AnimalFormModalV2 = ({
                                                     <option value="Health Panel">Health Panel</option>
                                                     <option value="Other">Other</option>
                                                 </select>
-                                                <input type="text" value={newHealthClearance.result} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, result: e.target.value })} placeholder="Result (e.g., Excellent, Good)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newHealthClearance.result} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, result: e.target.value })} placeholder="Result (e.g., Excellent, Good)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                 <DatePicker value={newHealthClearance.dateIssued} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, dateIssued: e.target.value })} className="py-1.5 px-2 text-sm" />
-                                                <input type="text" value={newHealthClearance.certificateId} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, certificateId: e.target.value })} placeholder="Certificate ID (e.g., XX-12345E24M)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newHealthClearance.certificateId} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, certificateId: e.target.value })} placeholder="Certificate ID (e.g., XX-12345E24M)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
-                                            <textarea value={newHealthClearance.notes} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, notes: e.target.value })} placeholder="Additional notes (optional)" rows="2" className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <textarea value={newHealthClearance.notes} onChange={(e) => setNewHealthClearance({ ...newHealthClearance, notes: e.target.value })} placeholder="Additional notes (optional)" rows="2" className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             <button type="button" onClick={addHealthClearance} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Clearance</button>
                                         </div>
 
                                         {/* Display existing clearances */}
                                         {(formData.healthClearances || []).length > 0 && (
                                             <div className="space-y-2">
-                                                <h4 className="text-sm font-semibold text-gray-700">Recorded Clearances</h4>
+                                                <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Recorded Clearances</h4>
                                                 <div className="space-y-2 max-h-64 overflow-y-auto">
                                                     {(formData.healthClearances || []).map((clearance, i) => (
-                                                        <div key={i} className="p-2 bg-green-50 rounded-md border border-green-200 flex justify-between items-start">
+                                                        <div key={i} className="p-2 bg-green-50 dark:bg-green-900/20 rounded-md border border-green-200 dark:border-green-700/60 flex justify-between items-start">
                                                             <div className="flex-1 text-xs">
-                                                                <p className="font-semibold text-gray-800">{clearance.clearanceType}</p>
-                                                                <p className="text-gray-600">Result: <span className="font-medium">{clearance.result}</span></p>
-                                                                <p className="text-gray-600">Date: {formatDate(clearance.dateIssued)}</p>
-                                                                {clearance.certificateId && <p className="text-gray-600">ID: <span className="font-mono text-xs">{clearance.certificateId}</span></p>}
-                                                                {clearance.notes && <p className="text-gray-600 mt-1 italic">Note: {clearance.notes}</p>}
+                                                                <p className="font-semibold text-gray-800 dark:text-dark-text">{clearance.clearanceType}</p>
+                                                                <p className="text-gray-600 dark:text-dark-text-secondary">Result: <span className="font-medium">{clearance.result}</span></p>
+                                                                <p className="text-gray-600 dark:text-dark-text-secondary">Date: {formatDate(clearance.dateIssued)}</p>
+                                                                {clearance.certificateId && <p className="text-gray-600 dark:text-dark-text-secondary">ID: <span className="font-mono text-xs">{clearance.certificateId}</span></p>}
+                                                                {clearance.notes && <p className="text-gray-600 dark:text-dark-text-secondary mt-1 italic">Note: {clearance.notes}</p>}
                                                             </div>
                                                             <button type="button" onClick={() => removeArrayItem('healthClearances', i)} className="ml-2 flex-shrink-0">
                                                                 <Trash2 size={14} className="text-red-500" />
@@ -4782,15 +4782,15 @@ const AnimalFormModalV2 = ({
 
                                         {/* Legacy fields - still available for reference */}
                                         <div className="border-t pt-3 mt-3">
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">Other Health Information</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">Other Health Information</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                 {!hiddenField('spayNeuterDate') && <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Spay/Neuter Date</label>
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Spay/Neuter Date</label>
                                                     <DatePicker name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                                 </div>}
                                                 {!hiddenField('heartwormStatus') && <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Heartworm Status</label>
-                                                    <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Heartworm Status</label>
+                                                    <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                         <option value="">Select...</option>
                                                         <option value="Negative">Negative</option>
                                                         <option value="Positive">Positive</option>
@@ -4799,12 +4799,12 @@ const AnimalFormModalV2 = ({
                                                     </select>
                                                 </div>}
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Genetic Test Results</label>
-                                                    <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Embark: Clear for DM, vWD" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Test Results</label>
+                                                    <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Embark: Clear for DM, vWD" />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Chronic Conditions</label>
-                                                    <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Allergies, arthritis" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Chronic Conditions</label>
+                                                    <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Allergies, arthritis" />
                                                 </div>
                                             </div>
                                         </div>
@@ -4814,70 +4814,70 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Procedures & Diagnostics" icon={<Microscope size={16} />}>
                                     {/* Medical Procedures */}
                                     <div className="space-y-2">
-                                        <h4 className="text-sm font-semibold text-gray-700">Medical Procedures</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Medical Procedures</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                 <DatePicker value={newProcedure.date} onChange={(e) => setNewProcedure({ ...newProcedure, date: e.target.value })} className="py-1.5 px-2 text-sm" />
-                                                <input type="text" value={newProcedure.name} onChange={(e) => setNewProcedure({ ...newProcedure, name: e.target.value })} placeholder="Procedure Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newProcedure.notes} onChange={(e) => setNewProcedure({ ...newProcedure, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newProcedure.name} onChange={(e) => setNewProcedure({ ...newProcedure, name: e.target.value })} placeholder="Procedure Name" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newProcedure.notes} onChange={(e) => setNewProcedure({ ...newProcedure, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <button type="button" onClick={addMedicalProcedure} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Procedure</button>
                                         </div>
-                                    {(formData.medicalProcedures || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.medicalProcedures || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('medicalProcedures', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                     {/* Lab Results */}
                                     <div className="space-y-2 pt-2 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Lab Results</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Lab Results</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                 <DatePicker value={newLabResult.date} onChange={(e) => setNewLabResult({ ...newLabResult, date: e.target.value })} className="py-1.5 px-2 text-sm" />
-                                                <input type="text" value={newLabResult.testName} onChange={(e) => setNewLabResult({ ...newLabResult, testName: e.target.value })} placeholder="Test Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newLabResult.result} onChange={(e) => setNewLabResult({ ...newLabResult, result: e.target.value })} placeholder="Result" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newLabResult.testName} onChange={(e) => setNewLabResult({ ...newLabResult, testName: e.target.value })} placeholder="Test Name" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newLabResult.result} onChange={(e) => setNewLabResult({ ...newLabResult, result: e.target.value })} placeholder="Result" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <button type="button" onClick={addLabResult} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Lab Result</button>
                                         </div>
-                                    {(formData.labResults || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.labResults || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
                                 <FormSection title="Veterinary Care" icon={<Stethoscope size={16} />}>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700">Primary Veterinarian</label>
-                                        <input type="text" name="primaryVet" value={formData.primaryVet} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Primary Veterinarian</label>
+                                        <input type="text" name="primaryVet" value={formData.primaryVet} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                     </div>
                                     {/* Vet Visits */}
                                     <div className="space-y-2 pt-2 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700">Veterinary Visits</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Veterinary Visits</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                 <DatePicker value={newVetVisit.date} onChange={(e) => setNewVetVisit({ ...newVetVisit, date: e.target.value })} className="py-1.5 px-2 text-sm" />
-                                                <input type="text" value={newVetVisit.reason} onChange={(e) => setNewVetVisit({ ...newVetVisit, reason: e.target.value })} placeholder="Reason for visit" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newVetVisit.notes} onChange={(e) => setNewVetVisit({ ...newVetVisit, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <input type="text" value={newVetVisit.reason} onChange={(e) => setNewVetVisit({ ...newVetVisit, reason: e.target.value })} placeholder="Reason for visit" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newVetVisit.notes} onChange={(e) => setNewVetVisit({ ...newVetVisit, notes: e.target.value })} placeholder="Notes" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <button type="button" onClick={addVetVisit} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Add Vet Visit</button>
                                         </div>
-                                    {(formData.vetVisits || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
+                                    {(formData.vetVisits || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
 
                                 <FormSection title="End of Life" icon={<Scale size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Deceased Date</label>
-                                            <DatePicker name="deceasedDate" value={formData.deceasedDate} onChange={handleChange} maxDate={new Date()} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Deceased Date</label>
+                                            <DatePicker name="deceasedDate" value={formData.deceasedDate} onChange={handleChange} maxDate={new Date()} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Cause of Death</label>
-                                            <input type="text" name="causeOfDeath" value={formData.causeOfDeath} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Cause of Death</label>
+                                            <input type="text" name="causeOfDeath" value={formData.causeOfDeath} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Necropsy Results</label>
-                                            <textarea name="necropsyResults" value={formData.necropsyResults} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Necropsy Results</label>
+                                            <textarea name="necropsyResults" value={formData.necropsyResults} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">End of Life Care Notes</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">End of Life Care Notes</label>
                                             <textarea name="endOfLifeCareNotes" value={formData.endOfLifeCareNotes || ''} onChange={handleChange} rows="2"
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                 placeholder="Wishes for cremation, burial, memorial" />
                                         </div>
                                     </div>
@@ -4888,19 +4888,19 @@ const AnimalFormModalV2 = ({
                             <div className="space-y-4">
                                 <FormSection title="Nutrition" icon={<UtensilsCrossed size={16} />} initiallyOpen>
                                     <div className="space-y-3">
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Schedule</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Feeding Schedule</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Feed Every (hours)</label>
-                                                    <input type="number" min="1" name="feedingIntervalHours" value={formData.feedingIntervalHours || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 24" />
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Feed Every (hours)</label>
+                                                    <input type="number" min="1" name="feedingIntervalHours" value={formData.feedingIntervalHours || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., 24" />
                                                     <div className="flex flex-wrap gap-1 mt-1.5">
                                                         {[6, 8, 12, 24, 48, 72, 168].map(h => (
                                                             <button
                                                                 key={h}
                                                                 type="button"
                                                                 onClick={() => setFormData(prev => ({ ...prev, feedingIntervalHours: h }))}
-                                                                className={`text-[11px] px-2 py-0.5 rounded-full border ${Number(formData.feedingIntervalHours) === h ? 'bg-primary dark:bg-dark-primary text-black border-primary' : 'bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100'}`}
+                                                                className={`text-[11px] px-2 py-0.5 rounded-full border ${Number(formData.feedingIntervalHours) === h ? 'bg-primary dark:bg-dark-primary text-black border-primary' : 'bg-gray-50 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary border-gray-300 dark:border-dark-border hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}
                                                             >
                                                                 {h < 24 ? `${h}h` : `${h / 24}d`}
                                                             </button>
@@ -4908,19 +4908,19 @@ const AnimalFormModalV2 = ({
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700">Last Fed</label>
-                                                    <p className="mt-1 py-1.5 px-2 text-sm text-gray-500">{formData.lastFedDate ? formatDate(formData.lastFedDate) : 'Never — use "Fed" in the Feeding & Care tab'}</p>
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Last Fed</label>
+                                                    <p className="mt-1 py-1.5 px-2 text-sm text-gray-500 dark:text-dark-text-muted">{formData.lastFedDate ? formatDate(formData.lastFedDate) : 'Never — use "Fed" in the Feeding & Care tab'}</p>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Details & Management</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-3">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Feeding Details & Management</h4>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Diet</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Diet</label>
                                                 <div className="flex gap-1.5 mb-1.5">
-                                                    <button type="button" onClick={() => setDietMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
-                                                    <button type="button" onClick={() => setDietMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'supply' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                                    <button type="button" onClick={() => setDietMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>Manual Entry</button>
+                                                    <button type="button" onClick={() => setDietMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${dietMode === 'supply' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>From Supplies</button>
                                                 </div>
                                                 {dietMode === 'manual' ? (
                                                     <div className="space-y-2">
@@ -4939,7 +4939,7 @@ const AnimalFormModalV2 = ({
                                                                         setDietManualEntry({ name: '' });
                                                                     }
                                                                 }}
-                                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                             />
                                                             <button
                                                                 type="button"
@@ -4957,7 +4957,7 @@ const AnimalFormModalV2 = ({
                                                         {parseJsonArrayField(formData.dietSupplies).length > 0 ? (
                                                             <div className="space-y-1">
                                                                 {parseJsonArrayField(formData.dietSupplies).map((s, i) => (
-                                                                    <div key={i} className="flex justify-between items-center p-1.5 bg-blue-50 rounded text-xs">
+                                                                    <div key={i} className="flex justify-between items-center p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded text-xs">
                                                                         <span>{s.name}</span>
                                                                         <button type="button" onClick={() => {
                                                                             const updated = parseJsonArrayField(formData.dietSupplies).filter((_, idx) => idx !== i);
@@ -4967,7 +4967,7 @@ const AnimalFormModalV2 = ({
                                                                 ))}
                                                             </div>
                                                         ) : (
-                                                            <p className="text-xs text-gray-400 italic">No diet supplies added yet.</p>
+                                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted italic">No diet supplies added yet.</p>
                                                         )}
                                                     </div>
                                                 ) : (
@@ -4977,14 +4977,14 @@ const AnimalFormModalV2 = ({
                                                             placeholder="Search diet supplies..."
                                                             value={dietSupplySearch}
                                                             onChange={(e) => setDietSupplySearch(e.target.value)}
-                                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                         />
-                                                        {loadingDietSupplies && <p className="text-xs text-gray-500">Loading supplies...</p>}
-                                                        <div className="bg-gray-50 border border-gray-300 rounded-md max-h-40 overflow-y-auto">
+                                                        {loadingDietSupplies && <p className="text-xs text-gray-500 dark:text-dark-text-muted">Loading supplies...</p>}
+                                                        <div className="bg-gray-50 dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text max-h-40 overflow-y-auto">
                                                             {availableDietSupplies
                                                                 .filter(s => s.name?.toLowerCase().includes(dietSupplySearch.toLowerCase()))
                                                                 .map(supply => (
-                                                                    <div key={supply.id} className="p-2 border-b hover:bg-gray-100 cursor-pointer flex justify-between items-center text-xs" onClick={() => {
+                                                                    <div key={supply.id} className="p-2 border-b hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer flex justify-between items-center text-xs" onClick={() => {
                                                                         setSelectedDietSupply(supply);
                                                                         const existing = parseJsonArrayField(formData.dietSupplies) || [];
                                                                         const newSupply = { id: supply.id, name: supply.name, category: supply.category };
@@ -4997,9 +4997,9 @@ const AnimalFormModalV2 = ({
                                                                 ))
                                                             }
                                                         </div>
-                                                        <div className="text-xs text-gray-600">
+                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
                                                             {parseJsonArrayField(formData.dietSupplies).map((s, i) => (
-                                                                <div key={i} className="flex justify-between items-center p-1 bg-blue-50 rounded mt-1">
+                                                                <div key={i} className="flex justify-between items-center p-1 bg-blue-50 dark:bg-blue-900/20 rounded mt-1">
                                                                     <span>{s.name}</span>
                                                                     <button type="button" onClick={() => {
                                                                         const updated = parseJsonArrayField(formData.dietSupplies).filter((_, idx) => idx !== i);
@@ -5012,10 +5012,10 @@ const AnimalFormModalV2 = ({
                                                 )}
                                             </div>
                                             <div className="pt-2 border-t">
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Supplements</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Supplements</label>
                                                 <div className="flex gap-1.5 mb-1.5">
-                                                    <button type="button" onClick={() => setSupplementMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>Manual Entry</button>
-                                                    <button type="button" onClick={() => setSupplementMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'supply' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>From Supplies</button>
+                                                    <button type="button" onClick={() => setSupplementMode('manual')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'manual' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>Manual Entry</button>
+                                                    <button type="button" onClick={() => setSupplementMode('supply')} className={`flex-1 px-2 py-1 text-[11px] font-medium rounded-md transition-colors ${supplementMode === 'supply' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>From Supplies</button>
                                                 </div>
                                                 {supplementMode === 'manual' ? (
                                                     <div className="space-y-2">
@@ -5025,7 +5025,7 @@ const AnimalFormModalV2 = ({
                                                                 placeholder="Name (e.g., Vitamin D3)"
                                                                 value={supplementManualEntry.name}
                                                                 onChange={(e) => setSupplementManualEntry(prev => ({ ...prev, name: e.target.value }))}
-                                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                             />
                                                             <input
                                                                 type="text"
@@ -5041,7 +5041,7 @@ const AnimalFormModalV2 = ({
                                                                         setSupplementManualEntry({ name: '', dosage: '' });
                                                                     }
                                                                 }}
-                                                                className="w-full sm:w-32 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                                className="w-full sm:w-32 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                             />
                                                             <button
                                                                 type="button"
@@ -5059,7 +5059,7 @@ const AnimalFormModalV2 = ({
                                                         {parseJsonArrayField(formData.supplementSupplies).length > 0 ? (
                                                             <div className="space-y-1">
                                                                 {parseJsonArrayField(formData.supplementSupplies).map((s, i) => (
-                                                                    <div key={i} className="flex justify-between items-center p-1.5 bg-purple-50 rounded text-xs">
+                                                                    <div key={i} className="flex justify-between items-center p-1.5 bg-purple-50 dark:bg-purple-900/20 rounded text-xs">
                                                                         <span>{s.name} {s.dosage && `(${s.dosage})`}</span>
                                                                         <button type="button" onClick={() => {
                                                                             const updated = parseJsonArrayField(formData.supplementSupplies).filter((_, idx) => idx !== i);
@@ -5069,7 +5069,7 @@ const AnimalFormModalV2 = ({
                                                                 ))}
                                                             </div>
                                                         ) : (
-                                                            <p className="text-xs text-gray-400 italic">No supplements added yet.</p>
+                                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted italic">No supplements added yet.</p>
                                                         )}
                                                     </div>
                                                 ) : (
@@ -5079,14 +5079,14 @@ const AnimalFormModalV2 = ({
                                                             placeholder="Search supplement supplies..."
                                                             value={supplementSupplySearch}
                                                             onChange={(e) => setSupplementSupplySearch(e.target.value)}
-                                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                         />
-                                                        {loadingSupplementSupplies && <p className="text-xs text-gray-500">Loading supplies...</p>}
-                                                        <div className="bg-gray-50 border border-gray-300 rounded-md max-h-40 overflow-y-auto">
+                                                        {loadingSupplementSupplies && <p className="text-xs text-gray-500 dark:text-dark-text-muted">Loading supplies...</p>}
+                                                        <div className="bg-gray-50 dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text max-h-40 overflow-y-auto">
                                                             {availableSupplementSupplies
                                                                 .filter(s => s.name?.toLowerCase().includes(supplementSupplySearch.toLowerCase()))
                                                                 .map(supply => (
-                                                                    <div key={supply.id} className="p-2 border-b hover:bg-gray-100 cursor-pointer flex justify-between items-center text-xs" onClick={() => {
+                                                                    <div key={supply.id} className="p-2 border-b hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer flex justify-between items-center text-xs" onClick={() => {
                                                                         setSelectedSupplementSupply(supply);
                                                                         const existing = parseJsonArrayField(formData.supplementSupplies) || [];
                                                                         const newSupply = { id: supply.id, name: supply.name, category: supply.category, dosage: supply.dosage || '' };
@@ -5099,9 +5099,9 @@ const AnimalFormModalV2 = ({
                                                                 ))
                                                             }
                                                         </div>
-                                                        <div className="text-xs text-gray-600">
+                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
                                                             {parseJsonArrayField(formData.supplementSupplies).map((s, i) => (
-                                                                <div key={i} className="flex justify-between items-center p-1 bg-purple-50 rounded mt-1">
+                                                                <div key={i} className="flex justify-between items-center p-1 bg-purple-50 dark:bg-purple-900/20 rounded mt-1">
                                                                     <span>{s.name} {s.dosage && `(${s.dosage})`}</span>
                                                                     <button type="button" onClick={() => {
                                                                         const updated = parseJsonArrayField(formData.supplementSupplies).filter((_, idx) => idx !== i);
@@ -5113,28 +5113,28 @@ const AnimalFormModalV2 = ({
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="pt-2 border-t"><label className="block text-xs font-medium text-gray-700">Portion Size/Amount Per Feeding</label><input type="text" name="portionSize" value={formData.portionSize || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 2 cups, 50g, 1/4 cup pellets + 2 tbsp fresh" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Feeding Method</label><input type="text" name="feedingMethod" value={formData.feedingMethod || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Hand-fed, Self-fed, Free-choice, Timed bowl, Force-feeding" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Feeding Location/Container</label><input type="text" name="feedingLocation" value={formData.feedingLocation || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Separate bowl, Feeding station, Enclosure floor, Ceramic dish, Stainless steel feeder" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Water Access</label><input type="text" name="waterAccess" value={formData.waterAccess || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Free access, Water bottle, Water bowl (changed daily), Misting system, Soaking dish" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Feeding Pace & Behavior Notes</label><textarea name="feedingBehaviorNotes" value={formData.feedingBehaviorNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Fast eater, needs to be monitored, Slow feeder requires time, Aggressive during feeding, Picky about presentation" /></div>
+                                            <div className="pt-2 border-t"><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Portion Size/Amount Per Feeding</label><input type="text" name="portionSize" value={formData.portionSize || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., 2 cups, 50g, 1/4 cup pellets + 2 tbsp fresh" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Feeding Method</label><input type="text" name="feedingMethod" value={formData.feedingMethod || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Hand-fed, Self-fed, Free-choice, Timed bowl, Force-feeding" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Feeding Location/Container</label><input type="text" name="feedingLocation" value={formData.feedingLocation || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Separate bowl, Feeding station, Enclosure floor, Ceramic dish, Stainless steel feeder" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Water Access</label><input type="text" name="waterAccess" value={formData.waterAccess || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Free access, Water bottle, Water bowl (changed daily), Misting system, Soaking dish" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Feeding Pace & Behavior Notes</label><textarea name="feedingBehaviorNotes" value={formData.feedingBehaviorNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Fast eater, needs to be monitored, Slow feeder requires time, Aggressive during feeding, Picky about presentation" /></div>
                                         </div>
                                     </div>
 
                                 </FormSection>
                                 <FormSection title="Enclosure" icon={<Home size={16} />}>
                                     {/* Enclosure Assignment */}
-                                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 space-y-2 mb-4">
-                                        <label className="block text-xs font-semibold text-gray-700">Enclosure Assignment</label>
+                                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700/60 space-y-2 mb-4">
+                                        <label className="block text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Enclosure Assignment</label>
                                         {selectedEnclosure ? (
-                                            <div className="p-3 bg-white border border-blue-300 rounded-lg">
+                                            <div className="p-3 bg-white dark:bg-dark-card-bg border border-blue-300 rounded-lg">
                                                 <div className="flex items-start gap-4">
-                                                    <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                                    <div className="w-24 h-24 bg-gray-100 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
                                                         <AnimalImage src={selectedEnclosure.imageUrl} alt={selectedEnclosure.name} className="w-full h-full object-cover" iconSize={40} />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex justify-between items-start">
-                                                            <p className="font-semibold text-lg text-gray-800 truncate">{selectedEnclosure.name}</p>
+                                                            <p className="font-semibold text-lg text-gray-800 dark:text-dark-text truncate">{selectedEnclosure.name}</p>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
@@ -5147,7 +5147,7 @@ const AnimalFormModalV2 = ({
                                                                 <Unlink size={16} />
                                                             </button>
                                                         </div>
-                                                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
+                                                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-dark-text-secondary">
                                                             <div className="flex items-center gap-1">
                                                                 <Users size={14} />
                                                                 <span>{selectedEnclosure.currentAnimals || 0} / {selectedEnclosure.capacity || '?'}</span>
@@ -5206,7 +5206,7 @@ const AnimalFormModalV2 = ({
                                                             )}
                                                         </div>
                                                         {selectedEnclosure.speciesLabels && selectedEnclosure.speciesLabels.length > 0 && (
-                                                            <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+                                                            <div className="mt-1 flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted">
                                                                 <Cat size={12} />
                                                                 <span className="truncate">Suitable for: {selectedEnclosure.speciesLabels.join(', ')}</span>
                                                             </div>
@@ -5232,24 +5232,24 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Environment Needs" icon={<Leaf size={16} />}>
                                     <div className="space-y-3">
                                         {/* Lighting */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Lighting</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Lighting Type</label><input type="text" name="lightingType" value={formData.lightingType || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., LED, UVB bulbs, Natural sunlight, Infrared heat lamp" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Lighting Schedule (On/Off Times)</label><input type="text" name="lightingSchedule" value={formData.lightingSchedule || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., 12 hours on / 12 hours off, 14h on / 10h off" /></div>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Lighting</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Lighting Type</label><input type="text" name="lightingType" value={formData.lightingType || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., LED, UVB bulbs, Natural sunlight, Infrared heat lamp" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Lighting Schedule (On/Off Times)</label><input type="text" name="lightingSchedule" value={formData.lightingSchedule || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., 12 hours on / 12 hours off, 14h on / 10h off" /></div>
                                         </div>
 
                                         {/* Sound & Noise */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Sound & Noise</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Noise Level Tolerance</label><input type="text" name="noiseToleranceLevel" value={formData.noiseToleranceLevel || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Quiet environment essential, Moderate noise okay, Tolerates loud sounds" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Sound Preferences & Triggers</label><input type="text" name="soundPreferences" value={formData.soundPreferences || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Avoids high frequencies, Enjoys soft music, Stressed by vacuum sounds" /></div>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Sound & Noise</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Noise Level Tolerance</label><input type="text" name="noiseToleranceLevel" value={formData.noiseToleranceLevel || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Quiet environment essential, Moderate noise okay, Tolerates loud sounds" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Sound Preferences & Triggers</label><input type="text" name="soundPreferences" value={formData.soundPreferences || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Avoids high frequencies, Enjoys soft music, Stressed by vacuum sounds" /></div>
                                         </div>
 
                                         {/* Enrichment */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Enrichment & Activity</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Enrichment Needs</label><textarea name="enrichmentNeeds" value={formData.enrichmentNeeds || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Climbing structures, Puzzle feeders, Toys, Digging substrate, Social interaction" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Enrichment Schedule/Frequency</label><input type="text" name="enrichmentFrequency" value={formData.enrichmentFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily rotation, Weekly new items, Continuous availability" /></div>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Enrichment & Activity</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Enrichment Needs</label><textarea name="enrichmentNeeds" value={formData.enrichmentNeeds || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Climbing structures, Puzzle feeders, Toys, Digging substrate, Social interaction" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Enrichment Schedule/Frequency</label><input type="text" name="enrichmentFrequency" value={formData.enrichmentFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Daily rotation, Weekly new items, Continuous availability" /></div>
                                         </div>
 
                                     </div>
@@ -5259,30 +5259,30 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Grooming & Coat Care" icon={<Scissors size={16} />}>
                                     <div className="space-y-3">
                                         {/* General Grooming */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">General Grooming</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">{fieldLabel('groomingNeeds', 'Grooming Needs')}</label><input type="text" name="groomingNeeds" value={formData.groomingNeeds} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, professional grooming" /></div>
-                                            {!hiddenField('sheddingLevel') && <div><label className="block text-xs font-medium text-gray-700">Shedding Level</label><input type="text" name="sheddingLevel" value={formData.sheddingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Heavy, Moderate, Minimal" /></div>}
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">General Grooming</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('groomingNeeds', 'Grooming Needs')}</label><input type="text" name="groomingNeeds" value={formData.groomingNeeds} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Regular brushing, professional grooming" /></div>
+                                            {!hiddenField('sheddingLevel') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Shedding Level</label><input type="text" name="sheddingLevel" value={formData.sheddingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Heavy, Moderate, Minimal" /></div>}
                                             <ScheduleFieldControl value={formData.groomingSchedule} onChange={v => setFormData(prev => ({ ...prev, groomingSchedule: v }))} />
                                         </div>
 
                                         {/* Brushing & Bathing */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Brushing & Bathing</h4>
-                                            {!hiddenField('brushingFrequency') && <div><label className="block text-xs font-medium text-gray-700">Brushing Frequency</label><input type="text" name="brushingFrequency" value={formData.brushingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily, 3x per week, Weekly" /></div>}
-                                            <div><label className="block text-xs font-medium text-gray-700">{fieldLabel('bathingFrequency', 'Bathing Frequency & Requirements')}</label><input type="text" name="bathingFrequency" value={formData.bathingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monthly, As needed, Never (dry species)" /></div>
-                                            {!hiddenField('coatCareNotes') && <div><label className="block text-xs font-medium text-gray-700">Coat/Feather/Scale Care Notes</label><textarea name="coatCareNotes" value={formData.coatCareNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Double coat requires undercoat removal, oils for feathers, misting for scales" /></div>}
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Brushing & Bathing</h4>
+                                            {!hiddenField('brushingFrequency') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Brushing Frequency</label><input type="text" name="brushingFrequency" value={formData.brushingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Daily, 3x per week, Weekly" /></div>}
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('bathingFrequency', 'Bathing Frequency & Requirements')}</label><input type="text" name="bathingFrequency" value={formData.bathingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Monthly, As needed, Never (dry species)" /></div>
+                                            {!hiddenField('coatCareNotes') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Coat/Feather/Scale Care Notes</label><textarea name="coatCareNotes" value={formData.coatCareNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Double coat requires undercoat removal, oils for feathers, misting for scales" /></div>}
                                             {!hiddenField('brushingFrequency') && <ScheduleFieldControl label="Brushing" value={formData.brushingSchedule} onChange={v => setFormData(prev => ({ ...prev, brushingSchedule: v }))} />}
                                             <ScheduleFieldControl label={fieldLabel('bathingFrequency', 'Bathing')} value={formData.bathingSchedule} onChange={v => setFormData(prev => ({ ...prev, bathingSchedule: v }))} />
                                         </div>
 
                                         {/* Specialized Care */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Specialized Care</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Nail/Claw/Hoof Care Requirements</label><input type="text" name="nailCareRequirements" value={formData.nailCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monthly trim, File sharp edges, Natural wear" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">{fieldLabel('beakHoofScaleMaintenance', 'Beak/Hoof/Scale Maintenance')}</label><input type="text" name="beakHoofScaleMaintenance" value={formData.beakHoofScaleMaintenance || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Beak trimming, Hoof conditioning, Scale inspection" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">{fieldLabel('skinEarCareNeeds', 'Skin & Ear Care Needs')}</label><input type="text" name="skinEarCareNeeds" value={formData.skinEarCareNeeds || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Ears cleaned weekly, Skin check for mites, Moisturizing needed" /></div>
-                                            {!hiddenField('dentalCareRequirements') && <div><label className="block text-xs font-medium text-gray-700">Dental Care Requirements</label><input type="text" name="dentalCareRequirements" value={formData.dentalCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, Professional cleaning, Chew toys for wear" /></div>}
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Specialized Care</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Nail/Claw/Hoof Care Requirements</label><input type="text" name="nailCareRequirements" value={formData.nailCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Monthly trim, File sharp edges, Natural wear" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('beakHoofScaleMaintenance', 'Beak/Hoof/Scale Maintenance')}</label><input type="text" name="beakHoofScaleMaintenance" value={formData.beakHoofScaleMaintenance || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Beak trimming, Hoof conditioning, Scale inspection" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('skinEarCareNeeds', 'Skin & Ear Care Needs')}</label><input type="text" name="skinEarCareNeeds" value={formData.skinEarCareNeeds || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Ears cleaned weekly, Skin check for mites, Moisturizing needed" /></div>
+                                            {!hiddenField('dentalCareRequirements') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dental Care Requirements</label><input type="text" name="dentalCareRequirements" value={formData.dentalCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Regular brushing, Professional cleaning, Chew toys for wear" /></div>}
                                             <ScheduleFieldControl label="Nail/Claw/Hoof" value={formData.nailCareSchedule} onChange={v => setFormData(prev => ({ ...prev, nailCareSchedule: v }))} />
                                             <ScheduleFieldControl label={fieldLabel('beakHoofScaleMaintenance', 'Beak/Hoof/Scale')} value={formData.beakHoofScaleSchedule} onChange={v => setFormData(prev => ({ ...prev, beakHoofScaleSchedule: v }))} />
                                             <ScheduleFieldControl label={fieldLabel('skinEarCareNeeds', 'Skin & Ear')} value={formData.skinEarCareSchedule} onChange={v => setFormData(prev => ({ ...prev, skinEarCareSchedule: v }))} />
@@ -5290,9 +5290,9 @@ const AnimalFormModalV2 = ({
                                         </div>
 
                                         {/* General Notes */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">{fieldLabel('groomingNotes', 'Grooming Notes & Preferences')}</h4>
-                                            <textarea name="groomingNotes" value={formData.groomingNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any additional grooming preferences, sensitivities, or special handling notes" />
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">{fieldLabel('groomingNotes', 'Grooming Notes & Preferences')}</h4>
+                                            <textarea name="groomingNotes" value={formData.groomingNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="Any additional grooming preferences, sensitivities, or special handling notes" />
                                         </div>
                                     </div>
                                 </FormSection>
@@ -5301,35 +5301,35 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Special Requirements & Preferences" icon={<Heart size={16} />}>
                                     <div className="space-y-3">
                                         {/* Dietary */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Dietary Requirements & Restrictions</h4>
-                                            <textarea name="dietaryRestrictions" value={formData.dietaryRestrictions || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Allergies (dairy, grain), Food sensitivities, Picky eater, Requires specific protein source" />
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Dietary Requirements & Restrictions</h4>
+                                            <textarea name="dietaryRestrictions" value={formData.dietaryRestrictions || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Allergies (dairy, grain), Food sensitivities, Picky eater, Requires specific protein source" />
                                         </div>
 
                                         {/* Dietary Preferences */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Dietary Preferences</h4>
-                                            <textarea name="dietaryPreferences" value={formData.dietaryPreferences || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Prefers wet food, Loves treats, Refuses certain vegetables, Needs hand-feeding" />
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Dietary Preferences</h4>
+                                            <textarea name="dietaryPreferences" value={formData.dietaryPreferences || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Prefers wet food, Loves treats, Refuses certain vegetables, Needs hand-feeding" />
                                         </div>
 
                                         {/* Special Care Needs */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Special Care Needs</h4>
-                                            <textarea name="specialCareNeeds" value={formData.specialCareNeeds || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Requires medication at specific times, Needs isolation during molting, Heat lamp essential, Water depth requirements" />
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Special Care Needs</h4>
+                                            <textarea name="specialCareNeeds" value={formData.specialCareNeeds || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Requires medication at specific times, Needs isolation during molting, Heat lamp essential, Water depth requirements" />
                                             <ScheduleFieldControl value={formData.specialCareSchedule} onChange={v => setFormData(prev => ({ ...prev, specialCareSchedule: v }))} />
                                         </div>
 
                                         {/* Special Observations */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Special Observations</h4>
-                                            <textarea name="healthMonitoringNotes" value={formData.healthMonitoringNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Watch for weight changes, Check skin condition weekly" />
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Special Observations</h4>
+                                            <textarea name="healthMonitoringNotes" value={formData.healthMonitoringNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Watch for weight changes, Check skin condition weekly" />
                                             <ScheduleFieldControl value={formData.healthMonitoringSchedule} onChange={v => setFormData(prev => ({ ...prev, healthMonitoringSchedule: v }))} />
                                         </div>
 
                                         {/* General Special Requirements */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Additional Special Requirements</h4>
-                                            <textarea name="additionalSpecialRequirements" value={formData.additionalSpecialRequirements || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any other special needs, preferences, or important care notes" />
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Additional Special Requirements</h4>
+                                            <textarea name="additionalSpecialRequirements" value={formData.additionalSpecialRequirements || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="Any other special needs, preferences, or important care notes" />
                                         </div>
                                     </div>
                                 </FormSection>
@@ -5342,13 +5342,13 @@ const AnimalFormModalV2 = ({
                                         </datalist>
 
                                         {/* Add New Animal-Specific Care Task */}
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Add Animal Care Task</h4>
-                                            <p className="text-xs text-gray-500">Direct, hands-on care done to the animal (not feeding, not medical) — shown in the "Scheduled Care" section of the Feeding & Care management view.</p>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Add Animal Care Task</h4>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">Direct, hands-on care done to the animal (not feeding, not medical) — shown in the "Scheduled Care" section of the Feeding & Care management view.</p>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                <input type="text" list="care-task-suggestions" value={newAnimalCareTaskName} onChange={e => setNewAnimalCareTaskName(e.target.value)} placeholder="Task name (e.g., Nail trim, Weigh-in)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="number" min="1" value={newAnimalCareTaskFreq} onChange={e => setNewAnimalCareTaskFreq(e.target.value)} placeholder="Frequency (days)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newAnimalCareTaskNotes} onChange={e => setNewAnimalCareTaskNotes(e.target.value)} placeholder="Notes (optional)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md md:col-span-2" />
+                                                <input type="text" list="care-task-suggestions" value={newAnimalCareTaskName} onChange={e => setNewAnimalCareTaskName(e.target.value)} placeholder="Task name (e.g., Nail trim, Weigh-in)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="number" min="1" value={newAnimalCareTaskFreq} onChange={e => setNewAnimalCareTaskFreq(e.target.value)} placeholder="Frequency (days)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newAnimalCareTaskNotes} onChange={e => setNewAnimalCareTaskNotes(e.target.value)} placeholder="Notes (optional)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text md:col-span-2" />
                                             </div>
                                             <button type="button" onClick={() => {
                                                 if (newAnimalCareTaskName.trim()) {
@@ -5371,18 +5371,18 @@ const AnimalFormModalV2 = ({
 
                                         {/* Existing Animal-Specific Care Tasks */}
                                         {(formData.animalCareTasks || []).length > 0 && (
-                                            <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                                <h4 className="text-sm font-semibold text-gray-700">Animal Care Tasks ({(formData.animalCareTasks || []).length})</h4>
+                                            <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                                <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Animal Care Tasks ({(formData.animalCareTasks || []).length})</h4>
                                                 <div className="space-y-1 max-h-48 overflow-y-auto">
                                                     {(formData.animalCareTasks || []).map((task, i) => (
-                                                        <div key={task.id || i} className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200 text-xs">
+                                                        <div key={task.id || i} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-dark-surface rounded border border-gray-200 dark:border-dark-border text-xs">
                                                             <div className="flex-1 min-w-0">
-                                                                <p className="font-medium text-gray-700 truncate">{task.taskName}</p>
-                                                                <p className="text-gray-500 text-xs">
+                                                                <p className="font-medium text-gray-700 dark:text-dark-text-secondary truncate">{task.taskName}</p>
+                                                                <p className="text-gray-500 dark:text-dark-text-muted text-xs">
                                                                     {task.frequencyDays ? `Every ${task.frequencyDays} day${task.frequencyDays === 1 ? '' : 's'}` : 'No schedule'}
                                                                     {task.lastDoneDate ? ` • Last done ${formatDate(task.lastDoneDate)}` : ''}
                                                                 </p>
-                                                                {task.notes && <p className="text-gray-400 text-xs truncate" title={task.notes}>{task.notes}</p>}
+                                                                {task.notes && <p className="text-gray-400 dark:text-dark-text-muted text-xs truncate" title={task.notes}>{task.notes}</p>}
                                                             </div>
                                                             <button type="button" onClick={() => {
                                                                 setFormData(prev => ({
@@ -5404,27 +5404,27 @@ const AnimalFormModalV2 = ({
                         {activeTab === 'behavior' && (
                             <div className="space-y-4">
                                 <FormSection title="Behavior & Temperament" icon={<MessageSquare size={16} />} initiallyOpen>
-                                    <div><label className="block text-xs font-medium text-gray-700">Temperament</label><input type="text" name="temperament" value={formData.temperament} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Friendly, skittish, aggressive, calm" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Handling Tolerance</label><input type="text" name="handlingTolerance" value={formData.handlingTolerance} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Enjoys handling, tolerates briefly" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Social Structure</label><textarea name="socialStructure" value={formData.socialStructure} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Lives with 2 cage mates, solitary" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Temperament</label><input type="text" name="temperament" value={formData.temperament} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Friendly, skittish, aggressive, calm" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Handling Tolerance</label><input type="text" name="handlingTolerance" value={formData.handlingTolerance} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Enjoys handling, tolerates briefly" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Social Structure</label><textarea name="socialStructure" value={formData.socialStructure} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Lives with 2 cage mates, solitary" /></div>
                                 </FormSection>
 
                                 <FormSection title="Activity & Training" icon={<Brain size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Activity Cycle</label>
-                                            <select name="activityCycle" value={formData.activityCycle} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Activity Cycle</label>
+                                            <select name="activityCycle" value={formData.activityCycle} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                 <option value="">Select...</option>
                                                 <option value="Diurnal">Diurnal (day active)</option>
                                                 <option value="Nocturnal">Nocturnal (night active)</option>
                                                 <option value="Crepuscular">Crepuscular (dawn/dusk)</option>
                                             </select>
                                         </div>
-                                        {!hiddenField('exerciseRequirements') && <div><label className="block text-xs font-medium text-gray-700">Exercise Requirements</label><input type="text" name="exerciseRequirements" value={formData.exerciseRequirements} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>}
-                                        {!hiddenField('dailyExerciseMinutes') && <div><label className="block text-xs font-medium text-gray-700">Daily Exercise (min)</label><input type="number" name="dailyExerciseMinutes" value={formData.dailyExerciseMinutes} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>}
+                                        {!hiddenField('exerciseRequirements') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Exercise Requirements</label><input type="text" name="exerciseRequirements" value={formData.exerciseRequirements} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>}
+                                        {!hiddenField('dailyExerciseMinutes') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Daily Exercise (min)</label><input type="number" name="dailyExerciseMinutes" value={formData.dailyExerciseMinutes} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>}
                                     </div>
-                                    {!hiddenField('trainingLevel') && <div><label className="block text-xs font-medium text-gray-700">Training Level</label><input type="text" name="trainingLevel" value={formData.trainingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>}
-                                    {!hiddenField('trainingDisciplines') && <div><label className="block text-xs font-medium text-gray-700">Training Disciplines</label><input type="text" name="trainingDisciplines" value={formData.trainingDisciplines} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>}
+                                    {!hiddenField('trainingLevel') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Training Level</label><input type="text" name="trainingLevel" value={formData.trainingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>}
+                                    {!hiddenField('trainingDisciplines') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Training Disciplines</label><input type="text" name="trainingDisciplines" value={formData.trainingDisciplines} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>}
                                     <div className="flex flex-wrap gap-4 pt-2">
                                         {!hiddenField('crateTrained') && <label className="flex items-center gap-2"><input type="checkbox" name="crateTrained" checked={!!formData.crateTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Crate Trained</label>}
                                         {!hiddenField('litterTrained') && <label className="flex items-center gap-2"><input type="checkbox" name="litterTrained" checked={!!formData.litterTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Litter Trained</label>}
@@ -5436,80 +5436,80 @@ const AnimalFormModalV2 = ({
                                 {(!hiddenField('workingRole') || !hiddenField('certifications')) && (
                                 <FormSection title="Working Role & Certifications" icon={<Trophy size={16} />}>
                                     <div className="space-y-3">
-                                        {!hiddenField('workingRole') && <div><label className="block text-xs font-medium text-gray-700">Working Role</label><input type="text" name="workingRole" value={formData.workingRole || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Service dog, Therapy dog, Show dog, Guard dog, Working animal" /></div>}
-                                        {!hiddenField('certifications') && <div><label className="block text-xs font-medium text-gray-700">Certifications & Titles</label><textarea name="certifications" value={formData.certifications || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., CGC, AKC titles (CH, GCH), Service Dog Certified, Therapy Dog International, Show wins" /></div>}
+                                        {!hiddenField('workingRole') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Working Role</label><input type="text" name="workingRole" value={formData.workingRole || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Service dog, Therapy dog, Show dog, Guard dog, Working animal" /></div>}
+                                        {!hiddenField('certifications') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Certifications & Titles</label><textarea name="certifications" value={formData.certifications || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., CGC, AKC titles (CH, GCH), Service Dog Certified, Therapy Dog International, Show wins" /></div>}
                                     </div>
                                 </FormSection>
                                 )}
 
                                 <FormSection title="Known Issues & Safety Concerns" icon={<AlertTriangle size={16} />}>
                                     <div className="space-y-3">
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Behavioral Issues</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Behavioral Issues</label><textarea name="behavioralIssues" value={formData.behavioralIssues} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Resource guarding, separation anxiety" /></div>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Behavioral Issues</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Behavioral Issues</label><textarea name="behavioralIssues" value={formData.behavioralIssues} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Resource guarding, separation anxiety" /></div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Bite History</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Bite History</label><textarea name="biteHistory" value={formData.biteHistory} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any bite incidents, context, and outcome" /></div>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Bite History</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Bite History</label><textarea name="biteHistory" value={formData.biteHistory} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="Any bite incidents, context, and outcome" /></div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Reactivity & Triggers</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Reactivity Notes</label><textarea name="reactivityNotes" value={formData.reactivityNotes} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Triggers, thresholds, management strategies" /></div>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Reactivity & Triggers</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reactivity Notes</label><textarea name="reactivityNotes" value={formData.reactivityNotes} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="Triggers, thresholds, management strategies" /></div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Escape & Flight Risk</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Escape Risk Level</label><select name="escapeRiskLevel" value={formData.escapeRiskLevel || 'Low'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="None">No Risk</option><option value="Low">Low</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Critical">Critical</option></select></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Escape Methods & Flight Triggers</label><textarea name="escapeBehavior" value={formData.escapeBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Climbs, digs, flies, jumps; triggered by loud noises, open doors, stress" /></div>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Escape & Flight Risk</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Escape Risk Level</label><select name="escapeRiskLevel" value={formData.escapeRiskLevel || 'Low'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="None">No Risk</option><option value="Low">Low</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Critical">Critical</option></select></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Escape Methods & Flight Triggers</label><textarea name="escapeBehavior" value={formData.escapeBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Climbs, digs, flies, jumps; triggered by loud noises, open doors, stress" /></div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Stereotypic & Stress Behaviors</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Stereotypic Behaviors Present</label><textarea name="stereotypicBehaviors" value={formData.stereotypicBehaviors || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Pacing, feather plucking, bar biting, over-grooming, head bobbing, spinning" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Stress Indicators</label><textarea name="stressIndicators" value={formData.stressIndicators || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Panting, freezing, hiding, aggression, loss of appetite" /></div>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Stereotypic & Stress Behaviors</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Stereotypic Behaviors Present</label><textarea name="stereotypicBehaviors" value={formData.stereotypicBehaviors || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Pacing, feather plucking, bar biting, over-grooming, head bobbing, spinning" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Stress Indicators</label><textarea name="stressIndicators" value={formData.stressIndicators || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Panting, freezing, hiding, aggression, loss of appetite" /></div>
                                         </div>
                                     </div>
                                 </FormSection>
 
                                 <FormSection title="Training Schedules" icon={<Brain size={16} />}>
-                                    <p className="text-xs text-gray-500 -mt-1">Optional recurring schedules for training/exercise activities — each tracked independently and shown clustered in the Feeding & Care management view.</p>
+                                    <p className="text-xs text-gray-500 dark:text-dark-text-muted -mt-1">Optional recurring schedules for training/exercise activities — each tracked independently and shown clustered in the Feeding & Care management view.</p>
                                     <div className="space-y-3">
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
-                                            <h4 className="text-sm font-semibold text-gray-700">Daily Exercise</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Daily Exercise</h4>
                                             <ScheduleFieldControl value={formData.exerciseSchedule} onChange={v => setFormData(prev => ({ ...prev, exerciseSchedule: v }))} />
                                         </div>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
-                                            <h4 className="text-sm font-semibold text-gray-700">Crate Training</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Crate Training</h4>
                                             <ScheduleFieldControl value={formData.crateTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, crateTrainingSchedule: v }))} />
                                         </div>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
-                                            <h4 className="text-sm font-semibold text-gray-700">Litter Training</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Litter Training</h4>
                                             <ScheduleFieldControl value={formData.litterTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, litterTrainingSchedule: v }))} />
                                         </div>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
-                                            <h4 className="text-sm font-semibold text-gray-700">Leash Training</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Leash Training</h4>
                                             <ScheduleFieldControl value={formData.leashTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, leashTrainingSchedule: v }))} />
                                         </div>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
-                                            <h4 className="text-sm font-semibold text-gray-700">Free-Flight Training</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Free-Flight Training</h4>
                                             <ScheduleFieldControl value={formData.freeFlightTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, freeFlightTrainingSchedule: v }))} />
                                         </div>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
-                                            <h4 className="text-sm font-semibold text-gray-700">Working Role Training <span className="font-normal text-gray-400">(service animal, etc.)</span></h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Working Role Training <span className="font-normal text-gray-400 dark:text-dark-text-muted">(service animal, etc.)</span></h4>
                                             <ScheduleFieldControl value={formData.workingRoleTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, workingRoleTrainingSchedule: v }))} />
                                         </div>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
-                                            <h4 className="text-sm font-semibold text-gray-700">Behavioral Issue Training <span className="font-normal text-gray-400">(general issues)</span></h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Behavioral Issue Training <span className="font-normal text-gray-400 dark:text-dark-text-muted">(general issues)</span></h4>
                                             <ScheduleFieldControl value={formData.behavioralIssueTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, behavioralIssueTrainingSchedule: v }))} />
                                         </div>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
-                                            <h4 className="text-sm font-semibold text-gray-700">Reactivity Training</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Reactivity Training</h4>
                                             <ScheduleFieldControl value={formData.reactivityTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, reactivityTrainingSchedule: v }))} />
                                         </div>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
-                                            <h4 className="text-sm font-semibold text-gray-700">Flight Risk Training</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-1">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Flight Risk Training</h4>
                                             <ScheduleFieldControl value={formData.flightRiskTrainingSchedule} onChange={v => setFormData(prev => ({ ...prev, flightRiskTrainingSchedule: v }))} />
                                         </div>
                                     </div>
@@ -5517,86 +5517,86 @@ const AnimalFormModalV2 = ({
 
                                 <FormSection title="Temperament Assessment (1-5 Scale)" icon={<Brain size={16} />}>
                                     <div className="space-y-3">
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <label className="text-xs font-semibold text-gray-700">Aggression Level</label>
+                                                <label className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Aggression Level</label>
                                                 <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.aggressionLevel || 3}</span>
                                             </div>
                                             <input type="range" name="aggressionLevel" min="1" max="5" value={formData.aggressionLevel || 3} onChange={handleChange} className="w-full" />
-                                            <p className="text-xs text-gray-500">1=Passive | 3=Neutral | 5=Highly Aggressive</p>
-                                            <div><label className="block text-xs font-medium text-gray-700 mt-2">Aggression Triggers & Types</label><textarea name="aggressionTriggers" value={formData.aggressionTriggers || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Territorial aggression, food guarding, fear-based, dominance, predatory drive" /></div>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">1=Passive | 3=Neutral | 5=Highly Aggressive</p>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mt-2">Aggression Triggers & Types</label><textarea name="aggressionTriggers" value={formData.aggressionTriggers || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Territorial aggression, food guarding, fear-based, dominance, predatory drive" /></div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <label className="text-xs font-semibold text-gray-700">Fear/Anxiety Level</label>
+                                                <label className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Fear/Anxiety Level</label>
                                                 <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.fearAnxietyLevel || 3}</span>
                                             </div>
                                             <input type="range" name="fearAnxietyLevel" min="1" max="5" value={formData.fearAnxietyLevel || 3} onChange={handleChange} className="w-full" />
-                                            <p className="text-xs text-gray-500">1=Very Confident | 3=Moderate | 5=Highly Fearful/Anxious</p>
-                                            <div><label className="block text-xs font-medium text-gray-700 mt-2">Specific Fears & Coping Mechanisms</label><textarea name="specificFears" value={formData.specificFears || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Afraid of loud noises, uses hiding as coping, needs reassurance, freezes when scared" /></div>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">1=Very Confident | 3=Moderate | 5=Highly Fearful/Anxious</p>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mt-2">Specific Fears & Coping Mechanisms</label><textarea name="specificFears" value={formData.specificFears || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Afraid of loud noises, uses hiding as coping, needs reassurance, freezes when scared" /></div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <label className="text-xs font-semibold text-gray-700">Boldness/Exploratory Level</label>
+                                                <label className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Boldness/Exploratory Level</label>
                                                 <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.boldnessLevel || 3}</span>
                                             </div>
                                             <input type="range" name="boldnessLevel" min="1" max="5" value={formData.boldnessLevel || 3} onChange={handleChange} className="w-full" />
-                                            <p className="text-xs text-gray-500">1=Very Cautious | 3=Moderate | 5=Highly Bold/Adventurous</p>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">1=Very Cautious | 3=Moderate | 5=Highly Bold/Adventurous</p>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <label className="text-xs font-semibold text-gray-700">Sociability Level</label>
+                                                <label className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Sociability Level</label>
                                                 <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.sociabilityLevel || 3}</span>
                                             </div>
                                             <input type="range" name="sociabilityLevel" min="1" max="5" value={formData.sociabilityLevel || 3} onChange={handleChange} className="w-full" />
-                                            <p className="text-xs text-gray-500">1=Solitary/Aloof | 3=Moderate Social | 5=Highly Social/Bonded</p>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">1=Solitary/Aloof | 3=Moderate Social | 5=Highly Social/Bonded</p>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <label className="text-xs font-semibold text-gray-700">Independence Level</label>
+                                                <label className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Independence Level</label>
                                                 <span className="text-xs bg-primary text-black px-2 py-1 rounded">{formData.independenceLevel || 3}</span>
                                             </div>
                                             <input type="range" name="independenceLevel" min="1" max="5" value={formData.independenceLevel || 3} onChange={handleChange} className="w-full" />
-                                            <p className="text-xs text-gray-500">1=Highly Dependent | 3=Moderate | 5=Very Independent</p>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">1=Highly Dependent | 3=Moderate | 5=Very Independent</p>
                                         </div>
                                     </div>
                                 </FormSection>
 
                                 <FormSection title="Specialized Behavioral Traits" icon={<Sparkles size={16} />}>
                                     <div className="space-y-3">
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Prey Drive & Hunting Behavior</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Prey Drive Level</label><select name="preyDriveLevel" value={formData.preyDriveLevel || 'Unknown'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Unknown">Unknown</option><option value="None">None</option><option value="Low">Low</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Very High">Very High</option></select></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Hunting/Predatory Behavior Notes</label><textarea name="huntingBehavior" value={formData.huntingBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Stalks small animals, pounces, tracking instincts, bird/rodent specific" /></div>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Prey Drive & Hunting Behavior</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Prey Drive Level</label><select name="preyDriveLevel" value={formData.preyDriveLevel || 'Unknown'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="Unknown">Unknown</option><option value="None">None</option><option value="Low">Low</option><option value="Moderate">Moderate</option><option value="High">High</option><option value="Very High">Very High</option></select></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Hunting/Predatory Behavior Notes</label><textarea name="huntingBehavior" value={formData.huntingBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Stalks small animals, pounces, tracking instincts, bird/rodent specific" /></div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Feeding Behavior & Food Behavior</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Feeding Behavior & Food Behavior</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                <div><label className="block text-xs font-medium text-gray-700">Food Aggression Level</label><select name="foodAggressionLevel" value={formData.foodAggressionLevel || 'None'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="None">None</option><option value="Mild">Mild</option><option value="Moderate">Moderate</option><option value="Severe">Severe</option></select></div>
-                                                <div><label className="block text-xs font-medium text-gray-700">Eating Speed</label><select name="eatingSpeed" value={formData.eatingSpeed || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Very Slow">Very Slow</option><option value="Slow">Slow</option><option value="Normal">Normal</option><option value="Fast">Fast</option><option value="Very Fast">Very Fast</option></select></div>
+                                                <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Food Aggression Level</label><select name="foodAggressionLevel" value={formData.foodAggressionLevel || 'None'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="None">None</option><option value="Mild">Mild</option><option value="Moderate">Moderate</option><option value="Severe">Severe</option></select></div>
+                                                <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Eating Speed</label><select name="eatingSpeed" value={formData.eatingSpeed || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="Very Slow">Very Slow</option><option value="Slow">Slow</option><option value="Normal">Normal</option><option value="Fast">Fast</option><option value="Very Fast">Very Fast</option></select></div>
                                             </div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Food Preferences & Pickiness</label><textarea name="foodPreferences" value={formData.foodPreferences || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Picky eater, refuses certain foods, competitive feeding, hoards food" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Food Preferences & Pickiness</label><textarea name="foodPreferences" value={formData.foodPreferences || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Picky eater, refuses certain foods, competitive feeding, hoards food" /></div>
                                         </div>
 
-                                        {!hiddenField('attachmentStyle') && <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Bonding & Attachment Style</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Attachment Type</label><select name="attachmentStyle" value={formData.attachmentStyle || 'Unknown'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Unknown">Unknown</option><option value="Solitary">Solitary (no bonding)</option><option value="Pair Bonded">Pair Bonded</option><option value="Group Bonded">Group Bonded</option><option value="Handler Bonded">Bonded to Handler</option><option value="Multi-individual">Multi-individual Bonds</option></select></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Bonding Behavior & Preferences</label><textarea name="bondingBehavior" value={formData.bondingBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Seeks out handler, displays affection, bond with specific individuals, forms hierarchies" /></div>
+                                        {!hiddenField('attachmentStyle') && <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Bonding & Attachment Style</h4>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Attachment Type</label><select name="attachmentStyle" value={formData.attachmentStyle || 'Unknown'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="Unknown">Unknown</option><option value="Solitary">Solitary (no bonding)</option><option value="Pair Bonded">Pair Bonded</option><option value="Group Bonded">Group Bonded</option><option value="Handler Bonded">Bonded to Handler</option><option value="Multi-individual">Multi-individual Bonds</option></select></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Bonding Behavior & Preferences</label><textarea name="bondingBehavior" value={formData.bondingBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Seeks out handler, displays affection, bond with specific individuals, forms hierarchies" /></div>
                                         </div>}
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Sensory Sensitivities</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Sensory Sensitivities</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                                <div><label className="block text-xs font-medium text-gray-700">Noise Sensitivity</label><select name="noiseSensitivity" value={formData.noiseSensitivity || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Normal">Normal</option><option value="Mildly Sensitive">Mildly Sensitive</option><option value="Highly Sensitive">Highly Sensitive</option></select></div>
-                                                <div><label className="block text-xs font-medium text-gray-700">Touch Sensitivity</label><select name="touchSensitivity" value={formData.touchSensitivity || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Normal">Normal</option><option value="Mildly Sensitive">Mildly Sensitive</option><option value="Highly Sensitive">Highly Sensitive</option></select></div>
-                                                <div><label className="block text-xs font-medium text-gray-700">Light Sensitivity</label><select name="lightSensitivity" value={formData.lightSensitivity || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Normal">Normal</option><option value="Prefers Dim">Prefers Dim</option><option value="Highly Sensitive">Highly Sensitive</option></select></div>
+                                                <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Noise Sensitivity</label><select name="noiseSensitivity" value={formData.noiseSensitivity || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="Normal">Normal</option><option value="Mildly Sensitive">Mildly Sensitive</option><option value="Highly Sensitive">Highly Sensitive</option></select></div>
+                                                <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Touch Sensitivity</label><select name="touchSensitivity" value={formData.touchSensitivity || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="Normal">Normal</option><option value="Mildly Sensitive">Mildly Sensitive</option><option value="Highly Sensitive">Highly Sensitive</option></select></div>
+                                                <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Light Sensitivity</label><select name="lightSensitivity" value={formData.lightSensitivity || 'Normal'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="Normal">Normal</option><option value="Prefers Dim">Prefers Dim</option><option value="Highly Sensitive">Highly Sensitive</option></select></div>
                                             </div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Sensory Sensitivity Notes</label><textarea name="sensoryNotes" value={formData.sensoryNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Avoids certain textures, loud noises trigger panic, prefers darkness" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Sensory Sensitivity Notes</label><textarea name="sensoryNotes" value={formData.sensoryNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Avoids certain textures, loud noises trigger panic, prefers darkness" /></div>
                                         </div>
                                     </div>
                                 </FormSection>
@@ -5607,9 +5607,9 @@ const AnimalFormModalV2 = ({
                                 {/* SECTION 1: Current Reproductive State */}
                                 <FormSection title="Current Reproductive State" icon={<Heart size={16} />}>
                                     {/* Auto-calculated display */}
-                                    <div className="space-y-2 p-3 bg-blue-50 border border-blue-200 rounded-lg mb-3">
-                                        <h4 className="text-sm font-semibold text-gray-700">Auto-Calculated from Litters:</h4>
-                                        <div className="space-y-1 text-sm text-gray-700">
+                                    <div className="space-y-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg mb-3">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Auto-Calculated from Litters:</h4>
+                                        <div className="space-y-1 text-sm text-gray-700 dark:text-dark-text-secondary">
                                             <div>📋 Planned Mating: {formData.isPlannedMating ? '✓' : '✗'}</div>
                                             <div>⚡ In Mating: {formData.isInMating ? '✓' : '✗'}</div>
                                             {formData.gender !== 'Male' && <div>🤰 {fieldLabel('isPregnant', 'Pregnant')}: {formData.isPregnant ? '✓' : '✗'}</div>}
@@ -5631,7 +5631,7 @@ const AnimalFormModalV2 = ({
 
                                     {/* Override controls */}
                                     <div className="flex items-center justify-between mb-3">
-                                        <label className="text-sm font-semibold text-gray-700">Manual Override</label>
+                                        <label className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Manual Override</label>
                                         <button
                                             type="button"
                                             onClick={() => {
@@ -5650,16 +5650,16 @@ const AnimalFormModalV2 = ({
 
                                     {/* Override options */}
                                     {reproductiveStateOverride && (
-                                        <div className="space-y-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <div className="space-y-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/60 rounded-lg">
                                             <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isPlannedMating} onChange={(e) => setFormData(p => ({...p, isPlannedMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Planned Mating</label></div>
                                             <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isInMating} onChange={(e) => setFormData(p => ({...p, isInMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: In Mating</label></div>
                                             {formData.gender !== 'Male' && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isPregnant} onChange={(e) => setFormData(p => ({...p, isPregnant: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: {fieldLabel('isPregnant', 'Pregnant')}</label></div>}
                                             {formData.gender !== 'Male' && formData.pregnancyHistory && formData.pregnancyHistory.length > 0 && (
-                                                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
-                                                    <p className="text-xs font-semibold text-blue-700">Pregnancy History ({formData.pregnancyHistory.length})</p>
+                                                <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg space-y-1">
+                                                    <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">Pregnancy History ({formData.pregnancyHistory.length})</p>
                                                     <div className="space-y-1">
                                                         {formData.pregnancyHistory.map((date, idx) => (
-                                                            <div key={idx} className="flex items-center justify-between text-xs p-1 bg-white border border-blue-100 rounded">
+                                                            <div key={idx} className="flex items-center justify-between text-xs p-1 bg-white dark:bg-dark-card-bg border border-blue-100 dark:border-blue-700/60 rounded">
                                                                 <span>🤰 {new Date(date + 'T00:00:00').toLocaleDateString()}</span>
                                                                 <button 
                                                                     type="button"
@@ -5675,8 +5675,8 @@ const AnimalFormModalV2 = ({
                                             )}
                                             {formData.gender !== 'Male' && !hiddenField('isNursing') && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isNursing} onChange={(e) => setFormData(p => ({...p, isNursing: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Nursing</label></div>}
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Reason for Override</label>
-                                                <textarea value={reproductiveStateOverrideReason} onChange={(e) => setReproductiveStateOverrideReason(e.target.value)} placeholder="Why overriding auto-calculated state..." className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none" rows="2" />
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Reason for Override</label>
+                                                <textarea value={reproductiveStateOverrideReason} onChange={(e) => setReproductiveStateOverrideReason(e.target.value)} placeholder="Why overriding auto-calculated state..." className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text resize-none" rows="2" />
                                             </div>
                                         </div>
                                     )}
@@ -5685,8 +5685,8 @@ const AnimalFormModalV2 = ({
                                 {/* SECTION 2: Fertility Status */}
                                 <FormSection title="Fertility Status" icon={<Sparkles size={16} />}>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Fertility Status</label>
-                                        <select value={currentReproductiveState.fertilityStatus} onChange={(e) => setCurrentReproductiveState({...currentReproductiveState, fertilityStatus: e.target.value})} className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Fertility Status</label>
+                                        <select value={currentReproductiveState.fertilityStatus} onChange={(e) => setCurrentReproductiveState({...currentReproductiveState, fertilityStatus: e.target.value})} className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                             <option>Fertile</option>
                                             <option>Subfertile</option>
                                             <option>Infertile</option>
@@ -5704,16 +5704,16 @@ const AnimalFormModalV2 = ({
                                     <FormSection title="Reproductive Cycle" icon={<Activity size={16} />}>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Last Reproductive Event Date</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Last Reproductive Event Date</label>
                                                 <DatePicker value={reproductiveCycle.lastReproductiveEventDate} onChange={(e) => setReproductiveCycle({...reproductiveCycle, lastReproductiveEventDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Cycle Length (days)</label>
-                                                <input type="number" value={reproductiveCycle.reproductiveEventCycleLength} onChange={(e) => setReproductiveCycle({...reproductiveCycle, reproductiveEventCycleLength: e.target.value})} placeholder="e.g., 21" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Cycle Length (days)</label>
+                                                <input type="number" value={reproductiveCycle.reproductiveEventCycleLength} onChange={(e) => setReproductiveCycle({...reproductiveCycle, reproductiveEventCycleLength: e.target.value})} placeholder="e.g., 21" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-xs font-medium text-gray-700">Current Reproductive Phase</label>
-                                                <select value={reproductiveCycle.currentReproductiveEventPhase} onChange={(e) => setReproductiveCycle({...reproductiveCycle, currentReproductiveEventPhase: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Current Reproductive Phase</label>
+                                                <select value={reproductiveCycle.currentReproductiveEventPhase} onChange={(e) => setReproductiveCycle({...reproductiveCycle, currentReproductiveEventPhase: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                     <option>Available</option>
                                                     <option>In Cycle</option>
                                                     <option>Resting</option>
@@ -5729,16 +5729,16 @@ const AnimalFormModalV2 = ({
                                     <FormSection title="Conception & Mating History" icon={<MessageSquare size={16} />}>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Last Conception Date</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Last Conception Date</label>
                                                 <DatePicker value={conceptionHistory.lastConceptionDate} onChange={(e) => setConceptionHistory({...conceptionHistory, lastConceptionDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Successful Conceptions (Lifetime)</label>
-                                                <input type="number" value={conceptionHistory.successfulConceptionCount} onChange={(e) => setConceptionHistory({...conceptionHistory, successfulConceptionCount: e.target.value})} placeholder="e.g., 5" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Successful Conceptions (Lifetime)</label>
+                                                <input type="number" value={conceptionHistory.successfulConceptionCount} onChange={(e) => setConceptionHistory({...conceptionHistory, successfulConceptionCount: e.target.value})} placeholder="e.g., 5" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-xs font-medium text-gray-700">Unsuccessful Conception Attempts</label>
-                                                <input type="number" value={conceptionHistory.unsuccessfulConceptionAttempts} onChange={(e) => setConceptionHistory({...conceptionHistory, unsuccessfulConceptionAttempts: e.target.value})} placeholder="e.g., 2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Unsuccessful Conception Attempts</label>
+                                                <input type="number" value={conceptionHistory.unsuccessfulConceptionAttempts} onChange={(e) => setConceptionHistory({...conceptionHistory, unsuccessfulConceptionAttempts: e.target.value})} placeholder="e.g., 2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                         </div>
                                     </FormSection>
@@ -5749,20 +5749,20 @@ const AnimalFormModalV2 = ({
                                     <FormSection title="Pregnancy/Development Details" icon={<AlertTriangle size={16} />}>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Development Period Start</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Development Period Start</label>
                                                 <DatePicker value={developmentDetails.developmentPeriodStart} onChange={(e) => setDevelopmentDetails({...developmentDetails, developmentPeriodStart: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Development Period Length (days)</label>
-                                                <input type="number" value={developmentDetails.developmentPeriodLength} onChange={(e) => setDevelopmentDetails({...developmentDetails, developmentPeriodLength: e.target.value})} placeholder="e.g., 63" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Development Period Length (days)</label>
+                                                <input type="number" value={developmentDetails.developmentPeriodLength} onChange={(e) => setDevelopmentDetails({...developmentDetails, developmentPeriodLength: e.target.value})} placeholder="e.g., 63" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Expected Delivery Date</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Expected Delivery Date</label>
                                                 <DatePicker value={developmentDetails.expectedDeliveryDate} onChange={(e) => setDevelopmentDetails({...developmentDetails, expectedDeliveryDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Development Method</label>
-                                                <select value={developmentDetails.developmentMethod} onChange={(e) => setDevelopmentDetails({...developmentDetails, developmentMethod: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Development Method</label>
+                                                <select value={developmentDetails.developmentMethod} onChange={(e) => setDevelopmentDetails({...developmentDetails, developmentMethod: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                     <option>Natural</option>
                                                     <option>Assisted</option>
                                                     <option>Artificial Incubation</option>
@@ -5777,20 +5777,20 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Reproductive Outcomes & Nursing" icon={<Trophy size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Total Offspring Produced (Lifetime)</label>
-                                            <input type="number" value={reproductiveOutcomes.totalOffspringProduced} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, totalOffspringProduced: e.target.value})} placeholder="e.g., 45" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Total Offspring Produced (Lifetime)</label>
+                                            <input type="number" value={reproductiveOutcomes.totalOffspringProduced} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, totalOffspringProduced: e.target.value})} placeholder="e.g., 45" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Viable Offspring Count</label>
-                                            <input type="number" value={reproductiveOutcomes.viableOffspringCount} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, viableOffspringCount: e.target.value})} placeholder="e.g., 43" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Viable Offspring Count</label>
+                                            <input type="number" value={reproductiveOutcomes.viableOffspringCount} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, viableOffspringCount: e.target.value})} placeholder="e.g., 43" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Reproductive Event Count (Litters/Clutches)</label>
-                                            <input type="number" value={reproductiveOutcomes.reproductiveEventCount} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, reproductiveEventCount: e.target.value})} placeholder="e.g., 8" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reproductive Event Count (Litters/Clutches)</label>
+                                            <input type="number" value={reproductiveOutcomes.reproductiveEventCount} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, reproductiveEventCount: e.target.value})} placeholder="e.g., 8" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Reproductive Event Outcome</label>
-                                            <select value={reproductiveOutcomes.reproductiveEventOutcome} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, reproductiveEventOutcome: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reproductive Event Outcome</label>
+                                            <select value={reproductiveOutcomes.reproductiveEventOutcome} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, reproductiveEventOutcome: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                 <option>Successful</option>
                                                 <option>Partial</option>
                                                 <option>Failed</option>
@@ -5798,7 +5798,7 @@ const AnimalFormModalV2 = ({
                                             </select>
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Dependent Care End Date (Weaning/Fledging/Independence)</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dependent Care End Date (Weaning/Fledging/Independence)</label>
                                             <DatePicker value={reproductiveOutcomes.dependentCareEndDate} onChange={(e) => setReproductiveOutcomes({...reproductiveOutcomes, dependentCareEndDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                         </div>
                                     </div>
@@ -5808,8 +5808,8 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Reproductive Health & Procedures" icon={<Leaf size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Artificial Reproduction Method</label>
-                                            <select value={reproductiveHealth.artificialReproductionMethod} onChange={(e) => setReproductiveHealth({...reproductiveHealth, artificialReproductionMethod: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Artificial Reproduction Method</label>
+                                            <select value={reproductiveHealth.artificialReproductionMethod} onChange={(e) => setReproductiveHealth({...reproductiveHealth, artificialReproductionMethod: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                 <option>None</option>
                                                 <option>AI (Artificial Insemination)</option>
                                                 <option>Embryo Transfer</option>
@@ -5818,18 +5818,18 @@ const AnimalFormModalV2 = ({
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Last Reproductive Intervention Date</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Last Reproductive Intervention Date</label>
                                             <DatePicker value={reproductiveHealth.lastReproductiveInterventionDate} onChange={(e) => setReproductiveHealth({...reproductiveHealth, lastReproductiveInterventionDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                         </div>
                                         <div className="md:col-span-2">
                                             <div className="flex items-center gap-2">
                                                 <input type="checkbox" id="dependentCare" checked={reproductiveHealth.dependentCareRequired} onChange={(e) => setReproductiveHealth({...reproductiveHealth, dependentCareRequired: e.target.checked})} className="w-4 h-4" />
-                                                <label htmlFor="dependentCare" className="text-xs font-medium text-gray-700">Dependent Care Required (Species Needs Parental Care)</label>
+                                                <label htmlFor="dependentCare" className="text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dependent Care Required (Species Needs Parental Care)</label>
                                             </div>
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Reproductive Health Notes (Clearances, Restrictions, Procedures)</label>
-                                            <textarea value={reproductiveHealth.reproductiveHealthNotes} onChange={(e) => setReproductiveHealth({...reproductiveHealth, reproductiveHealthNotes: e.target.value})} placeholder="e.g., PennHIP certified, genetic clearances pending, spay/neuter date..." className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none" rows="3" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reproductive Health Notes (Clearances, Restrictions, Procedures)</label>
+                                            <textarea value={reproductiveHealth.reproductiveHealthNotes} onChange={(e) => setReproductiveHealth({...reproductiveHealth, reproductiveHealthNotes: e.target.value})} placeholder="e.g., PennHIP certified, genetic clearances pending, spay/neuter date..." className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text resize-none" rows="3" />
                                         </div>
                                     </div>
                                 </FormSection>
@@ -5838,74 +5838,74 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Delivery & Breeding Health" icon={<Heart size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Last Delivery Date</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Last Delivery Date</label>
                                             <DatePicker value={formData.lastDeliveryDate} onChange={(e) => setFormData({...formData, lastDeliveryDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">{fieldLabel('deliveryMethod', 'Delivery Method')}</label>
-                                            <input type="text" value={formData.deliveryMethod} onChange={(e) => setFormData({...formData, deliveryMethod: e.target.value})} placeholder="e.g., Natural, C-section, Assisted" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('deliveryMethod', 'Delivery Method')}</label>
+                                            <input type="text" value={formData.deliveryMethod} onChange={(e) => setFormData({...formData, deliveryMethod: e.target.value})} placeholder="e.g., Natural, C-section, Assisted" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Reproductive Complications</label>
-                                            <input type="text" value={formData.reproductiveComplications} onChange={(e) => setFormData({...formData, reproductiveComplications: e.target.value})} placeholder="e.g., Dystocia, retained placenta, infection" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reproductive Complications</label>
+                                            <input type="text" value={formData.reproductiveComplications} onChange={(e) => setFormData({...formData, reproductiveComplications: e.target.value})} placeholder="e.g., Dystocia, retained placenta, infection" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         {!hiddenField('reproductiveClearances') && <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Reproductive Clearances</label>
-                                            <input type="text" value={formData.reproductiveClearances} onChange={(e) => setFormData({...formData, reproductiveClearances: e.target.value})} placeholder="e.g., OFA certified, genetic screening passed" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reproductive Clearances</label>
+                                            <input type="text" value={formData.reproductiveClearances} onChange={(e) => setFormData({...formData, reproductiveClearances: e.target.value})} placeholder="e.g., OFA certified, genetic screening passed" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>}
                                     </div>
                                 </FormSection>
 
                                 {/* Original Breeding Records Section (kept for history) */}
                                 <FormSection title="Add Breeding Record (Manual Log)" icon={<Egg size={16} />} initiallyOpen>
-                                    <div className="p-2 bg-red-50 border-2 border-red-400 rounded-lg flex items-start gap-2 mb-1">
-                                        <AlertTriangle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
-                                        <p className="text-xs text-red-800 leading-snug">
+                                    <div className="p-2 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 rounded-lg flex items-start gap-2 mb-1">
+                                        <AlertTriangle size={16} className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                                        <p className="text-xs text-red-800 dark:text-red-300 leading-snug">
                                             <span className="font-bold uppercase">Manual note only</span> — does <b>NOT</b> create a Litter, link offspring, or affect pedigree/COI. Use <b>Litter Management</b> to record a real litter.
                                         </p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Breeding Method</label>
-                                            <select name="breedingMethod" value={newBreedingRecord.breedingMethod} onChange={(e) => setNewBreedingRecord(p => ({ ...p, breedingMethod: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Breeding Method</label>
+                                            <select name="breedingMethod" value={newBreedingRecord.breedingMethod} onChange={(e) => setNewBreedingRecord(p => ({ ...p, breedingMethod: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                 <option>Natural</option><option>AI</option><option>Assisted</option><option>Unknown</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Mating Date</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Mating Date</label>
                                             <DatePicker value={newBreedingRecord.matingDate} onChange={(e) => setNewBreedingRecord(p => ({ ...p, matingDate: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Mate</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Mate</label>
                                             {mateInfo ? (
-                                                <div className="flex items-center gap-2 mt-1 p-2 border rounded-md bg-white">
+                                                <div className="flex items-center gap-2 mt-1 p-2 border rounded-md bg-white dark:bg-dark-card-bg">
                                                     <span className="flex-1">{[mateInfo.prefix, mateInfo.name, mateInfo.suffix].filter(Boolean).join(' ')} ({mateInfo.id_public})</span>
                                                     <button type="button" onClick={clearMateSelection} className="text-red-500"><X size={16} /></button>
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <input type="text" value={newBreedingRecord.mate} onChange={(e) => setNewBreedingRecord(p => ({ ...p, mate: e.target.value, mateAnimalId: null }))} placeholder="Enter mate name manually" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                                    <input type="text" value={newBreedingRecord.mate} onChange={(e) => setNewBreedingRecord(p => ({ ...p, mate: e.target.value, mateAnimalId: null }))} placeholder="Enter mate name manually" className="flex-1 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                                     <button type="button" onClick={() => { setParentSearchModalConfig({ title: 'Select Mate', onSelect: handleSelectMate, requiredGender: formData.gender === 'Male' ? ['Female', 'Intersex', 'Unknown'] : ['Male', 'Intersex', 'Unknown'] }); setParentSearchModalOpen(true); }} className="px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">Select from DB</button>
                                                 </div>
                                             )}
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Outcome</label>
-                                            <select name="outcome" value={newBreedingRecord.outcome} onChange={(e) => setNewBreedingRecord(p => ({ ...p, outcome: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Outcome</label>
+                                            <select name="outcome" value={newBreedingRecord.outcome} onChange={(e) => setNewBreedingRecord(p => ({ ...p, outcome: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text">
                                                 <option>Successful</option><option>Unsuccessful</option><option>Pending</option><option>Unknown</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Birth/Lay Date</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Birth/Lay Date</label>
                                             <DatePicker value={newBreedingRecord.birthEventDate} onChange={(e) => setNewBreedingRecord(p => ({ ...p, birthEventDate: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Litter Size</label>
-                                            <input type="number" value={newBreedingRecord.litterSizeBorn} onChange={(e) => setNewBreedingRecord(p => ({ ...p, litterSizeBorn: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Litter Size</label>
+                                            <input type="number" value={newBreedingRecord.litterSizeBorn} onChange={(e) => setNewBreedingRecord(p => ({ ...p, litterSizeBorn: e.target.value }))} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-medium text-gray-700">Notes</label>
-                                            <textarea value={newBreedingRecord.notes} onChange={(e) => setNewBreedingRecord(p => ({ ...p, notes: e.target.value }))} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Notes</label>
+                                            <textarea value={newBreedingRecord.notes} onChange={(e) => setNewBreedingRecord(p => ({ ...p, notes: e.target.value }))} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                     </div>
                                     <button type="button" onClick={addBreedingRecord} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-sm font-medium mt-2">Add Breeding Record</button>
@@ -5940,33 +5940,33 @@ const AnimalFormModalV2 = ({
                                 const isSire = slotKey === 'sire' || slotKey.endsWith('Sire');
                                 const isCTC = d.mode === 'ctc';
                                 const isParent = slotKey === 'sire' || slotKey === 'dam';
-                                const bdr = isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40';
+                                const bdr = isSire ? 'border-blue-200 dark:border-blue-700/60 bg-blue-50/40' : 'border-pink-200 dark:border-pink-700/60 bg-pink-50/40';
                                 const lbl = isSire ? 'text-blue-500' : 'text-pink-500';
 
                                 return (
                                     <div key={slotKey} className={`rounded-lg border ${isParent ? 'p-4' : 'p-3'} space-y-2 text-xs ${bdr}`}>
                                         <div className="flex items-center justify-between">
                                             <p className={`${isParent ? 'text-xs' : 'text-[10px]'} font-bold uppercase tracking-widest ${lbl}`}>{label}</p>
-                                            <div className="flex rounded border border-gray-300 overflow-hidden text-[10px]">
+                                            <div className="flex rounded border border-gray-300 dark:border-dark-border overflow-hidden text-[10px]">
                                                 <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'manual')}
-                                                    className={`px-2 py-0.5 transition-colors ${!isCTC ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Manual</button>
+                                                    className={`px-2 py-0.5 transition-colors ${!isCTC ? 'bg-gray-200 dark:bg-dark-surface font-semibold text-gray-800 dark:text-dark-text' : 'text-gray-400 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}>Manual</button>
                                                 <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'ctc')}
-                                                    className={`px-2 py-0.5 transition-colors ${isCTC ? 'bg-primary dark:bg-dark-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Link CTC</button>
+                                                    className={`px-2 py-0.5 transition-colors ${isCTC ? 'bg-primary dark:bg-dark-primary font-semibold text-black' : 'text-gray-400 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}>Link CTC</button>
                                             </div>
                                         </div>
 
                                         {isCTC ? (
                                             d.ctcId ? (
                                                 <div className="space-y-1.5">
-                                                    <div className={`flex items-center gap-3 ${isParent ? 'p-3' : 'p-2'} bg-white rounded border border-primary/30`}>
+                                                    <div className={`flex items-center gap-3 ${isParent ? 'p-3' : 'p-2'} bg-white dark:bg-dark-card-bg rounded border border-primary/30`}>
                                                         {d.imageUrl
                                                             ? <img src={d.imageUrl} className={`${isParent ? 'w-16 h-16' : 'w-10 h-10'} rounded-full object-cover flex-shrink-0`} alt="" />
-                                                            : <div className={`${isParent ? 'w-16 h-16' : 'w-10 h-10'} rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0`}><Cat size={isParent ? 22 : 16} className="text-gray-300" /></div>
+                                                            : <div className={`${isParent ? 'w-16 h-16' : 'w-10 h-10'} rounded-full bg-gray-100 dark:bg-dark-surface flex items-center justify-center flex-shrink-0`}><Cat size={isParent ? 22 : 16} className="text-gray-300 dark:text-dark-border" /></div>
                                                         }
                                                         <div className="flex-1 min-w-0">
-                                                            <p className={`${isParent ? 'text-sm' : 'text-xs'} font-semibold text-gray-800 truncate`}>{[d.prefix,d.name,d.suffix].filter(Boolean).join(' ')}</p>
-                                                            {d.variety && <p className={`${isParent ? 'text-xs' : 'text-[11px]'} text-gray-500 truncate`}>{d.variety}</p>}
-                                                            <p className="text-[10px] font-mono text-gray-500">{d.ctcId}</p>
+                                                            <p className={`${isParent ? 'text-sm' : 'text-xs'} font-semibold text-gray-800 dark:text-dark-text truncate`}>{[d.prefix,d.name,d.suffix].filter(Boolean).join(' ')}</p>
+                                                            {d.variety && <p className={`${isParent ? 'text-xs' : 'text-[11px]'} text-gray-500 dark:text-dark-text-muted truncate`}>{d.variety}</p>}
+                                                            <p className="text-[10px] font-mono text-gray-500 dark:text-dark-text-muted">{d.ctcId}</p>
                                                         </div>
                                                     </div>
                                                     <button type="button"
@@ -5986,18 +5986,18 @@ const AnimalFormModalV2 = ({
                                         ) : (
                                             <>
                                                 <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
-                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                    className="w-full px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
                                                 <input placeholder="Variety / Morph" value={d.variety || ''} onChange={e => setSlotField(slotKey, 'variety', e.target.value)}
-                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                    className="w-full px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
                                                 <input placeholder="Genetic Code" value={d.genCode || ''} onChange={e => setSlotField(slotKey, 'genCode', e.target.value)}
-                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                    className="w-full px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary" />
                                                 <input type="date" value={d.birthDate || ''} onChange={e => setSlotField(slotKey, 'birthDate', e.target.value)}
-                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                    className="w-full px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
                                                 <input placeholder="Breeder Name" value={d.breederName || ''} onChange={e => setSlotField(slotKey, 'breederName', e.target.value)}
-                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                    className="w-full px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
                                                 <div className="flex items-center gap-2">
-                                                    {d.imageUrl && <img src={d.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200" />}
-                                                    <label className={`flex-1 flex items-center gap-1.5 px-2 py-1 border border-gray-300 rounded text-xs cursor-pointer bg-white hover:bg-gray-50 transition ${mpSlotUploading[slotKey] ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                    {d.imageUrl && <img src={d.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200 dark:border-dark-border" />}
+                                                    <label className={`flex-1 flex items-center gap-1.5 px-2 py-1 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-xs cursor-pointer bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition ${mpSlotUploading[slotKey] ? 'opacity-50 pointer-events-none' : ''}`}>
                                                         {mpSlotUploading[slotKey] ? <><Loader2 size={11} className="animate-spin" /> Uploading?</> : <><Camera size={11} /> {d.imageUrl ? 'Change Photo' : 'Add Photo'}</>}
                                                         <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                                                             const file = e.target.files?.[0];
@@ -6027,12 +6027,12 @@ const AnimalFormModalV2 = ({
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-2">
                                         <Dna size={18} className="text-orange-500" />
-                                        <h3 className="text-base font-semibold text-gray-700">Pedigree</h3>
+                                        <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary">Pedigree</h3>
                                     </div>
-                                    <p className="text-xs text-gray-400 -mt-3">This Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Manual ancestors are also specific to this animal only — they do not seed or propagate to siblings, offspring, or any other relative's pedigree. Changes are saved when you click Save Animal.</p>
+                                    <p className="text-xs text-gray-400 dark:text-dark-text-muted -mt-3">This Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Manual ancestors are also specific to this animal only — they do not seed or propagate to siblings, offspring, or any other relative's pedigree. Changes are saved when you click Save Animal.</p>
 
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                        <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 1 — Parents</p>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {renderEditSlot('sire', 'Sire', 'sire')}
                                             {renderEditSlot('dam', 'Dam', 'dam')}
@@ -6040,7 +6040,7 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                        <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
@@ -6056,23 +6056,23 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                        <p className="text-xs font-semibold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                                <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted -mt-1 mb-0.5">via Grandsire</p>
                                                 {renderEditSlot('sireSireSire', 'Great-Grandsire', 'sire')}
                                                 {renderEditSlot('sireSireDam', 'Great-Granddam', 'sire')}
-                                                <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-1 mb-0.5">via Granddam</p>
                                                 {renderEditSlot('sireDamSire', 'Great-Grandsire', 'sire')}
                                                 {renderEditSlot('sireDamDam', 'Great-Granddam', 'sire')}
                                             </div>
                                             <div className="space-y-2">
                                                 <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                                <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted -mt-1 mb-0.5">via Grandsire</p>
                                                 {renderEditSlot('damSireSire', 'Great-Grandsire', 'dam')}
                                                 {renderEditSlot('damSireDam', 'Great-Granddam', 'dam')}
-                                                <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                                <p className="text-[10px] text-gray-400 dark:text-dark-text-muted mt-1 mb-0.5">via Granddam</p>
                                                 {renderEditSlot('damDamSire', 'Great-Grandsire', 'dam')}
                                                 {renderEditSlot('damDamDam', 'Great-Granddam', 'dam')}
                                             </div>
@@ -6100,14 +6100,14 @@ const AnimalFormModalV2 = ({
                                             { key: 'care', label: 'Care Schedule Updates' },
                                             { key: 'field', label: 'Field Edits' }
                                         ].map(({key, label}) => (
-                                            <label key={key} className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded transition">
+                                            <label key={key} className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded transition">
                                                 <input
                                                     type="checkbox"
                                                     checked={eventVisibility[key]}
                                                     onChange={(e) => setEventVisibility({...eventVisibility, [key]: e.target.checked})}
-                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600"
+                                                    className="w-4 h-4 rounded border-gray-300 dark:border-dark-border text-blue-600 dark:text-blue-400"
                                                 />
-                                                <span className="text-sm font-medium text-gray-700">{label}</span>
+                                                <span className="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">{label}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -6118,11 +6118,11 @@ const AnimalFormModalV2 = ({
                                     {(formData.milestones || []).length > 0 && (
                                         <div className="space-y-2 mb-4">
                                             {(formData.milestones || []).map((milestone, idx) => (
-                                                <div key={idx} className="flex items-start justify-between bg-white border border-yellow-200 rounded-lg p-3">
+                                                <div key={idx} className="flex items-start justify-between bg-white dark:bg-dark-card-bg border border-yellow-200 dark:border-yellow-700/60 rounded-lg p-3">
                                                     <div className="flex-1">
-                                                        <p className="text-sm font-semibold text-gray-800">{milestone.label}</p>
-                                                        <p className="text-xs text-gray-500">{formatDate(milestone.startDate)}</p>
-                                                        {milestone.description && <p className="text-xs text-gray-600 mt-1">{milestone.description}</p>}
+                                                        <p className="text-sm font-semibold text-gray-800 dark:text-dark-text">{milestone.label}</p>
+                                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">{formatDate(milestone.startDate)}</p>
+                                                        {milestone.description && <p className="text-xs text-gray-600 dark:text-dark-text-secondary mt-1">{milestone.description}</p>}
                                                     </div>
                                                     <button
                                                         type="button"
@@ -6138,19 +6138,19 @@ const AnimalFormModalV2 = ({
                                             ))}
                                         </div>
                                     )}
-                                    <div className="space-y-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div className="space-y-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg">
                                         <input
                                             type="text"
                                             placeholder="Milestone label"
                                             value={newMilestoneLabel}
                                             onChange={(e) => setNewMilestoneLabel(e.target.value)}
-                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                         />
                                         <DatePicker
                                             value={newMilestoneDate}
                                             onChange={setNewMilestoneDate}
                                             label="Date"
-                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                            className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                         />
                                         <div className="flex gap-2">
                                             <input
@@ -6158,12 +6158,12 @@ const AnimalFormModalV2 = ({
                                                 placeholder="Interval"
                                                 value={newMilestoneInterval}
                                                 onChange={(e) => setNewMilestoneInterval(e.target.value)}
-                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                             />
                                             <select
                                                 value={newMilestoneUnit}
                                                 onChange={(e) => setNewMilestoneUnit(e.target.value)}
-                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                className="flex-1 py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                             >
                                                 <option>week</option>
                                                 <option>month</option>
@@ -6212,14 +6212,14 @@ const AnimalFormModalV2 = ({
                                                 {/* Pinned Events */}
                                                 {pinnedEvents_filtered.length > 0 && (
                                                     <div className="space-y-2">
-                                                        <h4 className="text-xs font-semibold text-gray-600 uppercase">📌 Pinned Events</h4>
+                                                        <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase">📌 Pinned Events</h4>
                                                         {pinnedEvents_filtered.map(event => (
-                                                            <div key={event.id} className="border-l-4 border-yellow-400 bg-yellow-50 p-3 rounded-lg">
+                                                            <div key={event.id} className="border-l-4 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
                                                                 <div className="flex items-start justify-between">
                                                                     <div className="flex-1">
-                                                                        <p className="text-sm font-semibold text-gray-800">{event.title}</p>
-                                                                        <p className="text-xs text-gray-600">{event.date} • {event.type}</p>
-                                                                        {event.description && <p className="text-xs text-gray-700 mt-1">{renderBoldText(event.description)}</p>}
+                                                                        <p className="text-sm font-semibold text-gray-800 dark:text-dark-text">{event.title}</p>
+                                                                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary">{event.date} • {event.type}</p>
+                                                                        {event.description && <p className="text-xs text-gray-700 dark:text-dark-text-secondary mt-1">{renderBoldText(event.description)}</p>}
                                                                     </div>
                                                                     <button
                                                                         type="button"
@@ -6232,10 +6232,10 @@ const AnimalFormModalV2 = ({
                                                                 {getNotesForEvent(event.id).length > 0 && (
                                                                     <div className="mt-2 space-y-1">
                                                                         {getNotesForEvent(event.id).map(note => (
-                                                                            <div key={note.id} className="text-xs bg-white p-2 rounded border border-yellow-200">
-                                                                                <p className="text-gray-700">{note.noteText}</p>
+                                                                            <div key={note.id} className="text-xs bg-white dark:bg-dark-card-bg p-2 rounded border border-yellow-200 dark:border-yellow-700/60">
+                                                                                <p className="text-gray-700 dark:text-dark-text-secondary">{note.noteText}</p>
                                                                                 <div className="flex justify-between items-center mt-1">
-                                                                                    <span className="text-gray-400 text-[10px]">{note.dateAdded}</span>
+                                                                                    <span className="text-gray-400 dark:text-dark-text-muted text-[10px]">{note.dateAdded}</span>
                                                                                     <button
                                                                                         type="button"
                                                                                         onClick={() => deleteTimelineNote(note.id)}
@@ -6257,19 +6257,19 @@ const AnimalFormModalV2 = ({
                                                 {regularEvents.length > 0 && (
                                                     <div className="space-y-2">
                                                         {pinnedEvents_filtered.length > 0 && <hr className="my-3" />}
-                                                        <h4 className="text-xs font-semibold text-gray-600 uppercase">All Events</h4>
+                                                        <h4 className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase">All Events</h4>
                                                         {regularEvents.map(event => (
-                                                            <div key={event.id} className="border-l-4 border-gray-300 bg-gray-50 p-3 rounded-lg">
+                                                            <div key={event.id} className="border-l-4 border-gray-300 dark:border-dark-border bg-gray-50 dark:bg-dark-surface p-3 rounded-lg">
                                                                 <div className="flex items-start justify-between">
                                                                     <div className="flex-1">
-                                                                        <p className="text-sm font-semibold text-gray-800">{event.title}</p>
-                                                                        <p className="text-xs text-gray-600">{event.date} • {event.type}</p>
-                                                                        {event.description && <p className="text-xs text-gray-700 mt-1">{renderBoldText(event.description)}</p>}
+                                                                        <p className="text-sm font-semibold text-gray-800 dark:text-dark-text">{event.title}</p>
+                                                                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary">{event.date} • {event.type}</p>
+                                                                        {event.description && <p className="text-xs text-gray-700 dark:text-dark-text-secondary mt-1">{renderBoldText(event.description)}</p>}
                                                                     </div>
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => toggleEventPin(event.id)}
-                                                                        className="text-gray-400 hover:text-yellow-500 transition-colors ml-2"
+                                                                        className="text-gray-400 dark:text-dark-text-muted hover:text-yellow-500 transition-colors ml-2"
                                                                     >
                                                                         <Star size={16} />
                                                                     </button>
@@ -6277,10 +6277,10 @@ const AnimalFormModalV2 = ({
                                                                 {getNotesForEvent(event.id).length > 0 && (
                                                                     <div className="mt-2 space-y-1">
                                                                         {getNotesForEvent(event.id).map(note => (
-                                                                            <div key={note.id} className="text-xs bg-white p-2 rounded border border-gray-200">
-                                                                                <p className="text-gray-700">{note.noteText}</p>
+                                                                            <div key={note.id} className="text-xs bg-white dark:bg-dark-card-bg p-2 rounded border border-gray-200 dark:border-dark-border">
+                                                                                <p className="text-gray-700 dark:text-dark-text-secondary">{note.noteText}</p>
                                                                                 <div className="flex justify-between items-center mt-1">
-                                                                                    <span className="text-gray-400 text-[10px]">{note.dateAdded}</span>
+                                                                                    <span className="text-gray-400 dark:text-dark-text-muted text-[10px]">{note.dateAdded}</span>
                                                                                     <button
                                                                                         type="button"
                                                                                         onClick={() => deleteTimelineNote(note.id)}
@@ -6299,7 +6299,7 @@ const AnimalFormModalV2 = ({
                                                 )}
 
                                                 {events.length === 0 && (
-                                                    <p className="text-sm text-gray-500 italic text-center py-4">No events to display. Check the filters or add milestones to get started.</p>
+                                                    <p className="text-sm text-gray-500 dark:text-dark-text-muted italic text-center py-4">No events to display. Check the filters or add milestones to get started.</p>
                                                 )}
                                             </div>
                                         );
@@ -6317,12 +6317,12 @@ const AnimalFormModalV2 = ({
                                             <Plus size={16} /> Add Note to Event
                                         </button>
                                     ) : (
-                                        <div className="space-y-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                            <label className="block text-sm font-medium text-gray-700">Select Event</label>
+                                        <div className="space-y-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Select Event</label>
                                             <select
                                                 value={newTimelineNote.eventId}
                                                 onChange={(e) => setNewTimelineNote({...newTimelineNote, eventId: e.target.value})}
-                                                className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"
+                                                className="w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                             >
                                                 <option value="">Choose an event...</option>
                                                 {aggregateTimelineEvents().map(event => (
@@ -6331,12 +6331,12 @@ const AnimalFormModalV2 = ({
                                                     </option>
                                                 ))}
                                             </select>
-                                            <label className="block text-sm font-medium text-gray-700 mt-2">Note</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mt-2">Note</label>
                                             <textarea
                                                 value={newTimelineNote.noteText}
                                                 onChange={(e) => setNewTimelineNote({...newTimelineNote, noteText: e.target.value})}
                                                 placeholder="Add context or notes about this event..."
-                                                className="w-full py-2 px-2 text-sm border border-gray-300 rounded-md resize-none"
+                                                className="w-full py-2 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text resize-none"
                                                 rows={3}
                                             />
                                             <div className="flex gap-2">
@@ -6353,7 +6353,7 @@ const AnimalFormModalV2 = ({
                                                         setShowNoteForm(false);
                                                         setNewTimelineNote({ eventId: '', noteText: '' });
                                                     }}
-                                                    className="flex-1 py-1.5 px-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 transition"
+                                                    className="flex-1 py-1.5 px-2 bg-gray-300 text-gray-700 dark:text-dark-text-secondary text-sm font-medium rounded-md hover:bg-gray-400 transition"
                                                 >
                                                     Cancel
                                                 </button>
@@ -6370,16 +6370,16 @@ const AnimalFormModalV2 = ({
                                     {(formData.ownershipHistory || []).length > 0 && (
                                         <div className="space-y-2 mb-4">
                                             {(formData.ownershipHistory || []).map((entry, idx) => (
-                                                <div key={idx} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3">
+                                                <div key={idx} className="flex items-center justify-between bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg p-3">
                                                     <div className="flex items-center gap-2 min-w-0 flex-1">
                                                         {entry.country && <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
                                                         <div className="min-w-0 flex-1">
-                                                            <p className="text-sm font-medium text-gray-800 truncate">{entry.ownerName || 'Unnamed'}</p>
-                                                            {entry.userId_public && <p className="text-xs text-gray-400 font-mono">{entry.userId_public}</p>}
-                                                            <div className="flex gap-2 text-xs text-gray-500 mt-1">
+                                                            <p className="text-sm font-medium text-gray-800 dark:text-dark-text truncate">{entry.ownerName || 'Unnamed'}</p>
+                                                            {entry.userId_public && <p className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{entry.userId_public}</p>}
+                                                            <div className="flex gap-2 text-xs text-gray-500 dark:text-dark-text-muted mt-1">
                                                                 <span>{entry.startDate || 'TBD'}</span>
                                                                 {entry.endDate && <span>→ {entry.endDate}</span>}
-                                                                {entry.ownershipType && <span className="bg-gray-100 px-1.5 py-0.5 rounded">{entry.ownershipType}</span>}
+                                                                {entry.ownershipType && <span className="bg-gray-100 dark:bg-dark-surface px-1.5 py-0.5 rounded">{entry.ownershipType}</span>}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -6392,21 +6392,21 @@ const AnimalFormModalV2 = ({
                                     )}
 
                                     {/* Add new entry */}
-                                    <div className="bg-white border border-dashed border-gray-300 rounded-lg p-3 space-y-3">
-                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Add Manual Entry</p>
+                                    <div className="bg-white dark:bg-dark-card-bg border border-dashed border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text p-3 space-y-3">
+                                        <p className="text-xs font-medium text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Add Manual Entry</p>
 
                                         {/* Mode toggle */}
                                         <div className="flex gap-2">
-                                            <button type="button" onClick={() => { setOhMode('manual'); setOhSelectedUser(null); setOhUserSearch(''); setOhUserResults([]); }} className={`px-3 py-1 text-xs rounded-full border transition ${ohMode === 'manual' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'}`}>Manual Name</button>
-                                            <button type="button" onClick={() => setOhMode('user')} className={`px-3 py-1 text-xs rounded-full border transition ${ohMode === 'user' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'}`}>Select User</button>
+                                            <button type="button" onClick={() => { setOhMode('manual'); setOhSelectedUser(null); setOhUserSearch(''); setOhUserResults([]); }} className={`px-3 py-1 text-xs rounded-full border transition ${ohMode === 'manual' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary border-gray-300 dark:border-dark-border hover:border-gray-500 dark:hover:border-dark-text-muted'}`}>Manual Name</button>
+                                            <button type="button" onClick={() => setOhMode('user')} className={`px-3 py-1 text-xs rounded-full border transition ${ohMode === 'user' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary border-gray-300 dark:border-dark-border hover:border-gray-500 dark:hover:border-dark-text-muted'}`}>Select User</button>
                                         </div>
 
                                         {ohMode === 'manual' ? (
-                                            <input type="text" value={ohOwnerName} onChange={e => setOhOwnerName(e.target.value)} placeholder="Owner name" className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary" />
+                                            <input type="text" value={ohOwnerName} onChange={e => setOhOwnerName(e.target.value)} placeholder="Owner name" className="block w-full p-2 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-sm focus:ring-primary focus:border-primary" />
                                         ) : (
                                             <div className="space-y-2">
                                                 <div className="flex gap-2">
-                                                    <input type="text" value={ohUserSearch} onChange={e => { setOhUserSearch(e.target.value); setOhUserResults([]); setOhSelectedUser(null); setOhOwnerName(''); }} placeholder="Search by name or CTUID" className="flex-1 p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary" />
+                                                    <input type="text" value={ohUserSearch} onChange={e => { setOhUserSearch(e.target.value); setOhUserResults([]); setOhSelectedUser(null); setOhOwnerName(''); }} placeholder="Search by name or CTUID" className="flex-1 p-2 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-sm focus:ring-primary focus:border-primary" />
                                                     <button type="button" disabled={ohSearching || !ohUserSearch.trim()} onClick={async () => {
                                                         if (!ohUserSearch.trim()) return;
                                                         setOhSearching(true);
@@ -6415,22 +6415,22 @@ const AnimalFormModalV2 = ({
                                                             setOhUserResults(res.data || []);
                                                         } catch(e) {}
                                                         setOhSearching(false);
-                                                    }} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-40 transition flex-shrink-0">
+                                                    }} className="px-3 py-1 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-sm rounded disabled:opacity-40 transition flex-shrink-0">
                                                         {ohSearching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
                                                     </button>
                                                 </div>
                                                 {ohUserResults.length > 0 && !ohSelectedUser && (
-                                                    <div className="border border-gray-200 rounded divide-y divide-gray-100 max-h-44 overflow-y-auto bg-white shadow-sm">
+                                                    <div className="border border-gray-200 dark:border-dark-border rounded divide-y divide-gray-100 max-h-44 overflow-y-auto bg-white dark:bg-dark-card-bg shadow-sm">
                                                         {ohUserResults.map(u => {
                                                             const showP = u.showPersonalName ?? false;
                                                             const showB = u.showBreederName ?? false;
                                                             const dName = (showP && showB && u.personalName && u.breederName) ? `${u.personalName} (${u.breederName})` : (showB && u.breederName) ? u.breederName : (showP && u.personalName) ? u.personalName : 'Anonymous';
                                                             return (
-                                                                <button key={u.id_public} type="button" onClick={() => { setOhSelectedUser(u); setOhOwnerName(dName); setOhCountry(u.country || ''); setOhUserResults([]); }} className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2">
-                                                                    {u.profileImage && u.profileImage !== 'present' ? <img src={u.profileImage} className="w-7 h-7 rounded-full object-cover flex-shrink-0" alt="" /> : <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><User size={12} className="text-gray-400" /></div>}
+                                                                <button key={u.id_public} type="button" onClick={() => { setOhSelectedUser(u); setOhOwnerName(dName); setOhCountry(u.country || ''); setOhUserResults([]); }} className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-dark-surface-hover flex items-center gap-2">
+                                                                    {u.profileImage && u.profileImage !== 'present' ? <img src={u.profileImage} className="w-7 h-7 rounded-full object-cover flex-shrink-0" alt="" /> : <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-dark-surface flex items-center justify-center flex-shrink-0"><User size={12} className="text-gray-400 dark:text-dark-text-muted" /></div>}
                                                                     <div className="min-w-0 flex-1">
-                                                                        <p className="text-sm font-medium text-gray-800 truncate">{dName}</p>
-                                                                        <p className="text-xs text-gray-400 font-mono">{u.id_public}</p>
+                                                                        <p className="text-sm font-medium text-gray-800 dark:text-dark-text truncate">{dName}</p>
+                                                                        <p className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{u.id_public}</p>
                                                                     </div>
                                                                     {u.country && <span className={`${getCountryFlag(u.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
                                                                 </button>
@@ -6439,21 +6439,21 @@ const AnimalFormModalV2 = ({
                                                     </div>
                                                 )}
                                                 {ohSelectedUser && (
-                                                    <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg p-2">
-                                                        {ohSelectedUser.profileImage && ohSelectedUser.profileImage !== 'present' ? <img src={ohSelectedUser.profileImage} className="w-9 h-9 rounded-full object-cover flex-shrink-0" alt="" /> : <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><User size={14} className="text-gray-400" /></div>}
+                                                    <div className="flex items-center gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg p-2">
+                                                        {ohSelectedUser.profileImage && ohSelectedUser.profileImage !== 'present' ? <img src={ohSelectedUser.profileImage} className="w-9 h-9 rounded-full object-cover flex-shrink-0" alt="" /> : <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-dark-surface flex items-center justify-center flex-shrink-0"><User size={14} className="text-gray-400 dark:text-dark-text-muted" /></div>}
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="text-sm font-semibold text-gray-800 truncate">{ohOwnerName}</p>
-                                                            <p className="text-xs text-gray-500 font-mono">{ohSelectedUser.id_public}</p>
+                                                            <p className="text-sm font-semibold text-gray-800 dark:text-dark-text truncate">{ohOwnerName}</p>
+                                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{ohSelectedUser.id_public}</p>
                                                         </div>
                                                         {ohSelectedUser.country && <span className={`${getCountryFlag(ohSelectedUser.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
-                                                        <button type="button" onClick={() => { setOhSelectedUser(null); setOhOwnerName(''); setOhUserSearch(''); setOhCountry(''); }} className="text-gray-400 hover:text-gray-600 p-0.5"><X size={13} /></button>
+                                                        <button type="button" onClick={() => { setOhSelectedUser(null); setOhOwnerName(''); setOhUserSearch(''); setOhCountry(''); }} className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary p-0.5"><X size={13} /></button>
                                                     </div>
                                                 )}
                                             </div>
                                         )}
 
                                         {/* Ownership Type */}
-                                        <select value={ohOwnershipType} onChange={e => setOhOwnershipType(e.target.value)} className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary">
+                                        <select value={ohOwnershipType} onChange={e => setOhOwnershipType(e.target.value)} className="block w-full p-2 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-sm focus:ring-primary focus:border-primary">
                                             <option value="">Ownership Type (optional)</option>
                                             <option value="Breeder">Breeder</option>
                                             <option value="Pet Owner">Pet Owner</option>
@@ -6465,10 +6465,10 @@ const AnimalFormModalV2 = ({
                                         </select>
 
                                         {/* Start Date */}
-                                        <input type="date" value={ohStartDate} onChange={e => setOhStartDate(e.target.value)} placeholder="Start Date" className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary" />
+                                        <input type="date" value={ohStartDate} onChange={e => setOhStartDate(e.target.value)} placeholder="Start Date" className="block w-full p-2 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-sm focus:ring-primary focus:border-primary" />
 
                                         {/* Country dropdown */}
-                                        <select value={ohCountry} onChange={e => setOhCountry(e.target.value)} className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary">
+                                        <select value={ohCountry} onChange={e => setOhCountry(e.target.value)} className="block w-full p-2 border border-gray-300 dark:border-dark-border rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text text-sm focus:ring-primary focus:border-primary">
                                             <option value="">Country (optional)</option>
                                             {[['US','United States'],['CA','Canada'],['GB','United Kingdom'],['AU','Australia'],['NZ','New Zealand'],['DE','Germany'],['FR','France'],['IT','Italy'],['ES','Spain'],['NL','Netherlands'],['SE','Sweden'],['NO','Norway'],['DK','Denmark'],['CH','Switzerland'],['BE','Belgium'],['AT','Austria'],['PL','Poland'],['CZ','Czech Republic'],['IE','Ireland'],['PT','Portugal'],['GR','Greece'],['RU','Russia'],['JP','Japan'],['KR','South Korea'],['CN','China'],['IN','India'],['BR','Brazil'],['MX','Mexico'],['ZA','South Africa'],['SG','Singapore'],['HK','Hong Kong'],['MY','Malaysia'],['TH','Thailand']].map(([code, name]) => (
                                                 <option key={code} value={code}>{name}</option>
@@ -6486,27 +6486,27 @@ const AnimalFormModalV2 = ({
                                 </FormSection>
                                 <FormSection title="Show & Performance" icon={<Trophy size={16} />}>
                                     {/* Structured Show Events */}
-                                    <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
-                                        <h4 className="text-sm font-semibold text-gray-700">Show Events</h4>
-                                        <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                    <div className="space-y-2 mb-4 pb-4 border-b border-gray-200 dark:border-dark-border">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Show Events</h4>
+                                        <div className="bg-white dark:bg-dark-card-bg p-2 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                                                 <DatePicker value={newShow.date} onChange={(e) => setNewShow({ ...newShow, date: e.target.value })} className="py-1.5 px-2 text-sm" />
-                                                <input type="text" value={newShow.showName} onChange={(e) => setNewShow({ ...newShow, showName: e.target.value })} placeholder="Show Name (e.g., Westminster)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newShow.titleEarned} onChange={(e) => setNewShow({ ...newShow, titleEarned: e.target.value })} placeholder="Title Earned (e.g., Best in Show)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newShow.judgeName} onChange={(e) => setNewShow({ ...newShow, judgeName: e.target.value })} placeholder="Judge Name" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <input type="text" value={newShow.score} onChange={(e) => setNewShow({ ...newShow, score: e.target.value })} placeholder="Score/Placement (e.g., 95/100)" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                                <textarea value={newShow.judgeComments} onChange={(e) => setNewShow({ ...newShow, judgeComments: e.target.value })} placeholder="Judge Comments" rows="2" className="py-1.5 px-2 text-sm border border-gray-300 rounded-md md:col-span-2 lg:col-span-1" />
+                                                <input type="text" value={newShow.showName} onChange={(e) => setNewShow({ ...newShow, showName: e.target.value })} placeholder="Show Name (e.g., Westminster)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newShow.titleEarned} onChange={(e) => setNewShow({ ...newShow, titleEarned: e.target.value })} placeholder="Title Earned (e.g., Best in Show)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newShow.judgeName} onChange={(e) => setNewShow({ ...newShow, judgeName: e.target.value })} placeholder="Judge Name" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <input type="text" value={newShow.score} onChange={(e) => setNewShow({ ...newShow, score: e.target.value })} placeholder="Score/Placement (e.g., 95/100)" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
+                                                <textarea value={newShow.judgeComments} onChange={(e) => setNewShow({ ...newShow, judgeComments: e.target.value })} placeholder="Judge Comments" rows="2" className="py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text md:col-span-2 lg:col-span-1" />
                                             </div>
                                             <button type="button" onClick={addShow} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-xs font-medium">+ Add Show Event</button>
                                         </div>
                                         {(parseJsonArrayField(formData.shows) || []).map((show, i) => (
-                                            <div key={i} className="flex justify-between items-start text-xs p-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded border border-purple-200">
+                                            <div key={i} className="flex justify-between items-start text-xs p-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded border border-purple-200 dark:border-purple-700/60">
                                                 <div className="flex-1">
                                                     <div className="font-semibold text-purple-900">{show.showName}</div>
-                                                    <div className="text-gray-700">{show.date}: {show.titleEarned || '(no title)'}</div>
-                                                    {show.judgeName && <div className="text-gray-600">Judge: {show.judgeName}</div>}
-                                                    {show.score && <div className="text-gray-600">Score: {show.score}</div>}
-                                                    {show.judgeComments && <div className="text-gray-600 italic">{show.judgeComments}</div>}
+                                                    <div className="text-gray-700 dark:text-dark-text-secondary">{show.date}: {show.titleEarned || '(no title)'}</div>
+                                                    {show.judgeName && <div className="text-gray-600 dark:text-dark-text-secondary">Judge: {show.judgeName}</div>}
+                                                    {show.score && <div className="text-gray-600 dark:text-dark-text-secondary">Score: {show.score}</div>}
+                                                    {show.judgeComments && <div className="text-gray-600 dark:text-dark-text-secondary italic">{show.judgeComments}</div>}
                                                 </div>
                                                 <button type="button" onClick={() => removeArrayItem('shows', i)} className="ml-2"><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
@@ -6514,72 +6514,72 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                     {/* Legacy Text Fields for Backward Compatibility */}
-                                    <div className="space-y-2 text-xs text-gray-500 italic">
+                                    <div className="space-y-2 text-xs text-gray-500 dark:text-dark-text-muted italic">
                                         <p className="font-semibold">Legacy Fields (for import compatibility)</p>
-                                        <div><label className="block text-xs font-medium text-gray-700">Show Titles</label><textarea name="showTitles" value={formData.showTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Working Titles</label><textarea name="workingTitles" value={formData.workingTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Show Ratings & Placements</label><textarea name="showRatings" value={formData.showRatings || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Grand Champion 2024, Reserve Winner, Points: 50" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Judge Comments & Evaluations</label><textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Notable feedback from judges, critiques, recommendations" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Performance Scores & Assessments</label><textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Agility: 9/10, Obedience: 8/10, Temperament: 10/10" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Show Titles</label><textarea name="showTitles" value={formData.showTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Working Titles</label><textarea name="workingTitles" value={formData.workingTitles} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Show Ratings & Placements</label><textarea name="showRatings" value={formData.showRatings || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Grand Champion 2024, Reserve Winner, Points: 50" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Judge Comments & Evaluations</label><textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="Notable feedback from judges, critiques, recommendations" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Performance Scores & Assessments</label><textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Agility: 9/10, Obedience: 8/10, Temperament: 10/10" /></div>
                                     </div>
                                 </FormSection>
                                 <FormSection title="Sale & Purchase" icon={<DollarSign size={16} />}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">
-                                        <div><label className="block text-xs font-medium text-gray-700">Purchase Date</label><input type="date" name="purchaseDate" value={formData.purchaseDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200 dark:border-dark-border">
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Purchase Date</label><input type="date" name="purchaseDate" value={formData.purchaseDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                         <div className="flex gap-2">
-                                            <div className="flex-1"><label className="block text-xs font-medium text-gray-700">Purchase Price</label><input type="text" name="purchasePrice" value={formData.purchasePrice} onChange={handleChange} placeholder="e.g., 500, 250" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                            <div className="w-24"><label className="block text-xs font-medium text-gray-700">Currency</label><select name="purchasePriceCurrency" value={formData.purchasePriceCurrency} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="USD">USD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="CAD">CAD C$</option><option value="AUD">AUD A$</option><option value="JPY">JPY ¥</option><option value="CHF">CHF</option><option value="INR">INR ₹</option><option value="AED">AED د.إ</option></select></div>
+                                            <div className="flex-1"><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Purchase Price</label><input type="text" name="purchasePrice" value={formData.purchasePrice} onChange={handleChange} placeholder="e.g., 500, 250" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                            <div className="w-24"><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Currency</label><select name="purchasePriceCurrency" value={formData.purchasePriceCurrency} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="USD">USD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="CAD">CAD C$</option><option value="AUD">AUD A$</option><option value="JPY">JPY ¥</option><option value="CHF">CHF</option><option value="INR">INR ₹</option><option value="AED">AED د.إ</option></select></div>
                                         </div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Seller/Breeder Name</label><input type="text" name="sellerName" value={formData.sellerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Seller/Breeder Name</label><input type="text" name="sellerName" value={formData.sellerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                         <div>
                                             <div className="flex items-center justify-between">
-                                                <label className="block text-xs font-medium text-gray-700">Seller Contact Info</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Seller Contact Info</label>
                                                 <button type="button" onClick={() => { setAssignModalTarget('seller'); setAssignModalOpen(true); }} className="text-xs text-primary-dark font-medium hover:underline">Select Contact</button>
                                             </div>
-                                            <input type="text" name="sellerContact" value={formData.sellerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <input type="text" name="sellerContact" value={formData.sellerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">
-                                        <div><label className="block text-xs font-medium text-gray-700">Sale Date</label><input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200 dark:border-dark-border">
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Sale Date</label><input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                         <div className="flex gap-2">
-                                            <div className="flex-1"><label className="block text-xs font-medium text-gray-700">Sale Price</label><input type="text" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="e.g., 800, 400" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                            <div className="w-24"><label className="block text-xs font-medium text-gray-700">Currency</label><select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="USD">USD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="CAD">CAD C$</option><option value="AUD">AUD A$</option><option value="JPY">JPY ¥</option><option value="CHF">CHF</option><option value="INR">INR ₹</option><option value="AED">AED د.إ</option></select></div>
+                                            <div className="flex-1"><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Sale Price</label><input type="text" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="e.g., 800, 400" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                            <div className="w-24"><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Currency</label><select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="USD">USD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="CAD">CAD C$</option><option value="AUD">AUD A$</option><option value="JPY">JPY ¥</option><option value="CHF">CHF</option><option value="INR">INR ₹</option><option value="AED">AED د.إ</option></select></div>
                                         </div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Buyer Name</label><input type="text" name="buyerName" value={formData.buyerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Buyer Name</label><input type="text" name="buyerName" value={formData.buyerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                         <div>
                                             <div className="flex items-center justify-between">
-                                                <label className="block text-xs font-medium text-gray-700">Buyer Contact Info</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Buyer Contact Info</label>
                                                 <button type="button" onClick={() => { setAssignModalTarget('buyer'); setAssignModalOpen(true); }} className="text-xs text-primary-dark font-medium hover:underline">Select Contact</button>
                                             </div>
-                                            <input type="text" name="buyerContact" value={formData.buyerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                            <input type="text" name="buyerContact" value={formData.buyerContact} onChange={handleChange} placeholder="Phone, email, or address" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <div><label className="block text-xs font-medium text-gray-700">Breeding Rights</label><select name="breedingRightsPurchased" value={formData.breedingRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="">Not Specified</option><option value="yes">Yes - Breeding Rights Included</option><option value="conditional">Conditional - Limited Terms</option><option value="no">No - Breeding Rights Not Included</option></select></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Show Rights</label><select name="showRightsPurchased" value={formData.showRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="">Not Specified</option><option value="yes">Yes - Show Rights Included</option><option value="conditional">Conditional - Limited Terms</option><option value="no">No - Show Rights Not Included</option></select></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Export Rights</label><select name="exportRightsPurchased" value={formData.exportRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="">Not Specified</option><option value="yes">Yes - Export Rights Included</option><option value="no">No - Export Rights Not Included</option></select></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Stud Services Allowed</label><select name="studServicesAllowed" value={formData.studServicesAllowed} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="">Not Specified</option><option value="yes">Yes</option><option value="conditional">Conditional</option><option value="no">No</option></select></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Breeding Rights</label><select name="breedingRightsPurchased" value={formData.breedingRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="">Not Specified</option><option value="yes">Yes - Breeding Rights Included</option><option value="conditional">Conditional - Limited Terms</option><option value="no">No - Breeding Rights Not Included</option></select></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Show Rights</label><select name="showRightsPurchased" value={formData.showRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="">Not Specified</option><option value="yes">Yes - Show Rights Included</option><option value="conditional">Conditional - Limited Terms</option><option value="no">No - Show Rights Not Included</option></select></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Export Rights</label><select name="exportRightsPurchased" value={formData.exportRightsPurchased} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="">Not Specified</option><option value="yes">Yes - Export Rights Included</option><option value="no">No - Export Rights Not Included</option></select></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Stud Services Allowed</label><select name="studServicesAllowed" value={formData.studServicesAllowed} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="">Not Specified</option><option value="yes">Yes</option><option value="conditional">Conditional</option><option value="no">No</option></select></div>
                                     </div>
                                     <div className="space-y-3 mt-4">
-                                        <div><label className="block text-xs font-medium text-gray-700">Resale Restrictions</label><textarea name="resaleRestrictions" value={formData.resaleRestrictions} onChange={handleChange} rows="2" placeholder="Any restrictions on reselling or transferring this animal" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Breeder Buyback Clause</label><textarea name="breederBuybackClause" value={formData.breederBuybackClause} onChange={handleChange} rows="2" placeholder="Details on whether original breeder has right to repurchase or buyback terms" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Resale Restrictions</label><textarea name="resaleRestrictions" value={formData.resaleRestrictions} onChange={handleChange} rows="2" placeholder="Any restrictions on reselling or transferring this animal" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                        <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Breeder Buyback Clause</label><textarea name="breederBuybackClause" value={formData.breederBuybackClause} onChange={handleChange} rows="2" placeholder="Details on whether original breeder has right to repurchase or buyback terms" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                     </div>
                                 </FormSection>
                                 <FormSection title="Legal & Documentation" icon={<FileCheck size={16} />}>
-                                    <div><label className="block text-xs font-medium text-gray-700">License Number</label><input type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">License Jurisdiction</label><input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Insurance</label><input type="text" name="insurance" value={formData.insurance} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Legal Status</label><input type="text" name="legalStatus" value={formData.legalStatus} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Breeding Restrictions</label><textarea name="breedingRestrictions" value={formData.breedingRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Export Restrictions</label><textarea name="exportRestrictions" value={formData.exportRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">License Number</label><input type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">License Jurisdiction</label><input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Insurance</label><input type="text" name="insurance" value={formData.insurance} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Legal Status</label><input type="text" name="legalStatus" value={formData.legalStatus} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Breeding Restrictions</label><textarea name="breedingRestrictions" value={formData.breedingRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
+                                    <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Export Restrictions</label><textarea name="exportRestrictions" value={formData.exportRestrictions} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
 
                                     {/* Document uploads (PDF, DOC, DOCX, Pages — max 10MB) */}
                                     <div className="md:col-span-2">
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Documents (Registration papers, contracts, health certificates, etc.)</label>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Documents (Registration papers, contracts, health certificates, etc.)</label>
                                         {(formData.legalDocuments || []).length > 0 && (
                                             <div className="space-y-1 mb-2">
                                                 {formData.legalDocuments.map(doc => (
-                                                    <div key={doc.id} className="flex items-center justify-between gap-2 p-2 border border-gray-300 rounded-md bg-white">
+                                                    <div key={doc.id} className="flex items-center justify-between gap-2 p-2 border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg">
                                                         <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary-dark hover:underline truncate min-w-0">
                                                             <FileText size={14} className="flex-shrink-0" />
                                                             <span className="truncate">{doc.filename || 'Document'}</span>
@@ -6591,7 +6591,7 @@ const AnimalFormModalV2 = ({
                                                 ))}
                                             </div>
                                         )}
-                                        <label className={`flex items-center justify-center gap-2 w-full py-2 px-3 text-sm font-medium rounded-md border-2 border-dashed cursor-pointer transition-colors ${uploadingDocument ? 'border-gray-300 text-gray-400 cursor-not-allowed' : 'border-primary text-primary-dark hover:bg-primary/10'}`}>
+                                        <label className={`flex items-center justify-center gap-2 w-full py-2 px-3 text-sm font-medium rounded-md border-2 border-dashed cursor-pointer transition-colors ${uploadingDocument ? 'border-gray-300 dark:border-dark-border text-gray-400 dark:text-dark-text-muted cursor-not-allowed' : 'border-primary text-primary-dark hover:bg-primary/10'}`}>
                                             {uploadingDocument ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                                             <span>{uploadingDocument ? 'Uploading...' : 'Upload Document'}</span>
                                             <input type="file" accept=".pdf,.doc,.docx,.pages,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.apple.pages" onChange={handleDocumentUpload} disabled={uploadingDocument} className="hidden" />
@@ -6639,10 +6639,10 @@ const AnimalFormModalV2 = ({
                     />
                 )}
                 {/* Footer */}
-                <div className="p-6 border-t border-gray-300 flex-shrink-0">
+                <div className="p-6 border-t border-gray-300 dark:border-dark-border flex-shrink-0">
                     <div className="flex justify-between items-center">
                         <div className="flex space-x-4">
-                            <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
+                            <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:text-dark-text font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
                                 <ArrowLeft size={18} />
                                 <span>Cancel</span>
                             </button>

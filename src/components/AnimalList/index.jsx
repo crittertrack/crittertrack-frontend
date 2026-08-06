@@ -1173,7 +1173,7 @@ useEffect(() => {
                     ) : (
                         <Home size={40} className="text-gray-400 dark:text-dark-text-muted" />
                     )}
-                    <span className={`absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-dark-card-bg dark:text-dark-text-secondary'}`}>
+                    <span className={`absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full ${occupancyStatus === 'Occupied' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:bg-dark-card-bg dark:text-dark-text-secondary'}`}>
                         {occupancyStatus}
                     </span>
                 </div>
@@ -1192,26 +1192,26 @@ useEffect(() => {
                     {/* Stats Row */}
                     <div className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-text-muted grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
                         <div className="flex items-center gap-1.5" title="Animals Housed">
-                            <Cat size={14} className="text-gray-400" />
+                            <Cat size={14} className="text-gray-400 dark:text-dark-text-muted" />
                             <span className="font-medium text-gray-700 dark:text-dark-text">{occupants.length} {occupants.length === 1 ? 'Animal' : 'Animals'}</span>
                         </div>
-                        {capacity > 0 && ( <div className="flex items-center gap-1.5" title="Occupancy Percentage"><BarChart2 size={14} className="text-gray-400" /><span className="font-medium text-gray-700 dark:text-dark-text">{occupancyPercentage.toFixed(0)}% Full</span></div> )}
-                        {tempRange && ( <div className="flex items-center gap-1.5" title="Temperature Range"><Thermometer size={14} className="text-gray-400" /><span className="font-medium text-gray-700 dark:text-dark-text">{tempRange}</span></div> )}
-                        {humidityRange && ( <div className="flex items-center gap-1.5" title="Humidity Range"><Droplet size={14} className="text-gray-400" /><span className="font-medium text-gray-700 dark:text-dark-text">{humidityRange}</span></div> )}
-                        {lightSchedule && ( <div className="flex items-center gap-1.5" title="Lighting Schedule"><LampCeiling size={14} className="text-gray-400" /><span className="font-medium text-gray-700 dark:text-dark-text">{lightSchedule}</span></div> )}
+                        {capacity > 0 && ( <div className="flex items-center gap-1.5" title="Occupancy Percentage"><BarChart2 size={14} className="text-gray-400 dark:text-dark-text-muted" /><span className="font-medium text-gray-700 dark:text-dark-text">{occupancyPercentage.toFixed(0)}% Full</span></div> )}
+                        {tempRange && ( <div className="flex items-center gap-1.5" title="Temperature Range"><Thermometer size={14} className="text-gray-400 dark:text-dark-text-muted" /><span className="font-medium text-gray-700 dark:text-dark-text">{tempRange}</span></div> )}
+                        {humidityRange && ( <div className="flex items-center gap-1.5" title="Humidity Range"><Droplet size={14} className="text-gray-400 dark:text-dark-text-muted" /><span className="font-medium text-gray-700 dark:text-dark-text">{humidityRange}</span></div> )}
+                        {lightSchedule && ( <div className="flex items-center gap-1.5" title="Lighting Schedule"><LampCeiling size={14} className="text-gray-400 dark:text-dark-text-muted" /><span className="font-medium text-gray-700 dark:text-dark-text">{lightSchedule}</span></div> )}
                     </div>
                     
                     {/* Warnings */}
                     <div className="mt-auto pt-2 flex flex-wrap gap-2">
                         {needsAttention && dueTypes.map(type => {
                             let label = 'Task Due';
-                            let colorClass = 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                            let colorClass = 'bg-gray-100 dark:bg-dark-surface text-gray-800 dark:bg-gray-700 dark:text-gray-300';
                             let icon = <Wrench size={12} />;
 
                             switch(type) {
-                                case 'Cleaning': label = 'Needs Cleaning'; colorClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'; icon = <Wrench size={12} />; break;
-                                case 'Maintenance': label = 'Needs Maintenance'; colorClass = 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'; icon = <Settings size={12} />; break;
-                                case 'Feeding': label = 'Feeding Due'; colorClass = 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'; icon = <Utensils size={12} />; break;
+                                case 'Cleaning': label = 'Needs Cleaning'; colorClass = 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'; icon = <Wrench size={12} />; break;
+                                case 'Maintenance': label = 'Needs Maintenance'; colorClass = 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'; icon = <Settings size={12} />; break;
+                                case 'Feeding': label = 'Feeding Due'; colorClass = 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300'; icon = <Utensils size={12} />; break;
                                 default: label = `${type} Due`; break;
                             }
                             return ( <span key={type} className={`flex items-center gap-1 text-xs ${colorClass} px-2 py-1 rounded-full font-medium`}>{icon} {label}</span> );
@@ -2953,7 +2953,7 @@ useEffect(() => {
                 <div className="flex items-center justify-between">
                     <button
                         onClick={() => setShowDuplicatesScreen(false)}
-                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
+                        className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text transition"
                     >
                         <ChevronLeft size={16} />
                         {animalView === 'list' ? 'Back to My Animals' : 'Back to Management'}
@@ -2961,7 +2961,7 @@ useEffect(() => {
                     <button
                         onClick={fetchDuplicates}
                         disabled={duplicatesLoading}
-                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
+                        className="flex items-center gap-1 text-xs text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary transition disabled:opacity-50"
                     >
                         <RefreshCw size={12} />
                         Refresh
@@ -2969,35 +2969,35 @@ useEffect(() => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Search size={18} className="text-amber-600" />
-                    <h3 className="text-lg font-semibold text-gray-800">Find Duplicate Animals</h3>
-                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{duplicateGroups.length} group{duplicateGroups.length !== 1 ? 's' : ''}</span>
+                    <Search size={18} className="text-amber-600 dark:text-amber-400" />
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Find Duplicate Animals</h3>
+                    <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">{duplicateGroups.length} group{duplicateGroups.length !== 1 ? 's' : ''}</span>
                 </div>
 
                 {duplicatesLoading ? (
                     <div className="flex justify-center py-12">
-                        <Loader2 size={32} className="animate-spin text-gray-400" />
+                        <Loader2 size={32} className="animate-spin text-gray-400 dark:text-dark-text-muted" />
                     </div>
                 ) : duplicateGroups.length === 0 ? (
-                    <div className="text-center py-16 text-gray-400">
-                        <Sparkles size={48} className="text-gray-300 mx-auto mb-3" />
+                    <div className="text-center py-16 text-gray-400 dark:text-dark-text-muted">
+                        <Sparkles size={48} className="text-gray-300 dark:text-dark-border mx-auto mb-3" />
                         <p className="text-sm font-medium">No duplicate animals found</p>
                         <p className="text-xs mt-1">Your collection looks clean!</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
                         {duplicateGroups.map((group, gIdx) => (
-                            <div key={gIdx} className="border border-amber-200 rounded-lg bg-amber-50/30 p-4 space-y-3">
+                            <div key={gIdx} className="border border-amber-200 dark:border-amber-700/60 rounded-lg bg-amber-50/30 dark:bg-amber-900/10 p-4 space-y-3">
                                 {(group.duplicates || []).map((dup, dIdx) => (
-                                    <div key={dIdx} className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                                        <div className="p-3 bg-amber-50 border-b border-amber-100 flex items-center justify-between">
-                                            <div className="text-xs text-amber-700 font-medium">
+                                    <div key={dIdx} className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-border shadow-sm">
+                                        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-700/60 flex items-center justify-between">
+                                            <div className="text-xs text-amber-700 dark:text-amber-300 font-medium">
                                                 {formatReasons(dup.reasons)}
                                             </div>
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleDismiss(group.primary.id_public, dup.animal.id_public)}
-                                                    className="text-xs px-2 py-1 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 rounded transition"
+                                                    className="text-xs px-2 py-1 bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-secondary rounded transition"
                                                 >
                                                     Not a duplicate
                                                 </button>
@@ -3016,30 +3016,30 @@ useEffect(() => {
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 divide-x divide-gray-200">
+                                        <div className="grid grid-cols-2 divide-x divide-gray-200 dark:divide-dark-border">
                                             {[group.primary, dup.animal].map((animal, aIdx) => (
                                                 <div key={aIdx} className="p-3 space-y-2">
                                                     <div className="flex items-start gap-2">
-                                                        <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                        <div className="w-12 h-12 bg-gray-100 dark:bg-dark-surface rounded overflow-hidden flex-shrink-0">
                                                             <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="font-semibold text-gray-800 text-sm truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
-                                                            <p className="text-xs text-gray-500">{animal.species} ? {animal.gender || 'Unknown'}</p>
-                                                            {animal.breederAssignedId && <p className="text-xs text-gray-400">ID: {animal.breederAssignedId}</p>}
+                                                            <p className="font-semibold text-gray-800 dark:text-dark-text text-sm truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
+                                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.species} ? {animal.gender || 'Unknown'}</p>
+                                                            {animal.breederAssignedId && <p className="text-xs text-gray-400 dark:text-dark-text-muted">ID: {animal.breederAssignedId}</p>}
                                                         </div>
                                                     </div>
                                                     {animal.birthDate && (
-                                                        <div className="text-xs text-gray-600">
-                                                            <span className="text-gray-400">Born:</span> {new Date(animal.birthDate).toLocaleDateString()}
+                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
+                                                            <span className="text-gray-400 dark:text-dark-text-muted">Born:</span> {new Date(animal.birthDate).toLocaleDateString()}
                                                         </div>
                                                     )}
                                                     {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
-                                                        <div className="text-xs text-gray-600">
-                                                            <span className="text-gray-400">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' • ')}
+                                                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary">
+                                                            <span className="text-gray-400 dark:text-dark-text-muted">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' • ')}
                                                         </div>
                                                     )}
-                                                    <div className="text-xs"><span className="text-gray-400">Status:</span> <span className={animal.status === 'Deceased' ? 'text-gray-500' : 'text-green-600'}>{animal.status || 'N/A'}</span></div>
+                                                    <div className="text-xs"><span className="text-gray-400 dark:text-dark-text-muted">Status:</span> <span className={animal.status === 'Deceased' ? 'text-gray-500 dark:text-dark-text-muted' : 'text-green-600 dark:text-green-400'}>{animal.status || 'N/A'}</span></div>
                                                 </div>
                                             ))}
                                         </div>
@@ -3179,14 +3179,14 @@ useEffect(() => {
                                                     autoFocus
                                                 />
                                                 <button onClick={() => { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); }} className="text-xs px-2 py-1 bg-primary dark:bg-dark-primary text-black rounded-lg">Save</button>
-                                                <button onClick={() => setRenamingCollectionId(null)} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary text-gray-700 rounded-lg">Cancel</button>
+                                                <button onClick={() => setRenamingCollectionId(null)} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary text-gray-700 dark:text-dark-text-secondary rounded-lg">Cancel</button>
                                             </>
                                         ) : (
                                             <>
                                                 <span className="flex-grow text-sm font-medium text-gray-700 dark:text-dark-text">{col.name}</span>
                                                 <span className="text-xs text-gray-400 dark:text-dark-text-muted">{Object.values(animalCollections).filter(ids => Array.isArray(ids) && ids.includes(col.id)).length} animals</span>
-                                                <button onClick={() => { setRenamingCollectionId(col.id); setRenamingCollectionName(col.name); }} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 rounded-lg">Rename</button>
-                                                <button onClick={() => deleteCollection(col.id)} className="text-xs px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg">Delete</button>
+                                                <button onClick={() => { setRenamingCollectionId(col.id); setRenamingCollectionName(col.name); }} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary rounded-lg">Rename</button>
+                                                <button onClick={() => deleteCollection(col.id)} className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg">Delete</button>
                                             </>
                                         )}
                                     </li>
@@ -3199,7 +3199,7 @@ useEffect(() => {
                 )}
 
                 {loading && allOwnedAnimals.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-gray-500 dark:text-dark-text-muted">
                         <Loader2 size={24} className="animate-spin mx-auto mb-2" />
                         Loading animals…
                     </div>
@@ -3207,10 +3207,10 @@ useEffect(() => {
 
                 {/* Empty state: no collections created yet */}
                 {!loading && userCollections.length === 0 && (
-                    <div className="text-center p-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                        <FolderOpen size={40} className="text-gray-300 mx-auto mb-3" />
-                        <p className="text-lg font-semibold text-gray-600 mb-1">No collections yet</p>
-                        <p className="text-sm text-gray-500 mb-4">Create collections to organise your animals into custom folders.</p>
+                    <div className="text-center p-10 bg-gray-50 dark:bg-dark-surface rounded-xl border border-dashed border-gray-300 dark:border-dark-border">
+                        <FolderOpen size={40} className="text-gray-300 dark:text-dark-border mx-auto mb-3" />
+                        <p className="text-lg font-semibold text-gray-600 dark:text-dark-text-secondary mb-1">No collections yet</p>
+                        <p className="text-sm text-gray-500 dark:text-dark-text-muted mb-4">Create collections to organise your animals into custom folders.</p>
                         <button onClick={() => setShowCollectionManager(true)} className="px-4 py-2 bg-accent hover:bg-accent/90 text-white text-sm font-semibold rounded-lg transition">
                             Create First Collection
                         </button>
@@ -3238,7 +3238,7 @@ useEffect(() => {
                                     {!isColCollapsed && (
                                         <div className="p-1.5 sm:p-4">
                                             {colAnimals.length === 0 ? (
-                                                <p className="text-sm text-gray-400 text-center py-4">No animals yet. Assign animals from the Uncategorized section below.</p>
+                                                <p className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-4">No animals yet. Assign animals from the Uncategorized section below.</p>
                                             ) : collectionsViewMode === 'cards' ? (
                                                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
                                                     {colAnimals.map(animal => (
@@ -3337,13 +3337,13 @@ useEffect(() => {
                                                             <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
                                                             <div className="absolute top-2 left-2 z-20">
                                                                 {assigningCollectionAnimalId === animal.id_public && (
-                                                                    <div className="absolute left-0 top-9 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30" onClick={e => e.stopPropagation()}>
-                                                                        <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
-                                                                        {userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded flex items-center gap-1.5 text-gray-700"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}
-                                                                        <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
+                                                                    <div className="absolute left-0 top-9 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg shadow-lg p-2 min-w-[150px] z-30" onClick={e => e.stopPropagation()}>
+                                                                        <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary mb-1.5">Add to collection:</p>
+                                                                        {userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded flex items-center gap-1.5 text-gray-700 dark:text-dark-text-secondary"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}
+                                                                        <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded text-gray-400 dark:text-dark-text-muted mt-1">Cancel</button>
                                                                     </div>
                                                                 )}
-                                                                <button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="bg-white/90 hover:bg-amber-50 text-amber-500 hover:text-amber-700 rounded-full p-1 shadow-sm border border-gray-200" title="Add to a collection"><Plus size={16} /></button>
+                                                                <button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="bg-white/90 dark:bg-dark-card-bg/90 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 rounded-full p-1 shadow-sm border border-gray-200 dark:border-dark-border" title="Add to a collection"><Plus size={16} /></button>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -3384,7 +3384,7 @@ useEffect(() => {
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400 dark:text-dark-text-muted">{ageStr}</div></td>
                                                                         <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-right"><div className="relative inline-block text-left"><button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Plus size={16} /></button>{assigningCollectionAnimalId === animal.id_public && (<div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-dark-card-bg ring-1 ring-black dark:ring-dark-text-muted ring-opacity-5 z-30" onClick={e => e.stopPropagation()}><div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"><p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary px-3 py-1">Add to collection:</p>{userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover flex items-center gap-1.5 text-gray-700 dark:text-dark-text"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}</div></div>)}</div></td>
+                                                                        <td className="px-3 py-1.5 text-right"><div className="relative inline-block text-left"><button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Plus size={16} /></button>{assigningCollectionAnimalId === animal.id_public && (<div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-dark-card-bg ring-1 ring-black dark:ring-dark-text-muted ring-opacity-5 z-30" onClick={e => e.stopPropagation()}><div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"><p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary px-3 py-1">Add to collection:</p>{userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover flex items-center gap-1.5 text-gray-700 dark:text-dark-text"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}</div></div>)}</div></td>
                                                                     </tr>
                                                                 );
                                                             })}
@@ -3443,7 +3443,7 @@ useEffect(() => {
                             icon={<Home size={32} className="text-blue-800 dark:text-blue-200" />}
                             label="Total Enclosures"
                             value={enclosures.length}
-                            colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
+                            colorClass="bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
                             hasDropdown={true}
                             isDropdownOpen={showEnclosureBreakdown}
                             onDropdownToggle={() => setShowEnclosureBreakdown(prev => !prev)}
@@ -3478,13 +3478,13 @@ useEffect(() => {
                             </div>
                         )}
                     </div>
-                    <StatCard icon={<Package size={32} className="text-green-800 dark:text-green-200" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
+                    <StatCard icon={<Package size={32} className="text-green-800 dark:text-green-200" />} label="Occupied" value={occupiedEnclosuresList.length} colorClass="bg-green-100 dark:bg-green-900/30 text-green-900 dark:bg-green-900/30 dark:text-green-200" />
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<Users size={32} className="text-purple-800 dark:text-purple-200" />}
                             label="Total Capacity"
                             value={totalCapacity}
-                            colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200"
+                            colorClass="bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200"
                             hasDropdown={true}
                             isDropdownOpen={showCapacityBreakdown}
                             onDropdownToggle={() => setShowCapacityBreakdown(prev => !prev)}
@@ -3507,13 +3507,13 @@ useEffect(() => {
                             </div>
                         )}
                     </div>
-                    <StatCard icon={<Cat size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
+                    <StatCard icon={<Cat size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Animals Housed" value={animalsHousedCount} colorClass="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" />
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={needsAttentionCount}
-                            colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                            colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                             hasDropdown={enclosuresNeedingAttention.length > 0}
                             isDropdownOpen={showNeedsAttentionBreakdown}
                             onDropdownToggle={() => setShowNeedsAttentionBreakdown(prev => !prev)}
@@ -3555,16 +3555,16 @@ useEffect(() => {
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
-                    <StatCard icon={<Calendar size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Animals in Planned Mating" value={plannedMatingList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<Hourglass size={32} className="text-sky-800 dark:text-sky-200" />} label="Animals In Mating" value={matingList.length} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<ScanHeart size={32} className="text-pink-800 dark:text-pink-200" />} label="Animals Pregnant" value={pregnantList.length} colorClass="bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
-                    <StatCard icon={<Droplet size={32} className="text-violet-800 dark:text-violet-200" />} label="Animals Nursing" value={nursingList.length} colorClass="bg-violet-100 text-violet-900 dark:bg-violet-900/30 dark:text-violet-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Calendar size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Animals in Planned Mating" value={plannedMatingList.length} colorClass="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Hourglass size={32} className="text-sky-800 dark:text-sky-200" />} label="Animals In Mating" value={matingList.length} colorClass="bg-sky-100 dark:bg-sky-900/30 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<ScanHeart size={32} className="text-pink-800 dark:text-pink-200" />} label="Animals Pregnant" value={pregnantList.length} colorClass="bg-pink-100 dark:bg-pink-900/30 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200" onClick={() => setAnimalView('reproduction')} />
+                    <StatCard icon={<Droplet size={32} className="text-violet-800 dark:text-violet-200" />} label="Animals Nursing" value={nursingList.length} colorClass="bg-violet-100 dark:bg-violet-900/30 text-violet-900 dark:bg-violet-900/30 dark:text-violet-200" onClick={() => setAnimalView('reproduction')} />
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={reproNeedsAttentionList.length}
-                            colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                            colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                             hasDropdown={reproNeedsAttentionList.length > 0}
                             isDropdownOpen={showReproNeedsAttentionBreakdown}
                             onDropdownToggle={() => setShowReproNeedsAttentionBreakdown(prev => !prev)}
@@ -3592,16 +3592,16 @@ useEffect(() => {
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
-                    <StatCard icon={<Cat size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Total in Health Program" value={quarantineList.length + treatmentList.length} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('health')} />
-                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />} label="Quarantine" value={quarantineList.length} colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" onClick={() => setAnimalView('health')} />
-                    <StatCard icon={<Activity size={32} className="text-red-800 dark:text-red-200" />} label="In Treatment" value={treatmentList.length} colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200" onClick={() => setAnimalView('health')} />
-                    <StatCard icon={<Droplet size={32} className="text-teal-800 dark:text-teal-200" />} label="Active Medications" value={activeMedicationsCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<Cat size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Total in Health Program" value={quarantineList.length + treatmentList.length} colorClass="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />} label="Quarantine" value={quarantineList.length} colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<Activity size={32} className="text-red-800 dark:text-red-200" />} label="In Treatment" value={treatmentList.length} colorClass="bg-red-100 dark:bg-red-900/30 text-red-900 dark:bg-red-900/30 dark:text-red-200" onClick={() => setAnimalView('health')} />
+                    <StatCard icon={<Droplet size={32} className="text-teal-800 dark:text-teal-200" />} label="Active Medications" value={activeMedicationsCount} colorClass="bg-teal-100 dark:bg-teal-900/30 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('health')} />
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={healthNeedsAttentionList.length}
-                            colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                            colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                             hasDropdown={healthNeedsAttentionList.length > 0}
                             isDropdownOpen={showHealthNeedsAttentionBreakdown}
                             onDropdownToggle={() => setShowHealthNeedsAttentionBreakdown(prev => !prev)}
@@ -3629,16 +3629,16 @@ useEffect(() => {
         return (
             <div className="mb-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 items-start">
-                    <StatCard icon={<Utensils size={32} className="text-green-800 dark:text-green-200" />} label="Feeding" value={feedingAssignedCount} colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200" onClick={() => setAnimalView('feeding')} />
-                    <StatCard icon={<Scissors size={32} className="text-teal-800 dark:text-teal-200" />} label="Grooming & Special Care" value={groomingAssignedCount} colorClass="bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('feeding')} />
-                    <StatCard icon={<Dumbbell size={32} className="text-sky-800 dark:text-sky-200" />} label="Training" value={trainingAssignedCount} colorClass="bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('feeding')} />
-                    <StatCard icon={<ClipboardList size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Custom Animal Care" value={scheduledCareAssignedCount} colorClass="bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<Utensils size={32} className="text-green-800 dark:text-green-200" />} label="Feeding" value={feedingAssignedCount} colorClass="bg-green-100 dark:bg-green-900/30 text-green-900 dark:bg-green-900/30 dark:text-green-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<Scissors size={32} className="text-teal-800 dark:text-teal-200" />} label="Grooming & Special Care" value={groomingAssignedCount} colorClass="bg-teal-100 dark:bg-teal-900/30 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<Dumbbell size={32} className="text-sky-800 dark:text-sky-200" />} label="Training" value={trainingAssignedCount} colorClass="bg-sky-100 dark:bg-sky-900/30 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200" onClick={() => setAnimalView('feeding')} />
+                    <StatCard icon={<ClipboardList size={32} className="text-indigo-800 dark:text-indigo-200" />} label="Custom Animal Care" value={scheduledCareAssignedCount} colorClass="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200" onClick={() => setAnimalView('feeding')} />
                     <div className="flex flex-col gap-2">
                         <StatCard
                             icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                             label="Needs Attention"
                             value={feedingCareNeedsAttentionList.length}
-                            colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                            colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                             hasDropdown={feedingCareNeedsAttentionList.length > 0}
                             isDropdownOpen={showFeedingCareNeedsAttentionBreakdown}
                             onDropdownToggle={() => setShowFeedingCareNeedsAttentionBreakdown(prev => !prev)}
@@ -3801,7 +3801,7 @@ useEffect(() => {
                 )}
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${isQuarantine ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'}`}>{isQuarantine ? 'Quarantine' : 'Treatment'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${isQuarantine ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300'}`}>{isQuarantine ? 'Quarantine' : 'Treatment'}</span>
                 </div>
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
@@ -3836,7 +3836,7 @@ useEffect(() => {
                 </div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
@@ -3870,7 +3870,7 @@ useEffect(() => {
                 <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{label}</div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
@@ -3903,7 +3903,7 @@ useEffect(() => {
                 <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{task.taskName}</div>
 
                 <div className="text-center">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
                 </div>
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
@@ -3935,7 +3935,7 @@ useEffect(() => {
                     <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">{availableList.length}</span>
                 </div>
                 {availableList.length === 0
-                    ? <div className="text-sm text-gray-400 text-center py-8">No animals currently marked as Available.</div>
+                    ? <div className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-8">No animals currently marked as Available.</div>
                     : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                         {availableList.map(a => (
                             <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species}
@@ -3969,23 +3969,23 @@ useEffect(() => {
         const MgmtGroup = ({ groupKey, label, groupAnimals, headerClass, renderExtras }) => {
             const isGrpCollapsed = collapsedMgmtGroups[groupKey] || false;
             return (
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="border border-gray-200 dark:border-dark-border rounded-lg overflow-hidden">
                     <div
                         className={`relative flex items-center justify-between ${headerClass} px-3 py-2 cursor-pointer`}
                         onClick={() => toggleGroup(groupKey)}
                     >
                         <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                             {isGrpCollapsed
-                                ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                                : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                                ? <ChevronDown className="w-3.5 h-3.5 text-gray-400 dark:text-dark-text-muted" />
+                                : <ChevronUp className="w-3.5 h-3.5 text-gray-400 dark:text-dark-text-muted" />}
                         </div>
-                        <span className="font-medium text-sm text-gray-800">{label}</span>
-                        <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{groupAnimals.length}</span>
+                        <span className="font-medium text-sm text-gray-800 dark:text-dark-text">{label}</span>
+                        <span className="text-xs text-gray-500 dark:text-dark-text-muted bg-white/70 dark:bg-black/20 px-2 py-0.5 rounded-full">{groupAnimals.length}</span>
                     </div>
                     {!isGrpCollapsed && (
-                        <div className="p-2 space-y-1.5 bg-white">
+                        <div className="p-2 space-y-1.5 bg-white dark:bg-dark-card-bg">
                             {groupAnimals.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-2">None</div>
+                                ? <div className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-2">None</div>
                                 : groupAnimals.map(a => (
                                     <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={renderExtras ? renderExtras(a) : null} />
                                 ))
@@ -4251,25 +4251,25 @@ useEffect(() => {
             <div className="space-y-3 sm:space-y-4 mt-4">
 
                 {/* -- 1. ENCLOSURES ------------------------------------------ */}
-                {(!view || view === 'enclosures') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'enclosures') && (<div className="border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
                     {/* Section header - collapse on click, Add button on right */}
-                    {!view && <div className="relative flex items-center justify-between bg-blue-50 px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer" onClick={() => toggleSection('enclosures')}>
+                    {!view && <div className="relative flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer" onClick={() => toggleSection('enclosures')}>
                         <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                             {collapsedMgmtSections['enclosures']
-                                ? <ChevronDown className="w-4 h-4 text-gray-400" />
-                                : <ChevronUp className="w-4 h-4 text-gray-400" />}
+                                ? <ChevronDown className="w-4 h-4 text-gray-400 dark:text-dark-text-muted" />
+                                : <ChevronUp className="w-4 h-4 text-gray-400 dark:text-dark-text-muted" />}
                         </div>
                         <div className="flex items-center gap-2">
-                            <Home size={18} className="text-blue-600" />
-                            <span className="font-semibold text-gray-800">Enclosures</span>
-                            <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{enclosures.length}</span>
+                            <Home size={18} className="text-blue-600 dark:text-blue-400" />
+                            <span className="font-semibold text-gray-800 dark:text-dark-text">Enclosures</span>
+                            <span className="text-xs text-gray-500 dark:text-dark-text-muted bg-white/70 dark:bg-black/20 px-2 py-0.5 rounded-full">{enclosures.length}</span>
                         </div>
                     </div>}                     
 
                     {(!collapsedMgmtSections['enclosures'] || !!view) && (
                         <div className="p-3 space-y-2">{renderEnclosuresTab()}
                             {generalEnclosures.length === 0 && unassignedAnimals.length === 0 ? (
-                                <div className="text-sm text-gray-400 text-center py-4">No enclosures yet. Click Add to create your first enclosure.</div>
+                                <div className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-4">No enclosures yet. Click Add to create your first enclosure.</div>
                             ) : (
                                 <>
                                     {/* Named enclosures */}
@@ -4277,21 +4277,21 @@ useEffect(() => {
                                         const occupants = enclosureAnimalMap[enc._id] || [];
                                         const isGrpCollapsed = collapsedMgmtGroups[`enc_${enc._id}`] || false;
                                         return (
-                                            <div key={enc._id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                            <div key={enc._id} className="border border-gray-200 dark:border-dark-border rounded-lg overflow-hidden">
                                                 {/* Enclosure header */}
-                                                <div className="relative flex items-center bg-blue-50/60 px-3 py-2 cursor-pointer"
+                                                <div className="relative flex items-center bg-blue-50/60 dark:bg-blue-900/20 px-3 py-2 cursor-pointer"
                                                     onClick={() => toggleGroup(`enc_${enc._id}`)}
                                                 >
                                                     <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                                                         {isGrpCollapsed
-                                                            ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                                                            : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                                                            ? <ChevronDown className="w-3.5 h-3.5 text-gray-400 dark:text-dark-text-muted" />
+                                                            : <ChevronUp className="w-3.5 h-3.5 text-gray-400 dark:text-dark-text-muted" />}
                                                     </div>
                                                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                        <span className="font-semibold text-sm text-gray-800 truncate">{enc.name}</span>
-                                                        {enc.enclosureType && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">{enc.enclosureType}</span>}
-                                                        {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
-                                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
+                                                        <span className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{enc.name}</span>
+                                                        {enc.enclosureType && <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">{enc.enclosureType}</span>}
+                                                        {enc.size && <span className="text-xs text-gray-400 dark:text-dark-text-muted whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
+                                                        <span className="text-xs text-gray-500 dark:text-dark-text-muted bg-white/70 dark:bg-black/20 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
                                                         <button
@@ -4317,20 +4317,20 @@ useEffect(() => {
                                                                 setEnclosureFormVisible(true);
                                                                 setCollapsedMgmtSections(p => ({...p, enclosures: false}));
                                                             }}
-                                                            className="p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit"
+                                                            className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-blue-600 rounded" title="Edit"
                                                         ><Edit size={13} /></button>
                                                         <button onClick={() => handleDeleteEnclosure(enc._id)}
-                                                            className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"
+                                                            className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded" title="Delete"
                                                         ><Trash2 size={13} /></button>
                                                     </div>
                                                 </div>
                                                 {!isGrpCollapsed && enc.notes && (
-                                                    <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 border-b border-gray-100">{enc.notes}</div>
+                                                    <div className="px-3 py-1.5 bg-gray-50 dark:bg-dark-surface text-xs text-gray-500 dark:text-dark-text-muted border-b border-gray-100">{enc.notes}</div>
                                                 )}
                                                 {!isGrpCollapsed && (
                                                     <div>
                                                         {occupants.length === 0
-                                                            ? <div className="text-xs text-gray-400 text-center py-2">No animals assigned yet</div>
+                                                            ? <div className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-2">No animals assigned yet</div>
                                                             : (
                                                                 <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                                                     {occupants.map(a => (
@@ -4338,7 +4338,7 @@ useEffect(() => {
                                                                             hideControls hideBreedingLines
                                                                             cardActions={
                                                                                 <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
-                                                                                    className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">
+                                                                                    className="text-[10px] text-gray-400 dark:text-dark-text-muted hover:text-red-500 border border-gray-200 dark:border-dark-border hover:border-red-200 rounded px-1.5 py-0.5 w-full">
                                                                                     Remove
                                                                                 </button>
                                                                             }
@@ -4355,20 +4355,20 @@ useEffect(() => {
 
                                     {/* Unassigned animals */}
                                     {unassignedAnimals.length > 0 && (
-                                        <div className="border border-dashed border-gray-300 rounded-lg overflow-hidden">
-                                            <div className="relative flex items-center justify-between bg-gray-50 px-3 py-2 cursor-pointer"
+                                        <div className="border border-dashed border-gray-300 dark:border-dark-border rounded-lg overflow-hidden">
+                                            <div className="relative flex items-center justify-between bg-gray-50 dark:bg-dark-surface px-3 py-2 cursor-pointer"
                                                 onClick={() => toggleGroup('enc_unassigned')}
                                             >
                                                 <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                                                     {collapsedMgmtGroups['enc_unassigned']
-                                                        ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                                                        : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                                                        ? <ChevronDown className="w-3.5 h-3.5 text-gray-400 dark:text-dark-text-muted" />
+                                                        : <ChevronUp className="w-3.5 h-3.5 text-gray-400 dark:text-dark-text-muted" />}
                                                 </div>
-                                                <span className="font-medium text-sm text-gray-500">Unassigned</span>
-                                                <span className="text-xs text-gray-400 bg-white/70 px-2 py-0.5 rounded-full">{unassignedAnimals.length}</span>
+                                                <span className="font-medium text-sm text-gray-500 dark:text-dark-text-muted">Unassigned</span>
+                                                <span className="text-xs text-gray-400 dark:text-dark-text-muted bg-white/70 dark:bg-black/20 px-2 py-0.5 rounded-full">{unassignedAnimals.length}</span>
                                             </div>
                                             {!collapsedMgmtGroups['enc_unassigned'] && (
-                                                <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 bg-white">
+                                                <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 bg-white dark:bg-dark-card-bg">
                                                     {unassignedAnimals.map(a => (
                                                         <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                             hideControls hideBreedingLines
@@ -4384,7 +4384,7 @@ useEffect(() => {
                                                                         </select>
                                                                     ) : (
                                                                         <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }}
-                                                                            className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full whitespace-nowrap">
+                                                                            className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 dark:border-blue-700/60 rounded px-1.5 py-0.5 w-full whitespace-nowrap">
                                                                             Assign
                                                                         </button>
                                                                     )
@@ -4405,9 +4405,9 @@ useEffect(() => {
 
 
                 {/* -- 2. FEEDING & CARE -------------------------------------- */}
-                {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'feeding') && (<div className="border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="feedingCare"
-                        icon={<Utensils size={18} className="text-green-600" />}
+                        icon={<Utensils size={18} className="text-green-600 dark:text-green-400" />}
                         title="Feeding & Care"
                         count={(feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount) > 0
                             ? `${feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount} due`
@@ -4486,9 +4486,9 @@ useEffect(() => {
                 </div>)}
 
                 {/* -- 3. REPRODUCTION ---------------------------------------- */}
-                {(!view || view === 'reproduction') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'reproduction') && (<div className="border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="reproduction"
-                        icon={<Heart size={18} className="text-pink-600" />}
+                        icon={<Heart size={18} className="text-pink-600 dark:text-pink-400" />}
                         title="Reproduction" count={reproTotal} bgClass="bg-pink-50 dark:bg-pink-900/20" hideHeader={!!view} />
                     {(!collapsedMgmtSections['reproduction'] || !!view) && (
                         <div className="p-3 space-y-4">
@@ -4572,9 +4572,9 @@ useEffect(() => {
                 </div>)}
 
                 {/* -- 4. MEDICAL / QUARANTINE -------------------------------- */}
-                {(!view || view === 'health') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'health') && (<div className="border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="medical"
-                        icon={<Activity size={18} className="text-red-600" />}
+                        icon={<Activity size={18} className="text-red-600 dark:text-red-400" />}
                         title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50 dark:bg-red-900/20" hideHeader={!!view} />
                     {(!collapsedMgmtSections['medical'] || !!view) && (
                         <div className="p-3 space-y-4">
@@ -4666,14 +4666,14 @@ useEffect(() => {
                 </div>)}
 
                 {/* -- 5. FOR SALE / AVAILABLE (moved to top-bar button) ------ */}
-                {!view && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {!view && (<div className="border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="available"
                         icon={<ShoppingBag size={18} className="text-purple-600 dark:text-purple-400" />}
                         title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50 dark:bg-purple-900/20" />
                     {!collapsedMgmtSections['available'] && (
                         <div className="p-3">
                             {availableList.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No animals currently marked as Available.</div>
+                                ? <div className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-4">No animals currently marked as Available.</div>
                                 : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                     {availableList.map(a => (
                                         <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
@@ -4702,22 +4702,22 @@ useEffect(() => {
                 {/* -- Feeding Modal ------------------------------------------------------- */}
                 {feedingModal && (
                     <div className="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" onClick={() => setFeedingModal(null)}>
-                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
+                        <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <h3 className="font-bold text-gray-800 text-base">Record Feeding</h3>
-                                    <p className="text-sm text-gray-500 mt-0.5">{feedingModal.animal.name}</p>
+                                    <h3 className="font-bold text-gray-800 dark:text-dark-text text-base">Record Feeding</h3>
+                                    <p className="text-sm text-gray-500 dark:text-dark-text-muted mt-0.5">{feedingModal.animal.name}</p>
                                 </div>
-                                <button onClick={() => setFeedingModal(null)} className="text-gray-400 hover:text-gray-600 p-1 rounded"><X size={18} /></button>
+                                <button onClick={() => setFeedingModal(null)} className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary p-1 rounded"><X size={18} /></button>
                             </div>
 
                             {/* Food / Supply selector */}
                             <div className="space-y-1.5">
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Food / Supply</label>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Food / Supply</label>
                                 <select
                                     value={feedingForm.supplyId}
                                     onChange={e => setFeedingForm(f => ({ ...f, supplyId: e.target.value, qty: '1' }))}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                                    className="w-full border border-gray-300 dark:border-dark-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
                                 >
                                     <option value="">No food selected</option>
                                     {supplies.filter(s => s.category === 'Food').map(s => (
@@ -4745,20 +4745,20 @@ useEffect(() => {
                                                 onChange={e => setFeedingForm(f => ({ ...f, updateStock: e.target.checked }))}
                                                 className="w-4 h-4 rounded accent-green-500"
                                             />
-                                            <span className="text-sm text-gray-700">Deduct from stock</span>
-                                            {s && <span className="text-xs text-gray-400">(current: {s.currentStock} {s.unit})</span>}
+                                            <span className="text-sm text-gray-700 dark:text-dark-text-secondary">Deduct from stock</span>
+                                            {s && <span className="text-xs text-gray-400 dark:text-dark-text-muted">(current: {s.currentStock} {s.unit})</span>}
                                         </label>
                                         {/* Quantity input ? only when deducting */}
                                         {feedingForm.updateStock && (
                                             <div className="space-y-1">
-                                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Quantity{s?.unit ? ` (${s.unit})` : ''}</label>
+                                                <label className="block text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Quantity{s?.unit ? ` (${s.unit})` : ''}</label>
                                                 <input
                                                     type="number" min="0.1" step="0.1"
                                                     value={feedingForm.qty}
                                                     onChange={e => setFeedingForm(f => ({ ...f, qty: e.target.value }))}
-                                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                                                    className="w-full border border-gray-300 dark:border-dark-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
                                                 />
-                                                {s && <p className="text-xs text-gray-400">Stock after: {s.currentStock} ? <span className={stockAfter < 0 ? 'text-red-500 font-medium' : 'text-gray-600'}>{stockAfter} {s.unit}</span></p>}
+                                                {s && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Stock after: {s.currentStock} ? <span className={stockAfter < 0 ? 'text-red-500 font-medium' : 'text-gray-600 dark:text-dark-text-secondary'}>{stockAfter} {s.unit}</span></p>}
                                             </div>
                                         )}
                                     </div>
@@ -4767,13 +4767,13 @@ useEffect(() => {
 
                             {/* Notes */}
                             <div className="space-y-1.5">
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Notes</label>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Notes</label>
                                 <input
                                     type="text"
                                     value={feedingForm.notes}
                                     onChange={e => setFeedingForm(f => ({ ...f, notes: e.target.value }))}
                                     placeholder="e.g. Refused once, ate second attempt"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                                    className="w-full border border-gray-300 dark:border-dark-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
                                 />
                             </div>
 
@@ -4786,7 +4786,7 @@ useEffect(() => {
                                 </button>
                                 <button
                                     onClick={() => setFeedingModal(null)}
-                                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                                    className="px-4 py-2 text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text border border-gray-300 dark:border-dark-border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition"
                                 >
                                     Cancel
                                 </button>
@@ -4851,7 +4851,7 @@ useEffect(() => {
     const LoadingSpinner = () => (
         <div className="flex items-center justify-center p-8">
           <Loader2 className="animate-spin text-primary-dark mr-2" size={24} />
-          <span className="text-gray-600">Loading...</span>
+          <span className="text-gray-600 dark:text-dark-text-secondary">Loading...</span>
         </div>
     );
 
@@ -4952,13 +4952,13 @@ useEffect(() => {
         const SearchResultItem = ({ animal, isGlobal }) => {
             const imgSrc = animal.imageUrl || animal.photoUrl || null;
             return (
-                <div className="flex items-center space-x-3 p-3 border-b hover:bg-gray-50 cursor-pointer" onClick={() => onSelect(animal)}>
-                    <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center"><AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} /></div>
+                <div className="flex items-center space-x-3 p-3 border-b hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onSelect(animal)}>
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-dark-surface rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center"><AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} /></div>
                     <div className="flex-grow">
-                        <p className="font-semibold text-gray-800">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</p>
-                        <p className="text-xs text-gray-500">{animal.id_public}</p>
-                        <p className="text-sm text-gray-600">{animal.species} &bull; {animal.gender} &bull; {animal.status || 'Unknown'}</p>
-                        {getSpeciesLatinName(animal.species) && ( <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p> )}
+                        <p className="font-semibold text-gray-800 dark:text-dark-text">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</p>
+                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">{animal.id_public}</p>
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{animal.species} &bull; {animal.gender} &bull; {animal.status || 'Unknown'}</p>
+                        {getSpeciesLatinName(animal.species) && ( <p className="text-xs italic text-gray-500 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</p> )}
                     </div>
                     {isGlobal && <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>}
                 </div>
@@ -5003,18 +5003,18 @@ useEffect(() => {
         };
         return (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
-                    <div className="flex justify-between items-center border-b pb-3 mb-4"><h3 className="text-xl font-bold text-gray-800">{title} Selector</h3><button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button></div>
+                <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
+                    <div className="flex justify-between items-center border-b pb-3 mb-4"><h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">{title} Selector</h3><button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={24} /></button></div>
                     <div className="mb-3">
-                        <div className="flex items-center space-x-2 mb-2"><span className="text-sm font-medium text-gray-600">Search Scope:</span>{['local','global','both'].map(s => ( <button key={s} type="button" onClick={() => setScope(s)} className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>{s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}</button>))}</div>
-                        <div className="flex space-x-2"><input type="text" placeholder={`Search by Name or ID (e.g., Minnie or CT2468)...`} value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setHasSearched(false); }} className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" /><button onClick={handleSearch} disabled={((scope === 'local' || scope === 'both') && loadingLocal) || ((scope === 'global' || scope === 'both') && loadingGlobal) || searchTerm.trim().length < 1} className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50">{ (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }</button></div>
+                        <div className="flex items-center space-x-2 mb-2"><span className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Search Scope:</span>{['local','global','both'].map(s => ( <button key={s} type="button" onClick={() => setScope(s)} className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}>{s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}</button>))}</div>
+                        <div className="flex space-x-2"><input type="text" placeholder={`Search by Name or ID (e.g., Minnie or CT2468)...`} value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setHasSearched(false); }} className="flex-grow p-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-primary focus:border-primary transition" /><button onClick={handleSearch} disabled={((scope === 'local' || scope === 'both') && loadingLocal) || ((scope === 'global' || scope === 'both') && loadingGlobal) || searchTerm.trim().length < 1} className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50">{ (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }</button></div>
                     </div>
                     <div className="flex-grow overflow-y-auto space-y-4">
-                        {loadingLocal ? <LoadingSpinner message="Searching your animals..." /> : localAnimals.length > 0 && ( <div className="border p-3 rounded-lg bg-white shadow-sm"><h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>{localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={false} />)}</div>)}
-                        {loadingGlobal ? <LoadingSpinner message="Searching global animals..." /> : globalAnimals.length > 0 && ( <div className="border p-3 rounded-lg bg-white shadow-sm"><h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Global Display Animals ({globalAnimals.length})</h4>{globalAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={true} />)}</div>)}
-                        {hasSearched && searchTerm.trim().length >= 1 && localAnimals.length === 0 && globalAnimals.length === 0 && !loadingLocal && !loadingGlobal && ( <p className="text-center text-gray-500 py-4">No animals found matching your search term or filters.</p>)}
+                        {loadingLocal ? <LoadingSpinner message="Searching your animals..." /> : localAnimals.length > 0 && ( <div className="border p-3 rounded-lg bg-white dark:bg-dark-card-bg shadow-sm"><h4 className="font-bold text-gray-700 dark:text-dark-text-secondary mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>{localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={false} />)}</div>)}
+                        {loadingGlobal ? <LoadingSpinner message="Searching global animals..." /> : globalAnimals.length > 0 && ( <div className="border p-3 rounded-lg bg-white dark:bg-dark-card-bg shadow-sm"><h4 className="font-bold text-gray-700 dark:text-dark-text-secondary mb-2 border-b pb-1">Global Display Animals ({globalAnimals.length})</h4>{globalAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} isGlobal={true} />)}</div>)}
+                        {hasSearched && searchTerm.trim().length >= 1 && localAnimals.length === 0 && globalAnimals.length === 0 && !loadingLocal && !loadingGlobal && ( <p className="text-center text-gray-500 dark:text-dark-text-muted py-4">No animals found matching your search term or filters.</p>)}
                     </div>
-                    <div className="mt-4 pt-4 border-t"><button onClick={() => onSelect(null)} className="w-full text-sm text-gray-500 hover:text-red-500 transition">Clear {title} ID</button></div>
+                    <div className="mt-4 pt-4 border-t"><button onClick={() => onSelect(null)} className="w-full text-sm text-gray-500 dark:text-dark-text-muted hover:text-red-500 transition">Clear {title} ID</button></div>
                 </div>
             </div>
         );
@@ -5132,13 +5132,13 @@ useEffect(() => {
 
     const renderDashboard = () => {
         const categoryIcons = {
-            'Mammal': <Cat size={16} className="mr-1.5 text-gray-500" />,
-            'Reptile': <Turtle size={16} className="mr-1.5 text-gray-500" />,
-            'Bird': <Bird size={16} className="mr-1.5 text-gray-500" />,
-            'Amphibian': <Circle size={16} className="mr-1.5 text-gray-500" />,
-            'Fish': <Fish size={16} className="mr-1.5 text-gray-500" />,
-            'Invertebrate': <Bug size={16} className="mr-1.5 text-gray-500" />,
-            'Other': <Sparkles size={16} className="mr-1.5 text-gray-500" />
+            'Mammal': <Cat size={16} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />,
+            'Reptile': <Turtle size={16} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />,
+            'Bird': <Bird size={16} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />,
+            'Amphibian': <Circle size={16} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />,
+            'Fish': <Fish size={16} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />,
+            'Invertebrate': <Bug size={16} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />,
+            'Other': <Sparkles size={16} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />
         };
 
         return (
@@ -5150,7 +5150,7 @@ useEffect(() => {
                             icon={<Cat size={32} className="text-blue-800 dark:text-blue-200" />}
                             label="Total Animals"
                             value={totalDashboardAnimalsCount}
-                            colorClass="bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
+                            colorClass="bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
                             hasDropdown={true}
                             isDropdownOpen={showCategoryBreakdown}
                             onDropdownToggle={() => setShowCategoryBreakdown(prev => !prev)}
@@ -5202,7 +5202,7 @@ useEffect(() => {
                             icon={<Heart size={32} className="text-red-800 dark:text-red-200" />}
                             label="Owned"
                             value={ownedDashboardCount}
-                            colorClass="bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200"
+                            colorClass="bg-red-100 dark:bg-red-900/30 text-red-900 dark:bg-red-900/30 dark:text-red-200"
                         />
                         <button
                             onClick={() => toggleAllAnimalsOwned(true)}
@@ -5226,7 +5226,7 @@ useEffect(() => {
                             icon={<Eye size={32} className="text-green-800 dark:text-green-200" />}
                             label="Public"
                             value={publicDashboardCount}
-                            colorClass="bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200"
+                            colorClass="bg-green-100 dark:bg-green-900/30 text-green-900 dark:bg-green-900/30 dark:text-green-200"
                         />
                         <button
                             onClick={() => toggleAllAnimalsPrivacy(true)}
@@ -5250,7 +5250,7 @@ useEffect(() => {
                             icon={<Archive size={32} className="text-purple-800 dark:text-purple-200" />}
                             label="Sold / Archived"
                             value={soldOrArchivedCount}
-                            colorClass="bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200"
+                            colorClass="bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200"
                         />
                         {!showDuplicatesScreen && (
                             <button
@@ -5274,7 +5274,7 @@ useEffect(() => {
                                         icon={<AlertTriangle size={32} className="text-orange-800 dark:text-orange-200" />}
                                         label="Needs Attention"
                                         value={totalAttention}
-                                        colorClass="bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
+                                        colorClass="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200"
                                         hasDropdown={totalAttention > 0}
                                         isDropdownOpen={showMainAlertsBreakdown}
                                         onDropdownToggle={() => setShowMainAlertsBreakdown(prev => !prev)}
@@ -5286,7 +5286,7 @@ useEffect(() => {
                                                 {feedingCareDueDashboard.length > 0 && (
                                                     <>
                                                         <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('feeding')}>
-                                                            <span className="flex items-center gap-1.5 text-red-700"><Utensils size={14} /> Feeding & Care</span>
+                                                            <span className="flex items-center gap-1.5 text-red-700 dark:text-red-300"><Utensils size={14} /> Feeding & Care</span>
                                                             <span className="font-medium">{feedingCareDueDashboard.length}</span>
                                                         </li>
                                                         <ul className="pl-6 space-y-1 text-xs">
@@ -5302,7 +5302,7 @@ useEffect(() => {
                                                 {healthNeedsAttentionList.length > 0 && (
                                                     <>
                                                         <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('health')}>
-                                                            <span className="flex items-center gap-1.5 text-orange-700"><Activity size={14} /> Health</span>
+                                                            <span className="flex items-center gap-1.5 text-orange-700 dark:text-orange-300"><Activity size={14} /> Health</span>
                                                             <span className="font-medium">{healthNeedsAttentionList.length}</span>
                                                         </li>
                                                         <ul className="pl-6 space-y-1 text-xs">
@@ -5318,7 +5318,7 @@ useEffect(() => {
                                                 {reproNeedsAttentionList.length > 0 && (
                                                     <>
                                                         <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('reproduction')}>
-                                                            <span className="flex items-center gap-1.5 text-pink-700"><Heart size={14} /> Reproduction</span>
+                                                            <span className="flex items-center gap-1.5 text-pink-700 dark:text-pink-300"><Heart size={14} /> Reproduction</span>
                                                             <span className="font-medium">{reproNeedsAttentionList.length}</span>
                                                         </li>
                                                         <ul className="pl-6 space-y-1 text-xs">
@@ -5334,7 +5334,7 @@ useEffect(() => {
                                                 {enclosureMaintenanceDueCount > 0 && (
                                                     <>
                                                         <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('enclosures')}>
-                                                            <span className="flex items-center gap-1.5 text-blue-700"><Home size={14} /> Enclosures</span>
+                                                            <span className="flex items-center gap-1.5 text-blue-700 dark:text-blue-300"><Home size={14} /> Enclosures</span>
                                                             <span className="font-medium">{enclosureMaintenanceDueCount}</span>
                                                         </li>
                                                         <ul className="pl-6 space-y-1 text-xs">
@@ -5566,7 +5566,7 @@ useEffect(() => {
                             onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} }}
                             title={defaultAnimalView === tab.key ? 'Default view' : 'Set as default'}
                             className={`absolute top-1 right-1.5 transition-colors ${
-                                defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
+                                defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 dark:text-dark-border hover:text-gray-500'
                             }`}
                         >
                             <Pin size={13} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
@@ -5589,7 +5589,7 @@ useEffect(() => {
                             onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} }}
                             title={defaultAnimalView === tab.key ? 'Default view' : 'Set as default'}
                             className={`absolute top-1 right-1.5 transition-colors ${
-                                defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
+                                defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 dark:text-dark-border hover:text-gray-500'
                             }`}
                         >
                             <Pin size={18} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
@@ -5633,10 +5633,10 @@ useEffect(() => {
                                     setDefaultMyAnimalsViewMode(myAnimalsViewMode);
                                 }
                             }}
-                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${
+                                className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 dark:border-dark-border ${
                                     (isCollectionsView && defaultCollectionsViewMode === collectionsViewMode) ||
                                     (!isCollectionsView && defaultMyAnimalsViewMode === myAnimalsViewMode)
-                                    ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
+                                    ? 'text-red-500' : 'text-gray-400 dark:text-dark-text-muted hover:text-red-400'}`}
                                 title="Pin as default view"
                             >
                                 <Pin size={14} fill={
@@ -5731,19 +5731,19 @@ useEffect(() => {
              {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
-                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm relative">
+                <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-dark-border shadow-sm relative">
                     {showColumnsDropdown && (
-                        <div ref={columnsDropdownRef} className="absolute top-10 right-2 bg-white border rounded-lg shadow-lg p-3 z-20 w-48">
+                        <div ref={columnsDropdownRef} className="absolute top-10 right-2 bg-white dark:bg-dark-card-bg border rounded-lg shadow-lg p-3 z-20 w-48">
                             <h4 className="text-xs font-bold mb-2">Displayed Columns</h4>
                             {Object.entries({ animal: 'Animal', species: 'Species', variety: 'Variety', enclosure: 'Enclosure', lifeStage: 'Life Stage', status: 'Status', health: 'Health', birthdateAge: 'Birthdate / Age', breedingLines: 'Lines', tags: 'Tags' }).map(([key, label]) => (
-                                <label key={key} className="flex items-center gap-2 text-sm text-gray-700 p-1 hover:bg-gray-100 rounded">
+                                <label key={key} className="flex items-center gap-2 text-sm text-gray-700 dark:text-dark-text-secondary p-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded">
                                     <input type="checkbox" checked={!!listViewColumns[key]} onChange={() => setListViewColumns(prev => ({...prev, [key]: !prev[key]}))} className="rounded" />
                                     {label}
                                 </label>
                             ))}
                         </div>
                     )}
-                    <table className="min-w-full text-xs divide-y divide-gray-200">
+                    <table className="min-w-full text-xs divide-y divide-gray-200 dark:divide-dark-border">
                         <thead className="bg-gray-50 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary uppercase text-[10px] sticky top-0 z-10 border-b dark:border-dark-text-muted">
                             <tr>
                                 <th className="px-4 py-2 text-center">
@@ -5766,7 +5766,7 @@ useEffect(() => {
                                 {listViewColumns.breedingLines && <th className="px-3 py-2 text-left font-semibold">Lines</th>}
                                 {listViewColumns.tags && <th className="px-3 py-2 text-left font-semibold">Tags</th>}
                                 <th className="px-3 py-2 text-right w-12">
-                                    <button onClick={() => setShowColumnsDropdown(v => !v)} className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200">
+                                    <button onClick={() => setShowColumnsDropdown(v => !v)} className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover">
                                         <SlidersHorizontal size={14} />
                                     </button>
                                 </th>
@@ -5783,7 +5783,7 @@ useEffect(() => {
                                     const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false);
 
                                     return (
-                                        <tr key={animal.id_public || animal._id} className="hover:bg-gray-50" onClick={() => onViewAnimal(animal)}>
+                                        <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
                                         <td className="px-4 py-1.5 text-center">
                                             <input
                                                 type="checkbox"
@@ -5796,7 +5796,7 @@ useEffect(() => {
                                         {listViewColumns.animal && (
                                             <td className="px-3 py-1.5">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden cursor-pointer" onClick={(e) => {e.stopPropagation(); onViewAnimal(animal);}}>
+                                                    <div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-surface flex-shrink-0 overflow-hidden cursor-pointer" onClick={(e) => {e.stopPropagation(); onViewAnimal(animal);}}>
                                                         <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} />
                                                     </div>
                                                     <div>
@@ -5816,7 +5816,7 @@ useEffect(() => {
                                         {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
                                         {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '—'}</td>}
                                         {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>}
-                                        {listViewColumns.health && <td className="px-3 py-1.5 text-gray-600 text-xs">{renderHealthColumnCell(animal)}</td>}
+                                        {listViewColumns.health && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text-secondary text-xs">{renderHealthColumnCell(animal)}</td>}
                                         {listViewColumns.birthdateAge && (
                                             <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text whitespace-nowrap">
                                                 <div>{formatLocalDate(animal.birthDate)}</div>
@@ -5840,7 +5840,7 @@ useEffect(() => {
                                             </td>
                                         )}
                                         <td className="px-3 py-1.5 text-right">
-                                            <button className="p-1 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200" onClick={(e) => {e.stopPropagation(); setOpenActionMenu(animal.id_public); }}>
+                                            <button className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" onClick={(e) => {e.stopPropagation(); setOpenActionMenu(animal.id_public); }}>
                                                 <MoreVertical size={16} />
                                             </button>
                                         </td>
@@ -5909,10 +5909,10 @@ useEffect(() => {
                                 <div className="flex items-center gap-0.5 sm:gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                                     {isBulkMode && (
                                         <>
-                                            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">
+                                            <span className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary hidden sm:inline">
                                                 {selected.length} selected
                                             </span>
-                                            <span className="text-xs text-gray-600 sm:hidden">
+                                            <span className="text-xs text-gray-600 dark:text-dark-text-secondary sm:hidden">
                                                 {selected.length}
                                             </span>
                                             {isArchiveMode ? (
@@ -5927,7 +5927,7 @@ useEffect(() => {
                                                     </button>
                                                     <button
                                                         onClick={() => toggleBulkArchiveMode(species)}
-                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm font-semibold rounded-lg transition"
+                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 dark:text-dark-text text-xs sm:text-sm font-semibold rounded-lg transition"
                                                     >
                                                         Cancel
                                                     </button>
@@ -5944,7 +5944,7 @@ useEffect(() => {
                                                     </button>
                                                     <button
                                                         onClick={() => toggleBulkDeleteMode(species)}
-                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm font-semibold rounded-lg transition"
+                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 dark:text-dark-text text-xs sm:text-sm font-semibold rounded-lg transition"
                                                     >
                                                         Cancel
                                                     </button>
@@ -5956,32 +5956,32 @@ useEffect(() => {
                                         <>
                                             <button
                                                 onClick={() => toggleBulkPrivacy(species, true)}
-                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                className="p-1 sm:p-2 hover:bg-gray-200 dark:hover:bg-dark-surface-hover rounded-lg transition"
                                                 title="Make All Public"
                                             >
-                                                <Eye className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-green-600" />
+                                                <Eye className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-green-600 dark:text-green-400" />
                                             </button>
                                             <button
                                                 onClick={() => toggleBulkPrivacy(species, false)}
-                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                className="p-1 sm:p-2 hover:bg-gray-200 dark:hover:bg-dark-surface-hover rounded-lg transition"
                                                 title="Make All Private"
                                             >
-                                                <EyeOff className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600" />
+                                                <EyeOff className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600 dark:text-dark-text-secondary" />
                                             </button>
                                             <button
                                                 onClick={() => toggleBulkDeleteMode(species)}
                                                 data-tutorial-target="bulk-delete-btn"
-                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                className="p-1 sm:p-2 hover:bg-gray-200 dark:hover:bg-dark-surface-hover rounded-lg transition"
                                                 title="Delete Multiple"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-red-500" />
                                             </button>
                                             <button
                                                 onClick={() => toggleBulkArchiveMode(species)}
-                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                className="p-1 sm:p-2 hover:bg-gray-200 dark:hover:bg-dark-surface-hover rounded-lg transition"
                                                 title="Archive Multiple"
                                             >
-                                                <Archive className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600" />
+                                                <Archive className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600 dark:text-dark-text-secondary" />
                                             </button>
                                         </>
                                     )}

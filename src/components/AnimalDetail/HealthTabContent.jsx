@@ -26,14 +26,14 @@ const parseHealthRecords = (data) => {
 // New component for status
 const StatusIndicator = ({ status }) => {
     const statusStyles = {
-        'Healthy': 'bg-emerald-100 text-emerald-800',
-        'Monitoring': 'bg-blue-100 text-blue-800',
-        'Concern': 'bg-yellow-100 text-yellow-800',
-        'Under Observation': 'bg-yellow-100 text-yellow-800',
-        'Under Treatment': 'bg-blue-100 text-blue-800',
-        'Quarantined': 'bg-orange-100 text-orange-800',
-        'Critical': 'bg-red-100 text-red-800',
-        'Unknown': 'bg-gray-100 text-gray-800',
+        'Healthy': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300',
+        'Monitoring': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+        'Concern': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
+        'Under Observation': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
+        'Under Treatment': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+        'Quarantined': 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300',
+        'Critical': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
+        'Unknown': 'bg-gray-100 dark:bg-dark-surface text-gray-800 dark:text-dark-text',
     };
     const style = statusStyles[status] || statusStyles['Unknown'];
     return <span className={`px-2 py-1 text-xs font-bold rounded-full ${style}`}>{status}</span>;
@@ -72,40 +72,40 @@ export const HealthTabContent = ({ animal }) => {
 
     return (
         <div className="space-y-6">
-                <InfoCard title="Health Status & Preventive Care" icon={<Shield size={18} className="text-gray-400" />}>
-                    <div className="pb-3 border-b border-gray-200 space-y-3">
+                <InfoCard title="Health Status & Preventive Care" icon={<Shield size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
+                    <div className="pb-3 border-b border-gray-200 dark:border-dark-border space-y-3">
                         <InfoItem label="Overall Health Status">
                             <StatusIndicator status={calculatedHealthStatus} />
                         </InfoItem>
                         {animal.healthStatusOverride && (
-                            <div className="p-2 bg-purple-50 border-l-4 border-purple-400">
-                                <p className="text-xs font-semibold text-purple-700">Health Status Override</p>
+                            <div className="p-2 bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-400">
+                                <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">Health Status Override</p>
                                 <p className="text-sm text-purple-900">{animal.healthStatusOverride}</p>
-                                {animal.healthStatusOverrideNotes && <p className="text-xs text-purple-700 mt-1">{animal.healthStatusOverrideNotes}</p>}
+                                {animal.healthStatusOverrideNotes && <p className="text-xs text-purple-700 dark:text-purple-300 mt-1">{animal.healthStatusOverrideNotes}</p>}
                             </div>
                         )}
                         {isQuarantined && (
-                            <div className="flex items-center gap-2 p-2 bg-orange-50 border-l-4 border-orange-400">
+                            <div className="flex items-center gap-2 p-2 bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-400">
                                 <AlertTriangle size={16} className="text-orange-500" />
                                 <div className="text-xs">
-                                    <p className="font-semibold text-orange-700">⚠️ Currently Quarantined</p>
-                                    <p className="text-gray-600">{animal.quarantineStatus.reason || 'No reason specified'}</p>
-                                    {animal.quarantineStatus.endDate && <p className="text-gray-500">Until: {formatDate(animal.quarantineStatus.endDate)}</p>}
+                                    <p className="font-semibold text-orange-700 dark:text-orange-300">⚠️ Currently Quarantined</p>
+                                    <p className="text-gray-600 dark:text-dark-text-secondary">{animal.quarantineStatus.reason || 'No reason specified'}</p>
+                                    {animal.quarantineStatus.endDate && <p className="text-gray-500 dark:text-dark-text-muted">Until: {formatDate(animal.quarantineStatus.endDate)}</p>}
                                 </div>
                             </div>
                         )}
                         {isUnderTreatment && !isQuarantined && (
-                             <div className="flex items-center gap-2 p-2 bg-blue-50 border-l-4 border-blue-400">
+                             <div className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400">
                                 <Activity size={16} className="text-blue-500" />
-                                <p className="text-xs font-semibold text-blue-700">Under Active Treatment</p>
+                                <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">Under Active Treatment</p>
                             </div>
                         )}
                     </div>
                     {hasPreventiveCare ? (
                         <>
                             {animal.parasitePreventionSchedule && (
-                                <div className="p-3 bg-blue-50 border-l-4 border-blue-400 rounded mb-4">
-                                    <p className="text-xs font-semibold text-blue-700 mb-2">📅 Upcoming Prevention Schedule</p>
+                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 rounded mb-4">
+                                    <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-2">📅 Upcoming Prevention Schedule</p>
                                     <p className="text-sm text-blue-900">{animal.parasitePreventionSchedule}</p>
                                 </div>
                             )}
@@ -114,7 +114,7 @@ export const HealthTabContent = ({ animal }) => {
                             {parasiteControl.length > 0 && <DetailJsonList label="Parasite Control" data={parasiteControl} renderItem={r => `${r.treatment} ${r.date ? `(${formatDate(r.date)})` : ''}`} />}
                         </>
                     ) : (
-                        <p className="text-sm text-gray-400">No preventive care records.</p>
+                        <p className="text-sm text-gray-400 dark:text-dark-text-muted">No preventive care records.</p>
                     )}
 
                     {/* Quarantine Details - Inside Health Status Card */}
@@ -128,8 +128,8 @@ export const HealthTabContent = ({ animal }) => {
                             }
                             
                             return (
-                                <div className="mt-4 pt-4 border-t border-gray-200">
-                                    <p className="text-xs font-semibold text-orange-700 mb-3">Quarantine Information</p>
+                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-border">
+                                    <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 mb-3">Quarantine Information</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         <InfoItem label="Status" value={status} />
                                         {(quarantine.type || quarantine.reason) && (
@@ -154,17 +154,17 @@ export const HealthTabContent = ({ animal }) => {
 
                 {/* Quarantine Information - REMOVED - Now inside Health Status Card */}
 
-                <InfoCard title="Procedures & Diagnostics" icon={<Microscope size={18} className="text-gray-400" />}>
+                <InfoCard title="Procedures & Diagnostics" icon={<Microscope size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {hasProcedures ? (
                         <>
                             {medicalProcedures.length > 0 && <DetailJsonList label="Medical Procedures" data={medicalProcedures.filter(Boolean)} renderItem={p => `${p.name} ${p.date ? `(${formatDate(p.date)})` : ''}`} />}
                             {labResults.length > 0 && <DetailJsonList label="Laboratory Results" data={labResults.filter(Boolean)} renderItem={r => `${r.testName} - ${r.result} ${r.date ? `(${formatDate(r.date)})` : ''}`} />}
                         </>
                     ) : (
-                        <p className="text-sm text-gray-400">No procedures or diagnostics recorded.</p>
+                        <p className="text-sm text-gray-400 dark:text-dark-text-muted">No procedures or diagnostics recorded.</p>
                     )}
                 </InfoCard>
-            <InfoCard title="Active Medical Records" icon={<HeartPulse size={18} className="text-gray-400" />}>
+            <InfoCard title="Active Medical Records" icon={<HeartPulse size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {hasActiveRecords ? (
                          <>
                             {medicalConditions.length > 0 && <DetailJsonList label="Medical Conditions" data={medicalConditions.filter(Boolean)} renderItem={item => `${item.condition || item.name}`} />}
@@ -182,28 +182,28 @@ export const HealthTabContent = ({ animal }) => {
                             }} />}
                         </>
                     ) : (
-                         <p className="text-sm text-gray-400">No active medical records.</p>
+                         <p className="text-sm text-gray-400 dark:text-dark-text-muted">No active medical records.</p>
                     )}
                 </InfoCard>
-            <InfoCard title="Veterinary Care" icon={<Stethoscope size={18} className="text-gray-400" />}>
+            <InfoCard title="Veterinary Care" icon={<Stethoscope size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {hasVetCare ? (
                         <>
                             {animal.primaryVet && <InfoItem label="Primary Veterinarian" value={animal.primaryVet} />}
                             {vetVisits.length > 0 && <DetailJsonList label="Veterinary Visits" data={vetVisits.filter(Boolean)} renderItem={v => `${v.reason} ${v.date ? `(${formatDate(v.date)})` : ''}`} />}
                         </>
                     ) : (
-                        <p className="text-sm text-gray-400">No veterinary information.</p>
+                        <p className="text-sm text-gray-400 dark:text-dark-text-muted">No veterinary information.</p>
                     )}
                 </InfoCard>
-            <InfoCard title="Health Clearances & Screening" icon={<HeartPulse size={18} className="text-gray-400" />}>
+            <InfoCard title="Health Clearances & Screening" icon={<HeartPulse size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {!hasClearances && (!animal.healthClearances || animal.healthClearances.length === 0) ? (
-                        <p className="text-sm text-gray-400">No health clearances recorded.</p>
+                        <p className="text-sm text-gray-400 dark:text-dark-text-muted">No health clearances recorded.</p>
                     ) : (
                         <div className="space-y-3">
                             {/* Structured Health Clearances */}
                             {animal.healthClearances && animal.healthClearances.length > 0 && (
                                 <div className="space-y-2">
-                                    <p className="text-xs font-semibold text-gray-600 uppercase">Clearances</p>
+                                    <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase">Clearances</p>
                                     {animal.healthClearances.map((clearance, i) => (
                                         <StructuredClearanceItem 
                                             key={i}
@@ -235,7 +235,7 @@ export const HealthTabContent = ({ animal }) => {
                     )}
                 </InfoCard>
                 {/* End of Life Card */}
-                <InfoCard title="End of Life Information" icon={<Scale size={18} className="text-gray-400" />}>
+                <InfoCard title="End of Life Information" icon={<Scale size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {(animal.deceasedDate || animal.causeOfDeath || animal.necropsyResults || animal.endOfLifeCareNotes) ? (
                         <div className="space-y-3">
                             {animal.deceasedDate && <InfoItem label="Deceased Date" value={formatDate(animal.deceasedDate)} />}
@@ -246,7 +246,7 @@ export const HealthTabContent = ({ animal }) => {
                             </InfoItem>}
                         </div>
                     ) : (
-                        <p className="text-sm text-gray-400">No end of life information recorded.</p>
+                        <p className="text-sm text-gray-400 dark:text-dark-text-muted">No end of life information recorded.</p>
                     )}
                 </InfoCard>
             </div>
