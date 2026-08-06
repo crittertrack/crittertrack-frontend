@@ -44,7 +44,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
 
     const [myReports, setMyReports] = useState([]);
     const [myReportsLoading, setMyReportsLoading] = useState(true);
-    const [showMyReports, setShowMyReports] = useState(false);
+    const [showMyReports, setShowMyReports] = useState(true);
 
     const fetchMyReports = useCallback(async () => {
         if (!authToken) return;
@@ -248,7 +248,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
         setError('');
     };
 
-    const myReportsSection = (myReports.length > 0 || myReportsLoading) && (
+    const myReportsSection = (
         <div className="w-full max-w-2xl mx-auto mb-4">
             <button
                 onClick={() => setShowMyReports(prev => !prev)}
@@ -263,6 +263,10 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                 <div className="mt-2 space-y-2">
                     {myReportsLoading ? (
                         <div className="flex justify-center py-6"><Loader2 size={20} className="animate-spin text-gray-400" /></div>
+                    ) : myReports.length === 0 ? (
+                        <div className="text-center py-6 px-4 bg-white dark:bg-dark-surface rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">You haven't submitted any reports yet.</p>
+                        </div>
                     ) : (
                         myReports.map(r => {
                             const status = STATUS_CONFIG[r.status] || STATUS_CONFIG.pending;
