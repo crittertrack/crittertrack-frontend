@@ -27,8 +27,6 @@ import DatePicker from './components/DatePicker';
 import WelcomeGuideModal from './components/WelcomeGuideModal';
 import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
-import ModOversightPanel from './components/moderation/ModOversightPanel';
-import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 import Marketplace from './components/Marketplace';
 import LitterManagement from './components/LitterManagement';
 import AnimalForm, { PedigreeChart } from './components/AnimalForm';
@@ -291,7 +289,7 @@ const App = () => {
     const { animalToView, setAnimalToView, animalToEdit, setAnimalToEdit, animalViewHistory, privateAnimalInitialTab, setPrivateAnimalInitialTab, privateBetaView, setPrivateBetaView, speciesToAdd, setSpeciesToAdd, editReturnPathRef, viewReturnPathRef, handleViewAnimal, handleEditAnimal, handleCancelEditAnimal, handleBackFromAnimal, handleCloseAllAnimals, handleSaveAnimal, handleArchiveAnimal, handleDeleteAnimal, toggleAnimalOwned, handleRestoreViewOnlyAnimal } = privateAnimalNav;
     const { showTransferModal, setShowTransferModal, budgetModalOpen, setBudgetModalOpen, transferAnimal, setTransferAnimal, preSelectedTransferAnimal, preSelectedTransactionType, setPreSelectedTransferAnimal, setPreSelectedTransactionType, transferUserQuery, setTransferUserQuery, transferUserResults, setTransferUserResults, transferSelectedUser, setTransferSelectedUser, transferSearching, setTransferSearching, transferSearchPerformed, setTransferSearchPerformed, transferPrice, setTransferPrice, transferNotes, setTransferNotes, handleSearchTransferUser, handleSelectTransferUser, handleSubmitTransfer, handleCloseTransferWorkflow, handleOpenTransferWithAnimal } = transferWorkflow;
     const { breedingLineDefs, setBreedingLineDefs, animalBreedingLines, setAnimalBreedingLines, BL_PRESETS_APP, saveBreedingLineDefs, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect } = breedingLinesState;
-    const { inModeratorMode, setInModeratorMode, showAdminPanel, setShowAdminPanel, showModReportQueue, setShowModReportQueue, showModerationAuthModal, setShowModerationAuthModal, modCurrentContext, setModCurrentContext, handleToggleModerationMode, handleModerationAuth, handleModQuickFlag } = modMode;
+    const { inModeratorMode, setInModeratorMode, showAdminPanel, setShowAdminPanel, showModerationAuthModal, setShowModerationAuthModal, modCurrentContext, setModCurrentContext, handleToggleModerationMode, handleModerationAuth } = modMode;
     const { setAnimalViewHistory } = privateAnimalNav;
 
     // Local state not covered by hooks
@@ -774,11 +772,6 @@ const App = () => {
         });
     }, [expandedBreedingRecords, animalToView?.breedingRecords, authToken, API_BASE_URL]);
     
-    const [showBugReportModal, setShowBugReportModal] = useState(false);
-    const [bugReportCategory, setBugReportCategory] = useState('Bug');
-    const [bugReportDescription, setBugReportDescription] = useState('');
-    const [bugReportSubmitting, setBugReportSubmitting] = useState(false);
-    
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
     const [feedbackSpecies, setFeedbackSpecies] = useState('');
     const [feedbackText, setFeedbackText] = useState('');
@@ -815,7 +808,7 @@ const App = () => {
     const [archiveLoading, setArchiveLoading] = useState(false);
     
     // Tutorial modal states
-    // NOTE: showAdminPanel, inModeratorMode, showModReportQueue now handled by useModerationMode hook
+    // NOTE: showAdminPanel, inModeratorMode now handled by useModerationMode hook
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showToolsMenu, setShowToolsMenu] = useState(false);
     const profileMenuDesktopRef = useRef(null);
@@ -837,7 +830,6 @@ const App = () => {
         setUserProfile(null);
         setInModeratorMode(false);
         setShowAdminPanel(false);
-        setShowModReportQueue(false);
         localStorage.removeItem('authToken');
         localStorage.removeItem('moderationAuthenticated');
         localStorage.removeItem('ct_bldefs');
@@ -853,9 +845,6 @@ const App = () => {
     // Phase 10a: Use idle timeout hook
     useIdleTimeout(authToken, handleLogout, showModalMessage);
 
-    // NOTE: handleModQuickFlag now provided by useModerationMode hook (Phase 10f)
-    // Old implementation removed to avoid conflicts - see useModerationMode.ts for current version
-
     // Detect mobile/app environment
     React.useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -865,10 +854,10 @@ const App = () => {
 
     // Poll for maintenance mode and urgent notifications
     useEffect(() => {
-        // Skip maintenance check for admins/moderators - they should always have access
-        const isStaff = ['admin', 'moderator'].includes(userProfile?.role);
-        if (!authToken || isStaff) {
-            return; // Don't need to check if staff or not logged in
+        // Skip maintenance check for the excluded owner accounts - they should always have access
+        const isMaintenanceExempt = ['CTU1', 'CTU2'].includes(userProfile?.id_public);
+        if (!authToken || isMaintenanceExempt) {
+            return; // Don't need to check if exempt or not logged in
         }
 
         // Capture current values in refs so interval callback doesn't re-trigger effect
@@ -1240,35 +1229,6 @@ const App = () => {
         fetchSpeciesAndConfigs();
     }, [API_BASE_URL]);
 	
-    const handleBugReportSubmit = async (e) => {
-        e.preventDefault();
-        if (!bugReportDescription.trim()) {
-            showModalMessage('Error', 'Please enter a description for your report.');
-            return;
-        }
-        
-        setBugReportSubmitting(true);
-        try {
-            await axios.post(`${API_BASE_URL}/bug-reports`, {
-                category: bugReportCategory,
-                description: bugReportDescription,
-                page: currentView
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            
-            showModalMessage('Success', 'Thank you for your report! We will review it soon.');
-            setShowBugReportModal(false);
-            setBugReportDescription('');
-            setBugReportCategory('Bug');
-        } catch (error) {
-            console.error('Failed to submit bug report:', error);
-            showModalMessage('Error', 'Failed to submit report. Please try again.');
-        } finally {
-            setBugReportSubmitting(false);
-        }
-    };
-    
     const handleSubmitFeedback = async (e) => {
         e.preventDefault();
         if (!feedbackSpecies || !feedbackText.trim()) return;
@@ -1363,28 +1323,6 @@ const App = () => {
                         />
                     )}
 
-                    {/* Moderator Action Sidebar - disabled, use mod panel instead */}
-                    {false && inModeratorMode && !showModReportQueue && !showAdminPanel && localStorage.getItem('moderationAuthenticated') === 'true' && (
-                        <ModeratorActionSidebar
-                            isActive={true}
-                            onOpenReportQueue={() => setShowModReportQueue(true)}
-                            onQuickFlag={handleModQuickFlag}
-                            onExitModeration={() => {
-                                setInModeratorMode(false);
-                                setShowAdminPanel(false);
-                                setShowModReportQueue(false);
-                                localStorage.removeItem('moderationAuthenticated');
-                                setViewingPublicProfile(null);
-                                setViewingPublicAnimal(null);
-                                navigate('/');
-                            }}
-                            currentPage={location.pathname}
-                            currentContext={modCurrentContext}
-                            API_BASE_URL={API_BASE_URL}
-                            authToken={authToken}
-                        />
-                    )}
-                    
                     <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6">
                         <div className="mb-3">
                             <GlobalSearchBar 
@@ -1435,22 +1373,6 @@ const App = () => {
                         currentUserRole={userProfile?.role}
                     />
 
-                    {/* Moderator Action Sidebar - disabled, use mod panel instead */}
-                    {false && inModeratorMode && !showModReportQueue && ['admin', 'moderator'].includes(userProfile?.role) && (
-                        <ModeratorActionSidebar
-                            isActive={true}
-                            onOpenReportQueue={() => setShowModReportQueue(true)}
-                            onQuickFlag={handleModQuickFlag}
-                            onExitModeration={() => {
-                                setInModeratorMode(false);
-                                setShowAdminPanel(false);
-                                setShowModReportQueue(false);
-                                localStorage.removeItem('moderationAuthenticated');
-                            }}
-                            currentPage={location.pathname}
-                            currentContext={modCurrentContext}
-                        />
-                    )}
                 </div>
             );
         }
@@ -2119,77 +2041,6 @@ const App = () => {
                 />
             )}
             
-            {showBugReportModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
-                        <div className="flex justify-between items-center mb-2">
-                            <h2 className="text-xl font-bold text-gray-800">Share Your Feedback</h2>
-                            <button 
-                                onClick={() => setShowBugReportModal(false)}
-                                className="text-gray-500 hover:text-gray-700 transition"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
-                        
-                        <p className="text-sm text-gray-600 mb-4">
-                            Report bugs, request new features, or share general feedback to help us improve CritterTrack.
-                        </p>
-                        
-                        <form onSubmit={handleBugReportSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                                <select
-                                    value={bugReportCategory}
-                                    onChange={(e) => setBugReportCategory(e.target.value)}
-                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                >
-                                    <option value="Bug">Bug</option>
-                                    <option value="Feature Request">Feature Request</option>
-                                    <option value="General Feedback">General Feedback</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                <textarea
-                                    value={bugReportDescription}
-                                    onChange={(e) => setBugReportDescription(e.target.value)}
-                                    placeholder="Describe your bug report, feature request, or feedback in detail. Include steps to reproduce if reporting a bug."
-                                    rows={6}
-                                    required
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary resize-none"
-                                />
-                            </div>
-                            
-                            <div className="flex gap-3 justify-end">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowBugReportModal(false)}
-                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={bugReportSubmitting}
-                                    className="px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition disabled:opacity-50 flex items-center gap-2"
-                                >
-                                    {bugReportSubmitting ? (
-                                        <>
-                                            <Loader2 className="animate-spin" size={16} />
-                                            Submitting...
-                                        </>
-                                    ) : (
-                                        'Submit Report'
-                                    )}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
             {/* Species Customization Feedback Modal */}
             {showFeedbackModal && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -2290,36 +2141,6 @@ const App = () => {
                     userId={userProfile?.id_public}
                     username={userProfile?.personalName}
                     skipAuthentication={true}
-                />
-            )}
-
-            {/* Moderation Report Queue - Full page view of all reports */}
-            {showModReportQueue && inModeratorMode && ['admin', 'moderator'].includes(userProfile?.role) && (
-                <ModOversightPanel
-                    isOpen={showModReportQueue}
-                    onClose={() => setShowModReportQueue(false)}
-                    authToken={authToken}
-                    API_BASE_URL={API_BASE_URL}
-                    onActionTaken={() => {
-                        // Refresh or update state if needed
-                    }}
-                />
-            )}
-
-            {/* Moderator Action Sidebar - disabled, use mod panel instead */}
-            {false && inModeratorMode && !showModReportQueue && !showAdminPanel && localStorage.getItem('moderationAuthenticated') === 'true' && (
-                <ModeratorActionSidebar
-                    isActive={true}
-                    onOpenReportQueue={() => setShowModReportQueue(true)}
-                    onQuickFlag={handleModQuickFlag}
-                    onExitModeration={() => {
-                        setInModeratorMode(false);
-                        setShowAdminPanel(false);
-                        setShowModReportQueue(false);
-                        localStorage.removeItem('moderationAuthenticated');
-                    }}
-                    currentPage={location.pathname}
-                    currentContext={modCurrentContext}
                 />
             )}
 

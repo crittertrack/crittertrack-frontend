@@ -5,7 +5,6 @@ import { Loader2, XCircle, Download, X, Lock } from 'lucide-react';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
-import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 const API_BASE_URL = '/api';
 
 const PrivateAnimalScreen = ({ onBack }) => {
@@ -36,7 +35,6 @@ const PublicAnimalPage = () => {
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const [isPrivate, setIsPrivate] = useState(false);
-    const [modCurrentContext, setModCurrentContext] = useState(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
 
@@ -216,22 +214,6 @@ const PublicAnimalPage = () => {
                     </div>
                 </div>
             )}
-            
-            {/* Moderator Action Sidebar - disabled, use mod panel instead */}
-            {false && inModeratorMode && (
-                <ModeratorActionSidebar
-                    isActive={true}
-                    onOpenReportQueue={() => navigate('/')}
-                    onQuickFlag={(flagData) => {
-                    }}
-                    onExitModeration={() => {
-                        localStorage.removeItem('moderationAuthenticated');
-                        navigate('/');
-                    }}
-                    currentPage={location.pathname}
-                    currentContext={modCurrentContext}
-                />
-            )}
 
         </div>
     );
@@ -244,194 +226,11 @@ const PublicProfilePage = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-    const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
     // Check if user is logged in and in moderator mode
     const authToken = localStorage.getItem('authToken');
-    const inModeratorMode = localStorage.getItem('moderationAuthenticated') === 'true';
     const [userProfile, setUserProfile] = useState(null);
     const [modCurrentContext, setModCurrentContext] = useState(null);
-
-    const showModalMessage = (title, message) => {
-        setModalContent({ title, message });
-        setShowModal(true);
-    };
-
-    const handleModQuickFlag = useCallback(async (flagData) => {
-        try {
-
-            // Handle different action types
-            if (flagData.action === 'flag') {
-                // Create a report for flagged content
-                const reportType = flagData.context?.type === 'profile' ? 'profile' : 
-                                  flagData.context?.type === 'animal' ? 'animal' : 'message';
-                
-                // Get the correct user ID based on context type
-                const userId = flagData.context?.type === 'profile'
-                    ? flagData.context?.userId
-                    : flagData.context?.creatorId;
-                
-                const reportData = {
-                    reason: flagData.reason,
-                    category: flagData.category,
-                    description: `Moderator flag: ${flagData.reason}`,
-                    reportedContentId: flagData.context?.id,
-                    reportedUserId: userId,
-                    isModeratorReport: true
-                };
-
-                await axios.post(
-                    `${API_BASE_URL}/reports/${reportType}`,
-                    reportData,
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                showModalMessage('Flag Submitted', 'Content has been flagged and added to the report queue.');
-            } 
-            else if (flagData.action === 'edit') {
-                // Edit/redact content fields
-                const contentType = flagData.context?.type;
-                const contentId = flagData.context?.id;
-                
-                await axios.patch(
-                    `${API_BASE_URL}/moderation/content/${contentType}/${contentId}/edit`,
-                    {
-                        fieldEdits: flagData.fieldEdits,
-                        reason: flagData.reason
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                showModalMessage('Content Edited', 'Content has been updated successfully.');
-                // Refresh the current view
-                window.location.reload();
-            }
-            else if (flagData.action === 'warn') {
-                // Warn user - get correct user ID based on context type
-                const userId = flagData.context?.type === 'profile'
-                    ? flagData.context?.userId
-                    : flagData.context?.creatorId;
-                
-                const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/warn`,
-                    {
-                        reason: flagData.reason,
-                        category: flagData.category
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                showModalMessage('Warning Sent', `User has been warned. Total warnings: ${response.data.warningCount}`);
-            }
-            else if (flagData.action === 'suspend') {
-                // Suspend user - get correct user ID based on context type
-                const userId = flagData.context?.type === 'profile'
-                    ? flagData.context?.userId
-                    : flagData.context?.creatorId;
-                
-                await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/status`,
-                    {
-                        status: 'suspended',
-                        reason: flagData.reason,
-                        durationDays: flagData.durationDays
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                showModalMessage('User Suspended', `User has been suspended for ${flagData.durationDays} days.`);
-            }
-            else if (flagData.action === 'ban') {
-                // Ban user - get correct user ID based on context type
-                const userId = flagData.context?.type === 'profile'
-                    ? flagData.context?.userId
-                    : flagData.context?.creatorId;
-                
-                await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/status`,
-                    {
-                        status: 'banned',
-                        reason: flagData.reason,
-                        ipBan: flagData.ipBan
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                showModalMessage('User Banned', 'User has been permanently banned.');
-            }
-            else if (flagData.action === 'lift-warning') {
-                // Lift warning from user
-                const userId = flagData.context?.type === 'profile'
-                    ? flagData.context?.userId
-                    : flagData.context?.creatorId;
-                
-                const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/lift-warning`,
-                    {
-                        reason: flagData.reason,
-                        warningIndex: flagData.warningIndex
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                showModalMessage('Warning Lifted', `User's warning count is now ${response.data.warningCount}.`);
-            }
-            else if (flagData.action === 'lift-suspension') {
-                // Lift suspension from user
-                const userId = flagData.context?.type === 'profile'
-                    ? flagData.context?.userId
-                    : flagData.context?.creatorId;
-                
-                await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/status`,
-                    {
-                        status: 'active',
-                        reason: flagData.reason
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                showModalMessage('Suspension Lifted', 'User account has been reactivated and can now log in.');
-            }
-            else if (flagData.action === 'lift-ban') {
-                // Lift ban from user
-                const userId = flagData.context?.type === 'profile'
-                    ? flagData.context?.userId
-                    : flagData.context?.creatorId;
-                
-                await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/status`,
-                    {
-                        status: 'active',
-                        reason: flagData.reason
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                showModalMessage('Ban Lifted', 'User account has been unbanned and can now log in.');
-            }
-        } catch (error) {
-            console.error('[MOD ACTION] ERROR OCCURRED:', {
-                message: error.message,
-                status: error.response?.status,
-                statusText: error.response?.statusText,
-                errorData: error.response?.data,
-                errorResponse: error.response,
-                fullError: error
-            });
-            
-            // Extract error message for user feedback
-            const errorMsg = error.response?.data?.message 
-                || error.response?.data?.error 
-                || error.message 
-                || 'An error occurred while performing this action.';
-            
-            console.error('[MOD ACTION] Showing error message to user:', errorMsg);
-            showModalMessage('Action Failed', errorMsg);
-        }
-    }, [authToken]);
-
 
     useEffect(() => {
         // Fetch current user profile if authenticated
@@ -518,41 +317,6 @@ const PublicProfilePage = () => {
                     navigate(`/?message=${profile.id_public}`);
                 } : null}
             />
-            
-            {/* Moderator Action Sidebar - disabled, use mod panel instead */}
-            {false && inModeratorMode && localStorage.getItem('moderationAuthenticated') === 'true' && (
-                <ModeratorActionSidebar
-                    isActive={true}
-                    onOpenReportQueue={() => navigate('/')}
-                    onQuickFlag={(flagData) => {
-                        handleModQuickFlag(flagData);
-                    }}
-                    onExitModeration={() => {
-                        localStorage.removeItem('moderationAuthenticated');
-                        window.location.href = '/';
-                    }}
-                    currentPage={window.location.pathname}
-                    currentContext={modCurrentContext}
-                    API_BASE_URL={API_BASE_URL}
-                    authToken={authToken}
-                />
-            )}
-            
-            {/* Modal for moderation action feedback */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
-                        <h2 className="text-xl font-bold text-gray-800 mb-4">{modalContent.title}</h2>
-                        <p className="text-gray-600 mb-6">{modalContent.message}</p>
-                        <button
-                            onClick={() => setShowModal(false)}
-                            className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
-                        >
-                            OK
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
     AlertCircle, Ban, Bean, Cat, CheckCircle, Eye, EyeOff,
-    Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, UserPlus, Users
+    Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, UserPlus, Users, Wrench
 } from 'lucide-react';
 import InstallPWA from '../InstallPWA';
 
@@ -26,6 +26,24 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [suspensionTimeRemaining, setSuspensionTimeRemaining] = useState(null);
     const [banInfo, setBanInfo] = useState(null);
     const [suspensionLiftedNotification, setSuspensionLiftedNotification] = useState(null);
+    const [maintenanceInfo, setMaintenanceInfo] = useState(null);
+
+    // Check maintenance status so we can warn users before they attempt to log in
+    useEffect(() => {
+        const checkMaintenanceStatus = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/auth/maintenance-status`);
+                if (response.data?.active) {
+                    setMaintenanceInfo({ message: response.data.message });
+                } else {
+                    setMaintenanceInfo(null);
+                }
+            } catch (error) {
+                console.error('Failed to check maintenance status:', error);
+            }
+        };
+        checkMaintenanceStatus();
+    }, []);
 
     // Restore verification state from localStorage on mount
     useEffect(() => {
@@ -226,6 +244,13 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 onLoginSuccess(response.data.token);
             } catch (error) {
                 console.error('Login error:', error.response?.data || error.message);
+                
+                // Maintenance mode is blocking this login
+                if (error.response?.status === 503 && error.response?.data?.maintenanceActive) {
+                    setMaintenanceInfo({ message: error.response.data.message });
+                    setLoading(false);
+                    return;
+                }
                 
                 // Check if this is a suspension or ban error (403)
                 if (error.response?.status === 403) {
@@ -449,6 +474,15 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
     return (
         <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
+            {maintenanceInfo && (
+                <div className="mb-6 p-4 rounded-lg bg-amber-50 border-l-4 border-amber-500 flex items-start gap-3">
+                    <Wrench size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <p className="text-sm font-bold text-amber-900">System Maintenance in Progress</p>
+                        <p className="text-sm text-amber-800 mt-1">{maintenanceInfo.message}</p>
+                    </div>
+                </div>
+            )}
             {!forgotPasswordStep && !verificationStep && (
                 <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 flex items-center gap-4 shadow">
                     <Users size={32} className="text-primary-dark" />

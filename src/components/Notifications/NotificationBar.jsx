@@ -56,7 +56,8 @@ const NOTIFICATION_TYPE_LABELS = {
   transfer_request: 'a transfer request', transfer_accepted: 'an accepted transfer', transfer_declined: 'a declined transfer',
   transfer_cancelled: 'a cancelled transfer', animal_returned: 'a returned animal', animal_recalled: 'a recalled animal',
   marketplace_inquiry: 'a marketplace inquiry', litter_assignment: 'a litter assignment', mating_reminder: 'a mating reminder',
-  new_rating: 'a new rating',
+  new_rating: 'a new rating', bug_report_update: 'your bug report', report_status_update: 'a report you filed',
+  report_feedback: 'a report you filed',
 };
 const describeNotification = (n) => {
   if (!n) return '';

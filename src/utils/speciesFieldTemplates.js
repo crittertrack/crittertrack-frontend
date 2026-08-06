@@ -26,6 +26,8 @@ export const SPECIES_CATEGORY_MAP = {
     'Land Snail': 'Invertebrate', 'Pill Millipede': 'Invertebrate', 'Plum Isopod': 'Invertebrate',
     'Praying Mantis': 'Invertebrate', 'Roly-Poly Isopod': 'Invertebrate', 'Scorpion': 'Invertebrate',
     'Smooth Isopod': 'Invertebrate', 'Stick Insect': 'Invertebrate', 'Tarantula': 'Invertebrate',
+    // Invertebrate - casing aliases seen in live data (DB entries don't exactly match the catalogued names)
+    'Plum isopod': 'Invertebrate', 'Roly-Poly isopod': 'Invertebrate', 'Pill millipede': 'Invertebrate',
     // Mammal
     'African Pygmy Dormouse': 'Mammal', 'African Pygmy Mouse': 'Mammal', 'Campbells Dwarf Hamster': 'Mammal',
     'Cat': 'Mammal', 'Chinchilla': 'Mammal', 'Chinese Dwarf Hamster': 'Mammal', 'Deer Mouse': 'Mammal',
@@ -34,6 +36,8 @@ export const SPECIES_CATEGORY_MAP = {
     'Guinea Pig': 'Mammal', 'Hedgehog': 'Mammal', 'Natal Rats': 'Mammal', 'Prairie Dog': 'Mammal',
     'Rabbit': 'Mammal', 'Roborovski Dwarf Hamster': 'Mammal', 'Russian Dwarf Hamster': 'Mammal',
     'Sugar Glider': 'Mammal', 'Syrian Hamster': 'Mammal', 'Hamster': 'Mammal',
+    // Mammal - casing alias seen in live data
+    'Deer mouse': 'Mammal',
     // Reptile
     '3 Lined Knobtail Gecko': 'Reptile', 'Ball Python': 'Reptile', 'Banded Knobtails Gecko': 'Reptile',
     'Bearded Dragon': 'Reptile', 'Blue-Tongued Skink': 'Reptile', 'Cape African House Snake': 'Reptile',
@@ -67,8 +71,8 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
     Bird: [
         'earset', 'heightAtWithers', 'eartagNumber', 'heatStatus', 'lastHeatDate', 'estrusCycleLength',
         'isNursing', 'nursingStartDate', 'weaningDate', 'heartwormStatus', 'hipElbowScores', 'eyeClearance',
-        'cardiacClearance', 'reproductiveClearances', 'dentalRecords', 'dentalCareRequirements', 'sheddingRecords',
-        'waterParameterChecks', 'brushingFrequency', 'coatCareNotes', 'brushingSchedule', 'strain', 'tattooId',
+        'cardiacClearance', 'reproductiveClearances', 'dentalRecords', 'dentalCareRequirements', 'dentalCareSchedule',
+        'sheddingRecords', 'waterParameterChecks', 'brushingFrequency', 'coatCareNotes', 'brushingSchedule', 'strain', 'tattooId',
     ],
     Fish: [
         'earset', 'heightAtWithers', 'eartagNumber', 'ringId', 'nailColor', 'heatStatus', 'lastHeatDate',
@@ -86,7 +90,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
         'earset', 'nailColor', 'heightAtWithers', 'eartagNumber', 'microchipNumber', 'heatStatus', 'lastHeatDate',
         'estrusCycleLength', 'isNursing', 'nursingStartDate', 'weaningDate', 'isNeutered', 'spayNeuterDate',
         'artificialInseminationUsed', 'dewormingRecords', 'allergies', 'heartwormStatus', 'hipElbowScores',
-        'eyeClearance', 'cardiacClearance', 'reproductiveClearances', 'dentalRecords', 'dentalCareRequirements',
+        'eyeClearance', 'cardiacClearance', 'reproductiveClearances', 'dentalRecords', 'dentalCareRequirements', 'dentalCareSchedule',
         'sheddingRecords', 'waterParameterChecks', 'vaccinations', 'sheddingLevel', 'brushingFrequency',
         'coatCareNotes', 'brushingSchedule', 'leashTrained', 'leashTrainingSchedule', 'crateTrained',
         'crateTrainingSchedule', 'litterTrained', 'litterTrainingSchedule', 'bodyConditionScore',
@@ -112,8 +116,10 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
     Other: [],
 };
 
-export const isFieldHiddenForSpecies = (fieldName, speciesName) => {
-    const category = getSpeciesCategory(speciesName);
+// categoryOverride lets callers with access to the real Species collection record
+// (which may differ from our static map for custom/user-added species) take priority.
+export const isFieldHiddenForSpecies = (fieldName, speciesName, categoryOverride) => {
+    const category = categoryOverride || getSpeciesCategory(speciesName);
     return (HIDDEN_FIELDS_BY_CATEGORY[category] || []).includes(fieldName);
 };
 
@@ -149,9 +155,9 @@ export const FIELD_LABEL_OVERRIDES = {
     bathingFrequency: { Reptile: 'Soaking Frequency' },
 };
 
-export const getFieldLabel = (fieldName, speciesName, defaultLabel) => {
+export const getFieldLabel = (fieldName, speciesName, defaultLabel, categoryOverride) => {
     const speciesOverride = SPECIES_LABEL_OVERRIDES[fieldName]?.[speciesName];
     if (speciesOverride) return speciesOverride;
-    const category = getSpeciesCategory(speciesName);
+    const category = categoryOverride || getSpeciesCategory(speciesName);
     return FIELD_LABEL_OVERRIDES[fieldName]?.[category] || defaultLabel;
 };

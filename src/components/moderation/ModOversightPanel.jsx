@@ -11,7 +11,8 @@ const REPORT_TYPES = [
     { value: 'profile', label: 'Profiles' },
     { value: 'animal', label: 'Animals' },
     { value: 'message', label: 'Messages' },
-    { value: 'rating', label: 'Ratings' }
+    { value: 'rating', label: 'Ratings' },
+    { value: 'bug', label: 'Bug Reports' }
 ];
 
 const STATUS_FILTERS = [
@@ -51,6 +52,9 @@ const CATEGORY_BADGE_COLORS = {
     'Spam': '#ff9800',
     'Copyright/Licensing Violation': '#9c27b0',
     'Community Guidelines Violation': '#2196f3',
+    Bug: '#d32f2f',
+    'Feature Request': '#00897b',
+    'General Feedback': '#5c6bc0',
     Other: '#757575'
 };
 
@@ -91,6 +95,10 @@ const formatReporter = (report = {}) => {
 };
 
 const getSubjectTitle = (report = {}) => {
+    if (report._reportType === 'bug') {
+        return `${report.category || 'Bug'} Report`;
+    }
+
     if (report.ratingId) {
         const r = report.ratingId;
         const rater = r.raterName || r.raterId_public || 'Unknown';
@@ -126,6 +134,10 @@ const getSubjectTitle = (report = {}) => {
 };
 
 const getSubjectOwner = (report = {}) => {
+    if (report._reportType === 'bug') {
+        return report.page ? `Page: ${report.page}` : 'App Feedback';
+    }
+
     if (report.ratingId) {
         const targetId = report.targetId_public || report.ratingId?.targetId_public;
         return targetId ? `Breeder: ${targetId}` : 'Unknown breeder';
@@ -757,9 +769,7 @@ export default function ModOversightPanel({
         
         setNoteLoading(true);
         try {
-            const reportType = selectedReport.ratingId ? 'rating' :
-                              selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
-                              selectedReport.reportedAnimalId ? 'animal' : 'profile';
+            const reportType = getReportType(selectedReport);
             
             const response = await fetch(
                 `${baseUrl}/moderation/reports/${reportType}/${selectedReport._id}/notes`,
@@ -797,9 +807,7 @@ export default function ModOversightPanel({
         
         setNoteLoading(true);
         try {
-            const reportType = selectedReport.ratingId ? 'rating' :
-                              selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
-                              selectedReport.reportedAnimalId ? 'animal' : 'profile';
+            const reportType = getReportType(selectedReport);
             
             const response = await fetch(
                 `${baseUrl}/moderation/reports/${reportType}/${selectedReport._id}/notes/${noteId}`,
@@ -834,9 +842,7 @@ export default function ModOversightPanel({
         
         setNoteLoading(true);
         try {
-            const reportType = selectedReport.ratingId ? 'rating' :
-                              selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
-                              selectedReport.reportedAnimalId ? 'animal' : 'profile';
+            const reportType = getReportType(selectedReport);
             
             const response = await fetch(
                 `${baseUrl}/moderation/reports/${reportType}/${selectedReport._id}/notes/${noteId}`,
@@ -1401,8 +1407,55 @@ export default function ModOversightPanel({
                                     );
                                 })()}
 
+                                {/* Bug Report Details Section - for bug/feedback reports */}
+                                {getReportType(selectedReport) === 'bug' && (
+                                    <div className="mod-detail-section">
+                                        <strong>Feedback Details:</strong>
+                                        <div style={{
+                                            backgroundColor: '#f5f5f5',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            marginTop: '8px',
+                                            border: '1px solid #e0e0e0'
+                                        }}>
+                                            {selectedReport.page && (
+                                                <p style={{ margin: '0 0 8px', fontSize: '13px' }}><strong>Page:</strong> {selectedReport.page}</p>
+                                            )}
+                                            {selectedReport.stepsToReproduce && (
+                                                <div style={{ marginBottom: '8px', fontSize: '13px' }}>
+                                                    <strong>Steps to Reproduce:</strong>
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', marginTop: '4px', whiteSpace: 'pre-wrap' }}>
+                                                        {selectedReport.stepsToReproduce}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {Array.isArray(selectedReport.images) && selectedReport.images.length > 0 && (
+                                                <div style={{ marginBottom: '8px' }}>
+                                                    <strong style={{ fontSize: '13px' }}>Images:</strong>
+                                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                                                        {selectedReport.images.map((url, idx) => (
+                                                            <a key={idx} href={url} target="_blank" rel="noopener noreferrer">
+                                                                <img
+                                                                    src={url}
+                                                                    alt={`Attachment ${idx + 1}`}
+                                                                    style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0e0e0' }}
+                                                                />
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {selectedReport.browserInfo && (
+                                                <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                                                    {[selectedReport.browserInfo.platform, selectedReport.browserInfo.language, selectedReport.browserInfo.screenResolution].filter(Boolean).join(' · ')}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Message Content Section - for message reports */}
-                                {reportType === 'message' && selectedReport.messageId && (
+                                {getReportType(selectedReport) === 'message' && selectedReport.messageId && (
                                     <div className="mod-detail-section">
                                         <strong>Reported Message:</strong>
                                         <div className="mod-message-content" style={{ 
@@ -1423,7 +1476,7 @@ export default function ModOversightPanel({
                                 )}
 
                                 {/* Conversation Messages Section - for conversation reports */}
-                                {reportType === 'message' && selectedReport.conversationMessages?.length > 0 && (
+                                {getReportType(selectedReport) === 'message' && selectedReport.conversationMessages?.length > 0 && (
                                     <div className="mod-detail-section">
                                         <strong>Conversation Messages (Last 24 Hours):</strong>
                                         <div style={{ marginTop: '8px', maxHeight: '300px', overflowY: 'auto' }}>

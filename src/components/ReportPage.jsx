@@ -1,7 +1,7 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Loader2, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle, Bug, Lightbulb, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Loader2, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle, Bug, Lightbulb, MessageSquare, ArrowLeft, Clock, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { compressImageToMaxSize } from '../utils/imageCompression';
 
 const API_BASE_URL = '/api';
@@ -14,6 +14,22 @@ const CATEGORY_OPTIONS = [
 
 const MAX_IMAGES = 5;
 
+const STATUS_CONFIG = {
+    pending: { icon: Clock, label: 'Pending', className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+    'in-progress': { icon: Loader2, label: 'In Progress', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    in_progress: { icon: Loader2, label: 'In Progress', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    reviewed: { icon: CheckCircle, label: 'Reviewed', className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+    resolved: { icon: CheckCircle, label: 'Resolved', className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+    dismissed: { icon: XCircle, label: 'Dismissed', className: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+};
+
+const getBrowserInfo = () => ({
+    userAgent: navigator.userAgent || null,
+    platform: navigator.platform || null,
+    language: navigator.language || null,
+    screenResolution: `${window.screen.width}x${window.screen.height}`,
+});
+
 export default function ReportPage({ authToken, userProfile, showModalMessage }) {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
@@ -25,6 +41,28 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
+
+    const [myReports, setMyReports] = useState([]);
+    const [myReportsLoading, setMyReportsLoading] = useState(true);
+    const [showMyReports, setShowMyReports] = useState(false);
+
+    const fetchMyReports = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const response = await axios.get(`${API_BASE_URL}/bug-reports/my-reports`, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
+            setMyReports(Array.isArray(response.data) ? response.data : []);
+        } catch (err) {
+            console.error('[ReportPage] Failed to fetch my reports:', err);
+        } finally {
+            setMyReportsLoading(false);
+        }
+    }, [authToken]);
+
+    useEffect(() => {
+        fetchMyReports();
+    }, [fetchMyReports]);
 
     // Handle image file selection
     const handleImageSelect = useCallback(async (e) => {
@@ -170,6 +208,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                 stepsToReproduce: stepsToReproduce.trim() || null,
                 images: uploadedUrls,
                 page: window.location.pathname,
+                browserInfo: getBrowserInfo(),
             };
 
             const response = await axios.post(`${API_BASE_URL}/bug-reports`, payload, {
@@ -181,6 +220,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
 
             if (response.status === 201) {
                 setSubmitted(true);
+                fetchMyReports();
                 // Cleanup previews
                 images.forEach(img => {
                     if (img.preview) URL.revokeObjectURL(img.preview);
@@ -208,9 +248,55 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
         setError('');
     };
 
+    const myReportsSection = (myReports.length > 0 || myReportsLoading) && (
+        <div className="w-full max-w-2xl mx-auto mt-4">
+            <button
+                onClick={() => setShowMyReports(prev => !prev)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-dark-surface rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition"
+            >
+                <span className="text-sm font-semibold text-gray-700 dark:text-dark-text">
+                    My Previous Reports {!myReportsLoading && `(${myReports.length})`}
+                </span>
+                {showMyReports ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
+            </button>
+            {showMyReports && (
+                <div className="mt-2 space-y-2">
+                    {myReportsLoading ? (
+                        <div className="flex justify-center py-6"><Loader2 size={20} className="animate-spin text-gray-400" /></div>
+                    ) : (
+                        myReports.map(r => {
+                            const status = STATUS_CONFIG[r.status] || STATUS_CONFIG.pending;
+                            const StatusIcon = status.icon;
+                            return (
+                                <div key={r._id} className="bg-white dark:bg-dark-surface rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                                    <div className="flex items-center justify-between gap-2 mb-1">
+                                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{r.category}</span>
+                                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${status.className}`}>
+                                            <StatusIcon size={11} className={r.status === 'in-progress' || r.status === 'in_progress' ? 'animate-spin' : ''} />
+                                            {status.label}
+                                        </span>
+                                    </div>
+                                    {r.subjectLabel && (
+                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{r.subjectLabel}</p>
+                                    )}
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{r.description}</p>
+                                    {r.adminNotes && (
+                                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-1.5"><strong>Team note:</strong> {r.adminNotes}</p>
+                                    )}
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">{new Date(r.createdAt).toLocaleDateString()}</p>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            )}
+        </div>
+    );
+
     // Already submitted - show success
     if (submitted) {
         return (
+            <>
             <div className="w-full max-w-2xl mx-auto bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
                 <div className="text-center py-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-4">
@@ -239,6 +325,8 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                     </div>
                 </div>
             </div>
+            {myReportsSection}
+            </>
         );
     }
 
@@ -473,6 +561,8 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                 Your report includes your account information so we can follow up if needed.
                 We take your privacy seriously and will only use this information to improve CritterTrack.
             </p>
+
+            {myReportsSection}
         </div>
     );
 }

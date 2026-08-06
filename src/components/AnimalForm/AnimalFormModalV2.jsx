@@ -16,6 +16,7 @@ import GeneticCodeBuilder from '../GeneticCodeBuilder';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from '../AnimalList/LocationManagerModal';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
+import { isFieldHiddenForSpecies, getFieldLabel } from '../../utils/speciesFieldTemplates';
 
 const getSpeciesCategory = (species) => {
     if (!species) return 'Other';
@@ -3507,6 +3508,12 @@ const AnimalFormModalV2 = ({
         { id: 'records', label: 'Records', icon: FileText },
     ];
 
+    // Species template: prefer the real Species collection category (covers custom species too),
+    // falling back to the static category map for species not present in speciesOptions yet.
+    const speciesCategory = (speciesOptions || []).find(s => s.name === formData.species)?.category || getSpeciesCategory(formData.species);
+    const hiddenField = (field) => isFieldHiddenForSpecies(field, formData.species, speciesCategory);
+    const fieldLabel = (field, def) => getFieldLabel(field, formData.species, def, speciesCategory);
+
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-0 sm:p-4 z-[80] backdrop-blur-sm">
             <AssignContactModal
@@ -3744,7 +3751,7 @@ const AnimalFormModalV2 = ({
                                                     </p>
                                                 </div>
                                                 {/* For Stud */}
-                                                <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
+                                                {!hiddenField('studFeeCurrency') && <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
                                                     <label className="flex items-center space-x-2">
                                                         <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} className="form-checkbox h-4 w-4 text-primary rounded" />
                                                         <span className="text-xs font-medium text-gray-700">Available for Stud/Breeding</span>
@@ -3757,7 +3764,7 @@ const AnimalFormModalV2 = ({
                                                             <input type="number" name="studFeeAmount" value={formData.studFeeAmount} onChange={handleChange} disabled={formData.studFeeCurrency === 'Negotiable'} placeholder="Fee" className="flex-1 py-1.5 px-2 border border-gray-300 rounded-md text-xs" />
                                                         </div>
                                                     )}
-                                                </div>
+                                                </div>}
                                             </div>
                                         )}
                                     </div>
@@ -3782,36 +3789,36 @@ const AnimalFormModalV2 = ({
                                                 <input type="text" name="breederAssignedId" value={formData.breederAssignedId || ''} onChange={handleChange}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
-                                            <div>
+                                            {!hiddenField('microchipNumber') && <div>
                                                 <label className="block text-xs font-medium text-gray-700">Microchip Number</label>
                                                 <input type="text" name="microchipNumber" value={formData.microchipNumber || ''} onChange={handleChange}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
+                                            </div>}
+                                            {!hiddenField('pedigreeRegistrationId') && <div>
                                                 <label className="block text-xs font-medium text-gray-700">Pedigree Registration ID</label>
                                                 <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId || ''} onChange={handleChange}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
+                                            </div>}
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Colony ID</label>
+                                                <label className="block text-xs font-medium text-gray-700">{fieldLabel('colonyId', 'Colony ID')}</label>
                                                 <input type="text" name="colonyId" value={formData.colonyId || ''} onChange={handleChange}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
-                                            <div>
+                                            {!hiddenField('tattooId') && <div>
                                                 <label className="block text-xs font-medium text-gray-700">Tattoo ID</label>
                                                 <input type="text" name="tattooId" value={formData.tattooId || ''} onChange={handleChange}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
+                                            </div>}
+                                            {!hiddenField('ringId') && <div>
                                                 <label className="block text-xs font-medium text-gray-700">Ring ID</label>
                                                 <input type="text" name="ringId" value={formData.ringId || ''} onChange={handleChange}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
+                                            </div>}
+                                            {!hiddenField('eartagNumber') && <div>
                                                 <label className="block text-xs font-medium text-gray-700">Ear Tag</label>
                                                 <input type="text" name="eartagNumber" value={formData.eartagNumber || ''} onChange={handleChange}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
+                                            </div>}
                                         </div>
                                         {/* Additional Identifiers */}
                                         <div className="mt-4 pt-4 border-t border-gray-200">
@@ -3883,22 +3890,23 @@ const AnimalFormModalV2 = ({
                                                 <p className="text-xs text-gray-500 mt-1">Cannot be changed after creation</p>
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Breed</label>
+                                                <label className="block text-xs font-medium text-gray-700">{fieldLabel('breed', 'Breed')}</label>
                                                 <input type="text" name="breed" value={formData.breed || ''} onChange={handleChange}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
-                                            <div className="md:col-span-2">
+                                            {!hiddenField('strain') && <div className="md:col-span-2">
                                                 <label className="block text-xs font-medium text-gray-700">Strain</label>
                                                 <input type="text" name="strain" value={formData.strain || ''} onChange={handleChange}
                                                     className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                     placeholder="e.g., C57BL/6, Wistar, Syrian" />
-                                            </div>
+                                            </div>}
                                         </div>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Origin */}
+                                {!hiddenField('origin') && (
                                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                                     <button type="button" onClick={() => toggleSection('origin')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 p-2 rounded transition-colors">
                                         <h3 className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><Globe size={16} className="flex-shrink-0" /> Origin</h3>
@@ -3919,6 +3927,7 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     )}
                                 </div>
+                                )}
 
                                 {/* Tags */}
                                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
@@ -3958,13 +3967,13 @@ const AnimalFormModalV2 = ({
                                                 className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Pattern</label>
+                                            <label className="block text-xs font-medium text-gray-700">{fieldLabel('coatPattern', 'Pattern')}</label>
                                             <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange}
                                                 className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="e.g., Solid, Hooded, Brindle" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Coat Type</label>
+                                            <label className="block text-xs font-medium text-gray-700">{fieldLabel('coat', 'Coat Type')}</label>
                                             <input type="text" name="coat" value={formData.coat} onChange={handleChange}
                                                 className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="e.g., Short, Long, Rex" />
@@ -3995,12 +4004,12 @@ const AnimalFormModalV2 = ({
                                                 className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="Eye color" />
                                         </div>
-                                        <div>
+                                        {!hiddenField('nailColor') && <div>
                                             <label className="block text-xs font-medium text-gray-700">Nail Color</label>
                                             <input type="text" name="nailColor" value={formData.nailColor || ''} onChange={handleChange}
                                                 className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                 placeholder="Nail/claw color" />
-                                        </div>
+                                        </div>}
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Size</label>
                                             <input type="text" name="size" value={formData.size || ''} onChange={handleChange}
@@ -4019,10 +4028,10 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Genetic Code" icon={<Dna size={16} />}>
                                     <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} />
                                 </FormSection>
-                                <FormSection title="Life Stage" icon={<Sprout size={16} />}>
+                                <FormSection title={fieldLabel('lifeStage', 'Life Stage')} icon={<Sprout size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Life Stage</label>
+                                            <label className="block text-xs font-medium text-gray-700">{fieldLabel('lifeStage', 'Life Stage')}</label>
                                             <select name="lifeStage" value={formData.lifeStage} onChange={handleChange}
                                                 className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                 <option value="">Unknown</option>
@@ -4621,7 +4630,7 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                     {/* Allergies */}
-                                    <div className="space-y-2 pt-3 border-t">
+                                    {!hiddenField('allergies') && <div className="space-y-2 pt-3 border-t">
                                         <h4 className="text-sm font-semibold text-gray-700">Allergies</h4>
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -4636,12 +4645,12 @@ const AnimalFormModalV2 = ({
                                                 <button type="button" onClick={() => removeArrayItem('allergies', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button>
                                             </div>
                                         ))}
-                                    </div>
+                                    </div>}
                                 </FormSection>
 
                                 <FormSection title="Preventive Care" icon={<Shield size={16} />} initiallyOpen>
                                     {/* Vaccinations */}
-                                    <div className="space-y-2">
+                                    {!hiddenField('vaccinations') && <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-gray-700">Vaccinations</h4>
                                         <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -4652,9 +4661,9 @@ const AnimalFormModalV2 = ({
                                             <button type="button" onClick={addVaccination} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Vaccination</button>
                                         </div>
                                     {(formData.vaccinations || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.name} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vaccinations', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
-                                    </div>
+                                    </div>}
                                     {/* Deworming */}
-                                    <div className="space-y-2 pt-2 border-t">
+                                    {!hiddenField('dewormingRecords') && <div className="space-y-2 pt-2 border-t">
                                         <h4 className="text-sm font-semibold text-gray-700">Deworming</h4>
                                         <div className="bg-white p-2 rounded-lg border border-gray-200 space-y-2">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -4665,7 +4674,7 @@ const AnimalFormModalV2 = ({
                                             <button type="button" onClick={addDeworming} className="w-full px-3 py-1.5 bg-primary text-black rounded-md text-xs font-medium">Add Deworming</button>
                                         </div>
                                     {(formData.dewormingRecords || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.medication} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('dewormingRecords', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
-                                    </div>
+                                    </div>}
                                     {/* Parasite Control */}
                                     <div className="space-y-2 pt-2 border-t">
                                         <h4 className="text-sm font-semibold text-gray-700">Parasite Control</h4>
@@ -4719,6 +4728,8 @@ const AnimalFormModalV2 = ({
 
                                 <FormSection title="Health Clearances & Screening" icon={<Hospital size={16} />}>
                                     <div className="space-y-4">
+                                        {!hiddenField('hipElbowScores') && (
+                                        <>
                                         {/* Structured Health Clearances */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
                                             <h4 className="text-sm font-semibold text-gray-700">Add Health Clearance</h4>
@@ -4765,16 +4776,18 @@ const AnimalFormModalV2 = ({
                                                 </div>
                                             </div>
                                         )}
+                                        </>
+                                        )}
 
                                         {/* Legacy fields - still available for reference */}
                                         <div className="border-t pt-3 mt-3">
                                             <h4 className="text-sm font-semibold text-gray-700 mb-3">Other Health Information</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <div>
+                                                {!hiddenField('spayNeuterDate') && <div>
                                                     <label className="block text-xs font-medium text-gray-700">Spay/Neuter Date</label>
                                                     <DatePicker name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm" />
-                                                </div>
-                                                <div>
+                                                </div>}
+                                                {!hiddenField('heartwormStatus') && <div>
                                                     <label className="block text-xs font-medium text-gray-700">Heartworm Status</label>
                                                     <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
                                                         <option value="">Select...</option>
@@ -4783,7 +4796,7 @@ const AnimalFormModalV2 = ({
                                                         <option value="On Prevention">On Prevention</option>
                                                         <option value="Unknown">Unknown</option>
                                                     </select>
-                                                </div>
+                                                </div>}
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-700">Genetic Test Results</label>
                                                     <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Embark: Clear for DM, vWD" />
@@ -5247,37 +5260,37 @@ const AnimalFormModalV2 = ({
                                         {/* General Grooming */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
                                             <h4 className="text-sm font-semibold text-gray-700">General Grooming</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Grooming Needs</label><input type="text" name="groomingNeeds" value={formData.groomingNeeds} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, professional grooming" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Shedding Level</label><input type="text" name="sheddingLevel" value={formData.sheddingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Heavy, Moderate, Minimal" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">{fieldLabel('groomingNeeds', 'Grooming Needs')}</label><input type="text" name="groomingNeeds" value={formData.groomingNeeds} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, professional grooming" /></div>
+                                            {!hiddenField('sheddingLevel') && <div><label className="block text-xs font-medium text-gray-700">Shedding Level</label><input type="text" name="sheddingLevel" value={formData.sheddingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Heavy, Moderate, Minimal" /></div>}
                                             <ScheduleFieldControl value={formData.groomingSchedule} onChange={v => setFormData(prev => ({ ...prev, groomingSchedule: v }))} />
                                         </div>
 
                                         {/* Brushing & Bathing */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
                                             <h4 className="text-sm font-semibold text-gray-700">Brushing & Bathing</h4>
-                                            <div><label className="block text-xs font-medium text-gray-700">Brushing Frequency</label><input type="text" name="brushingFrequency" value={formData.brushingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily, 3x per week, Weekly" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Bathing Frequency & Requirements</label><input type="text" name="bathingFrequency" value={formData.bathingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monthly, As needed, Never (dry species)" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Coat/Feather/Scale Care Notes</label><textarea name="coatCareNotes" value={formData.coatCareNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Double coat requires undercoat removal, oils for feathers, misting for scales" /></div>
-                                            <ScheduleFieldControl label="Brushing" value={formData.brushingSchedule} onChange={v => setFormData(prev => ({ ...prev, brushingSchedule: v }))} />
-                                            <ScheduleFieldControl label="Bathing" value={formData.bathingSchedule} onChange={v => setFormData(prev => ({ ...prev, bathingSchedule: v }))} />
+                                            {!hiddenField('brushingFrequency') && <div><label className="block text-xs font-medium text-gray-700">Brushing Frequency</label><input type="text" name="brushingFrequency" value={formData.brushingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Daily, 3x per week, Weekly" /></div>}
+                                            <div><label className="block text-xs font-medium text-gray-700">{fieldLabel('bathingFrequency', 'Bathing Frequency & Requirements')}</label><input type="text" name="bathingFrequency" value={formData.bathingFrequency || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monthly, As needed, Never (dry species)" /></div>
+                                            {!hiddenField('coatCareNotes') && <div><label className="block text-xs font-medium text-gray-700">Coat/Feather/Scale Care Notes</label><textarea name="coatCareNotes" value={formData.coatCareNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Double coat requires undercoat removal, oils for feathers, misting for scales" /></div>}
+                                            {!hiddenField('brushingFrequency') && <ScheduleFieldControl label="Brushing" value={formData.brushingSchedule} onChange={v => setFormData(prev => ({ ...prev, brushingSchedule: v }))} />}
+                                            <ScheduleFieldControl label={fieldLabel('bathingFrequency', 'Bathing')} value={formData.bathingSchedule} onChange={v => setFormData(prev => ({ ...prev, bathingSchedule: v }))} />
                                         </div>
 
                                         {/* Specialized Care */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
                                             <h4 className="text-sm font-semibold text-gray-700">Specialized Care</h4>
                                             <div><label className="block text-xs font-medium text-gray-700">Nail/Claw/Hoof Care Requirements</label><input type="text" name="nailCareRequirements" value={formData.nailCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Monthly trim, File sharp edges, Natural wear" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Beak/Hoof/Scale Maintenance</label><input type="text" name="beakHoofScaleMaintenance" value={formData.beakHoofScaleMaintenance || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Beak trimming, Hoof conditioning, Scale inspection" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Skin & Ear Care Needs</label><input type="text" name="skinEarCareNeeds" value={formData.skinEarCareNeeds || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Ears cleaned weekly, Skin check for mites, Moisturizing needed" /></div>
-                                            <div><label className="block text-xs font-medium text-gray-700">Dental Care Requirements</label><input type="text" name="dentalCareRequirements" value={formData.dentalCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, Professional cleaning, Chew toys for wear" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">{fieldLabel('beakHoofScaleMaintenance', 'Beak/Hoof/Scale Maintenance')}</label><input type="text" name="beakHoofScaleMaintenance" value={formData.beakHoofScaleMaintenance || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Beak trimming, Hoof conditioning, Scale inspection" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-700">{fieldLabel('skinEarCareNeeds', 'Skin & Ear Care Needs')}</label><input type="text" name="skinEarCareNeeds" value={formData.skinEarCareNeeds || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Ears cleaned weekly, Skin check for mites, Moisturizing needed" /></div>
+                                            {!hiddenField('dentalCareRequirements') && <div><label className="block text-xs font-medium text-gray-700">Dental Care Requirements</label><input type="text" name="dentalCareRequirements" value={formData.dentalCareRequirements || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Regular brushing, Professional cleaning, Chew toys for wear" /></div>}
                                             <ScheduleFieldControl label="Nail/Claw/Hoof" value={formData.nailCareSchedule} onChange={v => setFormData(prev => ({ ...prev, nailCareSchedule: v }))} />
-                                            <ScheduleFieldControl label="Beak/Hoof/Scale" value={formData.beakHoofScaleSchedule} onChange={v => setFormData(prev => ({ ...prev, beakHoofScaleSchedule: v }))} />
-                                            <ScheduleFieldControl label="Skin & Ear" value={formData.skinEarCareSchedule} onChange={v => setFormData(prev => ({ ...prev, skinEarCareSchedule: v }))} />
-                                            <ScheduleFieldControl label="Dental" value={formData.dentalCareSchedule} onChange={v => setFormData(prev => ({ ...prev, dentalCareSchedule: v }))} />
+                                            <ScheduleFieldControl label={fieldLabel('beakHoofScaleMaintenance', 'Beak/Hoof/Scale')} value={formData.beakHoofScaleSchedule} onChange={v => setFormData(prev => ({ ...prev, beakHoofScaleSchedule: v }))} />
+                                            <ScheduleFieldControl label={fieldLabel('skinEarCareNeeds', 'Skin & Ear')} value={formData.skinEarCareSchedule} onChange={v => setFormData(prev => ({ ...prev, skinEarCareSchedule: v }))} />
+                                            {!hiddenField('dentalCareRequirements') && <ScheduleFieldControl label="Dental" value={formData.dentalCareSchedule} onChange={v => setFormData(prev => ({ ...prev, dentalCareSchedule: v }))} />}
                                         </div>
 
                                         {/* General Notes */}
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
-                                            <h4 className="text-sm font-semibold text-gray-700">Grooming Notes & Preferences</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700">{fieldLabel('groomingNotes', 'Grooming Notes & Preferences')}</h4>
                                             <textarea name="groomingNotes" value={formData.groomingNotes || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="Any additional grooming preferences, sensitivities, or special handling notes" />
                                         </div>
                                     </div>
@@ -5406,25 +5419,27 @@ const AnimalFormModalV2 = ({
                                                 <option value="Crepuscular">Crepuscular (dawn/dusk)</option>
                                             </select>
                                         </div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Exercise Requirements</label><input type="text" name="exerciseRequirements" value={formData.exerciseRequirements} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Daily Exercise (min)</label><input type="number" name="dailyExerciseMinutes" value={formData.dailyExerciseMinutes} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                        {!hiddenField('exerciseRequirements') && <div><label className="block text-xs font-medium text-gray-700">Exercise Requirements</label><input type="text" name="exerciseRequirements" value={formData.exerciseRequirements} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>}
+                                        {!hiddenField('dailyExerciseMinutes') && <div><label className="block text-xs font-medium text-gray-700">Daily Exercise (min)</label><input type="number" name="dailyExerciseMinutes" value={formData.dailyExerciseMinutes} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>}
                                     </div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Training Level</label><input type="text" name="trainingLevel" value={formData.trainingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
-                                    <div><label className="block text-xs font-medium text-gray-700">Training Disciplines</label><input type="text" name="trainingDisciplines" value={formData.trainingDisciplines} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>
+                                    {!hiddenField('trainingLevel') && <div><label className="block text-xs font-medium text-gray-700">Training Level</label><input type="text" name="trainingLevel" value={formData.trainingLevel} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>}
+                                    {!hiddenField('trainingDisciplines') && <div><label className="block text-xs font-medium text-gray-700">Training Disciplines</label><input type="text" name="trainingDisciplines" value={formData.trainingDisciplines} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" /></div>}
                                     <div className="flex flex-wrap gap-4 pt-2">
-                                        <label className="flex items-center gap-2"><input type="checkbox" name="crateTrained" checked={!!formData.crateTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Crate Trained</label>
-                                        <label className="flex items-center gap-2"><input type="checkbox" name="litterTrained" checked={!!formData.litterTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Litter Trained</label>
-                                        <label className="flex items-center gap-2"><input type="checkbox" name="leashTrained" checked={!!formData.leashTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Leash Trained</label>
-                                        <label className="flex items-center gap-2"><input type="checkbox" name="freeFlightTrained" checked={!!formData.freeFlightTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Free-Flight Trained</label>
+                                        {!hiddenField('crateTrained') && <label className="flex items-center gap-2"><input type="checkbox" name="crateTrained" checked={!!formData.crateTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Crate Trained</label>}
+                                        {!hiddenField('litterTrained') && <label className="flex items-center gap-2"><input type="checkbox" name="litterTrained" checked={!!formData.litterTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Litter Trained</label>}
+                                        {!hiddenField('leashTrained') && <label className="flex items-center gap-2"><input type="checkbox" name="leashTrained" checked={!!formData.leashTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Leash Trained</label>}
+                                        {!hiddenField('freeFlightTrained') && <label className="flex items-center gap-2"><input type="checkbox" name="freeFlightTrained" checked={!!formData.freeFlightTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Free-Flight Trained</label>}
                                     </div>
                                 </FormSection>
 
+                                {(!hiddenField('workingRole') || !hiddenField('certifications')) && (
                                 <FormSection title="Working Role & Certifications" icon={<Trophy size={16} />}>
                                     <div className="space-y-3">
-                                        <div><label className="block text-xs font-medium text-gray-700">Working Role</label><input type="text" name="workingRole" value={formData.workingRole || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Service dog, Therapy dog, Show dog, Guard dog, Working animal" /></div>
-                                        <div><label className="block text-xs font-medium text-gray-700">Certifications & Titles</label><textarea name="certifications" value={formData.certifications || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., CGC, AKC titles (CH, GCH), Service Dog Certified, Therapy Dog International, Show wins" /></div>
+                                        {!hiddenField('workingRole') && <div><label className="block text-xs font-medium text-gray-700">Working Role</label><input type="text" name="workingRole" value={formData.workingRole || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Service dog, Therapy dog, Show dog, Guard dog, Working animal" /></div>}
+                                        {!hiddenField('certifications') && <div><label className="block text-xs font-medium text-gray-700">Certifications & Titles</label><textarea name="certifications" value={formData.certifications || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., CGC, AKC titles (CH, GCH), Service Dog Certified, Therapy Dog International, Show wins" /></div>}
                                     </div>
                                 </FormSection>
+                                )}
 
                                 <FormSection title="Known Issues & Safety Concerns" icon={<AlertTriangle size={16} />}>
                                     <div className="space-y-3">
@@ -5567,11 +5582,11 @@ const AnimalFormModalV2 = ({
                                             <div><label className="block text-xs font-medium text-gray-700">Food Preferences & Pickiness</label><textarea name="foodPreferences" value={formData.foodPreferences || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Picky eater, refuses certain foods, competitive feeding, hoards food" /></div>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
+                                        {!hiddenField('attachmentStyle') && <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
                                             <h4 className="text-sm font-semibold text-gray-700">Bonding & Attachment Style</h4>
                                             <div><label className="block text-xs font-medium text-gray-700">Attachment Type</label><select name="attachmentStyle" value={formData.attachmentStyle || 'Unknown'} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md"><option value="Unknown">Unknown</option><option value="Solitary">Solitary (no bonding)</option><option value="Pair Bonded">Pair Bonded</option><option value="Group Bonded">Group Bonded</option><option value="Handler Bonded">Bonded to Handler</option><option value="Multi-individual">Multi-individual Bonds</option></select></div>
                                             <div><label className="block text-xs font-medium text-gray-700">Bonding Behavior & Preferences</label><textarea name="bondingBehavior" value={formData.bondingBehavior || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" placeholder="e.g., Seeks out handler, displays affection, bond with specific individuals, forms hierarchies" /></div>
-                                        </div>
+                                        </div>}
 
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2">
                                             <h4 className="text-sm font-semibold text-gray-700">Sensory Sensitivities</h4>
@@ -5596,8 +5611,8 @@ const AnimalFormModalV2 = ({
                                         <div className="space-y-1 text-sm text-gray-700">
                                             <div>📋 Planned Mating: {formData.isPlannedMating ? '✓' : '✗'}</div>
                                             <div>⚡ In Mating: {formData.isInMating ? '✓' : '✗'}</div>
-                                            {formData.gender !== 'Male' && <div>🤰 Pregnant: {formData.isPregnant ? '✓' : '✗'}</div>}
-                                            {formData.gender !== 'Male' && <div>🍼 Nursing: {formData.isNursing ? '✓' : '✗'}</div>}
+                                            {formData.gender !== 'Male' && <div>🤰 {fieldLabel('isPregnant', 'Pregnant')}: {formData.isPregnant ? '✓' : '✗'}</div>}
+                                            {formData.gender !== 'Male' && !hiddenField('isNursing') && <div>🍼 Nursing: {formData.isNursing ? '✓' : '✗'}</div>}
                                         </div>
                                         {(formData.isPlannedMating || formData.isInMating || (formData.gender !== 'Male' && (formData.isPregnant || formData.isNursing))) && (
                                             <button
@@ -5637,7 +5652,7 @@ const AnimalFormModalV2 = ({
                                         <div className="space-y-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                             <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isPlannedMating} onChange={(e) => setFormData(p => ({...p, isPlannedMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Planned Mating</label></div>
                                             <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isInMating} onChange={(e) => setFormData(p => ({...p, isInMating: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: In Mating</label></div>
-                                            {formData.gender !== 'Male' && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isPregnant} onChange={(e) => setFormData(p => ({...p, isPregnant: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Pregnant</label></div>}
+                                            {formData.gender !== 'Male' && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isPregnant} onChange={(e) => setFormData(p => ({...p, isPregnant: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: {fieldLabel('isPregnant', 'Pregnant')}</label></div>}
                                             {formData.gender !== 'Male' && formData.pregnancyHistory && formData.pregnancyHistory.length > 0 && (
                                                 <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
                                                     <p className="text-xs font-semibold text-blue-700">Pregnancy History ({formData.pregnancyHistory.length})</p>
@@ -5657,7 +5672,7 @@ const AnimalFormModalV2 = ({
                                                     </div>
                                                 </div>
                                             )}
-                                            {formData.gender !== 'Male' && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isNursing} onChange={(e) => setFormData(p => ({...p, isNursing: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Nursing</label></div>}
+                                            {formData.gender !== 'Male' && !hiddenField('isNursing') && <div className="flex items-center gap-2"><input type="checkbox" className="w-4 h-4" checked={!!formData.isNursing} onChange={(e) => setFormData(p => ({...p, isNursing: e.target.checked}))} /> <label className="text-xs font-medium">Mark as: Nursing</label></div>}
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Reason for Override</label>
                                                 <textarea value={reproductiveStateOverrideReason} onChange={(e) => setReproductiveStateOverrideReason(e.target.value)} placeholder="Why overriding auto-calculated state..." className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md resize-none" rows="2" />
@@ -5826,17 +5841,17 @@ const AnimalFormModalV2 = ({
                                             <DatePicker value={formData.lastDeliveryDate} onChange={(e) => setFormData({...formData, lastDeliveryDate: e.target.value})} className="mt-1 block w-full py-1.5 px-2 text-sm" />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Delivery Method</label>
+                                            <label className="block text-xs font-medium text-gray-700">{fieldLabel('deliveryMethod', 'Delivery Method')}</label>
                                             <input type="text" value={formData.deliveryMethod} onChange={(e) => setFormData({...formData, deliveryMethod: e.target.value})} placeholder="e.g., Natural, C-section, Assisted" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                         </div>
                                         <div className="md:col-span-2">
                                             <label className="block text-xs font-medium text-gray-700">Reproductive Complications</label>
                                             <input type="text" value={formData.reproductiveComplications} onChange={(e) => setFormData({...formData, reproductiveComplications: e.target.value})} placeholder="e.g., Dystocia, retained placenta, infection" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
                                         </div>
-                                        <div className="md:col-span-2">
+                                        {!hiddenField('reproductiveClearances') && <div className="md:col-span-2">
                                             <label className="block text-xs font-medium text-gray-700">Reproductive Clearances</label>
                                             <input type="text" value={formData.reproductiveClearances} onChange={(e) => setFormData({...formData, reproductiveClearances: e.target.value})} placeholder="e.g., OFA certified, genetic screening passed" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
-                                        </div>
+                                        </div>}
                                     </div>
                                 </FormSection>
 

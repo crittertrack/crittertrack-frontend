@@ -2,20 +2,16 @@ import React, { useState, useEffect } from 'react';
 import {
     X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
-    ChevronDown, ChevronRight, ChevronLeft, CheckCircle, Clock, Flag, MessageSquare, FileText,
-    Bug, Dna, PawPrint, Wrench, Database, PanelLeftClose, PanelLeft, LogOut
+    ChevronDown, ChevronRight, ChevronLeft, CheckCircle, Clock, Flag, MessageSquare,
+    Dna, PawPrint, Database, PanelLeftClose, PanelLeft, LogOut
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
-import AuditLogViewer from './moderation/AuditLogViewer';
 import CommunicationTab from './admin/CommunicationTab';
 import SystemSettingsTab from './admin/SystemSettingsTab';
-import ModChatTab from './admin/ModChatTab';
 import AnimalManagementPanel from './admin/AnimalManagementPanel';
-import BugReportsTab from './admin/BugReportsTab';
 import FeedbackTab from './admin/FeedbackTab';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
-import GeneticsBuilderTab from './admin/GeneticsBuilderTab';
 import BackupManagementTab from './admin/BackupManagementTab';
 import AnalyticsTab from './admin/AnalyticsTab';
 
@@ -594,7 +590,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 onToggle={() => setExpandedSections(prev => ({ ...prev, moderation: !prev.moderation }))}
                                 sidebarCollapsed={sidebarCollapsed}
                                 items={[
-                                    { id: 'mod-chat', label: 'Mod Team Chat', icon: MessageSquare },
                                     { id: 'moderation', label: 'Reports', icon: AlertTriangle },
                                     { id: 'user-management', label: 'User Management', icon: Users },
                                     { id: 'animals', label: 'Animal Management', icon: Shield },
@@ -613,8 +608,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 onToggle={() => setExpandedSections(prev => ({ ...prev, admin: !prev.admin }))}
                                 sidebarCollapsed={sidebarCollapsed}
                                 items={[
-                                    { id: 'audit-logs', label: 'Audit Logs', icon: FileText },
-                                    { id: 'bug-reports', label: 'Bug Reports', icon: Bug },
                                     { id: 'backup-management', label: 'Backup Management', icon: Database, requiredRole: 'admin' },
                                     { id: 'reports', label: 'Analytics', icon: BarChart3 }
                                 ]}
@@ -633,7 +626,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 items={[
                                     { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
                                     { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
-                                    { id: 'genetics-builder', label: 'Genetics Builder', icon: Wrench, requiredRole: 'admin' },
                                     { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
                                 ]}
                                 activeSection={activeSection}
@@ -730,27 +722,10 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             </div>
                         )}
 
-                        {/* Audit Logs */}
-                        {activeSection === 'audit-logs' && (
-                            <div className="p-8">
-                                <AuditLogViewer />
-                            </div>
-                        )}
-
                         {/* System Settings */}
                         {activeSection === 'system-settings' && (
                             <div className="p-8">
                                 <SystemSettingsTab
-                                    API_BASE_URL={API_BASE_URL}
-                                    authToken={authToken}
-                                />
-                            </div>
-                        )}
-
-                        {/* Bug Reports */}
-                        {activeSection === 'bug-reports' && (
-                            <div className="p-8">
-                                <BugReportsTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />
@@ -777,16 +752,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             </div>
                         )}
 
-                        {/* Genetics Builder */}
-                        {activeSection === 'genetics-builder' && (
-                            <div className="p-8">
-                                <GeneticsBuilderTab
-                                    API_BASE_URL={API_BASE_URL}
-                                    authToken={authToken}
-                                />
-                            </div>
-                        )}
-
                         {/* Backup Management */}
                         {activeSection === 'backup-management' && (
                             <div className="p-8">
@@ -803,17 +768,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 <AnalyticsTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
-                                />
-                            </div>
-                        )}
-
-                        {/* Mod Team Chat */}
-                        {activeSection === 'mod-chat' && (
-                            <div className="p-8">
-                                <ModChatTab
-                                    API_BASE_URL={API_BASE_URL}
-                                    authToken={authToken}
-                                    currentUserId={userId}
                                 />
                             </div>
                         )}

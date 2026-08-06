@@ -99,11 +99,10 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
         const matchesSearch = 
             item.phenotype?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.genotype?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.feedback?.toLowerCase().includes(searchTerm.toLowerCase());
-            item.genotype?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.feedback?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.User?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.User?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+            item.userId?.personalName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.userId?.breederName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.userId?.email?.toLowerCase().includes(searchTerm.toLowerCase());
         
         const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
         
@@ -277,9 +276,9 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
                             <div className="feedback-footer">
                                 <div className="feedback-user-info">
                                     <User size={14} />
-                                    <span>{item.User?.username || 'Anonymous'}</span>
-                                    {item.User?.email && (
-                                        <span className="feedback-user-email">{item.User.email}</span>
+                                    <span>{item.userId?.personalName || item.userId?.breederName || 'Anonymous'}</span>
+                                    {item.userId?.email && (
+                                        <span className="feedback-user-email">{item.userId.email}</span>
                                     )}
                                 </div>
                             </div>
