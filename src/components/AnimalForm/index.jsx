@@ -956,7 +956,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
         const borderColor = (!animal || animal.isHidden) ? (isSire ? '#76a7ff' : '#f48abf')
             : animal.gender === 'Male' ? '#3b82f6'
-            : animal.gender === 'Female' ? '#934E69'
+            : animal.gender === 'Female' ? '#f48abf'
             : (inlineMode ? '#94a3b8' : certBorderColor);
 
         const bgColor = (!animal || animal.isHidden) ? (isSire ? '#e8f1ff' : themeColors['pedigree-female-bg'])
