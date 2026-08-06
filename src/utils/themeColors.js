@@ -19,6 +19,9 @@ module.exports = {
   'dark-primary': '#7eaab3',
   'dark-primary-hover': '#6f949d',
   'dark-accent': '#8c5a6c', // Muted further — was #b46280 (still too vibrant against dark backgrounds).
+  // Muted version of Tailwind's blue-600, for solid blue CTA buttons (e.g. EnclosureModal) in dark mode.
+  'dark-info-blue': '#4d648c',
+  'dark-info-blue-hover': '#405577',
   // Was mistakenly set equal to dark-bg, making text invisible wherever both were used together.
   'dark-text': '#EDEDF0',
   'dark-text-secondary': '#C4C3CA',

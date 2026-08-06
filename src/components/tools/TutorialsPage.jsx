@@ -38,22 +38,22 @@ const TutorialsPage = () => {
   };
 
   return (
-        <div className="w-full h-full bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
+        <div className="w-full h-full bg-white dark:bg-dark-card-bg rounded-xl shadow-lg flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0 bg-gradient-to-r from-primary/10 to-accent/10">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-dark-text flex-shrink-0 bg-gradient-to-r from-primary/10 to-accent/10">
             <div className="flex items-center gap-3">
               {/* Mobile menu toggle */}
               <button
                 onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
-                className="sm:hidden p-2 hover:bg-gray-100 rounded-lg transition"
+                className="sm:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition"
                 aria-label="Toggle lesson menu"
               >
-                <Menu size={24} className="text-gray-700" />
+                <Menu size={24} className="text-gray-700 dark:text-dark-text" />
               </button>
               <BookOpen size={32} className="text-primary flex-shrink-0" />
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">LESSONS</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mt-1">Browse tutorials and guides</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text">LESSONS</h2>
+                <p className="text-gray-600 dark:text-dark-text-secondary text-xs sm:text-sm mt-1">Browse tutorials and guides</p>
               </div>
             </div>
           </div>
@@ -63,25 +63,25 @@ const TutorialsPage = () => {
             {/* Left Sidebar - Lesson List (collapsible on mobile) */}
             <div className={`${
               isLeftPanelOpen ? 'absolute sm:relative inset-0 z-10' : 'hidden'
-            } sm:block w-full sm:w-80 md:w-96 border-r border-gray-200 overflow-y-auto bg-gray-50`}>
+            } sm:block w-full sm:w-80 md:w-96 border-r border-gray-200 dark:border-dark-text overflow-y-auto bg-gray-50 dark:bg-dark-card-bg`}>
               
               {/* Getting Started Section */}
-              <div className="border-b border-gray-300">
+              <div className="border-b border-gray-300 dark:border-dark-text">
                 <button
                   onClick={() => toggleSection('getting-started')}
-                  className="w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-gray-50 transition font-semibold text-gray-800 text-left"
+                  className="w-full px-4 py-3 flex items-center justify-between bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-semibold text-gray-800 dark:text-dark-text text-left"
                 >
                   <span className="text-sm sm:text-base">🚀 Getting Started</span>
                   {expandedSection === 'getting-started' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 {expandedSection === 'getting-started' && (
-                  <div className="bg-gray-50">
+                  <div className="bg-gray-50 dark:bg-dark-card-bg">
                     {onboardingLessons.map((lesson) => (
                       <button
                         key={lesson.id}
                         onClick={() => selectLesson(lesson)}
-                        className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 transition ${
-                          selectedLesson?.id === lesson.id ? 'bg-blue-100 text-blue-800 font-semibold border-l-4 border-blue-600' : 'text-gray-700'
+                        className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition ${
+                          selectedLesson?.id === lesson.id ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-800 dark:text-dark-primary font-semibold border-l-4 border-blue-600 dark:border-dark-primary' : 'text-gray-700 dark:text-dark-text-secondary'
                         }`}
                       >
                         {lesson.title}
@@ -92,22 +92,22 @@ const TutorialsPage = () => {
               </div>
 
               {/* Key Features Section */}
-              <div className="border-b border-gray-300">
+              <div className="border-b border-gray-300 dark:border-dark-text">
                 <button
                   onClick={() => toggleSection('key-features')}
-                  className="w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-gray-50 transition font-semibold text-gray-800 text-left"
+                  className="w-full px-4 py-3 flex items-center justify-between bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-semibold text-gray-800 dark:text-dark-text text-left"
                 >
                   <span className="text-sm sm:text-base">📋 Key Features</span>
                   {expandedSection === 'key-features' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 {expandedSection === 'key-features' && (
-                  <div className="bg-gray-50">
+                  <div className="bg-gray-50 dark:bg-dark-card-bg">
                     {featureLessons.map((lesson) => (
                       <button
                         key={lesson.id}
                         onClick={() => selectLesson(lesson)}
-                        className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 transition ${
-                          selectedLesson?.id === lesson.id ? 'bg-blue-100 text-blue-800 font-semibold border-l-4 border-blue-600' : 'text-gray-700'
+                        className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition ${
+                          selectedLesson?.id === lesson.id ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-800 dark:text-dark-primary font-semibold border-l-4 border-blue-600 dark:border-dark-primary' : 'text-gray-700 dark:text-dark-text-secondary'
                         }`}
                       >
                         {lesson.title}
@@ -118,22 +118,22 @@ const TutorialsPage = () => {
               </div>
 
               {/* Advanced Features Section */}
-              <div className="border-b border-gray-300">
+              <div className="border-b border-gray-300 dark:border-dark-text">
                 <button
                   onClick={() => toggleSection('advanced')}
-                  className="w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-gray-50 transition font-semibold text-gray-800 text-left"
+                  className="w-full px-4 py-3 flex items-center justify-between bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-semibold text-gray-800 dark:text-dark-text text-left"
                 >
                   <span className="text-sm sm:text-base">✨ Advanced Features</span>
                   {expandedSection === 'advanced' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 {expandedSection === 'advanced' && (
-                  <div className="bg-gray-50">
+                  <div className="bg-gray-50 dark:bg-dark-card-bg">
                     {advancedLessons.map((lesson) => (
                       <button
                         key={lesson.id}
                         onClick={() => selectLesson(lesson)}
-                        className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 transition ${
-                          selectedLesson?.id === lesson.id ? 'bg-blue-100 text-blue-800 font-semibold border-l-4 border-blue-600' : 'text-gray-700'
+                        className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition ${
+                          selectedLesson?.id === lesson.id ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-800 dark:text-dark-primary font-semibold border-l-4 border-blue-600 dark:border-dark-primary' : 'text-gray-700 dark:text-dark-text-secondary'
                         }`}
                       >
                         {lesson.title}
@@ -145,7 +145,7 @@ const TutorialsPage = () => {
             </div>
 
             {/* Right Side - Lesson Details */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-white">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-white dark:bg-dark-card-bg">
               {selectedLesson ? (
                 <div className="max-w-7xl mx-auto">
                   {/* Mobile back button */}
@@ -158,12 +158,12 @@ const TutorialsPage = () => {
                   </button>
 
                   {/* Lesson Title */}
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text mb-3">
                     {selectedLesson.title}
                   </h2>
                   
                   {/* Description */}
-                  <p className="text-gray-600 text-sm sm:text-base mb-6 leading-relaxed">
+                  <p className="text-gray-600 dark:text-dark-text-secondary text-sm sm:text-base mb-6 leading-relaxed">
                     {selectedLesson.description}
                   </p>
 
@@ -178,7 +178,7 @@ const TutorialsPage = () => {
                       <div className="space-y-4">
                         {/* Step Progress Indicator */}
                         <div className="flex items-center justify-between mb-4">
-                          <span className="text-sm font-semibold text-gray-600">
+                          <span className="text-sm font-semibold text-gray-600 dark:text-dark-text-secondary">
                             Step {currentStepIndex + 1} of {totalSteps}
                           </span>
                           <div className="flex gap-1">
@@ -196,15 +196,15 @@ const TutorialsPage = () => {
                         </div>
 
                         {/* Current Step */}
-                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 sm:p-6 border border-gray-200">
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-surface dark:to-dark-surface rounded-lg p-4 sm:p-6 border border-gray-200 dark:border-dark-text">
                           {/* Step Header */}
                           <div className="flex items-start gap-3 mb-3">
                             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent text-black font-bold flex items-center justify-center text-sm shadow-md">
                               {currentStepIndex + 1}
                             </div>
                             <div className="flex-1">
-                              <h3 className="font-bold text-gray-800 text-lg">{currentStep.title}</h3>
-                              <p className="text-gray-600 text-sm mt-1">{currentStep.content}</p>
+                              <h3 className="font-bold text-gray-800 dark:text-dark-text text-lg">{currentStep.title}</h3>
+                              <p className="text-gray-600 dark:text-dark-text-secondary text-sm mt-1">{currentStep.content}</p>
                             </div>
                           </div>
 
@@ -245,7 +245,7 @@ const TutorialsPage = () => {
                           <button
                             onClick={() => setCurrentStepIndex(prev => Math.max(0, prev - 1))}
                             disabled={currentStepIndex === 0}
-                            className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed bg-white hover:bg-gray-100 border-2 border-gray-300 disabled:hover:bg-white"
+                            className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed bg-white dark:bg-dark-card-bg dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-surface-hover border-2 border-gray-300 dark:border-dark-text disabled:hover:bg-white dark:disabled:hover:bg-dark-card-bg"
                             aria-label="Previous step"
                           >
                             <ChevronLeft size={20} />
@@ -276,7 +276,7 @@ const TutorialsPage = () => {
               ) : (
                 // No lesson selected
                 <div className="h-full flex items-center justify-center">
-                  <div className="text-center text-gray-400">
+                  <div className="text-center text-gray-400 dark:text-dark-text-muted">
                     <BookOpen size={64} className="mx-auto mb-4 opacity-50" />
                     <p className="text-lg font-medium">Coming Soon</p>
                     <p className="text-sm mt-2">Tutorials and guides are being reworked — check back soon!</p>

@@ -2359,16 +2359,16 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           </div>
         </div>
       ) : (
-        <div className="w-full max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-3 sm:p-6">
+        <div className="w-full max-w-7xl mx-auto bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Offspring Calculator</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-dark-text">Offspring Calculator</h1>
               
               {/* Species Selector */}
               <select
                 value={selectedSpecies}
                 onChange={(e) => setSelectedSpecies(e.target.value)}
-                className="px-3 py-1.5 border-2 border-gray-300 rounded-lg text-sm font-medium bg-white hover:border-primary focus:border-primary focus:outline-none transition"
+                className="px-3 py-1.5 border-2 border-gray-300 dark:border-dark-text rounded-lg text-sm font-medium bg-white dark:bg-dark-card-bg dark:text-dark-text hover:border-primary focus:border-primary focus:outline-none transition"
                 disabled={loadingGenetics}
               >
                 <option value="Fancy Mouse">Fancy Mouse</option>
@@ -2378,14 +2378,14 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               </select>
               
               {loadingGenetics && (
-                <span className="text-sm text-gray-600">Loading...</span>
+                <span className="text-sm text-gray-600 dark:text-dark-text-muted">Loading...</span>
               )}
             </div>
             
             <div className="flex gap-2">
               <button
                 onClick={resetCalculator}
-                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-red-100 text-red-700 border-2 border-red-300 rounded-lg hover:bg-red-200 transition text-sm sm:text-base"
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-2 border-red-300 dark:border-red-700/60 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition text-sm sm:text-base"
                 title="Reset calculator to empty state"
               >
                 <X className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
@@ -2395,7 +2395,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               {selectedSpecies === 'Fancy Mouse' && (
                 <button
                   onClick={() => setShowExamples(true)}
-                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary dark:bg-dark-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary dark:bg-dark-primary text-black border-2 border-black dark:border-dark-text rounded-lg hover:bg-primary-dark transition text-sm sm:text-base"
                 >
                   <Book className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                   <span className="hidden sm:inline">View Examples</span>
@@ -2407,14 +2407,14 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6" data-tutorial-target="parent-selectors">
         {/* Sire/Father */}
-        <div className="bg-blue-50 rounded-lg p-3 sm:p-4 border-2 border-blue-300">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 sm:p-4 border-2 border-blue-300 dark:border-blue-700/60">
           <div className="flex justify-between items-center mb-2 sm:mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-blue-800">Sire/Father</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-blue-800 dark:text-blue-300">Sire/Father</h2>
             {authToken && myAnimals.length > 0 && (
               <button
                 onClick={() => openAnimalSelector('parent1')}
                 data-tutorial-target="select-animal-btn"
-                className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm rounded-lg transition"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-800 text-white text-xs sm:text-sm rounded-lg transition"
                 title="Select from your animals"
               >
                 <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -2432,7 +2432,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 <select
                   value={parent1[locus]}
                   onChange={(e) => updateParent1(locus, e.target.value)}
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">{locus} - {data.name}</option>
                   {validCombinations.map((combo) => (
@@ -2445,17 +2445,17 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               );
             })}
           </div>
-          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white rounded-lg border-2 border-blue-500">
-            <p className={`text-base sm:text-lg font-semibold ${parent1Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800'} mb-1 sm:mb-2`}>
-              <span className="text-xs sm:text-sm font-medium text-gray-700">Phenotype: </span>
+          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white dark:bg-dark-card-bg rounded-lg border-2 border-blue-500 dark:border-blue-700/60">
+            <p className={`text-base sm:text-lg font-semibold ${parent1Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800 dark:text-blue-300'} mb-1 sm:mb-2`}>
+              <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Phenotype: </span>
               {parent1Result.phenotype}
             </p>
             {parent1Result.notes && parent1Result.notes.length > 0 && (
-              <p className="text-xs sm:text-sm text-blue-700 italic mb-1 sm:mb-2">
+              <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 italic mb-1 sm:mb-2">
                 Note: {parent1Result.notes.join('; ')}
               </p>
             )}
-            <p className="text-xs sm:text-sm text-gray-700">
+            <p className="text-xs sm:text-sm text-gray-700 dark:text-dark-text-secondary">
               <span className="font-medium">Genotype: </span>
               {Object.entries(parent1)
                 .filter(([_, value]) => value && value !== '')
@@ -2463,13 +2463,13 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 .join(', ') || ''}
             </p>
             {parent1Result.carriers && parent1Result.carriers.length > 0 && (
-              <p className="text-xs sm:text-sm text-gray-700 mt-1">
+              <p className="text-xs sm:text-sm text-gray-700 dark:text-dark-text-secondary mt-1">
                 <span className="font-medium">Carried: </span>
                 {parent1Result.carriers.join(', ')}
               </p>
             )}
             {parent1Result.hidden && parent1Result.hidden.length > 0 && (
-              <p className="text-xs sm:text-sm text-gray-700 mt-1">
+              <p className="text-xs sm:text-sm text-gray-700 dark:text-dark-text-secondary mt-1">
                 <span className="font-medium">Hidden: </span>
                 {parent1Result.hidden.join(', ')}
               </p>
@@ -2478,13 +2478,13 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         </div>
 
         {/* Dam/Mother */}
-        <div className="bg-pink-50 rounded-lg p-3 sm:p-4 border-2 border-pink-300">
+        <div className="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-3 sm:p-4 border-2 border-pink-300 dark:border-pink-700/60">
           <div className="flex justify-between items-center mb-2 sm:mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-pink-800">Dam/Mother</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-pink-800 dark:text-pink-300">Dam/Mother</h2>
             {authToken && myAnimals.length > 0 && (
               <button
                 onClick={() => openAnimalSelector('parent2')}
-                className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white text-xs sm:text-sm rounded-lg transition"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-pink-600 dark:bg-pink-700 hover:bg-pink-700 dark:hover:bg-pink-800 text-white text-xs sm:text-sm rounded-lg transition"
                 title="Select from your animals"
               >
                 <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -2499,7 +2499,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 <select
                   value={parent2[locus]}
                   onChange={(e) => updateParent2(locus, e.target.value)}
-                  className="w-full px-2 py-1 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-2 py-1 text-xs sm:text-sm border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
                   <option value="">{locus} - {data.name}</option>
                   {data.combinations.map((combo) => (
@@ -2511,17 +2511,17 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               </div>
             ))}
           </div>
-          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white rounded-lg border-2 border-pink-500">
-            <p className={`text-base sm:text-lg font-semibold ${parent2Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800'} mb-1 sm:mb-2`}>
-              <span className="text-xs sm:text-sm font-medium text-gray-700">Phenotype: </span>
+          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white dark:bg-dark-card-bg rounded-lg border-2 border-pink-500 dark:border-pink-700/60">
+            <p className={`text-base sm:text-lg font-semibold ${parent2Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800 dark:text-pink-300'} mb-1 sm:mb-2`}>
+              <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Phenotype: </span>
               {parent2Result.phenotype}
             </p>
             {parent2Result.notes && parent2Result.notes.length > 0 && (
-              <p className="text-xs sm:text-sm text-blue-700 italic mb-1 sm:mb-2">
+              <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 italic mb-1 sm:mb-2">
                 Note: {parent2Result.notes.join('; ')}
               </p>
             )}
-            <p className="text-xs sm:text-sm text-gray-700">
+            <p className="text-xs sm:text-sm text-gray-700 dark:text-dark-text-secondary">
               <span className="font-medium">Genotype: </span>
               {Object.entries(parent2)
                 .filter(([_, value]) => value && value !== '')
@@ -2529,13 +2529,13 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 .join(', ') || ''}
             </p>
             {parent2Result.carriers && parent2Result.carriers.length > 0 && (
-              <p className="text-xs sm:text-sm text-gray-700 mt-1">
+              <p className="text-xs sm:text-sm text-gray-700 dark:text-dark-text-secondary mt-1">
                 <span className="font-medium">Carried: </span>
                 {parent2Result.carriers.join(', ')}
               </p>
             )}
             {parent2Result.hidden && parent2Result.hidden.length > 0 && (
-              <p className="text-xs sm:text-sm text-gray-700 mt-1">
+              <p className="text-xs sm:text-sm text-gray-700 dark:text-dark-text-secondary mt-1">
                 <span className="font-medium">Hidden: </span>
                 {parent2Result.hidden.join(', ')}
               </p>
@@ -2551,8 +2551,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               disabled={!hasAnySelection(parent1) || !hasAnySelection(parent2)}
               className={`px-8 py-3 text-white text-lg font-semibold rounded-lg transition shadow-lg ${
                 hasAnySelection(parent1) && hasAnySelection(parent2)
-                  ? 'bg-pink-600 hover:bg-pink-700 cursor-pointer'
-                  : 'bg-gray-400 cursor-not-allowed opacity-50'
+                  ? 'bg-pink-600 dark:bg-pink-700 hover:bg-pink-700 dark:hover:bg-pink-800 cursor-pointer'
+                  : 'bg-gray-400 dark:bg-dark-surface cursor-not-allowed opacity-50'
               }`}
               data-tutorial-target="calculate-offspring-btn"
             >
@@ -2562,20 +2562,20 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
           {/* Offspring Results */}
           {offspringResults && (
-            <div className="mt-6 bg-purple-50 rounded-lg p-6 border-2 border-purple-300" data-tutorial-target="offspring-results">
+            <div className="mt-6 bg-purple-50 dark:bg-dark-accent-purple-bg rounded-lg p-6 border-2 border-purple-300 dark:border-dark-accent-purple/60" data-tutorial-target="offspring-results">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-purple-800">Possible Offspring Outcomes</h2>
+                <h2 className="text-xl font-semibold text-purple-800 dark:text-dark-accent-purple">Possible Offspring Outcomes</h2>
                 <div className="flex gap-2">
-                  <span className="text-sm font-medium text-purple-700 bg-purple-200 px-3 py-1 rounded-full">
+                  <span className="text-sm font-medium text-purple-700 dark:text-dark-accent-purple bg-purple-200 dark:bg-dark-accent-purple/30 px-3 py-1 rounded-full">
                     {offspringResults.length} phenotypes
                   </span>
-                  <span className="text-sm font-medium text-purple-700 bg-purple-200 px-3 py-1 rounded-full">
+                  <span className="text-sm font-medium text-purple-700 dark:text-dark-accent-purple bg-purple-200 dark:bg-dark-accent-purple/30 px-3 py-1 rounded-full">
                     {offspringResults.reduce((total, result) => total + result.genotypes.length, 0)} genotypes
                   </span>
                 </div>
               </div>
               {showWildcardNote && (
-                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg text-sm">
+                <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/60 text-yellow-800 dark:text-yellow-300 rounded-lg text-sm">
                   <p><strong>Note on "/-" notation:</strong> A genotype like "A/-" indicates that the animal has at least one dominant "A" allele, but the other allele is unknown because one or both parents had an unknown allele at that locus. This is a placeholder for a dominant phenotype where the full genotype isn't certain.</p>
                 </div>
               )}
@@ -2588,20 +2588,20 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                       : '');
                   
                   return (
-                  <div key={idx} className="bg-white p-4 rounded-lg border border-purple-200">
+                  <div key={idx} className="bg-white dark:bg-dark-card-bg p-4 rounded-lg border border-purple-200 dark:border-dark-accent-purple/40">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className={`text-lg font-semibold ${displayPhenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
-                            <span className="text-sm font-medium text-gray-600">Phenotype: </span>
+                          <p className={`text-lg font-semibold ${displayPhenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800 dark:text-dark-text'}`}>
+                            <span className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Phenotype: </span>
                             {displayPhenotype}
                           </p>
-                          <span className="text-purple-700 font-semibold">
+                          <span className="text-purple-700 dark:text-dark-accent-purple font-semibold">
                             {result.percentage}%
                           </span>
                         </div>
                         {result.notes && result.notes.length > 0 && (
-                          <p className="text-sm text-blue-700 italic mt-1">
+                          <p className="text-sm text-blue-700 dark:text-blue-400 italic mt-1">
                             Note: {result.notes.join('; ')}
                           </p>
                         )}
@@ -2609,14 +2609,14 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                       <div className="flex gap-2 flex-wrap">
                         <button
                           onClick={() => togglePhenotype(idx)}
-                          className="px-3 py-1 text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg transition flex items-center gap-1"
+                          className="px-3 py-1 text-sm bg-purple-100 dark:bg-dark-accent-purple/20 hover:bg-purple-200 dark:hover:bg-dark-accent-purple/40 text-purple-800 dark:text-dark-accent-purple rounded-lg transition flex items-center gap-1"
                         >
                           {expandedPhenotypes[idx] ? '▲' : '▼'} {result.genotypes.length} genotype{result.genotypes.length !== 1 ? 's' : ''}
                         </button>
                         {authToken && (
                           <button
                             onClick={() => openFeedbackModal(result.phenotype, result.genotypes[0])}
-                            className="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition whitespace-nowrap"
+                            className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 rounded-lg transition whitespace-nowrap"
                             title="Report incorrect or unknown phenotype"
                           >
                             Report Issue
@@ -2626,32 +2626,32 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                     </div>
                     
                     {expandedPhenotypes[idx] && (
-                      <div className="mt-3 pt-3 border-t border-purple-100">
+                      <div className="mt-3 pt-3 border-t border-purple-100 dark:border-dark-accent-purple/30">
                         {/* Carrier explanation for beginners */}
-                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                          <h4 className="font-semibold text-blue-800 mb-2">Possible Carriers:</h4>
+                        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg">
+                          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Possible Carriers:</h4>
                           {(() => {
                             const carriers = generateCarrierExplanation(result.genotypes);
                             return carriers.length > 0 ? (
-                              <div className="text-sm text-blue-700">
+                              <div className="text-sm text-blue-700 dark:text-blue-400">
                                 <p className="mb-2">Some offspring may carry hidden genes for:</p>
                                 <div className="flex flex-wrap gap-1">
                                   {carriers.map((carrier, cIdx) => (
-                                    <span key={cIdx} className="bg-blue-100 px-2 py-1 rounded text-xs">
+                                    <span key={cIdx} className="bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 px-2 py-1 rounded text-xs">
                                       {carrier}
                                     </span>
                                   ))}
                                 </div>
                               </div>
                             ) : (
-                              <p className="text-sm text-blue-700">No recessive carriers in this combination</p>
+                              <p className="text-sm text-blue-700 dark:text-blue-400">No recessive carriers in this combination</p>
                             );
                           })()}
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                           {result.genotypes.map((genotype, gIdx) => (
-                            <div key={gIdx} className="text-sm text-gray-700 bg-purple-50 px-3 py-2 rounded">
+                            <div key={gIdx} className="text-sm text-gray-700 dark:text-dark-text-secondary bg-purple-50 dark:bg-dark-accent-purple-bg px-3 py-2 rounded">
                               {Object.entries(genotype)
                                 .map(([_, alleles]) => alleles)
                                 .join(' ')}

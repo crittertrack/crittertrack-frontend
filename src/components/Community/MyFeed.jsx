@@ -100,28 +100,28 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-md p-4">
-            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-md p-4">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4 flex items-center gap-2">
                 <Heart className="text-purple-500" />
                 Favorites
             </h2>
             {/* Favorite Animals */}
             <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-700 mb-3">
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">
                     Favorite Animals ({favoriteAnimals.length})
                 </h3>
                 {favoriteAnimals.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No favorite animals yet. Visit animal profiles to add favorites!</p>
+                    <p className="text-gray-500 dark:text-dark-text-muted text-sm">No favorite animals yet. Visit animal profiles to add favorites!</p>
                 ) : (
                     <>
                         <div className="relative mb-2">
-                            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                             <input
                                 type="text"
                                 placeholder="Search favorites..."
                                 value={animalSearch}
                                 onChange={e => setAnimalSearch(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:outline-none focus:border-primary"
                             />
                         </div>
                         <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -138,32 +138,32 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                             return (
                                 <div
                                     key={animal.id_public}
-                                    className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
+                                    className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition cursor-pointer"
                                     onClick={() => navigate(`/animal/${animal.id_public}`)}
                                 >
-                                    <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                    <div className="w-12 h-12 bg-gray-100 dark:bg-dark-surface rounded overflow-hidden flex-shrink-0">
                                         {imgSrc ? (
                                             <img src={imgSrc} alt={fullName} className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                 <Cat size={24} />
                                             </div>
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-gray-800 truncate flex items-center gap-1">
+                                        <p className="font-semibold text-gray-800 dark:text-dark-text truncate flex items-center gap-1">
                                             {fullName}
                                             {animal.gender === 'Male' ? <Mars size={14} strokeWidth={2.5} className="text-primary flex-shrink-0" /> : animal.gender === 'Female' ? <Venus size={14} strokeWidth={2.5} className="text-accent flex-shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={14} strokeWidth={2.5} className="text-purple-500 flex-shrink-0" /> : <Circle size={14} strokeWidth={2.5} className="text-gray-400 flex-shrink-0" />}
                                         </p>
-                                        <p className="text-xs text-gray-500 truncate">{animal.id_public} – {animal.species}</p>
-                                        {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
+                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{animal.id_public} – {animal.species}</p>
+                                        {variety && <p className="text-xs text-gray-400 dark:text-dark-text-muted truncate">{variety}</p>}
                                     </div>
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             toggleFavoriteAnimal(animal.id_public);
                                         }}
-                                        className="p-2 text-purple-500 hover:bg-purple-50 rounded transition flex-shrink-0"
+                                        className="p-2 text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition flex-shrink-0"
                                     >
                                         <Heart size={18} fill="currentColor" />
                                     </button>
@@ -177,21 +177,21 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
 
             {/* Favorite Users */}
             <div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-3">
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-text-secondary mb-3">
                     Favorite Breeders ({favoriteUsers.length})
                 </h3>
                 {favoriteUsers.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No favorite breeders yet. Visit breeder profiles to add favorites!</p>
+                    <p className="text-gray-500 dark:text-dark-text-muted text-sm">No favorite breeders yet. Visit breeder profiles to add favorites!</p>
                 ) : (
                     <>
                         <div className="relative mb-2">
-                            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                             <input
                                 type="text"
                                 placeholder="Search favorites..."
                                 value={breederSearch}
                                 onChange={e => setBreederSearch(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:outline-none focus:border-primary"
                             />
                         </div>
                         <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -207,28 +207,28 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                             return (
                                 <div
                                     key={user.id_public}
-                                    className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
+                                    className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition cursor-pointer"
                                     onClick={() => navigate(`/user/${user.id_public}`)}
                                 >
-                                    <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden flex-shrink-0">
+                                    <div className="w-12 h-12 bg-gray-100 dark:bg-dark-surface rounded-full overflow-hidden flex-shrink-0">
                                         {user.profileImage ? (
                                             <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                 <User size={24} />
                                             </div>
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-sm text-gray-800 truncate">{displayName}</p>
-                                        <p className="text-xs text-gray-500 truncate">{user.id_public}</p>
+                                        <p className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{displayName}</p>
+                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{user.id_public}</p>
                                     </div>
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             toggleFavoriteUser(user.id_public);
                                         }}
-                                        className="p-2 text-purple-500 hover:bg-purple-50 rounded transition"
+                                        className="p-2 text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition"
                                     >
                                         <Heart size={18} fill="currentColor" />
                                     </button>

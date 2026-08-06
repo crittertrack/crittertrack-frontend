@@ -8,6 +8,11 @@
     font-size: 1rem;
     transition: all 0.2s;
     box-sizing: border-box;
+    @apply bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:border-dark-text-muted;
+}
+
+.date-picker-input::placeholder {
+    @apply text-gray-400 dark:text-dark-text-muted;
 }
 
 .date-picker-input:focus {

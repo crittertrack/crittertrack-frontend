@@ -13,7 +13,7 @@ const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) 
 
   return (
     <div className="w-full">
-      <label className="block text-sm font-medium text-gray-700 mb-2">{title}</label>
+      <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">{title}</label>
       <div className="relative">
         <input
           type="text"
@@ -21,17 +21,17 @@ const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           disabled={disabled}
-          className="w-full p-2 border border-gray-300 rounded-lg"
+          className="w-full p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg"
         />
-        <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
       </div>
-      <div className="mt-2 h-48 overflow-y-auto border rounded-lg bg-gray-50">
+      <div className="mt-2 h-48 overflow-y-auto border dark:border-dark-text rounded-lg bg-gray-50 dark:bg-dark-card-bg">
         {filteredAnimals.map(animal => (
           <button
             key={animal.id_public}
             onClick={() => onSelect(animal)}
             disabled={disabled}
-            className={`w-full text-left p-2 text-sm hover:bg-blue-50 transition ${selectedAnimal?.id_public === animal.id_public ? 'bg-blue-100 font-semibold' : ''}`}
+            className={`w-full text-left p-2 text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition ${selectedAnimal?.id_public === animal.id_public ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-900 dark:text-dark-primary font-semibold' : 'dark:text-dark-text'}`}
           >
             {getFullName(animal)} ({animal.id_public})
           </button>
@@ -108,14 +108,14 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
   };
 
   return (
-    <div className="w-full h-full bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-white dark:bg-dark-card-bg rounded-xl shadow-lg flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0 bg-gradient-to-r from-primary/10 to-accent/10">
+      <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-dark-text flex-shrink-0 bg-gradient-to-r from-primary/10 to-accent/10">
         <div className="flex items-center gap-3">
           <Scale size={32} className="text-primary flex-shrink-0" />
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">COI Calculator</h2>
-            <p className="text-gray-600 text-xs sm:text-sm mt-1">Calculate the Coefficient of Inbreeding for a potential pairing.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text">COI Calculator</h2>
+            <p className="text-gray-600 dark:text-dark-text-secondary text-xs sm:text-sm mt-1">Calculate the Coefficient of Inbreeding for a potential pairing.</p>
           </div>
         </div>
       </div>
@@ -124,7 +124,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
       <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
-            <label htmlFor="species-selector" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="species-selector" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
               Filter by Species
             </label>
             <select
@@ -137,17 +137,17 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
                 setCoiResult(null);
                 setError('');
               }}
-              className="w-full p-2 border border-gray-300 rounded-lg"
+              className="w-full p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg"
             >
               {speciesOptions.map(species => (
                 <option key={species} value={species}>{species}</option>
               ))}
             </select>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">
               Select a species to narrow down the animal lists below.
             </p>
             {!isSpeciesSupported && selectedSpecies !== 'All' && (
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text rounded-lg text-sm">
                 <p>COI calculation is currently available for Fancy Mouse and Fancy Rat. Support for other species is in development!</p>
               </div>
             )}
@@ -192,22 +192,22 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
           </div>
 
           {error && (
-            <div className="p-4 mb-6 bg-red-50 border border-red-200 text-red-800 rounded-lg text-center">
+            <div className="p-4 mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-lg text-center">
               <p>{error}</p>
             </div>
           )}
 
           {coiResult && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Calculation Result</h3>
+            <div className="bg-gray-50 dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-lg p-6">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4 text-center">Calculation Result</h3>
               <div className="text-center">
-                <p className="text-gray-600">The predicted Coefficient of Inbreeding (COI) for offspring from:</p>
-                <p className="font-semibold my-2">{getFullName(sire)} &times; {getFullName(dam)}</p>
-                <div className="my-4 p-6 bg-white border-2 border-primary rounded-full w-40 h-40 mx-auto flex flex-col items-center justify-center shadow-lg">
+                <p className="text-gray-600 dark:text-dark-text-secondary">The predicted Coefficient of Inbreeding (COI) for offspring from:</p>
+                <p className="font-semibold my-2 dark:text-dark-text">{getFullName(sire)} &times; {getFullName(dam)}</p>
+                <div className="my-4 p-6 bg-white dark:bg-dark-card-bg border-2 border-primary rounded-full w-40 h-40 mx-auto flex flex-col items-center justify-center shadow-lg">
                   <span className="text-4xl font-bold text-primary">{(coiResult.inbreedingCoefficient ?? 0).toFixed(2)}%</span>
-                  <span className="text-sm text-gray-500">COI</span>
+                  <span className="text-sm text-gray-500 dark:text-dark-text-muted">COI</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Calculated over {coiResult.generations} generations.</p>
+                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-2">Calculated over {coiResult.generations} generations.</p>
               </div>
 
               {(() => {
@@ -221,21 +221,21 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
                 if (ancestors.length === 0) return null;
 
                 return (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-dark-text">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-4 text-center flex items-center justify-center gap-2">
                       <Dna size={20} />
                       Common Ancestors ({ancestors.length})
                     </h4>
                     <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                       {ancestors.map((ancestor, index) => (
-                        <div key={ancestor.id_public || index} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
-                          <p className="font-bold text-gray-800">{getFullName(ancestor)} ({ancestor.id_public})</p>
-                          <p className="text-xs text-gray-500 mt-0.5">Contribution: <span className="font-semibold">{(ancestor.contribution * 100).toFixed(4)}%</span></p>
+                        <div key={ancestor.id_public || index} className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-lg p-3 text-sm">
+                          <p className="font-bold text-gray-800 dark:text-dark-text">{getFullName(ancestor)} ({ancestor.id_public})</p>
+                          <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">Contribution: <span className="font-semibold">{(ancestor.contribution * 100).toFixed(4)}%</span></p>
                           {/* Paths are not available in the current API response, so they are hidden. */}
                           {(ancestor.sirePath || ancestor.damPath) &&
                             <div className="mt-2 text-xs grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              <div><p className="font-semibold text-blue-700">Path from Sire:</p><p className="text-gray-600">{(ancestor.sirePath || []).join(' → ')}</p></div>
-                              <div><p className="font-semibold text-pink-700">Path from Dam:</p><p className="text-gray-600">{(ancestor.damPath || []).join(' → ')}</p></div>
+                              <div><p className="font-semibold text-blue-700 dark:text-blue-400">Path from Sire:</p><p className="text-gray-600 dark:text-dark-text-secondary">{(ancestor.sirePath || []).join(' → ')}</p></div>
+                              <div><p className="font-semibold text-pink-700 dark:text-pink-400">Path from Dam:</p><p className="text-gray-600 dark:text-dark-text-secondary">{(ancestor.damPath || []).join(' → ')}</p></div>
                             </div>
                           }
                         </div>
@@ -248,7 +248,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
           )}
 
           {!coiResult && !isLoading && (
-             <div className="text-center text-gray-400 mt-8">
+             <div className="text-center text-gray-400 dark:text-dark-text-muted mt-8">
                 <Scale size={48} className="mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium">Select a sire and dam to begin.</p>
                 <p className="text-sm mt-2">The calculator will determine the inbreeding coefficient based on their shared ancestors.</p>

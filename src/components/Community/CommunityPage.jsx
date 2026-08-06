@@ -86,7 +86,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
 
     return (
         <div className="w-full max-w-7xl mx-auto p-4">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-dark-text mb-6 flex items-center gap-2">
                 <Users size={32} className="text-primary" />
                 Community
             </h1>
@@ -101,8 +101,8 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
 
                     {/* Recent Activity Section */}
                     {recentActivityUsers.length > 0 && (
-                        <div className="bg-white rounded-lg shadow-md p-4">
-                            <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-md p-4">
+                            <h2 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-3 flex items-center gap-2">
                                 <Users size={20} className="text-primary-dark" />
                                 Recent Activity
                             </h2>
@@ -114,25 +114,25 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                     return (
                                         <div
                                             key={user.id_public}
-                                            className="relative bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition cursor-pointer text-center"
+                                            className="relative bg-gray-50 dark:bg-dark-surface rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition cursor-pointer text-center"
                                             onClick={() => navigate(`/user/${user.id_public}`)}
                                         >
                                             {user.isActive && (
-                                                <span className="absolute top-2 right-2 w-3 h-3 bg-green-400 border-2 border-white rounded-full" title="Active now" />
+                                                <span className="absolute top-2 right-2 w-3 h-3 bg-green-400 border-2 border-white dark:border-dark-card-bg rounded-full" title="Active now" />
                                             )}
-                                            <div className="w-14 h-14 bg-gray-200 rounded-full overflow-hidden mx-auto mb-2">
+                                            <div className="w-14 h-14 bg-gray-200 dark:bg-dark-card-bg rounded-full overflow-hidden mx-auto mb-2">
                                                 {user.profileImage ? (
                                                     <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                         <User size={28} />
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="font-semibold text-sm text-gray-800 break-words line-clamp-2 leading-tight">{displayName}</p>
-                                            <p className="text-xs text-gray-500 truncate">{user.id_public}</p>
+                                            <p className="font-semibold text-sm text-gray-800 dark:text-dark-text break-words line-clamp-2 leading-tight">{displayName}</p>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{user.id_public}</p>
                                             {user.isNew && !user.isActive && (
-                                                <span className="inline-block mt-1 text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">NEW</span>
+                                                <span className="inline-block mt-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded">NEW</span>
                                             )}
                                         </div>
                                     );
@@ -144,20 +144,20 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     {/* News and Breeder Directory */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
                         {/* News Section */}
-                        <div className="lg:col-span-1 bg-white rounded-lg shadow-md overflow-hidden">
+                        <div className="lg:col-span-1 bg-white dark:bg-dark-card-bg rounded-lg shadow-md overflow-hidden">
                             <NewsSection API_BASE_URL={API_BASE_URL} authToken={authToken} />
                         </div>
 
                         {/* Breeder Directory Section */}
-                        <div className="lg:col-span-1 bg-white rounded-lg shadow-md overflow-hidden">
+                        <div className="lg:col-span-1 bg-white dark:bg-dark-card-bg rounded-lg shadow-md overflow-hidden">
                             <button
                                 onClick={() => setBreederDirCollapsed(v => !v)}
-                                className="w-full flex sm:hidden items-center justify-between p-4 border-b border-gray-200"
+                                className="w-full flex sm:hidden items-center justify-between p-4 border-b border-gray-200 dark:border-dark-text"
                             >
-                                <span className="font-bold text-gray-800 flex items-center gap-2">
+                                <span className="font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                                     <Star size={18} className="text-primary" /> Breeders Directory
                                 </span>
-                                {breederDirCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                                {breederDirCollapsed ? <ChevronDown size={18} className="dark:text-dark-text" /> : <ChevronUp size={18} className="dark:text-dark-text" />}
                             </button>
                             <div className={`${breederDirCollapsed ? 'hidden' : 'block'} sm:block`}>
                                 <BreederDirectory

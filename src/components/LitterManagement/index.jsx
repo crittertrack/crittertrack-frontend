@@ -326,7 +326,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                 {/* Species grid */}
                 <div className="flex-grow overflow-y-auto p-4">
                     {favCount > 0 && !search && (
-                        <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                        <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-2 flex items-center gap-1">
                             <Star size={11} className="fill-current" /> Favourites
                         </p>
                     )}
@@ -349,20 +349,20 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                                 onClick={() => onSelect(s.name)}
                                                 className={`w-full h-20 flex flex-col items-start justify-center p-2 border-2 rounded-lg text-left transition hover:shadow-md relative ${
                                                     isFav
-                                                        ? 'border-amber-300 bg-amber-50 hover:bg-amber-100'
+                                                        ? 'border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50'
                                                         : s.isDefault
                                                         ? 'border-primary bg-primary/10 hover:bg-primary/20'
                                                         : 'border-gray-200 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg hover:border-primary/50 hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
                                                 }`}
                                             >
-                                                <span className="font-medium text-sm text-gray-800 dark:text-dark-text leading-tight pr-5 line-clamp-1">
+                                                <span className={`font-medium text-sm leading-tight pr-5 line-clamp-1 ${isFav ? 'text-amber-800 dark:text-amber-200' : 'text-gray-800 dark:text-dark-text'}`}>
                                                     {s.name}
                                                 </span>
                                                 {s.latinName && (
-                                                    <span className="text-xs italic text-gray-500 dark:text-dark-text-muted mt-0.5 leading-tight line-clamp-1">{s.latinName}</span>
+                                                    <span className={`text-xs italic mt-0.5 leading-tight line-clamp-1 ${isFav ? 'text-amber-700 dark:text-amber-400' : 'text-gray-500 dark:text-dark-text-muted'}`}>{s.latinName}</span>
                                                 )}
                                                 {s.category && (
-                                                    <span className="absolute bottom-1 left-2 text-gray-400 dark:text-dark-text-muted">
+                                                    <span className={`absolute bottom-1 left-2 ${isFav ? 'text-amber-600 dark:text-amber-500' : 'text-gray-400 dark:text-dark-text-muted'}`}>
                                                         {s.category === 'Mammal' && <Cat size={12} />}
                                                         {s.category === 'Reptile' && <Turtle size={12} />}
                                                         {s.category === 'Bird' && <Bird size={12} />}
@@ -377,7 +377,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                                 type="button"
                                                 onClick={e => toggleFavorite(e, s.name)}
                                                 title={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                                                className={`absolute top-2 right-2 transition ${isFav ? 'text-amber-400 opacity-100' : 'text-gray-300 opacity-0 group-hover:opacity-100 hover:text-amber-400'}`}
+                                                className={`absolute top-2 right-2 transition ${isFav ? 'text-amber-400 dark:text-amber-500 opacity-100' : 'text-gray-300 dark:text-dark-text-muted opacity-0 group-hover:opacity-100 hover:text-amber-400 dark:hover:text-amber-500'}`}
                                             >
                                                 <Star size={13} className={isFav ? 'fill-current' : ''} />
                                             </button>
@@ -3534,7 +3534,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                             <p className="text-xs text-gray-500 dark:text-dark-text-muted">The entry will appear as <span className="font-semibold text-indigo-600 dark:text-indigo-400">Planned</span> until you edit it and add a birth date.</p>
                             <div className="flex gap-3 justify-end border-t dark:border-dark-text-muted pt-3">
                                 <button type="button" onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="px-4 py-2 border border-gray-300 dark:border-dark-text-muted text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover font-semibold text-sm">Cancel</button>
-                                <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg text-sm">Save Mating</button>
+                                <button type="submit" className="bg-indigo-600 dark:bg-dark-accent-purple hover:bg-indigo-700 dark:hover:bg-dark-accent-purple/80 text-white font-bold py-2 px-5 rounded-lg text-sm">Save Mating</button>
                             </div>
                         </form>
                     </div>

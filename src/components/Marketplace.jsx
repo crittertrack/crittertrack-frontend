@@ -298,14 +298,14 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-6 dark:bg-dark-card-bg">
             {/* Header */}
             <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                     <ShoppingBag className="text-accent" />
                     Marketplace
                 </h1>
-                <p className="text-gray-600 mt-1">Browse animals available for sale or stud services</p>
+                <p className="text-gray-600 dark:text-dark-text mt-1">Browse animals available for sale or stud services</p>
             </div>
 
             {/* Listing Type Tabs */}
@@ -315,7 +315,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                     className={`flex-1 py-2 px-4 rounded-lg font-medium transition ${
                         listingType === 'all' 
                             ? 'bg-accent text-white' 
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                     }`}
                 >
                     All Listings
@@ -325,7 +325,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                     className={`flex-1 py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2 ${
                         listingType === 'sale' 
                             ? 'bg-yellow-500 text-white' 
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                     }`}
                 >
                     <Tag size={18} />
@@ -336,7 +336,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                     className={`flex-1 py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2 ${
                         listingType === 'stud' 
                             ? 'bg-purple-600 text-white' 
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                     }`}
                 >
                     <Heart size={18} />
@@ -348,13 +348,13 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
             <form onSubmit={handleSearch} className="mb-4">
                 <div className="flex gap-2">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text" size={20} />
                         <input
                             type="text"
                             placeholder="Search by name or ID..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
+                            className="w-full pl-10 pr-4 py-2 border dark:border-dark-text rounded-lg focus:ring-2 focus:ring-accent focus:border-accent bg-white dark:bg-dark-surface text-gray-900 dark:text-dark-text dark:placeholder-dark-text"
                         />
                     </div>
                     <button
@@ -369,7 +369,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                         className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
                             showFilters || hasActiveFilters
                                 ? 'bg-accent text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                         }`}
                     >
                         <Filter size={18} />
@@ -383,14 +383,14 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
 
             {/* Filters Panel */}
             {showFilters && (
-                <div className="bg-gray-50 rounded-lg p-4 mb-4 border">
+                <div className="bg-gray-50 dark:bg-dark-card-bg rounded-lg p-4 mb-4 border dark:border-dark-text">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1">Species</label>
                             <select
                                 value={selectedSpecies}
                                 onChange={(e) => setSelectedSpecies(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
+                                className="w-full px-3 py-2 border dark:border-dark-text rounded-lg focus:ring-2 focus:ring-accent focus:border-accent bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                             >
                                 <option value="">All Species</option>
                                 {speciesOptions.map((species) => (
@@ -399,11 +399,11 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1">Gender</label>
                             <select
                                 value={selectedGender}
                                 onChange={(e) => setSelectedGender(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
+                                className="w-full px-3 py-2 border dark:border-dark-text rounded-lg focus:ring-2 focus:ring-accent focus:border-accent bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                             >
                                 <option value="">Any Gender</option>
                                 <option value="Male">Male</option>
@@ -414,11 +414,11 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1">Country</label>
                             <select
                                 value={selectedCountry}
                                 onChange={(e) => { setSelectedCountry(e.target.value); if (e.target.value !== 'US') setSelectedState(''); }}
-                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
+                                className="w-full px-3 py-2 border dark:border-dark-text rounded-lg focus:ring-2 focus:ring-accent focus:border-accent bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                             >
                                 <option value="">All Countries</option>
                                 {countryOptions.map((country) => (
@@ -430,11 +430,11 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                         </div>
                         {selectedCountry === 'US' && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1">State</label>
                                 <select
                                     value={selectedState}
                                     onChange={(e) => setSelectedState(e.target.value)}
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
+                                    className="w-full px-3 py-2 border dark:border-dark-text rounded-lg focus:ring-2 focus:ring-accent focus:border-accent bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                 >
                                     <option value="">All States</option>
                                     {US_STATES.map((s) => (
@@ -447,7 +447,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                             {hasActiveFilters && (
                                 <button
                                     onClick={resetFilters}
-                                    className="w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition flex items-center justify-center gap-2"
+                                    className="w-full px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition flex items-center justify-center gap-2"
                                 >
                                     <X size={18} />
                                     Clear Filters
@@ -459,7 +459,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
             )}
 
             {/* Results Count */}
-            <div className="flex justify-between items-center mb-4 text-sm text-gray-600">
+            <div className="flex justify-between items-center mb-4 text-sm text-gray-600 dark:text-dark-text">
                 <span>
                     {loading ? 'Loading...' : `${pagination.total} listing${pagination.total !== 1 ? 's' : ''} found`}
                 </span>
@@ -490,10 +490,10 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
 
             {/* Empty State */}
             {!loading && !error && animals.length === 0 && (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <ShoppingBag className="mx-auto text-gray-400 mb-4" size={48} />
-                    <h3 className="text-lg font-medium text-gray-700 mb-2">No listings found</h3>
-                    <p className="text-gray-500 mb-4">
+                <div className="text-center py-12 bg-gray-50 dark:bg-dark-surface rounded-lg">
+                    <ShoppingBag className="mx-auto text-gray-400 dark:text-dark-text mb-4" size={48} />
+                    <h3 className="text-lg font-medium text-gray-700 dark:text-dark-text mb-2">No listings found</h3>
+                    <p className="text-gray-500 dark:text-dark-text mb-4">
                         {hasActiveFilters 
                             ? 'Try adjusting your filters or search terms' 
                             : 'Check back later for new listings'}
@@ -717,7 +717,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
     const age = calculateAge(animal.birthDate);
     
     return (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition border border-gray-100">
+        <div className="bg-white dark:bg-dark-surface rounded-xl shadow-md overflow-hidden hover:shadow-lg transition border border-gray-100 dark:border-dark-text">
             {/* Image */}
             <div className="relative h-48 bg-gray-100">
                 {animal.imageUrl || animal.photoUrl ? (
@@ -771,25 +771,25 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                 {/* Name and ID */}
                 <div className="flex justify-between items-start mb-2">
                     <h3 
-                        className="font-semibold text-gray-800 text-lg cursor-pointer hover:text-accent transition"
+                        className="font-semibold text-gray-800 dark:text-dark-text text-lg cursor-pointer hover:text-accent transition"
                         onClick={() => onViewAnimal && onViewAnimal(animal.id_public)}
                     >
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </h3>
-                    <span className="text-xs text-gray-500 font-mono">
+                    <span className="text-xs text-gray-500 dark:text-dark-text font-mono">
                         {animal.id_public}
                     </span>
                 </div>
                 
                 {/* Species and Age */}
-                <div className="text-sm text-gray-600 mb-3">
+                <div className="text-sm text-gray-600 dark:text-dark-text mb-3">
                     <span>{animal.species}</span>
                     {age && <span className="mx-1">•</span>}
                     {age && <span>{age} old</span>}
                     {(() => {
                         const variety = [animal.color, animal.coatPattern, animal.coat, animal.earset].filter(Boolean).join(' ');
                         return variety && (
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-gray-500 dark:text-dark-text mt-1">
                             {variety}
                         </div>
                     );})()}
@@ -816,9 +816,9 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                 
                 {/* Owner Info */}
                 {animal.ownerInfo && (
-                    <div className="border-t pt-3 mt-3">
+                    <div className="border-t dark:border-dark-text pt-3 mt-3">
                         <div 
-                            className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer hover:text-accent transition"
+                            className="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-text cursor-pointer hover:text-accent transition"
                             onClick={() => onViewProfile && onViewProfile(animal.ownerInfo.id_public)}
                         >
                             {animal.ownerInfo.profileImage ? (
@@ -844,7 +844,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                             )}
                         </div>
                         {animal.ownerInfo.country && (
-                            <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 ml-8">
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-dark-text mt-1 ml-8">
                                 <span className={`${getCountryFlag(animal.ownerInfo.country)} inline-block h-3 w-4`}></span>
                                 <span>{getCountryName(animal.ownerInfo.country)}{animal.ownerInfo.country === 'US' && animal.ownerInfo.state ? `, ${getStateName(animal.ownerInfo.state)}` : ''}</span>
                             </div>

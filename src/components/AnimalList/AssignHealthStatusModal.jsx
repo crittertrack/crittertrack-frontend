@@ -124,21 +124,21 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Status</label>
-                                    <select name="status" value={details.status} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                    <select name="status" value={details.status} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text">
                                         <option value="Quarantine">Quarantine</option>
                                         <option value="Isolation">Isolation</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Type/Reason</label>
-                                    <select name="type" value={details.type} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                    <select name="type" value={details.type} onChange={handleDetailChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text">
                                         <option value="">Select type...</option>
                                         {QUARANTINE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                                     </select>
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Additional Notes</label>
-                                    <input type="text" name="reason" value={details.reason} onChange={handleDetailChange} placeholder="e.g., Specific illness, concerns, observations" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    <input type="text" name="reason" value={details.reason} onChange={handleDetailChange} placeholder="e.g., Specific illness, concerns, observations" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Start Date <span className="text-red-500">*</span></label>
@@ -159,15 +159,15 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Name</label>
-                                    <input type="text" name="name" value={medication.name} onChange={handleMedicationChange} placeholder="e.g., Amoxicillin" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    <input type="text" name="name" value={medication.name} onChange={handleMedicationChange} placeholder="e.g., Amoxicillin" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dose</label>
-                                    <input type="text" name="dose" value={medication.dose} onChange={handleMedicationChange} placeholder="e.g., 50mg" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    <input type="text" name="dose" value={medication.dose} onChange={handleMedicationChange} placeholder="e.g., 50mg" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted" />
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Reason</label>
-                                    <input type="text" name="reason" value={medication.reason} onChange={handleMedicationChange} placeholder="e.g., Post-surgical recovery, illness, injury" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    <input type="text" name="reason" value={medication.reason} onChange={handleMedicationChange} placeholder="e.g., Post-surgical recovery, illness, injury" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Start Date <span className="text-red-500">*</span></label>
@@ -180,11 +180,11 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                                 <div className="flex gap-2">
                                     <div className="flex-1">
                                         <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Dose Interval</label>
-                                        <input type="number" min="0" name="intervalValue" value={medication.intervalValue} onChange={handleMedicationChange} placeholder="e.g., 12" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                        <input type="number" min="0" name="intervalValue" value={medication.intervalValue} onChange={handleMedicationChange} placeholder="e.g., 12" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted" />
                                     </div>
                                     <div className="flex-1">
                                         <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Unit</label>
-                                        <select name="intervalUnit" value={medication.intervalUnit} onChange={handleMedicationChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md">
+                                        <select name="intervalUnit" value={medication.intervalUnit} onChange={handleMedicationChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text">
                                             <option value="hours">Hours</option>
                                             <option value="days">Days</option>
                                             <option value="weeks">Weeks</option>
@@ -194,7 +194,7 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Medication Notes</label>
-                                    <input type="text" name="notes" value={medication.notes} onChange={handleMedicationChange} placeholder="e.g., Give with food" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 rounded-md" />
+                                    <input type="text" name="notes" value={medication.notes} onChange={handleMedicationChange} placeholder="e.g., Give with food" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted" />
                                 </div>
                             </div>
                         </div>
@@ -218,7 +218,7 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search by name or ID..."
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md"
+                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted"
                             />
                         </div>
                         <div className="border border-gray-200 dark:border-dark-text-muted rounded-lg max-h-56 overflow-y-auto divide-y divide-gray-100 dark:divide-dark-text-muted">
@@ -229,9 +229,9 @@ const AssignHealthStatusModal = ({ isOpen, onClose, animals, onSubmit, saving })
                                 const checked = selectedIds.has(a.id_public);
                                 return (
                                     <label key={a.id_public} className={`flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-surface-hover ${checked ? 'bg-primary/5' : ''}`}>
-                                        <input type="checkbox" checked={checked} onChange={() => toggleAnimal(a.id_public)} className="rounded border-gray-300" />
-                                        <span className="flex-1 truncate">{getAnimalDisplayName(a)}</span>
-                                        <span className="text-xs text-gray-400">{a.id_public}</span>
+                                        <input type="checkbox" checked={checked} onChange={() => toggleAnimal(a.id_public)} className="rounded border-gray-300 dark:border-dark-text-muted" />
+                                        <span className="flex-1 truncate dark:text-dark-text">{getAnimalDisplayName(a)}</span>
+                                        <span className="text-xs text-gray-400 dark:text-dark-text-muted">{a.id_public}</span>
                                         {a.isQuarantine && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700">Quarantine</span>}
                                         {a.isInTreatment && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-100 text-red-700">Treatment</span>}
                                     </label>

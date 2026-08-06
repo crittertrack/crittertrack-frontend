@@ -382,18 +382,18 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     }, [breeders, searchQuery, selectedSpecies, selectedCountry, selectedState]);
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-gray-50 dark:bg-dark-card-bg pb-20">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10">
+            <div className="bg-white dark:bg-dark-card-bg border-b border-gray-200 dark:border-dark-text p-4 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-center gap-3 mb-3">
                         <button
                             onClick={() => navigate(-1)}
-                            className="p-2 hover:bg-gray-100 rounded transition"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded transition"
                         >
-                            <ArrowLeft size={20} />
+                            <ArrowLeft size={20} className="dark:text-dark-text" />
                         </button>
-                        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <h1 className="text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                             <Star size={24} className="text-primary" />
                             Breeders
                         </h1>
@@ -401,13 +401,13 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
 
                     {/* Search */}
                     <div className="relative mb-3">
-                        <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                         <input
                             type="text"
                             placeholder="Search by name or ID..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                     </div>
 
@@ -417,7 +417,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                             <select
                                 value={selectedSpecies}
                                 onChange={(e) => setSelectedSpecies(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                             >
                                 <option value="">All Species</option>
                                 {availableSpecies.map(species => (
@@ -431,7 +431,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                             <select
                                 value={selectedCountry}
                                 onChange={(e) => { setSelectedCountry(e.target.value); if (e.target.value !== 'US') setSelectedState(''); }}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                             >
                                 <option value="">All Countries</option>
                                 {availableCountries.map(country => (
@@ -446,7 +446,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                 <select
                                     value={selectedState}
                                     onChange={(e) => setSelectedState(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                                 >
                                     <option value="">All States</option>
                                     {availableStates.map(stateCode => (
@@ -469,8 +469,8 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                     </div>
                 ) : filteredBreeders.length === 0 ? (
                     <div className="text-center py-20">
-                        <Star size={48} className="mx-auto text-gray-300 mb-3" />
-                        <p className="text-gray-600">No breeders found</p>
+                        <Star size={48} className="mx-auto text-gray-300 dark:text-dark-text-muted mb-3" />
+                        <p className="text-gray-600 dark:text-dark-text-secondary">No breeders found</p>
                         {(searchQuery || selectedSpecies || selectedCountry || selectedState) && (
                             <button
                                 onClick={() => {
@@ -507,13 +507,13 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                 <div
                                     // Added a state to manage expanded/collapsed status for each card
                                     key={breeder.id_public}
-                                    className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition"
+                                    className="bg-white dark:bg-dark-card-bg rounded-lg border border-gray-200 dark:border-dark-text p-6 hover:shadow-md transition"
                                 >
                                     {/* Header Row */}
                                     <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
                                         {/* Profile Picture */}
                                         <div className="flex-shrink-0">
-                                            <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden">
+                                            <div className="w-20 h-20 bg-gray-100 dark:bg-dark-surface rounded-full overflow-hidden">
                                                 {breeder.profileImage ? (
                                                     <img 
                                                         src={breeder.profileImage} 
@@ -521,7 +521,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                         <User size={36} />
                                                     </div>
                                                 )}
@@ -531,7 +531,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                         {/* Name and CTU Badge */}
                                         <div className="flex-1 min-w-0">
                                             <div className="mb-1">
-                                                <h3 className="text-lg font-bold text-gray-800 inline">{displayName}</h3>
+                                                <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text inline">{displayName}</h3>
                                                 <span className="ml-1 inline-block"><DonationBadge user={breeder} size="sm" /></span>
                                             </div>
                                             <div className="flex items-center gap-3 flex-wrap">
@@ -539,7 +539,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                                     {breeder.id_public}
                                                 </span>
                                                 {breeder.country && (
-                                                    <div className="flex items-center gap-2 text-xs text-gray-600">
+                                                    <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-dark-text-secondary">
                                                         <span className={`${getCountryFlag(breeder.country)} inline-block h-4 w-6 flex-shrink-0`}></span>
                                                         <span>{getCountryName(breeder.country)}{breeder.country === 'US' && breeder.state ? `, ${getStateName(breeder.state)}` : ''}</span>
                                                     </div>
@@ -568,15 +568,15 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                             return (
                                                 <div
                                                     key={species}
-                                                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200"
+                                                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-dark-surface rounded-full border border-gray-200 dark:border-dark-text"
                                                 >
                                                     {status === 'breeder' ? (
                                                         <Star size={14} className="text-primary" />
                                                     ) : (
-                                                        <Moon size={14} className="text-gray-500" />
+                                                        <Moon size={14} className="text-gray-500 dark:text-dark-text-muted" />
                                                     )}
-                                                    <span className="text-xs font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
-                                                    <span className="text-xs text-gray-500">
+                                                    <span className="text-xs font-medium text-gray-800 dark:text-dark-text">{getSpeciesDisplayName(species)}</span>
+                                                    <span className="text-xs text-gray-500 dark:text-dark-text-muted">
                                                         ({status === 'breeder' ? 'Active' : 'Retired'})
                                                     </span>
                                                 </div>
@@ -613,7 +613,7 @@ const BreederBioSection = ({ bio }) => {
     return (
         <div className="mb-4">
             <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expanded ? 'max-h-[1000px]' : 'max-h-[58px]'}`}>
-                <p ref={bioRef} className="text-xs text-gray-700 leading-relaxed">
+                <p ref={bioRef} className="text-xs text-gray-700 dark:text-dark-text-secondary leading-relaxed">
                     {bio}
                 </p>
             </div>

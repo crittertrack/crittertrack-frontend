@@ -192,8 +192,8 @@ const TraitSelector = ({ species, selectedTraits, onTraitChange, disabled }) => 
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {traitGroups.map(({ groupName, chips }) => (
         <div key={groupName}>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{groupName}</label>
-          <select value={selectedTraits[groupName] || ''} onChange={(e) => onTraitChange(groupName, e.target.value)} disabled={disabled} className="w-full p-2 border border-gray-300 rounded-lg bg-white">
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">{groupName}</label>
+          <select value={selectedTraits[groupName] || ''} onChange={(e) => onTraitChange(groupName, e.target.value)} disabled={disabled} className="w-full p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text">
             <option value="">- None -</option>
             {chips.map(chip => (<option key={chip.id} value={chip.id}>{chip.label}</option>))}
           </select>
@@ -609,7 +609,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
         const relevantLoci = geneOrder.filter(locus => animalLoci[locus]);
 
         if (relevantLoci.length === 0) {
-            return <span className="text-gray-400 italic">No genetic code recorded.</span>;
+            return <span className="text-gray-400 dark:text-dark-text-muted italic">No genetic code recorded.</span>;
         }
 
         return (
@@ -618,7 +618,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
                     const isResponsible = targetLoci.hasOwnProperty(locus);
                     const combo = animalLoci[locus].join('/');
                     return (
-                        <span key={locus} className={isResponsible ? 'font-bold text-black' : 'text-gray-500'}>
+                        <span key={locus} className={isResponsible ? 'font-bold text-black dark:text-dark-text' : 'text-gray-500 dark:text-dark-text-muted'}>
                             {combo}
                         </span>
                     );
@@ -628,27 +628,27 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
     };
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg">
-            <div className="p-4 cursor-pointer hover:bg-gray-50" onClick={() => setIsExpanded(!isExpanded)}>
+        <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-lg">
+            <div className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-surface-hover" onClick={() => setIsExpanded(!isExpanded)}>
                 <div className="flex items-center justify-between">
                     <div className="text-sm">
-                        <p><span className="font-semibold text-blue-700">Sire:</span> {getFullName(sire)} ({sire.id_public})</p>
-                        <p><span className="font-semibold text-pink-700">Dam:</span> {getFullName(dam)} ({dam.id_public})</p>
+                        <p><span className="font-semibold text-blue-700 dark:text-blue-400">Sire:</span> <span className="dark:text-dark-text">{getFullName(sire)} ({sire.id_public})</span></p>
+                        <p><span className="font-semibold text-pink-700 dark:text-pink-400">Dam:</span> <span className="dark:text-dark-text">{getFullName(dam)} ({dam.id_public})</span></p>
                     </div>
                     <div className="text-center ml-4 flex-shrink-0">
                         <p className="text-2xl font-bold text-primary">{(probability * 100).toFixed(1)}%</p>
-                        <p className="text-xs text-gray-500">Chance</p>
+                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">Chance</p>
                     </div>
                 </div>
             </div>
             {isExpanded && (
-                <div className="border-t bg-gray-50 p-4 space-y-2">
+                <div className="border-t dark:border-dark-text bg-gray-50 dark:bg-dark-card-bg p-4 space-y-2">
                     <div>
-                        <p className="text-xs font-semibold text-blue-700 mb-1">Sire Genotype:</p>
+                        <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-1">Sire Genotype:</p>
                         {renderGenotype(sireLoci)}
                     </div>
                     <div>
-                        <p className="text-xs font-semibold text-pink-700 mb-1">Dam Genotype:</p>
+                        <p className="text-xs font-semibold text-pink-700 dark:text-pink-400 mb-1">Dam Genotype:</p>
                         {renderGenotype(damLoci)}
                     </div>
                 </div>
@@ -658,24 +658,24 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
   };
 
   const CollapsibleGroup = ({ title, count, children, isOpen, onToggle }) => (
-    <div className="border border-gray-200 rounded-lg">
-        <button onClick={onToggle} className="w-full flex items-center justify-between p-3 bg-gray-100 hover:bg-gray-200 transition">
-            <div className="flex items-center gap-2"><h4 className="font-bold text-gray-700">{title}</h4><span className="text-xs bg-gray-300 text-gray-700 font-semibold px-2 py-0.5 rounded-full">{count}</span></div>
-            {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+    <div className="border border-gray-200 dark:border-dark-text rounded-lg">
+        <button onClick={onToggle} className="w-full flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-surface hover:bg-gray-200 dark:hover:bg-dark-surface-hover transition">
+            <div className="flex items-center gap-2"><h4 className="font-bold text-gray-700 dark:text-dark-text">{title}</h4><span className="text-xs bg-gray-300 dark:bg-dark-card-bg text-gray-700 dark:text-dark-text-secondary font-semibold px-2 py-0.5 rounded-full">{count}</span></div>
+            {isOpen ? <ChevronUp size={20} className="dark:text-dark-text" /> : <ChevronDown size={20} className="dark:text-dark-text" />}
         </button>
         {isOpen && <div className="p-3 space-y-3">{children}</div>}
     </div>
   );
 
   return (
-    <div className="w-full h-full bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-white dark:bg-dark-card-bg rounded-xl shadow-lg flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0 bg-gradient-to-r from-primary/10 to-accent/10">
+      <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-dark-text flex-shrink-0 bg-gradient-to-r from-primary/10 to-accent/10">
         <div className="flex items-center gap-3">
           <Target size={32} className="text-primary flex-shrink-0" />
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Target Outcome Calculator</h2>
-            <p className="text-gray-600 text-xs sm:text-sm mt-1">Find potential pairings to produce a specific genetic outcome.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text">Target Outcome Calculator</h2>
+            <p className="text-gray-600 dark:text-dark-text-secondary text-xs sm:text-sm mt-1">Find potential pairings to produce a specific genetic outcome.</p>
           </div>
         </div>
       </div>
@@ -686,7 +686,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
           {/* Species and Mode Selection */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="md:col-span-1">
-              <label htmlFor="species-select" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="species-select" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                 Species
               </label>
               <select
@@ -694,31 +694,31 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
                 value={selectedSpecies}
                 onChange={(e) => setSelectedSpecies(e.target.value)}
                 disabled={isLoading}
-                className="w-full p-2 border border-gray-300 rounded-lg bg-white"
+                className="w-full p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text"
               >
                 <option value="" disabled>Select a species</option>
                 {availableSpecies.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
               </select>
             </div>
             <div className="md:col-span-2 self-end">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
                 Calculator Mode
               </label>
-              <div className="flex rounded-lg border border-gray-300 p-1 bg-gray-200">
-                <button onClick={() => setMode('traits')} disabled={isLoading} className={`w-1/2 p-2 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${mode === 'traits' ? 'bg-white shadow' : 'text-gray-600 hover:bg-gray-300'}`}><Palette size={16} /> Visual Traits</button>
-                <button onClick={() => setMode('genetics')} disabled={isLoading} className={`w-1/2 p-2 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${mode === 'genetics' ? 'bg-white shadow' : 'text-gray-600 hover:bg-gray-300'}`}><Settings size={16} /> Genetic Code</button>
+              <div className="flex rounded-lg border border-gray-300 dark:border-dark-text p-1 bg-gray-200 dark:bg-dark-card-bg">
+                <button onClick={() => setMode('traits')} disabled={isLoading} className={`w-1/2 p-2 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${mode === 'traits' ? 'bg-white dark:bg-dark-surface shadow dark:text-dark-text' : 'text-gray-600 dark:text-dark-text-muted hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}><Palette size={16} /> Visual Traits</button>
+                <button onClick={() => setMode('genetics')} disabled={isLoading} className={`w-1/2 p-2 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${mode === 'genetics' ? 'bg-white dark:bg-dark-surface shadow dark:text-dark-text' : 'text-gray-600 dark:text-dark-text-muted hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}><Settings size={16} /> Genetic Code</button>
               </div>
             </div>
           </div>
 
-          <div className="mb-8 p-4 sm:p-6 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="mb-8 p-4 sm:p-6 border border-gray-200 dark:border-dark-text rounded-lg bg-gray-50 dark:bg-dark-card-bg">
             {!selectedSpecies ? (
-              <p className="text-center text-gray-500">Please select a species to begin.</p>
+              <p className="text-center text-gray-500 dark:text-dark-text-muted">Please select a species to begin.</p>
             ) : mode === 'traits' ? (
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Select Desired Traits</h3>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-4">Select Desired Traits</h3>
                 {Object.values(selectedTraits).includes('fox') && !selectedTraits['Albino & Dilution'] && (
-                    <div className="p-3 mb-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
+                    <div className="p-3 mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-lg text-sm">
                         <p><b>Note:</b> For the 'Fox' phenotype to be expressed, a selection from 'Albino & Dilution' (like Siamese, Himalayan, etc.) is also required.</p>
                     </div>
                 )}
@@ -731,7 +731,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
               </div>
             ) : (
               <div>
-                <label htmlFor="targetGenetics" className="block text-lg font-semibold text-gray-800 mb-4">
+                <label htmlFor="targetGenetics" className="block text-lg font-semibold text-gray-800 dark:text-dark-text mb-4">
                   Enter Desired Genetic Code
                 </label>
                 <div className="relative">
@@ -742,15 +742,15 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
                     value={targetGenetics}
                     onChange={(e) => setTargetGenetics(e.target.value)}
                     disabled={isLoading || !isSpeciesSupported}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
+                    className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg"
                   />
-                  <Dna size={20} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Dna size={20} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Enter the genetic combination you want to achieve in the offspring.</p>
+                <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-2">Enter the genetic combination you want to achieve in the offspring.</p>
               </div>
             )}
             {!isSpeciesSupported && selectedSpecies && (
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text rounded-lg text-sm">
                 <p>
                   Detailed trait and genetic code calculations are currently available for Fancy Mouse and Fancy Rat. Support for other species is in development!
                 </p>
@@ -772,11 +772,11 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
             </button>
           </div>
 
-          {error && <div className="p-4 mb-6 bg-red-50 border border-red-200 text-red-800 rounded-lg text-center"><p>{error}</p></div>}
+          {error && <div className="p-4 mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-lg text-center"><p>{error}</p></div>}
 
           {results && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Potential Pairings Found ({results.pairings.length})</h3>
+            <div className="bg-gray-50 dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-lg p-6">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4 text-center">Potential Pairings Found ({results.pairings.length})</h3>
               {results.pairings.length > 0 ? (
                 <div className="space-y-4">
                   {groupedResults.high.length > 0 && (
@@ -795,12 +795,12 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
                     </CollapsibleGroup>
                   )}
                 </div>
-              ) : (<p className="text-center text-gray-600">No potential pairings found in your animals that can produce the target genetics.</p>)}
+              ) : (<p className="text-center text-gray-600 dark:text-dark-text-secondary">No potential pairings found in your animals that can produce the target genetics.</p>)}
             </div>
           )}
 
           {!results && !isLoading && (
-             <div className="text-center text-gray-400 mt-8">
+             <div className="text-center text-gray-400 dark:text-dark-text-muted mt-8">
                 <Target size={48} className="mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium">Select your target criteria above to begin.</p>
                 <p className="text-sm mt-2">The calculator will search your animals for pairs that could produce the desired outcome.</p>

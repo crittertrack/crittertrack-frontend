@@ -93,20 +93,20 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     })();
 
     const typeStyles = {
-        planned:     { bg: 'bg-indigo-100 hover:bg-indigo-200 text-indigo-800 border border-dashed border-indigo-400', dot: 'bg-indigo-400', label: 'Planned Mating', Icon: CalendarPlus },
-        mated:       { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Mated', Icon: Hourglass },
-        due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due', Icon: BellRing },
-        born:        { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-500', dot: 'bg-violet-500', label: 'Born', Icon: Cake },
-        weaned:      { bg: 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300', dot: 'bg-blue-400', label: 'Weaned', Icon: Rainbow },
-        birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthdate', Icon: PartyPopper },
-        feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due', Icon: UtensilsCrossed },
-        grooming:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Grooming/Special Care', Icon: Scissors },
-        training:    { bg: 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300', dot: 'bg-emerald-400', label: 'Training', Icon: Dumbbell },
-        health:      { bg: 'bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-400', dot: 'bg-rose-500', label: 'Health', Icon: HeartPulse },
-        maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance', Icon: Wrench },
-        caretask:    { bg: 'bg-cyan-100 hover:bg-cyan-200 text-cyan-800 border border-cyan-300', dot: 'bg-cyan-400', label: 'Care Task', Icon: HandCoins },
-        supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order', Icon: Package },
-        milestone:   { bg: 'bg-lime-100 hover:bg-lime-200 text-lime-800 border border-lime-300', dot: 'bg-lime-400', label: 'Milestone', Icon: Bell },
+        planned:     { bg: 'bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 text-indigo-800 dark:text-indigo-300 border border-dashed border-indigo-400 dark:border-indigo-700/60', dot: 'bg-indigo-400', label: 'Planned Mating', Icon: CalendarPlus },
+        mated:       { bg: 'bg-sky-100 dark:bg-sky-900/30 hover:bg-sky-200 dark:hover:bg-sky-900/50 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-700/60', dot: 'bg-sky-400', label: 'Mated', Icon: Hourglass },
+        due:         { bg: 'bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60', dot: 'bg-amber-400', label: 'Due', Icon: BellRing },
+        born:        { bg: 'bg-violet-100 dark:bg-violet-900/30 hover:bg-violet-200 dark:hover:bg-violet-900/50 text-violet-800 dark:text-violet-300 border border-violet-500 dark:border-violet-700/60', dot: 'bg-violet-500', label: 'Born', Icon: Cake },
+        weaned:      { bg: 'bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700/60', dot: 'bg-blue-400', label: 'Weaned', Icon: Rainbow },
+        birthday:    { bg: 'bg-pink-100 dark:bg-pink-900/30 hover:bg-pink-200 dark:hover:bg-pink-900/50 text-pink-800 dark:text-pink-300 border border-pink-300 dark:border-pink-700/60', dot: 'bg-pink-400', label: 'Birthdate', Icon: PartyPopper },
+        feeding:     { bg: 'bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 text-orange-800 dark:text-orange-300 border border-orange-300 dark:border-orange-700/60', dot: 'bg-orange-400', label: 'Feeding Due', Icon: UtensilsCrossed },
+        grooming:    { bg: 'bg-teal-100 dark:bg-teal-900/30 hover:bg-teal-200 dark:hover:bg-teal-900/50 text-teal-800 dark:text-teal-300 border border-teal-300 dark:border-teal-700/60', dot: 'bg-teal-400', label: 'Grooming/Special Care', Icon: Scissors },
+        training:    { bg: 'bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60', dot: 'bg-emerald-400', label: 'Training', Icon: Dumbbell },
+        health:      { bg: 'bg-rose-100 dark:bg-rose-900/30 hover:bg-rose-200 dark:hover:bg-rose-900/50 text-rose-800 dark:text-rose-300 border border-rose-400 dark:border-rose-700/60', dot: 'bg-rose-500', label: 'Health', Icon: HeartPulse },
+        maintenance: { bg: 'bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 border border-yellow-400 dark:border-yellow-700/60', dot: 'bg-yellow-400', label: 'Maintenance', Icon: Wrench },
+        caretask:    { bg: 'bg-cyan-100 dark:bg-cyan-900/30 hover:bg-cyan-200 dark:hover:bg-cyan-900/50 text-cyan-800 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-700/60', dot: 'bg-cyan-400', label: 'Care Task', Icon: HandCoins },
+        supply:      { bg: 'bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-700/60', dot: 'bg-red-400', label: 'Supply Order', Icon: Package },
+        milestone:   { bg: 'bg-lime-100 dark:bg-lime-900/30 hover:bg-lime-200 dark:hover:bg-lime-900/50 text-lime-800 dark:text-lime-300 border border-lime-300 dark:border-lime-700/60', dot: 'bg-lime-400', label: 'Milestone', Icon: Bell },
     };
 
     const fmtD = (v) => {
@@ -548,69 +548,69 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     };
 
     const TooltipRow = ({ label, value }) => value ? (
-        <div className="flex gap-2 text-sm"><span className="text-gray-500 w-36 flex-shrink-0">{label}</span><span className="text-gray-800 font-medium">{value}</span></div>
+        <div className="flex gap-2 text-sm"><span className="text-gray-500 dark:text-dark-text-muted w-36 flex-shrink-0">{label}</span><span className="text-gray-800 dark:text-dark-text font-medium">{value}</span></div>
     ) : null;
 
     return (
-        <div className="w-full max-w-7xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-3 sm:p-6 rounded-xl shadow-lg">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4">
-                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
+                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center">
                     <Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Calendar
                 </h2>
             </div>
 
             {/* Calendar widget */}
-            <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl border-2 border-gray-200 dark:border-dark-text shadow-sm overflow-hidden">
                 {/* Month Navigation */}
-                <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
-                    <button onClick={() => setCalendarMonth(new Date(year, month - 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-200 transition">
-                        <ChevronLeft size={20} className="text-gray-600" />
+                <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-dark-card-bg border-b border-gray-200 dark:border-dark-text">
+                    <button onClick={() => setCalendarMonth(new Date(year, month - 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-surface-hover transition">
+                        <ChevronLeft size={20} className="text-gray-600 dark:text-dark-text" />
                     </button>
-                    <h3 className="text-lg font-bold text-gray-800">{monthNames[month]} {year}</h3>
-                    <button onClick={() => setCalendarMonth(new Date(year, month + 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-200 transition">
-                        <ChevronRight size={20} className="text-gray-600" />
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">{monthNames[month]} {year}</h3>
+                    <button onClick={() => setCalendarMonth(new Date(year, month + 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-surface-hover transition">
+                        <ChevronRight size={20} className="text-gray-600 dark:text-dark-text" />
                     </button>
                 </div>
 
                 {/* Filters */}
-                <div className="px-4 py-3 bg-white border-b border-gray-200 space-y-3">
+                <div className="px-4 py-3 bg-white dark:bg-dark-card-bg border-b border-gray-200 dark:border-dark-text space-y-3">
                     <div className="flex flex-col md:flex-row md:items-center gap-2">
                         <div className="flex items-center gap-2 w-full md:w-auto flex-1">
-                            <Search size={14} className="text-gray-400" />
+                            <Search size={14} className="text-gray-400 dark:text-dark-text-muted" />
                             <input
                                 value={calendarQuery}
                                 onChange={e => setCalendarQuery(e.target.value)}
                                 placeholder="Filter by pair, litter ID, sire/dam, animal, or enclosure"
-                                className="w-full md:w-80 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                className="w-full md:w-80 p-2 text-sm border border-gray-300 dark:border-dark-text rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted"
                             />
                         </div>
                         <div className="relative" ref={eventTypesDropdownRef}>
                             <button
                                 onClick={() => setShowEventTypesDropdown(prev => !prev)}
                                 title="Configure which event types are shown"
-                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${Object.values(calendarEventFilters).some(Boolean) ? 'bg-primary/10 text-primary-dark hover:bg-primary/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${Object.values(calendarEventFilters).some(Boolean) ? 'bg-primary/10 dark:bg-dark-primary/20 text-primary-dark dark:text-dark-primary hover:bg-primary/20 dark:hover:bg-dark-primary/30' : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                             >
                                 <Filter size={14} />
                                 <span>Event Types {Object.values(calendarEventFilters).some(Boolean) ? 'On' : 'Off'}</span>
                                 <ChevronDown size={14} className={`ml-1 transition-transform ${showEventTypesDropdown ? 'rotate-180' : ''}`} />
                             </button>
                             {showEventTypesDropdown && (
-                                <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl z-10">
-                                    <div className="p-3 border-b flex items-center justify-between">
+                                <div className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-lg shadow-xl z-10">
+                                    <div className="p-3 border-b dark:border-dark-text flex items-center justify-between">
                                         <div>
-                                            <h4 className="font-semibold text-sm text-gray-800">Calendar Event Types</h4>
-                                            <p className="text-xs text-gray-500">Select which events to show.</p>
+                                            <h4 className="font-semibold text-sm text-gray-800 dark:text-dark-text">Calendar Event Types</h4>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-muted">Select which events to show.</p>
                                         </div>
                                         <div className="flex flex-col gap-1 text-xs flex-shrink-0">
-                                            <button onClick={() => setAllEventFilters(true)} className="text-primary-dark hover:underline text-left">All</button>
-                                            <button onClick={() => setAllEventFilters(false)} className="text-gray-400 hover:underline text-left">None</button>
+                                            <button onClick={() => setAllEventFilters(true)} className="text-primary-dark dark:text-dark-primary hover:underline text-left">All</button>
+                                            <button onClick={() => setAllEventFilters(false)} className="text-gray-400 dark:text-dark-text-muted hover:underline text-left">None</button>
                                         </div>
                                     </div>
                                     <div className="p-3 space-y-2 max-h-80 overflow-y-auto">
                                         {Object.entries(typeStyles).map(([key, style]) => (
-                                            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-dark-text-secondary">
                                                 <input
                                                     type="checkbox"
                                                     checked={!!calendarEventFilters[key]}
@@ -631,37 +631,37 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 <div className="overflow-x-auto">
                     <div className="min-w-full sm:min-w-[42rem]">
                         {/* Day-of-week headers */}
-                        <div className="grid grid-cols-7 border-b-2 border-gray-300 bg-gray-50">
+                        <div className="grid grid-cols-7 border-b-2 border-gray-300 dark:border-dark-text bg-gray-50 dark:bg-dark-card-bg">
                             {dayNames.map((d, i) => (
-                                <div key={d} className={`py-1 sm:py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wide ${isWeekendCol[i] ? 'text-rose-400' : 'text-gray-500'}`}>{d}</div>
+                                <div key={d} className={`py-1 sm:py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wide ${isWeekendCol[i] ? 'text-rose-400' : 'text-gray-500 dark:text-dark-text-muted'}`}>{d}</div>
                             ))}
                         </div>
 
                         {/* Day Cells */}
                         <div className="relative">
                             {loading && (
-                                <div className="absolute inset-0 z-10 bg-white/70 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 rounded-b-xl">
+                                <div className="absolute inset-0 z-10 bg-white/70 dark:bg-dark-card-bg/70 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 rounded-b-xl">
                                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                                    <span className="text-sm text-gray-500 font-medium">Loading events…</span>
+                                    <span className="text-sm text-gray-500 dark:text-dark-text-muted font-medium">Loading events…</span>
                                 </div>
                             )}
-                            <div className="grid grid-cols-7 divide-x divide-y divide-gray-300">
+                            <div className="grid grid-cols-7 divide-x divide-y divide-gray-300 dark:divide-dark-text">
                                 {cells.map((day, idx) => {
                                     const colIdx = idx % 7;
                                     const isWeekend = isWeekendCol[colIdx];
-                                    if (day === null) return <div key={`blank-${idx}`} className={`min-h-[64px] sm:min-h-[96px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />;
+                                    if (day === null) return <div key={`blank-${idx}`} className={`min-h-[64px] sm:min-h-[96px] ${isWeekend ? 'bg-rose-50/40 dark:bg-rose-950/20' : 'bg-gray-50/60 dark:bg-dark-card-bg/60'}`} />;
                                     const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                                     const events = eventMap[dateKey] || [];
                                     const isToday = dateKey === todayStr;
                                     return (
-                                        <div key={dateKey} className={`min-h-[64px] sm:min-h-[96px] p-1 sm:p-1.5 overflow-hidden ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
-                                            <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-xs sm:text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
+                                        <div key={dateKey} className={`min-h-[64px] sm:min-h-[96px] p-1 sm:p-1.5 overflow-hidden ${isToday ? 'bg-blue-50 dark:bg-blue-900/20' : isWeekend ? 'bg-rose-50/30 dark:bg-rose-950/10 hover:bg-rose-50/60 dark:hover:bg-rose-950/20' : 'hover:bg-gray-50/80 dark:hover:bg-dark-surface-hover'}`}>
+                                            <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-xs sm:text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700 dark:text-dark-text-secondary'}`}>
                                                 {day}
                                             </span>
                                             <div className="mt-0.5 space-y-0.5">
                                                 {events.map((ev, i) => {
                                                     const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                                        ? { ...typeStyles.due, bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                                        ? { ...typeStyles.due, bg: 'bg-gray-100 dark:bg-dark-surface hover:bg-gray-200 dark:hover:bg-dark-surface-hover text-gray-500 dark:text-dark-text-muted border border-gray-300 dark:border-dark-text-muted', label: 'Due (Born)' }
                                                         : (typeStyles[ev.type] || typeStyles.born);
                                                     return (
                                                         <button
@@ -692,11 +692,11 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                         const a = calendarTooltip.animal;
                         const st = typeStyles[calendarTooltip.type] || typeStyles.born;
                         return (
-                            <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                            <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-lg">
                                 <div className="flex justify-between items-start gap-2 mb-2">
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${st.bg}`}>{st.label}</span>
-                                        <span className="font-bold text-gray-800 text-sm">{a._calLabel || getAnimalDisplayName(a)}</span>
+                                        <span className="font-bold text-gray-800 dark:text-dark-text text-sm">{a._calLabel || getAnimalDisplayName(a)}</span>
                                     </div>
                                     <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={16} /></button>
                                 </div>
@@ -773,30 +773,30 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
 
                     const Row = ({ label, value, cls }) => {
                         if (value == null || value === '') return null;
-                        return <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">{label}</span><span className={`text-gray-800 font-medium ${cls || ''}`}>{value}</span></div>;
+                        return <div className="flex gap-2 text-sm"><span className="text-gray-500 dark:text-dark-text-muted w-32 flex-shrink-0">{label}</span><span className={`text-gray-800 dark:text-dark-text font-medium ${cls || ''}`}>{value}</span></div>;
                     };
 
                     const tooltipPillStyle = (type === 'due' && l.birthDate)
-                        ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                        ? { bg: 'bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted border border-gray-300 dark:border-dark-text-muted', label: 'Due (Born)' }
                         : (typeStyles[type] || typeStyles.born);
 
                     return (
-                        <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                            <div className="flex justify-between items-start gap-2 mb-3 pb-2 border-b border-gray-200">
+                        <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-lg">
+                            <div className="flex justify-between items-start gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-dark-text">
                                 <div>
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${tooltipPillStyle.bg}`}>{tooltipPillStyle.label}</span>
-                                        <span className="font-bold text-gray-800 text-sm">{l.breedingPairCodeName ? pairName : `${sn} · ${dn}`}</span>
+                                        <span className="font-bold text-gray-800 dark:text-dark-text text-sm">{l.breedingPairCodeName ? pairName : `${sn} · ${dn}`}</span>
                                     </div>
-                                    {callId && <p className="text-xs text-gray-400 mt-0.5">{callId}</p>}
+                                    {callId && <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-0.5">{callId}</p>}
                                 </div>
-                                <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={16} /></button>
+                                <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text flex-shrink-0"><X size={16} /></button>
                             </div>
                             <div className="space-y-1.5">
                                 {type === 'due' && (<>
                                     <Row label="Mated:" value={fmtD(l.matingDate)} />
                                     <Row label="Due:" value={fmtD(l.expectedDueDate)} />
-                                    {daysStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Status:</span><span className={daysStatus.cls}>{daysStatus.text}</span></div>}
+                                    {daysStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 dark:text-dark-text-muted w-32 flex-shrink-0">Status:</span><span className={daysStatus.cls}>{daysStatus.text}</span></div>}
                                     <Row label="Method:" value={l.breedingMethod && l.breedingMethod !== 'Unknown' ? l.breedingMethod : null} />
                                     <Row label="Condition:" value={l.breedingConditionAtTime || null} />
                                 </>)}
@@ -806,8 +806,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                     <Row label="Total:" value={l.litterSizeBorn ?? l.numberBorn ?? null} />
                                     <Row label="Males:" value={l.maleCount ?? null} />
                                     <Row label="Females:" value={l.femaleCount ?? null} />
-                                    <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Stillborn:</span><span className="text-gray-800 font-medium">{l.stillbornCount ?? 0}</span></div>
-                                    <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Weaned:</span><span className="text-gray-800 font-medium">{l.litterSizeWeaned ?? l.numberWeaned ?? 0}</span></div>
+                                    <div className="flex gap-2 text-sm"><span className="text-gray-500 dark:text-dark-text-muted w-32 flex-shrink-0">Stillborn:</span><span className="text-gray-800 dark:text-dark-text font-medium">{l.stillbornCount ?? 0}</span></div>
+                                    <div className="flex gap-2 text-sm"><span className="text-gray-500 dark:text-dark-text-muted w-32 flex-shrink-0">Weaned:</span><span className="text-gray-800 dark:text-dark-text font-medium">{l.litterSizeWeaned ?? l.numberWeaned ?? 0}</span></div>
                                     <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
                                 </>)}
                                 {type === 'weaned' && (() => {
@@ -829,8 +829,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                     return (<>
                                         <Row label="Born:" value={fmtD(l.birthDate)} />
                                         <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
-                                        {ageInDays != null && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Age:</span><span className="text-gray-800 font-medium">{ageInDays} day{ageInDays !== 1 ? 's' : ''}</span></div>}
-                                        {weanStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Status:</span><span className={weanStatus.cls}>{weanStatus.text}</span></div>}
+                                        {ageInDays != null && <div className="flex gap-2 text-sm"><span className="text-gray-500 dark:text-dark-text-muted w-32 flex-shrink-0">Age:</span><span className="text-gray-800 dark:text-dark-text font-medium">{ageInDays} day{ageInDays !== 1 ? 's' : ''}</span></div>}
+                                        {weanStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 dark:text-dark-text-muted w-32 flex-shrink-0">Status:</span><span className={weanStatus.cls}>{weanStatus.text}</span></div>}
                                     </>);
                                 })()}
                                 {(type === 'mated' || type === 'planned') && (<>
@@ -846,33 +846,33 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 })()}
 
                 {/* Month Agenda */}
-                <div className="mx-3 mb-3 p-3 bg-white border border-gray-200 rounded-lg">
+                <div className="mx-3 mb-3 p-3 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm font-semibold text-gray-800">Month Agenda</h4>
-                        <span className="text-xs text-gray-500">{monthEventList.length} event{monthEventList.length !== 1 ? 's' : ''}</span>
+                        <h4 className="text-sm font-semibold text-gray-800 dark:text-dark-text">Month Agenda</h4>
+                        <span className="text-xs text-gray-500 dark:text-dark-text-muted">{monthEventList.length} event{monthEventList.length !== 1 ? 's' : ''}</span>
                     </div>
                     {monthEventList.length === 0 ? (
-                        <p className="text-xs text-gray-500">No events this month.</p>
+                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">No events this month.</p>
                     ) : (
                         <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                             {monthEventList.map((ev, idx) => {
                                 const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                    ? { ...typeStyles.due, bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                    ? { ...typeStyles.due, bg: 'bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-dark-text-muted border border-gray-300 dark:border-dark-text-muted', label: 'Due (Born)' }
                                     : (typeStyles[ev.type] || typeStyles.born);
                                 return (
                                     <button
                                         key={`${ev.dateKey}-${ev.type}-${ev.litter?._id ?? ev.animal?._id ?? idx}-${idx}`}
                                         onClick={() => setCalendarTooltip({ key: `${ev.dateKey}-${idx}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                        className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:bg-gray-50 transition"
+                                        className="w-full text-left px-2 py-1.5 rounded border border-gray-200 dark:border-dark-text hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition"
                                     >
                                         <div className="flex items-center justify-between gap-2">
                                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full ${st.bg}`}>
                                                 {getEventIcon(ev.type, 11)}
                                                 {st.label}
                                             </span>
-                                            <span className="text-[11px] text-gray-500">{fmtD(ev.dateKey)}</span>
+                                            <span className="text-[11px] text-gray-500 dark:text-dark-text-muted">{fmtD(ev.dateKey)}</span>
                                         </div>
-                                        <div className="text-xs text-gray-800 mt-1 truncate"><PillLabel ev={ev} /></div>
+                                        <div className="text-xs text-gray-800 dark:text-dark-text mt-1 truncate"><PillLabel ev={ev} /></div>
                                     </button>
                                 );
                             })}

@@ -59,12 +59,12 @@ const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
                 </div>
             </div>
             {isExpanded && (
-                 <div className={`p-3 border-t bg-white ${styles.border}`}>
+                 <div className={`p-3 border-t bg-white dark:bg-dark-card-bg ${styles.border}`}>
                     {isPoll ? (
                         <BroadcastPoll broadcast={item} authToken={authToken} API_BASE_URL={API_BASE_URL} isEmbedded={true} hideTitle={true} />
                     ) : (
                         <>
-                            <div className="text-xs text-gray-700 prose max-w-none" dangerouslySetInnerHTML={{ __html: item.message || item.content }} />
+                            <div className="text-xs text-gray-700 dark:text-dark-text-secondary prose max-w-none" dangerouslySetInnerHTML={{ __html: item.message || item.content }} />
                             {item.link && (
                                 <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline mt-2 inline-block">
                                     Read more
@@ -126,15 +126,15 @@ const NewsSection = ({ API_BASE_URL, authToken }) => {
     };
 
     return (
-        <div className="p-4 h-full flex flex-col">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4 flex-shrink-0">
+        <div className="p-4 h-full flex flex-col bg-white dark:bg-dark-card-bg">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2 mb-4 flex-shrink-0">
                 <Rss className="text-orange-500" />
                 News & Announcements
             </h2>
             <div className="flex-grow overflow-y-auto -mr-4 pr-4">
                 {loading ? (
                     <div className="flex justify-center items-center py-8 h-full">
-                        <Loader2 className="animate-spin text-gray-400" size={32} />
+                        <Loader2 className="animate-spin text-gray-400 dark:text-dark-text-muted" size={32} />
                     </div>
                 ) : news.length > 0 ? (
                     <div className="space-y-4">
@@ -149,7 +149,7 @@ const NewsSection = ({ API_BASE_URL, authToken }) => {
                             />
                         ))}
                     </div>
-                ) : <div className="text-center py-8 bg-gray-50 rounded-lg h-full flex items-center justify-center"><p className="text-gray-500">No news to display at the moment.</p></div>}
+                ) : <div className="text-center py-8 bg-gray-50 dark:bg-dark-surface rounded-lg h-full flex items-center justify-center"><p className="text-gray-500 dark:text-dark-text-muted">No news to display at the moment.</p></div>}
             </div>
         </div>
     );
