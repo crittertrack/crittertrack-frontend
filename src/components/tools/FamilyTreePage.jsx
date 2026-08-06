@@ -50,7 +50,7 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
     };
 
     return (
-        <div className="p-4 sm:p-6 bg-white dark:bg-dark-surface rounded-xl shadow-lg">
+        <div className="p-4 sm:p-6 bg-white dark:bg-dark-card-bg rounded-xl shadow-lg">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text mb-4">Family Tree Explorer</h1>
             <p className="text-gray-600 dark:text-dark-text-secondary mb-6">
                 Select an animal from your collection to load and explore its full pedigree.
@@ -63,7 +63,7 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
                         id="species-selector"
                         value={selectedSpecies}
                         onChange={(e) => handleSpeciesChange(e.target.value)}
-                        className="w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-gray-900 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full py-2.5 px-3 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                         <option value="">-- Select a Species --</option>
                         {speciesOptions.map(species => (
@@ -74,7 +74,7 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
                 <div>
                     <label htmlFor="animal-search" className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-2">2. Search for Animal</label>
                     <div className="relative" ref={searchRef}>
-                        <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg">
+                        <div className="flex items-center border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg">
                             <Search className="h-5 w-5 text-gray-400 mx-3" />
                             <input
                                 id="animal-search"
@@ -90,7 +90,7 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
                                 onFocus={() => setIsDropdownOpen(true)}
                                 placeholder="Search by name or ID..."
                                 disabled={!selectedSpecies}
-                                className="w-full py-2.5 pr-10 bg-transparent focus:outline-none text-gray-900 dark:text-dark-text disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                className="w-full py-2.5 pr-10 bg-transparent focus:outline-none text-gray-900 dark:text-dark-text disabled:bg-gray-100 dark:disabled:bg-dark-card-bg disabled:cursor-not-allowed"
                             />
                             {searchTerm && (
                                 <button onClick={() => { setSearchTerm(''); setSelectedAnimal(null); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
@@ -99,10 +99,10 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
                             )}
                         </div>
                         {isDropdownOpen && selectedSpecies && (
-                            <div className="absolute z-10 mt-1 w-full bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            <div className="absolute z-10 mt-1 w-full bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 {animalsOfSpecies.length > 0 ? (
                                     animalsOfSpecies.map(animal => (
-                                        <div key={animal.id_public} onClick={() => handleSelectAnimal(animal)} className="px-4 py-2.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-dark-text">
+                                        <div key={animal.id_public} onClick={() => handleSelectAnimal(animal)} className="px-4 py-2.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text">
                                             {getFullName(animal)} ({animal.id_public})
                                         </div>
                                     ))
@@ -115,16 +115,16 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
 
             <div className="max-w-lg mx-auto mb-8">
                 <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-2">3. Select Graph Type</label>
-                <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 p-1 bg-gray-200 dark:bg-dark-bg">
+                <div className="flex rounded-lg border border-gray-300 dark:border-dark-text-muted p-1 bg-gray-200 dark:bg-dark-card-bg">
                     <button 
                         onClick={() => setGraphMode('direct')}
-                        className={`w-1/2 p-2 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${graphMode === 'direct' ? 'bg-white dark:bg-dark-surface shadow' : 'text-gray-600 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-gray-700'}`}
+                        className={`w-1/2 p-2 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${graphMode === 'direct' ? 'bg-white dark:bg-dark-card-bg shadow' : 'text-gray-600 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}
                     >
                         Direct Lines
                     </button>
                     <button 
                         onClick={() => setGraphMode('full')}
-                        className={`w-1/2 p-2 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${graphMode === 'full' ? 'bg-white dark:bg-dark-surface shadow' : 'text-gray-600 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-gray-700'}`}
+                        className={`w-1/2 p-2 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${graphMode === 'full' ? 'bg-white dark:bg-dark-card-bg shadow' : 'text-gray-600 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}
                     >
                         Full Graph
                     </button>
@@ -136,7 +136,7 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
                 </p>
             </div>
 
-            <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8" style={{ height: '70vh', width: '100%', overflow: 'hidden' }}>
+            <div className="mt-8 border-t border-gray-200 dark:border-dark-text-muted pt-8" style={{ height: '70vh', width: '100%', overflow: 'hidden' }}>
                 {selectedAnimal ? (
                     <FamilyTreeView 
                         animals={myAnimals} 

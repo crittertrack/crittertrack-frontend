@@ -56,24 +56,24 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X: XIcon, Searc
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-center border-b p-4 flex-shrink-0">
-                    <h3 className="text-lg font-bold text-gray-800">Select Species</h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={22} /></button>
+                <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">Select Species</h3>
+                    <button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={22} /></button>
                 </div>
 
                 {/* Search + Category */}
-                <div className="p-4 border-b flex-shrink-0 space-y-3">
+                <div className="p-4 border-b dark:border-dark-text-muted flex-shrink-0 space-y-3">
                     <div className="relative">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                         <input
                             type="text"
                             placeholder="Search by name or latin name..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             autoFocus
-                            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-sm bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                         />
                     </div>
                     <div className="flex flex-wrap gap-1.5">
@@ -83,7 +83,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X: XIcon, Searc
                                 type="button"
                                 onClick={() => setCat(c)}
                                 className={`px-3 py-1 text-xs font-semibold rounded-full transition ${
-                                    cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                                 }`}
                             >
                                 {c}
@@ -95,12 +95,12 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X: XIcon, Searc
                 {/* Species grid */}
                 <div className="flex-grow overflow-y-auto p-4">
                     {favCount > 0 && !search && (
-                        <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                        <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-2 flex items-center gap-1">
                             <Star size={11} className="fill-current" /> Favourites
                         </p>
                     )}
                     {filtered.length === 0 ? (
-                        <p className="text-center text-gray-500 py-8">No species found.</p>
+                        <p className="text-center text-gray-500 dark:text-dark-text-muted py-8">No species found.</p>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {filtered.map((s, idx) => {
@@ -110,7 +110,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X: XIcon, Searc
                                 return (
                                     <React.Fragment key={s._id || s.name}>
                                         {showDivider && (
-                                            <div className="col-span-full border-t border-gray-200 my-1" />
+                                            <div className="col-span-full border-t border-gray-200 dark:border-dark-text-muted my-1" />
                                         )}
                                         <div className="relative group">
                                             <button
@@ -118,20 +118,20 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X: XIcon, Searc
                                                 onClick={() => onSelect(s.name)}
                                                 className={`w-full h-20 flex flex-col items-start justify-center p-2 border-2 rounded-lg text-left transition hover:shadow-md relative ${
                                                     isFav
-                                                        ? 'border-amber-300 bg-amber-50 hover:bg-amber-100'
+                                                        ? 'border-amber-300 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50'
                                                         : s.isDefault
-                                                        ? 'border-primary bg-primary/10 hover:bg-primary/20'
-                                                        : 'border-gray-200 bg-white hover:border-primary/50 hover:bg-gray-50'
+                                                        ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 hover:bg-primary/20 dark:hover:bg-dark-primary/20'
+                                                        : 'border-gray-200 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg hover:border-primary/50 hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
                                                 }`}
                                             >
-                                                <span className="font-medium text-sm text-gray-800 leading-tight pr-5 line-clamp-1">
+                                                <span className="font-medium text-sm text-gray-800 dark:text-dark-text leading-tight pr-5 line-clamp-1">
                                                     {s.name}
                                                 </span>
                                                 {s.latinName && (
-                                                    <span className="text-xs italic text-gray-500 mt-0.5 leading-tight line-clamp-1">{s.latinName}</span>
+                                                    <span className="text-xs italic text-gray-500 dark:text-dark-text-muted mt-0.5 leading-tight line-clamp-1">{s.latinName}</span>
                                                 )}
                                                 {s.category && (
-                                                    <span className="absolute bottom-1 left-2 text-gray-400">
+                                                    <span className="absolute bottom-1 left-2 text-gray-400 dark:text-dark-text-muted">
                                                         {getCategoryIcon(s.category)}
                                                     </span>
                                                 )}
@@ -140,7 +140,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X: XIcon, Searc
                                                 type="button"
                                                 onClick={e => toggleFavorite(e, s.name)}
                                                 title={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                                                className={`absolute top-2 right-2 transition ${isFav ? 'text-amber-400 opacity-100' : 'text-gray-300 opacity-0 group-hover:opacity-100 hover:text-amber-400'}`}
+                                                className={`absolute top-2 right-2 transition ${isFav ? 'text-amber-400 opacity-100' : 'text-gray-300 dark:text-dark-text-muted opacity-0 group-hover:opacity-100 hover:text-amber-400'}`}
                                             >
                                                 <Star size={13} className={isFav ? 'fill-current' : ''} />
                                             </button>
@@ -153,9 +153,9 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X: XIcon, Searc
                 </div>
 
                 {/* Footer */}
-                <div className="border-t p-3 flex-shrink-0 flex justify-between items-center">
-                    <span className="text-xs text-gray-400">{filtered.length} species{favCount > 0 ? ` – ${favCount} favourited` : ''}</span>
-                    <button onClick={onClose} className="text-sm text-gray-500 hover:text-gray-800 transition">Cancel</button>
+                <div className="border-t dark:border-dark-text-muted p-3 flex-shrink-0 flex justify-between items-center">
+                    <span className="text-xs text-gray-400 dark:text-dark-text-muted">{filtered.length} species{favCount > 0 ? ` – ${favCount} favourited` : ''}</span>
+                    <button onClick={onClose} className="text-sm text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text transition">Cancel</button>
                 </div>
             </div>
         </div>

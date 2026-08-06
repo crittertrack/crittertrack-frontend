@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
+?????????????// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -1728,7 +1728,7 @@ const App = () => {
                                 fetchNotificationCount();
                             }}
                             data-tutorial-target="notification-bell"
-                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-dark-surface dark:hover:bg-dark-surface-hover dark:text-dark-text-secondary py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-dark-card-bg dark:hover:bg-dark-surface-hover dark:text-dark-text-secondary py-2 px-3 rounded-lg transition duration-150 shadow-sm"
                             title="Notifications"
                         >
                             <Bell size={18} />
@@ -1742,7 +1742,7 @@ const App = () => {
                         <button
                             onClick={() => setShowMessages(true)}
                             data-tutorial-target="messages-btn"
-                            className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-lg transition duration-150 shadow-sm ${unreadAdminMessageCount > 0 ? 'bg-red-50 hover:bg-red-100 text-red-700 ring-1 ring-red-300 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 dark:ring-red-800' : 'bg-gray-100 hover:bg-gray-200 text-black dark:bg-dark-surface dark:hover:bg-dark-surface-hover dark:text-dark-text-secondary'}`}
+                            className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-lg transition duration-150 shadow-sm ${unreadAdminMessageCount > 0 ? 'bg-red-50 hover:bg-red-100 text-red-700 ring-1 ring-red-300 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 dark:ring-red-800' : 'bg-gray-100 hover:bg-gray-200 text-black dark:bg-dark-card-bg dark:hover:bg-dark-surface-hover dark:text-dark-text-secondary'}`}
                             title={unreadAdminMessageCount > 0 ? 'Admin message ? response required' : 'Messages'}
                         >
                             <MessageSquare size={18} />
@@ -1771,7 +1771,7 @@ const App = () => {
                                 }
                             </button>
                             {showProfileMenu && (
-                                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
+                                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
                                     <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <User size={15} /> Profile
@@ -1822,7 +1822,7 @@ const App = () => {
                                     fetchNotificationCount();
                                 }}
                                 data-tutorial-target="notification-bell"
-                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-dark-surface dark:hover:bg-dark-surface-hover dark:text-dark-text-secondary p-2 rounded-lg transition duration-150 shadow-sm"
+                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-dark-card-bg dark:hover:bg-dark-surface-hover dark:text-dark-text-secondary p-2 rounded-lg transition duration-150 shadow-sm"
                                 title="Notifications"
                             >
                                 <Bell size={18} />
@@ -1836,7 +1836,7 @@ const App = () => {
                             <button
                                 onClick={() => setShowMessages(true)}
                                 data-tutorial-target="messages-btn"
-                                className={`relative flex items-center justify-center p-2 rounded-lg transition duration-150 shadow-sm ${unreadAdminMessageCount > 0 ? 'bg-red-50 hover:bg-red-100 text-red-700 ring-1 ring-red-300 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 dark:ring-red-800' : 'bg-gray-100 hover:bg-gray-200 text-black dark:bg-dark-surface dark:hover:bg-dark-surface-hover dark:text-dark-text-secondary'}`}
+                                className={`relative flex items-center justify-center p-2 rounded-lg transition duration-150 shadow-sm ${unreadAdminMessageCount > 0 ? 'bg-red-50 hover:bg-red-100 text-red-700 ring-1 ring-red-300 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 dark:ring-red-800' : 'bg-gray-100 hover:bg-gray-200 text-black dark:bg-dark-card-bg dark:hover:bg-dark-surface-hover dark:text-dark-text-secondary'}`}
                                 title={unreadAdminMessageCount > 0 ? 'Admin message ? response required' : 'Messages'}
                             >
                                 <MessageSquare size={18} />
@@ -1865,7 +1865,7 @@ const App = () => {
                                     }
                                 </button>
                                 {showProfileMenu && (
-                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
+                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-card-bg rounded-xl shadow-xl border border-gray-200 dark:border-dark-text-muted py-1 z-50">
                                         <button onClick={() => { navigate(`/user/${userProfile.id_public}`); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <User size={15} /> Profile
@@ -1943,7 +1943,7 @@ const App = () => {
                 </div>
             </header>
 
-            {/* Unified alerts/notifications banner — unread messages/notifications, moderator
+            {/* Unified alerts/notifications banner � unread messages/notifications, moderator
                 warnings/notices, and optional care/breeding alerts. Shown on every page. */}
             <NotificationBar
                 authToken={authToken}

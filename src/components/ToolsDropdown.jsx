@@ -32,15 +32,15 @@ const toolLinks = [
 
 const ToolsDropdown = ({ onLinkClick }) => {
   return (
-    <div className="absolute top-full right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none py-1 z-10">
+    <div className="absolute top-full right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-dark-card-bg ring-1 ring-black ring-opacity-5 dark:ring-dark-text-muted focus:outline-none py-1 z-10">
       {toolLinks.map((link) => (
         <NavLink
           key={link.href}
           to={link.href}
           onClick={onLinkClick}
           className={({ isActive }) =>
-            `flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-dark-surface ${
-              isActive ? 'bg-gray-100 dark:bg-dark-surface font-semibold' : ''
+            `flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-dark-text-secondary dark:hover:bg-dark-surface-hover ${
+              isActive ? 'bg-gray-100 dark:bg-dark-card-bg font-semibold dark:text-dark-text' : ''
             }`
           }
         >

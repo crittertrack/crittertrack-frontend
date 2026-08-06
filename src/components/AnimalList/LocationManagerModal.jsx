@@ -100,7 +100,7 @@ const LocationManagerModal = ({ isOpen, onClose, locations, onSave, onDelete, sa
                             </div>
                         )}
                         {formState.type === 'building' && (
-                            <div className="space-y-3 p-3 border rounded-md bg-gray-50 dark:bg-dark-surface border-gray-200 dark:border-dark-text-muted">
+                            <div className="space-y-3 p-3 border rounded-md bg-gray-50 dark:bg-dark-card-bg border-gray-200 dark:border-dark-text-muted">
                                 <h5 className="font-medium text-gray-600 dark:text-dark-text">Address (Optional)</h5>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div><label className="text-xs text-gray-500 dark:text-dark-text-muted">Street</label><input type="text" name="street" value={formState.address.street || ''} onChange={handleAddressChange} className="mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-md bg-white dark:bg-dark-card-bg dark:text-dark-text" /></div>
@@ -122,7 +122,7 @@ const LocationManagerModal = ({ isOpen, onClose, locations, onSave, onDelete, sa
                             const buildingRooms = rooms.filter(r => r.parentLocationId === building._id);
                             const addressStr = formatAddress(building.address);
                             return (
-                                <div key={building._id} className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg">
+                                <div key={building._id} className="bg-gray-50 dark:bg-dark-card-bg p-3 rounded-lg">
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <div className="flex items-center gap-2"><Building size={18} className="text-gray-600 dark:text-dark-text-secondary" /><span className="font-semibold text-gray-800 dark:text-dark-text">{building.name}</span></div>
