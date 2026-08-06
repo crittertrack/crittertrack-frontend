@@ -130,7 +130,7 @@ const ResourcesPage = ({ API_BASE_URL }) => {
                 </div>
                 <a
                     href="mailto:CrittertrackOwner@gmail.com?subject=Resource%20Suggestion&body=I'd%20like%20to%20suggest%20a%20resource%20to%20add%3A%0D%0A%0D%0ATitle%3A%0D%0AURL%3A%0D%0ANotes%3A"
-                    className="inline-flex items-center gap-1.5 px-3 py-2 border border-primary text-primary dark:text-accent dark:border-accent rounded-lg text-sm font-medium hover:bg-primary hover:text-white dark:hover:bg-accent dark:hover:text-dark-bg transition whitespace-nowrap"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-accent dark:bg-dark-accent hover:bg-accent/80 dark:hover:bg-dark-accent/80 text-white rounded-lg text-sm font-medium transition whitespace-nowrap"
                 >
                     <Mail size={16} />
                     Suggest a Resource
