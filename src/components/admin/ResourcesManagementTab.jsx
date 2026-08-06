@@ -9,7 +9,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const emptyForm = { title: '', url: '', description: '', species: [], tags: '' };
+    const emptyForm = { title: '', url: '', description: '', subject: '', language: '', species: [], tags: '' };
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedResource, setSelectedResource] = useState(null);
@@ -53,6 +53,8 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
             title: resource.title || '',
             url: resource.url || '',
             description: resource.description || '',
+            subject: resource.subject || '',
+            language: resource.language || '',
             species: resource.species || [],
             tags: (resource.tags || []).join(', ')
         });
@@ -73,6 +75,8 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
         title: form.title.trim(),
         url: form.url.trim(),
         description: form.description.trim(),
+        subject: form.subject.trim(),
+        language: form.language.trim(),
         species: form.species,
         tags: form.tags.split(',').map(t => t.trim()).filter(Boolean)
     });
@@ -223,6 +227,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
                                 <div className="font-semibold text-gray-800 truncate">
                                     {r.title}
                                     {r.subject && <span className="ml-2 text-xs font-normal text-gray-500">({r.subject})</span>}
+                                    {r.language && <span className="ml-2 text-xs font-normal text-gray-400">[{r.language}]</span>}
                                 </div>
                                 <div className="text-xs text-gray-500 truncate">{r.url}</div>
                                 {(r.species?.length > 0 || r.tags?.length > 0) && (
@@ -265,9 +270,26 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
                                 <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
                                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="w-full p-2 border border-gray-300 rounded-lg text-sm" />
                             </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Subject (optional, e.g. "Genetics", "Nutrition")</label>
-                                <input type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} className="w-full p-2 border border-gray-300 rounded-lg text-sm" />
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Subject (optional, e.g. "Genetics")</label>
+                                    <input type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} className="w-full p-2 border border-gray-300 rounded-lg text-sm" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Language (optional)</label>
+                                    <input
+                                        type="text"
+                                        list="resource-language-suggestions"
+                                        value={form.language}
+                                        onChange={e => setForm(p => ({ ...p, language: e.target.value }))}
+                                        className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                    />
+                                    <datalist id="resource-language-suggestions">
+                                        {['English', 'Dutch', 'French', 'German', 'Spanish', 'Italian', 'Portuguese'].map(l => (
+                                            <option key={l} value={l} />
+                                        ))}
+                                    </datalist>
+                                </div>
                             </div>
                             {renderSpeciesPicker()}
                             <div>

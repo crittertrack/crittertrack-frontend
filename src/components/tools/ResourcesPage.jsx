@@ -10,6 +10,7 @@ const ResourcesPage = ({ API_BASE_URL }) => {
     const [speciesQuery, setSpeciesQuery] = useState('');
     const [selectedSpecies, setSelectedSpecies] = useState([]);
     const [selectedSubjects, setSelectedSubjects] = useState([]);
+    const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
 
     useEffect(() => {
@@ -45,6 +46,12 @@ const ResourcesPage = ({ API_BASE_URL }) => {
         return [...set].sort((a, b) => a.localeCompare(b));
     }, [resources]);
 
+    const allLanguages = useMemo(() => {
+        const set = new Set();
+        resources.forEach(r => { if (r.language) set.add(r.language); });
+        return [...set].sort((a, b) => a.localeCompare(b));
+    }, [resources]);
+
     const speciesSuggestions = useMemo(() => {
         if (!speciesQuery.trim()) return [];
         const q = speciesQuery.toLowerCase();
@@ -59,6 +66,10 @@ const ResourcesPage = ({ API_BASE_URL }) => {
 
     const toggleSubject = (subject) => {
         setSelectedSubjects(prev => prev.includes(subject) ? prev.filter(s => s !== subject) : [...prev, subject]);
+    };
+
+    const toggleLanguage = (language) => {
+        setSelectedLanguages(prev => prev.includes(language) ? prev.filter(l => l !== language) : [...prev, language]);
     };
 
     const addSpecies = (species) => {
@@ -88,11 +99,14 @@ const ResourcesPage = ({ API_BASE_URL }) => {
             const matchesSubject = selectedSubjects.length === 0 ||
                 (r.subject && selectedSubjects.includes(r.subject));
 
-            return matchesSearch && matchesSpecies && matchesTags && matchesSubject;
-        });
-    }, [resources, searchTerm, selectedSpecies, selectedTags, selectedSubjects]);
+            const matchesLanguage = selectedLanguages.length === 0 ||
+                (r.language && selectedLanguages.includes(r.language));
 
-    const hasActiveFilters = searchTerm || selectedSpecies.length > 0 || selectedTags.length > 0 || selectedSubjects.length > 0;
+            return matchesSearch && matchesSpecies && matchesTags && matchesSubject && matchesLanguage;
+        });
+    }, [resources, searchTerm, selectedSpecies, selectedTags, selectedSubjects, selectedLanguages]);
+
+    const hasActiveFilters = searchTerm || selectedSpecies.length > 0 || selectedTags.length > 0 || selectedSubjects.length > 0 || selectedLanguages.length > 0;
 
     const clearFilters = () => {
         setSearchTerm('');
@@ -100,6 +114,7 @@ const ResourcesPage = ({ API_BASE_URL }) => {
         setSelectedSpecies([]);
         setSelectedTags([]);
         setSelectedSubjects([]);
+        setSelectedLanguages([]);
     };
 
     return (
@@ -181,6 +196,25 @@ const ResourcesPage = ({ API_BASE_URL }) => {
                 </div>
             )}
 
+            {allLanguages.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                    {allLanguages.map(language => (
+                        <button
+                            key={language}
+                            type="button"
+                            onClick={() => toggleLanguage(language)}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full transition ${
+                                selectedLanguages.includes(language)
+                                    ? 'bg-accent text-white'
+                                    : 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
+                            }`}
+                        >
+                            {language}
+                        </button>
+                    ))}
+                </div>
+            )}
+
             {allTags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-4">
                     {allTags.map(tag => (
@@ -235,6 +269,9 @@ const ResourcesPage = ({ API_BASE_URL }) => {
                                     {r.title}
                                     {r.subject && (
                                         <span className="ml-2 text-xs font-medium text-primary-dark dark:text-dark-primary align-middle">{r.subject}</span>
+                                    )}
+                                    {r.language && (
+                                        <span className="ml-2 text-xs font-medium text-gray-400 dark:text-dark-text-muted align-middle">[{r.language}]</span>
                                     )}
                                 </h3>
                                 <ExternalLink size={16} className="text-gray-400 dark:text-dark-text-muted flex-shrink-0 mt-0.5" />
