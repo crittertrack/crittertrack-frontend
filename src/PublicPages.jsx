@@ -9,8 +9,8 @@ const API_BASE_URL = '/api';
 
 const PrivateAnimalScreen = ({ onBack }) => {
     return (
-        <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6">
-            <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
+        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center justify-center p-6">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-8 max-w-md text-center">
                 <Lock size={64} className="text-gray-500 mx-auto mb-4" />
                 <h1 className="text-2xl font-bold text-gray-800 mb-2">This Animal is Private</h1>
                 <p className="text-gray-600 mb-6">
@@ -113,7 +113,7 @@ const PublicAnimalPage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-page-bg flex items-center justify-center p-6">
+            <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex items-center justify-center p-6">
                 <Loader2 className="animate-spin text-primary" size={48} />
             </div>
         );
@@ -121,8 +121,8 @@ const PublicAnimalPage = () => {
 
     if (isPrivate) {
         return (
-            <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
-                <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+            <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6">
+                <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     <button
                         onClick={handleGoBack}
@@ -138,8 +138,8 @@ const PublicAnimalPage = () => {
 
     if (notFound) {
         return (
-            <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6">
-                <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
+            <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center justify-center p-6">
+                <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-8 max-w-md text-center">
                     <XCircle size={64} className="text-red-500 mx-auto mb-4" />
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">Animal Not Found</h1>
                     <p className="text-gray-600 mb-6"> {/* Changed from creatorId_public to creatorId_public */}
@@ -157,8 +157,8 @@ const PublicAnimalPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
-            <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6">
+            <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
                     onClick={handleGoBack}
@@ -266,7 +266,7 @@ const PublicProfilePage = ({ onOpenMessages }) => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-page-bg flex items-center justify-center p-6">
+            <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex items-center justify-center p-6">
                 <Loader2 className="animate-spin text-primary" size={48} />
             </div>
         );
@@ -274,8 +274,8 @@ const PublicProfilePage = ({ onOpenMessages }) => {
 
     if (notFound) {
         return (
-            <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6">
-                <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
+            <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center justify-center p-6">
+                <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-lg p-8 max-w-md text-center">
                     <XCircle size={64} className="text-red-500 mx-auto mb-4" />
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">Profile Not Found</h1>
                     <p className="text-gray-600 mb-6">
@@ -293,8 +293,8 @@ const PublicProfilePage = ({ onOpenMessages }) => {
     }
 
     return (
-        <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
-            <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6">
+            <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
                     onClick={() => navigate('/')}
