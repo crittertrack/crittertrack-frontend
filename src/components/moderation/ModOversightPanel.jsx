@@ -35,7 +35,7 @@ const DATE_PRESETS = [
 const STATUS_BADGE_COLORS = {
     pending: '#ff6f00',
     in_progress: themeColors['accent-purple-dark'],
-    reviewed: '#1976d2',
+    reviewed: themeColors['info-blue-dark'],
     resolved: '#388e3c',
     dismissed: '#757575'
 };
@@ -928,7 +928,7 @@ export default function ModOversightPanel({
                                                 {getContentOwnerDetails(selectedReport).websiteUrl && (
                                                     <div className="mod-detail-item">
                                                         <span className="mod-detail-label">Website:</span>
-                                                        <a href={getContentOwnerDetails(selectedReport).websiteUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2' }}>
+                                                        <a href={getContentOwnerDetails(selectedReport).websiteUrl} target="_blank" rel="noopener noreferrer" style={{ color: themeColors['info-blue-dark'] }}>
                                                             {getContentOwnerDetails(selectedReport).websiteUrl}
                                                         </a>
                                                     </div>
@@ -1266,7 +1266,7 @@ export default function ModOversightPanel({
                                         <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                                             <button
                                                 className="mod-action-btn"
-                                                style={{ backgroundColor: '#e3f2fd', borderColor: '#1976d2', color: '#0d47a1' }}
+                                                style={{ backgroundColor: '#e3f2fd', borderColor: themeColors['info-blue-dark'], color: themeColors['info-blue-dark'] }}
                                                 onClick={() => openUserActionModal('inform')}
                                                 disabled={actionLoading}
                                             >
@@ -1289,7 +1289,7 @@ export default function ModOversightPanel({
 
                                 {/* Warn/Inform Modal */}
                                 {userActionModal && (
-                                    <div style={{ margin: '12px 0', padding: '14px', backgroundColor: userActionModal.mode === 'warn' ? '#fff8e1' : '#e3f2fd', border: `1px solid ${userActionModal.mode === 'warn' ? '#f57c00' : '#1976d2'}`, borderRadius: '8px' }}>
+                                    <div style={{ margin: '12px 0', padding: '14px', backgroundColor: userActionModal.mode === 'warn' ? '#fff8e1' : '#e3f2fd', border: `1px solid ${userActionModal.mode === 'warn' ? '#f57c00' : themeColors['info-blue-dark']}`, borderRadius: '8px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                             <strong style={{ fontSize: '14px' }}>
                                                 {userActionModal.mode === 'warn' ? '⚠️ Issue Warning' : '💬 Inform User'} — {userActionModal.userName}
@@ -1309,7 +1309,7 @@ export default function ModOversightPanel({
                                             <button
                                                 onClick={handleUserAction}
                                                 disabled={userActionLoading || !userActionText.trim()}
-                                                style={{ padding: '6px 16px', backgroundColor: userActionModal.mode === 'warn' ? '#f57c00' : '#1976d2', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', opacity: (!userActionText.trim() || userActionLoading) ? 0.6 : 1 }}
+                                                style={{ padding: '6px 16px', backgroundColor: userActionModal.mode === 'warn' ? '#f57c00' : themeColors['info-blue-dark'], color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', opacity: (!userActionText.trim() || userActionLoading) ? 0.6 : 1 }}
                                             >
                                                 {userActionLoading ? 'Sending...' : (userActionModal.mode === 'warn' ? 'Issue Warning' : 'Send Message')}
                                             </button>
@@ -1350,7 +1350,7 @@ export default function ModOversightPanel({
                                             const statusColors = {
                                                 pending: { bg: '#fff3e0', border: '#ff6f00', text: '#e65100' },
                                                 in_progress: { bg: themeColors['page-bg'], border: themeColors['accent-purple-dark'], text: themeColors['accent-purple-dark'] },
-                                                reviewed: { bg: '#e3f2fd', border: '#1976d2', text: '#0d47a1' },
+                                                reviewed: { bg: '#e3f2fd', border: themeColors['info-blue-dark'], text: themeColors['info-blue-dark'] },
                                                 resolved: { bg: '#e8f5e9', border: '#388e3c', text: '#1b5e20' },
                                                 dismissed: { bg: '#f5f5f5', border: '#757575', text: '#424242' }
                                             };

@@ -19,6 +19,9 @@ const SRC_DIR = path.join(__dirname, '..', 'src');
 const MAPPING = {
     'accent-purple': { hex: '#7c3aed', absorbs: ['#9333ea', '#8b5cf6'] },
     'accent-purple-dark': { hex: '#6a1b9a', absorbs: ['#7b1fa2', '#9c27b0'] },
+    'info-indigo': { hex: '#6366f1', absorbs: ['#2563eb'] },
+    'info-blue': { hex: '#3b82f6', absorbs: ['#007bff', '#667eea'] },
+    'info-blue-dark': { hex: '#1976d2', absorbs: ['#1565c0', '#0056b3', '#0d47a1'] },
     // Reuses the existing page-bg token instead of a new one — these are all pale
     // pink/rose shades within Delta-E 12 of it (see colors.md §3).
     'page-bg': {

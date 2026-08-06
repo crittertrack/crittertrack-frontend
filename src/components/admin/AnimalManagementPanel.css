@@ -68,12 +68,12 @@
 
 .animal-mgmt-search input:focus {
     outline: none;
-    border-color: #6366f1;
+    @apply border-info-indigo;
 }
 
 .animal-mgmt-search button {
     padding: 10px 20px;
-    background: #6366f1;
+    @apply bg-info-indigo;
     color: white;
     border: none;
     border-radius: 8px;
@@ -177,7 +177,7 @@
 .animal-id {
     font-family: monospace;
     font-weight: 600;
-    color: #6366f1;
+    @apply text-info-indigo;
 }
 
 .animal-name .prefix,
@@ -249,8 +249,8 @@
 }
 
 .action-btn.view:hover {
-    color: #6366f1;
-    border-color: #6366f1;
+    @apply text-info-indigo;
+    @apply border-info-indigo;
 }
 
 .action-btn.edit:hover {
@@ -360,7 +360,7 @@
 .animal-modal-id {
     font-family: monospace;
     font-size: 14px;
-    color: #6366f1;
+    @apply text-info-indigo;
     background: #eef2ff;
     padding: 4px 10px;
     border-radius: 6px;
@@ -573,7 +573,7 @@
 }
 
 .btn-primary {
-    background: #6366f1;
+    @apply bg-info-indigo;
     color: white;
 }
 
@@ -644,7 +644,7 @@
 .form-row select:focus,
 .form-row textarea:focus {
     outline: none;
-    border-color: #6366f1;
+    @apply border-info-indigo;
 }
 
 .form-row textarea {

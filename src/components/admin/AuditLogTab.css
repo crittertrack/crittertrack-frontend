@@ -25,7 +25,7 @@
 }
 
 .tab-header button:hover:not(:disabled) {
-    background: #1976d2;
+    @apply bg-info-blue-dark;
 }
 
 .tab-header button:disabled {
@@ -202,7 +202,7 @@
 }
 
 .pagination-controls button:hover:not(:disabled) {
-    background: #1976d2;
+    @apply bg-info-blue-dark;
 }
 
 .pagination-controls button:disabled {

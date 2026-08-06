@@ -17,7 +17,7 @@
 
 .date-input:focus {
     outline: none;
-    border-color: #6366f1;
+    @apply border-info-indigo;
     ring: 2px;
     ring-color: #6366f1;
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
@@ -47,7 +47,7 @@
 }
 
 .react-datepicker__header {
-    background-color: #6366f1;
+    @apply bg-info-indigo;
     border-bottom: none;
     border-radius: 0.5rem 0.5rem 0 0;
     padding-top: 0.5rem;
@@ -74,7 +74,7 @@
 }
 
 .react-datepicker__close-icon::after {
-    background-color: #6366f1;
+    @apply bg-info-indigo;
     font-size: 1rem;
 }
 
@@ -92,6 +92,6 @@
 
 .react-datepicker__month-option--selected,
 .react-datepicker__year-option--selected {
-    background-color: #6366f1;
+    @apply bg-info-indigo;
     color: white;
 }

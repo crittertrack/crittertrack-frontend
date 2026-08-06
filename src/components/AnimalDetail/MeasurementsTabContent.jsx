@@ -4,6 +4,7 @@ import { formatDate } from '../../utils/dateFormatter';
 import axios from 'axios';
 import { InfoCard } from './DashboardComponents';
 import { parseJsonField } from './utils';
+import themeColors from '../../utils/themeColors';
 
 const GrowthChart = ({ records, animal }) => {
     if (!records || records.length < 1) return null;
@@ -55,9 +56,9 @@ const GrowthChart = ({ records, animal }) => {
                         </text>
                     )
                 ))}
-                <path d={weightPathData} fill="none" stroke="#3b82f6" strokeWidth="2" />
+                <path d={weightPathData} fill="none" stroke={themeColors['info-blue']} strokeWidth="2" />
                 {weightPoints.map((p, i) => (
-                    <circle key={`point-${i}`} cx={p.x} cy={p.y} r="5" fill="#3b82f6" stroke="#fff" strokeWidth="2">
+                    <circle key={`point-${i}`} cx={p.x} cy={p.y} r="5" fill={themeColors['info-blue']} stroke="#fff" strokeWidth="2">
                         <title>{`Date: ${formatDate(p.date)}\nWeight: ${p.weight} ${animal.measurementUnits?.weight || 'g'}`}</title>
                     </circle>
                 ))}

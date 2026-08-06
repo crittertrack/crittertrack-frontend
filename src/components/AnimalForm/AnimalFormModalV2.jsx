@@ -8,6 +8,7 @@ import {
     Loader2, ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, DollarSign,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
+import themeColors from '../../utils/themeColors';
 import { formatDate, formatDateShort, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
 import { computeIsInTreatment, calculateHealthStatus as calculateHealthStatusShared, remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { getCurrencySymbol } from '../../utils/locationUtils';
@@ -4145,7 +4146,7 @@ const AnimalFormModalV2 = ({
                                                                 </g>
                                                             );
                                                         })}
-                                                        <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke="#3b82f6" strokeWidth="2" />
+                                                        <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke={themeColors['info-blue']} strokeWidth="2" />
                                                         <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
                                                         {points.map((p, i) => (
                                                             i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
@@ -4154,9 +4155,9 @@ const AnimalFormModalV2 = ({
                                                                 </text>
                                                             )
                                                         ))}
-                                                        <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                        <path d={pathData} fill="none" stroke={themeColors['info-blue']} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                                         {points.map((p, i) => (
-                                                            <circle key={`weight-point-${i}`} cx={p.x} cy={p.y} r="4" fill="#3b82f6" stroke="#fff" strokeWidth="1.5">
+                                                            <circle key={`weight-point-${i}`} cx={p.x} cy={p.y} r="4" fill={themeColors['info-blue']} stroke="#fff" strokeWidth="1.5">
                                                                 <title>{`Date: ${p.date}\nWeight: ${p.weight} ${measurementUnits.weight}${p.notes ? `\nNotes: ${p.notes}` : ''}`}</title>
                                                             </circle>
                                                         ))}

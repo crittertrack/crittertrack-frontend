@@ -385,7 +385,7 @@
 
 .feedback-notes-textarea:focus {
     outline: none;
-    border-color: #3b82f6;
+    @apply border-info-blue;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -427,7 +427,7 @@
 
 .mod-action-btn.replace {
     background: #e3f2fd;
-    color: #1565c0;
+    @apply text-info-blue-dark;
 }
 
 .mod-action-btn.replace:hover {
@@ -613,7 +613,7 @@
 }
 
 .reports-stat-blue .reports-stat-value {
-    color: #2563eb;
+    @apply text-info-indigo;
 }
 
 .reports-stat-green {
@@ -719,11 +719,11 @@
 }
 
 .sortable-header:hover {
-    color: #2563eb;
+    @apply text-info-indigo;
 }
 
 .sort-icon {
-    color: #2563eb;
+    @apply text-info-indigo;
 }
 
 /* Error Banner */
@@ -838,7 +838,7 @@
 
 .report-status-blue {
     background: #dbeafe;
-    color: #2563eb;
+    @apply text-info-indigo;
 }
 
 .report-status-green {

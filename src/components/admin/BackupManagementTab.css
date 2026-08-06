@@ -471,7 +471,7 @@
 
 .backup-type.manual {
     background: #dbeafe;
-    color: #2563eb;
+    @apply text-info-indigo;
 }
 
 .backup-type.auto {

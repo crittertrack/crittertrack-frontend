@@ -121,8 +121,8 @@
     color: #6b7280;
 }
 
-.species-stat-blue svg { color: #2563eb; }
-.species-stat-blue .species-stat-value { color: #2563eb; }
+.species-stat-blue svg { @apply text-info-indigo; }
+.species-stat-blue .species-stat-value { @apply text-info-indigo; }
 
 .species-stat-green svg { color: #059669; }
 .species-stat-green .species-stat-value { color: #059669; }
@@ -253,7 +253,7 @@
 
 .species-badge-default {
     background: #dbeafe;
-    color: #2563eb;
+    @apply text-info-indigo;
 }
 
 .species-badge-user {

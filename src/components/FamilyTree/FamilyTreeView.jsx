@@ -1005,7 +1005,7 @@ const FamilyTreeView = ({
                                     const isOffspringPath = parentNodes.some(id => descendantsOfFocus.has(id) || id === focusAnimalId);
 
                                     if (isOffspringPath) strokeColor = '#ec4899'; // Theme pink
-                                    else if (isAncestorPath) strokeColor = '#3b82f6'; // Theme blue
+                                    else if (isAncestorPath) strokeColor = themeColors['info-blue'];
                                 }
 
                                 const active = false; // Highlighting removed
@@ -1031,8 +1031,8 @@ const FamilyTreeView = ({
                             const active = graphData.focusId === id;
                             const isMale = animal.gender === 'Male';
                             const isFemale = animal.gender === 'Female';
-                            const borderColor = isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#94a3b8';
-                            const bgColor = isMale ? '#dbeafe' : isFemale ? themeColors['pedigree-female-bg'] : '#eef2f7';
+                            const borderColor = isMale ? themeColors['info-blue'] : isFemale ? '#ec4899' : '#94a3b8';
+                            const bgColor = isMale ? themeColors['pedigree-male-bg'] : isFemale ? themeColors['pedigree-female-bg'] : '#eef2f7';
                             const displayName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed';
                             const imageSrc = animal.imageUrl || animal.photoUrl || null;
 

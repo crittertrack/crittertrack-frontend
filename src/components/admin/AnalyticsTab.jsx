@@ -364,7 +364,7 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
                                     {reportsBreakdown.byStatus.map((entry, index) => {
                                         const colors = {
                                             'Pending': '#fbbf24',
-                                            'In progress': '#3b82f6',
+                                            'In progress': themeColors['info-blue'],
                                             'Reviewed': themeColors['accent-purple'],
                                             'Resolved': '#22c55e',
                                             'Dismissed': '#6b7280'
@@ -426,7 +426,7 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
                             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                             <YAxis tick={{ fontSize: 12 }} />
                             <Tooltip />
-                            <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} name="Reports" />
+                            <Bar dataKey="count" fill={themeColors['info-indigo']} radius={[4, 4, 0, 0]} name="Reports" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

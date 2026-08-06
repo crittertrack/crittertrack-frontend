@@ -30,6 +30,13 @@ module.exports = {
   // Female pedigree/family-tree card background — kept separate from page-bg
   // (which is more saturated) since these need to stay a very pale wash.
   'pedigree-female-bg': '#fdeef6',
+  // Male pedigree/family-tree card background — was #e8f1ff / #dbeafe.
+  'pedigree-male-bg': '#e8f1ff',
   // Pale purple wash paired with accent-purple text/borders (litter cards, species badges).
   'accent-purple-bg': '#f3e8ff',
+
+  // Blue family (status badges, buttons, links across admin/moderation panels).
+  'info-indigo': '#6366f1', // was #6366f1 / #2563eb
+  'info-blue': '#3b82f6', // was #3b82f6 / #007bff / #667eea
+  'info-blue-dark': '#1976d2', // was #1976d2 / #1565c0 / #0056b3 / #0d47a1
 };

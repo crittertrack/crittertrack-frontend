@@ -100,7 +100,7 @@
 }
 
 .feedback-stat-blue .feedback-stat-value {
-    color: #2563eb;
+    @apply text-info-indigo;
 }
 
 .feedback-stat-green {
@@ -236,7 +236,7 @@
 
 .feedback-status-blue {
     background: #dbeafe;
-    color: #2563eb;
+    @apply text-info-indigo;
 }
 
 .feedback-status-green {
@@ -430,7 +430,7 @@
 
 .feedback-btn-review {
     background: #dbeafe;
-    color: #2563eb;
+    @apply text-info-indigo;
 }
 
 .feedback-btn-review:hover:not(:disabled) {

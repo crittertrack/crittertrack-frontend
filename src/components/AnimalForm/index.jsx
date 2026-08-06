@@ -955,15 +955,15 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         }
         const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
         const borderColor = (!animal || animal.isHidden) ? (isSire ? '#76a7ff' : '#f48abf')
-            : animal.gender === 'Male' ? '#3b82f6'
+            : animal.gender === 'Male' ? themeColors['info-blue']
             : animal.gender === 'Female' ? '#f48abf'
             : (inlineMode ? '#94a3b8' : certBorderColor);
 
-        const bgColor = (!animal || animal.isHidden) ? (isSire ? '#e8f1ff' : themeColors['pedigree-female-bg'])
-            : (!animal.isHidden && !animal.gender) ? (isSire ? '#e8f1ff' : themeColors['pedigree-female-bg'])
-            : animal.gender === 'Male' ? '#e8f1ff'
+        const bgColor = (!animal || animal.isHidden) ? (isSire ? themeColors['pedigree-male-bg'] : themeColors['pedigree-female-bg'])
+            : (!animal.isHidden && !animal.gender) ? (isSire ? themeColors['pedigree-male-bg'] : themeColors['pedigree-female-bg'])
+            : animal.gender === 'Male' ? themeColors['pedigree-male-bg']
             : animal.gender === 'Female' ? themeColors['pedigree-female-bg']
-            : (isSire ? '#e8f1ff' : themeColors['pedigree-female-bg']);
+            : (isSire ? themeColors['pedigree-male-bg'] : themeColors['pedigree-female-bg']);
 
         const baseStyle = {
             border: `1px solid ${borderColor}`,
@@ -1227,7 +1227,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                         {totalBorn != null ? totalBorn : '—'}
                                         {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                             <span style={{ marginLeft: 6 }}>
-                                                <span style={{ color: '#3b82f6', fontWeight: 700 }}>{litter.maleCount ?? 0}M</span>
+                                                <span style={{ color: themeColors['info-blue'], fontWeight: 700 }}>{litter.maleCount ?? 0}M</span>
                                                 {' / '}
                                                 <span style={{ color: '#ec4899', fontWeight: 700 }}>{litter.femaleCount ?? 0}F</span>
                                                 {' / '}
@@ -1268,8 +1268,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         const isMale = animal.gender === 'Male';
         const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;
-        const cardBg = isMale ? '#dbeafe' : isFemale ? themeColors['pedigree-female-bg'] : '#f3f4f6';
-        const cardBorder = isMale ? '#3b82f6' : isFemale ? '#934E69' : certBorderColor;
+        const cardBg = isMale ? themeColors['pedigree-male-bg'] : isFemale ? themeColors['pedigree-female-bg'] : '#f3f4f6';
+        const cardBorder = isMale ? themeColors['info-blue'] : isFemale ? '#934E69' : certBorderColor;
 
         return (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
@@ -1330,12 +1330,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         const isMale = animal.gender === 'Male';
         const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;
-        const cardBg = isMale ? '#e8f1ff' : isFemale ? themeColors['pedigree-female-bg'] : '#f3f6fb';
+        const cardBg = isMale ? themeColors['pedigree-male-bg'] : isFemale ? themeColors['pedigree-female-bg'] : '#f3f6fb';
         const cardBorder = isMale ? '#79a9ff' : isFemale ? '#f48abf' : '#b9c7db';
 
         return (
             <div style={{ backgroundColor: cardBg, border: `1.5px solid ${cardBorder}`, borderRadius: 10, padding: '10px', boxSizing: 'border-box', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 8, right: 8 }}><GenderIcon size={18} color={isMale ? '#3b82f6' : isFemale ? '#934E69' : '#64748b'} /></div>
+                <div style={{ position: 'absolute', top: 8, right: 8 }}><GenderIcon size={18} color={isMale ? themeColors['info-blue'] : isFemale ? '#934E69' : '#64748b'} /></div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <div style={{ width: 86, height: 86, flexShrink: 0, overflow: 'hidden', borderRadius: 10, border: '1px solid #c9d5e6', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {imgSrc ? (
@@ -1464,7 +1464,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     const imgSrc = a && !a.isHidden ? (a.imageUrl || a.photoUrl || null) : null;
                     const isMale = a?.gender === 'Male' || (a?.gender !== 'Female' && n.isSire === true);
                     const isFemale = a?.gender === 'Female' || (a?.gender !== 'Male' && n.isSire === false);
-                    const borderColor = isUnknown ? '#94a3b8' : isMale ? '#3b82f6' : isFemale ? '#934E69' : '#64748b';
+                    const borderColor = isUnknown ? '#94a3b8' : isMale ? themeColors['info-blue'] : isFemale ? '#934E69' : '#64748b';
                     const bgColor = isUnknown ? '#e5e7eb' : '#f8fafc';
                     const fullName = a && !a.isHidden ? [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') : 'Unknown';
                     const clickable = !!(a && !a.isHidden && a.id_public);

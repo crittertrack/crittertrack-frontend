@@ -3,6 +3,7 @@ import { Palette, Dna, Sprout, Ruler } from 'lucide-react';
 import { InfoCard, InfoItem } from './DashboardComponents';
 import { formatDate } from '../../utils/dateFormatter';
 import { isFieldHiddenForSpecies, getFieldLabel } from '../../utils/speciesFieldTemplates';
+import themeColors from '../../utils/themeColors';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -124,9 +125,9 @@ export const AppearanceTabContent = ({ animal }) => {
                                             </text>
                                         )
                                     ))}
-                                    <path d={weightPathData} fill="none" stroke="#3b82f6" strokeWidth="2" />
+                                    <path d={weightPathData} fill="none" stroke={themeColors['info-blue']} strokeWidth="2" />
                                     {weightPoints.map((p, i) => (
-                                        <circle key={`point-${i}`} cx={p.x} cy={p.y} r="5" fill="#3b82f6" stroke="#fff" strokeWidth="2">
+                                        <circle key={`point-${i}`} cx={p.x} cy={p.y} r="5" fill={themeColors['info-blue']} stroke="#fff" strokeWidth="2">
                                             <title>{`Date: ${formatDate(p.date)}\nWeight: ${p.weight} ${animal.measurementUnits?.weight || 'g'}`}</title>
                                         </circle>
                                     ))}

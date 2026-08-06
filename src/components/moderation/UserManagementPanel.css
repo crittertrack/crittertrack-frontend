@@ -109,7 +109,7 @@
 }
 
 .status-filters select:focus {
-    border-color: #6366f1;
+    @apply border-info-indigo;
 }
 
 .role-filters {
@@ -134,7 +134,7 @@
 }
 
 .role-filters select:focus {
-    border-color: #6366f1;
+    @apply border-info-indigo;
 }
 
 .user-count {
@@ -185,7 +185,7 @@
     display: inline-block;
     margin-left: 4px;
     vertical-align: middle;
-    color: #6366f1;
+    @apply text-info-indigo;
 }
 
 .users-table td {
@@ -203,7 +203,7 @@
 .user-id {
     font-family: monospace;
     font-weight: 600;
-    color: #6366f1;
+    @apply text-info-indigo;
     white-space: nowrap;
 }
 
@@ -309,8 +309,8 @@
 }
 
 .action-btn.history-btn:hover {
-    border-color: #6366f1;
-    color: #6366f1;
+    @apply border-info-indigo;
+    @apply text-info-indigo;
 }
 
 .action-btn.warn-btn:hover {
@@ -491,7 +491,7 @@
 }
 
 .action-moderator {
-    color: #6366f1;
+    @apply text-info-indigo;
     font-size: 12px;
     margin-bottom: 4px;
 }
@@ -698,7 +698,7 @@
 .form-group textarea:focus,
 .form-group input:focus {
     outline: none;
-    border-color: #6366f1;
+    @apply border-info-indigo;
 }
 
 .form-hint {
@@ -919,7 +919,7 @@
 }
 
 .tab-btn.active {
-    color: #6366f1;
+    @apply text-info-indigo;
     border-bottom-color: #6366f1;
 }
 
@@ -975,8 +975,8 @@
 
 /* Timeline colors */
 .timeline-blue .timeline-marker {
-    border-color: #3b82f6;
-    color: #3b82f6;
+    @apply border-info-blue;
+    @apply text-info-blue;
 }
 
 .timeline-yellow .timeline-marker {
