@@ -1032,7 +1032,7 @@ const FamilyTreeView = ({
                             const isMale = animal.gender === 'Male';
                             const isFemale = animal.gender === 'Female';
                             const borderColor = isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#94a3b8';
-                            const bgColor = isMale ? '#dbeafe' : isFemale ? themeColors['page-bg'] : '#eef2f7';
+                            const bgColor = isMale ? '#dbeafe' : isFemale ? themeColors['pedigree-female-bg'] : '#eef2f7';
                             const displayName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed';
                             const imageSrc = animal.imageUrl || animal.photoUrl || null;
 

@@ -262,7 +262,7 @@
 }
 
 .species-badge-config {
-    @apply bg-page-bg;
+    @apply bg-accent-purple-bg;
     @apply text-accent-purple;
 }
 
@@ -350,7 +350,7 @@
 
 .config-preview-item {
     font-size: 0.75rem;
-    @apply bg-page-bg;
+    @apply bg-accent-purple-bg;
     @apply text-accent-purple;
     padding: 2px 8px;
     border-radius: 4px;

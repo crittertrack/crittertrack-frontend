@@ -26,4 +26,10 @@ module.exports = {
   // shade family instead of dozens of hand-typed hex literals.
   'accent-purple': '#7c3aed', // was #7c3aed / #9333ea / #8b5cf6
   'accent-purple-dark': '#6a1b9a', // was #6a1b9a / #7b1fa2 / #9c27b0
+
+  // Female pedigree/family-tree card background — kept separate from page-bg
+  // (which is more saturated) since these need to stay a very pale wash.
+  'pedigree-female-bg': '#fdeef6',
+  // Pale purple wash paired with accent-purple text/borders (litter cards, species badges).
+  'accent-purple-bg': '#f3e8ff',
 };

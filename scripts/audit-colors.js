@@ -11,6 +11,8 @@ const path = require('path');
 const SRC_DIR = path.join(__dirname, '..', 'src');
 const OUTPUT_FILE = path.join(__dirname, '..', '..', 'colors.md');
 const SCAN_EXTENSIONS = new Set(['.css', '.js', '.jsx']);
+// The canonical token definitions themselves, not a "usage" to flag.
+const EXCLUDE_FILES = new Set([path.join(SRC_DIR, 'utils', 'themeColors.js')]);
 const HEX_PATTERN = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
 
 // Distance thresholds are CIE76 Delta-E (perceptual Lab-space distance, ~2.3 = just
@@ -32,7 +34,7 @@ function walk(dir, files = []) {
         const fullPath = path.join(dir, entry.name);
         if (entry.isDirectory()) {
             walk(fullPath, files);
-        } else if (SCAN_EXTENSIONS.has(path.extname(entry.name))) {
+        } else if (SCAN_EXTENSIONS.has(path.extname(entry.name)) && !EXCLUDE_FILES.has(fullPath)) {
             files.push(fullPath);
         }
     }
