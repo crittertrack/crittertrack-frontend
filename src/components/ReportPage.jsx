@@ -319,7 +319,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                                         </div>
                                     )}
                                     {r.adminNotes && (
-                                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700"><strong>Team note:</strong> {r.adminNotes}</p>
+                                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700"><strong>Response from Moderator:</strong> {r.adminNotes}</p>
                                     )}
                                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">{new Date(r.createdAt).toLocaleDateString()}</p>
                                 </div>
