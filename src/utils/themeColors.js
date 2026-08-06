@@ -11,7 +11,7 @@ module.exports = {
   'accent': '#D27096',
 
   // Dark mode colors
-  'dark-bg': '#1B1A20',
+  'dark-bg': '#2A2830', // Softer charcoal instead of near-black — was #1B1A20 (too close to true black).
   'dark-surface': '#66666b',
   'dark-surface-hover': '#2D2B34',
   'dark-border': '#35343D',

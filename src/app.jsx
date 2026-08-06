@@ -1309,7 +1309,7 @@ const App = () => {
         // Handle public profile viewing for non-logged-in users
         if (viewingPublicProfile) {
             return (
-                <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
+                <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     {viewingPublicAnimal && (
                         <ViewAnimalModalV2 
@@ -1380,7 +1380,7 @@ const App = () => {
         // Offspring Calculator for non-logged-in users
         if (currentView === 'calculator') {
             return (
-                <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
+                <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
                     <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6">
@@ -1442,7 +1442,7 @@ const App = () => {
         // Donation view for non-logged-in users
         if (currentView === 'donation') {
             return (
-                <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
+                <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center justify-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
                     <DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />
@@ -1452,7 +1452,7 @@ const App = () => {
         
         // Default auth view with search button
         return (
-            <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
+            <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center justify-center p-6 font-sans">
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                 
                 {/* Public navigation header */}
@@ -1616,7 +1616,7 @@ const App = () => {
     }
 
      return (
-        <div className="min-h-screen bg-page-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0">
+        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0">
             {/* Fixed Donation Button - Top Left */}
             <div className="fixed top-4 left-4 z-[60]">
                 <button
