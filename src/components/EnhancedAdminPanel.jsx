@@ -3,7 +3,7 @@ import {
     X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
     ChevronDown, ChevronRight, ChevronLeft, CheckCircle, Clock, Flag, MessageSquare,
-    Dna, PawPrint, Database, PanelLeftClose, PanelLeft, LogOut
+    Dna, PawPrint, Database, PanelLeftClose, PanelLeft, LogOut, BookOpen
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
@@ -12,6 +12,7 @@ import SystemSettingsTab from './admin/SystemSettingsTab';
 import AnimalManagementPanel from './admin/AnimalManagementPanel';
 import FeedbackTab from './admin/FeedbackTab';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
+import ResourcesManagementTab from './admin/ResourcesManagementTab';
 import BackupManagementTab from './admin/BackupManagementTab';
 import AnalyticsTab from './admin/AnalyticsTab';
 
@@ -625,6 +626,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 sidebarCollapsed={sidebarCollapsed}
                                 items={[
                                     { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
+                                    { id: 'resources-management', label: 'Resources Management', icon: BookOpen, requiredRole: 'admin' },
                                     { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
                                     { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
                                 ]}
@@ -746,6 +748,16 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {activeSection === 'species-management' && (
                             <div className="p-8">
                                 <SpeciesManagementTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            </div>
+                        )}
+
+                        {/* Resources Management */}
+                        {activeSection === 'resources-management' && (
+                            <div className="p-8">
+                                <ResourcesManagementTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />

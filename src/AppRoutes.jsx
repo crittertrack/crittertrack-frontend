@@ -17,6 +17,7 @@ const SpeciesManager = lazy(() => import('./components/Modals/SpeciesModals').th
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
 
 const TutorialsPage = lazy(() => import('./components/tools/TutorialsPage'));
+const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
 const SuppliesPage = lazy(() => import('./components/SuppliesPage'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
 const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
@@ -532,6 +533,9 @@ export function AppRoutes({
           showModalMessage={showModalMessage}
         />
       } />
+
+      {/* Resources Page — public, unauthenticated route */}
+      <Route path="/resources" element={<ResourcesPage API_BASE_URL={API_BASE_URL} />} />
 
     </Routes>
     </Suspense>

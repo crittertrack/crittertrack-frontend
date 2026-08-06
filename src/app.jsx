@@ -49,6 +49,7 @@ import AnimalImage from './components/shared/AnimalImage';
 import AnimalImageUpload from './components/AnimalImageUpload';
 import { compressImageFile, compressImageToMaxSize, compressImageWithWorker } from './utils/imageCompression';
 import DonationView from './components/Donation/DonationView';
+import ResourcesPage from './components/tools/ResourcesPage';
 import CommunityPage from './components/Community/CommunityPage';
 import ThemeToggle from './components/ThemeToggle';
 
@@ -1022,7 +1023,7 @@ const App = () => {
             localStorage.removeItem('authToken');
             setUserProfile(null);
             // Only redirect to home if not on a public route. Note: /calculator is the Offspring Calculator.
-            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal'];
+            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal', 'resources'];
             const currentPath = location.pathname.split('/')[1] || '';
             if (!publicRoutes.includes(currentPath)) {
                 navigate('/');
@@ -1434,6 +1435,27 @@ const App = () => {
                 </div>
             );
         }
+
+        // Resources page for non-logged-in users
+        if (currentView === 'resources') {
+            return (
+                <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6 font-sans">
+                    {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
+
+                    <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                        <CustomAppLogo size="w-10 h-10" />
+                        <button
+                            onClick={() => navigate('/')}
+                            className="px-3 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-semibold rounded-lg transition flex items-center"
+                        >
+                            <LogIn size={18} className="mr-1" /> Login
+                        </button>
+                    </header>
+
+                    <ResourcesPage API_BASE_URL={API_BASE_URL} />
+                </div>
+            );
+        }
         
         // Default auth view with search button
         return (
@@ -1445,6 +1467,12 @@ const App = () => {
                     <CustomAppLogo size="w-10 h-10" />
                     <div className="flex items-center gap-2">
                         <ThemeToggle />
+                        <button 
+                            onClick={() => navigate('/resources')}
+                            className="px-3 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-semibold rounded-lg transition flex items-center"
+                        >
+                            <BookOpen size={18} className="mr-1" /> Resources
+                        </button>
                         <button 
                             onClick={() => navigate('/calculator')}
                             className="px-3 py-2 bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
