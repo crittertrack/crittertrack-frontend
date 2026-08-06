@@ -69,7 +69,7 @@
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    background: #ffebee;
+    @apply bg-page-bg;
     border: 1px solid #ef5350;
     border-radius: 8px;
     padding: 12px;

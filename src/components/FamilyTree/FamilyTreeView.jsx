@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Loader2, ZoomIn, ZoomOut, Home, Cat } from 'lucide-react';
 import dagre from 'dagre';
 import { formatDate } from '../../utils/dateFormatter';
+import themeColors from '../../utils/themeColors';
 
 const NODE_W = 96;
 const NODE_H = 92;
@@ -1031,7 +1032,7 @@ const FamilyTreeView = ({
                             const isMale = animal.gender === 'Male';
                             const isFemale = animal.gender === 'Female';
                             const borderColor = isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#94a3b8';
-                            const bgColor = isMale ? '#dbeafe' : isFemale ? '#fce7f3' : '#eef2f7';
+                            const bgColor = isMale ? '#dbeafe' : isFemale ? themeColors['page-bg'] : '#eef2f7';
                             const displayName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed';
                             const imageSrc = animal.imageUrl || animal.photoUrl || null;
 

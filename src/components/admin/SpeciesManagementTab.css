@@ -127,8 +127,8 @@
 .species-stat-green svg { color: #059669; }
 .species-stat-green .species-stat-value { color: #059669; }
 
-.species-stat-purple svg { color: #7c3aed; }
-.species-stat-purple .species-stat-value { color: #7c3aed; }
+.species-stat-purple svg { @apply text-accent-purple; }
+.species-stat-purple .species-stat-value { @apply text-accent-purple; }
 
 /* Filters */
 .species-filters {
@@ -193,7 +193,7 @@
     align-items: center;
     gap: 8px;
     background: #fef2f2;
-    border: 1px solid #fecaca;
+    border: 1px solid #F1D1DC /* consolidated: page-bg */;
     color: #dc2626;
     padding: 12px 16px;
     border-radius: 8px;
@@ -262,8 +262,8 @@
 }
 
 .species-badge-config {
-    background: #f3e8ff;
-    color: #7c3aed;
+    @apply bg-page-bg;
+    @apply text-accent-purple;
 }
 
 .species-latin {
@@ -350,8 +350,8 @@
 
 .config-preview-item {
     font-size: 0.75rem;
-    background: #f3e8ff;
-    color: #7c3aed;
+    @apply bg-page-bg;
+    @apply text-accent-purple;
     padding: 2px 8px;
     border-radius: 4px;
 }
@@ -674,7 +674,7 @@
     align-items: flex-start;
     gap: 12px;
     background: #fef2f2;
-    border: 1px solid #fecaca;
+    border: 1px solid #F1D1DC /* consolidated: page-bg */;
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 16px;

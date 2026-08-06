@@ -27,6 +27,11 @@ module.exports = {
         'dark-text': '#1B1A20',
         'dark-text-secondary': '#1B1A20',
         'dark-text-muted': '#90909B',
+
+        // Consolidated stray colors (see colors.md) — one token per near-duplicate
+        // shade family instead of dozens of hand-typed hex literals.
+        'accent-purple': '#7c3aed', // was #7c3aed / #9333ea / #8b5cf6
+        'accent-purple-dark': '#6a1b9a', // was #6a1b9a / #7b1fa2 / #9c27b0
       }
     },
     fontFamily: {

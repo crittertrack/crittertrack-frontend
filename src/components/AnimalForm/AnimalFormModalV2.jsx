@@ -3547,7 +3547,7 @@ const AnimalFormModalV2 = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex-shrink-0 px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded border-2 transition-colors ${activeTab === tab.id ? 'bg-[#F2E4E9] text-black border-gray-300' : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'}`}
+                                className={`flex-shrink-0 px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded border-2 transition-colors ${activeTab === tab.id ? 'bg-page-bg text-black border-gray-300' : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'}`}
                                 title={tab.label}
                             >
                                 {React.createElement(tab.icon, { size: 15, className: `inline-block align-middle flex-shrink-0 mr-1 ${tab.color || ''}` })}

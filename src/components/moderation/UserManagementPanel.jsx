@@ -6,6 +6,7 @@ import {
 import axios from 'axios';
 import { parseApiError, withRetry } from '../../utils/errorHandler';
 import './UserManagementPanel.css';
+import themeColors from '../../utils/themeColors';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
@@ -504,7 +505,7 @@ const UserManagementPanel = () => {
                                     {currentUserRole === 'admin' && (
                                         <button
                                             className="action-btn"
-                                            style={{ background: user.monthlyDonationActive ? '#7c3aed' : user.lastDonationDate ? '#16a34a' : '#e5e7eb', color: (user.monthlyDonationActive || user.lastDonationDate) ? '#fff' : '#374151' }}
+                                            style={{ background: user.monthlyDonationActive ? themeColors['accent-purple'] : user.lastDonationDate ? '#16a34a' : '#e5e7eb', color: (user.monthlyDonationActive || user.lastDonationDate) ? '#fff' : '#374151' }}
                                             onClick={() => { setBadgeUser(user); setShowBadgeModal(true); }}
                                             title="Manage donation badge"
                                         >
@@ -554,7 +555,7 @@ const UserManagementPanel = () => {
                                 Current: {badgeUser.monthlyDonationActive ? '💎 Monthly Supporter' : (badgeUser.lastDonationDate && (Math.floor((new Date() - new Date(badgeUser.lastDonationDate)) / (1000 * 60 * 60 * 24)) <= 31)) ? '🔥 Recent Donor' : 'No badge'}
                             </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                <button style={{ background: '#7c3aed', color: '#fff', padding: '10px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: 14, textAlign: 'left' }} onClick={() => handleDonationBadge(badgeUser._id, 'monthly')}>
+                                <button style={{ background: themeColors['accent-purple'], color: '#fff', padding: '10px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: 14, textAlign: 'left' }} onClick={() => handleDonationBadge(badgeUser._id, 'monthly')}>
                                     💎 Grant / Toggle Monthly Supporter
                                 </button>
                                 <button style={{ background: '#16a34a', color: '#fff', padding: '10px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: 14, textAlign: 'left' }} onClick={() => handleDonationBadge(badgeUser._id, 'gift')}>

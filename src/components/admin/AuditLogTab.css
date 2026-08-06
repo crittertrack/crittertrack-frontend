@@ -79,7 +79,7 @@
 
 .error-message {
     padding: 12px;
-    background: #ffebee;
+    @apply bg-page-bg;
     color: #c62828;
     border-radius: 4px;
     margin-bottom: 20px;

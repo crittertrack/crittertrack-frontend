@@ -5,6 +5,7 @@ import {
     Briefcase, Trash2
 } from 'lucide-react';
 import './ModOversightPanel.css';
+import themeColors from '../../utils/themeColors';
 
 const REPORT_TYPES = [
     { value: 'all', label: 'All Types' },
@@ -33,7 +34,7 @@ const DATE_PRESETS = [
 
 const STATUS_BADGE_COLORS = {
     pending: '#ff6f00',
-    in_progress: '#9c27b0',
+    in_progress: themeColors['accent-purple-dark'],
     reviewed: '#1976d2',
     resolved: '#388e3c',
     dismissed: '#757575'
@@ -43,7 +44,7 @@ const CATEGORY_BADGE_COLORS = {
     'Inappropriate/Offensive Content': '#f44336',
     'Harassment or Bullying': '#e91e63',
     'Spam': '#ff9800',
-    'Copyright/Licensing Violation': '#9c27b0',
+    'Copyright/Licensing Violation': themeColors['accent-purple-dark'],
     'Community Guidelines Violation': '#2196f3',
     Bug: '#d32f2f',
     'Feature Request': '#00897b',
@@ -990,7 +991,7 @@ export default function ModOversightPanel({
                                                             </span>
                                                         )}
                                                         {animal.gender && (
-                                                            <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: animal.gender === 'Male' ? '#e3f2fd' : '#fce4ec', borderRadius: '4px' }}>
+                                                            <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: animal.gender === 'Male' ? '#e3f2fd' : themeColors['page-bg'], borderRadius: '4px' }}>
                                                                 {animal.gender}
                                                             </span>
                                                         )}
@@ -1169,7 +1170,7 @@ export default function ModOversightPanel({
                                         <div style={{ marginTop: '8px', maxHeight: '300px', overflowY: 'auto' }}>
                                             {selectedReport.conversationMessages.map((msg, index) => (
                                                 <div key={index} className="mod-message-content" style={{ 
-                                                    backgroundColor: msg.senderId?.toString() === selectedReport.reportedUserId?._id?.toString() ? '#ffebee' : '#e3f2fd', 
+                                                    backgroundColor: msg.senderId?.toString() === selectedReport.reportedUserId?._id?.toString() ? themeColors['page-bg'] : '#e3f2fd', 
                                                     padding: '10px', 
                                                     borderRadius: '8px', 
                                                     marginBottom: '8px',
@@ -1227,7 +1228,7 @@ export default function ModOversightPanel({
                                                 <button
                                                     style={{
                                                         padding: '6px 14px',
-                                                        backgroundColor: '#fee2e2',
+                                                        backgroundColor: themeColors['page-bg'],
                                                         color: '#dc2626',
                                                         border: '1px solid #fca5a5',
                                                         borderRadius: '6px',
@@ -1348,7 +1349,7 @@ export default function ModOversightPanel({
                                             const isActive = selectedReport.status === status.value;
                                             const statusColors = {
                                                 pending: { bg: '#fff3e0', border: '#ff6f00', text: '#e65100' },
-                                                in_progress: { bg: '#f3e5f5', border: '#9c27b0', text: '#6a1b9a' },
+                                                in_progress: { bg: themeColors['page-bg'], border: themeColors['accent-purple-dark'], text: themeColors['accent-purple-dark'] },
                                                 reviewed: { bg: '#e3f2fd', border: '#1976d2', text: '#0d47a1' },
                                                 resolved: { bg: '#e8f5e9', border: '#388e3c', text: '#1b5e20' },
                                                 dismissed: { bg: '#f5f5f5', border: '#757575', text: '#424242' }

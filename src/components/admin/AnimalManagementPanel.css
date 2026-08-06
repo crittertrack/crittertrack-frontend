@@ -30,7 +30,7 @@
 .animal-mgmt-error {
     background: #fef2f2;
     color: #dc2626;
-    border: 1px solid #fecaca;
+    border: 1px solid #F1D1DC /* consolidated: page-bg */;
 }
 
 .animal-mgmt-success {
@@ -171,7 +171,7 @@
 }
 
 .animal-mgmt-table tr.has-reports:hover {
-    background: #fee2e2;
+    @apply bg-page-bg;
 }
 
 .animal-id {
@@ -474,7 +474,7 @@
 
 .report-item {
     background: #fef2f2;
-    border: 1px solid #fecaca;
+    border: 1px solid #F1D1DC /* consolidated: page-bg */;
     border-radius: 8px;
     padding: 12px;
 }

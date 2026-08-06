@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import axios from 'axios';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
+import themeColors from '../../utils/themeColors';
 import AnimalImage from '../shared/AnimalImage';
 import {
     ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock,
@@ -957,11 +958,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             : animal.gender === 'Female' ? '#934E69'
             : (inlineMode ? '#94a3b8' : certBorderColor);
 
-        const bgColor = (!animal || animal.isHidden) ? (isSire ? '#e8f1ff' : '#fdeef6')
-            : (!animal.isHidden && !animal.gender) ? (isSire ? '#e8f1ff' : '#fdeef6')
+        const bgColor = (!animal || animal.isHidden) ? (isSire ? '#e8f1ff' : themeColors['page-bg'])
+            : (!animal.isHidden && !animal.gender) ? (isSire ? '#e8f1ff' : themeColors['page-bg'])
             : animal.gender === 'Male' ? '#e8f1ff'
-            : animal.gender === 'Female' ? '#fdeef6'
-            : (isSire ? '#e8f1ff' : '#fdeef6');
+            : animal.gender === 'Female' ? themeColors['page-bg']
+            : (isSire ? '#e8f1ff' : themeColors['page-bg']);
 
         const baseStyle = {
             border: `1px solid ${borderColor}`,
@@ -1180,8 +1181,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             const imgSrc = litter.images?.[0]?.url || null;
             const idLabel = [litter.litter_id_public, litter.breedingPairCodeName].filter(Boolean).join(' · ');
             const totalBorn = litter.litterSizeBorn ?? litter.numberBorn ?? null;
-            const litterCardBg = '#f3e8ff';
-            const litterCardBorder = '#7c3aed';
+            const litterCardBg = themeColors['page-bg'];
+            const litterCardBorder = themeColors['accent-purple'];
             return (
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: litterCardBg, border: `1px solid ${litterCardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
                     {/* Photo */}
@@ -1266,7 +1267,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         const isMale = animal.gender === 'Male';
         const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;
-        const cardBg = isMale ? '#dbeafe' : isFemale ? '#fce7f3' : '#f3f4f6';
+        const cardBg = isMale ? '#dbeafe' : isFemale ? themeColors['page-bg'] : '#f3f4f6';
         const cardBorder = isMale ? '#3b82f6' : isFemale ? '#934E69' : certBorderColor;
 
         return (
@@ -1328,7 +1329,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         const isMale = animal.gender === 'Male';
         const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;
-        const cardBg = isMale ? '#e8f1ff' : isFemale ? '#fdeef6' : '#f3f6fb';
+        const cardBg = isMale ? '#e8f1ff' : isFemale ? themeColors['page-bg'] : '#f3f6fb';
         const cardBorder = isMale ? '#79a9ff' : isFemale ? '#f48abf' : '#b9c7db';
 
         return (

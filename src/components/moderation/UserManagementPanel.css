@@ -28,7 +28,7 @@
     gap: 8px;
     padding: 12px 16px;
     background: #fef2f2;
-    border: 1px solid #fecaca;
+    border: 1px solid #F1D1DC /* consolidated: page-bg */;
     border-radius: 8px;
     color: #dc2626;
     margin-bottom: 16px;
@@ -329,8 +329,8 @@
 }
 
 .action-btn.role-btn:hover {
-    border-color: #8b5cf6;
-    color: #8b5cf6;
+    @apply border-accent-purple;
+    @apply text-accent-purple;
 }
 
 .action-btn.lift-btn {
@@ -628,7 +628,7 @@
     gap: 12px;
     padding: 12px 16px;
     background: #fef2f2;
-    border: 1px solid #fecaca;
+    border: 1px solid #F1D1DC /* consolidated: page-bg */;
     border-radius: 8px;
     color: #dc2626;
     font-size: 13px;
@@ -644,7 +644,7 @@
     align-items: center;
     gap: 4px;
     padding: 6px 12px;
-    background: #fecaca;
+    @apply bg-page-bg;
     border: 1px solid #f87171;
     border-radius: 6px;
     color: #b91c1c;
@@ -788,13 +788,13 @@
 }
 
 .btn-primary.btn-role {
-    background: #8b5cf6;
+    @apply bg-accent-purple;
     border: none;
     color: white;
 }
 
 .btn-primary.btn-role:hover {
-    background: #7c3aed;
+    @apply bg-accent-purple;
 }
 
 .btn-primary:disabled,
@@ -1004,8 +1004,8 @@
 }
 
 .timeline-purple .timeline-marker {
-    border-color: #8b5cf6;
-    color: #8b5cf6;
+    @apply border-accent-purple;
+    @apply text-accent-purple;
     background: #f5f3ff;
 }
 
@@ -1105,7 +1105,7 @@
 }
 
 .status-badge.status-banned {
-    background: #fecaca;
+    @apply bg-page-bg;
     color: #991b1b;
 }
 

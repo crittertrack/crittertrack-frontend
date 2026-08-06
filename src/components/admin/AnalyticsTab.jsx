@@ -9,6 +9,7 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     AreaChart, Area
 } from 'recharts';
+import themeColors from '../../utils/themeColors';
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -364,7 +365,7 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
                                         const colors = {
                                             'Pending': '#fbbf24',
                                             'In progress': '#3b82f6',
-                                            'Reviewed': '#8b5cf6',
+                                            'Reviewed': themeColors['accent-purple'],
                                             'Resolved': '#22c55e',
                                             'Dismissed': '#6b7280'
                                         };

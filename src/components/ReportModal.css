@@ -126,7 +126,7 @@
 }
 
 .report-error {
-    background: #ffebee;
+    @apply bg-page-bg;
     color: #c62828;
     padding: 12px;
     border-radius: 4px;

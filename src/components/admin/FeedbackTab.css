@@ -17,7 +17,7 @@
 }
 
 .feedback-title svg {
-    color: #7c3aed;
+    @apply text-accent-purple;
 }
 
 .feedback-title h2 {
@@ -48,8 +48,8 @@
 }
 
 .feedback-refresh-btn:hover {
-    border-color: #7c3aed;
-    color: #7c3aed;
+    @apply border-accent-purple;
+    @apply text-accent-purple;
 }
 
 .feedback-refresh-btn:disabled {
@@ -173,7 +173,7 @@
     align-items: center;
     gap: 8px;
     background: #fef2f2;
-    border: 1px solid #fecaca;
+    border: 1px solid #F1D1DC /* consolidated: page-bg */;
     color: #dc2626;
     padding: 12px 16px;
     border-radius: 8px;
@@ -197,12 +197,12 @@
 }
 
 .feedback-card:hover {
-    border-color: #7c3aed;
+    @apply border-accent-purple;
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
 }
 
 .feedback-card.selected {
-    border-color: #7c3aed;
+    @apply border-accent-purple;
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
 }
 
@@ -276,7 +276,7 @@
 }
 
 .genetics-field svg {
-    color: #7c3aed;
+    @apply text-accent-purple;
     margin-top: 2px;
 }
 
@@ -401,7 +401,7 @@
 
 .feedback-action-section textarea:focus {
     outline: none;
-    border-color: #7c3aed;
+    @apply border-accent-purple;
 }
 
 .feedback-action-buttons {

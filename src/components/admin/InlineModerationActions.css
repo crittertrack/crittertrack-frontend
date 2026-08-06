@@ -141,7 +141,7 @@
 }
 
 .mod-action-btn.hide:hover:not(:disabled) {
-    background: #ffebee;
+    @apply bg-page-bg;
 }
 
 .mod-action-btn.unhide {
@@ -156,11 +156,11 @@
 .mod-action-btn.delete {
     color: #d32f2f;
     border-color: #d32f2f;
-    background: #ffebee;
+    @apply bg-page-bg;
 }
 
 .mod-action-btn.delete:hover:not(:disabled) {
-    background: #ffcdd2;
+    @apply bg-page-bg;
 }
 
 .mod-reason-input {
