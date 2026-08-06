@@ -12,7 +12,7 @@
 
 .date-picker-input:focus {
     outline: none;
-    @apply border-accent-purple;
+    @apply border-accent-purple dark:border-dark-accent-purple;
     ring: 2px;
     ring-color: #7c3aed /* consolidated: accent-purple */;
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
@@ -33,7 +33,7 @@
 }
 
 .react-datepicker__header {
-    @apply bg-accent-purple;
+    @apply bg-accent-purple dark:bg-dark-accent-purple;
     border-bottom: none;
     border-radius: 0.5rem 0.5rem 0 0;
 }
@@ -45,12 +45,12 @@
 
 .react-datepicker__day--selected,
 .react-datepicker__day--keyboard-selected {
-    @apply bg-accent-purple;
+    @apply bg-accent-purple dark:bg-dark-accent-purple;
     color: white;
 }
 
 .react-datepicker__day:hover {
-    @apply bg-accent-purple-bg;
+    @apply bg-accent-purple-bg dark:bg-dark-accent-purple-bg;
 }
 
 .react-datepicker__day--disabled {
@@ -72,12 +72,12 @@
 
 .react-datepicker__month-option:hover,
 .react-datepicker__year-option:hover {
-    @apply bg-accent-purple-bg;
+    @apply bg-accent-purple-bg dark:bg-dark-accent-purple-bg;
 }
 
 .react-datepicker__month-option--selected,
 .react-datepicker__year-option--selected {
-    @apply bg-accent-purple;
+    @apply bg-accent-purple dark:bg-dark-accent-purple;
     color: white;
 }
 

@@ -5178,14 +5178,14 @@ useEffect(() => {
                         <div className="flex rounded-lg overflow-hidden shrink-0 shadow-sm w-full" data-tutorial-target="ownership-visibility-filter">
                             <button
                                 onClick={() => setOwnedFilterMode('owned')}
-                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border'}`}
+                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 ${ownedFilterMode === 'owned' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                                 title="Show only animals you own"
                             >
                                 <Heart size={14} /> Owned
                             </button>
                             <button
                                 onClick={() => setOwnedFilterMode('all')}
-                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 border-l border-gray-300 dark:border-dark-border ${ownedFilterMode === 'all' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border'}`}
+                                className={`w-1/2 px-3 py-1.5 transition duration-150 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 border-l border-gray-300 dark:border-dark-border ${ownedFilterMode === 'all' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50' : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                                 title="Show all animals (owned and unowned)"
                             >
                                 All
@@ -5213,7 +5213,7 @@ useEffect(() => {
                         </button>
                         <button
                             onClick={() => toggleAllAnimalsOwned(false)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
                             title="Mark All Animals as Unowned"
                         >
                             <HeartOff size={14} /> Set All Unowned
@@ -5237,7 +5237,7 @@ useEffect(() => {
                         </button>
                         <button
                             onClick={() => toggleAllAnimalsPrivacy(false)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-border"
+                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover"
                             title="Make All Animals Private"
                         >
                             <EyeOff size={14} /> Set All Private
@@ -5357,21 +5357,21 @@ useEffect(() => {
                             <button
                                 onClick={() => setShowAlertsDropdown(prev => !prev)}
                                 title="Configure alerts"
-                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${Object.values(alertSettings).some(Boolean) ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                className={`w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 ${Object.values(alertSettings).some(Boolean) ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/60' : 'bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'}`}
                             >
                                 <Bell size={14} className="sm:w-4 sm:h-4" />
                                 <span>Alerts {Object.values(alertSettings).some(Boolean) ? 'On' : 'Off'}</span>
                                 <ChevronDown size={14} className={`ml-1 transition-transform ${showAlertsDropdown ? 'rotate-180' : ''}`} />
                             </button>
                             {showAlertsDropdown && (
-                                <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl z-10">
-                                    <div className="p-3 border-b">
-                                        <h4 className="font-semibold text-sm text-gray-800">Notification Settings</h4>
-                                        <p className="text-xs text-gray-500">Select which alerts to show.</p>
+                                <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg shadow-xl z-10">
+                                    <div className="p-3 border-b dark:border-dark-border">
+                                        <h4 className="font-semibold text-sm text-gray-800 dark:text-dark-text">Notification Settings</h4>
+                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted">Select which alerts to show.</p>
                                     </div>
                                     <div className="p-3 space-y-2">
                                         {Object.entries(ALERT_CATEGORIES).map(([key, label]) => (
-                                            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-dark-text-secondary">
                                                 <input
                                                     type="checkbox"
                                                     checked={!!alertSettings[key]}
@@ -5481,7 +5481,7 @@ useEffect(() => {
                         {!showArchiveScreen && (
                             <button
                                 onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); }}
-                                className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
+                                className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 dark:bg-amber-700 text-white border-amber-500 dark:border-amber-700' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
                                 title="Find Duplicate Animals"
                             >
                                 <Search size={14} className="sm:w-4 sm:h-4" />
@@ -5490,11 +5490,11 @@ useEffect(() => {
                         )}
                         {/* Add Enclosure button */}
                         {animalView === 'reproduction' ? (
-                            <button onClick={() => setShowAddMatingForm(true)} className="flex bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
+                            <button onClick={() => setShowAddMatingForm(true)} className="flex bg-accent dark:bg-dark-accent hover:bg-accent/90 dark:hover:bg-dark-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Planned Mating">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Mating</span>
                             </button>
                         ) : animalView === 'health' ? (
-                            <button onClick={() => setShowAssignHealthStatusModal(true)} className="flex bg-orange-600 hover:bg-orange-700 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Assign Quarantine or Treatment">
+                            <button onClick={() => setShowAssignHealthStatusModal(true)} className="flex bg-orange-600 dark:bg-orange-800 hover:bg-orange-700 dark:hover:bg-orange-700 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Assign Quarantine or Treatment">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Assign Quarantine/Treatment</span>
                             </button>
                         ) : animalView === 'feeding' ? null : (

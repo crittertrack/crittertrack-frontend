@@ -780,10 +780,6 @@ const App = () => {
     const [showWelcomeGuide, setShowWelcomeGuide] = useState(false);
     const [hasSeenWelcomeGuide, setHasSeenWelcomeGuide] = useState(false);
     
-    const [hasSeenDonationHighlight, setHasSeenDonationHighlight] = useState(() => {
-        return localStorage.getItem('hasSeenDonationHighlight') === 'true';
-    });
-    
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
     
@@ -1176,17 +1172,6 @@ const App = () => {
             return () => clearInterval(interval);
         }
     }, [authToken, fetchNotificationCount, fetchUnreadMessageCount]);
-
-    // Mark donation highlight as seen after 8 seconds
-    useEffect(() => {
-        if (authToken && !hasSeenDonationHighlight) {
-            const timer = setTimeout(() => {
-                setHasSeenDonationHighlight(true);
-                localStorage.setItem('hasSeenDonationHighlight', 'true');
-            }, 8000);
-            return () => clearTimeout(timer);
-        }
-    }, [authToken, hasSeenDonationHighlight]);
 
     // Close profile dropdown when clicking outside
     useEffect(() => {
@@ -1617,34 +1602,6 @@ const App = () => {
 
      return (
         <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0">
-            {/* Fixed Donation Button - Top Left */}
-            <div className="fixed top-4 left-4 z-[60]">
-                <button
-                    onClick={() => {
-                        navigate('/donation');
-                        if (!hasSeenDonationHighlight) {
-                            setHasSeenDonationHighlight(true);
-                            localStorage.setItem('hasSeenDonationHighlight', 'true');
-                        }
-                    }}
-                    className={`bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white p-2.5 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center ${
-                        !hasSeenDonationHighlight ? 'animate-pulse ring-4 ring-pink-300 ring-opacity-50' : ''
-                    }`}
-                    title="Support CritterTrack"
-                    aria-label="Support CritterTrack"
-                >
-                    <Heart size={20} className="fill-current" />
-                </button>
-                
-                {/* First-time tooltip */}
-                {!hasSeenDonationHighlight && (
-                    <div className="absolute top-full mt-2 left-0 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap animate-bounce">
-                        <div className="absolute bottom-full left-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-b-4 border-b-gray-900"></div>
-                        <Heart size={14} className="inline-block align-middle mr-1 text-red-400 fill-current" /> Support CritterTrack
-                    </div>
-                )}
-            </div>
-            
             {/* Welcome Guide Modal - Shows once to brand new users on first login */}
             {showWelcomeGuide && (
                 <WelcomeGuideModal 

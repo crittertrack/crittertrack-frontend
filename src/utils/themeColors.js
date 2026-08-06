@@ -18,7 +18,7 @@ module.exports = {
   'dark-border': '#35343D',
   'dark-primary': '#7eaab3',
   'dark-primary-hover': '#6f949d',
-  'dark-accent': '#b46280',
+  'dark-accent': '#8c5a6c', // Muted further — was #b46280 (still too vibrant against dark backgrounds).
   // Was mistakenly set equal to dark-bg, making text invisible wherever both were used together.
   'dark-text': '#EDEDF0',
   'dark-text-secondary': '#C4C3CA',
@@ -28,6 +28,8 @@ module.exports = {
   // shade family instead of dozens of hand-typed hex literals.
   'accent-purple': '#7c3aed', // was #7c3aed / #9333ea / #8b5cf6
   'accent-purple-dark': '#6a1b9a', // was #6a1b9a / #7b1fa2 / #9c27b0
+  'dark-accent-purple': '#7c6aab', // Muted/desaturated version of accent-purple for dark mode.
+  'dark-accent-purple-bg': '#332b4d', // Muted dark wash paired with dark-accent-purple.
 
   // Female pedigree/family-tree card background — kept separate from page-bg
   // (which is more saturated) since these need to stay a very pale wash.
