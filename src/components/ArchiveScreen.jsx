@@ -85,7 +85,7 @@ const ArchiveScreen = ({
             <div className="flex items-center justify-between">
                 <button
                     onClick={onBack}
-                    className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
+                    className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text transition"
                 >
                     <ChevronLeft size={16} />
                     Back
@@ -93,7 +93,7 @@ const ArchiveScreen = ({
                 <button
                     onClick={fetchArchiveData}
                     disabled={archiveLoading}
-                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
+                    className="flex items-center gap-1 text-xs text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary transition disabled:opacity-50"
                 >
                     <RefreshCw size={12} />
                     Refresh
@@ -101,26 +101,26 @@ const ArchiveScreen = ({
             </div>
 
             <div className="flex items-center gap-2">
-                <Archive size={18} className="text-gray-600" />
-                <h3 className="text-lg font-semibold text-gray-800">Archive</h3>
-                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
+                <Archive size={18} className="text-gray-600 dark:text-dark-text-secondary" />
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Archive</h3>
+                <span className="text-xs bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary px-2 py-0.5 rounded-full">
                     {archivedAnimals.length + soldTransferredAnimals.length} animal{(archivedAnimals.length + soldTransferredAnimals.length) !== 1 ? 's' : ''}
                 </span>
             </div>
 
             <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                 <input
                     type="text"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     placeholder="Search by name, prefix/suffix, or ID..."
-                    className="w-full pl-9 pr-8 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-400"
+                    className="w-full pl-9 pr-8 py-1.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text placeholder:text-gray-400 dark:placeholder:text-dark-text-muted focus:ring-2 focus:ring-purple-300 dark:focus:ring-dark-accent-purple focus:border-purple-400 dark:focus:border-dark-accent-purple"
                 />
                 {searchQuery && (
                     <button
                         onClick={() => setSearchQuery('')}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary"
                         title="Clear search"
                     >
                         <X size={14} />
@@ -130,19 +130,19 @@ const ArchiveScreen = ({
 
             {archiveLoading ? (
                 <div className="flex justify-center py-12">
-                    <Loader2 size={32} className="animate-spin text-gray-400" />
+                    <Loader2 size={32} className="animate-spin text-gray-400 dark:text-dark-text-muted" />
                 </div>
             ) : (
                 <div className="space-y-3 sm:space-y-4">
 
                     {/* -- SOLD / TRANSFERRED -------------------------------- */}
-                    <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
                         <SectionHeader
                             sectionKey="soldTransferred"
-                            icon={<ArrowLeftRight size={18} className="text-orange-600" />}
+                            icon={<ArrowLeftRight size={18} className="text-orange-600 dark:text-orange-400" />}
                             title="Sold / Transferred"
                             count={filteredSoldTransferredAnimals.length}
-                            bgClass="bg-orange-50"
+                            bgClass="bg-orange-50 dark:bg-orange-900/20"
                         />
                         {!collapsedMgmtSections['soldTransferred'] && (() => {
                             const soldOwners = [...new Map(
@@ -156,15 +156,15 @@ const ArchiveScreen = ({
                             return (
                                 <div className="p-3 space-y-2">
                                     {filteredSoldTransferredAnimals.length === 0
-                                        ? <div className="text-sm text-gray-400 text-center py-4">{searchQuery ? 'No matching sold or transferred animals.' : 'No sold or transferred animals.'}</div>
+                                        ? <div className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-4">{searchQuery ? 'No matching sold or transferred animals.' : 'No sold or transferred animals.'}</div>
                                         : <>
                                             {soldOwners.length > 1 && (
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Filter by recipient:</span>
+                                                    <span className="text-xs font-medium text-gray-500 dark:text-dark-text-secondary whitespace-nowrap">Filter by recipient:</span>
                                                     <select
                                                         value={soldOwnerFilter}
                                                         onChange={e => setSoldOwnerFilter(e.target.value)}
-                                                        className="flex-1 text-xs border border-gray-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-400 bg-white"
+                                                        className="flex-1 text-xs border border-gray-300 dark:border-dark-border rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-orange-300 dark:focus:ring-orange-700 focus:border-orange-400 dark:focus:border-orange-600 bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
                                                     >
                                                         <option value="">All recipients ({filteredSoldTransferredAnimals.length})</option>
                                                         {soldOwners.map(o => (
@@ -188,10 +188,10 @@ const ArchiveScreen = ({
                                                                     onClick={e => { e.stopPropagation(); if (a.creatorIdPublic) navigate(`/user/${a.creatorIdPublic}`); }}
                                                                 >
                                                                     {a.ownerAvatar
-                                                                        ? <img src={a.ownerAvatar} alt={a.manualownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />
-                                                                        : <span className="w-5 h-5 rounded-full bg-orange-200 text-orange-700 text-[10px] font-bold flex items-center justify-center shrink-0">{a.manualownerName.charAt(0).toUpperCase()}</span>
+                                                                        ? <img src={a.ownerAvatar} alt={a.manualownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200 dark:border-orange-700/60" />
+                                                                        : <span className="w-5 h-5 rounded-full bg-orange-200 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-[10px] font-bold flex items-center justify-center shrink-0">{a.manualownerName.charAt(0).toUpperCase()}</span>
                                                                     }
-                                                                    <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.manualownerName}</span>
+                                                                    <span className="text-xs text-orange-700 dark:text-orange-300 font-medium max-w-[110px] truncate whitespace-nowrap">{a.manualownerName}</span>
                                                                 </button>
                                                             ) : null
                                                         }
@@ -206,18 +206,18 @@ const ArchiveScreen = ({
                     </div>
 
                     {/* -- ARCHIVED ANIMALS -------------------------------- */}
-                    <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
                         <SectionHeader
                             sectionKey="archived"
-                            icon={<Archive size={18} className="text-gray-600" />}
+                            icon={<Archive size={18} className="text-gray-600 dark:text-dark-text-secondary" />}
                             title="Archived Animals"
                             count={filteredArchivedAnimals.length}
-                            bgClass="bg-gray-50"
+                            bgClass="bg-gray-50 dark:bg-dark-surface"
                         />
                         {!collapsedMgmtSections['archived'] && (
                             <div className="p-3 space-y-1.5">
                                 {filteredArchivedAnimals.length === 0
-                                    ? <div className="text-sm text-gray-400 text-center py-4">{searchQuery ? 'No matching archived animals.' : 'No archived animals.'}</div>
+                                    ? <div className="text-sm text-gray-400 dark:text-dark-text-muted text-center py-4">{searchQuery ? 'No matching archived animals.' : 'No archived animals.'}</div>
                                     : filteredArchivedAnimals.map(a => (
                                         <MgmtAnimalCard
                                             key={a._id || a.id_public}
@@ -225,7 +225,7 @@ const ArchiveScreen = ({
                                             extras={
                                                 <button
                                                     onClick={e => { e.stopPropagation(); handleUnarchive(a); }}
-                                                    className="text-xs px-2 py-0.5 rounded font-medium border bg-blue-500 text-white hover:bg-blue-600 border-blue-500 whitespace-nowrap"
+                                                    className="text-xs px-2 py-0.5 rounded font-medium border bg-blue-500 dark:bg-dark-info-blue text-white hover:bg-blue-600 dark:hover:bg-dark-info-blue-hover border-blue-500 dark:border-dark-info-blue whitespace-nowrap"
                                                 >
                                                     Unarchive
                                                 </button>
@@ -238,8 +238,8 @@ const ArchiveScreen = ({
                     </div>
 
                     {archivedAnimals.length === 0 && soldTransferredAnimals.length === 0 && (
-                        <div className="text-center py-16 text-gray-400">
-                            <Archive size={48} className="mx-auto mb-3 text-gray-300" />
+                        <div className="text-center py-16 text-gray-400 dark:text-dark-text-muted">
+                            <Archive size={48} className="mx-auto mb-3 text-gray-300 dark:text-dark-border" />
                             <p className="text-sm font-medium">No archived or transferred animals</p>
                             <p className="text-xs mt-1">Animals you archive will appear here</p>
                         </div>
