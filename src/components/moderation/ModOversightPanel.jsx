@@ -2,7 +2,7 @@
 import { 
     AlertCircle, RefreshCw, Search, Filter, Clock, CheckCircle, 
     Loader2, Flag, Calendar, Tag, Eye, ChevronUp, ChevronDown,
-    UserCheck, Users, Briefcase, Edit2, Trash2, Send, MessageSquare
+    Briefcase, Edit2, Trash2, Send, MessageSquare
 } from 'lucide-react';
 import './ModOversightPanel.css';
 
@@ -22,13 +22,6 @@ const STATUS_FILTERS = [
     { value: 'in_progress', label: 'In Progress' },
     { value: 'resolved', label: 'Resolved' },
     { value: 'dismissed', label: 'Dismissed' }
-];
-
-const ASSIGNMENT_FILTERS = [
-    { value: 'all', label: 'All Assignments' },
-    { value: 'unassigned', label: 'Unassigned' },
-    { value: 'assigned_to_me', label: 'Assigned to Me' },
-    { value: 'assigned_to_others', label: 'Assigned to Others' }
 ];
 
 const DATE_PRESETS = [
@@ -270,7 +263,6 @@ export default function ModOversightPanel({
     const [statusFilter, setStatusFilter] = useState('all');
     const [reportType, setReportType] = useState('all');
     const [datePreset, setDatePreset] = useState('all');
-    const [assignmentFilter, setAssignmentFilter] = useState('all');
     const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
     const [adminNotes, setAdminNotes] = useState(''); // Legacy single note
     const [newNoteText, setNewNoteText] = useState(''); // For new discussion note
@@ -279,12 +271,7 @@ export default function ModOversightPanel({
     const [noteLoading, setNoteLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    
-    // Assignment state
-    const [moderators, setModerators] = useState([]);
-    const [workloadStats, setWorkloadStats] = useState(null);
-    const [showWorkload, setShowWorkload] = useState(false);
-    const [assigningReport, setAssigningReport] = useState(false);
+    const [deleteReportLoading, setDeleteReportLoading] = useState(false);
 
     // Warn / Inform state
     const [userActionModal, setUserActionModal] = useState(null); // { mode: 'warn'|'inform', userId, userName }
@@ -336,7 +323,6 @@ export default function ModOversightPanel({
     useEffect(() => {
         if (isOpen) {
             fetchReports();
-            fetchWorkloadStats();
             fetchGlobalStats();
         }
     }, [isOpen, statusFilter, reportType]);
@@ -353,26 +339,6 @@ export default function ModOversightPanel({
             }
         } catch (err) {
             console.error('[ModOversightPanel] Error fetching global stats:', err);
-        }
-    };
-
-    const fetchWorkloadStats = async () => {
-        if (!authToken) return;
-        
-        try {
-            const response = await fetch(`${baseUrl}/moderation/moderators/workload`, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                }
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                setModerators(data.moderators || []);
-                setWorkloadStats(data);
-            }
-        } catch (err) {
-            console.error('[ModOversightPanel] Error fetching workload:', err);
         }
     };
 
@@ -514,83 +480,6 @@ export default function ModOversightPanel({
         }
     };
 
-    // Claim a report for yourself
-    const handleClaimReport = async (report) => {
-        if (!report) return;
-        setAssigningReport(true);
-        setError('');
-
-        try {
-            const type = getReportType(report);
-            const response = await fetch(
-                `${baseUrl}/moderation/reports/${type}/${report._id}/claim`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                }
-            );
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to claim report');
-            }
-
-            await fetchReports();
-            await fetchWorkloadStats();
-            if (selectedReport?._id === report._id) {
-                setSelectedReport(data.report);
-            }
-            if (onActionTaken) onActionTaken();
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setAssigningReport(false);
-        }
-    };
-
-    // Assign a report to a specific moderator
-    const handleAssignReport = async (report, moderatorId) => {
-        if (!report) return;
-        setAssigningReport(true);
-        setError('');
-
-        try {
-            const type = getReportType(report);
-            const response = await fetch(
-                `${baseUrl}/moderation/reports/${type}/${report._id}/assign`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({ moderatorId })
-                }
-            );
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to assign report');
-            }
-
-            await fetchReports();
-            await fetchWorkloadStats();
-            if (selectedReport?._id === report._id) {
-                setSelectedReport(data.report);
-            }
-            if (onActionTaken) onActionTaken();
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setAssigningReport(false);
-        }
-    };
-
     // Calculate stats (from loaded reports — used for filtered list context)
     const stats = useMemo(() => ({
         total: globalStats?.total ?? reports.length,
@@ -614,23 +503,6 @@ export default function ModOversightPanel({
             });
         }
         
-        // Apply assignment filter
-        if (assignmentFilter !== 'all' && currentUserId) {
-            filtered = filtered.filter(report => {
-                const assignedToId = report.assignedTo?._id || report.assignedTo;
-                switch (assignmentFilter) {
-                    case 'unassigned':
-                        return !assignedToId;
-                    case 'assigned_to_me':
-                        return assignedToId === currentUserId;
-                    case 'assigned_to_others':
-                        return assignedToId && assignedToId !== currentUserId;
-                    default:
-                        return true;
-                }
-            });
-        }
-        
         // Apply search filter
         if (searchTerm.trim()) {
             const search = searchTerm.toLowerCase();
@@ -641,14 +513,12 @@ export default function ModOversightPanel({
                 const reporter = formatReporter(report).toLowerCase();
                 const category = reasonMeta.categoryLabel.toLowerCase();
                 const description = (reasonMeta.description || '').toLowerCase();
-                const assigneeName = (report.assignedTo?.breederName || report.assignedTo?.personalName || '').toLowerCase();
                 
                 return subjectTitle.includes(search) ||
                        owner.includes(search) ||
                        reporter.includes(search) ||
                        category.includes(search) ||
-                       description.includes(search) ||
-                       assigneeName.includes(search);
+                       description.includes(search);
             });
         }
         
@@ -677,7 +547,7 @@ export default function ModOversightPanel({
         });
         
         return filtered;
-    }, [reports, searchTerm, datePreset, sortConfig, assignmentFilter, currentUserId]);
+    }, [reports, searchTerm, datePreset, sortConfig, currentUserId]);
 
     const handleUpdateStatus = async (nextStatus) => {
         if (!selectedReport || !nextStatus) return;
@@ -878,6 +748,41 @@ export default function ModOversightPanel({
         setEditNoteText('');
     };
 
+    // Permanently delete an entire report
+    const handleDeleteReport = async (report) => {
+        if (!report) return;
+        if (!window.confirm('Permanently delete this report? This cannot be undone.')) return;
+
+        setDeleteReportLoading(true);
+        setError('');
+        try {
+            const type = getReportType(report);
+            const response = await fetch(
+                `${baseUrl}/moderation/reports/${type}/${report._id}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                }
+            );
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to delete report');
+
+            if (selectedReport?._id === report._id) {
+                setSelectedReport(null);
+                setAdminNotes('');
+            }
+            await fetchReports();
+            if (onActionTaken) onActionTaken();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setDeleteReportLoading(false);
+        }
+    };
+
     const parsedSelectedReason = useMemo(
         () => (selectedReport ? parseReason(selectedReport.reason) : null),
         [selectedReport]
@@ -908,21 +813,6 @@ export default function ModOversightPanel({
         );
     };
 
-    // Assignment badge component
-    const AssignmentBadge = ({ report }) => {
-        if (!report.assignedTo) return null;
-        const assignee = report.assignedTo;
-        const name = assignee.breederName || assignee.personalName || assignee.email || 'Unknown';
-        const isMe = currentUserId && (assignee._id === currentUserId || assignee === currentUserId);
-        
-        return (
-            <span className={`report-assignment-badge ${isMe ? 'assigned-to-me' : ''}`}>
-                <UserCheck size={12} />
-                {isMe ? 'You' : name}
-            </span>
-        );
-    };
-
     return (
         <div className={containerClass}>
             {!embedded && (
@@ -944,8 +834,8 @@ export default function ModOversightPanel({
                     <div className="reports-title">
                         <Flag size={28} />
                         <div>
-                            <h2>User Reports</h2>
-                            <p>Review and manage user-submitted reports</p>
+                            <h2>Reports & Bug Reports</h2>
+                            <p>Review and manage user-submitted reports and bug reports</p>
                         </div>
                     </div>
                     <button 
@@ -986,39 +876,6 @@ export default function ModOversightPanel({
                     </div>
                 </div>
 
-                {/* Workload Stats Toggle */}
-                {workloadStats && (
-                    <div className="workload-section">
-                        <button 
-                            className="workload-toggle-btn"
-                            onClick={() => setShowWorkload(!showWorkload)}
-                        >
-                            <Users size={16} />
-                            {showWorkload ? 'Hide' : 'Show'} Moderator Workload
-                            {workloadStats.unassigned?.total > 0 && (
-                                <span className="unassigned-badge">{workloadStats.unassigned.total} unassigned</span>
-                            )}
-                        </button>
-                        
-                        {showWorkload && (
-                            <div className="workload-grid">
-                                {moderators.map(({ moderator, assignedReports }) => (
-                                    <div key={moderator._id} className="workload-card">
-                                        <div className="workload-mod-name">{moderator.name}</div>
-                                        <div className="workload-mod-role">{moderator.role}</div>
-                                        <div className="workload-counts">
-                                            <span title="Profile Reports">👤 {assignedReports.profile}</span>
-                                            <span title="Animal Reports">🐾 {assignedReports.animal}</span>
-                                            <span title="Message Reports">💬 {assignedReports.message}</span>
-                                            <strong>Total: {assignedReports.total}</strong>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-
                 {/* Filters */}
                 <div className="reports-filters">
                     <div className="reports-search-box">
@@ -1056,17 +913,6 @@ export default function ModOversightPanel({
                         </select>
                     </div>
                     <div className="reports-filter-group">
-                        <UserCheck size={18} />
-                        <select 
-                            value={assignmentFilter}
-                            onChange={(e) => setAssignmentFilter(e.target.value)}
-                        >
-                            {ASSIGNMENT_FILTERS.map(a => (
-                                <option key={a.value} value={a.value}>{a.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="reports-filter-group">
                         <Clock size={18} />
                         <select 
                             value={datePreset}
@@ -1092,15 +938,26 @@ export default function ModOversightPanel({
                 {/* Reports list or detail view */}
                 {selectedReport ? (
                     <div className="mod-detail-view">
-                        <button 
-                            className="mod-back-button"
-                            onClick={() => {
-                                setSelectedReport(null);
-                                setAdminNotes('');
-                            }}
-                        >
-                            ← Back to Reports
-                        </button>
+                        <div className="mod-detail-view-topbar">
+                            <button 
+                                className="mod-back-button"
+                                onClick={() => {
+                                    setSelectedReport(null);
+                                    setAdminNotes('');
+                                }}
+                            >
+                                ← Back to Reports
+                            </button>
+                            <button
+                                className="mod-delete-report-btn"
+                                onClick={() => handleDeleteReport(selectedReport)}
+                                disabled={deleteReportLoading}
+                                title="Permanently delete this report"
+                            >
+                                {deleteReportLoading ? <Loader2 size={14} className="spin" /> : <Trash2 size={14} />}
+                                Delete Report
+                            </button>
+                        </div>
 
                         <div className="mod-report-detail">
                             <h4>{getSubjectTitle(selectedReport)}</h4>
@@ -1113,58 +970,6 @@ export default function ModOversightPanel({
                                     >
                                         {selectedReport.status.replace('_', ' ').toUpperCase()}
                                     </span>
-                                </div>
-
-                                {/* Assignment Section */}
-                                <div className="mod-detail-section mod-assignment-section">
-                                    <strong>Assignment:</strong>
-                                    <div className="assignment-controls">
-                                        {selectedReport.assignedTo ? (
-                                            <div className="current-assignment">
-                                                <span className="assigned-to-text">
-                                                    <UserCheck size={16} />
-                                                    Assigned to: {selectedReport.assignedTo.breederName || selectedReport.assignedTo.personalName || selectedReport.assignedTo.email}
-                                                    {selectedReport.assignedTo._id === currentUserId && <span className="you-badge">(You)</span>}
-                                                </span>
-                                                <button
-                                                    className="unassign-btn"
-                                                    onClick={() => handleAssignReport(selectedReport, null)}
-                                                    disabled={assigningReport}
-                                                >
-                                                    Unassign
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="no-assignment">
-                                                <span className="unassigned-text">Unassigned</span>
-                                                <button
-                                                    className="claim-btn"
-                                                    onClick={() => handleClaimReport(selectedReport)}
-                                                    disabled={assigningReport}
-                                                >
-                                                    <UserCheck size={14} />
-                                                    Claim Report
-                                                </button>
-                                            </div>
-                                        )}
-                                        
-                                        <div className="assign-dropdown">
-                                            <select
-                                                value={selectedReport.assignedTo?._id || ''}
-                                                onChange={(e) => handleAssignReport(selectedReport, e.target.value || null)}
-                                                disabled={assigningReport}
-                                            >
-                                                <option value="">Assign to...</option>
-                                                {moderators.map(({ moderator }) => (
-                                                    <option key={moderator._id} value={moderator._id}>
-                                                        {moderator.name} ({moderator.role})
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        
-                                        {assigningReport && <Loader2 size={16} className="spin" />}
-                                    </div>
                                 </div>
 
                                 <div className="mod-detail-section">
@@ -1788,7 +1593,7 @@ export default function ModOversightPanel({
                                     <p>
                                         {searchTerm || statusFilter !== 'all' || reportType !== 'all'
                                             ? 'Try adjusting your filters'
-                                            : 'No user reports have been submitted yet'}
+                                            : 'No reports or bug reports have been submitted yet'}
                                     </p>
                                 </div>
                             ) : (
@@ -1797,7 +1602,7 @@ export default function ModOversightPanel({
                                     return (
                                         <div 
                                             key={report._id}
-                                            className={`report-card ${report.assignedTo ? 'has-assignment' : ''}`}
+                                            className="report-card"
                                             onClick={() => handleSelectReport(report)}
                                         >
                                             <div className="report-card-header">
@@ -1808,7 +1613,6 @@ export default function ModOversightPanel({
                                                         {reasonMeta.categoryLabel}
                                                     </span>
                                                     <StatusBadge status={report.status} />
-                                                    <AssignmentBadge report={report} />
                                                 </div>
                                                 <span className="report-card-date">
                                                     <Calendar size={14} />

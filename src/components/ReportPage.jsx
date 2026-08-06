@@ -249,7 +249,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
     };
 
     const myReportsSection = (myReports.length > 0 || myReportsLoading) && (
-        <div className="w-full max-w-2xl mx-auto mt-4">
+        <div className="w-full max-w-2xl mx-auto mb-4">
             <button
                 onClick={() => setShowMyReports(prev => !prev)}
                 className="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-dark-surface rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition"
@@ -297,6 +297,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
     if (submitted) {
         return (
             <>
+            {myReportsSection}
             <div className="w-full max-w-2xl mx-auto bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
                 <div className="text-center py-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-4">
@@ -325,13 +326,13 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                     </div>
                 </div>
             </div>
-            {myReportsSection}
             </>
         );
     }
 
     return (
         <div className="w-full max-w-2xl mx-auto">
+            {myReportsSection}
             <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-5">
@@ -561,8 +562,6 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                 Your report includes your account information so we can follow up if needed.
                 We take your privacy seriously and will only use this information to improve CritterTrack.
             </p>
-
-            {myReportsSection}
         </div>
     );
 }

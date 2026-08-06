@@ -218,10 +218,14 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
                         <Calendar size={16} />
                         In the last {dateRange === '7d' ? '7 days' : dateRange === '30d' ? '30 days' : dateRange === '90d' ? '90 days' : 'year'}
                     </h4>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-4 gap-4">
                         <div className="text-center">
                             <p className="text-2xl font-bold text-blue-600">{overview.rangeStats.newUsers}</p>
                             <p className="text-xs text-gray-500">New Users</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-2xl font-bold text-green-600">{overview.rangeStats.newAnimals}</p>
+                            <p className="text-xs text-gray-500">New Animals</p>
                         </div>
                         <div className="text-center">
                             <p className="text-2xl font-bold text-yellow-600">{overview.rangeStats.newReports}</p>
