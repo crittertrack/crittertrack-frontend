@@ -204,10 +204,10 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                <div className="flex justify-between items-center border-b p-4">
-                    <h3 className="text-xl font-bold text-gray-800">Notifications</h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div className="flex justify-between items-center border-b dark:border-dark-text p-4">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">Notifications</h3>
+                    <button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text">
                         <X size={24} />
                     </button>
                 </div>
@@ -215,15 +215,15 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                 <div className="flex-grow overflow-y-auto p-4 space-y-4">
                     {loading ? (
                         <div className="flex justify-center py-8">
-                            <Loader2 className="animate-spin" size={32} />
+                            <Loader2 className="animate-spin dark:text-dark-text-muted" size={32} />
                         </div>
                     ) : notifications.length === 0 ? (
-                        <p className="text-center text-gray-500 py-8">No notifications</p>
+                        <p className="text-center text-gray-500 dark:text-dark-text-muted py-8">No notifications</p>
                     ) : (
                         <>
                             {pendingNotifications.length > 0 && (
                                 <div>
-                                    <h4 className="font-bold text-gray-700 mb-2">Pending Requests</h4>
+                                    <h4 className="font-bold text-gray-700 dark:text-dark-text-secondary mb-2">Pending Requests</h4>
                                     {pendingNotifications.map(notification => (
                                         <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${
                                             notification.type === 'content_edited' 

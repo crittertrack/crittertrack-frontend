@@ -293,28 +293,28 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] sm:h-[600px] flex flex-col">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] sm:h-[600px] flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-center p-2 sm:p-4 border-b">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-1 sm:gap-2">
-                        <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
+                <div className="flex justify-between items-center p-2 sm:p-4 border-b dark:border-dark-text">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-1 sm:gap-2">
+                        <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500 dark:text-dark-info-blue" />
                         Messages
                     </h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition p-1">
+                    <button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text transition p-1">
                         <X className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
                     {/* Conversations List - Hidden on mobile when conversation selected */}
-                    <div className={`${selectedConversation ? 'hidden sm:flex' : 'flex'} sm:w-1/3 w-full border-r overflow-y-auto flex-col`}>
+                    <div className={`${selectedConversation ? 'hidden sm:flex' : 'flex'} sm:w-1/3 w-full border-r dark:border-dark-text overflow-y-auto flex-col`}>
                         {loading ? (
                             <div className="flex items-center justify-center h-full">
-                                <Loader2 className="animate-spin text-gray-400 w-6 h-6 sm:w-8 sm:h-8" />
+                                <Loader2 className="animate-spin text-gray-400 dark:text-dark-text-muted w-6 h-6 sm:w-8 sm:h-8" />
                             </div>
                         ) : conversations.length === 0 ? (
-                            <div className="p-3 sm:p-4 text-center text-gray-500">
-                                <MessageSquare className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 text-gray-300" />
+                            <div className="p-3 sm:p-4 text-center text-gray-500 dark:text-dark-text-muted">
+                                <MessageSquare className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 text-gray-300 dark:text-dark-text-muted" />
                                 <p className="text-sm sm:text-base">No conversations yet</p>
                             </div>
                         ) : (
@@ -322,34 +322,34 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                 <div
                                     key={conv.conversationId}
                                     onClick={() => setSelectedConversation(conv)}
-                                    className={`p-2 sm:p-4 border-b cursor-pointer hover:bg-gray-50 transition ${
-                                        selectedConversation?.conversationId === conv.conversationId ? 'bg-blue-50' : ''
+                                    className={`p-2 sm:p-4 border-b dark:border-dark-text cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition ${
+                                        selectedConversation?.conversationId === conv.conversationId ? 'bg-blue-50 dark:bg-dark-info-blue/20' : ''
                                     }`}
                                 >
                                     <div className="flex items-center gap-2 sm:gap-3">
-                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 dark:bg-dark-surface rounded-full overflow-hidden flex-shrink-0">
                                             {conv.otherUser?.profileImage ? (
                                                 <img src={conv.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                     <User size={20} />
                                                 </div>
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-baseline">
-                                                <p className="font-semibold text-sm truncate flex items-center gap-1">
+                                                <p className="font-semibold text-sm truncate flex items-center gap-1 text-gray-900 dark:text-dark-text">
                                                     {getDisplayName(conv.otherUser)}
                                                     <DonationBadge badge={getDonationBadge(conv.otherUser)} size="xs" />
                                                 </p>
                                                 {conv.unreadCount > 0 && (
-                                                    <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-0.5 ml-2">
+                                                    <span className="bg-purple-600 dark:bg-dark-accent-purple text-white text-xs rounded-full px-2 py-0.5 ml-2">
                                                         {conv.unreadCount}
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-gray-500 truncate">{conv.lastMessage}</p>
-                                            <p className="text-xs text-gray-400">{formatTime(conv.lastMessageDate)}</p>
+                                            <p className="text-xs text-gray-500 dark:text-dark-text-secondary truncate">{conv.lastMessage}</p>
+                                            <p className="text-xs text-gray-400 dark:text-dark-text-muted">{formatTime(conv.lastMessageDate)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -360,59 +360,59 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                     {/* Messages Thread */}
                     <div className="flex-1 flex flex-col">
                         {!selectedConversation ? (
-                            <div className="flex items-center justify-center h-full text-gray-400 px-4">
+                            <div className="flex items-center justify-center h-full text-gray-400 dark:text-dark-text-muted px-4">
                                 <div className="text-center">
-                                    <MessageSquare size={64} className="mx-auto mb-4 text-gray-200" />
+                                    <MessageSquare size={64} className="mx-auto mb-4 text-gray-200 dark:text-dark-text-muted" />
                                     <p>Select a conversation to view messages</p>
                                 </div>
                             </div>
                         ) : (
                             <>
                                 {/* Conversation Header */}
-                                <div className="p-4 border-b bg-gray-50">
+                                <div className="p-4 border-b dark:border-dark-text bg-gray-50 dark:bg-dark-surface/20">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <button
                                                 onClick={() => setSelectedConversation(null)}
-                                                className="sm:hidden text-gray-600 hover:text-gray-800 transition"
+                                                className="sm:hidden text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text transition"
                                             >
                                                 <ArrowLeft size={20} />
                                             </button>
-                                            <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
+                                            <div className="w-10 h-10 bg-gray-200 dark:bg-dark-surface rounded-full overflow-hidden">
                                                 {selectedConversation.otherUser?.profileImage ? (
                                                     <img src={selectedConversation.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                                         <User size={20} />
                                                     </div>
                                                 )}
                                             </div>
                                             <div>
-                                                <p className="font-semibold flex items-center gap-2">
+                                                <p className="font-semibold flex items-center gap-2 text-gray-900 dark:text-dark-text">
                                                     {getDisplayName(selectedConversation.otherUser)}
                                                     <DonationBadge badge={getDonationBadge(selectedConversation.otherUser)} size="xs" />
                                                 </p>
-                                                <p className="text-xs text-gray-500">{selectedConversation.otherUser?.id_public}</p>
+                                                <p className="text-xs text-gray-500 dark:text-dark-text-secondary">{selectedConversation.otherUser?.id_public}</p>
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={handleBlockUser}
-                                                className="p-2 text-gray-600 hover:bg-red-100 hover:text-red-600 rounded-lg transition"
+                                                className="p-2 text-gray-600 dark:text-dark-text-secondary hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition"
                                                 title="Block user"
                                             >
                                                 <Ban size={18} />
                                             </button>
                                             <button
                                                 onClick={handleReportConversation}
-                                                className="p-2 text-gray-600 hover:bg-orange-100 hover:text-orange-600 rounded-lg transition"
+                                                className="p-2 text-gray-600 dark:text-dark-text-secondary hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-600 dark:hover:text-orange-400 rounded-lg transition"
                                                 title="Report conversation"
                                             >
                                                 <Flag size={18} />
                                             </button>
                                             <button
                                                 onClick={handleDeleteConversation}
-                                                className="p-2 text-gray-600 hover:bg-red-100 hover:text-red-600 rounded-lg transition"
+                                                className="p-2 text-gray-600 dark:text-dark-text-secondary hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition"
                                                 title="Delete conversation"
                                             >
                                                 <Trash2 size={18} />
@@ -424,7 +424,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                 {/* Messages */}
                                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                                     {messages.length === 0 ? (
-                                        <div className="flex items-center justify-center h-full text-gray-400">
+                                        <div className="flex items-center justify-center h-full text-gray-400 dark:text-dark-text-muted">
                                             <p>No messages yet. Start the conversation!</p>
                                         </div>
                                     ) : (
@@ -435,8 +435,8 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                 <div key={msg._id} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'} group`}>
                                                     <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
                                                         isSentByMe 
-                                                            ? 'bg-blue-500 text-white' 
-                                                            : 'bg-gray-200 text-gray-800'
+                                                            ? 'bg-blue-500 dark:bg-dark-info-blue text-white' 
+                                                            : 'bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text'
                                                     }`}>
                                                         {/* Images */}
                                                         {hasImages && (
@@ -468,7 +468,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                             <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
                                                         )}
                                                         <div className="flex items-center justify-between gap-2 mt-1">
-                                                            <p className={`text-xs ${isSentByMe ? 'text-blue-100' : 'text-gray-500'}`}>
+                                                            <p className={`text-xs ${isSentByMe ? 'text-blue-100' : 'text-gray-500 dark:text-dark-text-secondary'}`}>
                                                                 {formatTime(msg.createdAt)}
                                                             </p>
                                                             {isSentByMe ? (
@@ -482,7 +482,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                             ) : (
                                                                 <button
                                                                     onClick={() => handleReportMessage(msg._id, msg.message || '[Image]')}
-                                                                    className="opacity-0 group-hover:opacity-100 transition p-1 hover:bg-gray-300 rounded"
+                                                                    className="opacity-0 group-hover:opacity-100 transition p-1 hover:bg-gray-300 dark:hover:bg-dark-surface-hover rounded"
                                                                     title="Report message"
                                                                 >
                                                                     <Flag size={14} />
@@ -498,13 +498,13 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                 </div>
 
                                 {/* Send Message Form */}
-                                <form onSubmit={handleSendMessage} className="p-4 border-t bg-gray-50">
+                                <form onSubmit={handleSendMessage} className="p-4 border-t dark:border-dark-text bg-gray-50 dark:bg-dark-surface/20">
                                     {userProfile?.allowMessages === false ? (
-                                        <div className="text-center py-2 text-sm text-gray-500">
+                                        <div className="text-center py-2 text-sm text-gray-500 dark:text-dark-text-muted">
                                             You have disabled messages. Enable them in your profile settings to send messages.
                                         </div>
                                     ) : selectedConversation.otherUser?.allowMessages === false ? (
-                                        <div className="text-center py-2 text-sm text-gray-500">
+                                        <div className="text-center py-2 text-sm text-gray-500 dark:text-dark-text-muted">
                                             This user has disabled messages
                                         </div>
                                     ) : (
@@ -517,7 +517,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                             <img
                                                                 src={preview}
                                                                 alt={`Preview ${idx + 1}`}
-                                                                className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-gray-300"
+                                                                className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-gray-300 dark:border-dark-text"
                                                             />
                                                             <button
                                                                 type="button"
@@ -545,7 +545,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                     value={newMessage}
                                                     onChange={(e) => setNewMessage(e.target.value)}
                                                     placeholder="Type a message..."
-                                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     disabled={sending}
                                                 />
                                                 {/* Image picker button next to send */}
@@ -553,7 +553,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                     type="button"
                                                     onClick={() => fileInputRef.current?.click()}
                                                     disabled={sending || selectedImages.length >= MAX_IMAGES_PER_MESSAGE}
-                                                    className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    className="p-2 text-gray-500 dark:text-dark-text-muted hover:text-blue-500 dark:hover:text-dark-info-blue hover:bg-blue-50 dark:hover:bg-dark-info-blue/20 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
                                                     title="Attach images"
                                                 >
                                                     <ImagePlus size={20} />
@@ -561,7 +561,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                 <button
                                                     type="submit"
                                                     disabled={sending || (!newMessage.trim() && selectedImages.length === 0)}
-                                                    className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                                    className="bg-blue-500 dark:bg-dark-info-blue text-white px-6 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-dark-info-blue-hover transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                                 >
                                                     {sending ? (
                                                         <>

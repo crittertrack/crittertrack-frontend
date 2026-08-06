@@ -247,22 +247,22 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
     };
 
     return (
-        <div className="w-full max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-3xl mx-auto bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg">
             <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center">
                     <Settings size={20} className="mr-2 text-primary-dark" />
                     Manage Species (Global for All Users)
                 </h2>
                 <button
                     onClick={onCancel}
                     data-tutorial-target="back-to-selector-btn"
-                    className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                    className="flex items-center text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text transition"
                 >
                     <ArrowLeft size={18} className="mr-1" /> Back
                 </button>
             </div>
 
-            <form onSubmit={handleAddSpecies} className="mb-6 p-3 sm:p-4 border rounded-lg bg-gray-50 space-y-3 overflow-x-hidden">
+            <form onSubmit={handleAddSpecies} className="mb-6 p-3 sm:p-4 border dark:border-dark-text rounded-lg bg-gray-50 dark:bg-dark-surface/20 space-y-3 overflow-x-hidden">
                 <div className="flex flex-col space-y-2 min-w-0">
                     <div className="flex flex-col sm:flex-row gap-2 sm:space-x-3">
                         <input
@@ -273,14 +273,14 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                             required
                             disabled={loading}
                             data-tutorial-target="species-name-input"
-                            className="flex-grow p-2 border border-gray-300 rounded-lg box-border min-w-0"
+                            className="flex-grow p-2 border border-gray-300 dark:border-dark-text rounded-lg box-border min-w-0 bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted"
                         />
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
                             disabled={loading}
                             data-tutorial-target="species-category-dropdown"
-                            className="p-2 border border-gray-300 rounded-lg box-border sm:flex-shrink-0 sm:w-auto w-full"
+                            className="p-2 border border-gray-300 dark:border-dark-text rounded-lg box-border sm:flex-shrink-0 sm:w-auto w-full bg-white dark:bg-dark-card-bg dark:text-dark-text"
                         >
                             {categories.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
@@ -294,7 +294,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                         onChange={(e) => setNewSpeciesLatinName(e.target.value)}
                         disabled={loading}
                         data-tutorial-target="species-latin-input"
-                        className="w-full p-2 border border-gray-300 rounded-lg"
+                        className="w-full p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted"
                     />
                 </div>
                 <div className="flex gap-3">
@@ -307,7 +307,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                         {loading ? 'Adding...' : 'Add'}
                     </button>
                 </div>
-                <p className="text-xs text-gray-500"><Globe size={12} className="inline-block align-middle mr-1" /> Species you add will be available to all users globally! Include the scientific name if known. </p>
+                <p className="text-xs text-gray-500 dark:text-dark-text-muted"><Globe size={12} className="inline-block align-middle mr-1" /> Species you add will be available to all users globally! Include the scientific name if known. </p>
             </form>
 
             <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:space-x-3 overflow-x-hidden">
@@ -316,12 +316,12 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                     placeholder="Search species..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-grow p-2 border border-gray-300 rounded-lg box-border min-w-0"
+                    className="flex-grow p-2 border border-gray-300 dark:border-dark-text rounded-lg box-border min-w-0 bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted"
                 />
                 <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-lg box-border sm:flex-shrink-0 sm:w-auto w-full"
+                    className="p-2 border border-gray-300 dark:border-dark-text rounded-lg box-border sm:flex-shrink-0 sm:w-auto w-full bg-white dark:bg-dark-card-bg dark:text-dark-text"
                 >
                     <option value="All">All Categories</option>
                     {categories.map(cat => (
@@ -331,35 +331,35 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
             </div>
 
             <div className="space-y-3 max-h-96 overflow-y-auto">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Available Species ({filteredSpecies.length})</h3>
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-text-secondary border-b dark:border-dark-text pb-2">Available Species ({filteredSpecies.length})</h3>
                 
                 {filteredSpecies.length === 0 ? (
-                    <p className="text-sm text-gray-500 p-2">No species found matching your filters.</p>
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted p-2">No species found matching your filters.</p>
                 ) : (
                     filteredSpecies.map(species => (
-                        <div key={species._id || species.name} className="flex justify-between items-center p-3 border rounded-lg bg-white shadow-sm">
+                        <div key={species._id || species.name} className="flex justify-between items-center p-3 border dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg shadow-sm">
                             <div>
-                                <span className="font-medium text-gray-800">{species.name}</span>
+                                <span className="font-medium text-gray-800 dark:text-dark-text">{species.name}</span>
                                 {species.latinName && (
-                                    <div className="text-xs italic text-gray-600">{species.latinName}</div>
+                                    <div className="text-xs italic text-gray-600 dark:text-dark-text-secondary">{species.latinName}</div>
                                 )}
-                                <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">{species.category}</span>
-                                {species.isDefault && <span className="ml-2 text-xs bg-primary text-black px-2 py-1 rounded">Default</span>}
+                                <span className="ml-2 text-xs bg-gray-200 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary px-2 py-1 rounded">{species.category}</span>
+                                {species.isDefault && <span className="ml-2 text-xs bg-primary dark:bg-dark-primary text-black px-2 py-1 rounded">Default</span>}
                             </div>
                             {species.isDefault ? (
-                                <span className="text-sm text-gray-400 flex items-center gap-1"><Lock size={14} /> Locked</span>
+                                <span className="text-sm text-gray-400 dark:text-dark-text-muted flex items-center gap-1"><Lock size={14} /> Locked</span>
                             ) : (
-                                <span className="text-xs text-gray-500">Added by community</span>
+                                <span className="text-xs text-gray-500 dark:text-dark-text-muted">Added by community</span>
                             )}
                         </div>
                     ))
                 )}
             </div>
             
-            <div className="mt-6 border-t pt-4">
+            <div className="mt-6 border-t dark:border-dark-text pt-4">
                 <button
                     onClick={() => setShowFeedbackModal(true)}
-                    className="flex items-center text-purple-600 hover:text-purple-700 transition font-medium"
+                    className="flex items-center text-purple-600 dark:text-dark-accent-purple hover:text-purple-700 dark:hover:text-dark-accent-purple/80 transition font-medium"
                 >
                     <Mail size={18} className="mr-1" /> Request Species Customization
                 </button>
@@ -368,20 +368,20 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
             {/* Feedback Modal */}
             {showFeedbackModal && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">Request Species Customization</h3>
-                        <p className="text-sm text-gray-600 mb-4">
+                    <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl p-6 w-full max-w-lg">
+                        <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4">Request Species Customization</h3>
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
                             Let us know if a species needs different or additional fields (e.g., "Morph" instead of "Color/Coat" for snakes, or missing fields like "Pattern")
                         </p>
                         
                         <form onSubmit={handleSubmitFeedback} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1">Species</label>
                                 <select
                                     value={feedbackSpecies}
                                     onChange={(e) => setFeedbackSpecies(e.target.value)}
                                     required
-                                    className="w-full p-2 border border-gray-300 rounded-lg"
+                                    className="w-full p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text"
                                 >
                                     <option value="">Select a species...</option>
                                     {speciesOptions.map(s => (
@@ -391,7 +391,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                             </div>
                             
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1">
                                     What fields need to be different or added?
                                 </label>
                                 <textarea
@@ -400,7 +400,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                                     required
                                     rows={4}
                                     placeholder='Example: For snakes, replace "Color" and "Coat" with "Morph", and add a "Pattern" field'
-                                    className="w-full p-2 border border-gray-300 rounded-lg"
+                                    className="w-full p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted"
                                 />
                             </div>
                             
@@ -412,14 +412,14 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                                         setFeedbackSpecies('');
                                         setFeedbackText('');
                                     }}
-                                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+                                    className="flex-1 px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text rounded-lg transition"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={feedbackSubmitting}
-                                    className="flex-1 px-4 py-2 bg-accent hover:bg-accent/80 text-white rounded-lg transition disabled:opacity-50 flex items-center justify-center"
+                                    className="flex-1 px-4 py-2 bg-accent dark:bg-dark-accent hover:bg-accent/80 dark:hover:bg-dark-accent/80 text-white rounded-lg transition disabled:opacity-50 flex items-center justify-center"
                                 >
                                     {feedbackSubmitting ? <Loader2 className="animate-spin mr-2" size={18} /> : <Mail size={18} className="mr-2" />}
                                     {feedbackSubmitting ? 'Sending...' : 'Send Feedback'}
@@ -486,9 +486,9 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
     };
     
     return (
-        <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg" data-tutorial-target="species-selector">
+        <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg" data-tutorial-target="species-selector">
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <h2 className="text-3xl font-bold text-gray-800 flex items-center">
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center">
                     <Cat size={24} className="mr-3 text-primary-dark" />
                     Select Species for New Animal
                 </h2>
@@ -501,8 +501,8 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 </button>
             </div>
             
-            <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
-                <p className="text-sm text-yellow-800">
+            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-700/60 rounded-lg">
+                <p className="text-sm text-yellow-800 dark:text-yellow-300">
                     <span className="italic">Theraphosidae sp.</span> Some default species are intentionally broad. Add your exact species when possible. Missing fields can be requested via species customization.
                 </p>
             </div>
@@ -513,13 +513,13 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                     placeholder="Search species..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 p-2 border border-gray-300 rounded-lg"
+                    className="flex-1 p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted"
                     data-tutorial-target="species-search-input"
                 />
                 <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-lg w-full sm:w-40 flex-shrink-0"
+                    className="p-2 border border-gray-300 dark:border-dark-text rounded-lg w-full sm:w-40 flex-shrink-0 bg-white dark:bg-dark-card-bg dark:text-dark-text"
                 >
                     {categories.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -528,12 +528,12 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
             </div>
 
             {favCount === 0 && !searchTerm && (
-                <p className="text-xs text-gray-400 mb-2">Tip: click the <Star size={11} className="inline-block align-middle" /> on any card to favourite a species.</p>
+                <p className="text-xs text-gray-400 dark:text-dark-text-muted mb-2">Tip: click the <Star size={11} className="inline-block align-middle" /> on any card to favourite a species.</p>
             )}
             
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6 max-h-96 overflow-y-auto" data-tutorial-target="default-species-section">
                 {favCount > 0 && !searchTerm && (
-                    <p className="col-span-full text-xs font-semibold text-amber-600 uppercase tracking-wide flex flex-wrap items-center gap-x-1 gap-y-0.5">
+                    <p className="col-span-full text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide flex flex-wrap items-center gap-x-1 gap-y-0.5">
                         <Star size={11} className="fill-current shrink-0" />
                         <span>Favourites – click</span>
                         <Star size={11} className="fill-current shrink-0" />
@@ -541,7 +541,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                     </p>
                 )}
                 {sortedSpecies.length === 0 ? (
-                    <p className="col-span-full text-center text-gray-500 p-4">No species found matching your filters.</p>
+                    <p className="col-span-full text-center text-gray-500 dark:text-dark-text-muted p-4">No species found matching your filters.</p>
                 ) : (
                     sortedSpecies.map((species, idx) => {
                         const isFav = favorites.includes(species.name);
@@ -549,25 +549,25 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                         const showDivider = !searchTerm && !isFav && prevFav;
                         return (
                             <React.Fragment key={species._id || species.name}>
-                                {showDivider && <div className="col-span-full border-t border-gray-200 my-1" />}
+                                {showDivider && <div className="col-span-full border-t border-gray-200 dark:border-dark-text my-1" />}
                                 <div className="relative group">
                                     <button
                                         onClick={() => onSelectSpecies(species.name)}
                                         data-tutorial-target={species.name === 'Fancy Mouse' ? 'species-fancy-mouse' : undefined}
                                         className={`w-full h-24 p-3 border-2 text-sm font-semibold rounded-lg transition duration-150 shadow-md relative text-center flex flex-col items-center justify-center ${
                                             isFav
-                                                ? 'border-amber-400 bg-amber-50 text-gray-800 hover:bg-amber-100'
+                                                ? 'border-amber-400 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-900/30 text-gray-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50'
                                                 : species.isDefault 
                                                 ? 'border-primary-dark bg-primary dark:bg-dark-primary text-gray-800 hover:bg-primary/80' 
-                                                : 'border-accent bg-accent text-white hover:bg-accent/80'
+                                                : 'border-accent dark:border-dark-accent bg-accent dark:bg-dark-accent text-white hover:bg-accent/80 dark:hover:bg-dark-accent/80'
                                         }`}
                                     >
                                         <span className="line-clamp-2">{species.name}</span>
                                         {species.latinName && (
-                                            <p className={`text-xs italic mt-1 line-clamp-1 ${isFav || species.isDefault ? 'text-gray-600' : 'text-white/80'}`}>{species.latinName}</p>
+                                            <p className={`text-xs italic mt-1 line-clamp-1 ${isFav || species.isDefault ? 'text-gray-600 dark:text-dark-text-secondary' : 'text-white/80'}`}>{species.latinName}</p>
                                         )}
                                         {species.category && (
-                                            <span className={`absolute top-2 left-2 ${isFav || species.isDefault ? 'text-gray-400' : 'text-white/60'}`}>
+                                            <span className={`absolute top-2 left-2 ${isFav || species.isDefault ? 'text-gray-400 dark:text-dark-text-muted' : 'text-white/60'}`}>
                                                 {getCategoryIcon(species.category)}
                                             </span>
                                         )}
@@ -576,7 +576,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                                         type="button"
                                         onClick={e => toggleFavorite(e, species.name)}
                                         title={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                                        className={`absolute bottom-2 right-2 transition z-10 ${isFav ? 'text-amber-400 opacity-100' : 'text-gray-400 opacity-100 hover:text-amber-400'}`}
+                                        className={`absolute bottom-2 right-2 transition z-10 ${isFav ? 'text-amber-400 opacity-100' : 'text-gray-400 dark:text-dark-text-muted opacity-100 hover:text-amber-400'}`}
                                     >
                                         <Star size={14} className={isFav ? 'fill-current' : ''} />
                                     </button>
@@ -587,9 +587,9 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 )}
             </div>
 
-            <div className="mt-8 border-t pt-4">
-                <p className="text-sm text-gray-500">
-                    <span className="font-semibold">{sortedSpecies.length}</span> species available{favCount > 0 ? <span className="ml-2 text-amber-600 font-medium">– {favCount} favourited</span> : ''}
+            <div className="mt-8 border-t dark:border-dark-text pt-4">
+                <p className="text-sm text-gray-500 dark:text-dark-text-muted">
+                    <span className="font-semibold">{sortedSpecies.length}</span> species available{favCount > 0 ? <span className="ml-2 text-amber-600 dark:text-amber-400 font-medium">– {favCount} favourited</span> : ''}
                 </p>
             </div>
         </div>

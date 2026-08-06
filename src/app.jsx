@@ -2003,28 +2003,28 @@ const App = () => {
             {/* Species Customization Feedback Modal */}
             {showFeedbackModal && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
+                    <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl p-6 w-full max-w-lg">
                         <div className="flex justify-between items-center mb-2">
-                            <h3 className="text-xl font-bold text-gray-800">Request Species Customization</h3>
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">Request Species Customization</h3>
                             <button 
                                 onClick={() => setShowFeedbackModal(false)}
-                                className="text-gray-500 hover:text-gray-700 transition"
+                                className="text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text transition"
                             >
                                 <X size={24} />
                             </button>
                         </div>
-                        <p className="text-sm text-gray-600 mb-4">
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
                             Let us know if a species needs different or additional fields (e.g., "Morph" instead of "Color/Coat" for snakes, or missing fields like "Pattern")
                         </p>
                         
                         <form onSubmit={handleSubmitFeedback} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1">Species</label>
                                 <select
                                     value={feedbackSpecies}
                                     onChange={(e) => setFeedbackSpecies(e.target.value)}
                                     required
-                                    className="w-full p-2 border border-gray-300 rounded-lg"
+                                    className="w-full p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text"
                                 >
                                     <option value="">Select a species...</option>
                                     {speciesOptions.map(s => (
@@ -2034,7 +2034,7 @@ const App = () => {
                             </div>
                             
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1">
                                     What fields need to be different or added?
                                 </label>
                                 <textarea
@@ -2043,7 +2043,7 @@ const App = () => {
                                     required
                                     rows={4}
                                     placeholder='Example: For snakes, replace "Color" and "Coat" with "Morph", and add a "Pattern" field'
-                                    className="w-full p-2 border border-gray-300 rounded-lg"
+                                    className="w-full p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted"
                                 />
                             </div>
                             
@@ -2055,14 +2055,14 @@ const App = () => {
                                         setFeedbackSpecies('');
                                         setFeedbackText('');
                                     }}
-                                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+                                    className="flex-1 px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text rounded-lg transition"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={feedbackSubmitting}
-                                    className="flex-1 px-4 py-2 bg-accent hover:bg-accent/80 text-white rounded-lg transition disabled:opacity-50 flex items-center justify-center"
+                                    className="flex-1 px-4 py-2 bg-accent dark:bg-dark-accent hover:bg-accent/80 dark:hover:bg-dark-accent/80 text-white rounded-lg transition disabled:opacity-50 flex items-center justify-center"
                                 >
                                     {feedbackSubmitting ? <Loader2 className="animate-spin mr-2" size={18} /> : <Mail size={18} className="mr-2" />}
                                     {feedbackSubmitting ? 'Sending...' : 'Send Feedback'}
