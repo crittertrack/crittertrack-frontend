@@ -178,41 +178,32 @@ const ResourcesPage = ({ API_BASE_URL }) => {
                 </div>
             )}
 
-            {allSubjects.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                    {allSubjects.map(subject => (
-                        <button
-                            key={subject}
-                            type="button"
-                            onClick={() => toggleSubject(subject)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full transition ${
-                                selectedSubjects.includes(subject)
-                                    ? 'bg-primary text-black'
-                                    : 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
-                            }`}
+            {(allSubjects.length > 0 || allLanguages.length > 0) && (
+                <div className="flex flex-wrap gap-3 mb-3">
+                    {allSubjects.length > 0 && (
+                        <select
+                            value={selectedSubject}
+                            onChange={e => setSelectedSubject(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-sm bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                         >
-                            {subject}
-                        </button>
-                    ))}
-                </div>
-            )}
-
-            {allLanguages.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                    {allLanguages.map(language => (
-                        <button
-                            key={language}
-                            type="button"
-                            onClick={() => toggleLanguage(language)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full transition ${
-                                selectedLanguages.includes(language)
-                                    ? 'bg-accent text-white'
-                                    : 'bg-gray-100 dark:bg-dark-surface text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
-                            }`}
+                            <option value="">All Subjects</option>
+                            {allSubjects.map(subject => (
+                                <option key={subject} value={subject}>{subject}</option>
+                            ))}
+                        </select>
+                    )}
+                    {allLanguages.length > 0 && (
+                        <select
+                            value={selectedLanguage}
+                            onChange={e => setSelectedLanguage(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-sm bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent"
                         >
-                            {language}
-                        </button>
-                    ))}
+                            <option value="">All Languages</option>
+                            {allLanguages.map(language => (
+                                <option key={language} value={language}>{language}</option>
+                            ))}
+                        </select>
+                    )}
                 </div>
             )}
 
