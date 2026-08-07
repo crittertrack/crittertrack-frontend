@@ -412,6 +412,7 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
     const [cropBox, setCropBox] = useState({ x: 0, y: 0, width: 100, height: 100 });
     const [processing, setProcessing] = useState(false);
     const [fileSizeWarning, setFileSizeWarning] = useState('');
+    const [previewError, setPreviewError] = useState(false);
     const [imageBox, setImageBox] = useState(null); // rendered image position/size relative to preview container
     const imgRef = useRef(null);
     const previewContainerRef = useRef(null);
@@ -421,15 +422,16 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
 
     useEffect(() => {
         if (files.length > currentIndex && imgRef.current) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imgRef.current.src = e.target.result;
-            };
-            reader.readAsDataURL(files[currentIndex]);
+            // createObjectURL avoids base64-encoding the whole file (readAsDataURL adds ~33%
+            // overhead) — matters a lot for the large multi-MB photos modern phone cameras produce.
+            const objectUrl = URL.createObjectURL(files[currentIndex]);
+            imgRef.current.src = objectUrl;
             setRotation(0);
             setCropMode(false);
             setCropBox({ x: 0, y: 0, width: 100, height: 100 });
             setFileSizeWarning('');
+            setPreviewError(false);
+            return () => URL.revokeObjectURL(objectUrl);
         }
     }, [currentIndex, files]);
 
@@ -584,112 +586,128 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
             }
         } catch (error) {
             console.error('Image processing error:', error);
-            setFileSizeWarning('Failed to process image');
+            setFileSizeWarning("Couldn't process this photo (unsupported or corrupted file) — try Skip or pick a different photo.");
         } finally {
             setProcessing(false);
         }
     };
 
+    // Drops the current (unprocessable) image and moves on, instead of leaving the whole
+    // batch stuck behind one bad photo.
+    const skipCurrentImage = () => {
+        setFileSizeWarning('');
+        setPreviewError(false);
+        if (currentIndex < files.length - 1) {
+            setCurrentIndex((i) => i + 1);
+        } else {
+            setProcessedImages((prev) => {
+                onComplete(prev);
+                return prev;
+            });
+        }
+    };
+
     const rotateImageFile = (file, degrees) => {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const radians = (degrees * Math.PI) / 180;
-                    const sin = Math.abs(Math.sin(radians));
-                    const cos = Math.abs(Math.cos(radians));
-                    canvas.width = img.height * sin + img.width * cos;
-                    canvas.height = img.height * cos + img.width * sin;
+        return new Promise((resolve, reject) => {
+            const objectUrl = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                const canvas = document.createElement('canvas');
+                const radians = (degrees * Math.PI) / 180;
+                const sin = Math.abs(Math.sin(radians));
+                const cos = Math.abs(Math.cos(radians));
+                canvas.width = img.height * sin + img.width * cos;
+                canvas.height = img.height * cos + img.width * sin;
 
-                    const ctx = canvas.getContext('2d');
-                    ctx.translate(canvas.width / 2, canvas.height / 2);
-                    ctx.rotate(radians);
-                    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+                const ctx = canvas.getContext('2d');
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(radians);
+                ctx.drawImage(img, -img.width / 2, -img.height / 2);
 
-                    canvas.toBlob(resolve, 'image/jpeg', 0.85);
-                };
-                img.src = e.target.result;
+                canvas.toBlob(resolve, 'image/jpeg', 0.85);
             };
-            reader.readAsDataURL(file);
+            img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to decode image')); };
+            img.src = objectUrl;
         });
     };
 
     const cropImageFile = (file, cropBox) => {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const scaleX = img.width / 100;
-                    const scaleY = img.height / 100;
-                    canvas.width = cropBox.width * scaleX;
-                    canvas.height = cropBox.height * scaleY;
+        return new Promise((resolve, reject) => {
+            const objectUrl = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                const canvas = document.createElement('canvas');
+                const scaleX = img.width / 100;
+                const scaleY = img.height / 100;
+                canvas.width = cropBox.width * scaleX;
+                canvas.height = cropBox.height * scaleY;
 
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(
-                        img,
-                        cropBox.x * scaleX,
-                        cropBox.y * scaleY,
-                        cropBox.width * scaleX,
-                        cropBox.height * scaleY,
-                        0,
-                        0,
-                        cropBox.width * scaleX,
-                        cropBox.height * scaleY
-                    );
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(
+                    img,
+                    cropBox.x * scaleX,
+                    cropBox.y * scaleY,
+                    cropBox.width * scaleX,
+                    cropBox.height * scaleY,
+                    0,
+                    0,
+                    cropBox.width * scaleX,
+                    cropBox.height * scaleY
+                );
 
-                    canvas.toBlob(resolve, 'image/jpeg', 0.85);
-                };
-                img.src = e.target.result;
+                canvas.toBlob(resolve, 'image/jpeg', 0.85);
             };
-            reader.readAsDataURL(file);
+            img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to decode image')); };
+            img.src = objectUrl;
         });
     };
 
     const compressImageFile = (file) => {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const maxWidth = 1200;
-                    const maxHeight = 1200;
-                    let width = img.width;
-                    let height = img.height;
+        return new Promise((resolve, reject) => {
+            const objectUrl = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                const canvas = document.createElement('canvas');
+                const maxWidth = 1200;
+                const maxHeight = 1200;
+                let width = img.width;
+                let height = img.height;
 
-                    if (width > height) {
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-                    } else {
-                        if (height > maxHeight) {
-                            width = Math.round((width * maxHeight) / height);
-                            height = maxHeight;
-                        }
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
                     }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
 
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
 
-                    canvas.toBlob(
-                        (blob) => {
-                            const resultFile = new File([blob], file.name, { type: 'image/jpeg' });
-                            resolve(resultFile);
-                        },
-                        'image/jpeg',
-                        0.8
-                    );
-                };
-                img.src = e.target.result;
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) {
+                            reject(new Error('Failed to encode compressed image'));
+                            return;
+                        }
+                        const resultFile = new File([blob], file.name, { type: 'image/jpeg' });
+                        resolve(resultFile);
+                    },
+                    'image/jpeg',
+                    0.8
+                );
             };
-            reader.readAsDataURL(file);
+            img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to decode image')); };
+            img.src = objectUrl;
         });
     };
 
@@ -711,14 +729,24 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                 <div className="p-6 space-y-4">
                     {/* Preview */}
                     <div ref={previewContainerRef} className="relative bg-gray-100 dark:bg-dark-surface rounded-lg p-4 flex items-center justify-center h-96 overflow-hidden">
-                        <img
-                            ref={imgRef}
-                            style={getRotationStyle()}
-                            className="max-w-full max-h-full object-contain"
-                            alt="Preview"
-                            onLoad={updateImageBox}
-                        />
-                        {cropMode && imageBox && (
+                        {previewError ? (
+                            <div className="text-center px-4">
+                                <AlertTriangle size={28} className="mx-auto text-amber-500 mb-2" />
+                                <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                                    Couldn't load a preview for this photo — it may be too large or an unsupported format. Try Skip or pick a different photo.
+                                </p>
+                            </div>
+                        ) : (
+                            <img
+                                ref={imgRef}
+                                style={getRotationStyle()}
+                                className="max-w-full max-h-full object-contain"
+                                alt="Preview"
+                                onLoad={updateImageBox}
+                                onError={() => setPreviewError(true)}
+                            />
+                        )}
+                        {!previewError && cropMode && imageBox && (
                             <div
                                 onMouseDown={(e) => handleCropDragStart(e, 'move')}
                                 className="absolute border-2 border-primary bg-primary/10 cursor-move"
@@ -873,10 +901,19 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
                     >
                         Cancel
                     </button>
+                    {(previewError || fileSizeWarning) && (
+                        <button
+                            type="button"
+                            onClick={skipCurrentImage}
+                            className="px-4 py-2 border border-amber-400 text-amber-700 dark:text-amber-300 rounded-md text-sm font-medium hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                        >
+                            Skip This Photo
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={processCurrentImage}
-                        disabled={processing}
+                        disabled={processing || previewError}
                         className="px-4 py-2 bg-primary dark:bg-dark-primary text-black rounded-md text-sm font-medium hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
                     >
                         {processing ? (
