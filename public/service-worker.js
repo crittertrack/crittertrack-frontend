@@ -158,3 +158,37 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+// --- Web Push ---
+self.addEventListener('push', (event) => {
+  let payload = { title: 'CritterTrack', body: 'You have a new notification.', url: '/notifications' };
+  if (event.data) {
+    try { payload = { ...payload, ...event.data.json() }; }
+    catch (err) { payload.body = event.data.text() || payload.body; }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: '/logo192.png',
+      badge: '/logo192.png',
+      tag: payload.tag || undefined,
+      data: { url: payload.url || '/' }
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  const url = event.notification.data?.url || '/';
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
+      const existing = clientsArr.find((c) => c.url.includes(self.location.origin));
+      if (existing) {
+        existing.navigate(url);
+        return existing.focus();
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});

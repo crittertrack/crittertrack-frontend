@@ -8,10 +8,11 @@ import {
 } from 'lucide-react';
 import { BreederDirectorySettings } from '../PublicProfile/BreederDirectory';
 import InfoButton from '../shared/InfoButton';
+import { isPushSupported, getPushPermission, subscribeToPush, unsubscribeFromPush, isSubscribedOnThisDevice } from '../../utils/pushNotifications';
 
 // Short contextual hints for the Settings page-header info button, keyed by tab id.
 const SETTINGS_TAB_INFO = {
-    'profile': { lessonId: 'settings-profile', body: <p>Edit your name, avatar, bio, and location. Toggle which name (breeder or personal) is shown publicly.</p> },
+    'profile': { lessonId: 'settings-profile', body: <p>Edit your name, avatar, bio, and location. Toggle which name (breeder or personal) is shown publicly. You can also enable <strong>push notifications</strong> here to get real device alerts for messages, requests, and daily animal care/feeding/health reminders — even when the app isn't open.</p> },
     'info-adoption': { lessonId: 'settings-info-adoption', body: <p>Add species-specific care info and adoption/rehoming policies shown on your public profile.</p> },
     'directory': { lessonId: 'settings-directory', body: <p>Control whether you're listed in the public Breeder Directory and how you appear there.</p> },
     'ratings': { lessonId: 'settings-ratings', body: <p>See ratings and reviews other users have left after transactions with you.</p> },
@@ -328,6 +329,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showStatsTab, setShowStatsTab] = useState(userProfile.showStatsTab ?? true);
     const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
     const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
+    const [pushSupported] = useState(() => isPushSupported());
+    const [pushSubscribed, setPushSubscribed] = useState(false);
+    const [pushBusy, setPushBusy] = useState(false);
+    const [pushCategories, setPushCategories] = useState([]);
+    const [pushPreferences, setPushPreferences] = useState(userProfile.pushCategoryPreferences || {});
     const [country, setCountry] = useState(userProfile.country || '');
     const [usState, setUsState] = useState(userProfile.state || '');
     const [breederInfoOpen, setBreederInfoOpen] = useState(false);
@@ -455,6 +461,44 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             .then(r => setZeSpeciesList(Array.isArray(r.data) ? r.data : []))
             .catch(() => {});
     }, [activeTab, API_BASE_URL, authToken]);
+
+    useEffect(() => {
+        if (activeTab !== 'profile' || !pushSupported) return;
+        isSubscribedOnThisDevice().then(setPushSubscribed).catch(() => {});
+        axios.get(`${API_BASE_URL}/push/preferences`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(r => {
+                setPushCategories(r.data.categories || []);
+                setPushPreferences(r.data.preferences || {});
+            })
+            .catch(() => {});
+    }, [activeTab, pushSupported, API_BASE_URL, authToken]);
+
+    const handleTogglePushEnabled = async () => {
+        setPushBusy(true);
+        try {
+            if (pushSubscribed) {
+                await unsubscribeFromPush(authToken, API_BASE_URL);
+                setPushSubscribed(false);
+            } else {
+                await subscribeToPush(authToken, API_BASE_URL);
+                setPushSubscribed(true);
+            }
+        } catch (err) {
+            showModalMessage('Error', err.message || 'Failed to update push notification settings.');
+        } finally {
+            setPushBusy(false);
+        }
+    };
+
+    const handleTogglePushCategory = async (categoryId, value) => {
+        setPushPreferences(prev => ({ ...prev, [categoryId]: value }));
+        try {
+            await axios.put(`${API_BASE_URL}/push/preferences`, { [categoryId]: value }, { headers: { Authorization: `Bearer ${authToken}` } });
+        } catch (err) {
+            setPushPreferences(prev => ({ ...prev, [categoryId]: !value }));
+            showModalMessage('Error', 'Failed to save that preference.');
+        }
+    };
 
     // Data Portability ? Export
     const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
@@ -1066,6 +1110,37 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                             <span>Allow other breeders to message me</span>
                         </label>
+                    </div>
+
+                    <div data-tutorial-target="push-notifications" className="pt-4 space-y-3 border-t border-gray-200 dark:border-dark-border">
+                        <h4 className="text-base font-medium text-gray-800 dark:text-dark-text">Push Notifications:</h4>
+                        {!pushSupported ? (
+                            <p className="text-sm text-gray-500 dark:text-dark-text-muted">Not supported in this browser. On iPhone/iPad, add CritterTrack to your Home Screen first (Share → Add to Home Screen), then try again from there.</p>
+                        ) : (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={handleTogglePushEnabled}
+                                    disabled={pushBusy}
+                                    className={`text-sm font-medium px-3 py-1.5 rounded-md ${pushSubscribed ? 'bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text hover:bg-gray-300' : 'bg-primary-dark text-white hover:bg-primary-darker'}`}
+                                >
+                                    {pushBusy ? 'Please wait…' : pushSubscribed ? 'Disable push notifications on this device' : 'Enable push notifications on this device'}
+                                </button>
+                                {pushSubscribed && (
+                                    <div className="space-y-2 pl-2">
+                                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Choose what you want to be notified about:</p>
+                                        {pushCategories.map((cat) => (
+                                            <label key={cat.id} className="flex items-center space-x-2 text-sm text-gray-700 dark:text-dark-text-secondary">
+                                                <input type="checkbox" checked={pushPreferences[cat.id] !== false}
+                                                    onChange={(e) => handleTogglePushCategory(cat.id, e.target.checked)}
+                                                    className="rounded text-primary-dark focus:ring-primary-dark" />
+                                                <span>{cat.label}{cat.description ? ` — ${cat.description}` : ''}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
 
                     <div data-tutorial-target="email-notifications" className="pt-4 space-y-3 border-t border-gray-200 dark:border-dark-border">
