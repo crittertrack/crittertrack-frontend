@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Users, Plus, Search, UserCheck, Loader2 } from 'lucide-react';
+import InfoButton from '../shared/InfoButton';
 
 const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
     const [contacts, setContacts] = useState([]);
@@ -96,6 +97,10 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                         <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                             <Users size={28} className="text-primary" />
                             Contacts
+                            <InfoButton title="Contacts">
+                                <p>Keep records of keepers and breeders you deal with — separate from your own animal records.</p>
+                                <p>Mark a contact as a Keeper or Breeder, and view the animals you've bought from or bred with them.</p>
+                            </InfoButton>
                         </h1>
                         <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">Manage keepers and breeders</p>
                     </div>

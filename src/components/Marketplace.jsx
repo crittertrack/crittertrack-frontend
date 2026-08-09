@@ -4,6 +4,7 @@ import axios from 'axios';
 import 'flag-icons/css/flag-icons.min.css';
 import ViewAnimalModalV2 from './AnimalDetail/ViewAnimalModalV2';
 import { getCountryFlag, getCountryName, US_STATES, getStateName } from '../utils/locationUtils';
+import InfoButton from './shared/InfoButton';
 
 const API_BASE_URL = '/api';
 
@@ -304,6 +305,10 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                     <ShoppingBag className="text-accent" />
                     Marketplace
+                    <InfoButton title="Marketplace">
+                        <p>Browse animals other breeders have listed for sale or stud. Use the tabs to switch between listing types, and the filters to narrow by species or location.</p>
+                        <p>Click an animal to see details or message the seller directly.</p>
+                    </InfoButton>
                 </h1>
                 <p className="text-gray-600 dark:text-dark-text mt-1">Browse animals available for sale or stud services</p>
             </div>

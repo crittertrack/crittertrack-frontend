@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { BookOpen, Search, ExternalLink, X, Loader2, Tag, ChevronDown, ChevronUp, Send } from 'lucide-react';
+import InfoButton from '../shared/InfoButton';
 
 const ResourcesPage = ({ API_BASE_URL, authToken }) => {
     const [resources, setResources] = useState([]);
@@ -144,6 +145,9 @@ const ResourcesPage = ({ API_BASE_URL, authToken }) => {
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                         <BookOpen className="text-accent" />
                         Helpful Resources
+                        <InfoButton title="Helpful Resources">
+                            <p>A curated directory of external links for care, health, genetics, and more. Filter by species, subject, or tag, and use "Suggest a Resource" to recommend additions.</p>
+                        </InfoButton>
                     </h1>
                     <p className="text-gray-600 dark:text-dark-text-secondary mt-1">A curated directory of external links for care, health, genetics, and more.</p>
                 </div>

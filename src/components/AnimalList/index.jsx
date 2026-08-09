@@ -40,13 +40,43 @@ const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
 
 // Short contextual hints for the page-header info button, keyed by animalView.
+const PIN_TAB_HINT = <p>Tip: hover a tab above and click its pin icon to set that tab as your default view — it'll open automatically next time.</p>;
 const ANIMAL_VIEW_INFO = {
-    list: { title: 'My Animals', body: <p>All animals you own or manage. Use the search and filters to narrow the list, and switch between card/table layouts.</p> },
-    collections: { title: 'Collections', body: <p>Group animals into custom folders for quick access — separate from enclosures, useful for breeding groups, sale lists, or any grouping you choose.</p> },
-    enclosures: { title: 'Enclosures', body: <p>Manage enclosures and see which animals are assigned to each. Toggle between Card and Section views, and pin your preferred default with the pin icon.</p> },
-    reproduction: { title: 'Reproduction', body: <p>Track planned matings, active pairings, pregnancies, and nursing litters in one place.</p> },
-    health: { title: 'Health', body: <p>Monitor animals in quarantine or under treatment, and assign health statuses to one or more animals at once.</p> },
-    feeding: { title: 'Feeding & Care', body: <p>Track feeding schedules, grooming/training routines, and any custom care tasks you've set up.</p> },
+    list: {
+        title: 'My Animals', body: <>
+            <p>All animals you own or manage. Use the search and filters to narrow the list, and switch between card/table layouts.</p>
+            <p><strong>Owned vs. Unowned:</strong> the Ownership filter shows "Owned" animals currently in your care vs. "Unowned" ones you're only tracking (e.g. co-owned, borrowed, or sold-but-monitored).</p>
+            <p><strong>Public vs. Private:</strong> the Public/Private filter is based on each animal's public-profile visibility toggle — "Public" animals appear on your public breeder profile, "Private" ones are hidden from other users.</p>
+            {PIN_TAB_HINT}
+        </>
+    },
+    collections: {
+        title: 'Collections', body: <>
+            <p>Group animals into custom folders for quick access — separate from enclosures, useful for breeding groups, sale lists, or any grouping you choose.</p>
+            <p>The same Ownership (owned/unowned) and Public/Private profile filters from My Animals apply here too, so you can narrow a collection down further.</p>
+            {PIN_TAB_HINT}
+        </>
+    },
+    enclosures: {
+        title: 'Enclosures', body: <>
+            <p>Manage enclosures and see which animals are assigned to each. Occupant lists automatically exclude sold/transferred, archived, and deceased animals.</p>
+            <p>Toggle between Card and Section views using the buttons above the enclosure list.</p>
+            {PIN_TAB_HINT}
+        </>
+    },
+    reproduction: { title: 'Reproduction', body: <>
+        <p>Track planned matings, active pairings, pregnancies, and nursing litters in one place.</p>
+        <p>This tab tracks the animals themselves (mating/pregnant/nursing status) — the actual litters, offspring counts, and birth records are tracked in Litter Management.</p>
+        {PIN_TAB_HINT}
+    </> },
+    health: { title: 'Health', body: <>
+        <p>Monitor animals in quarantine or under treatment, and assign health statuses to one or more animals at once.</p>
+        {PIN_TAB_HINT}
+    </> },
+    feeding: { title: 'Feeding & Care', body: <>
+        <p>Track feeding schedules, grooming/training routines, and any custom care tasks you've set up.</p>
+        {PIN_TAB_HINT}
+    </> },
 };
 
 const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, health: true, birthdateAge: true, breedingLines: true, tags: true };

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView'; 
+import InfoButton from '../shared/InfoButton';
 
 const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) => {
     const [selectedAnimal, setSelectedAnimal] = useState(null);
@@ -51,7 +52,12 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
 
     return (
         <div className="p-4 sm:p-6 bg-white dark:bg-dark-card-bg rounded-xl shadow-lg">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text mb-4">Family Tree Explorer</h1>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text mb-4 flex items-center gap-2">
+                Family Tree Explorer
+                <InfoButton title="Family Tree Explorer">
+                    <p>Select one of your animals to explore its full pedigree as an interactive tree. Switch between "Direct" (sire/dam line only) and "Full" (all known relatives) modes.</p>
+                </InfoButton>
+            </h1>
             <p className="text-gray-600 dark:text-dark-text-secondary mb-6">
                 Select an animal from your collection to load and explore its full pedigree.
             </p>

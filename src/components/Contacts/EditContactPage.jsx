@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Save, X, User, Loader2, Search } from 'lucide-react';
 import { UserSearchModal } from '../Modals/SearchModals';
+import InfoButton from '../shared/InfoButton';
 
 const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile }) => {
     const { contactId } = useParams();
@@ -131,6 +132,9 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
                 <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <User size={28} className="text-primary" />
                     Edit Contact
+                    <InfoButton title="Edit Contact">
+                        <p>Update this contact's details, such as their name, address, or keeper/breeder role.</p>
+                    </InfoButton>
                 </h1>
                 <p className="text-sm text-gray-600 mt-1">Update the details for {formData.personalName || formData.breederName}.</p>
             </header>

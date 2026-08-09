@@ -5,6 +5,7 @@ import { Users, Loader2, User, ScrollText, Star, ChevronDown, ChevronUp } from '
 import MyFeed from './MyFeed'; // Assuming MyFeed is in the same directory
 import BreederDirectory from '../PublicProfile/BreederDirectory';
 import NewsSection from '../NewsSection';
+import InfoButton from '../shared/InfoButton';
 
 // Helper to check if a user has a publicly visible name
 const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
@@ -89,6 +90,9 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
             <h1 className="text-3xl font-bold text-gray-800 dark:text-dark-text mb-6 flex items-center gap-2">
                 <Users size={32} className="text-primary" />
                 Community
+                <InfoButton title="Community">
+                    <p>See recently active and new breeders, browse the Breeder Directory, and keep up with community news.</p>
+                </InfoButton>
             </h1>
 
             {loading ? (

@@ -7,6 +7,18 @@ import {
     Search, Settings, Star, TableOfContents, Trash2, Upload, User, X
 } from 'lucide-react';
 import { BreederDirectorySettings } from '../PublicProfile/BreederDirectory';
+import InfoButton from '../shared/InfoButton';
+
+// Short contextual hints for the Settings page-header info button, keyed by tab id.
+const SETTINGS_TAB_INFO = {
+    'profile': <p>Edit your name, avatar, bio, and location. Toggle which name (breeder or personal) is shown publicly.</p>,
+    'info-adoption': <p>Add species-specific care info and adoption/rehoming policies shown on your public profile.</p>,
+    'directory': <p>Control whether you're listed in the public Breeder Directory and how you appear there.</p>,
+    'ratings': <p>See ratings and reviews other users have left after transactions with you.</p>,
+    'breeding-lines': <p>Define and color-code your own breeding line names, used to tag and filter animals across the app.</p>,
+    'data': <p>Export or import your CritterTrack data for backup or migration.</p>,
+    'account': <p>Manage your login email, password, and account security settings.</p>,
+};
 
 const API_BASE_URL = '/api';
 
@@ -866,6 +878,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center">
                     <Settings size={24} className="mr-3 text-primary-dark" />
                     Edit Profile
+                    {SETTINGS_TAB_INFO[activeTab] && (
+                        <InfoButton title="Settings" className="ml-2">
+                            {SETTINGS_TAB_INFO[activeTab]}
+                        </InfoButton>
+                    )}
                 </h2>
                 <button 
                     onClick={onCancel} 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BookOpen, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { TUTORIAL_LESSONS } from '../../data/tutorialLessonsNew';
 import { getStepScreenshot } from '../../data/tutorialScreenshots';
+import InfoButton from '../shared/InfoButton';
 
 /**
  * TutorialsPage
@@ -52,7 +53,12 @@ const TutorialsPage = () => {
               </button>
               <BookOpen size={32} className="text-primary flex-shrink-0" />
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text">LESSONS</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
+                  LESSONS
+                  <InfoButton title="Lessons">
+                    <p>Step-by-step guides with screenshots covering onboarding, features, and advanced workflows. Pick a lesson from the list to get started.</p>
+                  </InfoButton>
+                </h2>
                 <p className="text-gray-600 dark:text-dark-text-secondary text-xs sm:text-sm mt-1">Browse tutorials and guides</p>
               </div>
             </div>
