@@ -4845,6 +4845,19 @@ useEffect(() => {
             <div className="space-y-4">
                 {/* Search/Filter Bar */}
                 <div className="p-2 bg-gray-50 dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-lg flex flex-wrap items-center gap-2">
+                    {/* View mode toggle: Cards (default) vs collapsible Sections */}
+                    <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
+                        <button onClick={() => setEnclosuresViewMode('cards')}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${enclosuresViewMode === 'cards' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                            title="Card view">
+                            <LayoutGrid size={14} />
+                        </button>
+                        <button onClick={() => setEnclosuresViewMode('sections')}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 dark:border-dark-text-muted ${enclosuresViewMode === 'sections' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                            title="Section view (collapsible list)">
+                            <ClipboardList size={14} />
+                        </button>
+                    </div>
                     <div className="relative flex-grow">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
                         <input 
@@ -4872,19 +4885,6 @@ useEffect(() => {
                         <option value="">All Suitable Species</option>
                         {enclosureSpeciesLabels.map(species => ( <option key={species} value={species}>{species}</option> ))}
                     </select>
-                    {/* View mode toggle: Cards (default) vs collapsible Sections */}
-                    <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
-                        <button onClick={() => setEnclosuresViewMode('cards')}
-                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${enclosuresViewMode === 'cards' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
-                            title="Card view">
-                            <LayoutGrid size={14} />
-                        </button>
-                        <button onClick={() => setEnclosuresViewMode('sections')}
-                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 dark:border-dark-text-muted ${enclosuresViewMode === 'sections' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
-                            title="Section view (collapsible list)">
-                            <ClipboardList size={14} />
-                        </button>
-                    </div>
                     <button onClick={() => setShowLocationManager(true)} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text-secondary dark:hover:bg-dark-surface-hover rounded-lg flex items-center gap-1.5"> <Settings size={14} /> Manage Locations </button>
                 </div>
 
