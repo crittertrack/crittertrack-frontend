@@ -536,12 +536,13 @@ const AnimalList = ({
         try { localStorage.setItem(`ct_default_collections_view_mode_${userKey}`, defaultCollectionsViewMode); } catch {}
     }, [defaultCollectionsViewMode, userKey]);
     // 'cards' = default grid of EnclosureCards; 'sections' = collapsible per-enclosure sections (like Collections)
-    const [enclosuresViewMode, setEnclosuresViewMode] = useState(() => {
-        try { return localStorage.getItem(`ct_enclosures_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
+    const [defaultEnclosuresViewMode, setDefaultEnclosuresViewMode] = useState(() => {
+        try { return localStorage.getItem(`ct_default_enclosures_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
     });
+    const [enclosuresViewMode, setEnclosuresViewMode] = useState(defaultEnclosuresViewMode);
     useEffect(() => {
-        try { localStorage.setItem(`ct_enclosures_view_mode_${userKey}`, enclosuresViewMode); } catch {}
-    }, [enclosuresViewMode, userKey]);
+        try { localStorage.setItem(`ct_default_enclosures_view_mode_${userKey}`, defaultEnclosuresViewMode); } catch {}
+    }, [defaultEnclosuresViewMode, userKey]);
 
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
@@ -652,6 +653,11 @@ const AnimalList = ({
             const dvm = localStorage.getItem(`ct_default_my_animals_view_mode_${userKey}`); if (dvm) {
                 setMyAnimalsViewMode(dvm);
                 setDefaultMyAnimalsViewMode(dvm);
+            }
+            const devm = localStorage.getItem(`ct_default_enclosures_view_mode_${userKey}`);
+            if (devm) {
+                setEnclosuresViewMode(devm);
+                setDefaultEnclosuresViewMode(devm);
             }
             const lvc = localStorage.getItem(`ct_list_columns_${userKey}`);
             if (lvc) {
@@ -4856,6 +4862,11 @@ useEffect(() => {
                             className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 dark:border-dark-text-muted ${enclosuresViewMode === 'sections' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
                             title="Section view (collapsible list)">
                             <ClipboardList size={14} />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); setDefaultEnclosuresViewMode(enclosuresViewMode); }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 dark:border-dark-text-muted ${defaultEnclosuresViewMode === enclosuresViewMode ? 'text-red-500' : 'text-gray-400 dark:text-dark-text-muted hover:text-red-400'}`}
+                            title="Pin as default view">
+                            <Pin size={14} fill={defaultEnclosuresViewMode === enclosuresViewMode ? 'currentColor' : 'none'} />
                         </button>
                     </div>
                     <div className="relative flex-grow">
