@@ -45,8 +45,8 @@ const ANIMAL_VIEW_INFO = {
     list: {
         title: 'My Animals', lessonId: 'animal-list-overview', body: <>
             <p>All animals you own or manage. Use the search and filters to narrow the list, and switch between card/table layouts.</p>
-            <p><strong>Owned vs. Unowned:</strong> the Ownership filter shows "Owned" animals currently in your care vs. "Unowned" ones you're only tracking (e.g. co-owned, borrowed, or sold-but-monitored).</p>
-            <p><strong>Public vs. Private:</strong> the Public/Private filter is based on each animal's public-profile visibility toggle — "Public" animals appear on your public breeder profile, "Private" ones are hidden from other users.</p>
+            <p><strong>Owned vs. Unowned:</strong> the Ownership filter shows "Owned" animals currently in your care vs. "Unowned" ones you created but are only tracking (e.g. co-owned, borrowed, or animals created for pedigrees.).</p>
+            <p><strong>Public vs. Private:</strong> the Public/Private filter is based on each animal's public-profile visibility toggle — "Public" animals appear on your public breeder profile and pedigrees, "Private" ones are completely hidden from other users.</p>
             {PIN_TAB_HINT}
         </>
     },
