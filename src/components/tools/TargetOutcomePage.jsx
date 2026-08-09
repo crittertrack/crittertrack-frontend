@@ -677,7 +677,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
               Target Outcome Calculator
-              <InfoButton title="Target Outcome Calculator">
+              <InfoButton title="Target Outcome Calculator" lessonId="target-outcome-calculator">
                 <p>Find potential sire/dam pairings from your animals that are likely to produce a specific genetic trait or outcome.</p>
               </InfoButton>
             </h2>

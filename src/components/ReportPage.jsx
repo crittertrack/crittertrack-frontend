@@ -386,7 +386,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                             <h1 className="text-xl font-bold text-white flex items-center gap-2">
                                 <MessageSquare size={20} />
                                 Report an Issue
-                                <InfoButton title="Report an Issue" variant="light">
+                                <InfoButton title="Report an Issue" variant="light" lessonId="report-an-issue">
                                     <p>Report bugs, suggest new features, or share general feedback directly with the developer.</p>
                                 </InfoButton>
                             </h1>

@@ -54,7 +54,7 @@ const FamilyTreePage = ({ API_BASE_URL, authToken, myAnimals, onViewAnimal }) =>
         <div className="p-4 sm:p-6 bg-white dark:bg-dark-card-bg rounded-xl shadow-lg">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text mb-4 flex items-center gap-2">
                 Family Tree Explorer
-                <InfoButton title="Family Tree Explorer">
+                <InfoButton title="Family Tree Explorer" lessonId="family-tree-explorer">
                     <p>Select one of your animals to explore its full pedigree as an interactive tree. Switch between "Direct" (sire/dam line only) and "Full" (all known relatives) modes.</p>
                 </InfoButton>
             </h1>

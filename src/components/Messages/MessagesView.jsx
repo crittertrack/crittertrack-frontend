@@ -3,6 +3,7 @@ import axios from 'axios';
 import { X, Loader2, MessageSquare, User, ArrowLeft, Ban, Flag, Trash2, ImagePlus, Maximize2 } from 'lucide-react';
 import { DonationBadge, getDonationBadge } from '../../utils/donationUtils';
 import { compressImageFile } from '../../utils/imageCompression';
+import InfoButton from '../shared/InfoButton';
 
 // ==================== MESSAGES VIEW ====================
 const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, selectedConversation, setSelectedConversation, userProfile }) => {
@@ -299,6 +300,9 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                     <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-1 sm:gap-2">
                         <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500 dark:text-dark-info-blue" />
                         Messages
+                        <InfoButton title="Messages" lessonId="messages-overview">
+                            <p>Direct message other breeders. You can share images, block or report a user, or delete a conversation from the options in a chat.</p>
+                        </InfoButton>
                     </h2>
                     <button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text transition p-1">
                         <X className="w-5 h-5 sm:w-6 sm:h-6" />

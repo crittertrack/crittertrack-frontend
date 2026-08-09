@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, Loader2, Search, X } from 'lucide-react';
 import axios from 'axios';
+import InfoButton from './shared/InfoButton';
 
 const ArchiveScreen = ({
     onBack,
@@ -106,6 +107,10 @@ const ArchiveScreen = ({
                 <span className="text-xs bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary px-2 py-0.5 rounded-full">
                     {archivedAnimals.length + soldTransferredAnimals.length} animal{(archivedAnimals.length + soldTransferredAnimals.length) !== 1 ? 's' : ''}
                 </span>
+                <InfoButton title="Archive" lessonId="archive-overview">
+                    <p>Archived animals are hidden from your main lists but kept on record. Sold/Transferred animals are ones you no longer own but can still view for history.</p>
+                    <p>Use "Unarchive" to bring an archived animal back into your active lists.</p>
+                </InfoButton>
             </div>
 
             <div className="relative">

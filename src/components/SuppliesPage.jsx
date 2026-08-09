@@ -205,7 +205,7 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                         <Package size={18} className="text-blue-600 dark:text-dark-info-blue-hover" />
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Supplies &amp; Inventory</h3>
                         <span className="text-xs bg-blue-100 dark:bg-dark-info-blue/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">{supplies.length} item{supplies.length !== 1 ? 's' : ''}</span>
-                        <InfoButton title="Supplies & Inventory">
+                        <InfoButton title="Supplies & Inventory" lessonId="supplies-inventory">
                             <p>Track supply stock levels, reorder thresholds, and costs.</p>
                             <p>Items below their reorder threshold or past their next order date show up in the alert banner above.</p>
                         </InfoButton>

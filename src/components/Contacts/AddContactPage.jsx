@@ -118,7 +118,7 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                     <UserPlus size={28} className="text-primary" />
                     Add New Contact
-                    <InfoButton title="Add New Contact">
+                    <InfoButton title="Add New Contact" lessonId="contacts-add">
                         <p>Create a record for a keeper or breeder you deal with, so you can track animals bought from or bred with them.</p>
                     </InfoButton>
                 </h1>

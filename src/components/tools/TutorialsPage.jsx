@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { BookOpen, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { TUTORIAL_LESSONS } from '../../data/tutorialLessonsNew';
 import { getStepScreenshot } from '../../data/tutorialScreenshots';
@@ -14,10 +15,26 @@ const TutorialsPage = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
+  const [searchParams] = useSearchParams();
 
   const onboardingLessons = TUTORIAL_LESSONS.onboarding;
   const featureLessons = TUTORIAL_LESSONS.features;
   const advancedLessons = TUTORIAL_LESSONS.advanced;
+
+  // Deep-link support: InfoButton popovers link here via ?lesson=<id> — jump straight to
+  // that lesson if it exists yet (lesson content is still being rebuilt, so this is a
+  // no-op until matching ids are added back to tutorialLessonsNew.js).
+  useEffect(() => {
+    const lessonId = searchParams.get('lesson');
+    if (!lessonId) return;
+    const match = (TUTORIAL_LESSONS.all || []).find(l => l.id === lessonId);
+    if (match) {
+      setSelectedLesson(match);
+      setCurrentStepIndex(0);
+      setIsLeftPanelOpen(false);
+    }
+  }, [searchParams]);
+
 
   // Convert step title to kebab-case filename
   const titleToFilename = (title) => {

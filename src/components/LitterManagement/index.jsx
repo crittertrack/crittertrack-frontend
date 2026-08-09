@@ -2296,7 +2296,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management
-                    <InfoButton title="Litter Management">
+                    <InfoButton title="Litter Management" lessonId="litter-management">
                         <p>Record planned matings, track pregnancies, and log litters with offspring counts and details.</p>
                     </InfoButton>
                 </h2>

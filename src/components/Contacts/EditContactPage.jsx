@@ -132,7 +132,7 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
                 <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <User size={28} className="text-primary" />
                     Edit Contact
-                    <InfoButton title="Edit Contact">
+                    <InfoButton title="Edit Contact" lessonId="contacts-edit">
                         <p>Update this contact's details, such as their name, address, or keeper/breeder role.</p>
                     </InfoButton>
                 </h1>

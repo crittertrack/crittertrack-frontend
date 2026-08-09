@@ -305,7 +305,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                     <ShoppingBag className="text-accent" />
                     Marketplace
-                    <InfoButton title="Marketplace">
+                    <InfoButton title="Marketplace" lessonId="marketplace-overview">
                         <p>Browse animals other breeders have listed for sale or stud. Use the tabs to switch between listing types, and the filters to narrow by species or location.</p>
                         <p>Click an animal to see details or message the seller directly.</p>
                     </InfoButton>

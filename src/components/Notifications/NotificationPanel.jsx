@@ -5,6 +5,7 @@ import {
     Loader2, PawPrint, Shield, Sparkles, Trash2, X, XCircle
 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
+import InfoButton from '../shared/InfoButton';
 
 const API_BASE_URL = '/api';
 
@@ -206,7 +207,12 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b dark:border-dark-text p-4">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">Notifications</h3>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
+                        Notifications
+                        <InfoButton title="Notifications" lessonId="notifications-overview">
+                            <p>Transfer requests, link requests, and system announcements appear here. Accept or decline requests directly, or delete notifications you no longer need.</p>
+                        </InfoButton>
+                    </h3>
                     <button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text">
                         <X size={24} />
                     </button>

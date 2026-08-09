@@ -117,7 +117,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
               COI Calculator
-              <InfoButton title="COI Calculator">
+              <InfoButton title="COI Calculator" lessonId="coi-calculator">
                 <p>Calculates the predicted Coefficient of Inbreeding for offspring from a chosen sire and dam pairing, based on shared ancestors.</p>
               </InfoButton>
             </h2>

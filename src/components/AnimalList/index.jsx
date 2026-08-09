@@ -43,7 +43,7 @@ const normalizeAnimalView = (value) =>
 const PIN_TAB_HINT = <p>Tip: hover a tab above and click its pin icon to set that tab as your default view — it'll open automatically next time.</p>;
 const ANIMAL_VIEW_INFO = {
     list: {
-        title: 'My Animals', body: <>
+        title: 'My Animals', lessonId: 'animal-list-overview', body: <>
             <p>All animals you own or manage. Use the search and filters to narrow the list, and switch between card/table layouts.</p>
             <p><strong>Owned vs. Unowned:</strong> the Ownership filter shows "Owned" animals currently in your care vs. "Unowned" ones you're only tracking (e.g. co-owned, borrowed, or sold-but-monitored).</p>
             <p><strong>Public vs. Private:</strong> the Public/Private filter is based on each animal's public-profile visibility toggle — "Public" animals appear on your public breeder profile, "Private" ones are hidden from other users.</p>
@@ -51,29 +51,29 @@ const ANIMAL_VIEW_INFO = {
         </>
     },
     collections: {
-        title: 'Collections', body: <>
+        title: 'Collections', lessonId: 'animal-collections', body: <>
             <p>Group animals into custom folders for quick access — separate from enclosures, useful for breeding groups, sale lists, or any grouping you choose.</p>
             <p>The same Ownership (owned/unowned) and Public/Private profile filters from My Animals apply here too, so you can narrow a collection down further.</p>
             {PIN_TAB_HINT}
         </>
     },
     enclosures: {
-        title: 'Enclosures', body: <>
+        title: 'Enclosures', lessonId: 'enclosures-overview', body: <>
             <p>Manage enclosures and see which animals are assigned to each. Occupant lists automatically exclude sold/transferred, archived, and deceased animals.</p>
             <p>Toggle between Card and Section views using the buttons above the enclosure list.</p>
             {PIN_TAB_HINT}
         </>
     },
-    reproduction: { title: 'Reproduction', body: <>
+    reproduction: { title: 'Reproduction', lessonId: 'reproduction-tracking', body: <>
         <p>Track planned matings, active pairings, pregnancies, and nursing litters in one place.</p>
         <p>This tab tracks the animals themselves (mating/pregnant/nursing status) — the actual litters, offspring counts, and birth records are tracked in Litter Management.</p>
         {PIN_TAB_HINT}
     </> },
-    health: { title: 'Health', body: <>
+    health: { title: 'Health', lessonId: 'health-tracking', body: <>
         <p>Monitor animals in quarantine or under treatment, and assign health statuses to one or more animals at once.</p>
         {PIN_TAB_HINT}
     </> },
-    feeding: { title: 'Feeding & Care', body: <>
+    feeding: { title: 'Feeding & Care', lessonId: 'feeding-care', body: <>
         <p>Track feeding schedules, grooming/training routines, and any custom care tasks you've set up.</p>
         {PIN_TAB_HINT}
     </> },
@@ -5664,7 +5664,7 @@ useEffect(() => {
                             {animalView === 'list' ? `My Animals` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                         </h2>
                         {ANIMAL_VIEW_INFO[animalView] && (
-                            <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} className="shrink-0">
+                            <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} lessonId={ANIMAL_VIEW_INFO[animalView].lessonId} className="shrink-0">
                                 {ANIMAL_VIEW_INFO[animalView].body}
                             </InfoButton>
                         )}

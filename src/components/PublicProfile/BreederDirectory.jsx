@@ -397,7 +397,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                         <h1 className="text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                             <Star size={24} className="text-primary" />
                             Breeders
-                            <InfoButton title="Breeder Directory">
+                            <InfoButton title="Breeder Directory" lessonId="breeder-directory">
                                 <p>Browse breeders who've opted into the public directory. Use the search and filters to find breeders by species, country, or state.</p>
                             </InfoButton>
                         </h1>

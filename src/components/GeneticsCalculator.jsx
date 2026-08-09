@@ -2364,7 +2364,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-dark-text">Offspring Calculator</h1>
-              <InfoButton title="Offspring Calculator">
+              <InfoButton title="Offspring Calculator" lessonId="offspring-calculator">
                 <p>Predict possible offspring outcomes (and their probabilities) by selecting a sire and dam's genetic traits.</p>
               </InfoButton>
               

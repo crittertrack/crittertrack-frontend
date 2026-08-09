@@ -145,7 +145,7 @@ const ResourcesPage = ({ API_BASE_URL, authToken }) => {
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                         <BookOpen className="text-accent" />
                         Helpful Resources
-                        <InfoButton title="Helpful Resources">
+                        <InfoButton title="Helpful Resources" lessonId="helpful-resources">
                             <p>A curated directory of external links for care, health, genetics, and more. Filter by species, subject, or tag, and use "Suggest a Resource" to recommend additions.</p>
                         </InfoButton>
                     </h1>

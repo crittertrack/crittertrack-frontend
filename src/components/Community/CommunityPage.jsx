@@ -90,7 +90,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
             <h1 className="text-3xl font-bold text-gray-800 dark:text-dark-text mb-6 flex items-center gap-2">
                 <Users size={32} className="text-primary" />
                 Community
-                <InfoButton title="Community">
+                <InfoButton title="Community" lessonId="community-overview">
                     <p>See recently active and new breeders, browse the Breeder Directory, and keep up with community news.</p>
                 </InfoButton>
             </h1>

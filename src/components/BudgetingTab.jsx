@@ -372,7 +372,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                     <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                         <DollarSign className="w-5 h-5 sm:w-7 sm:h-7 text-green-600 dark:text-green-400" />
                         Budget Tracker
-                        <InfoButton title="Budget Tracker">
+                        <InfoButton title="Budget Tracker" lessonId="budget-tracker">
                             <p>Track income and expenses from animal sales, purchases, and other transactions.</p>
                             <p>Use "Export CSV" to download your transaction history, and the currency selector to change the symbol shown across this page.</p>
                         </InfoButton>

@@ -559,7 +559,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                     <Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Calendar
-                    <InfoButton title="Calendar">
+                    <InfoButton title="Calendar" lessonId="calendar-overview">
                         <p>See upcoming matings, due dates, births, weaning, feeding/care tasks, and other scheduled events in one place.</p>
                         <p>Use the search box to filter by pair, litter ID, animal, or enclosure, and "Event Types" to show or hide categories.</p>
                     </InfoButton>

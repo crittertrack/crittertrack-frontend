@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Edit } from 'lucide-react';
+import InfoButton from '../shared/InfoButton';
 
 const ContactDetail = ({ API_BASE_URL, authToken }) => {
     const { contactId } = useParams();
@@ -69,7 +70,12 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
         <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
             <header className="mb-6 flex justify-between items-start">
                 <div>
-                    <h1 className="text-2xl font-bold">{contactData.details.breederName || contactData.details.personalName}</h1>
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                        {contactData.details.breederName || contactData.details.personalName}
+                        <InfoButton title="Contact Profile" lessonId="contacts-detail">
+                            <p>Overview shows this contact's saved details. Owned Animals and Bred Animals list your animals linked to them as buyer/seller or sire/dam.</p>
+                        </InfoButton>
+                    </h1>
                     <p className="text-gray-500">Contact Profile</p>
                 </div>
                 <button
