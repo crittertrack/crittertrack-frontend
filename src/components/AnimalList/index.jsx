@@ -535,6 +535,13 @@ const AnimalList = ({
     useEffect(() => {
         try { localStorage.setItem(`ct_default_collections_view_mode_${userKey}`, defaultCollectionsViewMode); } catch {}
     }, [defaultCollectionsViewMode, userKey]);
+    // 'cards' = default grid of EnclosureCards; 'sections' = collapsible per-enclosure sections (like Collections)
+    const [enclosuresViewMode, setEnclosuresViewMode] = useState(() => {
+        try { return localStorage.getItem(`ct_enclosures_view_mode_${userKey}`) || 'cards'; } catch { return 'cards'; }
+    });
+    useEffect(() => {
+        try { localStorage.setItem(`ct_enclosures_view_mode_${userKey}`, enclosuresViewMode); } catch {}
+    }, [enclosuresViewMode, userKey]);
 
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
@@ -2153,12 +2160,12 @@ useEffect(() => {
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
     const enclosureAnimalMap = {}; // { enclosureId: [animals] }
-    const unassignedAnimals = [];
     allAnimals.forEach(a => {
         const key = a.enclosureId || 'unassigned';
         if (!enclosureAnimalMap[key]) enclosureAnimalMap[key] = [];
         enclosureAnimalMap[key].push(a);
     });
+    const unassignedAnimals = enclosureAnimalMap['unassigned'] || [];
 
 
     // Check if any filters are active (different from defaults) ? uses appliedFilters for panel filters
@@ -4806,6 +4813,34 @@ useEffect(() => {
         if (enclosureStatusFilter) { if (enclosureStatusFilter === 'occupied') { filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length > 0); } else if (enclosureStatusFilter === 'empty') { filteredEnclosures = filteredEnclosures.filter(e => (enclosureAnimalMap[e._id] || []).length === 0); } }
         if (enclosureBuildingFilter) { if (enclosureRoomFilter) { filteredEnclosures = filteredEnclosures.filter(e => e.roomId === enclosureRoomFilter); } else { filteredEnclosures = filteredEnclosures.filter(e => e.buildingId === enclosureBuildingFilter); } }
         if (enclosureSpeciesFilter) { filteredEnclosures = filteredEnclosures.filter(e => (e.speciesLabels || []).includes(enclosureSpeciesFilter)); }
+
+        const toggleEncGroup = (key) => setCollapsedMgmtGroups(prev => ({ ...prev, [key]: !prev[key] }));
+
+        const handleAssignAnimalToEnclosureInline = (animalIdPublic, enclosureId) => {
+            const newEnclosureId = enclosureId || null;
+            const prevRaw = allAnimalsRaw;
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: newEnclosureId } : a));
+            setAssigningAnimalId(null);
+            axios.patch(`${API_BASE_URL}/enclosures/assign-animal`,
+                { animalId_public: animalIdPublic, enclosureId: newEnclosureId },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .catch(err => {
+                    console.error('Assign enclosure failed:', err);
+                    setAllAnimalsRaw(prevRaw);
+                });
+        };
+
+        const handleDeleteEnclosureInline = async (encId) => {
+            if (!window.confirm('Delete this enclosure? Animals inside will become unassigned.')) return;
+            try {
+                await axios.delete(`${API_BASE_URL}/enclosures/${encId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                fetchEnclosures();
+                fetchAllAnimals();
+            } catch (err) {
+                showModalMessage('Error', err.response?.data?.message || 'Failed to delete enclosure');
+            }
+        };
+
         return (
             <div className="space-y-4">
                 {/* Search/Filter Bar */}
@@ -4837,13 +4872,128 @@ useEffect(() => {
                         <option value="">All Suitable Species</option>
                         {enclosureSpeciesLabels.map(species => ( <option key={species} value={species}>{species}</option> ))}
                     </select>
+                    {/* View mode toggle: Cards (default) vs collapsible Sections */}
+                    <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
+                        <button onClick={() => setEnclosuresViewMode('cards')}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${enclosuresViewMode === 'cards' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                            title="Card view">
+                            <LayoutGrid size={14} />
+                        </button>
+                        <button onClick={() => setEnclosuresViewMode('sections')}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 dark:border-dark-text-muted ${enclosuresViewMode === 'sections' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-white dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
+                            title="Section view (collapsible list)">
+                            <ClipboardList size={14} />
+                        </button>
+                    </div>
                     <button onClick={() => setShowLocationManager(true)} className="p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text-secondary dark:hover:bg-dark-surface-hover rounded-lg flex items-center gap-1.5"> <Settings size={14} /> Manage Locations </button>
                 </div>
-                {/* Main Content */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {filteredEnclosures.map(enclosure => ( <EnclosureCard key={enclosure._id} enclosure={enclosure} /> ))}
-                </div>
-                 {filteredEnclosures.length === 0 && ( <div className="text-center py-16 text-gray-500 dark:text-dark-text-secondary"> <Home size={48} className="mx-auto text-gray-300 dark:text-dark-border mb-4" /> <h3 className="font-semibold text-lg">No Enclosures Found</h3> <p className="text-sm mt-1">Try adjusting your filters or add a new enclosure.</p> </div> )}
+
+                {enclosuresViewMode === 'cards' ? (
+                    <>
+                        {/* Main Content */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {filteredEnclosures.map(enclosure => ( <EnclosureCard key={enclosure._id} enclosure={enclosure} /> ))}
+                        </div>
+                        {filteredEnclosures.length === 0 && ( <div className="text-center py-16 text-gray-500 dark:text-dark-text-secondary"> <Home size={48} className="mx-auto text-gray-300 dark:text-dark-border mb-4" /> <h3 className="font-semibold text-lg">No Enclosures Found</h3> <p className="text-sm mt-1">Try adjusting your filters or add a new enclosure.</p> </div> )}
+                    </>
+                ) : (
+                    <div className="space-y-3">
+                        {filteredEnclosures.length === 0 && unassignedAnimals.length === 0 ? (
+                            <div className="text-center py-16 text-gray-500 dark:text-dark-text-secondary"> <Home size={48} className="mx-auto text-gray-300 dark:text-dark-border mb-4" /> <h3 className="font-semibold text-lg">No Enclosures Found</h3> <p className="text-sm mt-1">Try adjusting your filters or add a new enclosure.</p> </div>
+                        ) : (
+                            <>
+                                {filteredEnclosures.map(enc => {
+                                    const occupants = enclosureAnimalMap[enc._id] || [];
+                                    const groupKey = `enc_${enc._id}`;
+                                    const isGrpCollapsed = collapsedMgmtGroups[groupKey] || false;
+                                    return (
+                                        <div key={enc._id} className="border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                                            {/* Enclosure header: thumbnail + name/info, collapsible */}
+                                            <div className="flex items-center gap-3 bg-blue-50/60 dark:bg-blue-900/20 px-3 py-2 cursor-pointer"
+                                                onClick={() => toggleEncGroup(groupKey)}
+                                            >
+                                                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 dark:bg-dark-card-bg flex items-center justify-center shrink-0">
+                                                    {enc.imageUrl ? <img src={enc.imageUrl} alt={enc.name} className="w-full h-full object-cover" /> : <Home size={18} className="text-gray-400 dark:text-dark-text-muted" />}
+                                                </div>
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    <span className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{enc.name}</span>
+                                                    {enc.enclosureType && <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">{enc.enclosureType}</span>}
+                                                    <span className="text-xs text-gray-500 dark:text-dark-text-muted bg-white/70 dark:bg-black/20 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                                                    <button onClick={() => openEnclosureModal(enc)} className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-blue-600 rounded" title="Edit"><Edit size={13} /></button>
+                                                    <button onClick={() => handleDeleteEnclosureInline(enc._id)} className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded" title="Delete"><Trash2 size={13} /></button>
+                                                </div>
+                                                {isGrpCollapsed ? <ChevronDown className="w-4 h-4 text-gray-400 dark:text-dark-text-muted shrink-0" /> : <ChevronUp className="w-4 h-4 text-gray-400 dark:text-dark-text-muted shrink-0" />}
+                                            </div>
+                                            {!isGrpCollapsed && (
+                                                occupants.length === 0 ? (
+                                                    <div className="text-xs text-gray-400 dark:text-dark-text-muted text-center py-3">No animals assigned yet</div>
+                                                ) : (
+                                                    <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                        {occupants.map(a => (
+                                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                                hideControls hideBreedingLines
+                                                                cardActions={
+                                                                    <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosureInline(a.id_public, ''); }}
+                                                                        className="text-[10px] text-gray-400 dark:text-dark-text-muted hover:text-red-500 border border-gray-200 dark:border-dark-border hover:border-red-200 rounded px-1.5 py-0.5 w-full">
+                                                                        Remove
+                                                                    </button>
+                                                                }
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Unassigned animals section */}
+                                {unassignedAnimals.length > 0 && (
+                                    <div className="border border-dashed border-gray-300 dark:border-dark-border rounded-lg overflow-hidden">
+                                        <div className="flex items-center justify-between bg-gray-50 dark:bg-dark-surface px-3 py-2 cursor-pointer"
+                                            onClick={() => toggleEncGroup('enc_unassigned')}
+                                        >
+                                            <span className="font-medium text-sm text-gray-500 dark:text-dark-text-muted">Unassigned</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-gray-400 dark:text-dark-text-muted bg-white/70 dark:bg-black/20 px-2 py-0.5 rounded-full">{unassignedAnimals.length}</span>
+                                                {collapsedMgmtGroups['enc_unassigned'] ? <ChevronDown className="w-3.5 h-3.5 text-gray-400 dark:text-dark-text-muted" /> : <ChevronUp className="w-3.5 h-3.5 text-gray-400 dark:text-dark-text-muted" />}
+                                            </div>
+                                        </div>
+                                        {!collapsedMgmtGroups['enc_unassigned'] && (
+                                            <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 bg-white dark:bg-dark-card-bg">
+                                                {unassignedAnimals.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={
+                                                            enclosures.length > 0 ? (
+                                                                assigningAnimalId === a.id_public ? (
+                                                                    <select autoFocus defaultValue=""
+                                                                        onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosureInline(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
+                                                                        onBlur={() => setAssigningAnimalId(null)}
+                                                                        className="text-[10px] border border-blue-300 rounded p-1 w-full">
+                                                                        <option value="" disabled>Select enclosure...</option>
+                                                                        {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
+                                                                    </select>
+                                                                ) : (
+                                                                    <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }}
+                                                                        className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 dark:border-blue-700/60 rounded px-1.5 py-0.5 w-full whitespace-nowrap">
+                                                                        Assign
+                                                                    </button>
+                                                                )
+                                                            ) : null
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
         );
     };
