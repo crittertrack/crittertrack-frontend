@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Scale, Dna, Loader2, Search } from 'lucide-react';
+import InfoButton from '../shared/InfoButton';
 
 // A simplified animal selector for the calculator
 const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) => {
@@ -114,7 +115,12 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
         <div className="flex items-center gap-3">
           <Scale size={32} className="text-primary flex-shrink-0" />
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text">COI Calculator</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
+              COI Calculator
+              <InfoButton title="COI Calculator">
+                <p>Calculates the predicted Coefficient of Inbreeding for offspring from a chosen sire and dam pairing, based on shared ancestors.</p>
+              </InfoButton>
+            </h2>
             <p className="text-gray-600 dark:text-dark-text-secondary text-xs sm:text-sm mt-1">Calculate the Coefficient of Inbreeding for a potential pairing.</p>
           </div>
         </div>

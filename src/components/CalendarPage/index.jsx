@@ -9,6 +9,7 @@ import {
 import { parseLocalDate } from '../../utils/dateFormatter';
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { getUserKey } from '../../utils/userKey';
+import InfoButton from '../shared/InfoButton';
 
 const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
@@ -555,9 +556,13 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-3 sm:p-6 rounded-xl shadow-lg">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4">
-                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center">
+                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                     <Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Calendar
+                    <InfoButton title="Calendar">
+                        <p>See upcoming matings, due dates, births, weaning, feeding/care tasks, and other scheduled events in one place.</p>
+                        <p>Use the search box to filter by pair, litter ID, animal, or enclosure, and "Event Types" to show or hide categories.</p>
+                    </InfoButton>
                 </h2>
             </div>
 

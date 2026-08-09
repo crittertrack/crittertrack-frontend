@@ -28,6 +28,7 @@ import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/sche
 import { getUserKey } from '../../utils/userKey';
 
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
+import InfoButton from '../shared/InfoButton';
 
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
@@ -37,6 +38,16 @@ const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Ret
 
 const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
+
+// Short contextual hints for the page-header info button, keyed by animalView.
+const ANIMAL_VIEW_INFO = {
+    list: { title: 'My Animals', body: <p>All animals you own or manage. Use the search and filters to narrow the list, and switch between card/table layouts.</p> },
+    collections: { title: 'Collections', body: <p>Group animals into custom folders for quick access — separate from enclosures, useful for breeding groups, sale lists, or any grouping you choose.</p> },
+    enclosures: { title: 'Enclosures', body: <p>Manage enclosures and see which animals are assigned to each. Toggle between Card and Section views, and pin your preferred default with the pin icon.</p> },
+    reproduction: { title: 'Reproduction', body: <p>Track planned matings, active pairings, pregnancies, and nursing litters in one place.</p> },
+    health: { title: 'Health', body: <p>Monitor animals in quarantine or under treatment, and assign health statuses to one or more animals at once.</p> },
+    feeding: { title: 'Feeding & Care', body: <p>Track feeding schedules, grooming/training routines, and any custom care tasks you've set up.</p> },
+};
 
 const DEFAULT_LIST_COLUMNS = { animal: true, species: true, variety: true, enclosure: true, lifeStage: true, status: true, health: true, birthdateAge: true, breedingLines: true, tags: true };
 
@@ -5622,6 +5633,11 @@ useEffect(() => {
                         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text truncate" data-tutorial-target="my-animals-title">
                             {animalView === 'list' ? `My Animals` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                         </h2>
+                        {ANIMAL_VIEW_INFO[animalView] && (
+                            <InfoButton title={ANIMAL_VIEW_INFO[animalView].title} className="shrink-0">
+                                {ANIMAL_VIEW_INFO[animalView].body}
+                            </InfoButton>
+                        )}
                         {/* Refresh button */}
                         <button
                             onClick={handleRefresh}

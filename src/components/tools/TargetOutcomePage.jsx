@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Target, Dna, Loader2, Search, Settings, Palette, PlusCircle, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { GENE_LOCI as MOUSE_GENE_LOCI } from '../GeneticsCalculator';
+import InfoButton from '../shared/InfoButton';
 
 const TARGET_OUTCOME_TRAIT_CHIPS = {
     'Fancy Mouse': [
@@ -674,7 +675,12 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
         <div className="flex items-center gap-3">
           <Target size={32} className="text-primary flex-shrink-0" />
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text">Target Outcome Calculator</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
+              Target Outcome Calculator
+              <InfoButton title="Target Outcome Calculator">
+                <p>Find potential sire/dam pairings from your animals that are likely to produce a specific genetic trait or outcome.</p>
+              </InfoButton>
+            </h2>
             <p className="text-gray-600 dark:text-dark-text-secondary text-xs sm:text-sm mt-1">Find potential pairings to produce a specific genetic outcome.</p>
           </div>
         </div>

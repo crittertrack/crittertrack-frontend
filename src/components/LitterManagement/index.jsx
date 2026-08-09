@@ -13,6 +13,7 @@ import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
 import { matchFancyRatPhenotype } from '../../data/fancyRatPhenotypeRules';
 import { PedigreeChart } from '../AnimalForm';
+import InfoButton from '../shared/InfoButton';
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
@@ -2293,8 +2294,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     return (
         <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted p-3 sm:p-6 rounded-xl shadow-lg">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center">
+                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management
+                    <InfoButton title="Litter Management">
+                        <p>Record planned matings, track pregnancies, and log litters with offspring counts and details.</p>
+                    </InfoButton>
                 </h2>
                 <div className="flex gap-2 flex-wrap">
                     <button
