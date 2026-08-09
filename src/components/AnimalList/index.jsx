@@ -2166,7 +2166,9 @@ useEffect(() => {
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
     const enclosureAnimalMap = {}; // { enclosureId: [animals] }
-    allAnimals.forEach(a => {
+    // Enclosures view should never show transferred/archived/deceased animals as occupants.
+    const housedAnimals = allAnimals.filter(a => !a.archived && a.status !== 'Deceased');
+    housedAnimals.forEach(a => {
         const key = a.enclosureId || 'unassigned';
         if (!enclosureAnimalMap[key]) enclosureAnimalMap[key] = [];
         enclosureAnimalMap[key].push(a);
