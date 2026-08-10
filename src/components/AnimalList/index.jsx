@@ -4,6 +4,7 @@ import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
+import { SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban, Info,
     Bell, Bird, Bug, Bean, Building, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, Dna, Hourglass, Star,
@@ -144,6 +145,8 @@ const getSpeciesDisplayName = (species) => {
 
 const getSpeciesCategory = (species) => {
     if (!species) return 'Other';
+    if (SPECIES_CATEGORY_MAP[species]) return SPECIES_CATEGORY_MAP[species];
+    // Fallback keyword match for custom/user-added species not in the catalogued map
     const s = species.toLowerCase();
     if (s.includes('mouse') || s.includes('rat') || s.includes('hamster') || s.includes('guinea pig')) {
         return 'Mammal';
@@ -3970,7 +3973,12 @@ useEffect(() => {
                     </>
                 ) : (
                     <>
-                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary truncate"><span className="sm:hidden font-semibold">Condition: </span>{conds.length > 0 ? conds.map(c => c.condition || c.name).filter(Boolean).join(', ') : '—'}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-text-secondary truncate"><span className="sm:hidden font-semibold">Reason: </span>{(() => {
+                            const reasons = [...new Set(meds.map(m => m.reason).filter(Boolean))];
+                            if (reasons.length > 0) return reasons.join(', ');
+                            if (conds.length > 0) return conds.map(c => c.condition || c.name).filter(Boolean).join(', ');
+                            return '—';
+                        })()}</div>
                         <div className="sm:col-span-2 text-xs space-y-0.5">
                             <span className="sm:hidden font-semibold">Medications: </span>
                             {meds.length > 0 ? meds.slice(0, 2).map((m, i) => {
@@ -3978,18 +3986,9 @@ useEffect(() => {
                                 const nextLabel = next ? formatNextDose(next) : null;
                                 const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
                                 return (
-                                    <div key={i} className="leading-tight flex items-center gap-1.5 flex-wrap">
-                                        <span>
-                                            <span className="font-medium text-gray-700 dark:text-dark-text-secondary">{m.name || m.medication}{m.reason ? ` — ${m.reason}` : ''}</span>
-                                            <span className="text-blue-500 dark:text-blue-400"> {[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-500 dark:text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
-                                        </span>
-                                        {m.intervalValue && (
-                                            <span className="flex items-center gap-0.5">
-                                                <button title="Confirm dose given" onClick={(e) => handleMedicationAction(e, animal, m.id, 'confirm')} className="p-0.5 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded"><Check size={12} /></button>
-                                                <button title="Prolong stop date" onClick={(e) => handleMedicationAction(e, animal, m.id, 'prolong')} className="p-0.5 text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded"><PlusCircle size={12} /></button>
-                                                <button title="Finish medication (stop date = today)" onClick={(e) => handleMedicationAction(e, animal, m.id, 'finish')} className="p-0.5 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"><X size={12} /></button>
-                                            </span>
-                                        )}
+                                    <div key={i} className="leading-tight">
+                                        <span className="font-medium text-gray-700 dark:text-dark-text-secondary">{m.name || m.medication}</span>
+                                        <span className="text-blue-500 dark:text-blue-400"> {[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-500 dark:text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
                                     </div>
                                 );
                             }) : <span className="text-gray-400 dark:text-dark-text-muted">No active medications</span>}
@@ -4001,12 +4000,22 @@ useEffect(() => {
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${isQuarantine ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300'}`}>{isQuarantine ? 'Quarantine' : 'Treatment'}</span>
                 </div>
 
-                <div className="sm:text-right flex items-center gap-1 justify-end">
-                    {isQuarantine
-                        ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> Release</button>
-                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> End Treatment</button>
-                    }
-                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
+                <div className="sm:text-right flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-1 justify-end">
+                        {isQuarantine
+                            ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> Release</button>
+                            : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> End Treatment</button>
+                        }
+                        <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
+                    </div>
+                    {!isQuarantine && meds.slice(0, 2).filter(m => m.intervalValue).map(m => (
+                        <div key={m.id} className="flex items-center gap-1 text-xs">
+                            <span className="text-gray-400 dark:text-dark-text-muted truncate max-w-[6rem]">{m.name || m.medication}</span>
+                            <button title="Confirm dose given" onClick={(e) => handleMedicationAction(e, animal, m.id, 'confirm')} className="p-0.5 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded"><Check size={12} /></button>
+                            <button title="Prolong stop date" onClick={(e) => handleMedicationAction(e, animal, m.id, 'prolong')} className="p-0.5 text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded"><PlusCircle size={12} /></button>
+                            <button title="Finish medication (stop date = today)" onClick={(e) => handleMedicationAction(e, animal, m.id, 'finish')} className="p-0.5 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"><X size={12} /></button>
+                        </div>
+                    ))}
                 </div>
             </div>
         );

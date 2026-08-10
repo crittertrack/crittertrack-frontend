@@ -18,12 +18,14 @@ import { CommunityGeneticsModal } from '../Modals/CommunityGeneticsModal';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from '../AnimalList/LocationManagerModal';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
-import { isFieldHiddenForSpecies, getFieldLabel } from '../../utils/speciesFieldTemplates';
+import { isFieldHiddenForSpecies, getFieldLabel, SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import InfoButton from '../shared/InfoButton';
 import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
 
 const getSpeciesCategory = (species) => {
     if (!species) return 'Other';
+    if (SPECIES_CATEGORY_MAP[species]) return SPECIES_CATEGORY_MAP[species];
+    // Fallback keyword match for custom/user-added species not in the catalogued map
     const s = species.toLowerCase();
     if (s.includes('mouse') || s.includes('rat') || s.includes('hamster') || s.includes('guinea pig')) {
         return 'Mammal';
