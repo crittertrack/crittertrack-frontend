@@ -116,8 +116,8 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'What happens after acceptance',
-        content: 'Once accepted, the recipient becomes the new owner with full edit access. You\'re automatically kept on as the original breeder with permanent view-only access, so pedigree and history stay intact.',
+        title: 'The Transfer Ownership modal',
+        content: 'Clicking Transfer opens a modal showing the animal\'s photo and info at the top, a recipient search (by name or CTU ID), an optional sale price, and a notes field for a message to include. Search results let you pick the right user before sending.',
       },
       {
         stepNumber: 5,
@@ -127,7 +127,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Where transferred animals end up on your list',
-        content: 'Once an animal is transferred away, it\'s automatically pulled from your active My Animals list and counted under "Sold/Archived" instead — a dedicated lesson later covers that Archive section in full.',
+        content: 'Once accepted, the recipient becomes the new owner with full edit access, while you\'re automatically kept on as the original breeder with permanent view-only access so pedigree and history stay intact. The animal is also pulled from your active My Animals list and counted under "Sold/Archived" instead — a dedicated lesson later covers that Archive section in full.',
       },
     ],
   },
