@@ -3956,7 +3956,7 @@ useEffect(() => {
         const meds = parseArrayField(animal.medications).filter(m => !m.status || m.status === 'active');
 
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className={`grid grid-cols-1 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border ${isQuarantine ? 'sm:grid-cols-7' : 'sm:grid-cols-8'}`}>
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                     <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-8 h-8 rounded-md object-cover flex-shrink-0" iconSize={16} />
                     <div className="min-w-0">
@@ -3993,6 +3993,15 @@ useEffect(() => {
                                 );
                             }) : <span className="text-gray-400 dark:text-dark-text-muted">No active medications</span>}
                         </div>
+                        <div className="text-xs space-y-1">
+                            {meds.slice(0, 2).filter(m => m.intervalValue).map(m => (
+                                <div key={m.id} className="flex items-center gap-1">
+                                    <button title="Confirm dose given" onClick={(e) => handleMedicationAction(e, animal, m.id, 'confirm')} className="p-1.5 border border-green-200 dark:border-green-900/50 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-md"><Check size={16} /></button>
+                                    <button title="Prolong stop date" onClick={(e) => handleMedicationAction(e, animal, m.id, 'prolong')} className="p-1.5 border border-blue-200 dark:border-blue-900/50 text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md"><PlusCircle size={16} /></button>
+                                    <button title="Finish medication (stop date = today)" onClick={(e) => handleMedicationAction(e, animal, m.id, 'finish')} className="p-1.5 border border-red-200 dark:border-red-900/50 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md"><X size={16} /></button>
+                                </div>
+                            ))}
+                        </div>
                     </>
                 )}
 
@@ -4000,22 +4009,12 @@ useEffect(() => {
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${isQuarantine ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300'}`}>{isQuarantine ? 'Quarantine' : 'Treatment'}</span>
                 </div>
 
-                <div className="sm:text-right flex flex-col items-end gap-1">
-                    <div className="flex items-center gap-1 justify-end">
-                        {isQuarantine
-                            ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> Release</button>
-                            : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> End Treatment</button>
-                        }
-                        <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
-                    </div>
-                    {!isQuarantine && meds.slice(0, 2).filter(m => m.intervalValue).map(m => (
-                        <div key={m.id} className="flex items-center gap-1 text-xs">
-                            <span className="text-gray-400 dark:text-dark-text-muted truncate max-w-[6rem]">{m.name || m.medication}</span>
-                            <button title="Confirm dose given" onClick={(e) => handleMedicationAction(e, animal, m.id, 'confirm')} className="p-0.5 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded"><Check size={12} /></button>
-                            <button title="Prolong stop date" onClick={(e) => handleMedicationAction(e, animal, m.id, 'prolong')} className="p-0.5 text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded"><PlusCircle size={12} /></button>
-                            <button title="Finish medication (stop date = today)" onClick={(e) => handleMedicationAction(e, animal, m.id, 'finish')} className="p-0.5 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"><X size={12} /></button>
-                        </div>
-                    ))}
+                <div className="sm:text-right flex items-center gap-1 justify-end">
+                    {isQuarantine
+                        ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> Release</button>
+                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> End Treatment</button>
+                    }
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
         );
@@ -4838,7 +4837,7 @@ useEffect(() => {
                                                             </div>
                                                         ) : (
                                                             <>
-                                                                <div className="hidden sm:grid grid-cols-7 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted">
+                                                                <div className={`hidden sm:grid items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted ${section.key === 'quarantine' ? 'grid-cols-7' : 'grid-cols-8'}`}>
                                                                     <div className="col-span-2">Animal</div>
                                                                     {section.key === 'quarantine' ? (
                                                                         <>
@@ -4848,8 +4847,9 @@ useEffect(() => {
                                                                         </>
                                                                     ) : (
                                                                         <>
-                                                                            <div>Condition</div>
+                                                                            <div>Reason</div>
                                                                             <div className="col-span-2">Medications</div>
+                                                                            <div>Dose Actions</div>
                                                                         </>
                                                                     )}
                                                                     <div className="text-center">Status</div>
