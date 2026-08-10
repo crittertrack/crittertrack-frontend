@@ -802,7 +802,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       },
       {
         stepNumber: 6,
-        title: 'Needs Attention alerts',
+        title: 'Reproduction Needs Attention alerts',
         content: 'When a planned mating, due date, or weaning date arrives (or passes) without you clicking the corresponding action, it shows up in the dashboard\'s "Needs Attention" breakdown so nothing falls through the cracks.',
       },
     ],
@@ -839,7 +839,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       },
       {
         stepNumber: 6,
-        title: 'Needs Attention alerts',
+        title: 'Health Needs Attention alerts',
         content: 'A medication dose becoming due, a quarantine end date being reached, or an animal\'s status calculating to Concern or Critical all show up in the dashboard\'s "Needs Attention" breakdown so nothing gets missed.',
       },
     ],
@@ -876,7 +876,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       },
       {
         stepNumber: 6,
-        title: 'Needs Attention alerts',
+        title: 'Feeding & Care Needs Attention alerts',
         content: 'Any overdue feeding, grooming/special-care schedule, training schedule, or custom care task shows up in the dashboard\'s "Needs Attention" breakdown, grouped by animal so you can see exactly what each one needs.',
       },
     ],
