@@ -1821,6 +1821,23 @@ useEffect(() => {
         });
     }, [allUserSpecies, userSpeciesOrder]);
 
+    const moveSpecies = useCallback((species, direction) => {
+        const currentOrder = speciesNames;
+        const idx = currentOrder.indexOf(species);
+        const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+        if (idx === -1 || swapIdx < 0 || swapIdx >= currentOrder.length) return;
+
+        const newOrder = [...currentOrder];
+        [newOrder[idx], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[idx]];
+        setUserSpeciesOrder(newOrder);
+
+        if (authToken) {
+            axios.post(`${API_BASE_URL}/users/species-order`, { speciesOrder: newOrder }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            }).catch(error => console.error('[SPECIES ORDER] Error saving:', error));
+        }
+    }, [speciesNames, authToken, API_BASE_URL]);
+
     const allSpeciesCategories = useMemo(() => {
         const categories = new Set(allUserSpecies.map(getSpeciesCategory));
         return ['All Categories', ...Array.from(categories).sort()];
@@ -5863,16 +5880,28 @@ useEffect(() => {
                                 <span>{showCollectionManager ? 'Close Collections' : 'Manage Collections'}</span>
                             </button>
                         )}
-                        <div className="relative flex-shrink-0">
-                            <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                value={searchInput}
-                                onChange={handleSearchInputChange}
-                                onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
-                                className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg"
-                            />
+                        <div className="relative flex-shrink-0 flex items-stretch">
+                            <div className="relative">
+                                <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
+                                <input
+                                    type="text"
+                                    placeholder="Search..."
+                                    value={searchInput}
+                                    onChange={handleSearchInputChange}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') triggerSearch(); }}
+                                    enterKeyHint="search"
+                                    inputMode="search"
+                                    className="w-36 sm:w-40 pl-8 p-2 text-sm border border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-l-lg border-r-0"
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                onClick={triggerSearch}
+                                className="px-2.5 border border-gray-300 dark:border-dark-text-muted bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover rounded-r-lg transition"
+                                title="Search"
+                            >
+                                <Search size={14} />
+                            </button>
                         </div>
                         <select
                             value={categoryFilter}

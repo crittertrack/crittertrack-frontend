@@ -2221,7 +2221,7 @@ const App = () => {
                                     showModalMessage={showModalMessage}
                                     API_BASE_URL={API_BASE_URL}
                                     userProfile={userProfile}
-                                    GENDER_OPTIONS={[...GENDER_OPTIONS, 'Mixed']}
+                                    GENDER_OPTIONS={GENDER_OPTIONS}
                                     STATUS_OPTIONS={STATUS_OPTIONS}
                                 />
                             ) : (
@@ -2275,7 +2275,7 @@ const App = () => {
                         Save={Save}
                         Trash2={Trash2}
                         RotateCcw={RotateCcw}
-                        GENDER_OPTIONS={[...GENDER_OPTIONS, 'Mixed']}
+                        GENDER_OPTIONS={GENDER_OPTIONS}
                         STATUS_OPTIONS={STATUS_OPTIONS}
                         AnimalImageUpload={AnimalImageUpload}
                     />
@@ -2353,7 +2353,7 @@ const App = () => {
                   Save={Save}
                   Trash2={Trash2}
                   RotateCcw={RotateCcw}
-                  GENDER_OPTIONS={[...GENDER_OPTIONS, 'Mixed']}
+                  GENDER_OPTIONS={GENDER_OPTIONS}
                   STATUS_OPTIONS={STATUS_OPTIONS}
                   AnimalImageUpload={AnimalImageUpload}
                   API_BASE_URL={API_BASE_URL}

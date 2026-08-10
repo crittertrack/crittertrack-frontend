@@ -11,15 +11,13 @@ import InfoButton from '../shared/InfoButton';
  * No interactive tutorials - just static guides with images
  */
 const TutorialsPage = () => {
-  const [expandedSection, setExpandedSection] = useState('getting-started');
+  const [expandedSection, setExpandedSection] = useState(TUTORIAL_LESSONS.sections[0]?.id ?? null);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
   const [searchParams] = useSearchParams();
 
-  const onboardingLessons = TUTORIAL_LESSONS.onboarding;
-  const featureLessons = TUTORIAL_LESSONS.features;
-  const advancedLessons = TUTORIAL_LESSONS.advanced;
+  const sections = TUTORIAL_LESSONS.sections;
 
   // Deep-link support: InfoButton popovers link here via ?lesson=<id> — jump straight to
   // that lesson if it exists yet (lesson content is still being rebuilt, so this is a
@@ -87,84 +85,33 @@ const TutorialsPage = () => {
             <div className={`${
               isLeftPanelOpen ? 'absolute sm:relative inset-0 z-10' : 'hidden'
             } sm:block w-full sm:w-80 md:w-96 border-r border-gray-200 dark:border-dark-text overflow-y-auto bg-gray-50 dark:bg-dark-card-bg`}>
-              
-              {/* Getting Started Section */}
-              <div className="border-b border-gray-300 dark:border-dark-text">
-                <button
-                  onClick={() => toggleSection('getting-started')}
-                  className="w-full px-4 py-3 flex items-center justify-between bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-semibold text-gray-800 dark:text-dark-text text-left"
-                >
-                  <span className="text-sm sm:text-base">🚀 Getting Started</span>
-                  {expandedSection === 'getting-started' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
-                {expandedSection === 'getting-started' && (
-                  <div className="bg-gray-50 dark:bg-dark-card-bg">
-                    {onboardingLessons.map((lesson) => (
-                      <button
-                        key={lesson.id}
-                        onClick={() => selectLesson(lesson)}
-                        className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition ${
-                          selectedLesson?.id === lesson.id ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-800 dark:text-dark-primary font-semibold border-l-4 border-blue-600 dark:border-dark-primary' : 'text-gray-700 dark:text-dark-text-secondary'
-                        }`}
-                      >
-                        {lesson.title}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
 
-              {/* Key Features Section */}
-              <div className="border-b border-gray-300 dark:border-dark-text">
-                <button
-                  onClick={() => toggleSection('key-features')}
-                  className="w-full px-4 py-3 flex items-center justify-between bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-semibold text-gray-800 dark:text-dark-text text-left"
-                >
-                  <span className="text-sm sm:text-base">📋 Key Features</span>
-                  {expandedSection === 'key-features' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
-                {expandedSection === 'key-features' && (
-                  <div className="bg-gray-50 dark:bg-dark-card-bg">
-                    {featureLessons.map((lesson) => (
-                      <button
-                        key={lesson.id}
-                        onClick={() => selectLesson(lesson)}
-                        className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition ${
-                          selectedLesson?.id === lesson.id ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-800 dark:text-dark-primary font-semibold border-l-4 border-blue-600 dark:border-dark-primary' : 'text-gray-700 dark:text-dark-text-secondary'
-                        }`}
-                      >
-                        {lesson.title}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Advanced Features Section */}
-              <div className="border-b border-gray-300 dark:border-dark-text">
-                <button
-                  onClick={() => toggleSection('advanced')}
-                  className="w-full px-4 py-3 flex items-center justify-between bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-semibold text-gray-800 dark:text-dark-text text-left"
-                >
-                  <span className="text-sm sm:text-base">✨ Advanced Features</span>
-                  {expandedSection === 'advanced' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
-                {expandedSection === 'advanced' && (
-                  <div className="bg-gray-50 dark:bg-dark-card-bg">
-                    {advancedLessons.map((lesson) => (
-                      <button
-                        key={lesson.id}
-                        onClick={() => selectLesson(lesson)}
-                        className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition ${
-                          selectedLesson?.id === lesson.id ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-800 dark:text-dark-primary font-semibold border-l-4 border-blue-600 dark:border-dark-primary' : 'text-gray-700 dark:text-dark-text-secondary'
-                        }`}
-                      >
-                        {lesson.title}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {sections.map((section) => (
+                <div key={section.id} className="border-b border-gray-300 dark:border-dark-text">
+                  <button
+                    onClick={() => toggleSection(section.id)}
+                    className="w-full px-4 py-3 flex items-center justify-between bg-white dark:bg-dark-card-bg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-semibold text-gray-800 dark:text-dark-text text-left"
+                  >
+                    <span className="text-sm sm:text-base">{section.label}</span>
+                    {expandedSection === section.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </button>
+                  {expandedSection === section.id && (
+                    <div className="bg-gray-50 dark:bg-dark-card-bg">
+                      {section.lessons.map((lesson) => (
+                        <button
+                          key={lesson.id}
+                          onClick={() => selectLesson(lesson)}
+                          className={`w-full px-6 py-2.5 text-left text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition ${
+                            selectedLesson?.id === lesson.id ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-800 dark:text-dark-primary font-semibold border-l-4 border-blue-600 dark:border-dark-primary' : 'text-gray-700 dark:text-dark-text-secondary'
+                          }`}
+                        >
+                          {lesson.title}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
 
             {/* Right Side - Lesson Details */}
