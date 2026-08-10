@@ -323,6 +323,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 5,
         title: 'Preventive Care',
         content: 'Log Vaccinations, Deworming, and Parasite Control treatments, each with a date and notes. For recurring prevention (e.g. monthly flea/tick treatment), use "Prevention Schedule" to set a treatment name, start date, and repeat interval — this creates a recurring reminder rather than a one-time record.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 6,
@@ -333,6 +334,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 7,
         title: 'Procedures, Labs & Vet Visits',
         content: 'Medical Procedures and Lab Results are both simple dated entries with a name/test and notes or result. Veterinary Care holds your Primary Veterinarian\'s name plus a running log of Veterinary Visits (date, reason, notes) — useful for a quick history without digging through the Timeline tab.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 8,
