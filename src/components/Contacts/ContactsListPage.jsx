@@ -184,12 +184,12 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                                         )}
                                                         {contact.ownedAnimalsCount > 0 && (
                                                             <span className="flex items-center gap-1" title="Owned Animals">
-                                                                <Cat size={14} /> {contact.ownedAnimalsCount}
+                                                                <Heart size={14} /> {contact.ownedAnimalsCount}
                                                             </span>
                                                         )}
                                                         {contact.bredAnimalsCount > 0 && (
                                                             <span className="flex items-center gap-1" title="Bred Animals">
-                                                                <Heart size={14} /> {contact.bredAnimalsCount}
+                                                                <Cat size={14} /> {contact.bredAnimalsCount}
                                                             </span>
                                                         )}
                                                     </div>
