@@ -111,9 +111,10 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
             await axios.post(`${API_BASE_URL}/transfers/${transferId}/accept`, {}, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            showModalMessage('Success', 'Transfer accepted! Animal has been added to your account. Refresh your app to see the changes. It can take up to 30 minutes for the transfer to fully process.');
+            showModalMessage('Success', 'Transfer accepted! Animal has been added to your account.');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
+            window.dispatchEvent(new Event('animals-changed'));
         } catch (error) {
             console.error('Error accepting transfer:', error);
             showModalMessage('Error', error.response?.data?.message || 'Failed to accept transfer');
@@ -131,6 +132,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
             showModalMessage('Declined', 'Transfer declined');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
+            window.dispatchEvent(new Event('animals-changed'));
         } catch (error) {
             console.error('Error declining transfer:', error);
             showModalMessage('Error', 'Failed to decline transfer');
@@ -148,6 +150,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
             showModalMessage('Success', 'View-only access accepted');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
+            window.dispatchEvent(new Event('animals-changed'));
         } catch (error) {
             console.error('Error accepting view-only:', error);
             showModalMessage('Error', 'Failed to accept view-only access');
