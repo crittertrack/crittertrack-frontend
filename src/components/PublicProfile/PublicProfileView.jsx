@@ -915,92 +915,80 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             {/* Animals Tab */}
             {activeTab === 'animals' && (<>
             {/* Filters */}
-            <div className="mb-6 p-4 border dark:border-dark-text rounded-lg bg-gray-50 dark:bg-dark-surface">
+            <div className="mb-6 p-3 border dark:border-dark-text rounded-lg bg-gray-50 dark:bg-dark-surface">
                     {/* Search, Category/Species/Gender/Status dropdowns, and A-Z/Age sort */}
-                    <div className="flex flex-col sm:flex-row gap-3 justify-between">
-                        <div className="flex gap-3 items-center flex-wrap">
-                            {/* Name / ID search */}
-                            <div className="flex gap-2 items-center">
-                                <Search size={16} className="text-gray-400 dark:text-dark-text-muted flex-shrink-0" />
-                                <input
-                                    type="text"
-                                    value={animalSearch}
-                                    onChange={(e) => setAnimalSearch(e.target.value)}
-                                    placeholder="Search by name or ID"
-                                    className="p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[160px]"
-                                />
-                            </div>
-                            {/* Category dropdown */}
-                            <div className="flex gap-2 items-center" data-tutorial-target="category-filter">
-                                <span className='text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Category:</span>
-                                <select
-                                    value={categoryFilter}
-                                    onChange={(e) => { setCategoryFilter(e.target.value); setSpeciesFilter(''); }}
-                                    className="p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
-                                >
-                                    <option value="">All Categories</option>
-                                    {animalCategories.map(cat => (
-                                        <option key={cat} value={cat}>{cat}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            {/* Species dropdown */}
-                            <div className="flex gap-2 items-center" data-tutorial-target="species-filter">
-                                <span className='text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Species:</span>
-                                <select 
-                                    value={speciesFilter}
-                                    onChange={(e) => setSpeciesFilter(e.target.value)}
-                                    className="p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
-                                >
-                                    <option value="">All Species</option>
-                                    {sortedSpecies.map(species => (
-                                        <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Gender dropdown */}
-                            <div className="flex gap-2 items-center" data-tutorial-target="gender-filter">
-                                <span className='text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Gender:</span>
-                                <select
-                                    value={genderFilter}
-                                    onChange={(e) => setGenderFilter(e.target.value)}
-                                    className="p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
-                                >
-                                    <option value="">All Genders</option>
-                                    {GENDER_OPTIONS.map(gender => (
-                                        <option key={gender} value={gender}>{gender}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Status dropdown */}
-                            <div className="flex gap-2 items-center" data-tutorial-target="status-filter">
-                                <span className='text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Status:</span>
-                                <select 
-                                    value={statusFilter} 
-                                    onChange={(e) => setStatusFilter(e.target.value)} 
-                                    className="p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
-                                >
-                                    <option value="">All</option>
-                                    {STATUS_OPTIONS.map(status => (
-                                        <option key={status} value={status}>{status}</option>
-                                    ))}
-                                </select>
-                            </div>
+                    <div className="flex flex-wrap xl:flex-nowrap items-center gap-2">
+                        {/* Name / ID search */}
+                        <div className="flex gap-1.5 items-center">
+                            <Search size={15} className="text-gray-400 dark:text-dark-text-muted flex-shrink-0" />
+                            <input
+                                type="text"
+                                value={animalSearch}
+                                onChange={(e) => setAnimalSearch(e.target.value)}
+                                placeholder="Search name or ID"
+                                className="p-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-32"
+                            />
                         </div>
+                        {/* Category dropdown */}
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => { setCategoryFilter(e.target.value); setSpeciesFilter(''); }}
+                            data-tutorial-target="category-filter"
+                            className="p-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                        >
+                            <option value="">All Categories</option>
+                            {animalCategories.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                        {/* Species dropdown */}
+                        <select 
+                            value={speciesFilter}
+                            onChange={(e) => setSpeciesFilter(e.target.value)}
+                            data-tutorial-target="species-filter"
+                            className="p-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                        >
+                            <option value="">All Species</option>
+                            {sortedSpecies.map(species => (
+                                <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
+                            ))}
+                        </select>
+                        {/* Gender dropdown */}
+                        <select
+                            value={genderFilter}
+                            onChange={(e) => setGenderFilter(e.target.value)}
+                            data-tutorial-target="gender-filter"
+                            className="p-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                        >
+                            <option value="">All Genders</option>
+                            {GENDER_OPTIONS.map(gender => (
+                                <option key={gender} value={gender}>{gender}</option>
+                            ))}
+                        </select>
+                        {/* Status dropdown */}
+                        <select 
+                            value={statusFilter} 
+                            onChange={(e) => setStatusFilter(e.target.value)} 
+                            data-tutorial-target="status-filter"
+                            className="p-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                        >
+                            <option value="">All Statuses</option>
+                            {STATUS_OPTIONS.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
 
                         {/* Sort buttons */}
-                        <div className="flex gap-2 items-center" data-tutorial-target="sort-buttons">
+                        <div className="flex gap-1.5 items-center ml-auto" data-tutorial-target="sort-buttons">
                             <button
                                 onClick={() => requestSort('name')}
-                                className={`flex items-center gap-1 text-sm p-2 rounded-lg shadow-sm transition ${sortConfig.key === 'name' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}
+                                className={`flex items-center gap-1 text-sm px-2 py-1.5 rounded-lg shadow-sm transition ${sortConfig.key === 'name' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}
                             >
                                 A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                             </button>
                             <button
                                 onClick={() => requestSort('birthdate')}
-                                className={`flex items-center gap-1 text-sm p-2 rounded-lg shadow-sm transition ${sortConfig.key === 'birthdate' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}
+                                className={`flex items-center gap-1 text-sm px-2 py-1.5 rounded-lg shadow-sm transition ${sortConfig.key === 'birthdate' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'}`}
                             >
                                 Age {sortConfig.key === 'birthdate' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
                             </button>
