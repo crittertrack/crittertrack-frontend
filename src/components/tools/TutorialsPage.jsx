@@ -151,6 +151,8 @@ const TutorialsPage = () => {
                         suggestedPath: `/images/tutorials/${currentSection?.id || 'unknown-tour'}/${filename}`,
                       };
                     });
+                    // Clamp in case the step changed to one with fewer screenshots before the reset effect runs
+                    const safeShotIndex = Math.min(currentShotIndex, screenshots.length - 1);
 
                     return (
                       <div className="space-y-4">
@@ -191,7 +193,7 @@ const TutorialsPage = () => {
                             {screenshots.length > 1 && (
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs font-semibold text-gray-500 dark:text-dark-text-secondary">
-                                  Image {currentShotIndex + 1} of {screenshots.length}
+                                  Image {safeShotIndex + 1} of {screenshots.length}
                                 </span>
                                 <div className="flex gap-1">
                                   {screenshots.map((_, shotIndex) => (
@@ -200,7 +202,7 @@ const TutorialsPage = () => {
                                       onClick={() => setCurrentShotIndex(shotIndex)}
                                       aria-label={`Show image ${shotIndex + 1}`}
                                       className={`h-2 w-2 rounded-full transition-all ${
-                                        shotIndex === currentShotIndex ? 'bg-primary w-6' : 'bg-gray-300 hover:bg-gray-400'
+                                        shotIndex === safeShotIndex ? 'bg-primary w-6' : 'bg-gray-300 hover:bg-gray-400'
                                       }`}
                                     />
                                   ))}
@@ -209,12 +211,12 @@ const TutorialsPage = () => {
                             )}
                             <div className="relative">
                               {(() => {
-                                const shot = screenshots[currentShotIndex];
+                                const shot = screenshots[safeShotIndex];
                                 return shot.url ? (
                                   <div className="rounded-lg overflow-hidden border-2 border-gray-300 shadow-sm">
                                     <img
                                       src={shot.url}
-                                      alt={`Screenshot: ${currentStep.title}${screenshots.length > 1 ? ` (${currentShotIndex + 1})` : ''}`}
+                                      alt={`Screenshot: ${currentStep.title}${screenshots.length > 1 ? ` (${safeShotIndex + 1})` : ''}`}
                                       className="w-full h-auto"
                                       onError={(e) => {
                                         // If image fails to load, show placeholder
