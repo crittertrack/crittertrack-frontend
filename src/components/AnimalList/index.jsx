@@ -4012,7 +4012,7 @@ useEffect(() => {
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     {isQuarantine
                         ? <button onClick={(e) => handleUnquarantine(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> Release</button>
-                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> End Treatment</button>
+                        : <button onClick={(e) => handleDischargeTreatment(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><LockOpen size={12} /> End Full Treatment</button>
                     }
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>

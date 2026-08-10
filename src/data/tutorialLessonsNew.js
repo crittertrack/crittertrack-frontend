@@ -312,7 +312,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 3,
         title: 'Treatment (Medications)',
-        content: 'Adding an active medication is what marks the animal as "In Treatment" and factors into its health status. Choose "Manual Entry" to type a medication\'s name/dose/reason/dates yourself, or "From Supplies" to search and pick one from your own tracked Supplies inventory (which pre-fills the name and lets you set dose/reason/dates on top of it). Either way, set an optional recurring Interval (e.g. every 12 hours) if it\'s a repeating dose. Like Quarantine, animals In Treatment collect in the Health management tab\'s In Treatment section, showing each active medication\'s next dose due time with quick Confirm/Prolong/Finish buttons, plus an "End Treatment" button to close it out entirely.',
+        content: 'Adding an active medication is what marks the animal as "In Treatment" and factors into its health status. Choose "Manual Entry" to type a medication\'s name/dose/reason/dates yourself, or "From Supplies" to search and pick one from your own tracked Supplies inventory (which pre-fills the name and lets you set dose/reason/dates on top of it). Either way, set an optional recurring Interval (e.g. every 12 hours) if it\'s a repeating dose. Like Quarantine, animals In Treatment collect in the Health management tab\'s In Treatment section, showing each active medication\'s next dose due time with quick Confirm/Prolong/Finish buttons — the Finish button only closes out that one medication, while the "End Full Treatment" button closes out every active medication at once.',
       },
       {
         stepNumber: 4,
@@ -815,7 +815,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 1,
         title: 'Quarantine and Treatment lists',
-        content: 'The Health tab splits animals into a Quarantine list and an In Treatment list, each row showing the relevant dates/reason and a status pill. "Release" clears an animal from Quarantine, and "End Treatment" discharges it from active treatment — both without affecting the animal\'s own record.',
+        content: 'The Health tab splits animals into a Quarantine list and an In Treatment list, each row showing the relevant dates/reason and a status pill. "Release" clears an animal from Quarantine, and "End Full Treatment" discharges it from active treatment by finishing every active medication at once — both without affecting the animal\'s own record.',
       },
       {
         stepNumber: 2,
