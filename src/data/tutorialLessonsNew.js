@@ -345,18 +345,20 @@ const ANIMAL_RECORD_TAB_LESSONS = [
   },
   {
     id: 'animal-tab-care',
-    title: 'Animal Record: Care Tab',
+    title: 'Animal Record: Routine Care Tab',
     description: 'Feeding, enclosure assignment, environment, grooming, and recurring care tasks.',
     steps: [
       {
         stepNumber: 1,
         title: 'Nutrition',
         content: 'Set a Feeding Schedule with "Feed Every (hours)" — type a value or click a quick preset chip (6h, 8h, 12h, 24h, 48h, 72h, 1wk); Last Fed is read-only here and only updates when you log a "Fed" action in the Feeding & Care tab. This schedule is what drives that animal\'s entry in the Feeding & Care management view, showing you exactly when it\'s next due to be fed. For Diet and Supplements, choose "Manual Entry" to type a name (and dosage, for supplements) yourself, or "From Supplies" to search and add items straight from your own tracked Supplies inventory — either way you can add multiple and remove any with its trash icon. Round it out with free-text Portion Size, Feeding Method, Feeding Location, Water Access, and Feeding Pace & Behavior Notes.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 2,
         title: 'Enclosure Assignment',
         content: 'Click "Search & Assign Enclosure" to open the enclosure picker. Once assigned, the enclosure\'s card shows its photo, occupancy (current/capacity), dimensions, purpose, type, temperature/humidity ranges, lighting, bedding, and enrichment at a glance — click the unlink icon to unassign without deleting the enclosure itself.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 3,
@@ -367,6 +369,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 4,
         title: 'Environment Needs',
         content: 'Free-text fields for anything about the animal\'s surroundings that isn\'t tied to the enclosure record itself: Lighting Type & Schedule, Noise Level Tolerance & Sound Preferences/Triggers, and Enrichment Needs & Schedule/Frequency.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 5,
