@@ -1,23 +1,6 @@
 // Tutorial lessons content is being reworked — rebuilt one lesson at a time.
 const GETTING_STARTED_LESSONS = [
   {
-    id: 'getting-started-welcome',
-    title: "Welcome — You're Logged In",
-    description: "A quick orientation to what this Getting Started section covers before diving into the rest of CritterTrack.",
-    steps: [
-      {
-        stepNumber: 1,
-        title: "You're in!",
-        content: "If you're reading this, you've already signed up and verified your email — that's how you got here. This Getting Started section picks up right after your first login.",
-      },
-      {
-        stepNumber: 2,
-        title: "What we'll cover",
-        content: "Next up: a quick tour of the app's layout and navigation, how to create and edit your first animal, and the account settings worth checking early on (like your public profile visibility and the Breeder Registry).",
-      },
-    ],
-  },
-  {
     id: 'getting-started-layout-tour',
     title: 'App Layout Tour',
     description: 'A quick tour of the main navigation bar and the icons/menus you\'ll use every day.',
