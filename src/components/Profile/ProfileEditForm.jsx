@@ -1743,7 +1743,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 onChange={e => setZeSpecies(e.target.value)}
                                 className="flex-1 p-2 border border-gray-300 dark:border-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary bg-white dark:bg-dark-card-bg dark:text-dark-text"
                             >
-                                <option value="">? select species ?</option>
+                                <option value="">-- select species --</option>
                                 {(zeSpeciesList || []).map(s => (
                                     <option key={s.name} value={s.name}>{s.name}</option>
                                 ))}
@@ -2241,7 +2241,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 onChange={e => setKtkSpecies(e.target.value)}
                                 className="flex-1 p-2 border border-gray-300 dark:border-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary bg-white dark:bg-dark-card-bg dark:text-dark-text"
                             >
-                                <option value="">? select species ?</option>
+                                <option value="">-- select species --</option>
                                 {(zeSpeciesList || []).map(s => (
                                     <option key={s.name} value={s.name}>{s.name}</option>
                                 ))}

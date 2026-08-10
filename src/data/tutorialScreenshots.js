@@ -13,7 +13,13 @@ const TUTORIAL_SCREENSHOTS = {
   "getting-started": {},
   "animal-record-tour": {},
   "animal-list-tour": {},
-  "settings-tour": {},
+  "settings-tour": {
+    // Steps 2 and 3 reuse step 1's screenshot — same screen, no new shot needed.
+    "settings-directory": {
+      step2: "/images/tutorials/settings-tour/species-and-breeding-status.png",
+      step3: "/images/tutorials/settings-tour/species-and-breeding-status.png",
+    },
+  },
   "litter-management-tour": {},
   "more-pages-tour": {}
 };
