@@ -29,26 +29,31 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
+        title: 'The scrolling news ticker',
+        content: 'A scrolling banner above the nav bar links to Ko-fi support, Report a Bug, and Helpful Resources, plus the latest community announcements/polls — clicking any of those jumps to Community. This is separate from the alerts banner just below the nav bar, which covers unread messages/notifications and care alerts instead.',
+      },
+      {
+        stepNumber: 3,
         title: 'Tools menu',
         content: 'The Tools dropdown holds: Tutorials (this page), Offspring Calculator, COI Calculator, Target Outcome Calculator, and Family Tree Explorer.',
       },
       {
-        stepNumber: 3,
+        stepNumber: 5,
         title: 'Finance menu',
         content: 'The Finance dropdown holds: Budget Tracker and Supplies.',
       },
       {
-        stepNumber: 4,
+        stepNumber: 6,
         title: 'Top-right icons',
         content: 'From left to right: the theme toggle (light/dark/auto), a push notifications quick-toggle for this device, the Notifications bell (purple badge = unread count), and the Messages icon (red badge = a message from CritterTrack staff, purple = a message from another user).',
       },
       {
-        stepNumber: 5,
+        stepNumber: 7,
         title: 'Your profile avatar',
         content: 'Click your avatar (top-right corner) to open a menu with Profile, Report an Issue and Logout.',
       },
       {
-        stepNumber: 6,
+        stepNumber: 8,
         title: 'Info buttons',
         content: 'Look for a small ⓘ icon near a page\'s title — click it for a quick contextual hint about that page, including a link to a related tutorial like this one when available.',
       },
