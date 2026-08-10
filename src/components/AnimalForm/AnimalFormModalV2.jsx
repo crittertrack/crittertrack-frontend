@@ -1414,6 +1414,7 @@ const AnimalFormModalV2 = ({
     API_BASE_URL,
     showModalMessage,
     userProfile,
+    handleReturnTransferredAnimal,
     speciesOptions = [],
     GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'], // NOSONAR
     STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']
@@ -6768,12 +6769,27 @@ const AnimalFormModalV2 = ({
                                 <ArrowLeft size={18} />
                                 <span>Cancel</span>
                             </button>
-                            {animalToEdit && onDelete && (
-                                <button type="button" onClick={() => onDelete(animalToEdit.id_public)} className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
-                                    <Trash2 size={18} />
-                                    <span>Delete</span>
-                                </button>
-                            )}
+                            {animalToEdit && (() => {
+                                // Transferred-to-me animals must never be deletable by the new owner —
+                                // only the original breeder can (via Return), matching AnimalModalV2's header logic.
+                                const isOriginalCreator = animalToEdit.originalCreatorId && userProfile?._id && animalToEdit.originalCreatorId === userProfile._id;
+                                const isCurrentOwner = userProfile?._id && animalToEdit.creatorId_public === userProfile?.id_public;
+                                const isNewOwner = animalToEdit.originalCreatorId && !isOriginalCreator && isCurrentOwner;
+                                if (isNewOwner && handleReturnTransferredAnimal) {
+                                    return (
+                                        <button type="button" onClick={() => handleReturnTransferredAnimal(animalToEdit.id_public)} className="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
+                                            <RotateCcw size={18} />
+                                            <span>Return to Original Breeder</span>
+                                        </button>
+                                    );
+                                }
+                                return onDelete ? (
+                                    <button type="button" onClick={() => onDelete(animalToEdit.id_public)} className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
+                                        <Trash2 size={18} />
+                                        <span>Delete</span>
+                                    </button>
+                                ) : null;
+                            })()}
                         </div>
                         <button type="submit" disabled={loading} className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50">
                             {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}

@@ -2207,6 +2207,7 @@ const App = () => {
                                     showModalMessage={showModalMessage}
                                     API_BASE_URL={API_BASE_URL}
                                     userProfile={userProfile}
+                                    handleReturnTransferredAnimal={transferWorkflow.handleReturnTransferredAnimal}
                                     GENDER_OPTIONS={GENDER_OPTIONS}
                                     STATUS_OPTIONS={STATUS_OPTIONS}
                                 />
