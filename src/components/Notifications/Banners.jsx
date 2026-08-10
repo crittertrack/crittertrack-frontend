@@ -408,10 +408,12 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                 });
             const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
                 // Filter for urgent broadcast types (warning/alert) - these MUST have explicit broadcastType
+                // "read" is the durable, server-side record of acknowledgement (survives logout/login and
+                // works across devices) - acknowledgedIds is just a local cache for instant UI feedback.
             const urgentNotifications = allNotifications.filter(n => {
                     const isBroadcastType = n.type === 'broadcast' || n.type === 'announcement';
                     const isUrgent = n.broadcastType === 'warning' || n.broadcastType === 'alert';
-                    const isNotAcknowledged = !acknowledgedIds.includes(n._id);
+                    const isNotAcknowledged = !n.read && !acknowledgedIds.includes(n._id);
                     return isBroadcastType && isUrgent && isNotAcknowledged;
                 });
                 // Show the most recent one
@@ -436,6 +438,10 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
             setAcknowledgedIds(newAcknowledged);
             localStorage.setItem('acknowledgedUrgentBroadcasts', JSON.stringify(newAcknowledged));
             setUrgentBroadcast(null);
+            // Persist server-side so it stays acknowledged after signing out/in or on another device.
+            axios.patch(`${API_BASE_URL}/notifications/${urgentBroadcast._id}/read`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            }).catch(error => console.error('Failed to persist broadcast acknowledgement:', error));
         }
     };
 
