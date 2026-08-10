@@ -147,6 +147,7 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 1,
         title: 'Getting to Settings',
         content: 'Click your avatar (top-right) → Profile to view your own public profile, then click the "Profile Settings" button (gear icon) to open Settings.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 2,
