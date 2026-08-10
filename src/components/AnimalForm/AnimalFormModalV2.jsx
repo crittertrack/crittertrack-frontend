@@ -1424,6 +1424,10 @@ const AnimalFormModalV2 = ({
     // matched automatically by CTUID, so this is used to record the assignment on the Contact itself.
     const [breederContactId, setBreederContactId] = useState(null);
     const [ownerContactId, setOwnerContactId] = useState(null);
+    // Snapshot of the above as loaded from the Contact's assignedAnimals, so a save can tell which
+    // contact(s) need to be unassigned versus (re)assigned.
+    const initialBreederContactIdRef = useRef(null);
+    const initialOwnerContactIdRef = useRef(null);
     const [uploadingDocument, setUploadingDocument] = useState(false);
     const [breederInfo, setBreederInfo] = useState(null);
     const [parentSearchModalOpen, setParentSearchModalOpen] = useState(false);
@@ -2812,6 +2816,23 @@ const AnimalFormModalV2 = ({
         }
     }, [formData.breederId_public, API_BASE_URL]);
 
+    // Look up which Contact(s) already have this animal in their assignedAnimals, so an existing
+    // manual breeder/owner link (no CTUID) is reflected on open and can be diffed against on save.
+    useEffect(() => {
+        if (!animalToEdit?.id_public) return;
+        axios.get(`${API_BASE_URL}/contacts`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => {
+                const contacts = res.data || [];
+                const breederContact = contacts.find(c => (c.assignedAnimals || []).some(a => a.animalId_public === animalToEdit.id_public && (a.role === 'breeder' || a.role === 'both')));
+                const ownerContact = contacts.find(c => (c.assignedAnimals || []).some(a => a.animalId_public === animalToEdit.id_public && (a.role === 'keeper' || a.role === 'both')));
+                setBreederContactId(breederContact?._id || null);
+                setOwnerContactId(ownerContact?._id || null);
+                initialBreederContactIdRef.current = breederContact?._id || null;
+                initialOwnerContactIdRef.current = ownerContact?._id || null;
+            })
+            .catch(err => console.error('[contacts] Failed to load existing assignments:', err));
+    }, [animalToEdit?.id_public, API_BASE_URL, authToken]);
+
     useEffect(() => {
         if (formData.ownerId_public) {
             axios.get(`${API_BASE_URL}/public/profiles/search?query=${formData.ownerId_public}&limit=1`)
@@ -3540,21 +3561,37 @@ const AnimalFormModalV2 = ({
 
             // Manually-picked Contacts with no linked CTUID aren't matched automatically by CTUID,
             // so record the assignment directly on the Contact so the animal shows under their
-            // Owned/Bred Animals tabs.
+            // Owned/Bred Animals tabs — and fully unassign a contact that no longer holds either role.
             const savedAnimalIdPublic = animalToEdit?.id_public
                 || saveResponse?.data?.animal?.id_public
                 || saveResponse?.data?.data?.id_public
                 || saveResponse?.data?.id_public;
             if (savedAnimalIdPublic) {
-                const assignments = [
-                    breederContactId && { contactId: breederContactId, role: 'breeder' },
-                    ownerContactId && { contactId: ownerContactId, role: 'keeper' },
-                ].filter(Boolean);
-                await Promise.all(assignments.map(({ contactId, role }) =>
-                    axios.post(`${API_BASE_URL}/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role }, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    }).catch(err => console.error('[assign-animal] Failed to link contact:', err))
-                ));
+                const authHeaders = { headers: { Authorization: `Bearer ${authToken}` } };
+                const affectedContactIds = new Set([
+                    initialBreederContactIdRef.current,
+                    initialOwnerContactIdRef.current,
+                    breederContactId,
+                    ownerContactId,
+                ].filter(Boolean));
+
+                const ops = Array.from(affectedContactIds).map(contactId => {
+                    const isBreeder = breederContactId === contactId;
+                    const isOwner = ownerContactId === contactId;
+                    if (isBreeder && isOwner) {
+                        return axios.post(`${API_BASE_URL}/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'both' }, authHeaders);
+                    } else if (isBreeder) {
+                        return axios.post(`${API_BASE_URL}/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'breeder' }, authHeaders);
+                    } else if (isOwner) {
+                        return axios.post(`${API_BASE_URL}/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'keeper' }, authHeaders);
+                    }
+                    // No longer breeder or owner for this contact — remove the assignment entirely.
+                    return axios.delete(`${API_BASE_URL}/contacts/${contactId}/assign-animal/${savedAnimalIdPublic}`, authHeaders);
+                });
+                await Promise.all(ops.map(p => p.catch(err => console.error('[assign-animal] Failed to sync contact assignment:', err))));
+
+                initialBreederContactIdRef.current = breederContactId;
+                initialOwnerContactIdRef.current = ownerContactId;
             }
 
             if (!animalToEdit) {
