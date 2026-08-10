@@ -66,7 +66,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Breeder Name & Privacy</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
-                                    You're anonymous by default — only your Personal Name is shown, and even that can be turned off. Set a Breeder Name and choose what's public in Settings → Profile.
+                                    Your <strong>Personal Name</strong> is public by default; your <strong>Breeder Name</strong> is hidden until you turn it on. Both can be shown, hidden, or fully anonymized in Settings → Profile.
                                 </p>
                                 <TutorialLink lessonId="getting-started-account-settings">Profile visibility & the Breeder Registry</TutorialLink>
                             </div>
