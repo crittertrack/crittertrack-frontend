@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { User, MapPin, Users, ShoppingBag, HelpCircle, MessageSquare, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { User, MapPin, Users, ShoppingBag, HelpCircle, MessageSquare, Loader2, GraduationCap } from 'lucide-react';
 
 const WelcomeGuideModal = ({ onClose }) => {
     const [isClosing, setIsClosing] = useState(false);
+    const navigate = useNavigate();
 
     const handleClose = async () => {
         setIsClosing(true);
@@ -13,6 +15,27 @@ const WelcomeGuideModal = ({ onClose }) => {
             // Close anyway
         }
     };
+
+    // Dismiss (mark as seen, same as the main close button) before navigating to a lesson.
+    const goToLesson = async (lessonId) => {
+        try {
+            await onClose();
+        } catch (error) {
+            console.error('Error closing welcome modal:', error);
+        }
+        navigate(lessonId ? `/tutorials?lesson=${encodeURIComponent(lessonId)}` : '/tutorials');
+    };
+
+    const TutorialLink = ({ lessonId, children }) => (
+        <button
+            type="button"
+            onClick={() => goToLesson(lessonId)}
+            className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline"
+        >
+            <GraduationCap size={13} />
+            {children}
+        </button>
+    );
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
@@ -28,7 +51,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                     {/* Intro */}
                     <div className="bg-blue-50 border-l-4 border-blue-500 p-2.5 sm:p-3 rounded">
                         <p className="text-xs sm:text-sm text-gray-700">
-                            To make the most of CritterTrack's community features, we recommend setting up your profile information.
+                            A few essentials worth knowing right away — each links to a full tutorial lesson if you want more detail.
                         </p>
                     </div>
 
@@ -43,9 +66,9 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Breeder Name & Privacy</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
-                                    Access profile settings by clicking your <strong>profile image circle</strong> in the top-right corner, then selecting <strong>Profile</strong>. Set your Breeder Name and choose what's displayed publicly.
-                                    <strong> Note:</strong> You'll only be visible if you have either name set to public. Completely anonymous accounts won't show up anywhere, nor will their animals.
+                                    You're anonymous by default — only your Personal Name is shown, and even that can be turned off. Set a Breeder Name and choose what's public in Settings → Profile.
                                 </p>
+                                <TutorialLink lessonId="getting-started-account-settings">Profile visibility & the Breeder Registry</TutorialLink>
                             </div>
                         </div>
 
@@ -58,9 +81,9 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Country Location</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
-                                    Setting your <strong>Country</strong> helps buyers find local breeders! When you list animals for sale or stud services, users can filter the marketplace by country. 
-                                    This filter also exists for the <strong>Breeders</strong> Registry.
+                                    Set your <strong>Country</strong> in Settings so buyers can filter the Marketplace and Breeder Directory by location.
                                 </p>
+                                <TutorialLink lessonId="breeder-directory">Finding & being found by location</TutorialLink>
                             </div>
                         </div>
 
@@ -73,9 +96,9 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Community Activity</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
-                                    The <strong>Community Feed</strong> showcases the newest and most active breeders, 
-                                    helping you connect with others and discover what's happening in the community.
+                                    The <strong>Community</strong> page shows recently active/new breeders, news, and your favorited animals & breeders in one place.
                                 </p>
+                                <TutorialLink lessonId="community-overview">Tour the Community page</TutorialLink>
                             </div>
                         </div>
 
@@ -86,11 +109,11 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Breeders</h3>
+                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Breeders Registry</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
-                                    In <strong>Profile</strong> (profile image circle → Profile), select your breeding status (Owner, Active Breeder, or Retired Breeder) 
-                                    for any <strong>species you have animals for</strong> on the site. This adds you to the public <strong>Breeders</strong> Registry.
+                                    In Settings → Directory, mark yourself Active/Retired Breeder per species you own to appear in the public <strong>Breeders</strong> registry.
                                 </p>
+                                <TutorialLink lessonId="getting-started-account-settings">Profile visibility & the Breeder Registry</TutorialLink>
                             </div>
                         </div>
                     </div>
@@ -104,10 +127,9 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Need Help Getting Started?</h3>
                                 <p className="text-xs text-gray-600">
-                                    Interactive tutorials are available anytime — click your <strong>profile image circle</strong> in the top-right corner and select <strong>Help</strong>. 
-                                    Learn about adding animals, the <strong>Management View</strong> for daily feeding &amp; care tracking, 
-                                    <strong> Supplies &amp; Inventory</strong>, per-animal <strong>Logs</strong>, genetics, budgeting, and more!
+                                    Interactive tutorials are available anytime — click your <strong>profile image circle</strong> and select <strong>Help</strong>.
                                 </p>
+                                <TutorialLink>Browse all tutorial lessons</TutorialLink>
                             </div>
                         </div>
                     </div>
@@ -121,10 +143,9 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">🚀 Beta Testing & Your Feedback</h3>
                                 <p className="text-xs text-gray-600">
-                                    CritterTrack is currently in <strong>beta</strong> and actively improving! We're working on bug fixes and new features. 
-                                    Throughout the platform, you'll see <strong className="text-purple-700">purple features</strong> (like the purple "Beta Feedback" button on the left side of the screen) — 
-                                    these are for beta feedback and suggestions. Don't hesitate to use them to share your thoughts, report issues, or suggest improvements. Your feedback helps shape the platform!
+                                    CritterTrack is in <strong>beta</strong>. Look for <strong className="text-purple-700">purple features</strong> like the "Beta Feedback" button to report bugs or suggest improvements.
                                 </p>
+                                <TutorialLink lessonId="report-an-issue">How to report an issue</TutorialLink>
                             </div>
                         </div>
                     </div>

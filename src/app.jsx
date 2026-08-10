@@ -1090,20 +1090,6 @@ const App = () => {
         }
     }, [authToken, userProfile]);
 
-    // First-time users: send them straight to the Tutorials page once, right after login/registration
-    useEffect(() => {
-        if (!authToken || !userProfile) return;
-        if (userProfile.hasCompletedOnboarding) return;
-
-        navigate('/tutorials');
-        setUserProfile(prev => prev ? { ...prev, hasCompletedOnboarding: true } : prev);
-        axios.post(
-            `${API_BASE_URL}/users/tutorial-complete`,
-            { isOnboardingComplete: true },
-            { headers: { Authorization: `Bearer ${authToken}` } }
-        ).catch(err => console.error('Failed to mark onboarding complete:', err));
-    }, [authToken, userProfile, navigate, API_BASE_URL]);
-
     // Fetch animals for offspring calculator when needed
     useEffect(() => {
         const fetchAnimalsForCalculator = async () => {
