@@ -671,41 +671,50 @@ const ImageEditorModal = ({ files, onComplete, onCancel }) => {
             const img = new Image();
             img.onload = () => {
                 URL.revokeObjectURL(objectUrl);
-                const canvas = document.createElement('canvas');
-                const maxWidth = 1200;
-                const maxHeight = 1200;
-                let width = img.width;
-                let height = img.height;
 
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height = Math.round((height * maxWidth) / width);
-                        width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                        width = Math.round((width * maxHeight) / height);
-                        height = maxHeight;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-
-                canvas.toBlob(
-                    (blob) => {
-                        if (!blob) {
-                            reject(new Error('Failed to encode compressed image'));
-                            return;
+                const renderAt = (maxDim, quality) => new Promise((res, rej) => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > maxDim) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
                         }
-                        const resultFile = new File([blob], file.name, { type: 'image/jpeg' });
-                        resolve(resultFile);
-                    },
-                    'image/jpeg',
-                    0.8
-                );
+                    } else {
+                        if (height > maxDim) {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        if (!blob) { rej(new Error('Failed to encode compressed image')); return; }
+                        res(blob);
+                    }, 'image/jpeg', quality);
+                });
+
+                (async () => {
+                    try {
+                        // Progressively shrink dimensions/quality until under MAX_FILE_SIZE instead of
+                        // giving up after one fixed-quality pass (which left large photos over the limit).
+                        const attempts = [
+                            [1200, 0.8], [1200, 0.6], [1000, 0.5], [800, 0.4], [600, 0.35], [500, 0.3],
+                        ];
+                        let bestBlob = null;
+                        for (const [maxDim, quality] of attempts) {
+                            const blob = await renderAt(maxDim, quality);
+                            if (!bestBlob || blob.size < bestBlob.size) bestBlob = blob;
+                            if (blob.size <= MAX_FILE_SIZE) break;
+                        }
+                        resolve(new File([bestBlob], file.name, { type: 'image/jpeg' }));
+                    } catch (err) {
+                        reject(err);
+                    }
+                })();
             };
             img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to decode image')); };
             img.src = objectUrl;
