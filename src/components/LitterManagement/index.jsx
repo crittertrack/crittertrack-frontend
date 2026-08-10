@@ -1754,6 +1754,46 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const toggleOffspringOwned = async (litterId, animalId_public, newOwnedValue) => {
+        setLitterOffspringMap(prev => ({
+            ...prev,
+            [litterId]: (prev[litterId] || []).map(a => a.id_public === animalId_public ? { ...a, isOwned: newOwnedValue } : a)
+        }));
+        window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId_public, isOwned: newOwnedValue } }));
+        try {
+            await axios.put(`${API_BASE_URL}/animals/${animalId_public}`, { isOwned: newOwnedValue }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+        } catch (error) {
+            console.error('Error updating owned status:', error);
+            setLitterOffspringMap(prev => ({
+                ...prev,
+                [litterId]: (prev[litterId] || []).map(a => a.id_public === animalId_public ? { ...a, isOwned: !newOwnedValue } : a)
+            }));
+            showModalMessage('Error', 'Failed to update owned status.');
+        }
+    };
+
+    const toggleOffspringPrivacy = async (litterId, animalId_public, newPrivacyValue) => {
+        setLitterOffspringMap(prev => ({
+            ...prev,
+            [litterId]: (prev[litterId] || []).map(a => a.id_public === animalId_public ? { ...a, showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue } : a)
+        }));
+        window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId_public, showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue } }));
+        try {
+            await axios.put(`${API_BASE_URL}/animals/${animalId_public}`, { showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+        } catch (error) {
+            console.error('Error updating privacy setting:', error);
+            setLitterOffspringMap(prev => ({
+                ...prev,
+                [litterId]: (prev[litterId] || []).map(a => a.id_public === animalId_public ? { ...a, showOnPublicProfile: !newPrivacyValue, isDisplay: !newPrivacyValue } : a)
+            }));
+            showModalMessage('Error', 'Failed to update privacy setting.');
+        }
+    };
+
     const handleDeleteLitter = async (litterId) => {
         if (!window.confirm('Are you sure you want to delete this litter? This will not delete the animals, only the litter record.')) {
             return;
@@ -3623,22 +3663,6 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                         {/* Species filter */}
                         <div className="flex flex-wrap gap-3 items-center pt-2 border-t border-gray-200 dark:border-dark-text-muted">
                             <div className="flex items-center gap-2">
-                                <label htmlFor="litter-species-filter" className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Species:</label>
-                                <select
-                                    id="litter-species-filter"
-                                    value={speciesFilter}
-                                    onChange={(e) => setSpeciesFilter(e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                                >
-                                    <option value="">All Species</option>
-                                    {DEFAULT_SPECIES_OPTIONS.map(species => (
-                                        <option key={species} value={species}>
-                                            {getSpeciesDisplayName(species)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="flex items-center gap-2 ml-auto">
                                 {filteredLitters.length > 0 && (
                                     <button
                                         onClick={toggleAllPublic}
@@ -3655,6 +3679,22 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                 )}
                             </div>
                             <div className="flex items-center gap-2">
+                                <label htmlFor="litter-species-filter" className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Species:</label>
+                                <select
+                                    id="litter-species-filter"
+                                    value={speciesFilter}
+                                    onChange={(e) => setSpeciesFilter(e.target.value)}
+                                    className="px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                >
+                                    <option value="">All Species</option>
+                                    {DEFAULT_SPECIES_OPTIONS.map(species => (
+                                        <option key={species} value={species}>
+                                            {getSpeciesDisplayName(species)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex items-center gap-2 ml-auto">
                                 <label htmlFor="litter-year-filter" className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Year:</label>
                                 <select
                                     id="litter-year-filter"
@@ -4250,21 +4290,53 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                                 )}
                                                             </div>
                                                             
+                                                            {/* Reproductive State Pill */}
+                                                            <div className="w-full flex justify-center items-center px-1">
+                                                                {(() => {
+                                                                    let state = null;
+                                                                    if (animal.isPregnant) {
+                                                                        state = { label: 'Pregnant', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300', icon: <ScanHeart size={11} className="fill-current" /> };
+                                                                    } else if (animal.isNursing) {
+                                                                        state = { label: 'Nursing', color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300', icon: <Droplet size={11} /> };
+                                                                    } else if (animal.isInMating) {
+                                                                        state = { label: 'In Mating', color: 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300', icon: <Hourglass size={11} /> };
+                                                                    } else if (animal.isPlannedMating) {
+                                                                        state = { label: 'Planned Mating', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300', icon: <Calendar size={11} /> };
+                                                                    }
+                                                                    return state ? (
+                                                                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap ${state.color}`}>
+                                                                            {state.icon} {state.label}
+                                                                        </span>
+                                                                    ) : null;
+                                                                })()}
+                                                            </div>
+
                                                             {/* Icon row */}
-                                                            <div className="w-full flex justify-center items-center space-x-2 py-1">
-                                                                {animal.isOwned ? (
-                                                                    <Heart size={12} className="text-black" />
-                                                                ) : (
-                                                                    <HeartOff size={12} className="text-black" />
-                                                                )}
-                                                                {animal.showOnPublicProfile || animal.isDisplay ? (
-                                                                    <Eye size={12} className="text-black" />
-                                                                ) : (
-                                                                    <EyeOff size={12} className="text-black" />
-                                                                )}
-                                                                {animal.isInMating && <Hourglass size={12} className="text-black" title="Mating" />}
-                                                                {animal.isPregnant && <ScanHeart size={12} className="text-black" title="Pregnant" />}
-                                                                {animal.isNursing && <Droplet size={12} className="text-black" title="Nursing" />}
+                                                            <div className="w-full flex justify-center items-center space-x-2 py-1" onClick={(e) => e.stopPropagation()}>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleOffspringOwned(litter._id, animal.id_public, !animal.isOwned)}
+                                                                    className="p-0.5 rounded hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition"
+                                                                    title={animal.isOwned ? 'Click to mark as Not Owned' : 'Click to mark as Owned'}
+                                                                >
+                                                                    {animal.isOwned ? (
+                                                                        <Heart size={12} className="text-red-600 dark:text-red-400" />
+                                                                    ) : (
+                                                                        <HeartOff size={12} className="text-gray-500 dark:text-dark-text-muted" />
+                                                                    )}
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleOffspringPrivacy(litter._id, animal.id_public, !(animal.showOnPublicProfile || animal.isDisplay))}
+                                                                    className="p-0.5 rounded hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition"
+                                                                    title={(animal.showOnPublicProfile || animal.isDisplay) ? 'Click to make Private' : 'Click to make Public'}
+                                                                >
+                                                                    {(animal.showOnPublicProfile || animal.isDisplay) ? (
+                                                                        <Eye size={12} className="text-green-600 dark:text-green-400" />
+                                                                    ) : (
+                                                                        <EyeOff size={12} className="text-gray-500 dark:text-dark-text-muted" />
+                                                                    )}
+                                                                </button>
                                                             </div>
                                                             
                                                             {/* Name */}

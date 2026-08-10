@@ -414,7 +414,7 @@ const ViewAnimalModalV2 = ({
                                             }`}
                                             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
                                         >
-                                            <Heart size={18} fill={isFavorited ? "currentColor" : "none"} />
+                                            <Star size={18} fill={isFavorited ? "currentColor" : "none"} />
                                             {isFavorited ? "Favorited" : "Favorite"}
                                         </button>
                                     )}

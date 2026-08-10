@@ -910,10 +910,25 @@ const SETTINGS_TAB_LESSONS = [
       {
         stepNumber: 2,
         title: 'The tabs across the top',
-        content: 'Animals is always there (grouped by species, with search/species/gender/status filters). Info & Adoption, Pairings, and For Sale/Stud only appear if that person has relevant content to show. Stats can be hidden via the Profile visibility checklist. Ratings is always shown.',
+        content: 'Animals is always there (grouped by species, with search/category/species/gender/status filters and A-Z/Age sorting). Info & Adoption, Pairings, and For Sale/Stud only appear if that person has relevant content to show. Stats can be hidden via the Profile visibility checklist — see the next step for what it shows. Ratings is always shown.',
       },
       {
         stepNumber: 3,
+        title: 'The Pairings tab',
+        content: 'When a breeder has pairings, they\'re grouped into up to four sections, each with its own icon and count, and each only shown if it has entries: Mated Pairings, Planned Pairings, Pregnant Pairings, and Past Pairings (born litters). Every card shows the breeding pair\'s nickname (if set) and Sire/Dam mini-cards with photo, name, variety, and ID, plus whichever dates apply — Planned Mating/Mated, Due, or Born with an auto-calculated age. Past Pairings cards also show the litter\'s Male/Female/Unknown split and total born, and a Year filter dropdown appears once litters span more than one year.',
+      },
+      {
+        stepNumber: 4,
+        title: 'The For Sale / Stud tab',
+        content: 'Split into two sections (each shown only if it has entries): For Sale and Available for Stud — an animal can appear in both if it\'s listed as both. Each card shows a photo, gender icon, name, species, and calculated age, plus a price badge (their set sale price, or "Negotiable") or a stud fee badge (their set fee, or "Negotiable"). Clicking any card opens that animal\'s full public record. These are the exact same listings that show up app-wide in the Marketplace — this tab is just that one breeder\'s slice of it.',
+      },
+      {
+        stepNumber: 5,
+        title: 'The Stats tab',
+        content: 'When shown, Stats is a live snapshot of everything else on that profile — nothing is entered manually. Summary cards cover Total Animals, Breeder Status, Pet Status, For Sale/Stud, Total Litters, Mated Pairings, Pregnant Pairings, Planned Pairings, and Total Offspring. Below that, breakdown bar-charts compare Animals by Species, Pairings by Species, Offspring by Species, and Pairings/Offspring by Year — each chart only shows up once there\'s more than one species or year to compare, so a single-species breeder won\'t see a species breakdown at all.',
+      },
+      {
+        stepNumber: 6,
         title: 'Actions on someone else\'s profile',
         content: 'Message (only if they allow messages and you\'re logged in), Favorite (star them for quick access later), Share Profile (QR code + copyable link), and Report. On your own profile these are replaced by a single "Profile Settings" button that jumps you back into Settings.',
       },
@@ -1085,11 +1100,179 @@ const SETTINGS_TAB_LESSONS = [
   },
 ];
 
+// "The Litter Management: A Feature-by-Feature Tour" section.
+const LITTER_MANAGEMENT_LESSONS = [
+  {
+    id: 'litter-management',
+    title: 'Litter Management: Overview',
+    description: 'What the Litter Management page tracks, and how to find your way around the list.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'What this page tracks',
+        content: 'Every pairing you record — from a planned mating all the way through birth and weaning — lives in one list here. Litters are always sorted with the most active statuses first (Pregnant, then Mated, then Planned, then Born), and newest date first within each status.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Quick stats and recalculating counts',
+        content: 'The stats bar at the top shows your total litters plus running Male/Female/Unknown offspring counts. If those numbers ever look off (e.g. after editing offspring directly), the "Recalculate" button reconciles every litter\'s gender counts and totals against its actually-linked offspring.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Searching, filtering, and sorting',
+        content: 'Search by CTL-ID, litter nickname, or sire/dam name or ID. The status pills (All/Pregnant/Mated/Planned/Born) narrow the list to one stage at a time, and the Species and Year dropdowns filter further — Year is based on birth date (or mating/pairing date if unborn).',
+      },
+      {
+        stepNumber: 4,
+        title: 'Making litters public',
+        content: 'The eye icon on each card toggles that one litter\'s visibility on your public profile\'s Pairings tab. The "Make All Public" button (top of the list) flips every currently-filtered litter at once, and shows "All Public" once none are hidden.',
+      },
+    ],
+  },
+  {
+    id: 'litter-planned-mating',
+    title: 'Recording a Planned Mating',
+    description: 'Starting a new pairing record before anything has happened yet.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Starting a mating record',
+        content: 'The "+ Mating" button opens a quick-add form for a future or just-happened pairing. Species is required and, once set, locks in place — you can\'t change a litter\'s species after starting it.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Picking sire and dam',
+        content: 'Sire and Dam each open a search modal that can look through your own animals, the global database, or both (toggle at the top). Sire search is filtered to Male/Intersex/Mixed/Unknown, Dam to Female/Intersex/Mixed/Unknown, and both must match the litter\'s species — a dam who died before the litter\'s birth date is blocked from being selected.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Predicted inbreeding coefficient',
+        content: 'As soon as both parents are picked, a "Predicted COI" percentage calculates automatically (shown while a "Calculating..." spinner runs). It\'s cached per sire/dam pairing for the rest of your session so switching back and forth doesn\'t re-fetch it every time.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Optional breeding details and saving',
+        content: 'An expandable "Breeding Details" section lets you log the mating date, expected due date, breeding method, and condition — all optional at this stage. "Save Mating" records it as a Planned pairing.',
+      },
+    ],
+  },
+  {
+    id: 'litter-status-transitions',
+    title: 'From Planned to Born: Status Transitions',
+    description: 'How a pairing moves through its stages, and the shortcuts for doing it quickly.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Status badges',
+        content: 'Every card shows one status badge: Planned (purple, dashed border), Mated (sky blue), Pregnant (pink), or Born (gray). The badge and border color are the fastest way to scan the list for where each pairing stands.',
+      },
+      {
+        stepNumber: 2,
+        title: 'One-click transitions',
+        content: 'Instead of opening the full edit form, small pill buttons right on the card header let you advance a pairing instantly: "Mated Today", "Assign Pregnant", "Born Today", and "Wean Today" — each one stamps today\'s date and updates the dam\'s state (e.g. marking her pregnant or nursing) in a single click.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Editing a still-planned mating',
+        content: 'Clicking a card that\'s still Planned opens a chooser instead of the full form: "Edit Mating" (change sire, dam, dates, or notes) or "Convert to Litter" (jump straight into recording birth details).',
+      },
+    ],
+  },
+  {
+    id: 'litter-birth-details',
+    title: 'Recording Birth Details',
+    description: 'Everything you can fill in once a litter has actually arrived.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Litter identity',
+        content: 'Once created, a litter gets an auto-assigned, read-only CTL-ID for system linkage. The Litter Name field is an optional nickname (e.g. "Summer 2025 Litter A") that shows on the card header instead of the raw ID.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Dates and birth method',
+        content: 'Birth Date and Weaning Date are both date pickers (birth date can\'t be in the future). Once a birth date is set, a Birth Method dropdown appears: Natural, C-Section, Assisted, Induced, or Unknown.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Gender counts and total born',
+        content: 'Male, Female, and Unknown fields track the gender breakdown. Total Born is read-only and auto-calculates as the largest of: your manual entry, the M+F+U sum, or however many offspring are actually linked — so it can never drop below what\'s already linked.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Stillborn and losses',
+        content: 'Checking "Extract stillborn from total counts" (or the equivalent for losses) subtracts gender-specific stillborn/loss entries from your M/F/U counts automatically, so the same offspring aren\'t double-counted as both born and lost. Weaned count is a separate, fully manual field.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Notes and photos',
+        content: 'Notes is a free-text field for anything worth remembering about the litter. Up to 5 photos can be attached (PNG/JPEG, 500 KB max each) — hover a thumbnail to delete it, and in the expanded card view you can click any photo for a fullscreen lightbox with a download button.',
+      },
+    ],
+  },
+  {
+    id: 'litter-offspring-management',
+    title: 'Managing Offspring',
+    description: 'Getting the actual animal records connected to (or created from) a litter.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Linking existing animals',
+        content: 'If animals matching the litter\'s sire, dam, and birth date already exist in your herd, they show up as a checklist — tick any to link them to this litter. If an animal\'s birthdate doesn\'t match the litter\'s yet, you\'ll be asked to confirm before it\'s linked.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Creating offspring in bulk',
+        content: 'Once sire, dam, and birth date are all set, buttons like "+ Add 3 remaining males" appear based on your gender counts minus whatever\'s already linked. Clicking one creates placeholder animals (named M1, M2, F1, F2, U1, etc.) with species, parents, and birthdate pre-filled — fully editable afterward.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Adding one at a time',
+        content: 'The expanded card also has an inline "Add Offspring" form for creating a single animal on the spot — Name and Gender are required, with Color, Coat, and Remarks optional.',
+      },
+      {
+        stepNumber: 4,
+        title: 'The offspring grid',
+        content: 'Linked offspring show as a card grid with status icons (Heart for owned, Eye for public, Hourglass/ScanHeart/Droplet for in-mating/pregnant/nursing). The orange Unlink icon removes an animal from the litter without deleting its record, while a separate bulk-delete mode (red Trash button) lets you select multiple and delete the animals themselves.',
+      },
+    ],
+  },
+  {
+    id: 'litter-expanded-view',
+    title: 'The Expanded Litter Card',
+    description: 'What you see when you click a card open, beyond the compact summary.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Parents and COI',
+        content: 'Sire and dam appear as clickable mini-cards (photo, name, species, ID) — clicking either opens that animal\'s full record, unless they\'ve been transferred away. The inbreeding coefficient badge sits between them, showing a loading skeleton until the calculation finishes.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Breeding and birth info',
+        content: 'A dedicated block lists every date and detail you\'ve recorded — mating date, expected due date, breeding method/condition, outcome (green for Successful, red for Unsuccessful), birth method, birth date with calculated age, and weaning date.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Stats and photos',
+        content: 'A tally section shows Born, Stillborn, Weaned, and Losses alongside the Male/Female/Unknown breakdown. Below that, any attached photos appear as a thumbnail gallery you can click through in the lightbox.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Pedigree and editing',
+        content: 'Horizontal and Vertical Pedigree buttons (shown once both parents are set) open that pairing\'s family tree. The Edit button reopens the full litter form — or the Edit/Convert chooser if the pairing is still only Planned.',
+      },
+    ],
+  },
+];
+
+
 const TUTORIAL_SECTIONS = [
   { id: 'getting-started', label: '🚀 Getting Started', lessons: GETTING_STARTED_LESSONS },
   { id: 'animal-record-tour', label: '🐾 The Animal Record: A Tab-by-Tab Tour', lessons: ANIMAL_RECORD_TAB_LESSONS },
   { id: 'animal-list-tour', label: '📋 The Animal List: A Tab-by-Tab Tour', lessons: ANIMAL_LIST_TOUR_LESSONS },
   { id: 'settings-tour', label: '⚙️ Profile & Settings: A Tab-by-Tab Tour', lessons: SETTINGS_TAB_LESSONS },
+  { id: 'litter-management-tour', label: '🐣 The Litter Management: A Feature-by-Feature Tour', lessons: LITTER_MANAGEMENT_LESSONS },
 ];
 
 const ALL_LESSONS_ARRAY = TUTORIAL_SECTIONS.flatMap(section => section.lessons);

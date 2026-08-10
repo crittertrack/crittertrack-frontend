@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Users, Heart, Edit, ShoppingBag, UserPlus, Search, Loader2, Cat, Mars, Venus, VenusAndMars, Circle, User } from 'lucide-react';
+import { Users, Star, Edit, ShoppingBag, UserPlus, Search, Loader2, Cat, Mars, Venus, VenusAndMars, Circle, User } from 'lucide-react';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 
 const MyFeed = ({ authToken, API_BASE_URL }) => {
@@ -102,7 +102,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
     return (
         <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-md p-4">
             <h2 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4 flex items-center gap-2">
-                <Heart className="text-purple-500" />
+                <Star className="text-purple-500" />
                 Favorites
             </h2>
             {/* Favorite Animals */}
@@ -165,7 +165,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                                         }}
                                         className="p-2 text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition flex-shrink-0"
                                     >
-                                        <Heart size={18} fill="currentColor" />
+                                        <Star size={18} fill="currentColor" />
                                     </button>
                                 </div>
                             );
@@ -230,7 +230,7 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                                         }}
                                         className="p-2 text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition"
                                     >
-                                        <Heart size={18} fill="currentColor" />
+                                        <Star size={18} fill="currentColor" />
                                     </button>
                                 </div>
                             );

@@ -735,7 +735,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     } ${favoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
                                 >
-                                    <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
+                                    <Star size={16} fill={isFavorited ? 'currentColor' : 'none'} />
                                     {isFavorited ? 'Favorited' : 'Favorite'}
                                 </button>
                             )}
