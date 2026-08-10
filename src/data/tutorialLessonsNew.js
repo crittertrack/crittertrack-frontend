@@ -470,6 +470,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 6,
         title: 'Reproductive Health & Delivery',
         content: 'Reproductive Health & Procedures covers Artificial Reproduction Method (AI, Embryo Transfer, In Vitro), Last Reproductive Intervention Date, a "Dependent Care Required" checkbox for species that need parental care, and a free-text Reproductive Health Notes box for clearances/restrictions. Delivery & Breeding Health tracks Last Delivery Date, Delivery Method, Reproductive Complications, and (species-conditional) Reproductive Clearances.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 7,
@@ -492,6 +493,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 2,
         title: 'Linking a CritterTrack ancestor',
         content: 'Switch a slot to "Link CTC" and click "Search CTC Animal?" to open the search modal — it can match one of your own animals or any other public animal on the site, and automatically filters to the correct gender for that slot (e.g. only males for a Sire slot). Once linked, the slot shows that animal\'s photo, name, variety, and CTC ID; click "Unlink" to remove the connection without deleting anything.',
+        screenshotCount: 3,
       },
       {
         stepNumber: 3,
@@ -513,10 +515,20 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Adding photos (from the Dashboard tab)',
-        content: 'Photos aren\'t added from the Gallery tab itself — click the "+" tile next to the main photo on the Dashboard tab (or the empty main image box) to pick one or more files. Each one opens in an editor where you can rotate and crop before it\'s added; images are also automatically compressed toward a small file size so galleries stay fast to load.',
+        content: 'Photos aren\'t added from the Gallery tab itself — click the "+" tile next to the main photo on the Dashboard tab (or the empty main image box) to pick one or more files at once. Each file opens one at a time in an editor for rotating/cropping before it\'s added; images are also automatically compressed toward a small file size so galleries stay fast to load.',
       },
       {
         stepNumber: 2,
+        title: 'Rotating and cropping each photo',
+        content: 'In the editor, click "Rotate 90°" repeatedly (or pick a value from the dropdown) to spin the image in 90° steps. Check "Enable Crop" to reveal a draggable crop box — drag its corner handles right on the preview, or type exact X/Y/Width/Height percentages, then click "Next Image" (or "Finish & Add to Gallery" on the last one) to apply the rotation and crop and move on.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Working through multiple photos',
+        content: 'The editor header shows your progress as "N / total" when you\'ve selected several files, processing one at a time. If a photo fails to preview or can\'t be compressed, a warning appears and a "Skip This Photo" button shows up next to Cancel so you can move past it without losing the rest of the batch.',
+      },
+      {
+        stepNumber: 4,
         title: 'Managing the gallery',
         content: 'Once you have photos, switch to the Gallery tab for the full management view. Hover any image for controls: the star sets it as the primary photo (the one shown on cards and as the main Dashboard image — outlined in your accent color), the left/right arrows reorder it, and the trash icon deletes it. A number badge on each photo always shows its current position, with position 1 being primary.',
       },
