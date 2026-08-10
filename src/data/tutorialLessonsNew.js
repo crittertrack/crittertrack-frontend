@@ -911,6 +911,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
         stepNumber: 5,
         title: 'The Alerts dropdown',
         content: 'The "Alerts On/Off" button (bell icon) in the dashboard row opens a checklist of categories — Feeding, Grooming/Special Care, Training, Reproduction, Medical/Quarantine, Enclosure Maintenance, Supply Restocking, and Birthdays — controlling which of these show up in the notification ticker at the very top of every page, not just this one.',
+        screenshotCount: 2,
       },
     ],
   },
