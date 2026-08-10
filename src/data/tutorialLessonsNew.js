@@ -192,7 +192,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 2,
         title: 'Identity',
-        content: 'Prefix / Name / Suffix, Gender, Date of Birth, Status (with a Deceased Date field that only appears once Status is set to Deceased), and a free-text Remarks box for general notes.',
+        content: 'Prefix / Name / Suffix, Gender, Date of Birth, Status (with a Deceased Date field that only appears once Status is set to Deceased). Changing Status to Rehomed pops up a confirmation asking if you\'d also like to archive the animal\'s record — archiving hides it from your main lists but keeps it fully intact in pedigrees. A free-text Remarks box is also here for general notes.',
       },
       {
         stepNumber: 3,
@@ -208,6 +208,70 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 5,
         title: 'Availability',
         content: 'Two independent checkboxes: "Available for Sale" (with a price + currency, or "Negotiable") and "Available for Stud/Breeding" (with a fee + currency). Checking one is what actually puts the animal on the Marketplace — but only once the animal\'s own Public/Private toggle is also set to Public.',
+      },
+    ],
+  },
+  {
+    id: 'animal-tab-identification',
+    title: 'Animal Record: Identification Tab',
+    description: 'ID numbers, classification, origin, and tags — all in collapsible sections.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Identification Numbers',
+        content: 'Breeder Assigned ID and Colony ID are always available. Microchip Number, Pedigree Registration ID, Tattoo ID, Ring ID, and Ear Tag only appear if your species uses them — this keeps the form from showing irrelevant fields like "Ear Tag" on a fish.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Additional Identifiers',
+        content: 'Need to track something with no dedicated field (e.g. a DNA test ID or a club registration number)? Type a Title and Value, then click the green + button to add it as its own row. Add as many as you like, and click the trash icon on any row to remove it.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Classification',
+        content: 'Species is locked and can never be changed after the animal is created. Breed is free text, and Strain (for species that use it) is a free-text field for genetic/research lines like "C57BL/6" or "Wistar".',
+      },
+      {
+        stepNumber: 4,
+        title: 'Origin',
+        content: 'A simple dropdown for species that track it: Captive-bred, Wild-caught, or Rescue.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Tags',
+        content: 'A free-form tagging field for anything you want to group by — lines, enclosures, projects, etc. Type a tag and press Enter or comma to add it, Backspace on an empty field removes the last tag, and each tag shows as a pill you can click the × on to remove individually.',
+      },
+    ],
+  },
+  {
+    id: 'animal-tab-appearance',
+    title: 'Animal Record: Appearance Tab',
+    description: 'Descriptive traits, the visual Genetic Code Builder, Life Stage, and growth tracking.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Appearance fields',
+        content: 'Color, Pattern, Coat Type, Morph, Markings, Eye Color, Size, and Carrier Traits are free text so you can describe your animal however your species/hobby community does. A few fields are species-specific and only appear when relevant — e.g. Earset only shows up for Rats, and Nail Color only for species that track it.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Genetic Code Builder',
+        content: 'For Fancy Mouse and Fancy Rat, click the "Add" button to open a full visual builder: a dropdown per gene locus, with a live-updating Phenotype and Carried gene preview as you pick genotypes. Use "Switch to Manual" to type/paste a code directly instead (e.g. "A/A B/b C/C"). For every other species, it\'s a simple manual text field — if your species isn\'t supported yet, you can click "Submit Genetics Info" to help the community add it.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Life Stage',
+        content: 'A dropdown: Newborn, Juvenile, Sub-Adult, Adult, Senior, or Mixed. This isn\'t auto-calculated from age — you set it manually.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Adding a measurement',
+        content: 'Under "Add New Measurement," pick a date and enter Weight, Body Length, Height at Withers, Chest Girth, and/or a Body Condition Score (the BCS scale itself changes based on species — Dogs use a 1-9 scale, Cats and others use 1-5). Add optional Notes, then click "Add Measurement" to save it as a new dated entry.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Tracking growth over time',
+        content: 'A "Current Measurements" summary always shows the most recent values. Once you\'ve logged 2+ weight entries, a Weight Growth Curve chart appears automatically — hover any point to see its exact date/weight/notes. You can switch Weight and Length units anytime (g/kg/lb/oz, cm/m/in/ft), and delete any past entry from the Measurements list with the trash icon.',
       },
     ],
   },

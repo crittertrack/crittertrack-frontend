@@ -64,7 +64,6 @@ import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Im
 import { ConflictResolutionModal, LitterSyncConflictModal } from './components/Modals/LitterConflictModals';
 import { ParentSearchModal, LocalAnimalSearchModal, UserSearchModal } from './components/Modals/SearchModals';
 import { SpeciesPickerModal, SpeciesManager, SpeciesSelector } from './components/Modals/SpeciesModals';
-import { CommunityGeneticsModal } from './components/Modals/CommunityGeneticsModal';
 import { MessagesView } from './components/Messages/MessagesView';
 
 // Phase 10: Custom Hooks for App state decomposition

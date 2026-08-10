@@ -19,7 +19,7 @@ const CommunityGeneticsModal = ({ species, onClose, authToken, API_BASE_URL, sho
         
         try {
             await axios.post(
-                `${API_BASE_URL}/api/species-genetics-feedback`,
+                `${API_BASE_URL}/species-genetics-feedback`,
                 {
                     species,
                     ...formData,

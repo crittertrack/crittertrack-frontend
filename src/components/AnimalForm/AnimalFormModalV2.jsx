@@ -14,6 +14,7 @@ import { computeIsInTreatment, calculateHealthStatus as calculateHealthStatusSha
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import AnimalImageUpload from '../AnimalImageUpload';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
+import { CommunityGeneticsModal } from '../Modals/CommunityGeneticsModal';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from '../AnimalList/LocationManagerModal';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
@@ -1563,6 +1564,7 @@ const AnimalFormModalV2 = ({
 
     // Enclosure states
     const [showEnclosureModal, setShowEnclosureModal] = useState(false);
+    const [showCommunityGeneticsModal, setShowCommunityGeneticsModal] = useState(false);
     const [availableEnclosures, setAvailableEnclosures] = useState([]);
     const [loadingEnclosures, setLoadingEnclosures] = useState(false);
     const [locations, setLocations] = useState([]);
@@ -4064,7 +4066,7 @@ const AnimalFormModalV2 = ({
                                     </div>
                                 </FormSection>
                                 <FormSection title="Genetic Code" icon={<Dna size={16} />}>
-                                    <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} />
+                                    <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)} />
                                 </FormSection>
                                 <FormSection title={fieldLabel('lifeStage', 'Life Stage')} icon={<Sprout size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -6697,6 +6699,15 @@ const AnimalFormModalV2 = ({
                     </div>
                 </div>
             </form>
+            {showCommunityGeneticsModal && (
+                <CommunityGeneticsModal
+                    species={formData.species}
+                    onClose={() => setShowCommunityGeneticsModal(false)}
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    showModalMessage={showModalMessage}
+                />
+            )}
             {showAssignEnclosureModal && (
                 <AssignEnclosureModal
                     isOpen={showAssignEnclosureModal}
