@@ -919,14 +919,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     {/* Search, Category/Species/Gender/Status dropdowns, and A-Z/Age sort */}
                     <div className="flex flex-wrap xl:flex-nowrap items-center gap-2">
                         {/* Name / ID search */}
-                        <div className="flex gap-1.5 items-center">
+                        <div className="flex gap-1.5 items-center flex-1 min-w-[160px]">
                             <Search size={15} className="text-gray-400 dark:text-dark-text-muted flex-shrink-0" />
                             <input
                                 type="text"
                                 value={animalSearch}
                                 onChange={(e) => setAnimalSearch(e.target.value)}
                                 placeholder="Search name or ID"
-                                className="p-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-32"
+                                className="p-1.5 text-sm border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full"
                             />
                         </div>
                         {/* Category dropdown */}
