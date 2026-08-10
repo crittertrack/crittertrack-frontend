@@ -142,7 +142,9 @@ const TutorialsPage = () => {
                     const currentStep = selectedLesson.steps[currentStepIndex];
                     const totalSteps = selectedLesson.steps.length;
                     const screenshotUrl = getStepScreenshot(selectedLesson.id, currentStep.stepNumber || currentStepIndex + 1);
+                    const currentSection = sections.find(s => s.lessons.some(l => l.id === selectedLesson.id));
                     const expectedFilename = titleToFilename(currentStep.title) + '.png';
+                    const suggestedPath = `/images/tutorials/${currentSection?.id || 'unknown-tour'}/${expectedFilename}`;
 
                     return (
                       <div className="space-y-4">
@@ -196,6 +198,7 @@ const TutorialsPage = () => {
                                   <div className="text-4xl mb-2">📸</div>
                                   <p className="text-gray-500 text-sm font-medium">Screenshot: {expectedFilename}</p>
                                   <p className="text-gray-400 text-xs mt-1">Image not found</p>
+                                  <p className="text-gray-400 text-xs mt-1 font-mono">Save to: {suggestedPath}</p>
                                 </div>
                               </div>
                             </div>
@@ -205,6 +208,7 @@ const TutorialsPage = () => {
                                 <div className="text-4xl mb-2">📸</div>
                                 <p className="text-gray-500 text-sm font-medium">Screenshot: {expectedFilename}</p>
                                 <p className="text-gray-400 text-xs mt-1">Visual guide coming soon</p>
+                                <p className="text-gray-400 text-xs mt-1 font-mono">Save to: {suggestedPath}</p>
                               </div>
                             </div>
                           )}
