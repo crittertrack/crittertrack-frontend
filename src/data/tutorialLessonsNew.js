@@ -703,7 +703,8 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 1,
         title: 'Creating a collection',
-        content: 'Switch to the Collections view and click "Manage Collections" to open the manager. Type a name in the "New collection name…" box and click Create.',
+        content: 'Switch to the Collections view and click "Manage Collections" to open the manager. Type a name in the "New collection name…" box and click Create. Click the small icon button next to the name box (or next to an existing collection\'s name) to open a picker with preset colors and a curated set of icons — your choice shows up in the collection\'s section header and in the "Add to collection" menu, making it easier to tell collections apart at a glance.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 2,
@@ -722,11 +723,6 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       },
       {
         stepNumber: 5,
-        title: 'Customizing color and icon',
-        content: 'Click the small icon button next to a collection\'s name (or next to the "New collection name…" box while creating one) to open a picker with preset colors and a curated set of icons. Your choice shows up in the collection\'s section header and in the "Add to collection" menu, making it easier to tell collections apart at a glance.',
-      },
-      {
-        stepNumber: 6,
         title: 'Card view vs. Table view',
         content: 'Like the main list, Collections view has its own Card/Table toggle, and each collection section (plus the Uncategorized group) can be collapsed independently.',
       },

@@ -3955,7 +3955,7 @@ useEffect(() => {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-7 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onViewAnimal(animal)}>
-                    <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
+                    <AnimalImage src={animal.imageUrl} alt={animal.name} className="w-8 h-8 rounded-md object-cover flex-shrink-0" iconSize={16} />
                     <div className="min-w-0">
                         <div className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</div>
                         <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">{animal.species}</div>
