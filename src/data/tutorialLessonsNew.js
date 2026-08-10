@@ -290,6 +290,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
         stepNumber: 5,
         title: 'Tracking growth over time',
         content: 'A "Current Measurements" summary always shows the most recent values. Once you\'ve logged 2+ weight entries, a Weight Growth Curve chart appears automatically — hover any point to see its exact date/weight/notes. You can switch Weight and Length units anytime (g/kg/lb/oz, cm/m/in/ft), and delete any past entry from the Measurements list with the trash icon.',
+        screenshotCount: 2,
       },
     ],
   },
