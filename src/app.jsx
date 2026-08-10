@@ -468,9 +468,10 @@ const App = () => {
     
     // Wrapper around handleSaveAnimal to trigger data refresh on any save
     const handleSaveAnimalWithRefresh = async (...args) => {
-        await handleSaveAnimal(...args);
+        const result = await handleSaveAnimal(...args);
         // Trigger full refresh of animal data after save
         setAnimalDataRefreshTrigger(t => t + 1);
+        return result;
     };
 
     // Add Sibling: open blank form pre-filled with same species/birthdate/parents

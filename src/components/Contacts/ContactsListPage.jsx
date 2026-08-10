@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Users, Plus, Search, UserCheck, Loader2 } from 'lucide-react';
+import { Users, Plus, Search, UserCheck, Loader2, Cat, Heart } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
 
 const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
@@ -181,6 +181,16 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                                         )}
                                                         {contact.address?.country && (
                                                             <span>{contact.address.country}</span>
+                                                        )}
+                                                        {contact.ownedAnimalsCount > 0 && (
+                                                            <span className="flex items-center gap-1" title="Owned Animals">
+                                                                <Cat size={14} /> {contact.ownedAnimalsCount}
+                                                            </span>
+                                                        )}
+                                                        {contact.bredAnimalsCount > 0 && (
+                                                            <span className="flex items-center gap-1" title="Bred Animals">
+                                                                <Heart size={14} /> {contact.bredAnimalsCount}
+                                                            </span>
                                                         )}
                                                     </div>
                                                 </div>

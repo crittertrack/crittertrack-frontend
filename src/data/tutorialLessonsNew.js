@@ -1266,6 +1266,292 @@ const LITTER_MANAGEMENT_LESSONS = [
   },
 ];
 
+// "More Pages & Tools" section — Contacts, Marketplace, Calendar, Community, the Tools
+// calculators, Finance, Messages/Notifications, Breeder Directory, and support pages.
+const MORE_PAGES_LESSONS = [
+  {
+    id: 'contacts-overview',
+    title: 'Contacts',
+    description: 'Keeping track of the keepers and breeders you deal with, separate from your own animal records.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'What Contacts tracks',
+        content: 'Each contact stores a Personal Name and/or Breeder Name/Kennel, prefix/suffix, and full address, plus a Keeper/Breeder role — kept separate from your own animal collection, for people you buy from, sell to, or breed with.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Search, filter, and add',
+        content: 'Search by name and narrow the list by Country from the dropdown. "Add Contact" opens the Add New Contact form; clicking any existing contact opens their profile.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Reading a contact\'s card',
+        content: 'Each row shows their linked CritterTrack ID (if any), country, and how many animals you\'ve recorded as owned by them or bred by them, at a glance — no need to open their profile just to check.',
+      },
+    ],
+  },
+  {
+    id: 'contacts-add',
+    title: 'Adding a Contact',
+    description: 'Creating a new record for a keeper or breeder.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Filling in the details',
+        content: 'Personal Name, Breeder Name/Kennel, Prefix/Suffix, and full address are all optional — fill in whatever you actually know about them, then save.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Linking a CritterTrack user',
+        content: '"Search" next to Linked CritterTrack User lets you look up and attach an actual CritterTrack profile (their CTU ID) to this contact — this is optional, but once linked, any of your animals with that CTU ID recorded as breeder or owner automatically show up under this contact\'s Owned/Bred Animals tabs, instead of relying only on manual per-animal assignment.',
+      },
+    ],
+  },
+  {
+    id: 'contacts-detail',
+    title: 'A Contact\'s Profile',
+    description: 'The three tabs shown on an individual contact\'s page.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Overview, Owned Animals, Bred Animals',
+        content: 'Overview shows this contact\'s saved details, including their linked CritterTrack ID if one was attached. Owned Animals lists your animals linked to them as buyer/owner; Bred Animals lists ones linked to them as breeder — each tab\'s count badge shows how many, matched either through their linked CTU ID or manual per-animal assignment.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Getting back to the list',
+        content: '"Back to Contacts" at the top returns you to the full list; "Edit" opens this contact\'s details for editing.',
+      },
+    ],
+  },
+  {
+    id: 'contacts-edit',
+    title: 'Editing a Contact',
+    description: 'Updating a contact\'s saved details.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Updating the record',
+        content: 'The same fields as Add New Contact, pre-filled with their current details, including their linked CritterTrack user if one was set — change anything (or link/unlink a user) and save.',
+      },
+    ],
+  },
+  {
+    id: 'marketplace-overview',
+    title: 'Marketplace',
+    description: 'Browsing animals other breeders have listed for sale or stud.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Listing type tabs',
+        content: 'All Listings, For Sale, and For Stud are separate tabs — an animal can appear under both Sale and Stud if it\'s listed as both.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Filtering and taking action',
+        content: 'Narrow the list by species or location, then click any animal to view its full details or message the seller directly from there. This is the exact same pool of listings shown on each breeder\'s own public profile "For Sale / Stud" tab — Marketplace is just the combined, app-wide view of all of them.',
+      },
+    ],
+  },
+  {
+    id: 'calendar-overview',
+    title: 'Calendar',
+    description: 'One combined schedule for every upcoming reproductive and care event.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'One combined schedule',
+        content: 'Upcoming matings, due dates, births, weaning, feeding/care tasks, and other scheduled events all show on the same calendar, instead of being spread across separate pages.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Searching and filtering events',
+        content: 'The search box filters by pair, litter ID, sire/dam, animal, or enclosure. "Event Types" lets you show or hide whole categories of events at once.',
+      },
+    ],
+  },
+  {
+    id: 'community-overview',
+    title: 'Community',
+    description: 'Recent breeder activity, news, the Breeder Directory, and your favorites, all in one place.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Recent Activity',
+        content: 'Up to 5 currently-active or newly-joined breeders (marked NEW) show at the top — click any of them to jump straight to their public profile.',
+      },
+      {
+        stepNumber: 2,
+        title: 'News, Breeder Directory, and My Feed',
+        content: 'Below that sit three panels: community News, an embedded Breeder Directory search (collapsible on mobile), and My Feed — your favorited animals and favorited breeders together in one place.',
+      },
+    ],
+  },
+  {
+    id: 'offspring-calculator',
+    title: 'Offspring Calculator',
+    description: 'Predicting possible offspring outcomes for a hypothetical pairing.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Predicting offspring outcomes',
+        content: 'Pick a species, then set a sire and dam\'s genetic traits to predict possible offspring outcomes and their probabilities — this is purely hypothetical trait math, not tied to two of your actual animals.',
+      },
+    ],
+  },
+  {
+    id: 'coi-calculator',
+    title: 'COI Calculator',
+    description: 'Testing a hypothetical pairing\'s inbreeding risk before committing to it.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Testing a hypothetical pairing',
+        content: 'Filter by species, then choose a sire and dam to calculate the predicted Coefficient of Inbreeding for their potential offspring, based on shared ancestors. This is separate from the actual COI shown automatically on an already-linked animal\'s own Dashboard — use this calculator to test a pairing before it happens.',
+      },
+    ],
+  },
+  {
+    id: 'family-tree-explorer',
+    title: 'Family Tree Explorer',
+    description: 'Exploring one of your animals\' full pedigree as an interactive tree.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Loading a pedigree tree',
+        content: 'Select a species, then one of your own animals, to load its full pedigree as an interactive, explorable tree.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Direct vs. Full mode',
+        content: '"Direct" shows only the straight sire/dam ancestor line; "Full" expands the tree to show all known relatives at each generation.',
+      },
+    ],
+  },
+  {
+    id: 'target-outcome-calculator',
+    title: 'Target Outcome Calculator',
+    description: 'Finding a pairing from your own animals likely to produce a specific trait.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Finding a pairing for a specific trait',
+        content: 'Choose a species and a target genetic outcome, and it searches your own animals for sire/dam pairings likely to produce that specific trait or outcome.',
+      },
+    ],
+  },
+  {
+    id: 'budget-tracker',
+    title: 'Budget Tracker',
+    description: 'Tracking income and expenses from your animals and supplies.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Tracking income and expenses',
+        content: 'Log transactions from animal sales, purchases, and other costs. The currency selector changes the symbol shown across the entire page.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Exporting your records',
+        content: '"Export CSV" downloads your full transaction history for use elsewhere.',
+      },
+    ],
+  },
+  {
+    id: 'supplies-inventory',
+    title: 'Supplies & Inventory',
+    description: 'Tracking stock levels, reorder thresholds, and costs for feed and supplies.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Tracking stock levels',
+        content: 'Each supply item tracks its current stock, a reorder threshold, cost per unit, and optionally a next-order date and reorder frequency.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Attention alerts',
+        content: 'Items that have dropped below their reorder threshold, or whose next-order date has passed, automatically show up in the alert banner at the top of the page.',
+      },
+    ],
+  },
+  {
+    id: 'messages-overview',
+    title: 'Messages',
+    description: 'Direct messaging with other breeders.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Direct messaging',
+        content: 'Message other breeders directly, including sharing images within a conversation.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Managing a conversation',
+        content: 'Block or report a user, or delete a conversation entirely, from that conversation\'s own options menu.',
+      },
+    ],
+  },
+  {
+    id: 'notifications-overview',
+    title: 'Notifications',
+    description: 'Transfer requests, link requests, and announcements in one panel.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'What shows up here',
+        content: 'Transfer requests, link requests, and system announcements all appear together in this one panel.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Acting on a notification',
+        content: 'Accept or decline requests directly from the panel, or delete any notification you no longer need.',
+      },
+    ],
+  },
+  {
+    id: 'breeder-directory',
+    title: 'Breeder Directory',
+    description: 'Finding breeders who\'ve opted into the public directory.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Finding breeders',
+        content: 'Browse breeders who\'ve opted in via their own Settings → Directory tab, and search or filter by species, country, or state to narrow the list down.',
+      },
+    ],
+  },
+  {
+    id: 'report-an-issue',
+    title: 'Report an Issue',
+    description: 'Sending a bug report, feature suggestion, or general feedback to the developer.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Reaching the developer directly',
+        content: 'Pick a category, then describe a bug, suggest a feature, or share general feedback — this goes straight to the developer, not to other users.',
+      },
+    ],
+  },
+  {
+    id: 'helpful-resources',
+    title: 'Helpful Resources',
+    description: 'A curated directory of external links for care, health, and genetics.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'A curated external link directory',
+        content: 'Browse external links for care, health, genetics, and more, filtered by species, subject, or tag.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Suggesting a resource',
+        content: 'Logged-in users can paste a link (or just describe one) via "Suggest a Resource" for the team to review and potentially add to the directory.',
+      },
+    ],
+  },
+];
+
 
 const TUTORIAL_SECTIONS = [
   { id: 'getting-started', label: '🚀 Getting Started', lessons: GETTING_STARTED_LESSONS },
@@ -1273,6 +1559,7 @@ const TUTORIAL_SECTIONS = [
   { id: 'animal-list-tour', label: '📋 The Animal List: A Tab-by-Tab Tour', lessons: ANIMAL_LIST_TOUR_LESSONS },
   { id: 'settings-tour', label: '⚙️ Profile & Settings: A Tab-by-Tab Tour', lessons: SETTINGS_TAB_LESSONS },
   { id: 'litter-management-tour', label: '🐣 The Litter Management: A Feature-by-Feature Tour', lessons: LITTER_MANAGEMENT_LESSONS },
+  { id: 'more-pages-tour', label: '📚 More Pages & Tools', lessons: MORE_PAGES_LESSONS },
 ];
 
 const ALL_LESSONS_ARRAY = TUTORIAL_SECTIONS.flatMap(section => section.lessons);

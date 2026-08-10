@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Edit } from 'lucide-react';
+import { Edit, ArrowLeft } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
 
 const ContactDetail = ({ API_BASE_URL, authToken }) => {
@@ -68,12 +68,18 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
 
     return (
         <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <button
+                onClick={() => navigate('/contacts')}
+                className="flex items-center text-gray-600 hover:text-gray-800 transition mb-4"
+            >
+                <ArrowLeft size={18} className="mr-1" /> Back to Contacts
+            </button>
             <header className="mb-6 flex justify-between items-start">
                 <div>
                     <h1 className="text-2xl font-bold flex items-center gap-2">
                         {contactData.details.breederName || contactData.details.personalName}
                         <InfoButton title="Contact Profile" lessonId="contacts-detail">
-                            <p>Overview shows this contact's saved details. Owned Animals and Bred Animals list your animals linked to them as buyer/seller or sire/dam.</p>
+                            <p>Overview shows this contact's saved details. Owned Animals lists animals recorded as owned by them; Bred Animals lists ones recorded as bred by them — matched either through their linked CritterTrack account or by manually setting them as the Owner/Breeder on an animal's Contacts fields.</p>
                         </InfoButton>
                     </h1>
                     <p className="text-gray-500">Contact Profile</p>

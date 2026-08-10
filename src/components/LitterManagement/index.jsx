@@ -2236,6 +2236,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         uniqueYears.sort((a, b) => b - a);
         return uniqueYears;
     }, [litters]);
+    // Species actually present among current litters (via sire, falling back to dam) — keeps the
+    // filter dropdown from listing species the user has no litters for.
+    const availableSpeciesInLitters = useMemo(() => {
+        const speciesSet = new Set();
+        litters.forEach(litter => {
+            const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
+            const dam = litter.dam || myAnimals.find(a => a.id_public === litter.damId_public);
+            const species = sire?.species || dam?.species;
+            if (species) speciesSet.add(species);
+        });
+        return DEFAULT_SPECIES_OPTIONS.filter(s => speciesSet.has(s));
+    }, [litters, myAnimals]);
     
     // Filtered animals are handled directly in the render sections below
     
@@ -3684,10 +3696,11 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                     id="litter-species-filter"
                                     value={speciesFilter}
                                     onChange={(e) => setSpeciesFilter(e.target.value)}
+                                    disabled={availableSpeciesInLitters.length === 0}
                                     className="px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                                 >
                                     <option value="">All Species</option>
-                                    {DEFAULT_SPECIES_OPTIONS.map(species => (
+                                    {availableSpeciesInLitters.map(species => (
                                         <option key={species} value={species}>
                                             {getSpeciesDisplayName(species)}
                                         </option>

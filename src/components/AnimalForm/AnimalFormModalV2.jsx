@@ -227,7 +227,7 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                     {mode === 'contact' && (
                         <div className="space-y-1">
                             {loadingContacts ? <Loader2 className="animate-spin" /> : contacts.map(contact => (
-                                <div key={contact._id} onClick={() => onSelect({ name: getContactDisplayName(contact), userId: contact.linkedCTUID, contactInfo: getContactInfoString(contact) })} className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer">
+                                <div key={contact._id} onClick={() => onSelect({ name: getContactDisplayName(contact), userId: contact.linkedCTUID, contactInfo: getContactInfoString(contact), contactId: contact._id })} className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer">
                                     <p className="font-semibold">{getContactDisplayName(contact)}</p>
                                     {contact.linkedCTUID && <p className="text-xs text-gray-500 dark:text-dark-text-muted">{contact.linkedCTUID}</p>}
                                 </div>
@@ -1420,6 +1420,10 @@ const AnimalFormModalV2 = ({
     const [loading, setLoading] = useState(false);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [assignModalTarget, setAssignModalTarget] = useState(null); // 'breeder' or 'keeper'
+    // Contact _id behind a breeder/owner selection with no linked CTUID — a manual contact can't be
+    // matched automatically by CTUID, so this is used to record the assignment on the Contact itself.
+    const [breederContactId, setBreederContactId] = useState(null);
+    const [ownerContactId, setOwnerContactId] = useState(null);
     const [uploadingDocument, setUploadingDocument] = useState(false);
     const [breederInfo, setBreederInfo] = useState(null);
     const [parentSearchModalOpen, setParentSearchModalOpen] = useState(false);
@@ -2917,12 +2921,14 @@ const AnimalFormModalV2 = ({
                 breederId_public: selection.userId || null,
                 manualBreederName: selection.name || '',
             }));
+            setBreederContactId(selection.contactId || null);
         } else if (assignModalTarget === 'owner') {
             setFormData(prev => ({
                 ...prev,
                 ownerId_public: selection.userId || null, // The new linked user ID
                 manualownerName: selection.name || '', // The manual name, falls back for display
             }));
+            setOwnerContactId(selection.contactId || null);
         } else if (assignModalTarget === 'seller') {
             setFormData(prev => ({
                 ...prev,
@@ -2948,6 +2954,7 @@ const AnimalFormModalV2 = ({
                 manualBreederName: '',
             }));
             setBreederInfo(null);
+            setBreederContactId(null);
         } else if (target === 'owner') {
             setFormData(prev => ({
                 ...prev,
@@ -2955,6 +2962,7 @@ const AnimalFormModalV2 = ({
                 manualownerName: '',
             }));
             setOwnerInfo(null);
+            setOwnerContactId(null);
         }
     };
 
@@ -3528,7 +3536,26 @@ const AnimalFormModalV2 = ({
                 payloadToSave.extraImages = [];
             }
 
-            await onSave(method, url, payloadToSave);
+            const saveResponse = await onSave(method, url, payloadToSave);
+
+            // Manually-picked Contacts with no linked CTUID aren't matched automatically by CTUID,
+            // so record the assignment directly on the Contact so the animal shows under their
+            // Owned/Bred Animals tabs.
+            const savedAnimalIdPublic = animalToEdit?.id_public
+                || saveResponse?.data?.animal?.id_public
+                || saveResponse?.data?.data?.id_public
+                || saveResponse?.data?.id_public;
+            if (savedAnimalIdPublic) {
+                const assignments = [
+                    breederContactId && { contactId: breederContactId, role: 'breeder' },
+                    ownerContactId && { contactId: ownerContactId, role: 'keeper' },
+                ].filter(Boolean);
+                await Promise.all(assignments.map(({ contactId, role }) =>
+                    axios.post(`${API_BASE_URL}/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    }).catch(err => console.error('[assign-animal] Failed to link contact:', err))
+                ));
+            }
 
             if (!animalToEdit) {
                 window.dispatchEvent(new Event('animals-changed'));

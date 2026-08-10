@@ -2205,6 +2205,17 @@ useEffect(() => {
         // Today"), so a due date that passes without that click must keep alerting (>= 0), not
         // just fire once on the exact day (=== 0) and then silently disappear as "overdue".
         const dueLabel = (days, label) => days > 0 ? `${label} (${days}d overdue)` : label;
+        // dam.isNursing reflects only her most recent litter, so an older already-weaned litter
+        // with a stale weaningDate must not be treated as "still nursing" just because she's
+        // currently nursing a newer one — track each dam's latest birth litter to gate on that.
+        const latestBirthLitterIdByDam = new Map();
+        (litters || []).forEach(litter => {
+            if (!litter.birthDate || !litter.damId_public) return;
+            const existing = latestBirthLitterIdByDam.get(litter.damId_public);
+            if (!existing || new Date(litter.birthDate) > new Date(existing.birthDate)) {
+                latestBirthLitterIdByDam.set(litter.damId_public, litter);
+            }
+        });
         (litters || []).forEach(litter => {
             const dam = litter.damId_public ? allAnimals.find(a => a.id_public === litter.damId_public) : null;
             const sire = litter.sireId_public ? allAnimals.find(a => a.id_public === litter.sireId_public) : null;
@@ -2223,7 +2234,8 @@ useEffect(() => {
             // available — the backend auto-closes it past the species' maxNursingDays safety-net
             // cutoff (see utils/reproStatusSync.js), so a litter nobody marked "Wean Today" for
             // doesn't alert forever once it's well past any realistic nursing window.
-            const stillNursing = dam ? !!dam.isNursing : (!litter.weaningConfirmed && !litter.pregnancyLost);
+            const isLatestBirthForDam = litter.damId_public && latestBirthLitterIdByDam.get(litter.damId_public)?._id === litter._id;
+            const stillNursing = dam ? (!!dam.isNursing && isLatestBirthForDam) : (!litter.weaningConfirmed && !litter.pregnancyLost);
             if (litter.birthDate && litter.weaningDate && dam && stillNursing) {
                 const days = daysSince(litter.weaningDate);
                 if (days !== null && days >= 0) items.push({ animal: dam, reason: dueLabel(days, 'Weaning date is today'), view: 'nursing' });
