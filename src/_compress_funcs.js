@@ -1,7 +1,7 @@
 ﻿// Returns a Promise that resolves to a Blob.
 async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, quality = 0.8 } = {}) {
     if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
+    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
     const img = await new Promise((resolve, reject) => {
@@ -46,7 +46,7 @@ async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, qual
 // Returns a Blob (best-effort). Throws if input isn't an image.
 async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
+    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
     console.log('[COMPRESSION DEBUG] Starting compression:', {

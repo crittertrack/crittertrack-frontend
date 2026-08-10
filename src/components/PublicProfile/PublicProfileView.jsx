@@ -267,7 +267,7 @@ const renderBreederInfoMarkdown = (text) => {
         .replace(/\n/g, '<br>');
 };
 
-// Reusable star row ? defined at module level so React never unmounts/remounts it between renders
+// Reusable star row — defined at module level so React never unmounts/remounts it between renders
 
 const RatingStarRow = ({ score, interactive, onSelect }) => (
     <div className="flex gap-1">
@@ -581,7 +581,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         setRatingForm({ score: resp.data.score, comment: resp.data.comment || '' });
                     }
                 } catch (err) {
-                    // 401/403/network ? ignore, canRate already set above
+                    // 401/403/network — ignore, canRate already set above
                 }
             }
         };

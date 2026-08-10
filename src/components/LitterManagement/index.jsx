@@ -80,7 +80,7 @@ const getSpeciesLatinName = (species) => {
 
 async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, quality = 0.8 } = {}) {
     if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
+    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
     const img = await new Promise((resolve, reject) => {
@@ -125,7 +125,7 @@ async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, qual
 // Returns a Blob (best-effort). Throws if input isn't an image.
 async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
+    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
     // Start with original dimensions limits from opts or defaults
@@ -932,7 +932,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 if (l.inbreedingCoefficient != null) return false; // already stored in DB
                 const cacheKey = `${l.sireId_public}:${l.damId_public}`;
                 if (coiCacheRef.current[cacheKey] != null) {
-                    // Already computed this session ? patch state immediately, no API call
+                    // Already computed this session — patch state immediately, no API call
                     setLitters(prev => prev.map(x => x._id === l._id ? { ...x, inbreedingCoefficient: coiCacheRef.current[cacheKey] } : x));
                     return false;
                 }
@@ -1293,13 +1293,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     // -- Litter form save-time reconciliation ---------------------------------
     // Returns { correctedCounts, warnings[] } based on form values + linked animals.
-    // Rule 1: gender sum > total ? bump total (silent)
-    // Rule 2: stillborn, losses, or weaned > total ? warn, do NOT auto-correct
+    // Rule 1: gender sum > total — bump total (silent)
+    // Rule 2: stillborn, losses, or weaned > total — warn, do NOT auto-correct
     const reconcileLitterFormCounts = (fd, linkedAnimals = []) => {
         const linkedMales   = linkedAnimals.filter(a => a.gender === 'Male').length;
         const linkedFemales = linkedAnimals.filter(a => a.gender === 'Female').length;
         const linkedUnknown = linkedAnimals.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
-        // Always keep manual entries ? only enforce minimum equal to linked count
+        // Always keep manual entries — only enforce minimum equal to linked count
         const maleCount    = Math.max(parseInt(fd.maleCount)    || 0, linkedMales);
         const femaleCount  = Math.max(parseInt(fd.femaleCount)  || 0, linkedFemales);
         const unknownCount = Math.max(parseInt(fd.unknownCount) || 0, linkedUnknown);
@@ -1336,7 +1336,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            // Get parent details ? fall back to cached selected animals for global (non-owned) ones
+            // Get parent details — fall back to cached selected animals for global (non-owned) ones
             const sire = myAnimals.find(a => a.id_public === formData.sireId_public) || selectedSireAnimal;
             const dam = myAnimals.find(a => a.id_public === formData.damId_public) || selectedDamAnimal;
 
@@ -1431,7 +1431,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             const litterId = litterResponse.data.litterId_backend;
 
-            // Litter was created with a birth date already recorded ? dam transitions to nursing
+            // Litter was created with a birth date already recorded — dam transitions to nursing
             if (formData.birthDate) {
                 syncDamPostBirth(formData.damId_public);
             }
@@ -1454,7 +1454,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 setPendingLitterImages([]);
             }
 
-            // Optimistic update ? add new litter to state immediately so it shows without waiting for refetch
+            // Optimistic update — add new litter to state immediately so it shows without waiting for refetch
             setLitters(prev => [litterResponse.data, ...prev]);
 
             // Calculate inbreeding coefficient in the background (non-blocking)
@@ -1610,7 +1610,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            // Use already-loaded myAnimals ? no network call needed
+            // Use already-loaded myAnimals — no network call needed
             const linkedIds = litter.offspringIds_public || [];
             
             const matching = myAnimals.filter(animal => {
@@ -1638,7 +1638,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const addedAnimal = availableToLink.animals.find(a => a.id_public === animalId);
             const existingOffspring = myAnimals.filter(a => (litter.offspringIds_public || []).includes(a.id_public));
             const allLinked = [...existingOffspring, ...(addedAnimal ? [addedAnimal] : [])];
-            // Only bump total born if linked count exceeds stored value ? never touch gender counts
+            // Only bump total born if linked count exceeds stored value — never touch gender counts
             const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
             // Update the litter's offspring list
@@ -1697,7 +1697,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const updatedOffspringIds = [...(litter.offspringIds_public || []), ...animalIdsToAdd];
             const existingOffspring = myAnimals.filter(a => (litter.offspringIds_public || []).includes(a.id_public));
             const allLinked = [...existingOffspring, ...availableToLink.animals];
-            // Only bump total born if linked count exceeds stored value ? never touch gender counts
+            // Only bump total born if linked count exceeds stored value — never touch gender counts
             const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
@@ -1736,7 +1736,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         try {
             const updatedOffspringIds = (litter.offspringIds_public || []).filter(id => id !== animalId_public);
             const remainingOffspring = (litterOffspringMap[litter._id] || []).filter(a => a.id_public !== animalId_public);
-            // Only update the link list ? never modify gender counts or total born on unlink
+            // Only update the link list — never modify gender counts or total born on unlink
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
             }, {
@@ -1987,6 +1987,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const handleUpdateLitter = async (e) => {
         e.preventDefault();
+
         
         if (!formData.sireId_public || !formData.damId_public) {
             showModalMessage('Error', 'Please select both a Sire and a Dam');
@@ -1994,10 +1995,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            // Get parent details ? fall back to cached selected animals for global (non-owned) ones
+            // Get parent details — fall back to cached selected animals for global (non-owned) ones
             const sire = myAnimals.find(a => a.id_public === formData.sireId_public) || selectedSireAnimal;
             const dam = myAnimals.find(a => a.id_public === formData.damId_public) || selectedDamAnimal;
             const offspringSpecies = sire?.species || dam?.species || formData.species || '';
+
 
             // Create offspring animals if requested
             const offspringPromises = [];
@@ -2033,7 +2035,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 if (!proceed) return;
             }
 
-            // Detect a first-time birth recording (no birthDate previously ? one now) so we
+            // Detect a first-time birth recording (no birthDate previously — one now) so we
             // can auto-transition the dam from Pregnant -> Nursing after the litter save succeeds.
             const originalLitter = litters.find(l => l._id === editingLitter);
             const isNewBirth = !!formData.birthDate && !originalLitter?.birthDate;
@@ -2074,7 +2076,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
-            // First-time birth recorded on this litter ? dam transitions Pregnant -> Nursing
+            // First-time birth recorded on this litter — dam transitions Pregnant -> Nursing
             if (isNewBirth) {
                 syncDamPostBirth(formData.damId_public);
             }
@@ -2184,7 +2186,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             const newAnimalId = response.data.id_public;
 
-            // Calculate inbreeding coefficient in the background ? don't block the save
+            // Calculate inbreeding coefficient in the background — don't block the save
             axios.get(`${API_BASE_URL}/animals/${newAnimalId}/inbreeding`, {
                 params: { generations: 50 },
                 headers: { Authorization: `Bearer ${authToken}` }

@@ -376,7 +376,7 @@ const AnimalList = ({
     const [categoryFilter, setCategoryFilter] = useState(() => {
         try { return localStorage.getItem('animalList_categoryFilter') || ''; } catch { return ''; }
     });
-    // Master species list ? all species the user has ANY animal for, never filtered
+    // Master species list — all species the user has ANY animal for, never filtered
     const [allUserSpecies, setAllUserSpecies] = useState([]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
         try {
@@ -506,7 +506,7 @@ const AnimalList = ({
         // Kept for compatibility with the animals-changed event handler
     }, []);
 
-    // Fetch ALL user animals (no client-side filters) ? used by Management View and Collections
+    // Fetch ALL user animals (no client-side filters) — used by Management View and Collections
     const fetchAllAnimals = useCallback(async () => {
         if (!authToken) return;
         try {
@@ -541,7 +541,7 @@ const AnimalList = ({
         } catch (err) { console.error('[fetchAvailableAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
-    // Fetch view-only/transferred animals ? these are animals the user sold/transferred but retains view-only access to
+    // Fetch view-only/transferred animals — these are animals the user sold/transferred but retains view-only access to
     const fetchSoldTransferred = useCallback(async () => {
         if (!authToken) return;
         try {
@@ -2293,7 +2293,7 @@ useEffect(() => {
     const unassignedAnimals = enclosureAnimalMap['unassigned'] || [];
 
 
-    // Check if any filters are active (different from defaults) ? uses appliedFilters for panel filters
+    // Check if any filters are active (different from defaults) — uses appliedFilters for panel filters
     const hasActiveFilters = (
         statusFilter !== '' ||
         appliedNameFilter !== '' ||
@@ -3206,7 +3206,7 @@ useEffect(() => {
     };
 
     // -- Shared Management Components ------------------------------------------
-    // All appearance fields that make up "Variety" ? same set as Tab 3 / Appearance section
+    // All appearance fields that make up "Variety" — same set as Tab 3 / Appearance section
     const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size'];
     const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
 

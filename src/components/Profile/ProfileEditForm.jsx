@@ -138,7 +138,7 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
 
 ﻿async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
+    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
     console.log('[COMPRESSION DEBUG] Starting compression:', {
@@ -410,7 +410,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [myReceivedRatings, setMyReceivedRatings] = useState(null);
     const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
 
-    // Breeding lines ? local draft state (not saved until user clicks Save)
+    // Breeding lines — local draft state (not saved until user clicks Save)
     const [localBLDefs, setLocalBLDefs] = useState(breedingLineDefs);
     const [blSaving, setBlSaving] = useState(false);
     const [blSaved, setBlSaved] = useState(false);
@@ -500,7 +500,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
     };
 
-    // Data Portability ? Export
+    // Data Portability — Export
     const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
     const [exportFormat, setExportFormat] = useState('json');
     const [exportIncludeArchived, setExportIncludeArchived] = useState(false);
@@ -508,7 +508,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [exportEmbedImages, setExportEmbedImages] = useState(false);
     const [exportLoading, setExportLoading] = useState(false);
 
-    // Data Portability ? Import
+    // Data Portability — Import
     const [importFile, setImportFile] = useState(null);
 
     // ZooEasy Import
@@ -998,7 +998,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none" 
                             disabled={profileLoading}
                         />
-                        {bio && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{bio.length}/1000 characters ? {bio.split('\n').length}/15 lines</p>}
+                        {bio && <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1">{bio.length}/1000 characters · {bio.split('\n').length}/15 lines</p>}
 
                         <select value={country} onChange={(e) => { setCountry(e.target.value); if (e.target.value !== 'US') setUsState(''); }}
                         className="w-full p-3 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
@@ -1785,7 +1785,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             setZeNewSpeciesName('');
                                         } catch (err) {
                                             if (err.response?.status === 409) {
-                                                // Already exists ? just select it
+                                                // Already exists — just select it
                                                 const existing = err.response.data.existing?.name || name;
                                                 setZeSpecies(existing);
                                                 setZeAddingSpecies(false);
@@ -3168,7 +3168,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     <button
                                         onClick={async () => {
                                             const finalResolutions = { ...sbConflictResolutions };
-                                            // Convert auto-detected use_existing conflicts ? map_to:<existingId>
+                                            // Convert auto-detected use_existing conflicts → map_to:<existingId>
                                             // so the backend knows exactly which CT animal to tag with the SB ID
                                             for (const conflict of sbConflicts) {
                                                 if (!finalResolutions[conflict.sbId] || finalResolutions[conflict.sbId] === 'use_existing') {

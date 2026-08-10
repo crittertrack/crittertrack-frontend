@@ -6039,7 +6039,7 @@ const AnimalFormModalV2 = ({
                             </div>
                         )}
                         {activeTab === 'pedigree' && (() => {
-                            // CTC selector modal ? always rendered so it works regardless of activeTab
+                            // CTC selector modal — always rendered so it works regardless of activeTab
                             const ctcModal = mpCTCOpenSlot ? (
                                 <ParentSearchModal
                                     title={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Sire' : 'Dam'}

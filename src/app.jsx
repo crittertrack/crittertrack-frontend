@@ -987,7 +987,7 @@ const App = () => {
                         handleLogout();
                     }
                 } else {
-                    // Network error or 5xx ? transient, reset counter and stay silent
+                    // Network error or 5xx — transient, reset counter and stay silent
                     consecutiveAuthErrors.current = 0;
                 }
                 // Other errors are non-critical (network, server errors) - don't logout
@@ -1067,7 +1067,7 @@ const App = () => {
         }
     }, [authToken, userProfile, showModalMessage]);
 
-    // Check if user has seen welcome guide ? backend flag is authoritative, localStorage is a fast-path cache
+    // Check if user has seen welcome guide — backend flag is authoritative, localStorage is a fast-path cache
     useEffect(() => {
         if (!authToken || !userProfile) return;
         

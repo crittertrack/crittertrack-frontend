@@ -482,6 +482,6 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     );
 };
 
-// Urgency Alerts Banner ? shows due-today/overdue litter events on every page (can be disabled per user)
+// Urgency Alerts Banner — shows due-today/overdue litter events on every page (can be disabled per user)
 
 export default NotificationsHub;
