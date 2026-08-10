@@ -68,7 +68,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     Your <strong>Personal Name</strong> is public by default; your <strong>Breeder Name</strong> is hidden until you turn it on. Both can be shown, hidden, or fully anonymized in Settings → Profile.
                                 </p>
-                                <TutorialLink lessonId="getting-started-account-settings">Profile visibility & the Breeder Registry</TutorialLink>
+                                <TutorialLink lessonId="settings-profile">Settings: Profile</TutorialLink>
                             </div>
                         </div>
 
@@ -83,7 +83,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     Set your <strong>Country</strong> in Settings so buyers can filter the Marketplace and Breeder Directory by location.
                                 </p>
-                                <TutorialLink lessonId="breeder-directory">Finding & being found by location</TutorialLink>
+                                <TutorialLink lessonId="settings-profile">Settings: Profile</TutorialLink>
                             </div>
                         </div>
 
@@ -113,7 +113,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     In Settings → Directory, mark yourself Active/Retired Breeder per species you own to appear in the public <strong>Breeders</strong> registry.
                                 </p>
-                                <TutorialLink lessonId="getting-started-account-settings">Profile visibility & the Breeder Registry</TutorialLink>
+                                <TutorialLink lessonId="settings-directory">Settings: Directory</TutorialLink>
                             </div>
                         </div>
                     </div>
