@@ -898,6 +898,28 @@ const ANIMAL_LIST_TOUR_LESSONS = [
 // "Profile & Settings: A Tab-by-Tab Tour" section — the 7 tabs under the avatar → Profile → Profile Settings page.
 const SETTINGS_TAB_LESSONS = [
   {
+    id: 'profile-view',
+    title: 'Viewing a Profile',
+    description: 'What a profile page (yours or someone else\'s) looks like, and how the tabs shown there tie back to your Settings.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Getting to a profile page',
+        content: 'Click your avatar (top-right) → Profile to jump straight to your own profile page. To view someone else\'s profile, click their name/avatar from Community, the Breeder Directory, or a Marketplace listing.',
+      },
+      {
+        stepNumber: 2,
+        title: 'The tabs across the top',
+        content: 'Animals is always there (grouped by species, with search/species/gender/status filters). Info & Adoption, Pairings, and For Sale/Stud only appear if that person has relevant content to show. Stats can be hidden via the Profile visibility checklist. Ratings is always shown.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Actions on someone else\'s profile',
+        content: 'Message (only if they allow messages and you\'re logged in), Favorite (star them for quick access later), Share Profile (QR code + copyable link), and Report. On your own profile these are replaced by a single "Profile Settings" button that jumps you back into Settings.',
+      },
+    ],
+  },
+  {
     id: 'settings-profile',
     title: 'Settings: Profile',
     description: 'Your public identity, visibility checklist, messaging preferences, and notification settings.',
