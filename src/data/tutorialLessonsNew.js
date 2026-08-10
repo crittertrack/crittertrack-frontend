@@ -858,6 +858,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
         stepNumber: 2,
         title: 'Marking a feeding',
         content: 'Click "Fed" to open the Record Feeding modal: optionally pick a Food/Supply item, toggle "Deduct from stock" and enter a quantity to draw it down from that supply\'s inventory automatically, and add any notes. "Skip" (only shown once a feeding is overdue) just logs a skipped feeding without opening the modal.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 3,

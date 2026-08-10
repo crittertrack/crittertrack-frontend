@@ -4988,7 +4988,7 @@ useEffect(() => {
                                     onClick={handleFeedingSubmit}
                                     className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition"
                                 >
-                                    ? Record Feeding
+                                    Record Feeding
                                 </button>
                                 <button
                                     onClick={() => setFeedingModal(null)}
