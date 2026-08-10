@@ -52,6 +52,7 @@ import DonationView from './components/Donation/DonationView';
 import ResourcesPage from './components/tools/ResourcesPage';
 import CommunityPage from './components/Community/CommunityPage';
 import ThemeToggle from './components/ThemeToggle';
+import PushToggleButton from './components/PushToggleButton';
 
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
 import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
@@ -1766,6 +1767,8 @@ const App = () => {
                     <div className="flex items-center space-x-3">
                         <ThemeToggle />
 
+                        <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
+
                         <button
                             onClick={() => {
                                 setShowNotifications(true);
@@ -1859,6 +1862,8 @@ const App = () => {
                         
                         <div className="flex items-center space-x-2 flex-shrink-0">
                             <ThemeToggle />
+
+                            <PushToggleButton authToken={authToken} API_BASE_URL={API_BASE_URL} showModalMessage={showModalMessage} />
 
                             <button
                                 onClick={() => {
