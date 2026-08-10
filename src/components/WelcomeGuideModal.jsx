@@ -127,7 +127,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Need Help Getting Started?</h3>
                                 <p className="text-xs text-gray-600">
-                                    Interactive tutorials are available anytime — click your <strong>profile image circle</strong> and select <strong>Help</strong>.
+                                    Step-by-step tutorials are available anytime — open the <strong>Tools</strong> menu (wrench icon) in the top nav and select <strong>Tutorials</strong>.
                                 </p>
                                 <TutorialLink>Browse all tutorial lessons</TutorialLink>
                             </div>
@@ -143,7 +143,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">🚀 Beta Testing & Your Feedback</h3>
                                 <p className="text-xs text-gray-600">
-                                    CritterTrack is in <strong>beta</strong>. Look for <strong className="text-purple-700">purple features</strong> like the "Beta Feedback" button to report bugs or suggest improvements.
+                                    CritterTrack is in <strong>beta</strong>. Click your <strong>profile image circle</strong> and select <strong>Report an Issue</strong> to report bugs or suggest improvements.
                                 </p>
                                 <TutorialLink lessonId="report-an-issue">How to report an issue</TutorialLink>
                             </div>
