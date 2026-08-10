@@ -181,34 +181,19 @@ const GETTING_STARTED_LESSONS = [
     ],
   },
   {
-    id: 'animal-list-overview',
-    title: 'My Animals — List & Filters',
-    description: 'The stat cards, filters, and view options on your main animal list.',
+    id: 'getting-started-list-basics',
+    title: 'My Animals — The Basics',
+    description: 'The one thing worth knowing early about your main list, before the full tour later on.',
     steps: [
       {
         stepNumber: 1,
-        title: 'Top stat cards',
-        content: 'Total Animals (click to expand a species/category breakdown), Owned, Public, Sold/Archived, and Needs Attention (click to expand a breakdown by Feeding & Care, Health, Reproduction, and Enclosure maintenance).',
+        title: 'A stat row lives up top',
+        content: 'Total Animals, Owned, Public, Sold/Archived, and Needs Attention — most are clickable for a quick breakdown. The Owned/All toggle here filters every tab (Collections, Enclosures, Reproduction, Health, Feeding & Care), not just this list.',
       },
       {
         stepNumber: 2,
-        title: 'Owned / All toggle',
-        content: 'This two-button toggle under Total Animals filters by each animal\'s own Owned/Unowned label (the same Heart toggle from the animals lesson) — "Owned" shows only your Owned animals, "All" shows everything regardless of that label. It applies to every tab, not just this list.',
-      },
-      {
-        stepNumber: 3,
-        title: 'Set All buttons',
-        content: 'Under the Owned and Public stat cards, "Set All Owned"/"Set All Unowned" and "Set All Public"/"Set All Private" bulk-update every animal at once — handy for a fresh account import, but easy to trigger by accident.',
-      },
-      {
-        stepNumber: 4,
-        title: 'Gender and Status filters',
-        content: 'Gender: All Genders, Male, Female, Intersex, Mixed, Unknown. Status: Pet, Growout, Breeder, Available, Booked, Retired, Deceased, Rehomed, Unknown.',
-      },
-      {
-        stepNumber: 5,
-        title: 'Card view vs. Table view',
-        content: 'Switch layouts with the view toggle. Table view has configurable columns: Animal, Species, Variety, Enclosure, Life Stage, Status, Health, Birthdate/Age, Breeding Lines, and Tags.',
+        title: 'More on this later',
+        content: 'Filters, sorting, Card vs. Table view, bulk actions, and everything else on this page gets its own full lesson in "The Animal List: A Tab-by-Tab Tour" section.',
       },
     ],
   },
@@ -617,8 +602,75 @@ const ANIMAL_RECORD_TAB_LESSONS = [
   },
 ];
 
-// "My Animals List Tour" section — Collections, Enclosures, Archive, and the shared pin-tab tip.
+// "The Animal List: A Tab-by-Tab Tour" section — Collections, Enclosures, Archive, and the shared pin-tab tip.
 const ANIMAL_LIST_TOUR_LESSONS = [
+  {
+    id: 'animal-list-overview',
+    title: 'My Animals: The Main List',
+    description: 'A closer look at the dashboard stats, filters, and both view modes on your main animal list.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'The dashboard stat row',
+        content: 'Five stat cards sit above the list: Total Animals (click to expand a species-category breakdown), Owned, Public, Sold/Archived, and Needs Attention. Owned, Public, and Needs Attention also expand into breakdowns when clicked.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Owned vs. All — applies to every tab',
+        content: 'The Owned/All toggle under Total Animals isn\'t just for this list — it filters Collections, Enclosures, Reproduction, Health, and Feeding & Care too, so unowned animals stay out of your way everywhere until you switch it to "All."',
+      },
+      {
+        stepNumber: 3,
+        title: 'Bulk ownership and visibility',
+        content: 'The Owned and Public stat cards each have "Set All" buttons beneath them — Set All Owned/Unowned and Set All Public/Private — for flipping every animal\'s status at once instead of one at a time.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Sold/Archived and Needs Attention',
+        content: 'The Sold/Archived card\'s button opens the Archive screen (covered in its own lesson). Needs Attention rolls up anything due across Feeding & Care, Health, Reproduction, and Enclosures — clicking an item in its breakdown jumps straight to that animal or tab.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Card view vs. List (table) view',
+        content: 'The grid/list icons at the left of the filter bar switch between Card view (animals grouped into collapsible species sections) and List view (a sortable table). The pin icon next to them saves whichever mode is currently active as your default for next time.',
+      },
+      {
+        stepNumber: 6,
+        title: 'Search and filters',
+        content: 'The filter bar covers Search (by name), Category, Species, Status, Gender, and — if you\'ve set up breeding lines — a Breeding Line filter too. A pink "Filtered" badge appears next to the page title whenever any filter is active, so you don\'t forget one is on.',
+      },
+      {
+        stepNumber: 7,
+        title: 'Sorting',
+        content: 'Two sort buttons — A-Z and Age — sit at the right of the filter bar. Click one to sort by it, click again to flip between ascending and descending.',
+      },
+      {
+        stepNumber: 8,
+        title: 'Choosing table columns',
+        content: 'In List view, a Columns button (gear/list icon) opens a dropdown to toggle which columns show: Animal, Species, Variety, Enclosure, Life Stage, Status, Health, Birthdate/Age, Breeding Lines, and Tags.',
+      },
+      {
+        stepNumber: 9,
+        title: 'Species groups in Card view',
+        content: 'Card view groups animals by species into collapsible sections you can reorder with the up/down arrows next to each header. Each group header also has its own Make All Public/Private buttons.',
+      },
+      {
+        stepNumber: 10,
+        title: 'Bulk delete and archive',
+        content: 'Also on each species group header: Delete Multiple and Archive Multiple buttons. Clicking either switches that group into a selection mode — check the animals you want, then confirm with "Delete Selected" or "Archive Selected," or back out with Cancel.',
+      },
+      {
+        stepNumber: 11,
+        title: 'Find Duplicates',
+        content: 'The "Find Duplicates" button (top-right, magnifying glass) scans for animals that look like accidental duplicates so you can review and clean them up.',
+      },
+      {
+        stepNumber: 12,
+        title: 'Pin your favorite tab',
+        content: 'Tip: hover any tab in the row above the dashboard (My Animals, Collections, Enclosures, Reproduction, Health, Feeding & Care) and click its pin icon to set that tab as your default view — it\'ll open automatically next time you visit.',
+      },
+    ],
+  },
   {
     id: 'animal-collections',
     title: 'Organizing Animals with Collections',
@@ -632,20 +684,25 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 2,
         title: 'Adding animals to a collection',
-        content: 'Uncategorized animals show a small Plus button on their card (or row, in table view). Click it and pick a collection from the "Add to collection:" list. An animal can belong to more than one collection.',
+        content: 'Uncategorized animals show a small Plus button on their card (or row, in table view). Click it and pick a collection from the "Add to collection:" list. Each animal can only be in one collection at a time — once assigned, it moves out of Uncategorized and that Plus button disappears.',
       },
       {
         stepNumber: 3,
         title: 'Removing an animal from a collection',
-        content: 'Inside a collection, each animal has an X button — click it to remove that animal from just that collection. It stays in your account and any other collections it belongs to.',
+        content: 'Inside a collection, each animal has an X button — click it to remove that animal from that collection. The animal itself stays in your account and reappears under Uncategorized, ready to be added to a different collection.',
       },
       {
         stepNumber: 4,
         title: 'Renaming and deleting collections',
-        content: 'In the collection manager, use Rename to edit a collection\'s name in place, or Delete to remove the collection entirely (this doesn\'t delete the animals in it). There\'s no color or icon customization — collections are name-only folders.',
+        content: 'In the collection manager, use Rename to edit a collection\'s name in place, or Delete to remove the collection entirely. Deleting a collection unassigns every animal that was in it (they fall back to Uncategorized) — it does not delete the animal records themselves.',
       },
       {
         stepNumber: 5,
+        title: 'Customizing color and icon',
+        content: 'Click the small icon button next to a collection\'s name (or next to the "New collection name…" box while creating one) to open a picker with preset colors and a curated set of icons. Your choice shows up in the collection\'s section header and in the "Add to collection" menu, making it easier to tell collections apart at a glance.',
+      },
+      {
+        stepNumber: 6,
         title: 'Card view vs. Table view',
         content: 'Like the main list, Collections view has its own Card/Table toggle, and each collection section (plus the Uncategorized group) can be collapsed independently.',
       },
@@ -657,7 +714,7 @@ const ADVANCED_FEATURES_LESSONS = [];
 const TUTORIAL_SECTIONS = [
   { id: 'getting-started', label: '🚀 Getting Started', lessons: GETTING_STARTED_LESSONS },
   { id: 'animal-record-tour', label: '🐾 The Animal Record: A Tab-by-Tab Tour', lessons: ANIMAL_RECORD_TAB_LESSONS },
-  { id: 'animal-list-tour', label: '📋 My Animals List Tour', lessons: ANIMAL_LIST_TOUR_LESSONS },
+  { id: 'animal-list-tour', label: '📋 The Animal List: A Tab-by-Tab Tour', lessons: ANIMAL_LIST_TOUR_LESSONS },
   { id: 'advanced', label: '✨ Advanced Features', lessons: ADVANCED_FEATURES_LESSONS },
 ];
 

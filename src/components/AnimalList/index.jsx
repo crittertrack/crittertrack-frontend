@@ -10,7 +10,8 @@ import {
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings, Users, PawPrint,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, ScanHeart, LampCeiling, BarChart2, Thermometer, Worm,
     Package, Plus, PlusCircle, RefreshCw, Ruler, Save, Search, ShoppingBag, SkipForward, SlidersHorizontal, Utensils,
-    Sparkles, Trash2, Turtle, Venus, VenusAndMars, Wrench, X, Scissors, Dumbbell
+    Sparkles, Trash2, Turtle, Venus, VenusAndMars, Wrench, X, Scissors, Dumbbell,
+    Bookmark, Tag, Gift, Egg, Rabbit, Trophy, Crown, Shield, Award, Layers
 } from 'lucide-react';
 import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import { formatDate, formatDateShort, calculateBreedingAge, formatLocalDate, parseLocalDate, isStatusPeriodActive } from '../../utils/dateFormatter';
@@ -35,6 +36,42 @@ const FAMILY_TREE_MIN_WIDTH = 900;
 
 const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+
+// Curated icon/color pickers for user-created Collections (folders under the Collections tab).
+const COLLECTION_ICON_OPTIONS = [
+    { key: 'folder', label: 'Folder', Icon: FolderOpen },
+    { key: 'star', label: 'Star', Icon: Star },
+    { key: 'heart', label: 'Heart', Icon: Heart },
+    { key: 'bookmark', label: 'Bookmark', Icon: Bookmark },
+    { key: 'flag', label: 'Flag', Icon: Flag },
+    { key: 'sparkles', label: 'Sparkles', Icon: Sparkles },
+    { key: 'shoppingBag', label: 'For Sale', Icon: ShoppingBag },
+    { key: 'tag', label: 'Tag', Icon: Tag },
+    { key: 'gift', label: 'Gift', Icon: Gift },
+    { key: 'egg', label: 'Egg', Icon: Egg },
+    { key: 'pawPrint', label: 'Paw Print', Icon: PawPrint },
+    { key: 'dna', label: 'DNA', Icon: Dna },
+    { key: 'users', label: 'Group', Icon: Users },
+    { key: 'cat', label: 'Cat', Icon: Cat },
+    { key: 'bird', label: 'Bird', Icon: Bird },
+    { key: 'fish', label: 'Fish', Icon: Fish },
+    { key: 'turtle', label: 'Turtle', Icon: Turtle },
+    { key: 'bug', label: 'Bug', Icon: Bug },
+    { key: 'rabbit', label: 'Rabbit', Icon: Rabbit },
+    { key: 'home', label: 'Home', Icon: Home },
+    { key: 'building', label: 'Building', Icon: Building },
+    { key: 'mapPin', label: 'Location', Icon: MapPin },
+    { key: 'trophy', label: 'Trophy', Icon: Trophy },
+    { key: 'crown', label: 'Crown', Icon: Crown },
+    { key: 'shield', label: 'Shield', Icon: Shield },
+    { key: 'award', label: 'Award', Icon: Award },
+    { key: 'layers', label: 'Layers', Icon: Layers },
+    { key: 'package', label: 'Package', Icon: Package },
+];
+const COLLECTION_ICON_MAP = Object.fromEntries(COLLECTION_ICON_OPTIONS.map(o => [o.key, o.Icon]));
+const getCollectionIcon = (key) => COLLECTION_ICON_MAP[key] || FolderOpen;
+const COLLECTION_COLOR_OPTIONS = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899'];
+const DEFAULT_COLLECTION_COLOR = '#f59e0b';
 
 const normalizeAnimalView = (value) =>
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'familyTree'].includes(value) ? value : 'list';
@@ -532,10 +569,10 @@ const AnimalList = ({
         try { localStorage.setItem(`ct_animal_collections_${userKey}`, JSON.stringify(map)); } catch {}
         _syncToApi(userCollections, map);
     };
-    const createCollection = (name) => {
+    const createCollection = (name, color = DEFAULT_COLLECTION_COLOR, icon = 'folder') => {
         if (!name.trim()) return;
         const id = `col_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-        _saveCollections([...userCollections, { id, name: name.trim() }]);
+        _saveCollections([...userCollections, { id, name: name.trim(), color, icon }]);
     };
     const deleteCollection = (id) => {
         const newCols = userCollections.filter(c => c.id !== id);
@@ -550,6 +587,9 @@ const AnimalList = ({
     const renameCollection = (id, name) => {
         if (!name.trim()) return;
         _saveCollections(userCollections.map(c => c.id === id ? { ...c, name: name.trim() } : c));
+    };
+    const updateCollectionStyle = (id, patch) => {
+        _saveCollections(userCollections.map(c => c.id === id ? { ...c, ...patch } : c));
     };
     const assignAnimalToCollection = (animalId, collectionId) => {
         const current = animalCollections[animalId] || [];
@@ -651,6 +691,10 @@ const AnimalList = ({
     const [animalCollections, setAnimalCollections] = useState({}); // populated from user-scoped key below
     const [showCollectionManager, setShowCollectionManager] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
+    const [newCollectionColor, setNewCollectionColor] = useState(DEFAULT_COLLECTION_COLOR);
+    const [newCollectionIcon, setNewCollectionIcon] = useState('folder');
+    const [showNewCollectionPicker, setShowNewCollectionPicker] = useState(false);
+    const [stylingCollectionId, setStylingCollectionId] = useState(null);
     const [renamingCollectionId, setRenamingCollectionId] = useState(null);
     const [renamingCollectionName, setRenamingCollectionName] = useState('');
     const [collapsedCollections, setCollapsedCollections] = useState({});
@@ -3221,16 +3265,50 @@ useEffect(() => {
                 {showCollectionManager && (
                     <div className="border border-gray-200 dark:border-dark-text-muted rounded-xl p-4 bg-gray-50 dark:bg-dark-card-bg space-y-3">
                         <div className="flex gap-2">
+                            <div className="relative shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNewCollectionPicker(v => !v)}
+                                    className="p-2 h-full border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg flex items-center justify-center"
+                                    style={{ color: newCollectionColor }}
+                                    title="Choose color & icon"
+                                >
+                                    {React.createElement(getCollectionIcon(newCollectionIcon), { size: 18 })}
+                                </button>
+                                {showNewCollectionPicker && (
+                                    <div className="absolute left-0 top-11 z-30 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg shadow-lg p-3 w-64">
+                                        <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary mb-1.5">Color</p>
+                                        <div className="flex flex-wrap gap-1.5 mb-3">
+                                            {COLLECTION_COLOR_OPTIONS.map(c => (
+                                                <button key={c} type="button" onClick={() => setNewCollectionColor(c)}
+                                                    className={`w-6 h-6 rounded-full border-2 ${newCollectionColor === c ? 'border-gray-800 dark:border-white' : 'border-transparent'}`}
+                                                    style={{ backgroundColor: c }} title={c} />
+                                            ))}
+                                        </div>
+                                        <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary mb-1.5">Icon</p>
+                                        <div className="grid grid-cols-7 gap-1.5">
+                                            {COLLECTION_ICON_OPTIONS.map(({ key, Icon, label }) => (
+                                                <button key={key} type="button" onClick={() => setNewCollectionIcon(key)}
+                                                    className={`p-1.5 rounded-lg flex items-center justify-center ${newCollectionIcon === key ? 'bg-gray-200 dark:bg-dark-surface-hover' : 'hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}
+                                                    title={label}>
+                                                    <Icon size={16} style={{ color: newCollectionColor }} />
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button type="button" onClick={() => setShowNewCollectionPicker(false)} className="mt-2 w-full text-xs px-2 py-1 bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary rounded-lg">Done</button>
+                                    </div>
+                                )}
+                            </div>
                             <input
                                 type="text"
                                 placeholder="New collection name…"
                                 value={newCollectionName}
                                 onChange={e => setNewCollectionName(e.target.value)}
-                                onKeyPress={e => { if (e.key === 'Enter' && newCollectionName.trim()) { createCollection(newCollectionName); setNewCollectionName(''); } }}
+                                onKeyPress={e => { if (e.key === 'Enter' && newCollectionName.trim()) { createCollection(newCollectionName, newCollectionColor, newCollectionIcon); setNewCollectionName(''); setNewCollectionColor(DEFAULT_COLLECTION_COLOR); setNewCollectionIcon('folder'); setShowNewCollectionPicker(false); } }}
                                 className="flex-grow p-2 text-sm border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-primary focus:border-primary"
                             />
                             <button
-                                onClick={() => { createCollection(newCollectionName); setNewCollectionName(''); }}
+                                onClick={() => { createCollection(newCollectionName, newCollectionColor, newCollectionIcon); setNewCollectionName(''); setNewCollectionColor(DEFAULT_COLLECTION_COLOR); setNewCollectionIcon('folder'); setShowNewCollectionPicker(false); }}
                                 disabled={!newCollectionName.trim()}
                                 className="px-3 py-2 bg-accent hover:bg-accent/90 text-white text-sm font-semibold rounded-lg transition disabled:opacity-50"
                             >
@@ -3256,6 +3334,40 @@ useEffect(() => {
                                             </>
                                         ) : (
                                             <>
+                                                <div className="relative shrink-0">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setStylingCollectionId(prev => prev === col.id ? null : col.id)}
+                                                        className="p-1.5 border border-gray-300 dark:border-dark-text-muted rounded-lg bg-white dark:bg-dark-card-bg flex items-center justify-center"
+                                                        style={{ color: col.color || DEFAULT_COLLECTION_COLOR }}
+                                                        title="Change color & icon"
+                                                    >
+                                                        {React.createElement(getCollectionIcon(col.icon), { size: 15 })}
+                                                    </button>
+                                                    {stylingCollectionId === col.id && (
+                                                        <div className="absolute left-0 top-9 z-30 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg shadow-lg p-3 w-64">
+                                                            <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary mb-1.5">Color</p>
+                                                            <div className="flex flex-wrap gap-1.5 mb-3">
+                                                                {COLLECTION_COLOR_OPTIONS.map(c => (
+                                                                    <button key={c} type="button" onClick={() => updateCollectionStyle(col.id, { color: c })}
+                                                                        className={`w-6 h-6 rounded-full border-2 ${(col.color || DEFAULT_COLLECTION_COLOR) === c ? 'border-gray-800 dark:border-white' : 'border-transparent'}`}
+                                                                        style={{ backgroundColor: c }} title={c} />
+                                                                ))}
+                                                            </div>
+                                                            <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary mb-1.5">Icon</p>
+                                                            <div className="grid grid-cols-7 gap-1.5">
+                                                                {COLLECTION_ICON_OPTIONS.map(({ key, Icon, label }) => (
+                                                                    <button key={key} type="button" onClick={() => updateCollectionStyle(col.id, { icon: key })}
+                                                                        className={`p-1.5 rounded-lg flex items-center justify-center ${(col.icon || 'folder') === key ? 'bg-gray-200 dark:bg-dark-surface-hover' : 'hover:bg-gray-100 dark:hover:bg-dark-surface-hover'}`}
+                                                                        title={label}>
+                                                                        <Icon size={16} style={{ color: col.color || DEFAULT_COLLECTION_COLOR }} />
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                            <button type="button" onClick={() => setStylingCollectionId(null)} className="mt-2 w-full text-xs px-2 py-1 bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary rounded-lg">Done</button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <span className="flex-grow text-sm font-medium text-gray-700 dark:text-dark-text">{col.name}</span>
                                                 <span className="text-xs text-gray-400 dark:text-dark-text-muted">{Object.values(animalCollections).filter(ids => Array.isArray(ids) && ids.includes(col.id)).length} animals</span>
                                                 <button onClick={() => { setRenamingCollectionId(col.id); setRenamingCollectionName(col.name); }} className="text-xs px-2 py-1 bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text-secondary rounded-lg">Rename</button>
@@ -3303,7 +3415,7 @@ useEffect(() => {
                                         onClick={() => setCollapsedCollections(prev => ({ ...prev, [col.id]: !prev[col.id] }))}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <FolderOpen size={16} className="text-amber-500" />
+                                            {React.createElement(getCollectionIcon(col.icon), { size: 16, style: { color: col.color || DEFAULT_COLLECTION_COLOR } })}
                                             <span className="font-bold text-gray-700 dark:text-dark-text">{col.name} ({colAnimals.length})</span>
                                         </div>
                                         {isColCollapsed ? <ChevronDown size={16} className="text-gray-400 dark:text-dark-text-muted" /> : <ChevronUp size={16} className="text-gray-400 dark:text-dark-text-muted" />}
@@ -3412,7 +3524,7 @@ useEffect(() => {
                                                                 {assigningCollectionAnimalId === animal.id_public && (
                                                                     <div className="absolute left-0 top-9 bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg shadow-lg p-2 min-w-[150px] z-30" onClick={e => e.stopPropagation()}>
                                                                         <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary mb-1.5">Add to collection:</p>
-                                                                        {userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded flex items-center gap-1.5 text-gray-700 dark:text-dark-text-secondary"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}
+                                                                        {userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded flex items-center gap-1.5 text-gray-700 dark:text-dark-text-secondary">{React.createElement(getCollectionIcon(col.icon), { size: 11, style: { color: col.color || DEFAULT_COLLECTION_COLOR } })} {col.name}</button>))}
                                                                         <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded text-gray-400 dark:text-dark-text-muted mt-1">Cancel</button>
                                                                     </div>
                                                                 )}
@@ -3457,7 +3569,7 @@ useEffect(() => {
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400 dark:text-dark-text-muted">{ageStr}</div></td>
                                                                         <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
-                                                                        <td className="px-3 py-1.5 text-right"><div className="relative inline-block text-left"><button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Plus size={16} /></button>{assigningCollectionAnimalId === animal.id_public && (<div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-dark-card-bg ring-1 ring-black dark:ring-dark-text-muted ring-opacity-5 z-30" onClick={e => e.stopPropagation()}><div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"><p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary px-3 py-1">Add to collection:</p>{userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover flex items-center gap-1.5 text-gray-700 dark:text-dark-text"><FolderOpen size={11} className="text-amber-500" /> {col.name}</button>))}</div></div>)}</div></td>
+                                                                        <td className="px-3 py-1.5 text-right"><div className="relative inline-block text-left"><button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Plus size={16} /></button>{assigningCollectionAnimalId === animal.id_public && (<div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-dark-card-bg ring-1 ring-black dark:ring-dark-text-muted ring-opacity-5 z-30" onClick={e => e.stopPropagation()}><div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"><p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary px-3 py-1">Add to collection:</p>{userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover flex items-center gap-1.5 text-gray-700 dark:text-dark-text">{React.createElement(getCollectionIcon(col.icon), { size: 11, style: { color: col.color || DEFAULT_COLLECTION_COLOR } })} {col.name}</button>))}</div></div>)}</div></td>
                                                                     </tr>
                                                                 );
                                                             })}
