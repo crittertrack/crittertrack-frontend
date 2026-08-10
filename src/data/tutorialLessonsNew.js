@@ -70,7 +70,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 5,
         title: 'Editing an existing animal',
-        content: 'Click an animal\'s card and use the Edit (pencil) icon, or open its detail view and click Edit in the header.',
+        content: 'Open the animal\'s detail view and click Edit in the header — that\'s the only way in.',
       },
       {
         stepNumber: 6,
@@ -106,19 +106,19 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
+        title: 'The Transfer Ownership modal',
+        content: 'Clicking Transfer opens a modal showing the animal\'s photo and info at the top, a recipient search (by name or CTU ID), an optional sale price, and a notes field for a message to include. Search results let you pick the right user before sending.',
+      },
+      {
+        stepNumber: 3,
         title: 'Nothing changes until they accept',
         content: 'Sending a transfer doesn\'t move ownership right away — the recipient gets a notification with Accept or Decline options, and the animal stays fully yours until they act on it.',
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
         title: 'Withdrawing a pending transfer',
         content: 'While a transfer is pending, that same header button becomes a "Withdraw" action (shown in red) so you can cancel it before the recipient responds.',
         screenshotCount: 2,
-      },
-      {
-        stepNumber: 4,
-        title: 'The Transfer Ownership modal',
-        content: 'Clicking Transfer opens a modal showing the animal\'s photo and info at the top, a recipient search (by name or CTU ID), an optional sale price, and a notes field for a message to include. Search results let you pick the right user before sending.',
       },
       {
         stepNumber: 5,
