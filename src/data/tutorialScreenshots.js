@@ -37,23 +37,3 @@ function getStepScreenshot(lessonId, stepNumber) {
 
 export { TUTORIAL_SCREENSHOTS, getStepScreenshot };
 export default { TUTORIAL_SCREENSHOTS, getStepScreenshot };
-
-
-/**
- * Get screenshot URL for a lesson step
- * @param {string} lessonId - Tutorial lesson ID
- * @param {number} stepNumber - Step number
- * @returns {string|null} Screenshot URL or null if not found
- */
-function getStepScreenshot(lessonId, stepNumber) {
-  const stepKey = `step${stepNumber}`;
-  for (const [tourName, lessons] of Object.entries(TUTORIAL_SCREENSHOTS)) {
-    if (lessons[lessonId] && lessons[lessonId][stepKey]) {
-      return lessons[lessonId][stepKey];
-    }
-  }
-  return null;
-}
-
-export { TUTORIAL_SCREENSHOTS, getStepScreenshot };
-export default { TUTORIAL_SCREENSHOTS, getStepScreenshot };
