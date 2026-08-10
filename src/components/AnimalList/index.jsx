@@ -6093,7 +6093,7 @@ useEffect(() => {
              {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'enclosures' ? renderEnclosuresTab() : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={allAnimalsRaw} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 <div className="space-y-3 sm:space-y-4"> {/* Skeleton grid */} </div>
             ) : displayedAnimalCount === 0 ? ( <div /> ) : myAnimalsViewMode === 'list' ? (
-                <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-dark-border shadow-sm relative">
+                <div className="relative">
                     {showColumnsDropdown && (
                         <div ref={columnsDropdownRef} className="absolute top-10 right-2 bg-white dark:bg-dark-card-bg border rounded-lg shadow-lg p-3 z-20 w-48">
                             <h4 className="text-xs font-bold mb-2">Displayed Columns</h4>
@@ -6105,6 +6105,7 @@ useEffect(() => {
                             ))}
                         </div>
                     )}
+                    <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-dark-border shadow-sm">
                     <table className="min-w-full text-xs divide-y divide-gray-200 dark:divide-dark-border">
                         <thead className="bg-gray-50 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-secondary uppercase text-[10px] sticky top-0 z-10 border-b dark:border-dark-text-muted">
                             <tr>
@@ -6212,6 +6213,7 @@ useEffect(() => {
                             })()}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             ) : (
                 <div className="space-y-3 sm:space-y-4">
