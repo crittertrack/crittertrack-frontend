@@ -894,13 +894,180 @@ const ANIMAL_LIST_TOUR_LESSONS = [
     ],
   },
 ];
-const ADVANCED_FEATURES_LESSONS = [];
+
+// "Profile & Settings: A Tab-by-Tab Tour" section — the 7 tabs under the avatar → Profile → Profile Settings page.
+const SETTINGS_TAB_LESSONS = [
+  {
+    id: 'settings-profile',
+    title: 'Settings: Profile',
+    description: 'Your public identity, visibility checklist, messaging preferences, and notification settings.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Photo and names',
+        content: 'Click the avatar placeholder to upload a profile photo (auto-compressed to a small file size). Personal Name is required and is your base identity in the app; Breeder Name is optional and only shows publicly once you check its box further down.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Website, social, bio, and location',
+        content: 'Website URL and Social Media Link only get their own "display" checkbox once you\'ve actually entered a value. Bio supports Bold/Italic formatting buttons and is capped at 1000 characters / 15 lines. Country (and State, for the US) are optional and mainly used by the Breeder Directory\'s location filters.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Public Profile Visibility checklist',
+        content: 'This checklist controls exactly what appears on your public profile card: Display Personal Name (on by default), Display Breeder Name, Display Email Address, Display Website URL, Display Social Media Link, Display Bio, and Show Stats tab. The Breeder Name/Website/Social/Bio checkboxes only appear once you\'ve filled in that field.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Messaging preferences',
+        content: 'A single "Allow other breeders to message me" checkbox. Turning it off only blocks messages from other users — it doesn\'t affect moderator/system notifications.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Push notifications',
+        content: 'The "Enable push notifications on this device" button turns on real device alerts for messages, requests, and daily care/feeding/health reminders (requires a supported browser — on iPhone/iPad you must Add to Home Screen first). Once enabled, a per-category checklist appears so you can fine-tune exactly what triggers a push.',
+      },
+      {
+        stepNumber: 6,
+        title: 'Email notifications',
+        content: 'Four mutually exclusive options control what gets emailed to you: None, Requests Only (breeder/transfer/breeding requests), Messages Only, or All.',
+      },
+    ],
+  },
+  {
+    id: 'settings-info-adoption',
+    title: 'Settings: Info & Adoption',
+    description: 'Optional long-form content shown on your public profile\'s own Info & Adoption tab.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Blank fields stay hidden',
+        content: 'Everything on this tab is optional — any field you leave blank simply doesn\'t appear on your public profile\'s Info & Adoption tab at all.',
+      },
+      {
+        stepNumber: 2,
+        title: 'The built-in fields',
+        content: 'About My Program/Breeding Goals, Adoption/Rehoming Rules, Enclosure Care Requirements, Routine Care, Health Guarantee, Waitlist and Booking Info, Pricing/Fee Notes, and Contact Preferences — each up to 2000 characters, with the same Bold/Italic formatting buttons as your Bio.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Custom Fields',
+        content: 'For anything the built-in fields don\'t cover, "Add Field" lets you create up to 10 of your own titled sections, each with its own text.',
+      },
+    ],
+  },
+  {
+    id: 'settings-directory',
+    title: 'Settings: Directory',
+    description: 'Opting into the public Breeder Directory, species by species.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Species & Breeding Status',
+        content: 'Every species you own animals of (plus any you\'ve previously marked) gets its own row with a status dropdown: 🏠 Owner (default, not listed anywhere), ⭐ Active Breeder, or 🌙 Retired Breeder. Click "Save Breeding Status" to apply changes.',
+      },
+      {
+        stepNumber: 2,
+        title: 'What actually makes you searchable',
+        content: 'Only species marked Active or Retired Breeder show up in Breeder Directory searches — and you still need Display Personal Name or Display Breeder Name checked on the Profile tab, or you won\'t appear in results at all even with a species marked.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Marked species stick around',
+        content: 'Once a species is marked Active or Retired, it stays in this list (and in Directory results) even if you no longer own any animals of that species — set it back to Owner to remove it.',
+      },
+    ],
+  },
+  {
+    id: 'settings-ratings',
+    title: 'Settings: Ratings',
+    description: 'The ratings and reviews other users have left you — read-only.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'What shows here',
+        content: 'An overall average score, a 1–5 star distribution breakdown, and the full list of individual reviews left by other users after transactions with you — reviewer name, star rating, comment, and date. Nothing here is editable; it\'s purely a summary of what others have said about you.',
+      },
+    ],
+  },
+  {
+    id: 'settings-breeding-lines',
+    title: 'Settings: Breeding Lines',
+    description: 'Define and manage your own named, color-coded breeding lines.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Defining a line',
+        content: 'Up to 10 personal breeding lines, each with a name (up to 30 characters) and a color picked from a preset palette. These are private — only visible to you, never on public profiles.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Assigning lines to animals',
+        content: 'Lines are assigned per-animal from that animal\'s own Identification tab, not from this Settings page — this page only defines and manages the lines themselves.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Hiding vs. deleting a line',
+        content: 'The eye icon toggles a line off — hidden everywhere without losing which animals are assigned to it — while the trash icon permanently deletes it and unassigns it from every animal that had it.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Remember to save',
+        content: 'Name, color, and enabled/disabled changes are all just a local draft until you click "Save Breeding Lines."',
+      },
+    ],
+  },
+  {
+    id: 'settings-data-portability',
+    title: 'Settings: Data Portability',
+    description: 'Exporting your records for backup, and importing from CritterTrack or other pedigree software.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Exporting your data',
+        content: 'Choose which sections to include (Animals, Litters, Enclosures, Supplies, Budget), pick a format — JSON (single file) or CSV (zip bundle) — and optionally include archived or sold animals, or embed images as base64 (JSON only).',
+      },
+      {
+        stepNumber: 2,
+        title: 'Importing a CritterTrack backup',
+        content: 'Upload a previously exported .json or .zip file and click "Preview Import" first — it shows a per-section breakdown of new vs. conflicting records so nothing gets written until you review and confirm.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Importing from other pedigree software',
+        content: 'Dedicated importers exist for ZooEasy, Kintraks, and SimpleBreed (via profile URL), each with their own dry-run preview and duplicate-conflict resolution step before anything is actually imported.',
+      },
+    ],
+  },
+  {
+    id: 'settings-account',
+    title: 'Settings: Account',
+    description: 'Login credentials and the account deletion danger zone.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Changing your email',
+        content: 'A dedicated "Change Email Address" form — you may need to log back in with the new address afterward.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Changing your password',
+        content: 'Requires your current password plus the new password entered twice to confirm it.',
+      },
+      {
+        stepNumber: 3,
+        title: 'The Danger Zone',
+        content: 'A collapsed "Danger Zone" section holds the "Delete Account" button — deleting is permanent, wipes all your animals/litters/profile data, and asks for a final confirmation before it\'s carried out.',
+      },
+    ],
+  },
+];
 
 const TUTORIAL_SECTIONS = [
   { id: 'getting-started', label: '🚀 Getting Started', lessons: GETTING_STARTED_LESSONS },
   { id: 'animal-record-tour', label: '🐾 The Animal Record: A Tab-by-Tab Tour', lessons: ANIMAL_RECORD_TAB_LESSONS },
   { id: 'animal-list-tour', label: '📋 The Animal List: A Tab-by-Tab Tour', lessons: ANIMAL_LIST_TOUR_LESSONS },
-  { id: 'advanced', label: '✨ Advanced Features', lessons: ADVANCED_FEATURES_LESSONS },
+  { id: 'settings-tour', label: '⚙️ Profile & Settings: A Tab-by-Tab Tour', lessons: SETTINGS_TAB_LESSONS },
 ];
 
 const ALL_LESSONS_ARRAY = TUTORIAL_SECTIONS.flatMap(section => section.lessons);
