@@ -1498,6 +1498,28 @@ const MORE_PAGES_LESSONS = [
     ],
   },
   {
+    id: 'alert-ticker-overview',
+    title: 'The Alert Ticker (Top Banner)',
+    description: 'The scrolling banner below the header that surfaces unread items and overdue care alerts.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'What it is',
+        content: 'A scrolling banner can appear just below the header on any page — showing unread messages, unread notifications, moderator warnings/notices, and any overdue care or breeding alerts you\'ve opted into. It stays hidden entirely when there\'s nothing to report.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Acting on an item',
+        content: 'Click an item to act on it: messages open the Messages panel, notifications open the Notifications panel, and care alerts (feeding, grooming, health, etc.) jump to the Dashboard. Warnings and moderator notices expand right in place instead, so you can read and acknowledge them.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Choosing which care alerts show',
+        content: 'The optional categories — Feeding, Grooming/Special Care, Training, Reproduction, Medical/Quarantine, Enclosure Maintenance, Supply Restocking, and Birthdays — are turned on or off from the "Alerts" button on the My Animals dashboard. That same setting controls both the dashboard\'s own alert list and this banner.',
+      },
+    ],
+  },
+  {
     id: 'breeder-directory',
     title: 'Breeder Directory',
     description: 'Finding breeders who\'ve opted into the public directory.',
