@@ -133,9 +133,18 @@ const TutorialsPage = () => {
                     const currentStep = selectedLesson.steps[currentStepIndex];
                     const totalSteps = selectedLesson.steps.length;
                     const currentSection = sections.find(s => s.lessons.some(l => l.id === selectedLesson.id));
-                    const screenshotUrl = getStepScreenshot(currentSection?.id, selectedLesson.id, currentStep.stepNumber || currentStepIndex + 1, currentStep.title);
-                    const expectedFilename = titleToFilename(currentStep.title) + '.png';
-                    const suggestedPath = `/images/tutorials/${currentSection?.id || 'unknown-tour'}/${expectedFilename}`;
+                    const stepNumber = currentStep.stepNumber || currentStepIndex + 1;
+                    // Most steps have one screenshot; a step can opt into more via `screenshotCount`
+                    // in tutorialLessonsNew.js (resolved as filename, filename-2, filename-3, ...).
+                    const screenshots = Array.from({ length: currentStep.screenshotCount || 1 }, (_, i) => {
+                      const variant = i + 1;
+                      const filename = titleToFilename(currentStep.title) + (variant > 1 ? `-${variant}` : '') + '.png';
+                      return {
+                        url: getStepScreenshot(currentSection?.id, selectedLesson.id, stepNumber, currentStep.title, variant),
+                        filename,
+                        suggestedPath: `/images/tutorials/${currentSection?.id || 'unknown-tour'}/${filename}`,
+                      };
+                    });
 
                     return (
                       <div className="space-y-4">
@@ -171,38 +180,42 @@ const TutorialsPage = () => {
                             </div>
                           </div>
 
-                          {/* Screenshot */}
-                          {screenshotUrl ? (
-                            <div className="mt-4 rounded-lg overflow-hidden border-2 border-gray-300 shadow-sm">
-                              <img 
-                                src={screenshotUrl} 
-                                alt={`Screenshot: ${currentStep.title}`}
-                                className="w-full h-auto"
-                                onError={(e) => {
-                                  // If image fails to load, show placeholder
-                                  e.target.style.display = 'none';
-                                  e.target.nextElementSibling.style.display = 'flex';
-                                }}
-                              />
-                              <div className="hidden bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 items-center justify-center">
-                                <div className="text-center">
-                                  <div className="text-4xl mb-2">📸</div>
-                                  <p className="text-gray-500 text-sm font-medium">Screenshot: {expectedFilename}</p>
-                                  <p className="text-gray-400 text-xs mt-1">Image not found</p>
-                                  <p className="text-gray-400 text-xs mt-1 font-mono">Save to: {suggestedPath}</p>
+                          {/* Screenshot(s) */}
+                          <div className={`mt-4 gap-3 ${screenshots.length > 1 ? 'grid sm:grid-cols-2' : ''}`}>
+                            {screenshots.map((shot, shotIndex) => (
+                              shot.url ? (
+                                <div key={shotIndex} className="rounded-lg overflow-hidden border-2 border-gray-300 shadow-sm">
+                                  <img 
+                                    src={shot.url} 
+                                    alt={`Screenshot: ${currentStep.title}${screenshots.length > 1 ? ` (${shotIndex + 1})` : ''}`}
+                                    className="w-full h-auto"
+                                    onError={(e) => {
+                                      // If image fails to load, show placeholder
+                                      e.target.style.display = 'none';
+                                      e.target.nextElementSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                  <div className="hidden bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 items-center justify-center">
+                                    <div className="text-center">
+                                      <div className="text-4xl mb-2">📸</div>
+                                      <p className="text-gray-500 text-sm font-medium">Screenshot: {shot.filename}</p>
+                                      <p className="text-gray-400 text-xs mt-1">Image not found</p>
+                                      <p className="text-gray-400 text-xs mt-1 font-mono">Save to: {shot.suggestedPath}</p>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="mt-4 bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 flex items-center justify-center">
-                              <div className="text-center">
-                                <div className="text-4xl mb-2">📸</div>
-                                <p className="text-gray-500 text-sm font-medium">Screenshot: {expectedFilename}</p>
-                                <p className="text-gray-400 text-xs mt-1">Visual guide coming soon</p>
-                                <p className="text-gray-400 text-xs mt-1 font-mono">Save to: {suggestedPath}</p>
-                              </div>
-                            </div>
-                          )}
+                              ) : (
+                                <div key={shotIndex} className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 flex items-center justify-center">
+                                  <div className="text-center">
+                                    <div className="text-4xl mb-2">📸</div>
+                                    <p className="text-gray-500 text-sm font-medium">Screenshot: {shot.filename}</p>
+                                    <p className="text-gray-400 text-xs mt-1">Visual guide coming soon</p>
+                                    <p className="text-gray-400 text-xs mt-1 font-mono">Save to: {shot.suggestedPath}</p>
+                                  </div>
+                                </div>
+                              )
+                            ))}
+                          </div>
                         </div>
 
                         {/* Navigation Arrows */}

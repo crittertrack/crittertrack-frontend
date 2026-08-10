@@ -32,18 +32,22 @@ function titleToFilename(title) {
  * Checks the manual override map first, then falls back to the naming convention
  * (/images/tutorials/{sectionId}/{titleToFilename(stepTitle)}.png) — the <img>'s onError
  * handler in TutorialsPage takes care of showing the placeholder if that file doesn't exist.
+ * A step with multiple screenshots (see `screenshotCount` in tutorialLessonsNew.js) passes
+ * `variant` 2, 3, etc., which resolves to a "-2"/"-3" suffixed filename/override key.
  * @param {string} sectionId - Tour/section id (matches a folder under public/images/tutorials/)
  * @param {string} lessonId - Tutorial lesson ID
  * @param {number} stepNumber - Step number
  * @param {string} stepTitle - Step title, used for the convention-based filename fallback
+ * @param {number} [variant=1] - Which screenshot for this step, for steps with more than one
  * @returns {string|null} Screenshot URL or null if it can't be determined
  */
-function getStepScreenshot(sectionId, lessonId, stepNumber, stepTitle) {
-  const stepKey = `step${stepNumber}`;
+function getStepScreenshot(sectionId, lessonId, stepNumber, stepTitle, variant = 1) {
+  const stepKey = variant > 1 ? `step${stepNumber}_${variant}` : `step${stepNumber}`;
   const override = TUTORIAL_SCREENSHOTS[sectionId]?.[lessonId]?.[stepKey];
   if (override) return override;
   if (!sectionId || !stepTitle) return null;
-  return `/images/tutorials/${sectionId}/${titleToFilename(stepTitle)}.png`;
+  const suffix = variant > 1 ? `-${variant}` : '';
+  return `/images/tutorials/${sectionId}/${titleToFilename(stepTitle)}${suffix}.png`;
 }
 
 export { TUTORIAL_SCREENSHOTS, getStepScreenshot, titleToFilename };

@@ -123,6 +123,7 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Returning an animal to its original breeder',
         content: 'If you\'re ever on the receiving end of a transfer, a "Return to original breeder" button (amber) appears in that animal\'s header, letting you hand it straight back whenever you want.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 6,
