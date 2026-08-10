@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BookOpen, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { TUTORIAL_LESSONS } from '../../data/tutorialLessonsNew';
-import { getStepScreenshot } from '../../data/tutorialScreenshots';
+import { getStepScreenshot, titleToFilename } from '../../data/tutorialScreenshots';
 import InfoButton from '../shared/InfoButton';
 
 /**
@@ -33,15 +33,6 @@ const TutorialsPage = () => {
     }
   }, [searchParams]);
 
-
-  // Convert step title to kebab-case filename
-  const titleToFilename = (title) => {
-    return title
-      .toLowerCase()
-      .replace(/[&]/g, 'and')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
 
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -141,8 +132,8 @@ const TutorialsPage = () => {
                   {(() => {
                     const currentStep = selectedLesson.steps[currentStepIndex];
                     const totalSteps = selectedLesson.steps.length;
-                    const screenshotUrl = getStepScreenshot(selectedLesson.id, currentStep.stepNumber || currentStepIndex + 1);
                     const currentSection = sections.find(s => s.lessons.some(l => l.id === selectedLesson.id));
+                    const screenshotUrl = getStepScreenshot(currentSection?.id, selectedLesson.id, currentStep.stepNumber || currentStepIndex + 1, currentStep.title);
                     const expectedFilename = titleToFilename(currentStep.title) + '.png';
                     const suggestedPath = `/images/tutorials/${currentSection?.id || 'unknown-tour'}/${expectedFilename}`;
 

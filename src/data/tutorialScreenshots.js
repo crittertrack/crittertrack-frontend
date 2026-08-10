@@ -5,10 +5,9 @@
 // Section ids (and their folders) come from TUTORIAL_SECTIONS in tutorialLessonsNew.js:
 // getting-started, animal-record-tour, animal-list-tour, settings-tour, litter-management-tour, more-pages-tour
 //
-// NOTE: public/images/tutorials/getting-started/ still holds ~70 screenshots from the
-// old (pre-rework) lesson set (ids like gs-add-animal, gs-select-species, etc.), none of
-// which match current lesson ids below. They're kept on disk in case they're reusable for
-// the new getting-started-animals / animal-record-tour lessons, but aren't wired up here yet.
+// Only needed here as an override — screenshots saved with the filename TutorialsPage
+// suggests (kebab-case of the step title, in the matching tour folder) are found
+// automatically by getStepScreenshot() without adding an entry below.
 
 const TUTORIAL_SCREENSHOTS = {
   "getting-started": {},
@@ -19,21 +18,34 @@ const TUTORIAL_SCREENSHOTS = {
   "more-pages-tour": {}
 };
 
-/**
- * Get screenshot URL for a lesson step
- * @param {string} lessonId - Tutorial lesson ID
- * @param {number} stepNumber - Step number
- * @returns {string|null} Screenshot URL or null if not found
- */
-function getStepScreenshot(lessonId, stepNumber) {
-  const stepKey = `step${stepNumber}`;
-  for (const [tourName, lessons] of Object.entries(TUTORIAL_SCREENSHOTS)) {
-    if (lessons[lessonId] && lessons[lessonId][stepKey]) {
-      return lessons[lessonId][stepKey];
-    }
-  }
-  return null;
+// Convert a step title to the kebab-case filename convention used across public/images/tutorials/.
+function titleToFilename(title) {
+  return title
+    .toLowerCase()
+    .replace(/[&]/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
-export { TUTORIAL_SCREENSHOTS, getStepScreenshot };
-export default { TUTORIAL_SCREENSHOTS, getStepScreenshot };
+/**
+ * Get screenshot URL for a lesson step.
+ * Checks the manual override map first, then falls back to the naming convention
+ * (/images/tutorials/{sectionId}/{titleToFilename(stepTitle)}.png) — the <img>'s onError
+ * handler in TutorialsPage takes care of showing the placeholder if that file doesn't exist.
+ * @param {string} sectionId - Tour/section id (matches a folder under public/images/tutorials/)
+ * @param {string} lessonId - Tutorial lesson ID
+ * @param {number} stepNumber - Step number
+ * @param {string} stepTitle - Step title, used for the convention-based filename fallback
+ * @returns {string|null} Screenshot URL or null if it can't be determined
+ */
+function getStepScreenshot(sectionId, lessonId, stepNumber, stepTitle) {
+  const stepKey = `step${stepNumber}`;
+  const override = TUTORIAL_SCREENSHOTS[sectionId]?.[lessonId]?.[stepKey];
+  if (override) return override;
+  if (!sectionId || !stepTitle) return null;
+  return `/images/tutorials/${sectionId}/${titleToFilename(stepTitle)}.png`;
+}
+
+export { TUTORIAL_SCREENSHOTS, getStepScreenshot, titleToFilename };
+export default { TUTORIAL_SCREENSHOTS, getStepScreenshot, titleToFilename };
+
