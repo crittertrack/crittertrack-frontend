@@ -2410,11 +2410,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 </div>
             </div>
 
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-dark-text-muted mb-4 sm:mb-6 pl-0.5">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-dark-text-muted mb-4 sm:mb-6 pl-0.5">
                 <span><span className="font-semibold text-gray-700 dark:text-dark-text-secondary">{litterStats.litters}</span> Litters</span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-blue-600 dark:text-blue-400">{litterStats.males}</span> Males</span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-pink-500 dark:text-pink-400">{litterStats.females}</span> Females</span>
                 <span className="border-l border-gray-200 dark:border-dark-text-muted pl-4"><span className="font-semibold text-gray-500 dark:text-dark-text-muted">{litterStats.unknown}</span> Unknown</span>
+                <InfoButton title="The Expanded Litter Card" lessonId="litter-expanded-view">
+                    <p>Click any litter card to expand it — status transition buttons (Mated today, Assign Pregnant, Born today, Mark Weaned) and offspring management both live inside the expanded view.</p>
+                </InfoButton>
             </div>
 
             {loading && litters.length === 0 && (
@@ -2441,7 +2444,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
                     <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
                         <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4">
-                            <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
+                                {editingLitter ? 'Edit Litter' : 'Create New Litter'}
+                                {/* No lessonId — this is an open, unsaved form, so no "View related tutorial" nav-away link. */}
+                                <InfoButton title="Recording Birth Details">
+                                    <p>Birth Date, Litter Size (by sex), and Notes here create a real Litter record — this is what counts toward pedigrees, offspring links, and COI, unlike a manual pedigree-only note.</p>
+                                </InfoButton>
+                            </h3>
                             <button 
                                 onClick={() => {
                                     setShowAddForm(false);
@@ -3456,6 +3465,10 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                             <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text flex items-center gap-2">
                                 <Heart size={18} className="text-indigo-500" />
                                 {editingMatingId ? 'Edit Planned Mating' : 'Record Planned Mating'}
+                                {/* No lessonId — this is an open, unsaved form, so no "View related tutorial" nav-away link. */}
+                                <InfoButton title="Recording a Planned Mating">
+                                    <p>Pick a Sire and Dam to start tracking a pairing — status (Mated, Pregnant, Born) is updated later by editing this same entry as things progress.</p>
+                                </InfoButton>
                             </h3>
                             <button onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text">
                                 <X size={22} />

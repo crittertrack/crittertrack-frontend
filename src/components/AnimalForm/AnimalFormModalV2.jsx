@@ -19,6 +19,8 @@ import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from '../AnimalList/LocationManagerModal';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { isFieldHiddenForSpecies, getFieldLabel } from '../../utils/speciesFieldTemplates';
+import InfoButton from '../shared/InfoButton';
+import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
 
 const getSpeciesCategory = (species) => {
     if (!species) return 'Other';
@@ -3642,9 +3644,17 @@ const AnimalFormModalV2 = ({
                 {/* Header */}
                 <div className="p-3 sm:p-6 border-b border-gray-300 dark:border-dark-border flex-shrink-0">
                     <h2 className="text-lg sm:text-3xl font-bold text-gray-800 dark:text-dark-text flex items-center justify-between">
-                        <span>
+                        <span className="flex items-center">
                             <PlusCircle size={20} className="inline mr-2 text-primary" />
                             {formTitle}
+                            {ANIMAL_FORM_TAB_INFO[activeTab] && (
+                                // No lessonId here on purpose — this is an open, unsaved edit form, and the
+                                // tutorial's "View related tutorial" link would navigate away via react-router
+                                // and abandon in-progress edits. The read-only view modals link to the lesson instead.
+                                <InfoButton title={ANIMAL_FORM_TAB_INFO[activeTab].title} className="ml-2">
+                                    <p>{ANIMAL_FORM_TAB_INFO[activeTab].body}</p>
+                                </InfoButton>
+                            )}
                         </span>
                         <button type="button" onClick={onCancel} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-700 transition duration-150 p-2 rounded-lg" title="Cancel">
                             <X size={22} />

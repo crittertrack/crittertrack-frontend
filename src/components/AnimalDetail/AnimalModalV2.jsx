@@ -23,6 +23,8 @@ import { BreedingTabContent } from './BreedingTabContent';
 import { InfoCard, InfoItem, TimelineItem } from './DashboardComponents'; // This component is used in AnimalModalV2.jsx
 import { EnclosureCard } from './EnclosureCard';
 import { RecordsTabContent } from './RecordsTabContent';
+import InfoButton from '../shared/InfoButton';
+import { ANIMAL_VIEW_TAB_INFO } from '../../data/animalTabInfo';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -589,6 +591,11 @@ const AnimalModalV2 = ({
                                 {tab.icon} {tab.label}
                             </button>
                         ))}
+                        {ANIMAL_VIEW_TAB_INFO[activeTab] && (
+                            <InfoButton title={ANIMAL_VIEW_TAB_INFO[activeTab].title} lessonId={ANIMAL_VIEW_TAB_INFO[activeTab].lessonId} className="shrink-0">
+                                <p>{ANIMAL_VIEW_TAB_INFO[activeTab].body}</p>
+                            </InfoButton>
+                        )}
                     </nav>
                 </div>
 

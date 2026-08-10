@@ -11,6 +11,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { formatDate } from '../../utils/dateFormatter';
 import { getSpeciesCategory } from '../../utils/speciesFieldTemplates';
 import ReportButton from '../ReportButton';
+import InfoButton from '../shared/InfoButton';
 
 const API_BASE_URL = '/api';
 
@@ -703,6 +704,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 >
                     <ArrowLeft size={18} className="mr-1" /> Back
                 </button>
+                <InfoButton title="Viewing a Profile" lessonId="profile-view">
+                    <p>The tabs shown here (Animals, Pairings, For Sale/Stud, Stats, Ratings) depend on what this person has opted into and has relevant content for.</p>
+                </InfoButton>
                 <div className="flex gap-2 flex-wrap justify-end">
                     {isOwnProfile ? (
                         <button
