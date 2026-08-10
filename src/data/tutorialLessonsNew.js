@@ -128,6 +128,11 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 6,
+        title: 'Accepting a returned animal',
+        content: 'A return doesn\'t happen instantly either — the original breeder gets a Pending Requests notification (e.g. "X wants to return Tutorial (CTC1234) to you") with Accept or Decline options, and must accept it before ownership actually moves back.',
+      },
+      {
+        stepNumber: 7,
         title: 'Where transferred animals end up on your list',
         content: 'Once accepted, the recipient becomes the new owner with full edit access, while you\'re automatically kept on as the original breeder with permanent view-only access so pedigree and history stay intact. The animal is also pulled from your active My Animals list and counted under "Sold/Archived" instead — a dedicated lesson later covers that Archive section in full.',
       },
