@@ -97,17 +97,49 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 8,
         title: 'Owned vs. Unowned',
-        content: 'Every animal you create defaults to "Owned." Use the Heart / Heart-off button on its card to flip this label — handy for animals you created but don\'t currently have in your possession (co-owned, borrowed, or only added for pedigree). The "Owned"/"All" buttons at the top of the list just filter by this same label, and bulk actions exist to mark many animals at once. Flipping this label never sells, transfers, or archives an animal — actually transferring ownership to another user is a separate process, covered next.',
+        content: 'Every animal you create defaults to "Owned." Use the Heart / Heart-off button on its card to flip this label — handy for animals you created but don\'t currently have in your possession (co-owned, borrowed, or only added for pedigree). The "Owned"/"All" buttons at the top of the list just filter by this same label, and bulk actions exist to mark many animals at once. Flipping this label never sells, transfers, or archives an animal — actually transferring ownership to another user is a separate process, covered in the next lesson.',
       },
       {
         stepNumber: 9,
-        title: 'Transferring ownership to another user',
-        content: 'The two-way-arrows "Transfer" button (in the animal\'s detail view header, next to Edit) sends this animal to another CritterTrack user — search for them by name or CTU ID, and they get a notification to Accept or Decline. Nothing changes until they accept. While a transfer is pending, that same button becomes a "Withdraw" action so you can cancel it. Once accepted, the recipient becomes the new owner and gets full edit access, while you\'re kept on as the original breeder with permanent view-only access for pedigree/history purposes. If you ever receive an animal this way, a "Return to original breeder" button appears in its header so you can hand it back.',
-      },
-      {
-        stepNumber: 10,
         title: 'A few features live here but are managed elsewhere',
         content: 'Enclosure assignment, Health/Quarantine & Treatment, Feeding/Grooming/Training schedules, Marketplace availability, Breeding Line assignment, and Seller/Buyer contact linkage can all be set from this same edit form, but you\'ll do the day-to-day work on their own dedicated pages — each covered in a later lesson.',
+      },
+    ],
+  },
+  {
+    id: 'getting-started-transfers',
+    title: 'Transferring Animal Ownership',
+    description: 'A closer look at the Transfer feature — this one trips people up, so it gets its own lesson.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Starting a transfer',
+        content: 'The two-way-arrows "Transfer" button lives in the animal\'s detail view header, next to Edit. Click it and search for the recipient by name or CTU ID.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Nothing changes until they accept',
+        content: 'Sending a transfer doesn\'t move ownership right away — the recipient gets a notification with Accept or Decline options, and the animal stays fully yours until they act on it.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Withdrawing a pending transfer',
+        content: 'While a transfer is pending, that same header button becomes a "Withdraw" action (shown in red) so you can cancel it before the recipient responds.',
+      },
+      {
+        stepNumber: 4,
+        title: 'What happens after acceptance',
+        content: 'Once accepted, the recipient becomes the new owner with full edit access. You\'re automatically kept on as the original breeder with permanent view-only access, so pedigree and history stay intact.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Returning an animal to its original breeder',
+        content: 'If you\'re ever on the receiving end of a transfer, a "Return to original breeder" button (amber) appears in that animal\'s header, letting you hand it straight back whenever you want.',
+      },
+      {
+        stepNumber: 6,
+        title: 'Where transferred animals end up on your list',
+        content: 'Once an animal is transferred away, it\'s automatically pulled from your active My Animals list and counted under "Sold/Archived" instead — a dedicated lesson later covers that Archive section in full.',
       },
     ],
   },
