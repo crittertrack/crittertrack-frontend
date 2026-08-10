@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bell, BellOff, BellRing, Loader2 } from 'lucide-react';
+import { Smartphone, SmartphoneNfc, Loader2 } from 'lucide-react';
 import { isPushSupported, isSubscribedOnThisDevice, subscribeToPush, unsubscribeFromPush } from '../../utils/pushNotifications';
 
 // Compact quick-access toggle for enabling/disabling push notifications on this device,
@@ -38,7 +38,7 @@ const PushToggleButton = ({ authToken, API_BASE_URL, showModalMessage }) => {
         }
     };
 
-    const Icon = busy ? Loader2 : subscribed ? BellRing : BellOff;
+    const Icon = busy ? Loader2 : subscribed ? SmartphoneNfc : Smartphone;
 
     return (
         <button
