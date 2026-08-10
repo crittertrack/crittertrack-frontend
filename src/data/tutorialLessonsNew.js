@@ -113,6 +113,7 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Withdrawing a pending transfer',
         content: 'While a transfer is pending, that same header button becomes a "Withdraw" action (shown in red) so you can cancel it before the recipient responds.',
+        screenshotCount: 2,
       },
       {
         stepNumber: 4,

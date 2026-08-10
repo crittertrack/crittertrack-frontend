@@ -2208,6 +2208,7 @@ const App = () => {
                                     API_BASE_URL={API_BASE_URL}
                                     userProfile={userProfile}
                                     handleReturnTransferredAnimal={transferWorkflow.handleReturnTransferredAnimal}
+                                    handleWithdrawTransfer={transferWorkflow.handleWithdrawTransfer}
                                     GENDER_OPTIONS={GENDER_OPTIONS}
                                     STATUS_OPTIONS={STATUS_OPTIONS}
                                 />

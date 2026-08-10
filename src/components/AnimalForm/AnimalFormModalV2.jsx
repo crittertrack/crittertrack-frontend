@@ -1415,6 +1415,7 @@ const AnimalFormModalV2 = ({
     showModalMessage,
     userProfile,
     handleReturnTransferredAnimal,
+    handleWithdrawTransfer,
     speciesOptions = [],
     GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'], // NOSONAR
     STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']
@@ -6780,6 +6781,16 @@ const AnimalFormModalV2 = ({
                                         <button type="button" onClick={() => handleReturnTransferredAnimal(animalToEdit.id_public)} className="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
                                             <RotateCcw size={18} />
                                             <span>Return to Original Breeder</span>
+                                        </button>
+                                    );
+                                }
+                                // A pending outgoing transfer must be withdrawn before this animal can be deleted,
+                                // otherwise the recipient is left with a notification for an animal that no longer exists.
+                                if (animalToEdit.pendingTransferId && handleWithdrawTransfer) {
+                                    return (
+                                        <button type="button" onClick={() => handleWithdrawTransfer(animalToEdit.pendingTransferId)} className="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
+                                            <RotateCcw size={18} />
+                                            <span>Withdraw Pending Transfer</span>
                                         </button>
                                     );
                                 }
