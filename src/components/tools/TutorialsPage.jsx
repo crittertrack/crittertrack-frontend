@@ -14,10 +14,16 @@ const TutorialsPage = () => {
   const [expandedSection, setExpandedSection] = useState(TUTORIAL_LESSONS.sections[0]?.id ?? null);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [currentShotIndex, setCurrentShotIndex] = useState(0);
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
   const [searchParams] = useSearchParams();
 
   const sections = TUTORIAL_LESSONS.sections;
+
+  // Reset to the first screenshot whenever the step (or lesson) changes
+  useEffect(() => {
+    setCurrentShotIndex(0);
+  }, [selectedLesson, currentStepIndex]);
 
   // Deep-link support: InfoButton popovers link here via ?lesson=<id> — jump straight to
   // that lesson if it exists yet (lesson content is still being rebuilt, so this is a
@@ -181,40 +187,80 @@ const TutorialsPage = () => {
                           </div>
 
                           {/* Screenshot(s) */}
-                          <div className={`mt-4 gap-3 ${screenshots.length > 1 ? 'grid sm:grid-cols-2' : ''}`}>
-                            {screenshots.map((shot, shotIndex) => (
-                              shot.url ? (
-                                <div key={shotIndex} className="rounded-lg overflow-hidden border-2 border-gray-300 shadow-sm">
-                                  <img 
-                                    src={shot.url} 
-                                    alt={`Screenshot: ${currentStep.title}${screenshots.length > 1 ? ` (${shotIndex + 1})` : ''}`}
-                                    className="w-full h-auto"
-                                    onError={(e) => {
-                                      // If image fails to load, show placeholder
-                                      e.target.style.display = 'none';
-                                      e.target.nextElementSibling.style.display = 'flex';
-                                    }}
-                                  />
-                                  <div className="hidden bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 items-center justify-center">
+                          <div className="mt-4">
+                            {screenshots.length > 1 && (
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-semibold text-gray-500 dark:text-dark-text-secondary">
+                                  Image {currentShotIndex + 1} of {screenshots.length}
+                                </span>
+                                <div className="flex gap-1">
+                                  {screenshots.map((_, shotIndex) => (
+                                    <button
+                                      key={shotIndex}
+                                      onClick={() => setCurrentShotIndex(shotIndex)}
+                                      aria-label={`Show image ${shotIndex + 1}`}
+                                      className={`h-2 w-2 rounded-full transition-all ${
+                                        shotIndex === currentShotIndex ? 'bg-primary w-6' : 'bg-gray-300 hover:bg-gray-400'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            <div className="relative">
+                              {(() => {
+                                const shot = screenshots[currentShotIndex];
+                                return shot.url ? (
+                                  <div className="rounded-lg overflow-hidden border-2 border-gray-300 shadow-sm">
+                                    <img
+                                      src={shot.url}
+                                      alt={`Screenshot: ${currentStep.title}${screenshots.length > 1 ? ` (${currentShotIndex + 1})` : ''}`}
+                                      className="w-full h-auto"
+                                      onError={(e) => {
+                                        // If image fails to load, show placeholder
+                                        e.target.style.display = 'none';
+                                        e.target.nextElementSibling.style.display = 'flex';
+                                      }}
+                                    />
+                                    <div className="hidden bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 items-center justify-center">
+                                      <div className="text-center">
+                                        <div className="text-4xl mb-2">📸</div>
+                                        <p className="text-gray-500 text-sm font-medium">Screenshot: {shot.filename}</p>
+                                        <p className="text-gray-400 text-xs mt-1">Image not found</p>
+                                        <p className="text-gray-400 text-xs mt-1 font-mono">Save to: {shot.suggestedPath}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 flex items-center justify-center">
                                     <div className="text-center">
                                       <div className="text-4xl mb-2">📸</div>
                                       <p className="text-gray-500 text-sm font-medium">Screenshot: {shot.filename}</p>
-                                      <p className="text-gray-400 text-xs mt-1">Image not found</p>
+                                      <p className="text-gray-400 text-xs mt-1">Visual guide coming soon</p>
                                       <p className="text-gray-400 text-xs mt-1 font-mono">Save to: {shot.suggestedPath}</p>
                                     </div>
                                   </div>
-                                </div>
-                              ) : (
-                                <div key={shotIndex} className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 flex items-center justify-center">
-                                  <div className="text-center">
-                                    <div className="text-4xl mb-2">📸</div>
-                                    <p className="text-gray-500 text-sm font-medium">Screenshot: {shot.filename}</p>
-                                    <p className="text-gray-400 text-xs mt-1">Visual guide coming soon</p>
-                                    <p className="text-gray-400 text-xs mt-1 font-mono">Save to: {shot.suggestedPath}</p>
-                                  </div>
-                                </div>
-                              )
-                            ))}
+                                );
+                              })()}
+                              {screenshots.length > 1 && (
+                                <>
+                                  <button
+                                    onClick={() => setCurrentShotIndex(prev => (prev === 0 ? screenshots.length - 1 : prev - 1))}
+                                    aria-label="Previous image"
+                                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 dark:bg-dark-card-bg/80 border border-gray-300 dark:border-dark-text shadow hover:bg-white dark:hover:bg-dark-card-bg transition"
+                                  >
+                                    <ChevronLeft size={18} />
+                                  </button>
+                                  <button
+                                    onClick={() => setCurrentShotIndex(prev => (prev === screenshots.length - 1 ? 0 : prev + 1))}
+                                    aria-label="Next image"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 dark:bg-dark-card-bg/80 border border-gray-300 dark:border-dark-text shadow hover:bg-white dark:hover:bg-dark-card-bg transition"
+                                  >
+                                    <ChevronRight size={18} />
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
 
