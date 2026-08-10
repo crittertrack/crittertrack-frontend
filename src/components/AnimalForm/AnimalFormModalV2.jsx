@@ -6788,7 +6788,7 @@ const AnimalFormModalV2 = ({
                                 // otherwise the recipient is left with a notification for an animal that no longer exists.
                                 if (animalToEdit.pendingTransferId && handleWithdrawTransfer) {
                                     return (
-                                        <button type="button" onClick={() => handleWithdrawTransfer(animalToEdit.pendingTransferId)} className="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
+                                        <button type="button" onClick={() => handleWithdrawTransfer(animalToEdit.pendingTransferId)} className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
                                             <RotateCcw size={18} />
                                             <span>Withdraw Pending Transfer</span>
                                         </button>
