@@ -798,7 +798,7 @@ const ANIMAL_LIST_TOUR_LESSONS = [
       {
         stepNumber: 5,
         title: 'Breeding/Nursery enclosures',
-        content: 'A dedicated Enclosures panel at the top lists any enclosure marked with the "Nursery / Breeding" purpose — use its Add button to create one. Animals housed there are automatically excluded from the four status lists below, since they\'re already grouped by enclosure.',
+        content: 'A dedicated Enclosures panel at the top lists any enclosure marked with the "Nursery / Breeding" purpose — use its Add button to create one. By default, animals housed there are excluded from the four status lists below since they\'re already grouped by enclosure — check "Also show Breeding/Nursery enclosure animals in the lists below" if you\'d rather see them in both places.',
       },
       {
         stepNumber: 6,

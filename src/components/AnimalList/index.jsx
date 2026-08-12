@@ -409,6 +409,20 @@ const AnimalList = ({
             return localStorage.getItem('animalList_publicFilter') || '';
         } catch { return ''; }
     });
+    // When true, animals housed in a Breeding/Nursery enclosure still appear in the Planned/Mating/
+    // Pregnant/Nursing lists below (in addition to the enclosure card) instead of being hidden there.
+    const [showReproEnclosureAnimalsInLists, setShowReproEnclosureAnimalsInLists] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_showReproEnclosureAnimalsInLists') === 'true';
+        } catch { return false; }
+    });
+    const toggleShowReproEnclosureAnimalsInLists = useCallback(() => {
+        setShowReproEnclosureAnimalsInLists(prev => {
+            const next = !prev;
+            try { localStorage.setItem('animalList_showReproEnclosureAnimalsInLists', String(next)); } catch {}
+            return next;
+        });
+    }, []);
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
     const [bulkArchiveMode, setBulkArchiveMode] = useState({}); // { species: true/false }
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
@@ -2182,17 +2196,17 @@ useEffect(() => {
         };
     }, [activeReproEventsByAnimal]);
 
-    const plannedMatingList = useMemo(() => allAnimals.filter(a => a.isPlannedMating && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
-    const matingList = useMemo(() => allAnimals.filter(a => a.isInMating && !inReproEnclosure(a)).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
+    const plannedMatingList = useMemo(() => allAnimals.filter(a => a.isPlannedMating && (showReproEnclosureAnimalsInLists || !inReproEnclosure(a))).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, showReproEnclosureAnimalsInLists]);
+    const matingList = useMemo(() => allAnimals.filter(a => a.isInMating && (showReproEnclosureAnimalsInLists || !inReproEnclosure(a))).map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, showReproEnclosureAnimalsInLists]);
     // Membership relies solely on the backend-authoritative flags (which apply the per-species
     // nursing cutoff) — the locally-derived litterStatus above has no cutoff and would otherwise
     // keep long-past litters showing here forever, out of sync with the flag used for the status pill.
     const pregnantList = useMemo(() => allAnimals
-        .filter(a => a.gender !== 'Male' && !inReproEnclosure(a) && !!a.isPregnant)
-        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
+        .filter(a => a.gender !== 'Male' && (showReproEnclosureAnimalsInLists || !inReproEnclosure(a)) && !!a.isPregnant)
+        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, showReproEnclosureAnimalsInLists]);
     const nursingList = useMemo(() => allAnimals
-        .filter(a => a.gender !== 'Male' && !inReproEnclosure(a) && !!a.isNursing)
-        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData]);
+        .filter(a => a.gender !== 'Male' && (showReproEnclosureAnimalsInLists || !inReproEnclosure(a)) && !!a.isNursing)
+        .map(mergeLitterData), [allAnimals, inReproEnclosure, mergeLitterData, showReproEnclosureAnimalsInLists]);
     const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly); // This is for the For Sale screen, not dashboard
     const feedDue = allAnimals.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours)); // This is for the Feeding management view
     const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0); // For Scheduled Care management view
@@ -4721,6 +4735,15 @@ useEffect(() => {
                                     }
                                 </div>
                             </div>
+                            <label className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-dark-text-secondary select-none cursor-pointer w-fit">
+                                <input
+                                    type="checkbox"
+                                    checked={showReproEnclosureAnimalsInLists}
+                                    onChange={toggleShowReproEnclosureAnimalsInLists}
+                                    className="rounded border-gray-300 dark:border-dark-text-muted text-pink-600 focus:ring-pink-500"
+                                />
+                                Also show Breeding/Nursery enclosure animals in the lists below
+                            </label>
                             {(() => {
                                 const reproSections = [
                                     { key: 'planned', title: 'Planned Matings', list: plannedMatingList, icon: <Calendar size={16} className="text-indigo-700 dark:text-indigo-300" />, headerClass: 'bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-900/40', emptyText: 'No planned matings yet.' },
