@@ -739,6 +739,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const isBrown = genotype.B === 'b/b';
     const isDilute = genotype.D === 'd/d';
     const isPinkEye = genotype.P === 'p/p';
+    const isLeaden = genotype.Ln === 'ln/ln';
     
     // Check for C-locus dilutes (exclude C/C and c/c)
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'ch/C', 'C/ce', 'ce/C', 'C/c', 'c/C', 'C/cch', 'cch/C'];
