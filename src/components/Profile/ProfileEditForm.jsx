@@ -1892,7 +1892,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 return (
                                                     <span className="ml-2 text-xs font-normal">
                                                         {high > 0 && <span className="text-amber-600 dark:text-amber-400">{high} duplicate{high !== 1 ? 's' : ''}</span>}
-                                                        {high > 0 && possible > 0 && <span className="text-gray-400 dark:text-dark-text-muted"> ? </span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400 dark:text-dark-text-muted"> · </span>}
                                                         {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
                                                     </span>
                                                 );
@@ -2379,7 +2379,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 return (
                                                     <span className="ml-2 text-xs font-normal">
                                                         {high > 0 && <span className="text-amber-600 dark:text-amber-400">{high} duplicate{high !== 1 ? 's' : ''}</span>}
-                                                        {high > 0 && possible > 0 && <span className="text-gray-400 dark:text-dark-text-muted"> ? </span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400 dark:text-dark-text-muted"> · </span>}
                                                         {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
                                                     </span>
                                                 );

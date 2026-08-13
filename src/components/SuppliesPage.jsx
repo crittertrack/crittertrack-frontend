@@ -264,8 +264,8 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             </div>
                         </div>
                         <div className="border-t border-blue-200 dark:border-blue-700/60 pt-3 space-y-2">
-                            <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary">Reorder Schedule <span className="font-normal text-gray-400 dark:text-dark-text-muted">(optional ? for bulk or timed items)</span></p>
-                            <p className="text-[11px] text-gray-400 dark:text-dark-text-muted">Set a date &amp; repeat frequency for items ordered on a schedule, regardless of stock count ? e.g. a 650 L bedding pallet every 3 months.</p>
+                            <p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary">Reorder Schedule <span className="font-normal text-gray-400 dark:text-dark-text-muted">(optional · for bulk or timed items)</span></p>
+                            <p className="text-[11px] text-gray-400 dark:text-dark-text-muted">Set a date &amp; repeat frequency for items ordered on a schedule, regardless of stock count · e.g. a 650 L bedding pallet every 3 months.</p>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
                                     <label className="text-xs font-medium text-gray-600 dark:text-dark-text-secondary mb-1 block">Next order date</label>

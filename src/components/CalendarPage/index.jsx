@@ -588,7 +588,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                 value={calendarQuery}
                                 onChange={e => setCalendarQuery(e.target.value)}
                                 placeholder="Filter by pair, litter ID, sire/dam, animal, or enclosure"
-                                className="w-full md:w-80 p-2 text-sm border border-gray-300 dark:border-dark-text rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted"
+                                className="w-full md:flex-1 md:max-w-2xl p-2 text-sm border border-gray-300 dark:border-dark-text rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted"
                             />
                         </div>
                         <div className="relative" ref={eventTypesDropdownRef}>

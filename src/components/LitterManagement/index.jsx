@@ -2582,7 +2582,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
                                         Species {!editingLitter && <span className="text-red-500">*</span>}
-                                        {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked ? cannot change on edit)</span>}
+                                        {editingLitter && <span className="ml-1 text-xs text-gray-400 dark:text-dark-text-muted font-normal">(locked · cannot change on edit)</span>}
                                     </label>
                                     <button
                                         type="button"
@@ -3323,7 +3323,7 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                         </label>
                                         <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800/40">
                                             <p className="text-xs text-blue-800 dark:text-blue-300 mb-3">
-                                                <strong>Create placeholder animals:</strong> Created with names M1, M2? / F1, F2? You can edit names and details after saving.
+                                                <strong>Create placeholder animals:</strong> Created with names M1, M2… / F1, F2… You can edit names and details after saving.
                                             </p>
                                             {(() => {
                                                 const linkedMales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length;
