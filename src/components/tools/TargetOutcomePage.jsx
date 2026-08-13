@@ -405,9 +405,12 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
     }
   };
 
-  const sires = allAnimals.filter(a => a.gender === 'Male' && a.geneticCode);
-  const dams = allAnimals.filter(a => a.gender === 'Female' && a.geneticCode);
+  // Requiring a fully-specified geneticCode excluded most animals in practice — genetic codes are
+  // an optional, manually-entered field, so plenty of eligible sires/dams simply don't have one.
+  const sires = allAnimals.filter(a => a.gender === 'Male');
+  const dams = allAnimals.filter(a => a.gender === 'Female');
   const pairings = [];
+  const unconfirmedPairings = [];
 
   for (const sire of sires) {
     for (const dam of dams) {
