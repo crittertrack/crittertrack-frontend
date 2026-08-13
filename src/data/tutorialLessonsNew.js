@@ -1421,8 +1421,8 @@ const MORE_PAGES_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'News, Breeder Directory, and My Feed',
-        content: 'Below that sit three panels: community News, an embedded Breeder Directory search (collapsible on mobile), and My Feed — your favorited animals and favorited breeders together in one place.',
+        title: 'News & Announcements, Breeders, and Favorites',
+        content: 'Below that sit three panels: News & Announcements (community announcements and polls), an embedded Breeders search (collapsible on mobile), and Favorites — your favorited animals and favorited breeders together in one place.',
       },
     ],
   },
