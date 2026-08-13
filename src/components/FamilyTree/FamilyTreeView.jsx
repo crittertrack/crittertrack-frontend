@@ -79,6 +79,7 @@ const FamilyTreeView = ({
 }) => {
     const [lineageData, setLineageData] = useState({});
     const [lineageLoading, setLineageLoading] = useState(false);
+    const [loadProgress, setLoadProgress] = useState({ found: 0, pending: 0 });
     const [zoom, setZoom] = useState(85);
     const [pan, setPan] = useState({ x: 24, y: 24 });
     const containerRef = useRef(null);
@@ -148,6 +149,7 @@ const FamilyTreeView = ({
         // Set loading state and clear previous data to prevent showing stale graph
         setLineageLoading(true);
         setLineageData({});
+        setLoadProgress({ found: 0, pending: 0 });
 
         // Guards against a slow, still in-flight fetch from a previous selection
         // overwriting the state for the current selection once it finally resolves.
@@ -189,6 +191,7 @@ const FamilyTreeView = ({
                     if (sireId) ancestorQueue.push(sireId);
                     if (damId) ancestorQueue.push(damId);
                 }
+                if (!cancelled) setLoadProgress({ found: Object.keys(nodes).length, pending: ancestorQueue.length });
             }
 
             // Phase 2: Identify parents and grandparents to fetch their offspring (siblings, aunts/uncles)
@@ -248,6 +251,7 @@ const FamilyTreeView = ({
                         console.error(`Failed to fetch offspring for ${animalId}`, e);
                     }
                 }
+                if (!cancelled) setLoadProgress({ found: Object.keys(nodes).length, pending: 0 });
             }));
 
             return nodes;
@@ -335,6 +339,8 @@ const FamilyTreeView = ({
                       }
                   }
               }
+
+              if (!cancelled) setLoadProgress({ found: Object.keys(nodes).length, pending: queue.length });
           }
 
           return nodes;
@@ -1082,9 +1088,17 @@ const FamilyTreeView = ({
                     </div>
                     {lineageLoading && (
                         <div className="absolute inset-0 z-20 bg-white/75 backdrop-blur-[1px] flex items-center justify-center pointer-events-auto">
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white shadow-sm text-gray-600 text-sm font-medium">
-                                <Loader2 size={16} className="animate-spin" />
-                                Loading lineage...
+                            <div className="flex flex-col gap-2 px-4 py-3 rounded-lg border border-gray-200 bg-white shadow-sm text-gray-600 text-sm font-medium min-w-[220px]">
+                                <div className="flex items-center gap-2">
+                                    <Loader2 size={16} className="animate-spin flex-shrink-0" />
+                                    <span>
+                                        Loading lineage{loadProgress.found > 0 ? ` — ${loadProgress.found} animal${loadProgress.found === 1 ? '' : 's'} found` : '...'}
+                                        {loadProgress.pending > 0 ? ` (${loadProgress.pending} queued)` : ''}
+                                    </span>
+                                </div>
+                                <div className="h-1 w-full rounded-full bg-gray-200 overflow-hidden">
+                                    <div className="h-full w-1/3 rounded-full bg-primary family-tree-loading-bar" />
+                                </div>
                             </div>
                         </div>
                     )}

@@ -34,6 +34,20 @@ font-family: 'Inter', sans-serif;
   animation: fadeInScale 0.5s ease-in-out;
 }
 
+/* Indeterminate progress bar for long-running loads (e.g. Family Tree "Full Graph" fetch) */
+@keyframes treeLoadingBar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+.family-tree-loading-bar {
+  animation: treeLoadingBar 1.1s ease-in-out infinite;
+}
+
 /* Hide scrollbar while keeping scroll functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;
