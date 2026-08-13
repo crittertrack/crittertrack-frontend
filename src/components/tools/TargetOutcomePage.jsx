@@ -376,11 +376,11 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
       return acc;
     }, {});
   } else {
-    return Promise.resolve({ pairings: [], targetLoci: {} });
+    return Promise.resolve({ pairings: [], unconfirmedPairings: [], targetLoci: {} });
   }
 
   if (!targetLoci || Object.keys(targetLoci).length === 0) {
-    return Promise.resolve({ pairings: [], targetLoci: {} });
+    return Promise.resolve({ pairings: [], unconfirmedPairings: [], targetLoci: {} });
   }
 
   const getAlleleProbability = (parentAlleles, desiredAllele) => {
@@ -418,22 +418,36 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
       const damLoci = parseGeneticCode(dam.geneticCode, species);
       let totalProbability = 1;
       let possible = true;
+      let hasUnknownLocus = false;
       for (const [locus, targetAlleles] of Object.entries(targetLoci)) {
-        const locusProbability = calculateLocusProbability(sireLoci[locus], damLoci[locus], targetAlleles);
+        const sireAlleles = sireLoci[locus];
+        const damAlleles = damLoci[locus];
+        // Locus not recorded at all, or recorded with a '-' placeholder (dominant allele known,
+        // other allele unspecified, e.g. "Ay/-") for either parent — we can't rule this pairing out,
+        // but we also can't honestly score it, so it goes to the "needs confirmation" bucket instead
+        // of being silently dropped (previous behavior: any unresolved locus = flat 0% = excluded).
+        if (!sireAlleles || !damAlleles || sireAlleles.includes('-') || damAlleles.includes('-')) {
+          hasUnknownLocus = true;
+          continue;
+        }
+        const locusProbability = calculateLocusProbability(sireAlleles, damAlleles, targetAlleles);
         if (locusProbability === 0) {
             possible = false;
             break;
         }
         totalProbability *= locusProbability;
       }
-      if (possible && totalProbability > 0) {
+      if (!possible) continue;
+      if (hasUnknownLocus) {
+        unconfirmedPairings.push({ sire, dam });
+      } else if (totalProbability > 0) {
         pairings.push({ sire, dam, probability: totalProbability });
       }
     }
   }
 
   pairings.sort((a, b) => b.probability - a.probability);
-  return new Promise(resolve => setTimeout(() => resolve({ pairings, targetLoci }), 250));
+  return new Promise(resolve => setTimeout(() => resolve({ pairings, unconfirmedPairings, targetLoci }), 250));
 };
 
 const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
@@ -575,7 +589,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
     }
   };
 
-  const [expandedGroups, setExpandedGroups] = useState({ high: true, medium: true, low: true });
+  const [expandedGroups, setExpandedGroups] = useState({ high: true, medium: true, low: true, unconfirmed: false });
 
   const groupedResults = useMemo(() => {
     if (!results?.pairings) return null;
@@ -660,6 +674,15 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
         </div>
     );
   };
+
+  const UnconfirmedPairingCard = ({ sire, dam }) => (
+    <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text rounded-lg p-4">
+      <div className="text-sm">
+        <p><span className="font-semibold text-blue-700 dark:text-blue-400">Sire:</span> <span className="dark:text-dark-text">{getFullName(sire)} ({sire.id_public})</span></p>
+        <p><span className="font-semibold text-pink-700 dark:text-pink-400">Dam:</span> <span className="dark:text-dark-text">{getFullName(dam)} ({dam.id_public})</span></p>
+      </div>
+    </div>
+  );
 
   const CollapsibleGroup = ({ title, count, children, isOpen, onToggle }) => (
     <div className="border border-gray-200 dark:border-dark-text rounded-lg">
@@ -805,6 +828,17 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions 
                   )}
                 </div>
               ) : (<p className="text-center text-gray-600 dark:text-dark-text-secondary">No potential pairings found in your animals that can produce the target genetics.</p>)}
+
+              {results.unconfirmedPairings?.length > 0 && (
+                <div className="mt-6">
+                  <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2 text-center">
+                    These pairs have at least one parent whose genetic code doesn't fully specify a trait needed for this outcome (e.g. "Ay/-"), so a percentage can't be calculated — but the outcome may still be possible.
+                  </p>
+                  <CollapsibleGroup title="Needs Genotype Confirmation" count={results.unconfirmedPairings.length} isOpen={expandedGroups.unconfirmed} onToggle={() => toggleGroup('unconfirmed')}>
+                    {results.unconfirmedPairings.map(r => <UnconfirmedPairingCard key={r.sire.id_public + r.dam.id_public} {...r} />)}
+                  </CollapsibleGroup>
+                </div>
+              )}
             </div>
           )}
 
