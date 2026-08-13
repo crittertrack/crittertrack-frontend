@@ -1516,7 +1516,12 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Direct vs. Full mode',
-        content: '"Direct" shows only the straight sire/dam ancestor line; "Full" expands the tree to show all known relatives at each generation.',
+        content: '"Direct Lines" shows the focus animal\'s direct ancestors and offspring, plus its siblings, aunts, and uncles. Clicking any animal node in the tree opens that animal\'s own record — handy for jumping straight to a relative instead of searching for it separately.',
+      },
+      {
+        stepNumber: 3,
+        title: 'What the Full graph shows',
+        content: 'Switching to "Full Graph" expands the tree to every related animal of the same species it can trace a connection to — not just the direct line, but siblings\' other litters, cousins, and further branches of the family. It can take a moment to load on a large pedigree since it\'s tracing many more connections at once.',
       },
     ],
   },

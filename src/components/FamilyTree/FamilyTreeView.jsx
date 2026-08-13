@@ -221,7 +221,9 @@ const FamilyTreeView = ({
             // Phase 3: Fetch offspring for the identified set of animals (concurrently — this set is small)
             await Promise.all(Array.from(idsToFetchOffspringFor).map(async (animalId) => {
                 try {
-                    const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalId}/offspring`, {
+                    // includeManaged: siblings/offspring recorded via Litter Management would
+                    // otherwise be silently excluded by this endpoint.
+                    const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalId}/offspring?includeManaged=true`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     const litters = offspringResponse.data || [];
@@ -293,7 +295,7 @@ const FamilyTreeView = ({
                   const animalData = await fetchAnimalData(currentId);
                   let litters = [];
                   try {
-                      const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${currentId}/offspring`, {
+                      const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${currentId}/offspring?includeManaged=true`, {
                           headers: { Authorization: `Bearer ${authToken}` }
                       });
                       litters = offspringResponse.data || [];
