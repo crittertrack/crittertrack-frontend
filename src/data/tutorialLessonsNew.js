@@ -1315,7 +1315,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'What Contacts tracks',
-        content: 'Each contact stores a Personal Name and/or Breeder Name/Kennel, prefix/suffix, and full address, plus a Keeper/Breeder role — kept separate from your own animal collection, for people you buy from, sell to, or breed with.',
+        content: 'Each contact stores a Personal Name and/or kennel/Breeder Name, prefix/suffix, and full address, plus a Keeper/Breeder role — kept separate from your own animal collection, for people you buy from, sell to, or breed with.',
       },
       {
         stepNumber: 2,
@@ -1337,7 +1337,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Filling in the details',
-        content: 'Personal Name, Breeder Name/Kennel, Prefix/Suffix, and full address are all optional — fill in whatever you actually know about them, then save.',
+        content: 'Personal Name, kennel/Breeder Name, Prefix/Suffix, and full address are all optional — fill in whatever you actually know about them, then save.',
       },
       {
         stepNumber: 2,

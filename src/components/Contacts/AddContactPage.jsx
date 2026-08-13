@@ -142,7 +142,7 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
 
                     {/* Breeder Name */}
                     <div>
-                        <label htmlFor="breederName" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Breeder Name / Kennel</label>
+                        <label htmlFor="breederName" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">kennel/Breeder Name</label>
                         <input
                             type="text"
                             id="breederName"
@@ -156,7 +156,7 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                     {/* Prefix */}
                     <div>
                         <label htmlFor="prefix" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Prefix</label>
-                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-1">Kennel/cattery abbreviation shown before their animals' names</p>
+                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-1">Kennel/breeder abbreviation shown before their animals' names</p>
                         <input
                             type="text"
                             id="prefix"
@@ -171,7 +171,7 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                     {/* Suffix */}
                     <div>
                         <label htmlFor="suffix" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Suffix</label>
-                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-1">Kennel/cattery abbreviation shown after their animals' names</p>
+                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-1">Kennel/breeder abbreviation shown after their animals' names</p>
                         <input
                             type="text"
                             id="suffix"

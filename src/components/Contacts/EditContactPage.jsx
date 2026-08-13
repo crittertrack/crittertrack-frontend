@@ -148,19 +148,19 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
                     </div>
                     {/* Breeder Name */}
                     <div>
-                        <label htmlFor="breederName" className="block text-sm font-medium text-gray-700 mb-1">Breeder Name / Kennel</label>
+                        <label htmlFor="breederName" className="block text-sm font-medium text-gray-700 mb-1">kennel/Breeder Name</label>
                         <input type="text" id="breederName" name="breederName" value={formData.breederName} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                     </div>
                     {/* Prefix */}
                     <div>
                         <label htmlFor="prefix" className="block text-sm font-medium text-gray-700 mb-1">Prefix</label>
-                        <p className="text-xs text-gray-500 mb-1">Kennel/cattery abbreviation shown before their animals' names</p>
+                        <p className="text-xs text-gray-500 mb-1">Kennel/breeder abbreviation shown before their animals' names</p>
                         <input type="text" id="prefix" name="prefix" value={formData.prefix} onChange={handleInputChange} placeholder="e.g., Silverline" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                     </div>
                     {/* Suffix */}
                     <div>
                         <label htmlFor="suffix" className="block text-sm font-medium text-gray-700 mb-1">Suffix</label>
-                        <p className="text-xs text-gray-500 mb-1">Kennel/cattery abbreviation shown after their animals' names</p>
+                        <p className="text-xs text-gray-500 mb-1">Kennel/breeder abbreviation shown after their animals' names</p>
                         <input type="text" id="suffix" name="suffix" value={formData.suffix} onChange={handleInputChange} placeholder="e.g., Cattery" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                     </div>
                 </div>
