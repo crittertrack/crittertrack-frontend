@@ -156,13 +156,14 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                     {/* Prefix */}
                     <div>
                         <label htmlFor="prefix" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Prefix</label>
+                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-1">Kennel/cattery abbreviation shown before their animals' names</p>
                         <input
                             type="text"
                             id="prefix"
                             name="prefix"
                             value={formData.prefix}
                             onChange={handleInputChange}
-                            placeholder="e.g., Dr., Mr., Ms."
+                            placeholder="e.g., Silverline"
                             className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted"
                         />
                     </div>
@@ -170,13 +171,14 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                     {/* Suffix */}
                     <div>
                         <label htmlFor="suffix" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Suffix</label>
+                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-1">Kennel/cattery abbreviation shown after their animals' names</p>
                         <input
                             type="text"
                             id="suffix"
                             name="suffix"
                             value={formData.suffix}
                             onChange={handleInputChange}
-                            placeholder="e.g., Jr., Sr., III"
+                            placeholder="e.g., Cattery"
                             className="w-full px-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text dark:placeholder-dark-text-muted"
                         />
                     </div>
