@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
@@ -801,6 +802,16 @@ const AnimalList = ({
             setAnimalView(normalizeAnimalView(initialAnimalView));
         }
     }, [initialAnimalView]);
+
+    // Deep-link from the NotificationBar ticker (navigate('/', { state: { animalView } })) — react-router
+    // clears location.state on its own once consumed, so this doesn't fight the pinned-default logic above.
+    const routerLocation = useLocation();
+    useEffect(() => {
+        const requestedView = routerLocation.state?.animalView;
+        if (requestedView) {
+            setAnimalView(normalizeAnimalView(requestedView));
+        }
+    }, [routerLocation.state]);
     const [feedingModal, setFeedingModal] = useState(null); // { animal } when open
     const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '', updateStock: true });
     const [enclosures, setEnclosures] = useState([]);

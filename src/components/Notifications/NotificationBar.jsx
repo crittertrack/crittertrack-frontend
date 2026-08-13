@@ -225,19 +225,19 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
 
     if (alertSettings.feeding) {
       const due = animals.filter(a => isFeedingDue(a.lastFedDate, a.feedingIntervalHours));
-      if (due.length > 0) items.push({ id: 'feeding', icon: Utensils, iconColor: 'text-amber-300', text: `Feeding: ${due.length} animal${due.length !== 1 ? 's' : ''} overdue ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/') });
+      if (due.length > 0) items.push({ id: 'feeding', icon: Utensils, iconColor: 'text-amber-300', text: `Feeding: ${due.length} animal${due.length !== 1 ? 's' : ''} overdue ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/', { state: { animalView: 'feeding' } }) });
     }
     if (alertSettings.grooming) {
       let count = 0;
       const names = new Set();
       animals.forEach(a => GROOMING_SCHEDULE_DEFS.forEach(def => { if (isTaskDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) { count++; names.add(animalDisplayName(a)); } }));
-      if (count > 0) items.push({ id: 'grooming', icon: Scissors, iconColor: 'text-teal-300', text: `Grooming/Special Care: ${count} task${count !== 1 ? 's' : ''} due ${formatNameList([...names])}`, onClick: () => navigate('/') });
+      if (count > 0) items.push({ id: 'grooming', icon: Scissors, iconColor: 'text-teal-300', text: `Grooming/Special Care: ${count} task${count !== 1 ? 's' : ''} due ${formatNameList([...names])}`, onClick: () => navigate('/', { state: { animalView: 'feeding' } }) });
     }
     if (alertSettings.training) {
       let count = 0;
       const names = new Set();
       animals.forEach(a => TRAINING_SCHEDULE_DEFS.forEach(def => { if (isTaskDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) { count++; names.add(animalDisplayName(a)); } }));
-      if (count > 0) items.push({ id: 'training', icon: Dumbbell, iconColor: 'text-lime-300', text: `Training: ${count} session${count !== 1 ? 's' : ''} due ${formatNameList([...names])}`, onClick: () => navigate('/') });
+      if (count > 0) items.push({ id: 'training', icon: Dumbbell, iconColor: 'text-lime-300', text: `Training: ${count} session${count !== 1 ? 's' : ''} due ${formatNameList([...names])}`, onClick: () => navigate('/', { state: { animalView: 'feeding' } }) });
     }
     if (alertSettings.reproduction) {
       let mated = 0, due = 0, weaned = 0;
@@ -261,20 +261,20 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
         if (mated > 0) parts.push(`${mated} mating${mated !== 1 ? 's' : ''} today`);
         if (due > 0) parts.push(`${due} birth${due !== 1 ? 's' : ''} due`);
         if (weaned > 0) parts.push(`${weaned} weaning${weaned !== 1 ? 's' : ''} due`);
-        items.push({ id: 'reproduction', icon: Heart, iconColor: 'text-pink-300', text: `Reproduction: ${parts.join(', ')}`, onClick: () => navigate('/') });
+        items.push({ id: 'reproduction', icon: Heart, iconColor: 'text-pink-300', text: `Reproduction: ${parts.join(', ')}`, onClick: () => navigate('/', { state: { animalView: 'reproduction' } }) });
       }
     }
     if (alertSettings.health) {
       const due = animals.filter(a => a.isQuarantine || a.isInTreatment || ['Concern', 'Critical'].includes(remapLegacyHealthStatus(a.healthStatusOverride || a.healthStatus)));
-      if (due.length > 0) items.push({ id: 'health', icon: HeartPulse, iconColor: 'text-red-300', text: `Health: ${due.length} animal${due.length !== 1 ? 's' : ''} need attention ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/') });
+      if (due.length > 0) items.push({ id: 'health', icon: HeartPulse, iconColor: 'text-red-300', text: `Health: ${due.length} animal${due.length !== 1 ? 's' : ''} need attention ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/', { state: { animalView: 'health' } }) });
     }
     if (alertSettings.maintenance) {
       const due = enclosures.filter(enc => (enc.cleaningTasks || []).some(t => isTaskDue(t.lastDoneDate, cleaningTaskFreqDays(t))));
-      if (due.length > 0) items.push({ id: 'maintenance', icon: Wrench, iconColor: 'text-orange-300', text: `Maintenance: ${due.length} enclosure${due.length !== 1 ? 's' : ''} overdue ${formatNameList(due.map(enc => enc.name || 'Unnamed'))}`, onClick: () => navigate('/') });
+      if (due.length > 0) items.push({ id: 'maintenance', icon: Wrench, iconColor: 'text-orange-300', text: `Maintenance: ${due.length} enclosure${due.length !== 1 ? 's' : ''} overdue ${formatNameList(due.map(enc => enc.name || 'Unnamed'))}`, onClick: () => navigate('/', { state: { animalView: 'enclosures' } }) });
     }
     if (alertSettings.supplies) {
       const count = supplies.filter(s => (s.reorderThreshold != null && Number(s.currentStock) <= Number(s.reorderThreshold)) || (s.nextOrderDate && parseLocalDate(s.nextOrderDate) <= today)).length;
-      if (count > 0) items.push({ id: 'supplies', icon: Package, iconColor: 'text-cyan-300', text: `Supplies: ${count} item${count !== 1 ? 's' : ''} need restocking`, onClick: () => navigate('/') });
+      if (count > 0) items.push({ id: 'supplies', icon: Package, iconColor: 'text-cyan-300', text: `Supplies: ${count} item${count !== 1 ? 's' : ''} need restocking`, onClick: () => navigate('/supplies') });
     }
     if (alertSettings.birthdays) {
       const due = animals.filter(a => {
@@ -282,7 +282,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
         const b = new Date(a.birthDate);
         return !isNaN(b.getTime()) && b.getMonth() === today.getMonth() && b.getDate() === today.getDate();
       });
-      if (due.length > 0) items.push({ id: 'birthdays', icon: Cake, iconColor: 'text-fuchsia-300', text: `Birthdays: ${due.length} animal${due.length !== 1 ? 's' : ''} today ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/') });
+      if (due.length > 0) items.push({ id: 'birthdays', icon: Cake, iconColor: 'text-fuchsia-300', text: `Birthdays: ${due.length} animal${due.length !== 1 ? 's' : ''} today ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/', { state: { animalView: 'list' } }) });
     }
     return items;
   }, [careDataLoaded, alertSettings, animals, litters, enclosures, supplies, navigate]);
