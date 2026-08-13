@@ -3864,7 +3864,14 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                         <div>
                                             <span className="text-gray-500 dark:text-dark-text-muted text-[10px] uppercase tracking-wide font-semibold block">{litter.isPlanned ? 'Status' : 'Born'}</span>
                                             {isPlannedOnly
-                                                ? <span className="text-xs font-semibold text-indigo-500 dark:text-indigo-400">Awaiting mating</span>
+                                                ? <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
+                                                    title="Mark as mated today"
+                                                    className="text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800/40 rounded-lg px-2 py-1 hover:bg-sky-100 dark:hover:bg-sky-900/30 transition flex items-center gap-1"
+                                                  >
+                                                    <Hourglass size={12} /> Mated Today
+                                                  </button>
                                                 : isMated
                                                 ? <button
                                                     type="button"
@@ -3898,16 +3905,6 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                             }
                                         </div>
                                     </div>
-                                    {isPlannedOnly && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
-                                            title="Mark as mated today"
-                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 transition"
-                                        >
-                                            <Hourglass size={11} /> Mated today
-                                        </button>
-                                    )}
                                     {isNursing && (
                                         <button
                                             type="button"

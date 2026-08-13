@@ -360,7 +360,9 @@ const App = () => {
             if (!authToken) return;
             
             try {
-                // Get current localStorage favorites
+                // Distinguish "never set on this device" from "explicitly set to empty" — only the
+                // former should adopt the backend's list wholesale.
+                const hasLocalFavorites = localStorage.getItem('speciesFavorites') !== null;
                 const localFavorites = JSON.parse(localStorage.getItem('speciesFavorites') || '[]');
                 
                 // Fetch from backend
@@ -370,20 +372,22 @@ const App = () => {
                 
                 const backendFavorites = response.data?.speciesFavorites || [];
                 
-                // Merge: union of both lists (take all unique favorites from both sources)
-                const mergedFavorites = [...new Set([...localFavorites, ...backendFavorites])];
+                if (!hasLocalFavorites) {
+                    // First time on this device — adopt whatever the backend already has.
+                    localStorage.setItem('speciesFavorites', JSON.stringify(backendFavorites));
+                    return;
+                }
                 
-                // Only update if there's a difference
-                if (JSON.stringify(mergedFavorites) !== JSON.stringify(backendFavorites)) {
-                    // Save merged favorites to backend
+                // localStorage is the source of truth once initialized (every toggle already pushes
+                // its full list to the backend immediately via the 'speciesFavoritesChanged' listener
+                // below) — union-merging backend favorites back in here would resurrect species the
+                // user had just unfavorited. Only push local -> backend to repair any drift.
+                if (JSON.stringify(localFavorites) !== JSON.stringify(backendFavorites)) {
                     await axios.post(`${API_BASE_URL}/users/species-favorites`, 
-                        { speciesFavorites: mergedFavorites },
+                        { speciesFavorites: localFavorites },
                         { headers: { Authorization: `Bearer ${authToken}` } }
                     );
                 }
-                
-                // Update localStorage with merged favorites
-                localStorage.setItem('speciesFavorites', JSON.stringify(mergedFavorites));
             } catch (error) {
                 console.error('[SPECIES FAVORITES] Sync error:', error);
                 // Silently fail - user can still use localStorage
