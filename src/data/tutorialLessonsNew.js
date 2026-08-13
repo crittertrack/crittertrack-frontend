@@ -1244,6 +1244,7 @@ const LITTER_MANAGEMENT_LESSONS = [
         stepNumber: 7,
         title: 'Notes and photos',
         content: 'Notes is a free-text field for anything worth remembering about the litter. Up to 5 photos can be attached (PNG/JPEG, 500 KB max each) — hover a thumbnail to delete it, and in the expanded card view you can click any photo for a fullscreen lightbox with a download button.',
+        screenshotCount: 2,
       },
     ],
   },

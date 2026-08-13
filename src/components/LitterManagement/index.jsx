@@ -2470,9 +2470,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                         <div className="flex-grow overflow-y-auto p-4">
                             <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} id="litter-form" className="space-y-4">
-                                {/* Litter Photos ? top of form, always visible for born litters */}
-                                {(editingLitter ? (() => { const tl = litters.find(l => l._id === editingLitter || l.litterId_backend === editingLitter); return tl && !tl.isPlanned; })() : true) && (
-                                    <div className="mb-2 p-4 border border-amber-200 dark:border-amber-800/40 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                                {/* Litter Photos ? always visible, including while converting a still-Planned litter */}
+                                <div className="mb-2 p-4 border border-amber-200 dark:border-amber-800/40 rounded-lg bg-amber-50 dark:bg-amber-900/20">
                                         <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2">
                                             <Camera size={16} className="inline-block align-middle mr-1" /> Litter Photos
                                             <span className="text-xs font-normal text-gray-400 dark:text-dark-text-muted">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
@@ -2547,7 +2546,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         )}
                                         <p className="text-xs text-gray-400 dark:text-dark-text-muted mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : 'Photos will be uploaded when you save the litter.'}</p>
                                     </div>
-                                )}
 
                                 {/* Auto-assigned CTL-ID (read-only) */}
                                 {editingLitter && editingLitter.litter_id_public && (
