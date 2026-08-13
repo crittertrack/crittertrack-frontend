@@ -1173,8 +1173,13 @@ const LITTER_MANAGEMENT_LESSONS = [
       },
       {
         stepNumber: 4,
+        title: 'Mating date and expected due date',
+        content: 'Mating Date and Expected Due Date sit directly on the form, both optional at this stage.',
+      },
+      {
+        stepNumber: 5,
         title: 'Optional breeding details and saving',
-        content: 'An expandable "Breeding Details" section lets you log the mating date, expected due date, breeding method, and condition — all optional at this stage. "Save Mating" records it as a Planned pairing.',
+        content: 'An expandable "Breeding Details" section adds the breeding method and condition, also optional. "Save Mating" records it as a Planned pairing.',
       },
     ],
   },
