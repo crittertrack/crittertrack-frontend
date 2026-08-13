@@ -2745,6 +2745,12 @@ const AnimalFormModalV2 = ({
         }
     );
 
+    // Snapshot of formData as it was built at mount time (before any user edits), run through the
+    // exact same defaulting/normalization above the animalToEdit raw doc did — used by the admin
+    // "Confirm Changes" diff so it compares like-for-like instead of transformed-payload-vs-raw-doc
+    // (which produced dozens of false-positive "changes" from date/shape reformatting alone).
+    const initialFormDataRef = useRef(formData);
+
     const [galleryImages, setGalleryImages] = useState([]);
     const [imageEditorOpen, setImageEditorOpen] = useState(false);
     const [imagesToEdit, setImagesToEdit] = useState([]);
@@ -3565,7 +3571,7 @@ const AnimalFormModalV2 = ({
                 payloadToSave.extraImages = [];
             }
 
-            const saveResponse = await onSave(method, url, payloadToSave);
+            const saveResponse = await onSave(method, url, payloadToSave, initialFormDataRef.current);
 
             // Manually-picked Contacts with no linked CTUID aren't matched automatically by CTUID,
             // so record the assignment directly on the Contact so the animal shows under their

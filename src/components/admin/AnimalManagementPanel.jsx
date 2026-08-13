@@ -210,21 +210,34 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     // those are only ever changed deliberately via the dedicated owner-change screen below.
     const ADMIN_EDIT_EXCLUDED_FIELDS = ['_id', 'id_public', 'creatorId', 'creatorId_public', '__v', 'createdAt', 'updatedAt'];
 
+    // '', null, undefined, [] and {} are all treated as "nothing set" so e.g. a stringified-empty
+    // array from one side and a null from the other don't register as a real change.
+    const isEmptyForDiff = (value) => {
+        if (value === undefined || value === null || value === '') return true;
+        if (Array.isArray(value)) return value.length === 0;
+        if (typeof value === 'object') return Object.keys(value).length === 0;
+        return false;
+    };
+
     const normalizeForDiff = (value) => {
-        if (value === undefined || value === null) return '';
+        if (isEmptyForDiff(value)) return '';
         if (typeof value === 'object') return JSON.stringify(value);
         return String(value);
     };
 
     // Custom `onSave` passed to AnimalFormModalV2. Instead of persisting anything, it diffs the
-    // built payload against the original animal, stashes the changed fields, and switches the UI
-    // to the owner-change + reason screen. skipNextCancelRef stops the form's own post-save
-    // onCancel() call (which normally closes the modal) from also closing this new screen.
-    const handleAdminContinueEdit = async (method, url, payloadToSave) => {
+    // built payload against the form's own initial (pre-edit) snapshot — not the raw fetched
+    // animal, whose dates/nested objects are shaped differently than what AnimalFormModalV2
+    // normalizes them to, which used to make untouched fields falsely show up as "changed" — then
+    // stashes the changed fields and switches the UI to the owner-change + reason screen.
+    // skipNextCancelRef stops the form's own post-save onCancel() call (which normally closes the
+    // modal) from also closing this new screen.
+    const handleAdminContinueEdit = async (method, url, payloadToSave, initialFormData) => {
+        const baseline = initialFormData || selectedAnimal;
         const edits = {};
         for (const key of Object.keys(payloadToSave)) {
             if (ADMIN_EDIT_EXCLUDED_FIELDS.includes(key)) continue;
-            if (normalizeForDiff(payloadToSave[key]) !== normalizeForDiff(selectedAnimal?.[key])) {
+            if (normalizeForDiff(payloadToSave[key]) !== normalizeForDiff(baseline?.[key])) {
                 edits[key] = payloadToSave[key];
             }
         }
