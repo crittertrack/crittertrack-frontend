@@ -52,6 +52,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     const [newOwnerResults, setNewOwnerResults] = useState([]);
     const [selectedNewOwner, setSelectedNewOwner] = useState(null);
     const [ownerChangeReason, setOwnerChangeReason] = useState('');
+    const [treatAsTransfer, setTreatAsTransfer] = useState(false);
     const [savingOwnerChange, setSavingOwnerChange] = useState(false);
     // AnimalFormModalV2 always calls onCancel() right after a successful onSave() resolves
     // (normally to close the form) — we don't want that to happen when "Continue" is what
@@ -201,6 +202,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         setNewOwnerQuery('');
         setNewOwnerResults([]);
         setOwnerChangeReason('');
+        setTreatAsTransfer(false);
         setShowEditModal(true);
     };
 
@@ -301,7 +303,11 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
                 },
-                body: JSON.stringify({ fieldEdits, reason: ownerChangeReason })
+                body: JSON.stringify({
+                    fieldEdits,
+                    reason: ownerChangeReason,
+                    treatAsTransfer: !!selectedNewOwner && treatAsTransfer
+                })
             });
 
             const contentType = response.headers.get('content-type');
@@ -319,6 +325,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             setPendingFieldEdits(null);
             setSelectedNewOwner(null);
             setOwnerChangeReason('');
+            setTreatAsTransfer(false);
             fetchAnimals();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
@@ -888,6 +895,20 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         </div>
                                     )}
                                 </div>
+                                {selectedNewOwner && (
+                                    <div className="form-row full-width checkbox-row">
+                                        <label className="checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                checked={treatAsTransfer}
+                                                onChange={(e) => setTreatAsTransfer(e.target.checked)}
+                                            />
+                                            Treat as a full transfer (previous owner keeps view-only access via
+                                            their Sold Animals archive, and becomes the animal's permanent
+                                            Original Creator if not already set)
+                                        </label>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="form-row full-width">
