@@ -1646,18 +1646,6 @@ const MORE_PAGES_LESSONS = [
     ],
   },
   {
-    id: 'breeder-directory',
-    title: 'Breeder Directory',
-    description: 'Finding breeders who\'ve opted into the public directory.',
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Finding breeders',
-        content: 'Browse breeders who\'ve opted in via their own Settings → Directory tab, and search or filter by species, country, or state to narrow the list down.',
-      },
-    ],
-  },
-  {
     id: 'report-an-issue',
     title: 'Report an Issue',
     description: 'Sending a bug report, feature suggestion, or general feedback to the developer.',
@@ -1666,6 +1654,11 @@ const MORE_PAGES_LESSONS = [
         stepNumber: 1,
         title: 'Reaching the developer directly',
         content: 'Pick a category, then describe a bug, suggest a feature, or share general feedback — this goes straight to the developer, not to other users.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Checking on past reports',
+        content: 'Switch to the "My Reports" tab to see everything you\'ve submitted, each with a status badge (Pending, In Progress, Reviewed, Resolved, or Dismissed). If a moderator has replied, their note appears right on the report as "Response from Moderator:".',
       },
     ],
   },
