@@ -23,6 +23,7 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
                 });
                 setFormData({
                     ...response.data,
+                    breederStatus: response.data.breederStatus === 'retired' ? 'retired' : 'active',
                     address: response.data.address || { street: '', city: '', state: '', postalCode: '', country: '' }
                 });
             } catch (error) {
@@ -230,6 +231,18 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
                             <label htmlFor="isBreeder" className="ml-2 block text-sm text-gray-900">Breeder</label>
                         </div>
                     </div>
+                    {formData.isBreeder && (
+                        <div className="flex gap-6 mt-3">
+                            <div className="flex items-center">
+                                <input id="breederStatusActive" name="breederStatus" type="radio" value="active" checked={formData.breederStatus === 'active'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
+                                <label htmlFor="breederStatusActive" className="ml-2 block text-sm text-gray-900">Active</label>
+                            </div>
+                            <div className="flex items-center">
+                                <input id="breederStatusRetired" name="breederStatus" type="radio" value="retired" checked={formData.breederStatus === 'retired'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300" />
+                                <label htmlFor="breederStatusRetired" className="ml-2 block text-sm text-gray-900">Retired</label>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Notes */}

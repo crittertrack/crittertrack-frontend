@@ -9,6 +9,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
     const [filteredContacts, setFilteredContacts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState('all'); // 'all', 'keeper', 'breeder'
+    const [breederStatusFilter, setBreederStatusFilter] = useState('all'); // 'all', 'active', 'retired'
     const [searchTerm, setSearchTerm] = useState('');
     const [countryFilter, setCountryFilter] = useState('');
     const navigate = useNavigate();
@@ -21,7 +22,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
 
     useEffect(() => {
         applyFilters();
-    }, [contacts, filterType, searchTerm, countryFilter]);
+    }, [contacts, filterType, breederStatusFilter, searchTerm, countryFilter]);
 
     const fetchContacts = async () => {
         try {
@@ -44,6 +45,10 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
             filtered = filtered.filter(c => c.isKeeper);
         } else if (filterType === 'breeder') {
             filtered = filtered.filter(c => c.isBreeder);
+        }
+
+        if (breederStatusFilter !== 'all') {
+            filtered = filtered.filter(c => c.isBreeder && (c.breederStatus || 'active') === breederStatusFilter);
         }
 
         if (searchTerm.trim()) {
@@ -158,6 +163,17 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                 Breeders
                             </button>
                         </div>
+                        <div className="flex-1 md:flex-grow-0 md:w-40">
+                            <select
+                                value={breederStatusFilter}
+                                onChange={(e) => setBreederStatusFilter(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg focus:ring-2 focus:ring-primary bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"
+                            >
+                                <option value="all">All Breeder Status</option>
+                                <option value="active">Active Breeders</option>
+                                <option value="retired">Retired Breeders</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -198,7 +214,11 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                                 </div>
                                                 <div className="flex gap-2 flex-shrink-0">
                                                     {contact.isKeeper && <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">Keeper</span>}
-                                                    {contact.isBreeder && <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">Breeder</span>}
+                                                    {contact.isBreeder && (
+                                                        <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                                                            Breeder{(contact.breederStatus || 'active') === 'retired' ? ' (Retired)' : ''}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </Link>

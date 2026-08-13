@@ -15,6 +15,7 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
         suffix: '',
         isKeeper: false,
         isBreeder: false,
+        breederStatus: 'active',
         notes: '',
         linkedCTUID: '',
         address: {
@@ -297,6 +298,18 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                             <label htmlFor="isBreeder" className="ml-2 block text-sm text-gray-900 dark:text-dark-text">Breeder</label>
                         </div>
                     </div>
+                    {formData.isBreeder && (
+                        <div className="flex gap-6 mt-3">
+                            <div className="flex items-center">
+                                <input id="breederStatusActive" name="breederStatus" type="radio" value="active" checked={formData.breederStatus === 'active'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-dark-text-muted" />
+                                <label htmlFor="breederStatusActive" className="ml-2 block text-sm text-gray-900 dark:text-dark-text">Active</label>
+                            </div>
+                            <div className="flex items-center">
+                                <input id="breederStatusRetired" name="breederStatus" type="radio" value="retired" checked={formData.breederStatus === 'retired'} onChange={handleInputChange} className="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-dark-text-muted" />
+                                <label htmlFor="breederStatusRetired" className="ml-2 block text-sm text-gray-900 dark:text-dark-text">Retired</label>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Notes */}
