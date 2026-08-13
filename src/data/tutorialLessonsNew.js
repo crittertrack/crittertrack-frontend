@@ -1579,13 +1579,13 @@ const MORE_PAGES_LESSONS = [
     steps: [
       {
         stepNumber: 1,
-        title: 'Tracking stock levels',
-        content: 'Each supply item tracks its current stock, a reorder threshold, cost per unit, and optionally a next-order date and reorder frequency.',
+        title: 'Tracking stock levels and alerts',
+        content: 'Each supply item tracks its current stock, a reorder threshold, cost per unit, and optionally a next-order date and reorder frequency. Items that drop below their reorder threshold, or whose next-order date has passed, automatically show up in the alert banner at the top of the page.',
       },
       {
         stepNumber: 2,
-        title: 'Attention alerts',
-        content: 'Items that have dropped below their reorder threshold, or whose next-order date has passed, automatically show up in the alert banner at the top of the page.',
+        title: 'Adding a supply item',
+        content: '"Add Item" asks for a Name, Category (Food, Bedding, Medication, or Other), Current Stock + Unit (e.g. bags, kg), Cost per unit, and a reorder threshold. For the Food category specifically, you can check "This is a feeder animal" to add Feeder Type (e.g. Mice, Crickets) and Size (e.g. Pinky, Adult) fields — useful for tracking feeder colonies alongside regular supplies. You can also set an optional Reorder Schedule (a repeat frequency in days/weeks/months) for items ordered on a timer rather than by stock count.',
       },
     ],
   },
