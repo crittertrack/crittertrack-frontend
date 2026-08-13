@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Users, Plus, Search, UserCheck, Loader2, Cat, Heart } from 'lucide-react';
+import { Users, Plus, Search, UserCheck, Loader2, Cat, Heart, MapPin } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
 
 const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
@@ -180,7 +180,9 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                                             </span>
                                                         )}
                                                         {contact.address?.country && (
-                                                            <span>{contact.address.country}</span>
+                                                            <span className="flex items-center gap-1">
+                                                                <MapPin size={14} /> {contact.address.country}
+                                                            </span>
                                                         )}
                                                         {contact.ownedAnimalsCount > 0 && (
                                                             <span className="flex items-center gap-1" title="Owned Animals">
