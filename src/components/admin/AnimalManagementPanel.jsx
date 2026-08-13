@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
     Search, Filter, Eye, EyeOff, Trash2, Edit, AlertTriangle, 
     ChevronLeft, ChevronRight, X, ExternalLink, Image, User,
-    RefreshCw, FileText
+    RefreshCw, FileText, Save, ArrowLeft, ArrowRight
 } from 'lucide-react';
+import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
+import AnimalFormModalV2 from '../AnimalForm/AnimalFormModalV2';
 import './AnimalManagementPanel.css';
 import './AnimalManagementTabs.css';
 
@@ -34,24 +36,28 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    
-    // Edit form
-    const [editForm, setEditForm] = useState({});
-    const [originalEditForm, setOriginalEditForm] = useState({}); // Store original values
-    const [editReason, setEditReason] = useState('');
+    const [showHideConfirm, setShowHideConfirm] = useState(false);
     const [actionReason, setActionReason] = useState('');
-    
-    // Owner and Breeder selection (Edit Modal)
-    const [showOwnerSearch, setShowOwnerSearch] = useState(false);
-    const [showBreederSearch, setShowBreederSearch] = useState(false);
-    const [ownerSearchQuery, setOwnerSearchQuery] = useState('');
-    const [breederSearchQuery, setBreederSearchQuery] = useState('');
-    const [ownerSearchResults, setOwnerSearchResults] = useState([]);
-    const [breederSearchResults, setBreederSearchResults] = useState([]);
-    
-    // Modal tabs
-    const [viewActiveTab, setViewActiveTab] = useState('overview');
-    const [editActiveTab, setEditActiveTab] = useState('overview');
+
+    // Read-only detail view (Eye icon) image lightbox — AnimalModalV2 expects these as props.
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [enlargedImageUrl, setEnlargedImageUrl] = useState('');
+
+    // Admin edit flow (Edit icon): AnimalFormModalV2's "Continue" button hands off the built
+    // payload here instead of saving directly, then we show a dedicated owner-change + reason
+    // screen before anything is actually persisted.
+    const [showOwnerChangeScreen, setShowOwnerChangeScreen] = useState(false);
+    const [pendingFieldEdits, setPendingFieldEdits] = useState(null);
+    const [newOwnerQuery, setNewOwnerQuery] = useState('');
+    const [newOwnerResults, setNewOwnerResults] = useState([]);
+    const [selectedNewOwner, setSelectedNewOwner] = useState(null);
+    const [ownerChangeReason, setOwnerChangeReason] = useState('');
+    const [savingOwnerChange, setSavingOwnerChange] = useState(false);
+    // AnimalFormModalV2 always calls onCancel() right after a successful onSave() resolves
+    // (normally to close the form) — we don't want that to happen when "Continue" is what
+    // triggered it, only when the admin explicitly clicks Cancel/X. This ref lets the onCancel
+    // handler tell the two situations apart without waiting on a state re-render.
+    const skipNextCancelRef = useRef(false);
     
     // Owner Filter (Main Filters)
     const [showOwnerFilterDropdown, setShowOwnerFilterDropdown] = useState(false);
@@ -122,18 +128,11 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                 if (!prev || prev.id_public !== updated.id_public) return prev;
                 return { ...prev, ...updated };
             });
-
-            setEditForm(prev => {
-                if (!showEditModal || !selectedAnimal || selectedAnimal.id_public !== updated.id_public) {
-                    return prev;
-                }
-                return { ...prev, ...updated };
-            });
         };
 
         window.addEventListener('animal-updated', handleAnimalUpdated);
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
-    }, [showEditModal, selectedAnimal]);
+    }, []);
 
     const fetchUsers = async () => {
         try {
@@ -192,233 +191,158 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         }
     };
 
+    // Opens the real AnimalFormModalV2 for this animal (same form the owner would use), with its
+    // Save button relabeled "Continue" — see handleAdminContinueEdit for what happens next.
     const openEditModal = (animal) => {
-        const formData = {
-            name: animal.name || '',
-            prefix: animal.prefix || '',
-            suffix: animal.suffix || '',
-            species: animal.species || '',
-            gender: animal.gender || '',
-            status: animal.status || '',
-            remarks: animal.remarks || '',
-            sireId_public: animal.sireId_public || '',
-            damId_public: animal.damId_public || '',
-            creatorId_public: animal.creatorId_public || '',
-            breederId_public: animal.breederId_public || '',
-            manualBreederName: animal.manualBreederName || '',
-            // Basic identification
-            breederyId: animal.breederyId || animal.registryCode || '',
-            tags: animal.tags || [],
-            // Ownership & Display
-            isOwned: animal.isOwned ?? true,
-            isDisplay: animal.isDisplay ?? false,
-            currentOwner: animal.currentOwner || '',
-            manualownerName: animal.manualownerName || '',
-            // Dates
-            birthDate: animal.birthDate ? new Date(animal.birthDate).toISOString().substring(0, 10) : '',
-            deceasedDate: animal.deceasedDate ? new Date(animal.deceasedDate).toISOString().substring(0, 10) : '',
-            // Appearance
-            color: animal.color || '',
-            coat: animal.coat || '',
-            earset: animal.earset || '',
-            coatPattern: animal.coatPattern || '',
-            // Physical Measurements
-            bodyWeight: animal.bodyWeight || '',
-            bodyLength: animal.bodyLength || '',
-            heightAtWithers: animal.heightAtWithers || '',
-            bodyConditionScore: animal.bodyConditionScore || '',
-            chestGirth: animal.chestGirth || '',
-            adultWeight: animal.adultWeight || '',
-            // Identification
-            microchipNumber: animal.microchipNumber || '',
-            pedigreeRegistrationId: animal.pedigreeRegistrationId || '',
-            breed: animal.breed || '',
-            strain: animal.strain || '',
-            geneticCode: animal.geneticCode || '',
-            origin: animal.origin || 'Captive-bred',
-            // Dog/Cat specific identification
-            licenseNumber: animal.licenseNumber || '',
-            licenseJurisdiction: animal.licenseJurisdiction || '',
-            tattooId: animal.tattooId || '',
-            // Health Status
-            isNeutered: animal.isNeutered || false,
-            isInfertile: animal.isInfertile || false,
-            spayNeuterDate: animal.spayNeuterDate ? new Date(animal.spayNeuterDate).toISOString().substring(0, 10) : '',
-            medicalConditions: animal.medicalConditions || '',
-            allergies: animal.allergies || '',
-            medications: animal.medications || '',
-            vetVisits: animal.vetVisits || '',
-            primaryVet: animal.primaryVet || '',
-            chronicConditions: animal.chronicConditions || '',
-            parasitePreventionSchedule: animal.parasitePreventionSchedule || '',
-            heartwormStatus: animal.heartwormStatus || '',
-            hipElbowScores: animal.hipElbowScores || '',
-            geneticTestResults: animal.geneticTestResults || '',
-            eyeClearance: animal.eyeClearance || '',
-            cardiacClearance: animal.cardiacClearance || '',
-            dentalRecords: animal.dentalRecords || '',
-            // Care & Environment
-            dietType: animal.dietType || '',
-            feedingSchedule: animal.feedingSchedule || '',
-            supplements: animal.supplements || '',
-            housingType: animal.housingType || '',
-            bedding: animal.bedding || '',
-            temperatureRange: animal.temperatureRange || '',
-            humidity: animal.humidity || '',
-            lighting: animal.lighting || '',
-            noise: animal.noise || '',
-            enrichment: animal.enrichment || '',
-            // Dog/Cat specific husbandry
-            exerciseRequirements: animal.exerciseRequirements || '',
-            dailyExerciseMinutes: animal.dailyExerciseMinutes || '',
-            groomingNeeds: animal.groomingNeeds || '',
-            sheddingLevel: animal.sheddingLevel || '',
-            crateTrained: animal.crateTrained || false,
-            litterTrained: animal.litterTrained || false,
-            leashTrained: animal.leashTrained || false,
-            // Behavior
-            temperament: animal.temperament || '',
-            handlingTolerance: animal.handlingTolerance || '',
-            socialStructure: animal.socialStructure || '',
-            activityCycle: animal.activityCycle || '',
-            lifeStage: animal.lifeStage || '',
-            // Training & Behavior
-            trainingLevel: animal.trainingLevel || '',
-            trainingDisciplines: animal.trainingDisciplines || '',
-            certifications: animal.certifications || '',
-            workingRole: animal.workingRole || '',
-            behavioralIssues: animal.behavioralIssues || '',
-            biteHistory: animal.biteHistory || '',
-            reactivityNotes: animal.reactivityNotes || '',
-            // Breeding Status
-            isPregnant: animal.isPregnant || false,
-            isNursing: animal.isNursing || false,
-            isInMating: animal.isInMating || false,
-            breedingRole: animal.breedingRole || 'both',
-            heatStatus: animal.heatStatus || '',
-            lastHeatDate: animal.lastHeatDate ? new Date(animal.lastHeatDate).toISOString().substring(0, 10) : '',
-            ovulationDate: animal.ovulationDate ? new Date(animal.ovulationDate).toISOString().substring(0, 10) : '',
-            matingDates: animal.matingDates || '',
-            expectedDueDate: animal.expectedDueDate ? new Date(animal.expectedDueDate).toISOString().substring(0, 10) : '',
-            litterCount: animal.litterCount || '',
-            nursingStartDate: animal.nursingStartDate ? new Date(animal.nursingStartDate).toISOString().substring(0, 10) : '',
-            weaningDate: animal.weaningDate ? new Date(animal.weaningDate).toISOString().substring(0, 10) : '',
-            // Reproduction specific
-            estrusCycleLength: animal.estrusCycleLength || '',
-            gestationLength: animal.gestationLength || '',
-            artificialInseminationUsed: animal.artificialInseminationUsed || false,
-            whelpingDate: animal.whelpingDate ? new Date(animal.whelpingDate).toISOString().substring(0, 10) : '',
-            queeningDate: animal.queeningDate ? new Date(animal.queeningDate).toISOString().substring(0, 10) : '',
-            deliveryMethod: animal.deliveryMethod || '',
-            reproductiveComplications: animal.reproductiveComplications || '',
-            reproductiveClearances: animal.reproductiveClearances || '',
-            // Stud/Fertility (sire role)
-            isStudAnimal: animal.isStudAnimal || false,
-            availableForBreeding: animal.availableForBreeding || false,
-            studFeeCurrency: animal.studFeeCurrency || 'USD',
-            studFeeAmount: animal.studFeeAmount || '',
-            fertilityStatus: animal.fertilityStatus || 'Unknown',
-            lastMatingDate: animal.lastMatingDate ? new Date(animal.lastMatingDate).toISOString().substring(0, 10) : '',
-            successfulMatings: animal.successfulMatings || '',
-            fertilityNotes: animal.fertilityNotes || '',
-            // Dam/Fertility (dam role)
-            isDamAnimal: animal.isDamAnimal || false,
-            damFertilityStatus: animal.damFertilityStatus || 'Unknown',
-            lastPregnancyDate: animal.lastPregnancyDate ? new Date(animal.lastPregnancyDate).toISOString().substring(0, 10) : '',
-            offspringCount: animal.offspringCount || '',
-            damFertilityNotes: animal.damFertilityNotes || '',
-            // Sale fields
-            isForSale: animal.isForSale || false,
-            salePriceCurrency: animal.salePriceCurrency || 'USD',
-            salePriceAmount: animal.salePriceAmount || '',
-            // Show/Competition
-            showTitles: animal.showTitles || '',
-            showRatings: animal.showRatings || '',
-            judgeComments: animal.judgeComments || '',
-            workingTitles: animal.workingTitles || '',
-            performanceScores: animal.performanceScores || '',
-            // Legal/Death
-            causeOfDeath: animal.causeOfDeath || '',
-            necropsyResults: animal.necropsyResults || '',
-            insurance: animal.insurance || '',
-            legalStatus: animal.legalStatus || '',
-            endOfLifeCareNotes: animal.endOfLifeCareNotes || '',
-            coOwnership: animal.coOwnership || '',
-            transferHistory: animal.transferHistory || '',
-            breedingRestrictions: animal.breedingRestrictions || '',
-            exportRestrictions: animal.exportRestrictions || '',
-            ownershipHistory: animal.ownershipHistory || [],
-            // Gallery
-            extraImages: animal.extraImages || []
-        };
-        setEditForm(formData);
-        setOriginalEditForm(formData); // Store original values for comparison
-        setEditReason('');
         setSelectedAnimal(animal);
+        setShowOwnerChangeScreen(false);
+        setPendingFieldEdits(null);
+        setSelectedNewOwner(null);
+        setNewOwnerQuery('');
+        setNewOwnerResults([]);
+        setOwnerChangeReason('');
         setShowEditModal(true);
-        setShowOwnerSearch(false);
-        setShowBreederSearch(false);
-        setOwnerSearchQuery('');
-        setBreederSearchQuery('');
     };
-    
-    const searchUsers = async (query, type) => {
-        if (!query.trim()) {
-            if (type === 'owner') setOwnerSearchResults([]);
-            else setBreederSearchResults([]);
+
+    // ADMIN_EDIT_EXCLUDED_FIELDS: never let the generic form-diff touch ownership/identity fields —
+    // those are only ever changed deliberately via the dedicated owner-change screen below.
+    const ADMIN_EDIT_EXCLUDED_FIELDS = ['_id', 'id_public', 'creatorId', 'creatorId_public', '__v', 'createdAt', 'updatedAt'];
+
+    const normalizeForDiff = (value) => {
+        if (value === undefined || value === null) return '';
+        if (typeof value === 'object') return JSON.stringify(value);
+        return String(value);
+    };
+
+    // Custom `onSave` passed to AnimalFormModalV2. Instead of persisting anything, it diffs the
+    // built payload against the original animal, stashes the changed fields, and switches the UI
+    // to the owner-change + reason screen. skipNextCancelRef stops the form's own post-save
+    // onCancel() call (which normally closes the modal) from also closing this new screen.
+    const handleAdminContinueEdit = async (method, url, payloadToSave) => {
+        const edits = {};
+        for (const key of Object.keys(payloadToSave)) {
+            if (ADMIN_EDIT_EXCLUDED_FIELDS.includes(key)) continue;
+            if (normalizeForDiff(payloadToSave[key]) !== normalizeForDiff(selectedAnimal?.[key])) {
+                edits[key] = payloadToSave[key];
+            }
+        }
+        setPendingFieldEdits(edits);
+        skipNextCancelRef.current = true;
+        setShowOwnerChangeScreen(true);
+        // Nothing has been saved to the backend yet — return a stand-in response so
+        // AnimalFormModalV2's own post-save bookkeeping (contact assignment sync) doesn't throw.
+        return { data: { id_public: selectedAnimal?.id_public } };
+    };
+
+    const handleAdminEditCancel = () => {
+        if (skipNextCancelRef.current) {
+            // Fired automatically right after handleAdminContinueEdit resolved — not a real cancel.
+            skipNextCancelRef.current = false;
             return;
         }
-        
+        setShowEditModal(false);
+        setSelectedAnimal(null);
+    };
+
+    const searchNewOwner = (query) => {
+        setNewOwnerQuery(query);
+        if (!query.trim()) {
+            setNewOwnerResults([]);
+            return;
+        }
+        const searchText = query.toLowerCase();
+        const filtered = users.filter(user => {
+            const personalName = (user.personalName || '').toLowerCase();
+            const username = (user.username || '').toLowerCase();
+            const email = (user.email || '').toLowerCase();
+            const idPublic = (user.id_public || '').toLowerCase();
+            return personalName.includes(searchText) ||
+                   username.includes(searchText) ||
+                   email.includes(searchText) ||
+                   idPublic.includes(searchText);
+        }).slice(0, 10);
+        setNewOwnerResults(filtered);
+    };
+
+    const selectNewOwner = (user) => {
+        setSelectedNewOwner(user);
+        setNewOwnerQuery('');
+        setNewOwnerResults([]);
+    };
+
+    // Final "Save" on the owner-change screen — the only point where anything is actually
+    // persisted for the admin edit flow. Sends the diffed field edits plus (optionally) the new
+    // owner, in one PATCH with one required reason.
+    const handleFinalAdminSave = async () => {
+        if (!ownerChangeReason.trim()) {
+            setError('Please provide a reason for this change.');
+            return;
+        }
+
+        const fieldEdits = { ...(pendingFieldEdits || {}) };
+        if (selectedNewOwner) {
+            fieldEdits.creatorId = selectedNewOwner._id;
+            fieldEdits.creatorId_public = selectedNewOwner.id_public;
+            fieldEdits.isOwned = true;
+            fieldEdits.showOnPublicProfile = true;
+        }
+
+        if (Object.keys(fieldEdits).length === 0) {
+            setError('No changes were made.');
+            return;
+        }
+
+        setSavingOwnerChange(true);
+        setError('');
         try {
-            const filtered = users.filter(user => {
-                const searchText = query.toLowerCase();
-                const personalName = (user.personalName || '').toLowerCase();
-                const username = (user.username || '').toLowerCase();
-                const email = (user.email || '').toLowerCase();
-                const idPublic = (user.id_public || '').toLowerCase();
-                return personalName.includes(searchText) || 
-                       username.includes(searchText) || 
-                       email.includes(searchText) ||
-                       idPublic.includes(searchText);
-            }).slice(0, 10);
-            
-            if (type === 'owner') setOwnerSearchResults(filtered);
-            else setBreederSearchResults(filtered);
+            const response = await fetch(`${API_BASE_URL}/moderation/content/animal/${selectedAnimal._id}/edit`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ fieldEdits, reason: ownerChangeReason })
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Invalid response from server');
+            }
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || data.message || 'Failed to update animal');
+
+            setSuccess('Animal updated successfully');
+            setShowEditModal(false);
+            setShowOwnerChangeScreen(false);
+            setSelectedAnimal(null);
+            setPendingFieldEdits(null);
+            setSelectedNewOwner(null);
+            setOwnerChangeReason('');
+            fetchAnimals();
+            setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            console.error('Search error:', err);
+            setError(err.message || 'Failed to update animal');
+        } finally {
+            setSavingOwnerChange(false);
         }
     };
-    
-    const selectOwner = (user) => {
-        setEditForm(prev => ({ ...prev, creatorId_public: user.id_public }));
-        setShowOwnerSearch(false);
-        setOwnerSearchQuery('');
-        setOwnerSearchResults([]);
-    };
-    
-    const selectBreeder = (user) => {
-        setEditForm(prev => ({ ...prev, breederId_public: user.id_public, manualBreederName: '' }));
-        setShowBreederSearch(false);
-        setBreederSearchQuery('');
-        setBreederSearchResults([]);
-    };
-    
-    const clearBreeder = () => {
-        setEditForm(prev => ({ ...prev, breederId_public: '', manualBreederName: '' }));
-    };
-    
-    const getOwnerDisplay = () => {
-        if (!editForm.creatorId_public) return 'Click to Select Owner';
-        const owner = users.find(u => u.id_public === editForm.creatorId_public);
-        if (!owner) return editForm.creatorId_public;
-        return `${owner.personalName || owner.username || owner.email} (${owner.id_public})`;
-    };
-    
-    const getBreederDisplay = () => {
-        if (!editForm.breederId_public) return 'Click to Select Breeder';
-        const breeder = users.find(u => u.id_public === editForm.breederId_public);
-        if (!breeder) return editForm.breederId_public;
-        return `${breeder.personalName || breeder.username || breeder.email} (${breeder.id_public})`;
+
+    // Lets the admin follow pedigree links (sire/dam/offspring) from inside the read-only view
+    // modal, same as a real owner clicking through to a relative's page.
+    const handleAdminViewAnimal = async (animal) => {
+        if (!animal?.id_public) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/animals/any/${animal.id_public}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            if (!response.ok) throw new Error('Failed to load animal');
+            const data = await response.json();
+            setSelectedAnimal(data.animal || data);
+        } catch (err) {
+            console.error('Failed to load linked animal:', err);
+            setError('Failed to load linked animal');
+        }
     };
     
     const getOwnerFilterDisplay = () => {
@@ -460,86 +384,6 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         setPage(1);
     };
 
-    const handleSaveEdit = async () => {
-        if (!editReason.trim()) {
-            setError('Please provide a reason for the edit');
-            return;
-        }
-
-        // Only send fields that were actually changed
-        const changedFields = {};
-        for (const key in editForm) {
-            if (editForm[key] !== originalEditForm[key]) {
-                changedFields[key] = editForm[key];
-            }
-        }
-
-        // If no fields were changed, show error
-        if (Object.keys(changedFields).length === 0) {
-            setError('No fields were modified');
-            return;
-        }
-
-        // If owner is being changed, resolve creatorId (backend ObjectId)
-        // The Animal model requires both creatorId (ObjectId) and creatorId_public (string)
-        if (changedFields.creatorId_public) {
-            const selectedUser = users.find(u => u.id_public === changedFields.creatorId_public);
-            if (selectedUser) {
-                changedFields.creatorId = selectedUser._id;
-                // creatorId_public is already in changedFields from the form
-                // Set animal as owned and public when owner changes
-                changedFields.isOwned = true;
-                changedFields.showOnPublicProfile = true;
-            } else {
-                setError('Selected owner not found');
-                return;
-            }
-        }
-
-        // Note: breederId_public is already in changedFields from the form
-        // There is no breederId ObjectId field in the Animal model
-        
-        // If manual breeder name is being set, ensure breederId_public is cleared
-        if (changedFields.manualBreederName && changedFields.manualBreederName.trim() !== '') {
-            changedFields.breederId_public = null;
-        }
-        
-        // If breeder user is being selected, ensure manualBreederName is cleared
-        if (changedFields.breederId_public && changedFields.breederId_public.trim() !== '') {
-            changedFields.manualBreederName = null;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/moderation/content/animal/${selectedAnimal._id}/edit`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: JSON.stringify({
-                    fieldEdits: changedFields,
-                    reason: editReason
-                })
-            });
-
-            // Check content type before parsing
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Invalid response from server');
-            }
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || data.message);
-
-            setSuccess('Animal updated successfully');
-            setShowEditModal(false);
-            fetchAnimals();
-            setTimeout(() => setSuccess(''), 3000);
-        } catch (err) {
-            setError(err.message || 'Failed to update animal');
-        }
-    };
-
     const handleHideAnimal = async (animal) => {
         if (!actionReason.trim()) {
             setError('Please provide a reason');
@@ -567,47 +411,12 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
 
             setSuccess('Animal hidden from public view');
             setShowDetailModal(false);
+            setShowHideConfirm(false);
             setActionReason('');
             fetchAnimals();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             setError(err.message || 'Failed to hide animal');
-        }
-    };
-
-    const handleRemoveImage = async (animal) => {
-        if (!actionReason.trim()) {
-            setError('Please provide a reason');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/moderation/animals/${animal._id}/image`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: JSON.stringify({ reason: actionReason })
-            });
-
-            // Check content type before parsing
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Invalid response from server');
-            }
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || data.message);
-
-            setSuccess('Animal image removed');
-            setActionReason('');
-            // Refresh detail view
-            openDetailModal(animal);
-            fetchAnimals();
-            setTimeout(() => setSuccess(''), 3000);
-        } catch (err) {
-            setError(err.message || 'Failed to remove image');
         }
     };
 
@@ -883,6 +692,24 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         >
                                             <Edit size={16} />
                                         </button>
+                                        {animal.showOnPublicProfile && (
+                                            <button
+                                                onClick={() => { setSelectedAnimal(animal); setActionReason(''); setShowHideConfirm(true); }}
+                                                title="Hide from Public"
+                                                className="action-btn"
+                                            >
+                                                <EyeOff size={16} />
+                                            </button>
+                                        )}
+                                        {['admin', 'moderator'].includes(userRole) && (
+                                            <button
+                                                onClick={() => { setSelectedAnimal(animal); setActionReason(''); setShowDeleteConfirm(true); }}
+                                                title="Delete Animal"
+                                                className="action-btn"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))
@@ -910,2110 +737,179 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                 </div>
             )}
 
-            {/* Detail Modal */}
+            {/* Detail Modal (Eye icon) — the real AnimalModalV2, same component a user sees when
+                clicking their own animal, with the mutating action props (edit/archive/transfer/
+                add sibling) omitted so it renders as a faithful read-only replica for admins. */}
             {showDetailModal && selectedAnimal && (
-                <div className="animal-modal-overlay" onClick={() => setShowDetailModal(false)}>
-                    <div className="animal-modal large-modal" onClick={e => e.stopPropagation()}>
+                <AnimalModalV2
+                    animal={selectedAnimal}
+                    onClose={() => { setShowDetailModal(false); setSelectedAnimal(null); }}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                    onViewAnimal={handleAdminViewAnimal}
+                    onUpdateAnimal={() => {}}
+                    onToggleOwned={() => {}}
+                    userProfile={null}
+                    handleReturnTransferredAnimal={() => {}}
+                    handleWithdrawTransfer={() => {}}
+                    handleAcceptTransfer={() => {}}
+                    handleRejectTransfer={() => {}}
+                    breedingLineDefs={[]}
+                    animalBreedingLines={{}}
+                    toggleAnimalBreedingLine={undefined}
+                    setAnimalBreedingLinesDirect={() => {}}
+                    setShowImageModal={setShowImageModal}
+                    setEnlargedImageUrl={setEnlargedImageUrl}
+                />
+            )}
+
+            {/* Simple image lightbox for the read-only detail view's gallery, mirroring the
+                enlarge-on-click behavior the real app provides via app.jsx. */}
+            {showImageModal && enlargedImageUrl && (
+                <div
+                    className="animal-modal-overlay"
+                    style={{ zIndex: 90 }}
+                    onClick={() => setShowImageModal(false)}
+                >
+                    <img
+                        src={enlargedImageUrl}
+                        alt=""
+                        style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }}
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
+
+            {/* Hide Confirmation */}
+            {showHideConfirm && selectedAnimal && (
+                <div className="animal-modal-overlay" onClick={() => setShowHideConfirm(false)}>
+                    <div className="animal-modal confirm-modal" onClick={e => e.stopPropagation()}>
                         <div className="animal-modal-header">
-                            <div className="modal-title-section">
-                                <h3>
-                                    {selectedAnimal.prefix && `${selectedAnimal.prefix} `}
-                                    {selectedAnimal.name}
-                                    {selectedAnimal.suffix && ` ${selectedAnimal.suffix}`}
-                                </h3>
-                                <span className="animal-modal-id">{selectedAnimal.id_public}</span>
-                            </div>
-                            <button className="modal-close" onClick={() => setShowDetailModal(false)}>
-                                <X size={20} />
-                            </button>
+                            <h3><EyeOff size={20} /> Hide from Public</h3>
                         </div>
-
-                        {/* Tab Navigation - ALL 16 TABS (15 standard + Reports) */}
-                        <div className="modal-tabs">
-                            <div className="modal-tabs-row" style={{display: 'flex', flexWrap: 'wrap', gap: '0.25rem'}}>
-                                {[
-                                    { id: 'overview', label: 'Overview', icon: '📋' },
-                                    { id: 'status', label: 'Status & Privacy', icon: '🔒' },
-                                    { id: 'physical', label: 'Physical', icon: '🎨' },
-                                    { id: 'identification', label: 'Identification', icon: '🏷️' },
-                                    { id: 'lineage', label: 'Lineage', icon: '🌳' },
-                                    { id: 'breeding', label: 'Breeding', icon: '🥚' },
-                                    { id: 'health', label: 'Health', icon: '🏥' },
-                                    { id: 'husbandry', label: 'Animal Care', icon: '🏠' },
-                                    { id: 'behavior', label: 'Behavior', icon: '🧠' },
-                                    { id: 'records', label: 'Records', icon: '📝' },
-                                    { id: 'endoflife', label: 'End of Life', icon: '⚖️' },
-                                    { id: 'show', label: 'Show', icon: '🏆' },
-                                    { id: 'legal', label: 'Legal', icon: '📄' },
-                                    { id: 'gallery', label: 'Gallery', icon: '🖼️' },
-                                    { id: 'logs', label: 'Logs', icon: '📜' },
-                                    { id: 'reports', label: 'Reports', icon: '⚠️' }
-                                ].map(tab => (
-                                    <button 
-                                        key={tab.id}
-                                        className={`tab ${viewActiveTab === tab.id ? 'active' : ''}`}
-                                        onClick={() => setViewActiveTab(tab.id)}
-                                        style={{flexShrink: 0}}
-                                    >
-                                        {tab.icon} {tab.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
                         <div className="animal-modal-body">
-                            <div className="tab-content scrollable-content">
-                                {/* Overview Tab */}
-                                {viewActiveTab === 'overview' && (
-                                    <div className="tab-panel">
-                                        {/* Image Section */}
-                                        {selectedAnimal.imageUrl && (
-                                            <div className="animal-detail-section">
-                                                <h4>Image</h4>
-                                                <div className="animal-image-preview">
-                                                    <img src={selectedAnimal.imageUrl} alt={selectedAnimal.name} />
-                                                    <div className="image-action-row">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Reason for removal..."
-                                                            value={actionReason}
-                                                            onChange={(e) => setActionReason(e.target.value)}
-                                                        />
-                                                        <button 
-                                                            className="btn-danger"
-                                                            onClick={() => handleRemoveImage(selectedAnimal)}
-                                                        >
-                                                            <Image size={14} /> Remove Image
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="animal-detail-section">
-                                            <h4>Basic Information</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Species:</strong> {selectedAnimal.species || '-'}</div>
-                                                <div><strong>Breed:</strong> {selectedAnimal.breed || '-'}</div>
-                                                <div><strong>Strain:</strong> {selectedAnimal.strain || '-'}</div>
-                                                <div><strong>Gender:</strong> {selectedAnimal.gender || '-'}</div>
-                                                <div><strong>Status:</strong> {selectedAnimal.status || '-'}</div>
-                                                <div><strong>Life Stage:</strong> {selectedAnimal.lifeStage || '-'}</div>
-                                                <div><strong>Birth Date:</strong> {selectedAnimal.birthDate ? formatDate(selectedAnimal.birthDate) : '-'}</div>
-                                                <div><strong>Deceased Date:</strong> {selectedAnimal.deceasedDate ? formatDate(selectedAnimal.deceasedDate) : '-'}</div>
-                                                <div><strong>Created:</strong> {formatDate(selectedAnimal.createdAt)}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Variety</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Variety:</strong> {[selectedAnimal.color, selectedAnimal.coatPattern, selectedAnimal.coat, selectedAnimal.earset].filter(Boolean).join(' ') || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Genetic Code</h4>
-                                            <p style={{fontFamily: 'monospace', wordBreak: 'break-all'}}>{selectedAnimal.geneticCode || '-'}</p>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Availability</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>For Sale:</strong> {selectedAnimal.isForSale ? 'Yes' : 'No'}</div>
-                                                {selectedAnimal.isForSale && (
-                                                    <div><strong>Sale Price:</strong> {selectedAnimal.salePriceAmount || 'Negotiable'} {selectedAnimal.currency}</div>
-                                                )}
-                                                <div><strong>Available for Stud:</strong> {selectedAnimal.availableForBreeding ? 'Yes' : 'No'}</div>
-                                                {selectedAnimal.availableForBreeding && (
-                                                    <div><strong>Stud Fee:</strong> {selectedAnimal.studFeeAmount || 'Negotiable'} {selectedAnimal.currency}</div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Breeder</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Original Breeder:</strong> {selectedAnimal.originalCreatorId?.personalName || selectedAnimal.originalCreatorId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Identification Numbers</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>CritterTrack ID:</strong> {selectedAnimal.id_public || '-'}</div>
-                                                <div><strong>Identification:</strong> {selectedAnimal.breederyId || '-'}</div>
-                                                <div><strong>Microchip:</strong> {selectedAnimal.microchipNumber || '-'}</div>
-                                                <div><strong>Pedigree Reg ID:</strong> {selectedAnimal.pedigreeRegistrationId || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Parents</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Sire:</strong> {selectedAnimal.fatherId_public || selectedAnimal.sireId_public || '-'}</div>
-                                                <div><strong>Dam:</strong> {selectedAnimal.motherId_public || selectedAnimal.damId_public || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Remarks</h4>
-                                            <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.remarks || '-'}</p>
-                                        </div>
-
-                                        {selectedAnimal.tags && selectedAnimal.tags.length > 0 && (
-                                            <div className="animal-detail-section">
-                                                <h4>Tags</h4>
-                                                <div className="tags-container">
-                                                    {selectedAnimal.tags.map((tag, idx) => (
-                                                        <span key={idx} className="tag-badge">{tag}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Status Tab */}
-                                {viewActiveTab === 'status' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Ownership</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Currently Owned:</strong> {selectedAnimal.isOwned ? 'Yes' : 'No'}</div>
-                                                <div><strong>Breeder:</strong> {selectedAnimal.originalCreatorId?.personalName || selectedAnimal.originalCreatorId?.email || selectedAnimal.manualBreederName || selectedAnimal.breederId_public || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Current Owner</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Owner:</strong> {selectedAnimal.creatorId?.personalName || selectedAnimal.creatorId?.email || '-'}</div>
-                                                <div><strong>Owner ID:</strong> {selectedAnimal.creatorId?.id_public || '-'}</div>
-                                                {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && selectedAnimal.coOwnership && (
-                                                    <div><strong>Co-Ownership:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.coOwnership}</span></div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Availability for Sale or Stud</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>For Sale:</strong> {selectedAnimal.isForSale ? 'Yes' : 'No'}</div>
-                                                {selectedAnimal.isForSale && (
-                                                    <div><strong>Sale Price:</strong> {selectedAnimal.salePriceAmount || 'Negotiable'} {selectedAnimal.currency}</div>
-                                                )}
-                                                <div><strong>For Stud:</strong> {selectedAnimal.availableForBreeding ? 'Yes' : 'No'}</div>
-                                                {selectedAnimal.availableForBreeding && (
-                                                    <div><strong>Stud Fee:</strong> {selectedAnimal.studFeeAmount || 'Negotiable'} {selectedAnimal.currency}</div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Physical Tab */}
-                                {viewActiveTab === 'physical' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Variety</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Variety:</strong> {[selectedAnimal.color, selectedAnimal.coatPattern, selectedAnimal.coat, selectedAnimal.earset].filter(Boolean).join(' ') || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Genetic Code</h4>
-                                            <p style={{fontFamily: 'monospace', wordBreak: 'break-all'}}>{selectedAnimal.geneticCode || '-'}</p>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Life Stage</h4>
-                                            <div className="detail-grid">
-                                                <div>{selectedAnimal.lifeStage || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Measurements</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Weight:</strong> {selectedAnimal.bodyWeight || '-'}</div>
-                                                <div><strong>Length:</strong> {selectedAnimal.bodyLength || '-'}</div>
-                                                <div><strong>Height:</strong> {selectedAnimal.heightAtWithers || '-'}</div>
-                                                <div><strong>Body Condition:</strong> {selectedAnimal.bodyConditionScore || '-'}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Identification Tab */}
-                                {viewActiveTab === 'identification' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Identification Numbers</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>CritterTrack ID:</strong> {selectedAnimal.id_public || '-'}</div>
-                                                <div><strong>Identification:</strong> {selectedAnimal.breederyId || '-'}</div>
-                                                <div><strong>Microchip Number:</strong> {selectedAnimal.microchipNumber || '-'}</div>
-                                                <div><strong>Pedigree Registration ID:</strong> {selectedAnimal.pedigreeRegistrationId || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Classification</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Species:</strong> {selectedAnimal.species || '-'}</div>
-                                                <div><strong>Breed:</strong> {selectedAnimal.breed || '-'}</div>
-                                                <div><strong>Strain:</strong> {selectedAnimal.strain || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Tags</h4>
-                                            <div className="tags-container">
-                                                {selectedAnimal.tags?.length > 0 ? (
-                                                    selectedAnimal.tags.map((tag, idx) => (
-                                                        <span key={idx} className="tag-badge">{tag}</span>
-                                                    ))
-                                                ) : '-'}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Lineage Tab */}
-                                {viewActiveTab === 'lineage' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Pedigree: Sire and Dam</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Sire:</strong> {selectedAnimal.fatherId_public || selectedAnimal.sireId_public || '-'}</div>
-                                                <div><strong>Dam:</strong> {selectedAnimal.motherId_public || selectedAnimal.damId_public || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Origin</h4>
-                                            <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.origin || '-'}</p>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Ownership History</h4>
-                                            <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.transferHistory || '-'}</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Breeding Tab */}
-                                {viewActiveTab === 'breeding' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Reproductive Status</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Neutered/Spayed:</strong> {selectedAnimal.isNeutered ? 'Yes' : 'No'}</div>
-                                                <div><strong>Infertile:</strong> {selectedAnimal.isInfertile ? 'Yes' : 'No'}</div>
-                                                {!selectedAnimal.isNeutered && !selectedAnimal.isInfertile && (
-                                                    <div><strong>In Mating:</strong> {selectedAnimal.isInMating ? 'Yes' : 'No'}</div>
-                                                )}
-                                                {['Female', 'Intersex', 'Unknown'].includes(selectedAnimal.gender) && !selectedAnimal.isNeutered && (
-                                                    <>
-                                                        <div><strong>Pregnant:</strong> {selectedAnimal.isPregnant ? 'Yes' : 'No'}</div>
-                                                        <div><strong>Nursing:</strong> {selectedAnimal.isNursing ? 'Yes' : 'No'}</div>
-                                                    </>
-                                                )}
-                                                {selectedAnimal.gender === 'Male' && !selectedAnimal.isNeutered && !selectedAnimal.isInfertile && (
-                                                    <div><strong>Stud Animal:</strong> {selectedAnimal.isStudAnimal ? 'Yes' : 'No'}</div>
-                                                )}
-                                                {selectedAnimal.gender === 'Female' && !selectedAnimal.isNeutered && !selectedAnimal.isInfertile && (
-                                                    <div><strong>Breeding Dam:</strong> {selectedAnimal.isDamAnimal ? 'Yes' : 'No'}</div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {['Female', 'Intersex', 'Unknown'].includes(selectedAnimal.gender) && !selectedAnimal.isNeutered && (
-                                            <div className="animal-detail-section">
-                                                <h4>Estrus/Cycle</h4>
-                                                <div className="detail-grid">
-                                                    <div><strong>Heat Status:</strong> {selectedAnimal.heatStatus || '-'}</div>
-                                                    <div><strong>Last Heat Date:</strong> {selectedAnimal.lastHeatDate ? formatDate(selectedAnimal.lastHeatDate) : '-'}</div>
-                                                    <div><strong>Ovulation Date:</strong> {selectedAnimal.ovulationDate ? formatDate(selectedAnimal.ovulationDate) : '-'}</div>
-                                                    {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && (
-                                                        <div><strong>Estrus Cycle Length:</strong> {selectedAnimal.estrusCycleLength ? `${selectedAnimal.estrusCycleLength} days` : '-'}</div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {!selectedAnimal.isNeutered && !selectedAnimal.isInfertile && (
-                                            <div className="animal-detail-section">
-                                                <h4>In Mating</h4>
-                                                <div className="detail-grid">
-                                                    <div><strong>Mating Date:</strong> {selectedAnimal.matingDates ? formatDate(selectedAnimal.matingDates) : '-'}</div>
-                                                    <div><strong>Expected Due Date:</strong> {selectedAnimal.expectedDueDate ? formatDate(selectedAnimal.expectedDueDate) : '-'}</div>
-                                                    {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && (
-                                                        <div><strong>Artificial Insemination:</strong> {selectedAnimal.artificialInseminationUsed ? 'Yes' : 'No'}</div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {!selectedAnimal.isNeutered && !selectedAnimal.isInfertile && ['Male', 'Intersex', 'Unknown'].includes(selectedAnimal.gender) && (
-                                            <div className="animal-detail-section">
-                                                <h4>Stud Information</h4>
-                                                <div className="detail-grid">
-                                                    <div><strong>Fertility Status:</strong> {selectedAnimal.fertilityStatus || '-'}</div>
-                                                    <div><strong>Successful Matings:</strong> {selectedAnimal.successfulMatings || '-'}</div>
-                                                </div>
-                                                {selectedAnimal.fertilityNotes && (
-                                                    <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}><strong>Notes:</strong> {selectedAnimal.fertilityNotes}</p>
-                                                )}
-                                                {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && selectedAnimal.reproductiveClearances && (
-                                                    <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}><strong>Reproductive Clearances:</strong> {selectedAnimal.reproductiveClearances}</p>
-                                                )}
-                                                {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && selectedAnimal.reproductiveComplications && (
-                                                    <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}><strong>Reproductive Complications:</strong> {selectedAnimal.reproductiveComplications}</p>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {!selectedAnimal.isNeutered && !selectedAnimal.isInfertile && ['Female', 'Intersex', 'Unknown'].includes(selectedAnimal.gender) && (
-                                            <div className="animal-detail-section">
-                                                <h4>Dam Information</h4>
-                                                <div className="detail-grid">
-                                                    <div><strong>Dam Fertility Status:</strong> {selectedAnimal.damFertilityStatus || selectedAnimal.fertilityStatus || '-'}</div>
-                                                    {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && (
-                                                        <>
-                                                            <div><strong>Gestation Length:</strong> {selectedAnimal.gestationLength ? `${selectedAnimal.gestationLength} days` : '-'}</div>
-                                                            <div><strong>Delivery Method:</strong> {selectedAnimal.deliveryMethod || '-'}</div>
-                                                        </>
-                                                    )}
-                                                    {selectedAnimal.species?.toLowerCase() === 'dog' && selectedAnimal.whelpingDate && (
-                                                        <div><strong>Whelping Date:</strong> {formatDate(selectedAnimal.whelpingDate)}</div>
-                                                    )}
-                                                    {selectedAnimal.species?.toLowerCase() === 'cat' && selectedAnimal.queeningDate && (
-                                                        <div><strong>Queening Date:</strong> {formatDate(selectedAnimal.queeningDate)}</div>
-                                                    )}
-                                                </div>
-                                                {selectedAnimal.damFertilityNotes && (
-                                                    <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}><strong>Notes:</strong> {selectedAnimal.damFertilityNotes}</p>
-                                                )}
-                                                {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && selectedAnimal.reproductiveClearances && (
-                                                    <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}><strong>Reproductive Clearances:</strong> {selectedAnimal.reproductiveClearances}</p>
-                                                )}
-                                                {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && selectedAnimal.reproductiveComplications && (
-                                                    <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}><strong>Reproductive Complications:</strong> {selectedAnimal.reproductiveComplications}</p>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        <div className="animal-detail-section">
-                                            <h4>Breeding History</h4>
-                                            <div className="detail-grid">
-                                                {['Male', 'Intersex', 'Unknown'].includes(selectedAnimal.gender) && (
-                                                    <>
-                                                        <div><strong>Last Mating Date:</strong> {selectedAnimal.lastMatingDate ? formatDate(selectedAnimal.lastMatingDate) : '-'}</div>
-                                                        <div><strong>Successful Matings:</strong> {selectedAnimal.successfulMatings || '-'}</div>
-                                                    </>
-                                                )}
-                                                {['Female', 'Intersex', 'Unknown'].includes(selectedAnimal.gender) && (
-                                                    <>
-                                                        <div><strong>Last Pregnancy Date:</strong> {selectedAnimal.lastPregnancyDate ? formatDate(selectedAnimal.lastPregnancyDate) : '-'}</div>
-                                                        <div><strong>Litter Count:</strong> {selectedAnimal.litterCount || '-'}</div>
-                                                    </>
-                                                )}
-                                                <div><strong>Total Offspring:</strong> {selectedAnimal.offspringCount || '-'}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Health Tab */}
-                                {viewActiveTab === 'health' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Preventive Care</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Vaccinations:</strong> {selectedAnimal.vaccinations || '-'}</div>
-                                                <div><strong>Deworming Records:</strong> {selectedAnimal.dewormingRecords || '-'}</div>
-                                                <div><strong>Parasite Control:</strong> {selectedAnimal.parasiteControl || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Procedures & Diagnostics</h4>
-                                            <div className="detail-grid">
-                                                <div>
-                                                    <strong>Medical Procedures:</strong>
-                                                    {(() => {
-                                                        try {
-                                                            const procedures = JSON.parse(selectedAnimal.medicalProcedures);
-                                                            if (Array.isArray(procedures) && procedures.length > 0) {
-                                                                return (
-                                                                    <ul>
-                                                                        {procedures.map((proc, idx) => (
-                                                                            <li key={idx}>{proc.name} - {formatDate(proc.date)} - {proc.notes}</li>
-                                                                        ))}
-                                                                    </ul>
-                                                                );
-                                                            }
-                                                            return ' -';
-                                                        } catch {
-                                                            return ' -';
-                                                        }
-                                                    })()}
-                                                </div>
-                                                <div><strong>Laboratory Results:</strong> {selectedAnimal.laboratoryResults || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Active Medical Records</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Medical Conditions:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.medicalConditions || '-'}</span></div>
-                                                <div><strong>Allergies:</strong> {selectedAnimal.allergies || '-'}</div>
-                                                <div><strong>Current Medications:</strong> {selectedAnimal.medications || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Veterinary Care</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Primary Veterinarian:</strong> {selectedAnimal.primaryVet || '-'}</div>
-                                                <div>
-                                                    <strong>Veterinary Visits:</strong>
-                                                    {(() => {
-                                                        try {
-                                                            const visits = JSON.parse(selectedAnimal.vetVisits);
-                                                            if (Array.isArray(visits) && visits.length > 0) {
-                                                                return (
-                                                                    <ul>
-                                                                        {visits.map((visit, idx) => (
-                                                                            <li key={idx}>{visit.reason} - {formatDate(visit.date)} - {visit.notes}</li>
-                                                                        ))}
-                                                                    </ul>
-                                                                );
-                                                            }
-                                                            return ' -';
-                                                        } catch {
-                                                            return ' -';
-                                                        }
-                                                    })()}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Husbandry Tab */}
-                                {viewActiveTab === 'husbandry' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Nutrition</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Diet Type:</strong> {selectedAnimal.dietType || '-'}</div>
-                                                <div><strong>Feeding Schedule:</strong> {selectedAnimal.feedingSchedule || '-'}</div>
-                                                <div><strong>Supplements:</strong> {selectedAnimal.supplements || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Husbandry</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Housing Type:</strong> {selectedAnimal.housingType || '-'}</div>
-                                                <div><strong>Bedding:</strong> {selectedAnimal.bedding || '-'}</div>
-                                                <div><strong>Enrichment:</strong> {selectedAnimal.enrichment || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Environment</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Temperature Range:</strong> {selectedAnimal.temperatureRange || '-'}</div>
-                                                <div><strong>Humidity:</strong> {selectedAnimal.humidity || '-'}</div>
-                                                <div><strong>Lighting:</strong> {selectedAnimal.lighting || '-'}</div>
-                                                <div><strong>Noise Level:</strong> {selectedAnimal.noise || '-'}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Behavior Tab */}
-                                {viewActiveTab === 'behavior' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Behavior</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Temperament:</strong> {selectedAnimal.temperament || '-'}</div>
-                                                <div><strong>Handling Tolerance:</strong> {selectedAnimal.handlingTolerance || '-'}</div>
-                                                <div><strong>Social Structure:</strong> {selectedAnimal.socialStructure || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Activity</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Activity Cycle:</strong> {selectedAnimal.activityCycle || '-'}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Records Tab */}
-                                {viewActiveTab === 'records' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Remarks & Notes</h4>
-                                            <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.remarks || '-'}</p>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Show Titles & Ratings</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Show Titles:</strong> {selectedAnimal.showTitles || '-'}</div>
-                                                <div><strong>Show Ratings:</strong> {selectedAnimal.showRatings || '-'}</div>
-                                                <div><strong>Judge Comments:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.judgeComments || '-'}</span></div>
-                                            </div>
-                                        </div>
-
-                                        {selectedAnimal.species?.toLowerCase() === 'dog' && (
-                                            <div className="animal-detail-section">
-                                                <h4>Working & Performance</h4>
-                                                <div className="detail-grid">
-                                                    <div><strong>Working Titles:</strong> {selectedAnimal.workingTitles || '-'}</div>
-                                                    <div><strong>Performance Scores:</strong> {selectedAnimal.performanceScores || '-'}</div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* End of Life Tab */}
-                                {viewActiveTab === 'endoflife' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Information</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Deceased Date:</strong> {selectedAnimal.deceasedDate ? formatDate(selectedAnimal.deceasedDate) : '-'}</div>
-                                                <div><strong>Cause of Death:</strong> {selectedAnimal.causeOfDeath || '-'}</div>
-                                                <div><strong>Necropsy Results:</strong> {selectedAnimal.necropsyResults || '-'}</div>
-                                            </div>
-                                            {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && selectedAnimal.endOfLifeCareNotes && (
-                                                <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}><strong>End of Life Care Notes:</strong> {selectedAnimal.endOfLifeCareNotes}</p>
-                                            )}
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Legal/Administrative</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Insurance:</strong> {selectedAnimal.insurance || '-'}</div>
-                                                <div><strong>Legal Status:</strong> {selectedAnimal.legalStatus || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        {['dog', 'cat'].includes(selectedAnimal.species?.toLowerCase()) && (selectedAnimal.breedingRestrictions || selectedAnimal.exportRestrictions) && (
-                                            <div className="animal-detail-section">
-                                                <h4>Restrictions</h4>
-                                                {selectedAnimal.breedingRestrictions && (
-                                                    <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}><strong>Breeding Restrictions:</strong> {selectedAnimal.breedingRestrictions}</p>
-                                                )}
-                                                {selectedAnimal.exportRestrictions && (
-                                                    <p className="remarks-text" style={{whiteSpace: 'pre-wrap'}}><strong>Export Restrictions:</strong> {selectedAnimal.exportRestrictions}</p>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Show Tab */}
-                                {viewActiveTab === 'show' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Show Titles & Ratings</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Show Titles:</strong> {selectedAnimal.showTitles || '-'}</div>
-                                                <div><strong>Show Ratings:</strong> {selectedAnimal.showRatings || '-'}</div>
-                                                <div><strong>Judge Comments:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.judgeComments || '-'}</span></div>
-                                            </div>
-                                        </div>
-
-                                        {selectedAnimal.species?.toLowerCase() === 'dog' && (
-                                            <div className="animal-detail-section">
-                                                <h4>Working & Performance</h4>
-                                                <div className="detail-grid">
-                                                    <div><strong>Working Titles:</strong> {selectedAnimal.workingTitles || '-'}</div>
-                                                    <div><strong>Performance Scores:</strong> {selectedAnimal.performanceScores || '-'}</div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Legal Tab */}
-                                {viewActiveTab === 'legal' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Licensing & Permits</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>License Number:</strong> {selectedAnimal.licenseNumber || '-'}</div>
-                                                <div><strong>License Jurisdiction:</strong> {selectedAnimal.licenseJurisdiction || '-'}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Legal & Administrative</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Insurance:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.insurance || '-'}</span></div>
-                                                <div><strong>Legal Status:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.legalStatus || '-'}</span></div>
-                                            </div>
-                                        </div>
-
-                                        <div className="animal-detail-section">
-                                            <h4>Restrictions</h4>
-                                            <div className="detail-grid">
-                                                <div><strong>Breeding Restrictions:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.breedingRestrictions || '-'}</span></div>
-                                                <div><strong>Export Restrictions:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.exportRestrictions || '-'}</span></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Gallery Tab */}
-                                {viewActiveTab === 'gallery' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Photo Gallery ({(selectedAnimal.extraImages || []).length} / 20 photos)</h4>
-                                            {(selectedAnimal.extraImages || []).length === 0 ? (
-                                                <div style={{textAlign: 'center', padding: '40px', color: '#9ca3af'}}>
-                                                    <div style={{fontSize: '48px', marginBottom: '10px'}}>📷</div>
-                                                    <p>No extra photos yet. Add photos in Edit mode.</p>
-                                                </div>
-                                            ) : (
-                                                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px'}}>
-                                                    {(selectedAnimal.extraImages || []).map((url, idx) => (
-                                                        <div key={idx} style={{position: 'relative', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', border: '1px solid #d1d5db'}}>
-                                                            <img src={url} alt={`Gallery ${idx + 1}`} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                                                            <span style={{position: 'absolute', bottom: '4px', left: '4px', background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '3px'}}>#{idx + 1}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Logs Tab */}
-                                {viewActiveTab === 'logs' && (
-                                    <div className="tab-panel">
-                                        <div className="animal-detail-section">
-                                            <h4>Activity Logs</h4>
-                                            <p style={{color: '#6b7280', fontSize: '14px', marginBottom: '10px'}}>
-                                                Logs show feeding, care updates, and field edits for this animal.
-                                            </p>
-                                            <div style={{textAlign: 'center', padding: '40px', color: '#9ca3af'}}>
-                                                <div style={{fontSize: '48px', marginBottom: '10px'}}>📜</div>
-                                                <p>Activity logs are available in the user's private animal detail view.</p>
-                                                <p style={{fontSize: '12px', marginTop: '10px'}}>Moderators see animal data but not owner-specific activity logs.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Reports Tab */}
-                                {viewActiveTab === 'reports' && (
-                                    <div className="tab-panel">
-                                        {selectedAnimal.reports && selectedAnimal.reports.length > 0 ? (
-                                            <div className="animal-detail-section reports-section">
-                                                <h4><AlertTriangle size={16} /> Reports ({selectedAnimal.reports.length})</h4>
-                                                <div className="reports-list">
-                                                    {selectedAnimal.reports.map(report => (
-                                                        <div key={report._id} className={`report-item ${report.status}`}>
-                                                            <div className="report-header">
-                                                                <span className={`report-status ${report.status}`}>{report.status}</span>
-                                                                <span className="report-date">{formatDate(report.createdAt)}</span>
-                                                            </div>
-                                                            <p className="report-reason">{report.reason}</p>
-                                                            <p className="report-by">
-                                                                Reported by: {report.reporterId?.personalName || report.reporterId?.email || 'Unknown'}
-                                                            </p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="animal-detail-section">
-                                                <p className="no-data">No reports for this animal.</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="animal-modal-footer">
-                            <div className="action-row">
+                            <p className="confirm-animal">
+                                <strong>{selectedAnimal.name}</strong> ({selectedAnimal.id_public})
+                            </p>
+                            <div className="form-row full-width">
+                                <label>Reason for Hiding *</label>
                                 <input
                                     type="text"
-                                    placeholder="Reason for action..."
                                     value={actionReason}
                                     onChange={(e) => setActionReason(e.target.value)}
-                                    className="action-reason-input"
+                                    placeholder="Why is this animal being hidden from public view?"
                                 />
                             </div>
-                            <div className="action-buttons">
-                                <button 
-                                    className="btn-secondary"
-                                    onClick={() => openEditModal(selectedAnimal)}
-                                >
-                                    <Edit size={14} /> Edit Fields
+                            <div className="modal-actions">
+                                <button className="btn-secondary" onClick={() => setShowHideConfirm(false)}>
+                                    Cancel
                                 </button>
-                                {selectedAnimal.showOnPublicProfile && (
-                                    <button 
-                                        className="btn-warning"
-                                        onClick={() => handleHideAnimal(selectedAnimal)}
-                                    >
-                                        <EyeOff size={14} /> Hide from Public
-                                    </button>
-                                )}
-                                {['admin', 'moderator'].includes(userRole) && (
-                                    <button 
-                                        className="btn-danger"
-                                        onClick={() => setShowDeleteConfirm(true)}
-                                    >
-                                        <Trash2 size={14} /> Delete Animal
-                                    </button>
-                                )}
+                                <button className="btn-primary" onClick={() => handleHideAnimal(selectedAnimal)}>
+                                    Hide Animal
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Edit Modal */}
-            {showEditModal && selectedAnimal && (
-                <div className="animal-modal-overlay" onClick={() => setShowEditModal(false)}>
-                    <div className="animal-modal large-modal edit-modal" onClick={e => e.stopPropagation()}>
+            {/* Edit Modal (Edit icon) — the real AnimalFormModalV2, same form a user sees when
+                clicking Edit on their own animal, but with its Save button relabeled "Continue".
+                Clicking it doesn't save anything yet — handleAdminContinueEdit diffs the built
+                payload and hands off to the owner-change + reason screen below. */}
+            {showEditModal && selectedAnimal && !showOwnerChangeScreen && (
+                <AnimalFormModalV2
+                    formTitle={`Edit ${selectedAnimal.name} (Admin)`}
+                    animalToEdit={selectedAnimal}
+                    species={selectedAnimal.species}
+                    onSave={handleAdminContinueEdit}
+                    onCancel={handleAdminEditCancel}
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    showModalMessage={(title, message) => setError(`${title}: ${message}`)}
+                    userProfile={null}
+                    submitLabel="Continue"
+                    submitIcon={<ArrowRight size={18} />}
+                />
+            )}
+
+            {/* Owner-change + reason screen — the "second screen" reached via Continue. Lets the
+                admin quick-change the animal's owner (optional) and requires a reason before the
+                field edits (and any owner change) are actually persisted together in one save. */}
+            {showOwnerChangeScreen && selectedAnimal && (
+                <div className="animal-modal-overlay" onClick={() => { if (!savingOwnerChange) { setShowEditModal(false); setShowOwnerChangeScreen(false); setSelectedAnimal(null); } }}>
+                    <div className="animal-modal confirm-modal" onClick={e => e.stopPropagation()}>
                         <div className="animal-modal-header">
-                            <div className="modal-title-section">
-                                <h3>Edit Animal: {selectedAnimal.id_public}</h3>
-                            </div>
-                            <button className="modal-close" onClick={() => setShowEditModal(false)}>
-                                <X size={20} />
-                            </button>
+                            <h3><Edit size={20} /> Confirm Changes: {selectedAnimal.name}</h3>
                         </div>
-
-                        {/* Tab Navigation */}
-                        <div className="modal-tabs" style={{display: 'flex', flexWrap: 'wrap', gap: '5px'}}>
-                            <button 
-                                className={`tab ${editActiveTab === 'overview' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('overview')}
-                            >
-                                📋 Overview
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'status' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('status')}
-                            >
-                                🔒 Status
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'physical' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('physical')}
-                            >
-                                🎨 Physical
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'identification' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('identification')}
-                            >
-                                🏷️ Identification
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'lineage' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('lineage')}
-                            >
-                                🌳 Lineage
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'breeding' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('breeding')}
-                            >
-                                🫘 Breeding
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'health' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('health')}
-                            >
-                                🏥 Health
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'husbandry' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('husbandry')}
-                            >
-                                🏠 Husbandry
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'behavior' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('behavior')}
-                            >
-                                🧠 Behavior
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'records' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('records')}
-                            >
-                                📝 Records
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'endoflife' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('endoflife')}
-                            >
-                                ⚖️ End of Life
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'show' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('show')}
-                            >
-                                🏆 Show
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'legal' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('legal')}
-                            >
-                                ⚖️ Legal
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'gallery' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('gallery')}
-                            >
-                                📷 Gallery
-                            </button>
-                        </div>
-
                         <div className="animal-modal-body">
-                            <div className="tab-content scrollable-content">
-
-                            {/* Tab 1: Overview */}
-                            {editActiveTab === 'overview' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Identity</h4>
-                                            <div className="form-row">
-                                                <label>Prefix</label>
-                                                <input type="text" value={editForm.prefix || ''} onChange={(e) => setEditForm({...editForm, prefix: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Name *</label>
-                                                <input type="text" value={editForm.name || ''} onChange={(e) => setEditForm({...editForm, name: e.target.value})} required />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Suffix</label>
-                                                <input type="text" value={editForm.suffix || ''} onChange={(e) => setEditForm({...editForm, suffix: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Species</label>
-                                                <input type="text" value={editForm.species || ''} onChange={(e) => setEditForm({...editForm, species: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Breed</label>
-                                                <input type="text" value={editForm.breed || ''} onChange={(e) => setEditForm({...editForm, breed: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Strain</label>
-                                                <input type="text" value={editForm.strain || ''} onChange={(e) => setEditForm({...editForm, strain: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Gender</label>
-                                                <select value={editForm.gender || ''} onChange={(e) => setEditForm({...editForm, gender: e.target.value})}>
-                                                    <option value="">Select...</option>
-                                                    <option value="Male">Male</option>
-                                                    <option value="Female">Female</option>
-                                                    <option value="Intersex">Intersex</option>
-                                                    <option value="Unknown">Unknown</option>
-                                                </select>
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Life Stage</label>
-                                                <select value={editForm.lifeStage || ''} onChange={(e) => setEditForm({...editForm, lifeStage: e.target.value})}>
-                                                    <option value="">Unknown</option>
-<option value="Newborn">Newborn</option>
-<option value="Juvenile">Juvenile</option>
-<option value="Unknown">Sub-Adult</option>
-<option value="Adult">Adult</option>
-<option value="Senior">Senior</option>
-<option value="Mixed">Mixed</option>
-                                                </select>
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Status</label>
-                                                <select value={editForm.status || ''} onChange={(e) => setEditForm({...editForm, status: e.target.value})}>
-                                                    <option value="">Select...</option>
-                                                    <option value="Pet">Pet</option>
-                                                    <option value="Growout">Growout</option>
-                                                    <option value="Breeder">Breeder</option>
-                                                    <option value="Available">Available</option>
-                                                    <option value="Booked">Booked</option>
-                                                    <option value="Retired">Retired</option>
-                                                    <option value="Deceased">Deceased</option>
-                                                    <option value="Rehomed">Rehomed</option>
-                                                    <option value="Unknown">Unknown</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Important Dates</h4>
-                                            <div className="form-row">
-                                                <label>Birth Date</label>
-                                                <input type="date" value={editForm.birthDate || ''} onChange={(e) => setEditForm({...editForm, birthDate: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Deceased Date</label>
-                                                <input type="date" value={editForm.deceasedDate || ''} onChange={(e) => setEditForm({...editForm, deceasedDate: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Remarks</h4>
-                                            <div className="form-row full-width">
-                                                <label>Remarks</label>
-                                                <textarea rows={4} value={editForm.remarks || ''} onChange={(e) => setEditForm({...editForm, remarks: e.target.value})} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            {pendingFieldEdits && Object.keys(pendingFieldEdits).length > 0 ? (
+                                <p className="confirm-note">
+                                    {Object.keys(pendingFieldEdits).length} field{Object.keys(pendingFieldEdits).length === 1 ? '' : 's'} will be updated.
+                                </p>
+                            ) : (
+                                <p className="confirm-note">No field changes were made — you can still change the owner below.</p>
                             )}
 
-                            {/* Tab 2: Ownership */}
-                            {editActiveTab === 'status' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Ownership</h4>
-                                            <div className="form-row">
-                                                <label className="checkbox-label">
-                                                    <input type="checkbox" checked={editForm.isOwned || false} onChange={(e) => setEditForm({...editForm, isOwned: e.target.checked})} />
-                                                    Currently Owned
-                                                </label>
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Owner Name</label>
-                                                <input type="text" value={editForm.currentOwner || ''} onChange={(e) => setEditForm({...editForm, currentOwner: e.target.value})} placeholder="Name of current owner" />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Owner Transfer</h4>
-                                            <div className="form-row full-width">
-                                                <label>Current Owner</label>
-                                                <div className="owner-selector">
-                                                    <span className="selected-owner">{getOwnerDisplay()}</span>
-                                                    <div className="owner-actions">
-                                                        <button type="button" className="btn-small" onClick={() => setShowOwnerSearch(!showOwnerSearch)}>
-                                                            {showOwnerSearch ? 'Cancel' : 'Change'}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                {showOwnerSearch && (
-                                                    <div className="user-search">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Search users by name, email, or ID..."
-                                                            value={ownerSearchQuery}
-                                                            onChange={(e) => { setOwnerSearchQuery(e.target.value); searchUsers(e.target.value, 'owner'); }}
-                                                        />
-                                                        {ownerSearchResults.length > 0 && (
-                                                            <div className="search-results">
-                                                                {ownerSearchResults.map(user => (
-                                                                    <div key={user._id} className="search-result-item" onClick={() => selectOwner(user)}>
-                                                                        <span>{user.personalName || user.username || user.email}</span>
-                                                                        <span className="user-id">{user.id_public}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Breeder</h4>
-                                            <div className="form-row full-width">
-                                                <label>Current Breeder</label>
-                                                <div className="owner-selector">
-                                                    <span className="selected-owner">{getBreederDisplay()}</span>
-                                                    <div className="owner-actions">
-                                                        <button type="button" className="btn-small" onClick={() => setShowBreederSearch(!showBreederSearch)}>
-                                                            {showBreederSearch ? 'Cancel' : 'Change'}
-                                                        </button>
-                                                        {editForm.breederId_public && (
-                                                            <button type="button" className="btn-small btn-danger" onClick={clearBreeder}>Clear</button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                {showBreederSearch && (
-                                                    <div className="user-search">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Search users by name, email, or ID..."
-                                                            value={breederSearchQuery}
-                                                            onChange={(e) => { setBreederSearchQuery(e.target.value); searchUsers(e.target.value, 'breeder'); }}
-                                                        />
-                                                        {breederSearchResults.length > 0 && (
-                                                            <div className="search-results">
-                                                                {breederSearchResults.map(user => (
-                                                                    <div key={user._id} className="search-result-item" onClick={() => selectBreeder(user)}>
-                                                                        <span>{user.personalName || user.username || user.email}</span>
-                                                                        <span className="user-id">{user.id_public}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Manual Breeder Name</label>
-                                                <input type="text" value={editForm.manualBreederName || ''} onChange={(e) => setEditForm({...editForm, manualBreederName: e.target.value})} placeholder="Enter breeder name (if not a registered user)" />
-                                            </div>
-                                        </div>
-
-                                        {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Co-Ownership</h4>
-                                                <div className="form-row full-width">
-                                                    <label>Co-Ownership</label>
-                                                    <textarea rows={2} value={editForm.coOwnership || ''} onChange={(e) => setEditForm({...editForm, coOwnership: e.target.value})} placeholder="Co-owner name, terms, breeding rights" />
-                                                </div>
+                            <div className="form-section">
+                                <h4 className="section-title">Owner</h4>
+                                <div className="form-row full-width">
+                                    <label>Current Owner</label>
+                                    <div className="owner-selector">
+                                        <span className="selected-owner">
+                                            {selectedNewOwner
+                                                ? `${selectedNewOwner.personalName || selectedNewOwner.username || selectedNewOwner.email} (${selectedNewOwner.id_public}) — new`
+                                                : getAnimalOwnerDisplay(selectedAnimal)}
+                                        </span>
+                                        {selectedNewOwner && (
+                                            <div className="owner-actions">
+                                                <button type="button" className="btn-small" onClick={() => setSelectedNewOwner(null)}>Undo</button>
                                             </div>
                                         )}
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Availability for Sale or Stud</h4>
-                                            <div className="form-row">
-                                                <label className="checkbox-label">
-                                                    <input type="checkbox" checked={editForm.isForSale || false} onChange={(e) => setEditForm({...editForm, isForSale: e.target.checked})} />
-                                                    For Sale
-                                                </label>
-                                            </div>
-                                            {editForm.isForSale && (
-                                                <>
-                                                    <div className="form-row">
-                                                        <label>Sale Price Currency</label>
-                                                        <select value={editForm.salePriceCurrency || ''} onChange={(e) => setEditForm({...editForm, salePriceCurrency: e.target.value})}>
-                                                            <option value="">Select...</option>
-                                                            <option value="USD">USD</option>
-                                                            <option value="EUR">EUR</option>
-                                                            <option value="GBP">GBP</option>
-                                                            <option value="CAD">CAD</option>
-                                                            <option value="AUD">AUD</option>
-                                                            <option value="JPY">JPY</option>
-                                                            <option value="Negotiable">Negotiable</option>
-                                                        </select>
-                                                    </div>
-                                                    <div className="form-row">
-                                                        <label>Sale Price Amount</label>
-                                                        <input type="number" min="0" step="0.01" value={editForm.salePriceAmount || ''} onChange={(e) => setEditForm({...editForm, salePriceAmount: e.target.value})} disabled={editForm.salePriceCurrency === 'Negotiable'} />
-                                                    </div>
-                                                </>
-                                            )}
-                                            <div className="form-row">
-                                                <label className="checkbox-label">
-                                                    <input type="checkbox" checked={editForm.availableForBreeding || false} onChange={(e) => setEditForm({...editForm, availableForBreeding: e.target.checked})} />
-                                                    Available for Stud
-                                                </label>
-                                            </div>
-                                            {editForm.availableForBreeding && (
-                                                <>
-                                                    <div className="form-row">
-                                                        <label>Stud Fee Currency</label>
-                                                        <select value={editForm.studFeeCurrency || ''} onChange={(e) => setEditForm({...editForm, studFeeCurrency: e.target.value})}>
-                                                            <option value="">Select...</option>
-                                                            <option value="USD">USD</option>
-                                                            <option value="EUR">EUR</option>
-                                                            <option value="GBP">GBP</option>
-                                                            <option value="CAD">CAD</option>
-                                                            <option value="AUD">AUD</option>
-                                                            <option value="JPY">JPY</option>
-                                                            <option value="Negotiable">Negotiable</option>
-                                                        </select>
-                                                    </div>
-                                                    <div className="form-row">
-                                                        <label>Stud Fee Amount</label>
-                                                        <input type="number" min="0" step="0.01" value={editForm.studFeeAmount || ''} onChange={(e) => setEditForm({...editForm, studFeeAmount: e.target.value})} disabled={editForm.studFeeCurrency === 'Negotiable'} />
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
                                     </div>
-                                </div>
-                            )}
-
-                            {/* Tab 3: Physical */}
-                            {editActiveTab === 'physical' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Appearance</h4>
-                                            <div className="form-row">
-                                                <label>Color</label>
-                                                <input type="text" value={editForm.color || ''} onChange={(e) => setEditForm({...editForm, color: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Pattern</label>
-                                                <input type="text" value={editForm.coatPattern || ''} onChange={(e) => setEditForm({...editForm, coatPattern: e.target.value})} placeholder="e.g., Solid, Hooded, Brindle" />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Coat Type</label>
-                                                <input type="text" value={editForm.coat || ''} onChange={(e) => setEditForm({...editForm, coat: e.target.value})} placeholder="e.g., Short, Long, Rex" />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Earset</label>
-                                                <input type="text" value={editForm.earset || ''} onChange={(e) => setEditForm({...editForm, earset: e.target.value})} placeholder="e.g., Standard, Dumbo" />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Eye Color</label>
-                                                <input type="text" value={editForm.eyeColor || ''} onChange={(e) => setEditForm({...editForm, eyeColor: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Genetic Code</h4>
-                                            <div className="form-row full-width">
-                                                <label>Genetic Code</label>
-                                                <textarea rows={2} value={editForm.geneticCode || ''} onChange={(e) => setEditForm({...editForm, geneticCode: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Life Stage</h4>
-                                            <div className="form-row">
-                                                <label>Life Stage</label>
-                                                <select value={editForm.lifeStage || ''} onChange={(e) => setEditForm({...editForm, lifeStage: e.target.value})}>
-                                                    <option value="">Unknown</option>
-<option value="Newborn">Newborn</option>
-<option value="Juvenile">Juvenile</option>
-<option value="Unknown">Sub-Adult</option>
-<option value="Adult">Adult</option>
-<option value="Senior">Senior</option>
-<option value="Mixed">Mixed</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Measurements</h4>
-                                            <div className="form-row">
-                                                <label>Body Weight</label>
-                                                <input type="text" value={editForm.bodyWeight || ''} onChange={(e) => setEditForm({...editForm, bodyWeight: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Body Length</label>
-                                                <input type="text" value={editForm.bodyLength || ''} onChange={(e) => setEditForm({...editForm, bodyLength: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Height at Withers</label>
-                                                <input type="text" value={editForm.heightAtWithers || ''} onChange={(e) => setEditForm({...editForm, heightAtWithers: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Body Condition Score</label>
-                                                <input type="text" value={editForm.bodyConditionScore || ''} onChange={(e) => setEditForm({...editForm, bodyConditionScore: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Markings & Description</h4>
-                                            <div className="form-row">
-                                                <label>Markings</label>
-                                                <input type="text" value={editForm.markings || ''} onChange={(e) => setEditForm({...editForm, markings: e.target.value})} placeholder="Notable markings" />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Markings Description</label>
-                                                <textarea rows={3} value={editForm.markingsDescription || ''} onChange={(e) => setEditForm({...editForm, markingsDescription: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Physical Description</label>
-                                                <textarea rows={4} value={editForm.physicalDescription || ''} onChange={(e) => setEditForm({...editForm, physicalDescription: e.target.value})} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 4: Identification */}
-                            {editActiveTab === 'identification' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Identification Numbers</h4>
-                                            <div className="form-row">
-                                                <label>Registry/Breeder ID</label>
-                                                <input type="text" value={editForm.breederyId || ''} onChange={(e) => setEditForm({...editForm, breederyId: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Microchip Number</label>
-                                                <input type="text" value={editForm.microchipNumber || ''} onChange={(e) => setEditForm({...editForm, microchipNumber: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Pedigree Registration ID</label>
-                                                <input type="text" value={editForm.pedigreeRegistrationId || ''} onChange={(e) => setEditForm({...editForm, pedigreeRegistrationId: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Dog/Cat Specific IDs</h4>
-                                                <div className="form-row">
-                                                    <label>License Number</label>
-                                                    <input type="text" value={editForm.licenseNumber || ''} onChange={(e) => setEditForm({...editForm, licenseNumber: e.target.value})} placeholder="City/County license #" />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>License Jurisdiction</label>
-                                                    <input type="text" value={editForm.licenseJurisdiction || ''} onChange={(e) => setEditForm({...editForm, licenseJurisdiction: e.target.value})} placeholder="e.g., Los Angeles County" />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Tattoo ID</label>
-                                                    <input type="text" value={editForm.tattooId || ''} onChange={(e) => setEditForm({...editForm, tattooId: e.target.value})} />
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Classification</h4>
-                                            <div className="form-row">
-                                                <label>Species</label>
-                                                <input type="text" value={editForm.species || ''} disabled />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Breed</label>
-                                                <input type="text" value={editForm.breed || ''} onChange={(e) => setEditForm({...editForm, breed: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Strain</label>
-                                                <input type="text" value={editForm.strain || ''} onChange={(e) => setEditForm({...editForm, strain: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Tags</h4>
-                                            <div className="form-row full-width">
-                                                <label>Tags</label>
-                                                <div className="tags-container">
-                                                    {editForm.tags?.map((tag, idx) => (
-                                                        <span key={idx} className="tag-badge">
-                                                            {tag}
-                                                            <button type="button" onClick={() => setEditForm({...editForm, tags: editForm.tags.filter((_, i) => i !== idx)})}>×</button>
-                                                        </span>
+                                    {!selectedNewOwner && (
+                                        <div className="user-search">
+                                            <input
+                                                type="text"
+                                                placeholder="Search users to reassign owner (leave blank to keep current owner)..."
+                                                value={newOwnerQuery}
+                                                onChange={(e) => searchNewOwner(e.target.value)}
+                                            />
+                                            {newOwnerResults.length > 0 && (
+                                                <div className="search-results">
+                                                    {newOwnerResults.map(user => (
+                                                        <div key={user._id} className="search-result-item" onClick={() => selectNewOwner(user)}>
+                                                            <span>{user.personalName || user.username || user.email}</span>
+                                                            <span className="user-id">{user.id_public}</span>
+                                                        </div>
                                                     ))}
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Type a tag and press Enter..."
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            e.preventDefault();
-                                                            const val = e.target.value.trim();
-                                                            if (val) {
-                                                                setEditForm({...editForm, tags: [...(editForm.tags || []), val]});
-                                                                e.target.value = '';
-                                                            }
-                                                        }
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 5: Lineage */}
-                            {editActiveTab === 'lineage' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Pedigree: Sire and Dam</h4>
-                                            <div className="form-row">
-                                                <label>Sire (Father) ID</label>
-                                                <input type="text" value={editForm.sireId_public || editForm.fatherId_public || ''} onChange={(e) => setEditForm({...editForm, sireId_public: e.target.value, fatherId_public: e.target.value})} placeholder="Father's public ID" />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Dam (Mother) ID</label>
-                                                <input type="text" value={editForm.damId_public || editForm.motherId_public || ''} onChange={(e) => setEditForm({...editForm, damId_public: e.target.value, motherId_public: e.target.value})} placeholder="Mother's public ID" />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Origin</h4>
-                                            <div className="form-row">
-                                                <label>Origin</label>
-                                                <select value={editForm.origin || ''} onChange={(e) => setEditForm({...editForm, origin: e.target.value})}>
-                                                    <option value="">Select...</option>
-                                                    <option value="Captive-bred">Captive-bred</option>
-                                                    <option value="Wild-caught">Wild-caught</option>
-                                                    <option value="Rescue">Rescue</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Ownership History</h4>
-                                            <div className="form-row full-width">
-                                                <label>Transfer History</label>
-                                                <textarea rows={3} value={editForm.transferHistory || ''} onChange={(e) => setEditForm({...editForm, transferHistory: e.target.value})} placeholder="History of ownership transfers..." />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 6: Breeding */}
-                            {editActiveTab === 'breeding' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Reproductive Status</h4>
-                                            <div className="form-row">
-                                                <label className="checkbox-label">
-                                                    <input type="checkbox" checked={editForm.isNeutered || false} onChange={(e) => setEditForm({...editForm, isNeutered: e.target.checked})} />
-                                                    Neutered/Spayed
-                                                </label>
-                                            </div>
-                                            <div className="form-row">
-                                                <label className="checkbox-label">
-                                                    <input type="checkbox" checked={editForm.isInfertile || false} onChange={(e) => setEditForm({...editForm, isInfertile: e.target.checked})} />
-                                                    Infertile
-                                                </label>
-                                            </div>
-                                            {!editForm.isNeutered && !editForm.isInfertile && (
-                                                <div className="form-row">
-                                                    <label className="checkbox-label">
-                                                        <input type="checkbox" checked={editForm.isInMating || false} onChange={(e) => setEditForm({...editForm, isInMating: e.target.checked})} />
-                                                        In Mating
-                                                    </label>
-                                                </div>
-                                            )}
-                                            {['Female', 'Intersex', 'Unknown'].includes(editForm.gender) && !editForm.isNeutered && !editForm.isInfertile && (
-                                                <div className="form-row">
-                                                    <label className="checkbox-label">
-                                                        <input type="checkbox" checked={editForm.isPregnant || false} onChange={(e) => setEditForm({...editForm, isPregnant: e.target.checked})} />
-                                                        Pregnant
-                                                    </label>
-                                                </div>
-                                            )}
-                                            {['Female', 'Intersex', 'Unknown'].includes(editForm.gender) && (
-                                                <div className="form-row">
-                                                    <label className="checkbox-label">
-                                                        <input type="checkbox" checked={editForm.isNursing || false} onChange={(e) => setEditForm({...editForm, isNursing: e.target.checked})} />
-                                                        Nursing
-                                                    </label>
-                                                </div>
-                                            )}
-                                            {editForm.gender === 'Male' && !editForm.isNeutered && !editForm.isInfertile && (
-                                                <div className="form-row">
-                                                    <label className="checkbox-label">
-                                                        <input type="checkbox" checked={editForm.isStudAnimal || false} onChange={(e) => setEditForm({...editForm, isStudAnimal: e.target.checked})} />
-                                                        Stud Animal
-                                                    </label>
-                                                </div>
-                                            )}
-                                            {editForm.gender === 'Female' && !editForm.isNeutered && !editForm.isInfertile && (
-                                                <div className="form-row">
-                                                    <label className="checkbox-label">
-                                                        <input type="checkbox" checked={editForm.isDamAnimal || false} onChange={(e) => setEditForm({...editForm, isDamAnimal: e.target.checked})} />
-                                                        Breeding Dam
-                                                    </label>
-                                                </div>
                                             )}
                                         </div>
-
-                                        {['Female', 'Intersex', 'Unknown'].includes(editForm.gender) && !editForm.isNeutered && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Estrus/Cycle</h4>
-                                                <div className="form-row">
-                                                    <label>Heat Status</label>
-                                                    <select value={editForm.heatStatus || ''} onChange={(e) => setEditForm({...editForm, heatStatus: e.target.value})}>
-                                                        <option value="">Select...</option>
-                                                        <option value="Pre-estrus">Pre-estrus</option>
-                                                        <option value="Estrus">Estrus</option>
-                                                        <option value="Post-estrus">Post-estrus</option>
-                                                        <option value="Anestrus">Anestrus</option>
-                                                    </select>
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Last Heat Date</label>
-                                                    <input type="date" value={editForm.lastHeatDate || ''} onChange={(e) => setEditForm({...editForm, lastHeatDate: e.target.value})} />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Ovulation Date</label>
-                                                    <input type="date" value={editForm.ovulationDate || ''} onChange={(e) => setEditForm({...editForm, ovulationDate: e.target.value})} />
-                                                </div>
-                                                {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                                    <div className="form-row">
-                                                        <label>Estrus Cycle Length (days)</label>
-                                                        <input type="number" value={editForm.estrusCycleLength || ''} onChange={(e) => setEditForm({...editForm, estrusCycleLength: e.target.value})} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {!editForm.isNeutered && !editForm.isInfertile && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Mating</h4>
-                                                <div className="form-row">
-                                                    <label>Mating Date</label>
-                                                    <input type="date" value={editForm.matingDates || ''} onChange={(e) => setEditForm({...editForm, matingDates: e.target.value})} />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Expected Due Date</label>
-                                                    <input type="date" value={editForm.expectedDueDate || ''} onChange={(e) => setEditForm({...editForm, expectedDueDate: e.target.value})} />
-                                                </div>
-                                                {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                                    <div className="form-row">
-                                                        <label className="checkbox-label">
-                                                            <input type="checkbox" checked={editForm.artificialInseminationUsed || false} onChange={(e) => setEditForm({...editForm, artificialInseminationUsed: e.target.checked})} />
-                                                            Artificial Insemination
-                                                        </label>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {['Male', 'Intersex', 'Unknown'].includes(editForm.gender) && !editForm.isNeutered && !editForm.isInfertile && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Stud Information</h4>
-                                                <div className="form-row">
-                                                    <label>Sire Fertility Status</label>
-                                                    <select value={editForm.fertilityStatus || ''} onChange={(e) => setEditForm({...editForm, fertilityStatus: e.target.value})}>
-                                                        <option value="">Select...</option>
-                                                        <option value="Unknown">Unknown</option>
-                                                        <option value="Fertile">Fertile</option>
-                                                        <option value="Subfertile">Subfertile</option>
-                                                    </select>
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Successful Matings</label>
-                                                    <input type="number" min="0" value={editForm.successfulMatings || ''} onChange={(e) => setEditForm({...editForm, successfulMatings: e.target.value})} />
-                                                </div>
-                                                <div className="form-row full-width">
-                                                    <label>Fertility Notes</label>
-                                                    <textarea rows={3} value={editForm.fertilityNotes || ''} onChange={(e) => setEditForm({...editForm, fertilityNotes: e.target.value})} />
-                                                </div>
-                                                {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                                    <>
-                                                        <div className="form-row full-width">
-                                                            <label>Reproductive Clearances</label>
-                                                            <textarea rows={2} value={editForm.reproductiveClearances || ''} onChange={(e) => setEditForm({...editForm, reproductiveClearances: e.target.value})} />
-                                                        </div>
-                                                        <div className="form-row full-width">
-                                                            <label>Reproductive Complications</label>
-                                                            <textarea rows={2} value={editForm.reproductiveComplications || ''} onChange={(e) => setEditForm({...editForm, reproductiveComplications: e.target.value})} />
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {['Female', 'Intersex', 'Unknown'].includes(editForm.gender) && !editForm.isNeutered && !editForm.isInfertile && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Dam Information</h4>
-                                                <div className="form-row">
-                                                    <label>Dam Fertility Status</label>
-                                                    <select value={editForm.damFertilityStatus || ''} onChange={(e) => setEditForm({...editForm, damFertilityStatus: e.target.value})}>
-                                                        <option value="">Select...</option>
-                                                        <option value="Unknown">Unknown</option>
-                                                        <option value="Fertile">Fertile</option>
-                                                        <option value="Subfertile">Subfertile</option>
-                                                    </select>
-                                                </div>
-                                                <div className="form-row full-width">
-                                                    <label>Dam Fertility Notes</label>
-                                                    <textarea rows={3} value={editForm.damFertilityNotes || ''} onChange={(e) => setEditForm({...editForm, damFertilityNotes: e.target.value})} />
-                                                </div>
-                                                {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                                    <>
-                                                        <div className="form-row">
-                                                            <label>Gestation Length (days)</label>
-                                                            <input type="number" value={editForm.gestationLength || ''} onChange={(e) => setEditForm({...editForm, gestationLength: e.target.value})} />
-                                                        </div>
-                                                        <div className="form-row">
-                                                            <label>Delivery Method</label>
-                                                            <select value={editForm.deliveryMethod || ''} onChange={(e) => setEditForm({...editForm, deliveryMethod: e.target.value})}>
-                                                                <option value="">Select...</option>
-                                                                <option value="Natural">Natural</option>
-                                                                <option value="C-Section">C-Section</option>
-                                                                <option value="Assisted">Assisted</option>
-                                                            </select>
-                                                        </div>
-                                                        {(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) === 'dog' && (
-                                                            <div className="form-row">
-                                                                <label>Whelping Date</label>
-                                                                <input type="date" value={editForm.whelpingDate || ''} onChange={(e) => setEditForm({...editForm, whelpingDate: e.target.value})} />
-                                                            </div>
-                                                        )}
-                                                        {(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) === 'cat' && (
-                                                            <div className="form-row">
-                                                                <label>Queening Date</label>
-                                                                <input type="date" value={editForm.queeningDate || ''} onChange={(e) => setEditForm({...editForm, queeningDate: e.target.value})} />
-                                                            </div>
-                                                        )}
-                                                        <div className="form-row full-width">
-                                                            <label>Reproductive Clearances</label>
-                                                            <textarea rows={2} value={editForm.reproductiveClearances || ''} onChange={(e) => setEditForm({...editForm, reproductiveClearances: e.target.value})} />
-                                                        </div>
-                                                        <div className="form-row full-width">
-                                                            <label>Reproductive Complications</label>
-                                                            <textarea rows={2} value={editForm.reproductiveComplications || ''} onChange={(e) => setEditForm({...editForm, reproductiveComplications: e.target.value})} />
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Breeding History</h4>
-                                            {['Male', 'Intersex', 'Unknown'].includes(editForm.gender) && (
-                                                <>
-                                                    <div className="form-row">
-                                                        <label>Last Mating Date</label>
-                                                        <input type="date" value={editForm.lastMatingDate || ''} onChange={(e) => setEditForm({...editForm, lastMatingDate: e.target.value})} />
-                                                    </div>
-                                                    <div className="form-row">
-                                                        <label>Successful Matings</label>
-                                                        <input type="number" min="0" value={editForm.successfulMatings || ''} onChange={(e) => setEditForm({...editForm, successfulMatings: e.target.value})} />
-                                                    </div>
-                                                </>
-                                            )}
-                                            {['Female', 'Intersex', 'Unknown'].includes(editForm.gender) && (
-                                                <>
-                                                    <div className="form-row">
-                                                        <label>Last Pregnancy Date</label>
-                                                        <input type="date" value={editForm.lastPregnancyDate || ''} onChange={(e) => setEditForm({...editForm, lastPregnancyDate: e.target.value})} />
-                                                    </div>
-                                                    <div className="form-row">
-                                                        <label>Litter Count</label>
-                                                        <input type="number" min="0" value={editForm.litterCount || ''} onChange={(e) => setEditForm({...editForm, litterCount: e.target.value})} />
-                                                    </div>
-                                                </>
-                                            )}
-                                            <div className="form-row">
-                                                <label>Total Offspring</label>
-                                                <input type="number" min="0" value={editForm.offspringCount || ''} onChange={(e) => setEditForm({...editForm, offspringCount: e.target.value})} />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
-                            )}
-
-                            {/* Tab 7: Health */}
-                            {editActiveTab === 'health' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Health Status</h4>
-                                            <div className="form-row">
-                                                <label>Health Status</label>
-                                                <input type="text" value={editForm.healthStatus || ''} onChange={(e) => setEditForm({...editForm, healthStatus: e.target.value})} placeholder="Overall health condition" />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Health Issues</label>
-                                                <input type="text" value={editForm.healthIssues || ''} onChange={(e) => setEditForm({...editForm, healthIssues: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Preventive Care</h4>
-                                            <div className="form-row full-width">
-                                                <label>Vaccinations</label>
-                                                <textarea rows={3} value={editForm.vaccinations || ''} onChange={(e) => setEditForm({...editForm, vaccinations: e.target.value})} placeholder="Vaccination records..." />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Deworming Records</label>
-                                                <textarea rows={3} value={editForm.dewormingRecords || ''} onChange={(e) => setEditForm({...editForm, dewormingRecords: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Parasite Control</label>
-                                                <textarea rows={2} value={editForm.parasiteControl || ''} onChange={(e) => setEditForm({...editForm, parasiteControl: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Parasite Prevention Schedule</label>
-                                                <textarea rows={2} value={editForm.parasitePreventionSchedule || ''} onChange={(e) => setEditForm({...editForm, parasitePreventionSchedule: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Medical Records</h4>
-                                            <div className="form-row full-width">
-                                                <label>Medical Conditions</label>
-                                                <textarea rows={3} value={editForm.medicalConditions || ''} onChange={(e) => setEditForm({...editForm, medicalConditions: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Allergies</label>
-                                                <textarea rows={2} value={editForm.allergies || ''} onChange={(e) => setEditForm({...editForm, allergies: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Current Medications</label>
-                                                <textarea rows={2} value={editForm.medications || ''} onChange={(e) => setEditForm({...editForm, medications: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Medical History</label>
-                                                <textarea rows={3} value={editForm.medicalHistory || ''} onChange={(e) => setEditForm({...editForm, medicalHistory: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Chronic Conditions</label>
-                                                <textarea rows={2} value={editForm.chronicConditions || ''} onChange={(e) => setEditForm({...editForm, chronicConditions: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Health Clearances & Screening</h4>
-                                                <div className="form-row">
-                                                    <label>Spay/Neuter Date</label>
-                                                    <input type="date" value={editForm.spayNeuterDate || ''} onChange={(e) => setEditForm({...editForm, spayNeuterDate: e.target.value})} />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Heartworm Status</label>
-                                                    <select value={editForm.heartwormStatus || ''} onChange={(e) => setEditForm({...editForm, heartwormStatus: e.target.value})}>
-                                                        <option value="">Select...</option>
-                                                        <option value="Negative">Negative</option>
-                                                        <option value="Positive">Positive</option>
-                                                        <option value="On Prevention">On Prevention</option>
-                                                        <option value="Unknown">Unknown</option>
-                                                    </select>
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Hip/Elbow Scores</label>
-                                                    <input type="text" value={editForm.hipElbowScores || ''} onChange={(e) => setEditForm({...editForm, hipElbowScores: e.target.value})} placeholder="e.g., OFA Good, PennHIP 0.32" />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Eye Clearance</label>
-                                                    <input type="text" value={editForm.eyeClearance || ''} onChange={(e) => setEditForm({...editForm, eyeClearance: e.target.value})} placeholder="e.g., CAER Clear 2024" />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Cardiac Clearance</label>
-                                                    <input type="text" value={editForm.cardiacClearance || ''} onChange={(e) => setEditForm({...editForm, cardiacClearance: e.target.value})} placeholder="e.g., OFA Cardiac Normal" />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Dental Records</label>
-                                                    <input type="text" value={editForm.dentalRecords || ''} onChange={(e) => setEditForm({...editForm, dentalRecords: e.target.value})} placeholder="e.g., Last cleaning 01/2024" />
-                                                </div>
-                                                <div className="form-row full-width">
-                                                    <label>Genetic Test Results</label>
-                                                    <textarea rows={2} value={editForm.geneticTestResults || ''} onChange={(e) => setEditForm({...editForm, geneticTestResults: e.target.value})} />
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Veterinary Care</h4>
-                                            <div className="form-row">
-                                                <label>Primary Veterinarian</label>
-                                                <input type="text" value={editForm.primaryVet || ''} onChange={(e) => setEditForm({...editForm, primaryVet: e.target.value})} placeholder="e.g., Dr. Smith, ABC Veterinary Clinic" />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Vet Visits</label>
-                                                <textarea rows={3} value={editForm.vetVisits || ''} onChange={(e) => setEditForm({...editForm, vetVisits: e.target.value})} placeholder="Veterinary visit records..." />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Laboratory Results</label>
-                                                <input type="text" value={editForm.laboratoryResults || ''} onChange={(e) => setEditForm({...editForm, laboratoryResults: e.target.value})} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 8: Husbandry */}
-                            {editActiveTab === 'husbandry' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Nutrition</h4>
-                                            <div className="form-row full-width">
-                                                <label>Diet Type</label>
-                                                <textarea rows={3} value={editForm.dietType || ''} onChange={(e) => setEditForm({...editForm, dietType: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Feeding Schedule</label>
-                                                <textarea rows={3} value={editForm.feedingSchedule || ''} onChange={(e) => setEditForm({...editForm, feedingSchedule: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Supplements</label>
-                                                <textarea rows={2} value={editForm.supplements || ''} onChange={(e) => setEditForm({...editForm, supplements: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Husbandry</h4>
-                                            <div className="form-row full-width">
-                                                <label>Housing Type</label>
-                                                <textarea rows={3} value={editForm.housingType || ''} onChange={(e) => setEditForm({...editForm, housingType: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Bedding</label>
-                                                <textarea rows={2} value={editForm.bedding || ''} onChange={(e) => setEditForm({...editForm, bedding: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Enrichment</label>
-                                                <textarea rows={2} value={editForm.enrichment || ''} onChange={(e) => setEditForm({...editForm, enrichment: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Environment</h4>
-                                            <div className="form-row">
-                                                <label>Temperature Range</label>
-                                                <input type="text" value={editForm.temperatureRange || ''} onChange={(e) => setEditForm({...editForm, temperatureRange: e.target.value})} placeholder="e.g. 20-24°C" />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Humidity</label>
-                                                <input type="text" value={editForm.humidity || ''} onChange={(e) => setEditForm({...editForm, humidity: e.target.value})} placeholder="e.g. 40-60%" />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Lighting</label>
-                                                <input type="text" value={editForm.lighting || ''} onChange={(e) => setEditForm({...editForm, lighting: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>Noise Level</label>
-                                                <input type="text" value={editForm.noise || ''} onChange={(e) => setEditForm({...editForm, noise: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Exercise & Grooming</h4>
-                                                <div className="form-row">
-                                                    <label>Exercise Requirements</label>
-                                                    <select value={editForm.exerciseRequirements || ''} onChange={(e) => setEditForm({...editForm, exerciseRequirements: e.target.value})}>
-                                                        <option value="">Select...</option>
-                                                        <option value="Low">Low</option>
-                                                        <option value="Moderate">Moderate</option>
-                                                        <option value="High">High</option>
-                                                        <option value="Very High">Very High</option>
-                                                    </select>
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Daily Exercise (minutes)</label>
-                                                    <input type="number" value={editForm.dailyExerciseMinutes || ''} onChange={(e) => setEditForm({...editForm, dailyExerciseMinutes: e.target.value})} />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Grooming Needs</label>
-                                                    <select value={editForm.groomingNeeds || ''} onChange={(e) => setEditForm({...editForm, groomingNeeds: e.target.value})}>
-                                                        <option value="">Select...</option>
-                                                        <option value="Low">Low</option>
-                                                        <option value="Moderate">Moderate</option>
-                                                        <option value="High">High</option>
-                                                        <option value="Professional">Professional</option>
-                                                    </select>
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Shedding Level</label>
-                                                    <select value={editForm.sheddingLevel || ''} onChange={(e) => setEditForm({...editForm, sheddingLevel: e.target.value})}>
-                                                        <option value="">Select...</option>
-                                                        <option value="None">None</option>
-                                                        <option value="Low">Low</option>
-                                                        <option value="Moderate">Moderate</option>
-                                                        <option value="Heavy">Heavy</option>
-                                                        <option value="Seasonal">Seasonal</option>
-                                                    </select>
-                                                </div>
-                                                <div className="form-row">
-                                                    <label className="checkbox-label">
-                                                        <input type="checkbox" checked={editForm.crateTrained || false} onChange={(e) => setEditForm({...editForm, crateTrained: e.target.checked})} />
-                                                        Crate Trained
-                                                    </label>
-                                                </div>
-                                                {(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) === 'cat' && (
-                                                    <div className="form-row">
-                                                        <label className="checkbox-label">
-                                                            <input type="checkbox" checked={editForm.litterTrained || false} onChange={(e) => setEditForm({...editForm, litterTrained: e.target.checked})} />
-                                                            Litter Trained
-                                                        </label>
-                                                    </div>
-                                                )}
-                                                {(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) === 'dog' && (
-                                                    <div className="form-row">
-                                                        <label className="checkbox-label">
-                                                            <input type="checkbox" checked={editForm.leashTrained || false} onChange={(e) => setEditForm({...editForm, leashTrained: e.target.checked})} />
-                                                            Leash Trained
-                                                        </label>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 9: Behavior */}
-                            {editActiveTab === 'behavior' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Behavior</h4>
-                                            <div className="form-row full-width">
-                                                <label>Temperament</label>
-                                                <textarea rows={3} value={editForm.temperament || ''} onChange={(e) => setEditForm({...editForm, temperament: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Handling Tolerance</label>
-                                                <textarea rows={2} value={editForm.handlingTolerance || ''} onChange={(e) => setEditForm({...editForm, handlingTolerance: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Social Structure</label>
-                                                <textarea rows={2} value={editForm.socialStructure || ''} onChange={(e) => setEditForm({...editForm, socialStructure: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Activity</h4>
-                                            <div className="form-row">
-                                                <label>Activity Cycle</label>
-                                                <select value={editForm.activityCycle || ''} onChange={(e) => setEditForm({...editForm, activityCycle: e.target.value})}>
-                                                    <option value="">Select...</option>
-                                                    <option value="Diurnal">Diurnal</option>
-                                                    <option value="Nocturnal">Nocturnal</option>
-                                                    <option value="Crepuscular">Crepuscular</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Training & Working</h4>
-                                                <div className="form-row">
-                                                    <label>Training Level</label>
-                                                    <select value={editForm.trainingLevel || ''} onChange={(e) => setEditForm({...editForm, trainingLevel: e.target.value})}>
-                                                        <option value="">Select...</option>
-                                                        <option value="None">None</option>
-                                                        <option value="Basic">Basic</option>
-                                                        <option value="Intermediate">Intermediate</option>
-                                                        <option value="Advanced">Advanced</option>
-                                                        <option value="Competition">Competition</option>
-                                                    </select>
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Training Disciplines</label>
-                                                    <input type="text" value={editForm.trainingDisciplines || ''} onChange={(e) => setEditForm({...editForm, trainingDisciplines: e.target.value})} />
-                                                </div>
-                                                <div className="form-row">
-                                                    <label>Working Role</label>
-                                                    <input type="text" value={editForm.workingRole || ''} onChange={(e) => setEditForm({...editForm, workingRole: e.target.value})} />
-                                                </div>
-                                                <div className="form-row full-width">
-                                                    <label>Certifications</label>
-                                                    <textarea rows={2} value={editForm.certifications || ''} onChange={(e) => setEditForm({...editForm, certifications: e.target.value})} />
-                                                </div>
-                                                <div className="form-row full-width">
-                                                    <label>Behavioral Issues</label>
-                                                    <textarea rows={2} value={editForm.behavioralIssues || ''} onChange={(e) => setEditForm({...editForm, behavioralIssues: e.target.value})} />
-                                                </div>
-                                                <div className="form-row full-width">
-                                                    <label>Bite History</label>
-                                                    <textarea rows={2} value={editForm.biteHistory || ''} onChange={(e) => setEditForm({...editForm, biteHistory: e.target.value})} />
-                                                </div>
-                                                <div className="form-row full-width">
-                                                    <label>Reactivity Notes</label>
-                                                    <textarea rows={2} value={editForm.reactivityNotes || ''} onChange={(e) => setEditForm({...editForm, reactivityNotes: e.target.value})} />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 10: Records */}
-                            {editActiveTab === 'records' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Remarks & Notes</h4>
-                                            <div className="form-row full-width">
-                                                <label>Remarks</label>
-                                                <textarea rows={5} value={editForm.remarks || ''} onChange={(e) => setEditForm({...editForm, remarks: e.target.value})} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 11: End of Life */}
-                            {editActiveTab === 'endoflife' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">End of Life</h4>
-                                            <div className="form-row">
-                                                <label>Date of Death</label>
-                                                <input type="date" value={editForm.deceasedDate || ''} onChange={(e) => setEditForm({...editForm, deceasedDate: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Cause of Death</label>
-                                                <textarea rows={2} value={editForm.causeOfDeath || ''} onChange={(e) => setEditForm({...editForm, causeOfDeath: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Necropsy Results</label>
-                                                <textarea rows={3} value={editForm.necropsyResults || ''} onChange={(e) => setEditForm({...editForm, necropsyResults: e.target.value})} />
-                                            </div>
-                                            {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                                <div className="form-row full-width">
-                                                    <label>End of Life Care Notes</label>
-                                                    <textarea rows={2} value={editForm.endOfLifeCareNotes || ''} onChange={(e) => setEditForm({...editForm, endOfLifeCareNotes: e.target.value})} />
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Legal / Administrative</h4>
-                                            <div className="form-row full-width">
-                                                <label>Insurance</label>
-                                                <textarea rows={2} value={editForm.insurance || ''} onChange={(e) => setEditForm({...editForm, insurance: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Legal Status</label>
-                                                <textarea rows={2} value={editForm.legalStatus || ''} onChange={(e) => setEditForm({...editForm, legalStatus: e.target.value})} />
-                                            </div>
-                                            {['dog', 'cat'].includes(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) && (
-                                                <>
-                                                    <div className="form-row full-width">
-                                                        <label>Breeding Restrictions</label>
-                                                        <textarea rows={2} value={editForm.breedingRestrictions || ''} onChange={(e) => setEditForm({...editForm, breedingRestrictions: e.target.value})} />
-                                                    </div>
-                                                    <div className="form-row full-width">
-                                                        <label>Export Restrictions</label>
-                                                        <textarea rows={2} value={editForm.exportRestrictions || ''} onChange={(e) => setEditForm({...editForm, exportRestrictions: e.target.value})} />
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 12: Show */}
-                            {editActiveTab === 'show' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Show Titles & Ratings</h4>
-                                            <div className="form-row full-width">
-                                                <label>Show Titles</label>
-                                                <textarea rows={3} value={editForm.showTitles || ''} onChange={(e) => setEditForm({...editForm, showTitles: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Show Ratings</label>
-                                                <textarea rows={3} value={editForm.showRatings || ''} onChange={(e) => setEditForm({...editForm, showRatings: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Judge Comments</label>
-                                                <textarea rows={4} value={editForm.judgeComments || ''} onChange={(e) => setEditForm({...editForm, judgeComments: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        {(editForm.species?.toLowerCase() || selectedAnimal.species?.toLowerCase()) === 'dog' && (
-                                            <div className="form-section">
-                                                <h4 className="section-title">Working & Performance</h4>
-                                                <div className="form-row full-width">
-                                                    <label>Working Titles</label>
-                                                    <textarea rows={3} value={editForm.workingTitles || ''} onChange={(e) => setEditForm({...editForm, workingTitles: e.target.value})} />
-                                                </div>
-                                                <div className="form-row full-width">
-                                                    <label>Performance Scores</label>
-                                                    <textarea rows={3} value={editForm.performanceScores || ''} onChange={(e) => setEditForm({...editForm, performanceScores: e.target.value})} />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 13: Legal */}
-                            {editActiveTab === 'legal' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Licensing & Permits</h4>
-                                            <div className="form-row">
-                                                <label>License Number</label>
-                                                <input type="text" value={editForm.licenseNumber || ''} onChange={(e) => setEditForm({...editForm, licenseNumber: e.target.value})} />
-                                            </div>
-                                            <div className="form-row">
-                                                <label>License Jurisdiction</label>
-                                                <input type="text" value={editForm.licenseJurisdiction || ''} onChange={(e) => setEditForm({...editForm, licenseJurisdiction: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Legal & Administrative</h4>
-                                            <div className="form-row full-width">
-                                                <label>Insurance</label>
-                                                <textarea rows={3} value={editForm.insurance || ''} onChange={(e) => setEditForm({...editForm, insurance: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Legal Status</label>
-                                                <textarea rows={3} value={editForm.legalStatus || ''} onChange={(e) => setEditForm({...editForm, legalStatus: e.target.value})} />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-section">
-                                            <h4 className="section-title">Restrictions</h4>
-                                            <div className="form-row full-width">
-                                                <label>Breeding Restrictions</label>
-                                                <textarea rows={3} value={editForm.breedingRestrictions || ''} onChange={(e) => setEditForm({...editForm, breedingRestrictions: e.target.value})} />
-                                            </div>
-                                            <div className="form-row full-width">
-                                                <label>Export Restrictions</label>
-                                                <textarea rows={3} value={editForm.exportRestrictions || ''} onChange={(e) => setEditForm({...editForm, exportRestrictions: e.target.value})} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Tab 14: Gallery */}
-                            {editActiveTab === 'gallery' && (
-                                <div className="tab-panel">
-                                    <div className="edit-form">
-                                        <div className="form-section">
-                                            <h4 className="section-title">Photo Gallery</h4>
-                                            <p style={{fontSize: '14px', color: '#6b7280', marginBottom: '15px'}}>
-                                                Extra images for this animal. Currently {(editForm.extraImages || []).length} / 20 photos.
-                                            </p>
-                                            <div style={{background: '#f9fafb', border: '1px solid #d1d5db', borderRadius: '8px', padding: '20px', textAlign: 'center'}}>
-                                                <p style={{color: '#9ca3af', fontSize: '14px'}}>
-                                                    📷 Gallery management (add/remove photos) is handled through the standard animal edit interface.
-                                                </p>
-                                                <p style={{color: '#9ca3af', fontSize: '12px', marginTop: '10px'}}>
-                                                    Moderators can view gallery photos in the View tab but cannot modify them here.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
                             </div>
 
-                            {/* Edit Reason (shown on all tabs) */}
-                            <div className="edit-form">
-                                <div className="form-row full-width">
-                                    <label>Reason for Edit *</label>
-                                    <input
-                                        type="text"
-                                        value={editReason}
-                                        onChange={(e) => setEditReason(e.target.value)}
-                                        placeholder="Why are you making this edit?"
-                                    />
-                                </div>
+                            <div className="form-row full-width">
+                                <label>Reason for Change *</label>
+                                <input
+                                    type="text"
+                                    value={ownerChangeReason}
+                                    onChange={(e) => setOwnerChangeReason(e.target.value)}
+                                    placeholder="Why are these changes being made?"
+                                />
                             </div>
 
                             <div className="modal-actions">
-                                <button className="btn-secondary" onClick={() => setShowEditModal(false)}>
-                                    Cancel
+                                <button
+                                    className="btn-secondary"
+                                    disabled={savingOwnerChange}
+                                    onClick={() => { setShowEditModal(false); setShowOwnerChangeScreen(false); setSelectedAnimal(null); }}
+                                >
+                                    <ArrowLeft size={14} /> Cancel
                                 </button>
-                                <button className="btn-primary" onClick={handleSaveEdit}>
-                                    Save Changes
+                                <button className="btn-primary" disabled={savingOwnerChange} onClick={handleFinalAdminSave}>
+                                    <Save size={14} /> {savingOwnerChange ? 'Saving...' : 'Save'}
                                 </button>
                             </div>
                         </div>

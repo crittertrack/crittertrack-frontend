@@ -1420,7 +1420,9 @@ const AnimalFormModalV2 = ({
     handleWithdrawTransfer,
     speciesOptions = [],
     GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'], // NOSONAR
-    STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']
+    STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'],
+    submitLabel,
+    submitIcon
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(false);
@@ -6805,8 +6807,8 @@ const AnimalFormModalV2 = ({
                             })()}
                         </div>
                         <button type="submit" disabled={loading} className="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50">
-                            {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                            <span>{loading ? 'Saving...' : 'Save Animal'}</span>
+                            {loading ? <Loader2 size={18} className="animate-spin" /> : (submitIcon || <Save size={18} />)}
+                            <span>{loading ? 'Saving...' : (submitLabel || 'Save Animal')}</span>
                         </button>
                     </div>
                 </div>
