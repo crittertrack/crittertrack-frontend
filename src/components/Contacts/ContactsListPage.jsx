@@ -63,6 +63,13 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
             filtered = filtered.filter(c => c.address?.country === countryFilter);
         }
 
+        // Keep active contacts above retired breeders regardless of updatedAt order
+        filtered.sort((a, b) => {
+            const aRetired = a.isBreeder && (a.breederStatus || 'active') === 'retired' ? 1 : 0;
+            const bRetired = b.isBreeder && (b.breederStatus || 'active') === 'retired' ? 1 : 0;
+            return aRetired - bRetired;
+        });
+
         setFilteredContacts(filtered);
     };
 
