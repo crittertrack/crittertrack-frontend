@@ -1478,8 +1478,18 @@ const MORE_PAGES_LESSONS = [
     steps: [
       {
         stepNumber: 1,
-        title: 'Finding a pairing for a specific trait',
-        content: 'Choose a species and a target genetic outcome, and it searches your own animals for sire/dam pairings likely to produce that specific trait or outcome.',
+        title: 'Adding traits',
+        content: 'Pick a species, then switch to "Visual Traits" mode — a dropdown appears for each trait group, letting you build your desired outcome by picking one option per group (e.g. a Base Color, then optionally a dilute). Some traits automatically select their required dependencies for you.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Or entering a genetic code',
+        content: 'Prefer to type it directly? Switch to "Genetic Code" mode instead and enter the exact allele combination you want (e.g. "a/a d/d e/e"), rather than picking traits from dropdowns.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Viewing results',
+        content: '"Find Potential Pairings" searches your own animals with recorded genetic codes and lists every sire/dam pair that could produce the target outcome, grouped into High (>50%), Medium (10–50%), and Low (<10%) probability. Expand any pairing to see each parent\'s full genotype, with the loci responsible for the outcome bolded.',
       },
     ],
   },
