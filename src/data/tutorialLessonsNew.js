@@ -1532,38 +1532,43 @@ const MORE_PAGES_LESSONS = [
     steps: [
       {
         stepNumber: 1,
+        title: 'Budget Tracker overview',
+        content: 'The currency selector at the top changes the symbol shown across the whole page — it doesn\'t convert any values, just how they\'re displayed. "Add Transaction" is where every sale, purchase, expense, or income entry starts.',
+      },
+      {
+        stepNumber: 2,
         title: 'Choosing a transaction type',
         content: '"Add Transaction" first asks what kind you\'re logging: Animal Sale, Animal Purchase, Expense, or Income. These are manual log entries only — they don\'t transfer ownership. To actually transfer an animal to another user, use that animal\'s own "Transfer" button instead.',
       },
       {
-        stepNumber: 2,
+        stepNumber: 3,
         title: 'Logging an Animal Sale',
         content: 'Fields: Date, optional Price, an optional link to one of your animals (filter by species, then search by name/ID), a Buyer name, and optional Notes. If you link one of your own animals, saving asks whether to also mark it Rehomed and archive it — logging the sale alone doesn\'t change the animal\'s own status or move it out of your main list automatically.',
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
         title: 'Logging an Animal Purchase',
         content: 'Same fields as a Sale — Date, optional Price, an optional link to one of your animals, and Notes — but with a Seller name instead of a Buyer, and no follow-up prompt afterward.',
       },
       {
-        stepNumber: 4,
+        stepNumber: 5,
         title: 'Logging an Expense or Income',
         content: 'Both share the same fields too: Date, optional Price, a required Category (Food & Supplies, Housing & Bedding, Medical & Veterinary, Equipment & Setup, or Other), a required Description, and optional Notes. Unlike Sales/Purchases, these aren\'t linked to a specific animal.',
       },
       {
-        stepNumber: 5,
+        stepNumber: 6,
         title: 'Reading your totals',
         content: 'The summary cards above the list show Total Sales, Total Purchases, Net Profit/Loss (green if positive, orange if a loss), and Average Sale (total sales ÷ number of animals sold) — all recalculated instantly as your search/type/year filters below change.',
       },
       {
-        stepNumber: 6,
+        stepNumber: 7,
         title: 'Searching and filtering the list',
         content: 'Search matches animal name/ID, buyer/seller, description, category, or notes. "All Types" and "All Years" narrow the list further. Each row\'s pencil and trash icons edit or delete that transaction.',
       },
       {
-        stepNumber: 7,
+        stepNumber: 8,
         title: 'Exporting your records',
-        content: '"Export CSV" downloads whatever the search/type/year filters currently show (not necessarily your full history) as a spreadsheet-ready file. The currency selector next to it only changes the symbol displayed on this page — it doesn\'t convert values.',
+        content: '"Export CSV" downloads whatever the search/type/year filters currently show (not necessarily your full history) as a spreadsheet-ready file.',
       },
     ],
   },
