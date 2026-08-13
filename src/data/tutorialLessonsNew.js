@@ -1467,6 +1467,19 @@ const MORE_PAGES_LESSONS = [
         stepNumber: 1,
         title: 'Testing a hypothetical pairing',
         content: 'Filter by species, then choose a sire and dam to calculate the predicted Coefficient of Inbreeding for their potential offspring, based on shared ancestors. This is separate from the actual COI shown automatically on an already-linked animal\'s own Dashboard — use this calculator to test a pairing before it happens.',
+        screenshotCount: 2,
+      },
+    ],
+  },
+  {
+    id: 'target-outcome-calculator',
+    title: 'Target Outcome Calculator',
+    description: 'Finding a pairing from your own animals likely to produce a specific trait.',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Finding a pairing for a specific trait',
+        content: 'Choose a species and a target genetic outcome, and it searches your own animals for sire/dam pairings likely to produce that specific trait or outcome.',
       },
     ],
   },
@@ -1484,18 +1497,6 @@ const MORE_PAGES_LESSONS = [
         stepNumber: 2,
         title: 'Direct vs. Full mode',
         content: '"Direct" shows only the straight sire/dam ancestor line; "Full" expands the tree to show all known relatives at each generation.',
-      },
-    ],
-  },
-  {
-    id: 'target-outcome-calculator',
-    title: 'Target Outcome Calculator',
-    description: 'Finding a pairing from your own animals likely to produce a specific trait.',
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Finding a pairing for a specific trait',
-        content: 'Choose a species and a target genetic outcome, and it searches your own animals for sire/dam pairings likely to produce that specific trait or outcome.',
       },
     ],
   },
