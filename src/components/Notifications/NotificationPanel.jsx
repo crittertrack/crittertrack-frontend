@@ -97,6 +97,9 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
             showModalMessage('Rejected', 'Request rejected and link removed');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
+            // Reject clears breederId_public/sireId_public/damId_public on the animal —
+            // bust cached animal lists/open modals so they stop showing the stale assignment.
+            window.dispatchEvent(new Event('animals-changed'));
         } catch (error) {
             console.error('Error rejecting notification:', error);
             showModalMessage('Error', 'Failed to reject request');
