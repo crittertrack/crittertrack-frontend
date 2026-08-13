@@ -1488,8 +1488,18 @@ const MORE_PAGES_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Viewing results',
-        content: '"Find Potential Pairings" searches your own animals with recorded genetic codes and lists every sire/dam pair that could produce the target outcome, grouped into High (>50%), Medium (10–50%), and Low (<10%) probability. Expand any pairing to see each parent\'s full genotype, with the loci responsible for the outcome bolded.',
+        title: 'Running the search',
+        content: '"Find Potential Pairings" searches your own animals with recorded genetic codes and lists every sire/dam pair that could produce the target outcome. Results are grouped into collapsible sections — High (>50%), Medium (10–50%), and Low (<10%) probability — each showing a count of how many pairings fall in that range.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Reading a collapsed outcome card',
+        content: 'Each pairing starts collapsed, showing just the Sire and Dam\'s name and ID side by side, with their combined Chance percentage of producing the target outcome on the right. Click anywhere on the card to expand it.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Reading an expanded outcome card',
+        content: 'Expanding a card reveals the Sire Genotype and Dam Genotype in full — every locus each parent carries, in bold wherever that locus is one of the ones responsible for the target outcome, so you can see exactly which genes make that pairing likely to work.',
       },
     ],
   },
