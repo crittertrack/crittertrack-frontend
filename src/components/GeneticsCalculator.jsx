@@ -796,11 +796,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       }
     }
     
-    // Track what Ay is paired with
-    if (genotype.A === 'Ay/ae' || genotype.A === 'ae/Ay') carriers.push('Extreme Black');
-    else if (genotype.A === 'Ay/a' || genotype.A === 'a/Ay') carriers.push('Black');
-    else if (genotype.A === 'Ay/A' || genotype.A === 'A/Ay') carriers.push('Agouti');
-    else if (genotype.A === 'Ay/Avy' || genotype.A === 'Avy/Ay') carriers.push('Brindle');
+    // (Ay-pairing carriers were already recorded by the guarded tracking block above)
     
     // Handle brown + dilute + pink-eye combination
     if (isBrown && isDilute && isPinkEye) {
@@ -953,10 +949,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsAndTexture(phenotypeName), carriers, hidden, notes: [] };
     }
     
-    // Track what Avy is paired with
-    if (genotype.A === 'Avy/ae' || genotype.A === 'ae/Avy') carriers.push('Extreme Black');
-    else if (genotype.A === 'Avy/a' || genotype.A === 'a/Avy') carriers.push('Black');
-    else if (genotype.A === 'Avy/A' || genotype.A === 'A/Avy') carriers.push('Agouti');
+    // (Avy-pairing carriers were already recorded by the guarded tracking block above)
     
     // Determine if it's tan variant and modifiers
     const isTanVariant = genotype.A === 'Avy/at' || genotype.A === 'at/Avy';
