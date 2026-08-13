@@ -1218,20 +1218,30 @@ const LITTER_MANAGEMENT_LESSONS = [
       {
         stepNumber: 2,
         title: 'Dates and birth method',
-        content: 'Birth Date and Weaning Date are both date pickers (birth date can\'t be in the future). Once a birth date is set, a Birth Method dropdown appears: Natural, C-Section, Assisted, Induced, or Unknown.',
+        content: 'Birth Date and Weaning Date are both date pickers (birth date can\'t be in the future). Birth Method sits in the Breeding Information section alongside Mating Date and Expected Due Date, and is available from the start: Natural, C-Section, Assisted, Induced, or Unknown.',
       },
       {
         stepNumber: 3,
+        title: 'Breeding outcome',
+        content: 'A "Breeding Outcome" dropdown in the Breeding Information section tracks whether the pairing was Successful, Unsuccessful, or Unknown — separate from the litter\'s status badge, so you can flag a mating as unsuccessful without deleting the record.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Recording a lost pregnancy',
+        content: 'If a dam was mated but never produced a litter, check "Pregnancy confirmed but no litter produced" (only shown once a Mating Date is set and no Birth Date exists yet). This reveals a Reason dropdown — Cannibalized, All Stillborn, Reabsorbed, or Unknown — plus an optional Notes field for extra detail.',
+      },
+      {
+        stepNumber: 5,
         title: 'Gender counts and total born',
         content: 'Male, Female, and Unknown fields track the gender breakdown. Total Born is read-only and auto-calculates as the largest of: your manual entry, the M+F+U sum, or however many offspring are actually linked — so it can never drop below what\'s already linked.',
       },
       {
-        stepNumber: 4,
+        stepNumber: 6,
         title: 'Stillborn and losses',
         content: 'Checking "Extract stillborn from total counts" (or the equivalent for losses) subtracts gender-specific stillborn/loss entries from your M/F/U counts automatically, so the same offspring aren\'t double-counted as both born and lost. Weaned count is a separate, fully manual field.',
       },
       {
-        stepNumber: 5,
+        stepNumber: 7,
         title: 'Notes and photos',
         content: 'Notes is a free-text field for anything worth remembering about the litter. Up to 5 photos can be attached (PNG/JPEG, 500 KB max each) — hover a thumbnail to delete it, and in the expanded card view you can click any photo for a fullscreen lightbox with a download button.',
       },
