@@ -1619,7 +1619,7 @@ const MORE_PAGES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Acting on a notification',
-        content: 'Accept or decline requests directly from the panel, or delete any notification you no longer need.',
+        content: 'Transfer and view-only requests get full Accept/Decline buttons. Breeder, parent (sire/dam), and link requests only show Reject/Acknowledge instead — that\'s because the assignment is applied automatically as soon as the request is sent, so there\'s nothing to "accept". Rejecting one of these is what actually undoes it, clearing the breeder or sire/dam link back off the animal; Acknowledge just clears it from your pending list and leaves the assignment as-is.',
       },
     ],
   },

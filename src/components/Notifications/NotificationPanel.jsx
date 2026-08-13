@@ -358,11 +358,13 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                             <span>Reject</span>
                                                         </button>
                                                         <button
-                                                            onClick={() => handleDelete(notification._id)}
-                                                            className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                                            onClick={() => handleApprove(notification._id)}
+                                                            disabled={processing === notification._id}
+                                                            title="The link is already in effect — this just clears it from your pending list."
+                                                            className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
                                                         >
-                                                            <Trash2 size={14} />
-                                                            <span>Delete</span>
+                                                            <CheckCircle size={14} />
+                                                            <span>Acknowledge</span>
                                                         </button>
                                                     </>
                                                 )}
@@ -378,11 +380,13 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                             <span>Reject</span>
                                                         </button>
                                                         <button
-                                                            onClick={() => handleDelete(notification._id)}
-                                                            className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+                                                            onClick={() => handleApprove(notification._id)}
+                                                            disabled={processing === notification._id}
+                                                            title="The link is already in effect — this just clears it from your pending list."
+                                                            className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
                                                         >
-                                                            <Trash2 size={14} />
-                                                            <span>Delete</span>
+                                                            <CheckCircle size={14} />
+                                                            <span>Acknowledge</span>
                                                         </button>
                                                     </>
                                                 )}
