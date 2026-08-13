@@ -1429,12 +1429,32 @@ const MORE_PAGES_LESSONS = [
   {
     id: 'offspring-calculator',
     title: 'Offspring Calculator',
-    description: 'Predicting possible offspring outcomes for a hypothetical pairing.',
+    description: 'Predicting possible offspring outcomes for a pairing — hypothetical or using your own animals.',
     steps: [
       {
         stepNumber: 1,
-        title: 'Predicting offspring outcomes',
-        content: 'Pick a species, then set a sire and dam\'s genetic traits to predict possible offspring outcomes and their probabilities — this is purely hypothetical trait math, not tied to two of your actual animals.',
+        title: 'Picking a species and setting traits',
+        content: 'Choose a species (Fancy Mouse is fully supported today; others are listed but not yet calculable). For each locus dropdown under Sire/Father and Dam/Mother, pick a genotype combination — the box below each parent updates live with their calculated Phenotype, Genotype, and any Carried/Hidden traits.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Selecting your own animals',
+        content: 'If you\'re logged in and own animals of that species, a "Select Animal" button appears next to Sire/Father and Dam/Mother — pick one of your actual animals to pull in its own known genetic traits instead of entering them by hand.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Calculating offspring',
+        content: '"Calculate Offspring" (enabled once both parents have at least one trait set) lists every possible offspring phenotype with its probability percentage — expand any phenotype to see the individual genotypes that make it up.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Reading an offspring card',
+        content: 'Each card shows a phenotype name and its probability percentage, plus an italic Note for anything unusual about that outcome. Click the "X genotypes" button to expand a Possible Carriers callout (hidden recessive genes some offspring may carry) and the full list of individual genotype combinations behind that phenotype. "Report Issue" (while logged in) flags a phenotype result that looks wrong or unknown.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Viewing genetics examples',
+        content: 'For Fancy Mouse, "View Examples" opens a separate reference view of common named varieties and their genotypes, grouped into tabs — handy for looking up a variety\'s genetic makeup without running your own calculation.',
       },
     ],
   },
