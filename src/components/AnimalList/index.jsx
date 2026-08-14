@@ -23,6 +23,7 @@ import DatePicker from '../DatePicker';
 import EnclosureModal from '../EnclosureModal';
 import LocationManagerModal from './LocationManagerModal';
 import AssignHealthStatusModal from './AssignHealthStatusModal';
+import { SpeciesPickerModal } from '../Modals/SpeciesModals';
 
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
@@ -5242,92 +5243,6 @@ useEffect(() => {
           <span className="text-gray-600 dark:text-dark-text-secondary">Loading...</span>
         </div>
     );
-
-    const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) => {
-        const categories = ['All', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
-        const [search, setSearch] = useState('');
-        const [cat, setCat] = useState('All');
-        const [favorites, setFavorites] = useState(() => {
-            try { return JSON.parse(localStorage.getItem('speciesFavorites') || '[]'); } catch { return []; }
-        });
-    
-        const toggleFavorite = (e, name) => {
-            e.stopPropagation();
-            setFavorites(prev => {
-                const next = prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name];
-                localStorage.setItem('speciesFavorites', JSON.stringify(next));
-                window.dispatchEvent(new CustomEvent('speciesFavoritesChanged', { detail: next }));
-                return next;
-            });
-        };
-    
-        const filtered = speciesOptions
-            .filter(s => {
-                const matchesCat = cat === 'All' || s.category === cat;
-                const matchesSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.latinName && s.latinName.toLowerCase().includes(search.toLowerCase()));
-                return matchesCat && matchesSearch;
-            })
-            .sort((a, b) => {
-                const aFav = favorites.includes(a.name);
-                const bFav = favorites.includes(b.name);
-                if (aFav && !bFav) return -1;
-                if (!aFav && bFav) return 1;
-                if (a.isDefault && !b.isDefault) return -1;
-                if (!a.isDefault && b.isDefault) return 1;
-                return a.name.localeCompare(b.name);
-            });
-    
-        const favCount = filtered.filter(s => favorites.includes(s.name)).length;
-    
-        return (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
-                    <div className="flex justify-between items-center border-b dark:border-dark-text-muted p-4 flex-shrink-0">
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-dark-text">Select Species</h3>
-                        <button onClick={onClose} className="text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={22} /></button>
-                    </div>
-                    <div className="p-4 border-b dark:border-dark-text-muted flex-shrink-0 space-y-3">
-                        <div className="relative">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
-                            <input type="text" placeholder="Search by name or latin name..." value={search} onChange={e => setSearch(e.target.value)} autoFocus className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-dark-text-muted rounded-lg text-sm bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted focus:ring-2 focus:ring-primary focus:border-transparent" />
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                            {categories.map(c => ( <button key={c} type="button" onClick={() => setCat(c)} className={`px-3 py-1 text-xs font-semibold rounded-full transition ${ cat === c ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-100 dark:bg-dark-card-bg text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover' }`}>{c}</button>))}
-                        </div>
-                    </div>
-                    <div className="flex-grow overflow-y-auto p-4">
-                        {favCount > 0 && !search && ( <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-2 flex items-center gap-1"><Star size={11} className="fill-current" /> Favourites</p>)}
-                        {filtered.length === 0 ? ( <p className="text-center text-gray-500 dark:text-dark-text-muted py-8">No species found.</p> ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                {filtered.map((s, idx) => {
-                                    const isFav = favorites.includes(s.name);
-                                    const prevFav = idx > 0 && favorites.includes(filtered[idx - 1].name);
-                                    const showDivider = !search && !isFav && prevFav;
-                                    return (
-                                        <React.Fragment key={s._id || s.name}>
-                                            {showDivider && ( <div className="col-span-full border-t border-gray-200 dark:border-dark-text-muted my-1" /> )}
-                                            <div className="relative group">
-                                                <button type="button" onClick={() => onSelect(s.name)} className={`w-full h-20 flex flex-col items-start justify-center p-2 border-2 rounded-lg text-left transition hover:shadow-md relative ${ isFav ? 'border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50' : s.isDefault ? 'border-primary bg-primary/10 hover:bg-primary/20' : 'border-gray-200 dark:border-dark-text-muted bg-white dark:bg-dark-card-bg hover:border-primary/50 hover:bg-gray-50 dark:hover:bg-dark-surface-hover' }`}>
-                                                    <span className={`font-medium text-sm leading-tight pr-5 line-clamp-1 ${isFav ? 'text-amber-800 dark:text-amber-200' : 'text-gray-800 dark:text-dark-text'}`}>{s.name}</span>
-                                                    {s.latinName && ( <span className={`text-xs italic mt-0.5 leading-tight line-clamp-1 ${isFav ? 'text-amber-700 dark:text-amber-400' : 'text-gray-500 dark:text-dark-text-muted'}`}>{s.latinName}</span> )}
-                                                    {s.category && ( <span className={`absolute bottom-1 left-2 ${isFav ? 'text-amber-600 dark:text-amber-500' : 'text-gray-400 dark:text-dark-text-muted'}`}>{s.category === 'Mammal' && <Cat size={12} />}{s.category === 'Reptile' && <Turtle size={12} />}{s.category === 'Bird' && <Bird size={12} />}{s.category === 'Amphibian' && <Worm size={12} />}{s.category === 'Fish' && <Fish size={12} />}{s.category === 'Invertebrate' && <Bug size={12} />}{s.category === 'Other' && <PawPrint size={12} />}</span>)}
-                                                </button>
-                                                <button type="button" onClick={e => toggleFavorite(e, s.name)} title={isFav ? 'Remove from favourites' : 'Add to favourites'} className={`absolute top-2 right-2 transition ${isFav ? 'text-amber-400 dark:text-amber-500 opacity-100' : 'text-gray-300 dark:text-dark-text-muted opacity-0 group-hover:opacity-100 hover:text-amber-400 dark:hover:text-amber-500'}`}><Star size={13} className={isFav ? 'fill-current' : ''} /></button>
-                                            </div>
-                                        </React.Fragment>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                    <div className="border-t dark:border-dark-text-muted p-3 flex-shrink-0 flex justify-between items-center">
-                        <span className="text-xs text-gray-400 dark:text-dark-text-muted">{filtered.length} species{favCount > 0 ? ` · ${favCount} favourited` : ''}</span>
-                        <button onClick={onClose} className="text-sm text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text transition">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     const ParentSearchModal = ({ title, currentId, onSelect, onClose, authToken, showModalMessage, API_BASE_URL, X, Search, Loader2, requiredGender, birthDate, species }) => {
         const [searchTerm, setSearchTerm] = useState('');
