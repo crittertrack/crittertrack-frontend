@@ -180,7 +180,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
     // Filter species by category and search
     const filteredSpecies = speciesOptions.filter(s => {
         const matchesCategory = categoryFilter === 'All' || (s.category && s.category === categoryFilter);
-        const matchesSearch = !searchTerm || (s.name && s.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesSearch = !searchTerm || (s.name && s.name.toLowerCase().includes(searchTerm.toLowerCase())) || (s.latinName && s.latinName.toLowerCase().includes(searchTerm.toLowerCase()));
         return matchesCategory && matchesSearch;
     });
     
@@ -455,7 +455,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
     // Filter species by category and search
     const filteredSpecies = speciesOptions.filter(s => {
         const matchesCategory = categoryFilter === 'All' || s.category === categoryFilter;
-        const matchesSearch = !searchTerm || s.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = !searchTerm || s.name.toLowerCase().includes(searchTerm.toLowerCase()) || (s.latinName && s.latinName.toLowerCase().includes(searchTerm.toLowerCase()));
         return matchesCategory && matchesSearch;
     });
     
@@ -510,7 +510,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
             <div className="mb-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3" data-tutorial-target="species-search-section">
                 <input
                     type="text"
-                    placeholder="Search species..."
+                    placeholder="Search by name or latin name..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="flex-1 p-2 border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted"
