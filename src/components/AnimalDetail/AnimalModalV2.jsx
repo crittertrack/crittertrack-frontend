@@ -337,7 +337,7 @@ const AnimalModalV2 = ({
                 {/* Header */}
                 <div className={`flex flex-col md:flex-row md:items-stretch p-3 md:p-6 pb-2 md:pb-4 border-b border-gray-200 dark:border-dark-border gap-3 md:gap-6`}>
                     {/* Left: Gallery */}
-                    <div className={`w-full md:w-1/4 h-64 sm:h-72 md:h-auto flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
+                    <div className={`w-full md:w-1/4 h-64 sm:h-72 md:h-80 flex-col gap-2 ${isHeaderCollapsed ? 'hidden' : 'flex'}`}>
                         <div className="flex-grow bg-gray-100 dark:bg-dark-surface rounded-lg flex items-center justify-center overflow-hidden border border-gray-300 dark:border-dark-border">
                             {mainImage ? (
                                 <img 
