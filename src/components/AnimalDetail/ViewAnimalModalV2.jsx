@@ -206,16 +206,15 @@ const ViewAnimalModalV2 = ({
         run();
     }, [authToken, API_BASE_URL, animal?.id_public]);
 
-    // Fetch litters where this animal is sire or dam
+    // Fetch litters where this animal is sire or dam — includes litters registered by
+    // OTHER users using this animal, not just ones this user created themselves.
     useEffect(() => {
         if (!animal?.id_public || !authToken) return;
         let cancelled = false;
-        axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
+        axios.get(`${API_BASE_URL}/litters/for-animal/${animal.id_public}`, { headers: { Authorization: `Bearer ${authToken}` } })
             .then(res => {
                 if (cancelled) return;
-                const linked = (res.data || []).filter(l =>
-                    l.sireId_public === animal.id_public || l.damId_public === animal.id_public
-                );
+                const linked = res.data || [];
                 setAnimalLitters(linked);
                 linked.forEach(litter => {
                     const lid = litter.litter_id_public;
