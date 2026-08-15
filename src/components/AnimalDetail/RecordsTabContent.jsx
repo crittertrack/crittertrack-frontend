@@ -106,7 +106,7 @@ export const RecordsTabContent = ({ animal }) => {
                 {hasSale ? (
                     <dl className="space-y-4">
                         {animal.saleDate && <InfoItem label="Sale Date" value={formatDate(animal.saleDate)} />}
-                        {animal.salePriceAmount && <InfoItem label="Sale Price" value={`${animal.salePriceCurrency || ''} ${animal.salePriceAmount}`} />}
+                        {animal.salePrice && <InfoItem label="Sale Price" value={`${animal.saleRecordCurrency || ''} ${animal.salePrice}`} />}
                         {animal.saleLocation && <InfoItem label="Sale Location" value={animal.saleLocation} />}
                         {animal.buyerName && <InfoItem label="Buyer" value={animal.buyerName} />}
                         {animal.buyerContact && <InfoItem label="Buyer Contact" value={animal.buyerContact} />}

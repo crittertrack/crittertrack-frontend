@@ -2505,7 +2505,7 @@ const AnimalFormModalV2 = ({
             sellerContact: animalToEdit.sellerContact || '',
             saleDate: animalToEdit.saleDate ? new Date(animalToEdit.saleDate).toISOString().substring(0, 10) : '',
             salePrice: animalToEdit.salePrice || '',
-            salePriceCurrency: animalToEdit.salePriceCurrency || 'USD',
+            saleRecordCurrency: animalToEdit.saleRecordCurrency || 'USD',
             buyerName: animalToEdit.buyerName || '',
             buyerContact: animalToEdit.buyerContact || '',
             breedingRightsPurchased: animalToEdit.breedingRightsPurchased || '',
@@ -2719,7 +2719,7 @@ const AnimalFormModalV2 = ({
             sellerContact: '',
             saleDate: '',
             salePrice: '',
-            salePriceCurrency: 'USD',
+            saleRecordCurrency: 'USD',
             buyerName: '',
             buyerContact: '',
             breedingRightsPurchased: '',
@@ -3165,7 +3165,7 @@ const AnimalFormModalV2 = ({
                 addEvent('keeper', formData.purchaseDate, 'Animal Purchased', `Purchased for: ${formData.purchasePrice ? `${getCurrencySymbol(formData.purchasePriceCurrency)}${formData.purchasePrice}` : 'Unknown price'}`);
             }
             if (formData.saleDate) {
-                addEvent('keeper', formData.saleDate, 'Animal Sold', `Sold for: ${formData.salePrice ? `${getCurrencySymbol(formData.salePriceCurrency)}${formData.salePrice}` : 'Unknown price'}`);
+                addEvent('keeper', formData.saleDate, 'Animal Sold', `Sold for: ${formData.salePrice ? `${getCurrencySymbol(formData.saleRecordCurrency)}${formData.salePrice}` : 'Unknown price'}`);
             }
         }
 
@@ -6677,7 +6677,7 @@ const AnimalFormModalV2 = ({
                                         <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Sale Date</label><input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                         <div className="flex gap-2">
                                             <div className="flex-1"><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Sale Price</label><input type="text" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="e.g., 800, 400" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
-                                            <div className="w-24"><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Currency</label><select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="USD">USD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="CAD">CAD C$</option><option value="AUD">AUD A$</option><option value="JPY">JPY ¥</option><option value="CHF">CHF</option><option value="INR">INR ₹</option><option value="AED">AED د.إ</option></select></div>
+                                            <div className="w-24"><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Currency</label><select name="saleRecordCurrency" value={formData.saleRecordCurrency} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text"><option value="USD">USD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="CAD">CAD C$</option><option value="AUD">AUD A$</option><option value="JPY">JPY ¥</option><option value="CHF">CHF</option><option value="INR">INR ₹</option><option value="AED">AED د.إ</option></select></div>
                                         </div>
                                         <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Buyer Name</label><input type="text" name="buyerName" value={formData.buyerName} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                         <div>

@@ -68,7 +68,7 @@ export const LegalTabContent = ({ animal, API_BASE_URL }) => {
                     <InfoCard title="Sale Information" icon={<Tag size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                         <dl className="space-y-4">
                             {animal.saleDate && <InfoItem label="Sale Date" value={formatDate(animal.saleDate)} />}
-                            {animal.salePriceAmount && <InfoItem label="Sale Price" value={`${animal.salePriceCurrency || ''} ${animal.salePriceAmount}`} />}
+                            {animal.salePrice && <InfoItem label="Sale Price" value={`${animal.saleRecordCurrency || ''} ${animal.salePrice}`} />}
                             {animal.saleLocation && <InfoItem label="Sale Location" value={animal.saleLocation} />}
                         </dl>
                     </InfoCard>
