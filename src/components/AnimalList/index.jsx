@@ -28,7 +28,7 @@ import { SpeciesPickerModal } from '../Modals/SpeciesModals';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
 import { ALERT_CATEGORIES } from '../../utils/alertCategories';
-import { breedingLineBgStyle, sortLinesGradientFirst } from '../../utils/breedingLineColor';
+import { breedingLineBgStyle, breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst } from '../../utils/breedingLineColor';
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { getUserKey } from '../../utils/userKey';
 
