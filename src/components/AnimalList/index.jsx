@@ -4059,7 +4059,7 @@ useEffect(() => {
         );
     };
 
-    const FeedingAnimalBar = ({ animal, onViewAnimal, onEditAnimal, handleMarkFed, handleSkipFeeding }) => {
+    const FeedingAnimalBar = ({ animal, onViewAnimal, onEditAnimal, handleMarkFed, handleSkipFeeding, handleDeleteFeedingSchedule }) => {
         const due = isFeedingDue(animal.lastFedDate, animal.feedingIntervalHours);
         return (
             <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
@@ -4087,6 +4087,7 @@ useEffect(() => {
                     <button onClick={(e) => handleMarkFed(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Utensils size={12} /> Fed</button>
                     {due && <button onClick={(e) => handleSkipFeeding(e, animal)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
                     {taskUndoStack[`feed_${animal.id_public}`] && <button onClick={(e) => handleRevertTask(e, `feed_${animal.id_public}`)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
+                    <button onClick={(e) => handleDeleteFeedingSchedule(e, animal)} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete feeding schedule"><Trash2 size={14} /></button>
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
@@ -4095,7 +4096,7 @@ useEffect(() => {
 
     // Generic bar row for a single dedicated schedule task (Grooming/Special Care/Training).
     // Each row represents ONE schedule field on ONE animal — tasks are never merged/shared.
-    const ScheduleAnimalBar = ({ animal, label, fieldName, onViewAnimal, onEditAnimal, handleMarkScheduleDone, handleSkipScheduleTask }) => {
+    const ScheduleAnimalBar = ({ animal, label, fieldName, onViewAnimal, onEditAnimal, handleMarkScheduleDone, handleSkipScheduleTask, handleDeleteScheduleTask }) => {
         const sched = animal[fieldName] || {};
         const due = isDue(sched.lastDoneDate, sched.frequencyDays);
         return (
@@ -4122,6 +4123,7 @@ useEffect(() => {
                     <button onClick={(e) => handleMarkScheduleDone(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
                     {due && <button onClick={(e) => handleSkipScheduleTask(e, animal, fieldName)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
                     {taskUndoStack[`sched_${animal.id_public}_${fieldName}`] && <button onClick={(e) => handleRevertTask(e, `sched_${animal.id_public}_${fieldName}`)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
+                    <button onClick={(e) => handleDeleteScheduleTask(e, animal, fieldName, label)} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete schedule"><Trash2 size={14} /></button>
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
@@ -4130,7 +4132,7 @@ useEffect(() => {
 
     // Bar row for a single custom animal care task (one row per task per animal), matching the
     // Grooming/Special Care/Training bar layout.
-    const AnimalCareTaskBar = ({ animal, taskIdx, task, onViewAnimal, onEditAnimal, handleMarkAnimalCareTaskDone, handleSkipAnimalCareTask }) => {
+    const AnimalCareTaskBar = ({ animal, taskIdx, task, onViewAnimal, onEditAnimal, handleMarkAnimalCareTaskDone, handleSkipAnimalCareTask, handleDeleteAnimalCareTask }) => {
         const due = isDue(task.lastDoneDate, task.frequencyDays);
         return (
             <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
@@ -4156,6 +4158,7 @@ useEffect(() => {
                     <button onClick={(e) => handleMarkAnimalCareTaskDone(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
                     {due && <button onClick={(e) => handleSkipAnimalCareTask(e, animal, taskIdx)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
                     {taskUndoStack[`care_${animal.id_public}_${taskIdx}`] && <button onClick={(e) => handleRevertTask(e, `care_${animal.id_public}_${taskIdx}`)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
+                    <button onClick={(e) => handleDeleteAnimalCareTask(e, animal, taskIdx)} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete task"><Trash2 size={14} /></button>
                     <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
             </div>
@@ -4164,7 +4167,7 @@ useEffect(() => {
 
     // Enclosure cleaning task row for the Feeding & Care tab — separate UI surface from the
     // enclosure cards/detail modal, but reads/writes the exact same Enclosure.cleaningTasks data.
-    const EnclosureCleaningTaskBar = ({ enclosure, task, handleMarkEnclosureCleaningTaskDone }) => {
+    const EnclosureCleaningTaskBar = ({ enclosure, task, handleMarkEnclosureCleaningTaskDone, handleDeleteEnclosureCleaningTask }) => {
         const due = isTaskDue(task);
         const freqLabel = task.frequencyDays ? `Every ${task.frequencyDays}d` : (task.frequency ? `Every ${task.frequency} ${task.frequencyUnit || 'days'}` : '—');
         return (
@@ -4192,6 +4195,7 @@ useEffect(() => {
                 <div className="sm:text-right flex items-center gap-1 justify-end">
                     <button onClick={(e) => handleMarkEnclosureCleaningTaskDone(e, enclosure, task._id)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
                     {taskUndoStack[`enc_${enclosure._id}_${task._id}`] && <button onClick={(e) => handleRevertTask(e, `enc_${enclosure._id}_${task._id}`)} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50" title="Undo last action"><Undo2 size={12} /> Revert</button>}
+                    <button onClick={(e) => handleDeleteEnclosureCleaningTask(e, enclosure, task._id)} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete task"><Trash2 size={14} /></button>
                 </div>
             </div>
         );
@@ -4382,6 +4386,25 @@ useEffect(() => {
             }
         };
 
+        // Removes the feeding schedule entirely (not just a single instance) — mirrors clearing it in the Routine Care tab.
+        const handleDeleteFeedingSchedule = (e, animal) => {
+            e.stopPropagation();
+            if (!window.confirm(`Delete the feeding schedule for ${animal.name || 'this animal'}?`)) return;
+            const prevInterval = animal.feedingIntervalHours;
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, feedingIntervalHours: null } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, feedingIntervalHours: null } }));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { feedingIntervalHours: null },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .catch(err => { console.error('Delete feeding schedule failed:', err); fetchAllAnimals(); });
+            setTaskUndoStack(prev => ({ ...prev, [`feed_${animal.id_public}`]: async () => {
+                setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, feedingIntervalHours: prevInterval } : a));
+                window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, feedingIntervalHours: prevInterval } }));
+                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { feedingIntervalHours: prevInterval },
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                    .catch(err => { console.error('Revert delete feeding schedule failed:', err); fetchAllAnimals(); });
+            } }));
+        };
+
         const handleMarkEnclosureCleaningTaskDone = (e, enclosure, taskId) => {
             e.stopPropagation();
             const prevTasks = enclosure.cleaningTasks || [];
@@ -4398,6 +4421,25 @@ useEffect(() => {
                 await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id}`, { cleaningTasks: reverted },
                     { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` } })
                     .catch(err => { console.error('Revert enclosure task failed:', err); fetchEnclosures(); });
+            } }));
+        };
+
+        const handleDeleteEnclosureCleaningTask = (e, enclosure, taskId) => {
+            e.stopPropagation();
+            const prevTasks = enclosure.cleaningTasks || [];
+            const prevTask = prevTasks.find(t => t._id === taskId);
+            if (!window.confirm(`Delete the cleaning task "${prevTask?.taskName || 'this task'}" from ${enclosure.name}?`)) return;
+            const updated = prevTasks.filter(t => t._id !== taskId);
+            setEnclosures(prev => prev.map(enc => enc._id === enclosure._id ? { ...enc, cleaningTasks: updated } : enc));
+            axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id}`, { cleaningTasks: updated },
+                { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` } })
+                .catch(err => { console.error('Delete enclosure task failed:', err); fetchEnclosures(); });
+            setTaskUndoStack(prev => ({ ...prev, [`enc_${enclosure._id}_${taskId}`]: async () => {
+                const reverted = [...updated, prevTask];
+                setEnclosures(p => p.map(enc => enc._id === enclosure._id ? { ...enc, cleaningTasks: reverted } : enc));
+                await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id}`, { cleaningTasks: reverted },
+                    { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` } })
+                    .catch(err => { console.error('Revert delete enclosure task failed:', err); fetchEnclosures(); });
             } }));
         };
 
@@ -4465,6 +4507,29 @@ useEffect(() => {
             } }));
         };
 
+        const handleDeleteAnimalCareTask = (e, animal, taskIdx) => {
+            e.stopPropagation();
+            const fieldName = 'animalCareTasks';
+            const prevList = animal[fieldName] || [];
+            const taskName = prevList[taskIdx]?.taskName || 'this task';
+            if (!window.confirm(`Delete the care task "${taskName}" for ${animal.name || 'this animal'}?`)) return;
+            const updated = prevList.filter((_, i) => i !== taskIdx);
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .catch(err => { console.error('Delete animal care task failed:', err); fetchAllAnimals(); });
+            setTaskUndoStack(prev => ({ ...prev, [`care_${animal.id_public}_${taskIdx}`]: async () => {
+                const reverted = [...updated];
+                reverted.splice(taskIdx, 0, prevList[taskIdx]);
+                setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: reverted } : a));
+                window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: reverted } }));
+                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: reverted },
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                    .catch(err => { console.error('Revert delete animal care task failed:', err); fetchAllAnimals(); });
+            } }));
+        };
+
         // Generic handlers for the dedicated, individually-tracked Grooming/Special Care/Training
         // schedules ({ lastDoneDate, frequencyDays } shape, one Mongoose field per task).
         const handleMarkScheduleDone = (e, animal, fieldName) => {
@@ -4500,6 +4565,25 @@ useEffect(() => {
                 await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: prevValue },
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                     .catch(err => { console.error('Revert schedule task failed:', err); fetchAllAnimals(); });
+            } }));
+        };
+
+        // Removes the schedule entirely (not just a single instance) — mirrors clearing it in the animal's edit form.
+        const handleDeleteScheduleTask = (e, animal, fieldName, label) => {
+            e.stopPropagation();
+            if (!window.confirm(`Delete the ${label || 'schedule'} for ${animal.name || 'this animal'}?`)) return;
+            const prevValue = animal[fieldName] || null;
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: null } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: null } }));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: null },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .catch(err => { console.error('Delete schedule task failed:', err); fetchAllAnimals(); });
+            setTaskUndoStack(prev => ({ ...prev, [`sched_${animal.id_public}_${fieldName}`]: async () => {
+                setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: prevValue } : a));
+                window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: prevValue } }));
+                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: prevValue },
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                    .catch(err => { console.error('Revert delete schedule task failed:', err); fetchAllAnimals(); });
             } }));
         };
 
@@ -4784,31 +4868,31 @@ useEffect(() => {
                                         key: 'feeding', title: 'Feeding', icon: <Utensils size={16} className="text-green-700 dark:text-green-300" />, headerClass: 'bg-green-50 dark:bg-green-900/20 border-b border-green-100 dark:border-green-900/40',
                                         list: [...feedDue, ...feedOk], dueCount: feedDue.length, colLabels: ['Last Fed', 'Diet'],
                                         emptyText: "No animals with a feeding schedule set yet — set one up in the animal's Routine Care tab.",
-                                        renderRow: a => <FeedingAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkFed={handleMarkFed} handleSkipFeeding={handleSkipFeeding} />,
+                                        renderRow: a => <FeedingAnimalBar key={a.id_public} animal={a} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkFed={handleMarkFed} handleSkipFeeding={handleSkipFeeding} handleDeleteFeedingSchedule={handleDeleteFeedingSchedule} />,
                                     },
                                     {
                                         key: 'grooming', title: 'Grooming & Special Care', icon: <Scissors size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...groomingScheduleDue, ...groomingScheduleOk], dueCount: groomingScheduleDue.length, colLabels: ['Last Done', 'Task'],
                                         emptyText: "No assigned schedules yet — set one up in the animal's Routine Care tab.",
-                                        renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />,
+                                        renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} handleDeleteScheduleTask={handleDeleteScheduleTask} />,
                                     },
                                     {
                                         key: 'training', title: 'Training', icon: <Dumbbell size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...trainingScheduleDue, ...trainingScheduleOk], dueCount: trainingScheduleDue.length, colLabels: ['Last Done', 'Task'],
                                         emptyText: "No assigned schedules yet — set one up in the animal's Behavior tab.",
-                                        renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} />,
+                                        renderRow: entry => <ScheduleAnimalBar key={`${entry.animal.id_public}_${entry.key}`} animal={entry.animal} label={entry.label} fieldName={entry.key} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkScheduleDone={handleMarkScheduleDone} handleSkipScheduleTask={handleSkipScheduleTask} handleDeleteScheduleTask={handleDeleteScheduleTask} />,
                                     },
                                     {
                                         key: 'animalcare', title: 'Custom Animal Care', icon: <ClipboardList size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...animalCareTaskDue, ...animalCareTaskOk], dueCount: animalCareTaskDue.length, colLabels: ['Last Done', 'Task'],
                                         emptyText: "No animal care tasks. Edit an animal and add tasks in the Routine Care tab.",
-                                        renderRow: entry => <AnimalCareTaskBar key={`${entry.animal.id_public}_${entry.taskIdx}`} animal={entry.animal} taskIdx={entry.taskIdx} task={entry.task} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkAnimalCareTaskDone={handleMarkAnimalCareTaskDone} handleSkipAnimalCareTask={handleSkipAnimalCareTask} />,
+                                        renderRow: entry => <AnimalCareTaskBar key={`${entry.animal.id_public}_${entry.taskIdx}`} animal={entry.animal} taskIdx={entry.taskIdx} task={entry.task} onViewAnimal={onViewAnimal} onEditAnimal={onEditAnimal} handleMarkAnimalCareTaskDone={handleMarkAnimalCareTaskDone} handleSkipAnimalCareTask={handleSkipAnimalCareTask} handleDeleteAnimalCareTask={handleDeleteAnimalCareTask} />,
                                     },
                                     {
                                         key: 'enclosurecleaning', title: 'Enclosure Cleaning', icon: <Wrench size={16} className="text-teal-700 dark:text-teal-300" />, headerClass: 'bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-900/40',
                                         list: [...enclosureCleaningDue, ...enclosureCleaningOk], dueCount: enclosureCleaningDue.length, colLabels: ['Last Done', 'Task'], entityLabel: 'Enclosure',
                                         emptyText: "No enclosure cleaning tasks. Add tasks when creating/editing an enclosure in the Enclosures tab.",
-                                        renderRow: entry => <EnclosureCleaningTaskBar key={`${entry.enclosure._id}_${entry.task._id}`} enclosure={entry.enclosure} task={entry.task} handleMarkEnclosureCleaningTaskDone={handleMarkEnclosureCleaningTaskDone} />,
+                                        renderRow: entry => <EnclosureCleaningTaskBar key={`${entry.enclosure._id}_${entry.task._id}`} enclosure={entry.enclosure} task={entry.task} handleMarkEnclosureCleaningTaskDone={handleMarkEnclosureCleaningTaskDone} handleDeleteEnclosureCleaningTask={handleDeleteEnclosureCleaningTask} />,
                                     },
                                 ];
 
