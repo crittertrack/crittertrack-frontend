@@ -464,7 +464,7 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                                                 ) : (
                                                     <Heart size={12} className="text-black" stroke="currentColor" fill="none" />
                                                 )}
-                                                {(animal.showOnPublicProfile !== undefined ? animal.showOnPublicProfile : true) ? (
+                                                {(animal.isDisplay !== undefined ? animal.isDisplay : true) ? (
                                                     <Eye size={12} className="text-black" />
                                                 ) : (
                                                     <EyeOff size={12} className="text-black" />

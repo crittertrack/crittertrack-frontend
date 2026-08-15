@@ -112,7 +112,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
 
             if (!animalInfo && id) return { isHidden: true, id_public: id };
             if (!animalInfo) return null;
-            if (!authToken && !animalInfo.showOnPublicProfile) return { isHidden: true, id_public: id };
+            if (!authToken && !animalInfo.isDisplay) return { isHidden: true, id_public: id };
 
             if (animalInfo.manualBreederName) {
                 animalInfo.breederName = animalInfo.manualBreederName;
@@ -471,7 +471,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 });
                                 animalInfo = response.data;
                                 // Do NOT set foundViaOwned = true here — animal is accessible but not owned.
-                                // This ensures the showOnPublicProfile check below still applies,
+                                // This ensures the isDisplay check below still applies,
                                 // consistent with how ViewOnlyParentCard handles the same case.
                             } catch (error2) {
                                 console.log(`Animal ${id} not accessible via any endpoint:`, error2.message);
@@ -501,7 +501,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     if (!animalInfo) return null;
 
                     // If not authenticated and animal is not publicly visible, hide it
-                    if (!authToken && !animalInfo.showOnPublicProfile) {
+                    if (!authToken && !animalInfo.isDisplay) {
                         return { isHidden: true, id_public: id };
                     }
 
@@ -701,7 +701,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             }
             if (!animalInfo && id) return { isHidden: true, id_public: id };
             if (!animalInfo) return null;
-            if (!authToken && !animalInfo.showOnPublicProfile) return { isHidden: true, id_public: id };
+            if (!authToken && !animalInfo.isDisplay) return { isHidden: true, id_public: id };
 
             if (animalInfo.manualBreederName) {
                 animalInfo.breederName = animalInfo.manualBreederName;

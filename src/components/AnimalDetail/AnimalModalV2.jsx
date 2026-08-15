@@ -405,8 +405,8 @@ const AnimalModalV2 = ({
                                     {onToggleOwned && <button onClick={() => onToggleOwned(animal.id_public, !animal.isOwned)} className={`p-2 rounded-lg transition ${animal.isOwned ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary'}`} title={animal.isOwned ? 'Mark as Not Owned' : 'Mark as Owned'}>{animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}</button>}
                                     {onUpdateAnimal && <button onClick={() => {
                                         const newIsDisplay = !animal.isDisplay;
-                                        onUpdateAnimal({ ...animal, isDisplay: newIsDisplay, showOnPublicProfile: newIsDisplay });
-                                        axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay, showOnPublicProfile: newIsDisplay }, { headers: { Authorization: `Bearer ${authToken}` } }).catch(() => onUpdateAnimal({ ...animal, isDisplay: !newIsDisplay, showOnPublicProfile: !newIsDisplay }));
+                                        onUpdateAnimal({ ...animal, isDisplay: newIsDisplay });
+                                        axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, { headers: { Authorization: `Bearer ${authToken}` } }).catch(() => onUpdateAnimal({ ...animal, isDisplay: !newIsDisplay }));
                                     }} className={`p-2 rounded-lg transition ${animal.isDisplay ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary'}`} title={animal.isDisplay ? 'Make Private' : 'Make Public'}>{animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}</button>}
                                     {onEdit && <button onClick={() => onEdit(animal)} className="p-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition"><Edit size={16} /></button>}
                                     {(() => {

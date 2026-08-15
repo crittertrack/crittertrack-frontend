@@ -299,7 +299,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             fieldEdits.creatorId = selectedNewOwner._id;
             fieldEdits.creatorId_public = selectedNewOwner.id_public;
             fieldEdits.isOwned = true;
-            fieldEdits.showOnPublicProfile = true;
+            fieldEdits.isDisplay = true;
         }
 
         if (Object.keys(fieldEdits).length === 0) {
@@ -685,7 +685,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </td>
                                     <td>{animal.status || '-'}</td>
                                     <td>
-                                        {animal.showOnPublicProfile ? (
+                                        {animal.isDisplay ? (
                                             <span className="badge public">Public</span>
                                         ) : (
                                             <span className="badge private">Private</span>
@@ -712,7 +712,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         >
                                             <Edit size={16} />
                                         </button>
-                                        {animal.showOnPublicProfile && (
+                                        {animal.isDisplay && (
                                             <button
                                                 onClick={() => { setSelectedAnimal(animal); setActionReason(''); setShowHideConfirm(true); }}
                                                 title="Hide from Public"

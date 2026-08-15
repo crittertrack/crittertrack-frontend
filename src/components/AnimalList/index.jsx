@@ -1751,9 +1751,9 @@ useEffect(() => {
 
         // Public/private filter
         if (publicFilter === 'public') {
-            source = source.filter(a => a.showOnPublicProfile === true);
+            source = source.filter(a => a.isDisplay === true);
         } else if (publicFilter === 'private') {
-            source = source.filter(a => !a.showOnPublicProfile);
+            source = source.filter(a => !a.isDisplay);
         }
 
         // Ownership filter
@@ -1830,9 +1830,9 @@ useEffect(() => {
         if (statusFilterNursing) source = source.filter(a => a.isNursing === true);
         if (statusFilterMating) source = source.filter(a => a.isInMating === true);
         if (publicFilter === 'public') {
-            source = source.filter(a => a.showOnPublicProfile === true);
+            source = source.filter(a => a.isDisplay === true);
         } else if (publicFilter === 'private') {
-            source = source.filter(a => !a.showOnPublicProfile);
+            source = source.filter(a => !a.isDisplay);
         }
         if (ownedFilterMode === 'owned') source = source.filter(a => a.isOwned !== false);
         if (blFilter.length > 0) source = source.filter(a => { const assigned = animalBreedingLines[a.id_public] || []; return blFilter.some(lineId => assigned.map(String).includes(String(lineId))); });
@@ -2021,7 +2021,7 @@ useEffect(() => {
     // Dashboard Counters
     const totalDashboardAnimalsCount = activeAnimalsForDashboard.length;
     const ownedDashboardCount = activeAnimalsForDashboard.filter(a => a.isOwned !== false).length;
-    const publicDashboardCount = activeAnimalsForDashboard.filter(a => a.showOnPublicProfile === true).length;
+    const publicDashboardCount = activeAnimalsForDashboard.filter(a => a.isDisplay === true).length;
 
     const availableDashboardList = useMemo(() => {
         return activeAnimalsForDashboard.filter(a => a.status === 'Available');
@@ -2476,11 +2476,11 @@ useEffect(() => {
         // Update local state immediately for instant UI feedback
         const updatedAnimals = animals.map(animal => 
             animal.id_public === animalId 
-                ? { ...animal, showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue }
+                ? { ...animal, isDisplay: newPrivacyValue }
                 : animal
         );
         setAnimals(updatedAnimals);
-        window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId, showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue } }));
+        window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId, isDisplay: newPrivacyValue } }));
 
         // Update database in the background
         try {
@@ -2491,7 +2491,6 @@ useEffect(() => {
                     'Authorization': `Bearer ${authToken}`
                 },
                 body: JSON.stringify({ 
-                    showOnPublicProfile: newPrivacyValue,
                     isDisplay: newPrivacyValue 
                 })
             });
@@ -2500,7 +2499,7 @@ useEffect(() => {
                 // Revert on failure
                 const revertedAnimals = animals.map(animal => 
                     animal.id_public === animalId 
-                        ? { ...animal, showOnPublicProfile: !newPrivacyValue, isDisplay: !newPrivacyValue }
+                        ? { ...animal, isDisplay: !newPrivacyValue }
                         : animal
                 );
                 setAnimals(revertedAnimals);
@@ -2511,7 +2510,7 @@ useEffect(() => {
             // Revert on error
             const revertedAnimals = animals.map(animal => 
                 animal.id_public === animalId 
-                    ? { ...animal, showOnPublicProfile: !newPrivacyValue, isDisplay: !newPrivacyValue }
+                    ? { ...animal, isDisplay: !newPrivacyValue }
                     : animal
             );
             setAnimals(revertedAnimals);
@@ -2581,13 +2580,13 @@ useEffect(() => {
         // Update local state immediately for instant UI feedback
         const updatedAnimals = animals.map(animal => 
             animalIds.includes(animal.id_public) 
-                ? { ...animal, showOnPublicProfile: makePublic, isDisplay: makePublic }
+                ? { ...animal, isDisplay: makePublic }
                 : animal
         );
         setAnimals(updatedAnimals);
         setAllAnimalsRaw(prev => prev.map(animal =>
             animalIds.includes(animal.id_public)
-                ? { ...animal, showOnPublicProfile: makePublic, isDisplay: makePublic }
+                ? { ...animal, isDisplay: makePublic }
                 : animal
         ));
 
@@ -2602,7 +2601,6 @@ useEffect(() => {
                         'Authorization': `Bearer ${authToken}`
                     },
                     body: JSON.stringify({ 
-                        showOnPublicProfile: makePublic,
                         isDisplay: makePublic 
                     })
                 });
@@ -2631,13 +2629,11 @@ useEffect(() => {
         // Update local state immediately for instant UI feedback
         const updatedAnimals = animals.map(animal => ({
             ...animal,
-            showOnPublicProfile: makePublic,
             isDisplay: makePublic
         }));
         setAnimals(updatedAnimals);
         setAllAnimalsRaw(prev => prev.map(animal => ({
             ...animal,
-            showOnPublicProfile: makePublic,
             isDisplay: makePublic
         })));
 
@@ -2652,7 +2648,6 @@ useEffect(() => {
                         'Authorization': `Bearer ${authToken}`
                     },
                     body: JSON.stringify({ 
-                        showOnPublicProfile: makePublic,
                         isDisplay: makePublic 
                     })
                 });
@@ -2872,16 +2867,16 @@ useEffect(() => {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         e.preventDefault();
-                                        onTogglePrivacy && onTogglePrivacy(animal.id_public, !animal.showOnPublicProfile);
+                                        onTogglePrivacy && onTogglePrivacy(animal.id_public, !animal.isDisplay);
                                     }}
                                     className={`p-0.5 sm:p-1 rounded transition-colors ${
-                                        animal.showOnPublicProfile 
+                                        animal.isDisplay 
                                             ? 'bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50' 
                                             : 'bg-gray-100 dark:bg-dark-card-bg hover:bg-gray-200 dark:hover:bg-dark-border'
                                     }`}
-                                    title={animal.showOnPublicProfile ? "Click to make Private" : "Click to make Public"}
+                                    title={animal.isDisplay ? "Click to make Private" : "Click to make Public"}
                                 >
-                                    {animal.showOnPublicProfile ? (
+                                    {animal.isDisplay ? (
                                         <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 dark:text-green-400" />
                                     ) : (
                                         <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 dark:text-dark-text-muted" />

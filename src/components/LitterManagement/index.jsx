@@ -1624,18 +1624,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const toggleOffspringPrivacy = async (litterId, animalId_public, newPrivacyValue) => {
         setLitterOffspringMap(prev => ({
             ...prev,
-            [litterId]: (prev[litterId] || []).map(a => a.id_public === animalId_public ? { ...a, showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue } : a)
+            [litterId]: (prev[litterId] || []).map(a => a.id_public === animalId_public ? { ...a, isDisplay: newPrivacyValue } : a)
         }));
-        window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId_public, showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue } }));
+        window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId_public, isDisplay: newPrivacyValue } }));
         try {
-            await axios.put(`${API_BASE_URL}/animals/${animalId_public}`, { showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue }, {
+            await axios.put(`${API_BASE_URL}/animals/${animalId_public}`, { isDisplay: newPrivacyValue }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
         } catch (error) {
             console.error('Error updating privacy setting:', error);
             setLitterOffspringMap(prev => ({
                 ...prev,
-                [litterId]: (prev[litterId] || []).map(a => a.id_public === animalId_public ? { ...a, showOnPublicProfile: !newPrivacyValue, isDisplay: !newPrivacyValue } : a)
+                [litterId]: (prev[litterId] || []).map(a => a.id_public === animalId_public ? { ...a, isDisplay: !newPrivacyValue } : a)
             }));
             showModalMessage('Error', 'Failed to update privacy setting.');
         }
@@ -1698,15 +1698,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const toggleAllPublic = async () => {
-        const allPublic = filteredLitters.every(l => l.showOnPublicProfile);
+        const allPublic = filteredLitters.every(l => l.isDisplayLitter);
         const newVal = !allPublic;
         setLitters(prev => prev.map(l =>
-            filteredLitters.some(fl => fl._id === l._id) ? { ...l, showOnPublicProfile: newVal } : l
+            filteredLitters.some(fl => fl._id === l._id) ? { ...l, isDisplayLitter: newVal } : l
         ));
         try {
             await Promise.all(
                 filteredLitters.map(l =>
-                    axios.put(`${API_BASE_URL}/litters/${l._id}`, { showOnPublicProfile: newVal }, {
+                    axios.put(`${API_BASE_URL}/litters/${l._id}`, { isDisplayLitter: newVal }, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     })
                 )
@@ -1714,21 +1714,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         } catch (err) {
             // Revert on failure
             setLitters(prev => prev.map(l =>
-                filteredLitters.some(fl => fl._id === l._id) ? { ...l, showOnPublicProfile: !newVal } : l
+                filteredLitters.some(fl => fl._id === l._id) ? { ...l, isDisplayLitter: !newVal } : l
             ));
         }
     };
 
     const toggleLitterPublic = async (litter) => {
-        const newVal = !litter.showOnPublicProfile;
-        setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, showOnPublicProfile: newVal } : l));
+        const newVal = !litter.isDisplayLitter;
+        setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, isDisplayLitter: newVal } : l));
         try {
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { showOnPublicProfile: newVal }, {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { isDisplayLitter: newVal }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
         } catch (err) {
             // Revert on failure
-            setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, showOnPublicProfile: !newVal } : l));
+            setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, isDisplayLitter: !newVal } : l));
         }
     };
 
@@ -3539,14 +3539,14 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                     <button
                                         onClick={toggleAllPublic}
                                         className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition ${
-                                            filteredLitters.every(l => l.showOnPublicProfile)
+                                            filteredLitters.every(l => l.isDisplayLitter)
                                                 ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-800/40 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
                                                 : 'bg-gray-100 dark:bg-dark-card-bg border-gray-300 dark:border-dark-text-muted text-gray-600 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-surface-hover'
                                         }`}
-                                        title={filteredLitters.every(l => l.showOnPublicProfile) ? 'Hide all from public profile' : 'Show all on public profile'}
+                                        title={filteredLitters.every(l => l.isDisplayLitter) ? 'Hide all from public profile' : 'Show all on public profile'}
                                     >
-                                        {filteredLitters.every(l => l.showOnPublicProfile) ? <Eye size={13} /> : <EyeOff size={13} />}
-                                        {filteredLitters.every(l => l.showOnPublicProfile) ? 'All Public' : 'Make All Public'}
+                                        {filteredLitters.every(l => l.isDisplayLitter) ? <Eye size={13} /> : <EyeOff size={13} />}
+                                        {filteredLitters.every(l => l.isDisplayLitter) ? 'All Public' : 'Make All Public'}
                                     </button>
                                 )}
                             </div>
@@ -3629,10 +3629,10 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                     <button
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); toggleLitterPublic(litter); }}
-                                        title={litter.showOnPublicProfile ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
-                                        className={`flex-shrink-0 mr-2 p-1 rounded transition ${litter.showOnPublicProfile ? 'text-green-500 hover:text-green-600' : 'text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary'}`}
+                                        title={litter.isDisplayLitter ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
+                                        className={`flex-shrink-0 mr-2 p-1 rounded transition ${litter.isDisplayLitter ? 'text-green-500 hover:text-green-600' : 'text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary'}`}
                                     >
-                                        {litter.showOnPublicProfile ? <Eye size={15} /> : <EyeOff size={15} />}
+                                        {litter.isDisplayLitter ? <Eye size={15} /> : <EyeOff size={15} />}
                                     </button>
                                     {/* Mobile layout: stacked info */}
                                     <div className="flex-1 sm:hidden">
@@ -4197,11 +4197,11 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                                                 </button>
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => toggleOffspringPrivacy(litter._id, animal.id_public, !(animal.showOnPublicProfile || animal.isDisplay))}
+                                                                    onClick={() => toggleOffspringPrivacy(litter._id, animal.id_public, !animal.isDisplay)}
                                                                     className="p-0.5 rounded hover:bg-gray-100 dark:hover:bg-dark-surface-hover transition"
-                                                                    title={(animal.showOnPublicProfile || animal.isDisplay) ? 'Click to make Private' : 'Click to make Public'}
+                                                                    title={animal.isDisplay ? 'Click to make Private' : 'Click to make Public'}
                                                                 >
-                                                                    {(animal.showOnPublicProfile || animal.isDisplay) ? (
+                                                                    {animal.isDisplay ? (
                                                                         <Eye size={12} className="text-green-600 dark:text-green-400" />
                                                                     ) : (
                                                                         <EyeOff size={12} className="text-gray-500 dark:text-dark-text-muted" />
