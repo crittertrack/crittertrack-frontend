@@ -2,6 +2,7 @@ import React from 'react';
 import { Hash, FolderOpen, Globe, Tag, Users } from 'lucide-react';
 import { InfoCard, InfoItem } from './DashboardComponents';
 import { isFieldHiddenForSpecies, getFieldLabel } from '../../utils/speciesFieldTemplates';
+import { breedingLineGlyph, breedingLineButtonStyle, sortLinesGradientFirst } from '../../utils/breedingLineColor';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -72,7 +73,7 @@ export const IdentificationTabContent = ({
             {isEditable && (
             <InfoCard title="Breeding Lines" icon={<Users size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                 {(() => {
-                    const namedLines = breedingLineDefs.filter(l => l.name && l.enabled !== false);
+                    const namedLines = sortLinesGradientFirst(breedingLineDefs.filter(l => l.name && l.enabled !== false));
                     if (namedLines.length === 0) {
                         return <p className="text-sm text-gray-400 dark:text-dark-text-muted">No breeding lines available.</p>;
                     }
@@ -120,14 +121,12 @@ export const IdentificationTabContent = ({
                                             type="button"
                                             onClick={() => toggleAnimalBreedingLine(animal.id_public, l.id)}
                                             style={{ 
-                                                borderColor: l.color, 
-                                                color: assigned ? '#fff' : l.color, 
-                                                backgroundColor: assigned ? l.color : 'transparent',
+                                                ...breedingLineButtonStyle(l.color, assigned),
                                                 cursor: 'pointer'
                                             }}
                                             className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition hover:opacity-80"
                                         >
-                                            <span>&#x25C6;</span> {l.name}
+                                            <span>{breedingLineGlyph(l.color)}</span> {l.name}
                                         </button>
                                     );
                                 })}

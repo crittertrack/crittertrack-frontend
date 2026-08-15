@@ -9,6 +9,7 @@ import {
 import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
+import { breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst } from '../../utils/breedingLineColor';
 import axios from 'axios';
 import { ViewOnlyParentCard, computeRelationships } from './utils';
 import { CareTabContent } from './CareTabContent';
@@ -517,7 +518,7 @@ const AnimalModalV2 = ({
                                             <div className="pt-2 border-t border-gray-200 dark:border-dark-border">
                                                 <p className="text-xs text-gray-700 dark:text-dark-text-secondary text-center flex justify-center items-center gap-x-2">
                                                     {(() => {
-                                                        const lines = (animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false);
+                                                        const lines = sortLinesGradientFirst((animalBreedingLines[animal.id_public] || []).map(lineId => breedingLineDefs.find(l => l.id === lineId)).filter(l => l && l.name && l.enabled !== false));
                                                         const idParts = [
                                                             animal.id_public,
                                                             animal.breederAssignedId,
@@ -533,7 +534,7 @@ const AnimalModalV2 = ({
                                                         const linesComponent = lines.length > 0 ? (
                                                             <span className="flex items-center gap-1">
                                                                 {lines.map(line => (
-                                                                    <span key={line.id} title={line.name} style={{ color: line.color }} className="text-sm leading-none">&#x25C6;</span>
+                                                                    <span key={line.id} title={line.name} style={breedingLineTextStyle(line.color)} className="text-sm leading-none">{breedingLineGlyph(line.color)}</span>
                                                                 ))}
                                                             </span>
                                                         ) : null;

@@ -9,6 +9,7 @@ import {
 import { BreederDirectorySettings } from '../PublicProfile/BreederDirectory';
 import InfoButton from '../shared/InfoButton';
 import { isPushSupported, getPushPermission, subscribeToPush, unsubscribeFromPush, isSubscribedOnThisDevice } from '../../utils/pushNotifications';
+import { breedingLineTextStyle, breedingLineGlyph } from '../../utils/breedingLineColor';
 
 // Short contextual hints for the Settings page-header info button, keyed by tab id.
 const SETTINGS_TAB_INFO = {
@@ -1411,7 +1412,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     onChange={(e) => setLocalBLDefs(localBLDefs.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
                                     className="flex-1 min-w-[120px] p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary"
                                 />
-                                <span style={{ color: line.color }} className="text-xl leading-none" title={line.name || `Line ${idx + 1}`}>&#x25C6;</span>
+                                <span style={breedingLineTextStyle(line.color)} className="text-xl leading-none" title={line.name || `Line ${idx + 1}`}>{breedingLineGlyph(line.color)}</span>
                                 {line.name && (
                                     <>
                                         <button

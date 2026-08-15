@@ -28,6 +28,7 @@ import { SpeciesPickerModal } from '../Modals/SpeciesModals';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
 import { ALERT_CATEGORIES } from '../../utils/alertCategories';
+import { breedingLineBgStyle, sortLinesGradientFirst } from '../../utils/breedingLineColor';
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { getUserKey } from '../../utils/userKey';
 
@@ -201,10 +202,10 @@ const BreedingLineManagerModal = ({ lines, onClose, onClearLine }) => {
                     <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface-hover"><X size={20} /></button>
                 </div>
                 <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
-                    {(lines || []).filter(l => l.name).map(line => (
+                    {sortLinesGradientFirst((lines || []).filter(l => l.name)).map(line => (
                         <div key={line.id} className="flex items-center justify-between p-2 border rounded-md hover:bg-gray-50 dark:border-dark-text-muted dark:hover:bg-dark-surface-hover">
                             <div className="flex items-center gap-3">
-                                <span style={{ backgroundColor: line.color }} className="w-4 h-4 rounded-full border border-gray-300 dark:border-dark-text-muted"></span>
+                                <span style={breedingLineBgStyle(line.color)} className="w-4 h-4 rounded-full border border-gray-300 dark:border-dark-text-muted"></span>
                                 <span className="font-medium text-gray-800 dark:text-dark-text">{line.name}</span>
                             </div>
                             <button onClick={() => onClearLine(line.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Clear line name and unassign from all animals">
@@ -2909,12 +2910,12 @@ useEffect(() => {
                     {/* Breeding line diamonds */}
                     {!hideBreedingLines && (() => {
                         const assignedIds = animalBreedingLines[animal.id_public] || [];
-                        const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false);
+                        const activeLines = sortLinesGradientFirst(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false));
                         if (activeLines.length === 0) return null;
                         return (
                             <div className="w-full px-2 pb-1 flex flex-wrap gap-0.5 justify-center">
                                 {activeLines.map(l => (
-                                    <span key={l.id} title={l.name} style={{ color: l.color }} className="text-sm leading-none">&#x25C6;</span>
+                                    <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-sm leading-none">{breedingLineGlyph(l.color)}</span>
                                 ))}
                             </div>
                         );
@@ -3516,7 +3517,7 @@ useEffect(() => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
                                                                 const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                                                const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false);
+                                                                const activeLines = sortLinesGradientFirst(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
                                                                         <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
@@ -3527,7 +3528,7 @@ useEffect(() => {
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{renderHealthColumnCell(animal)}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400 dark:text-dark-text-muted">{ageStr}</div></td>
-                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
+                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-lg leading-none">{breedingLineGlyph(l.color)}</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-right">
                                                                             <button onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }} className="bg-white dark:bg-dark-card-bg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 hover:text-red-600 rounded-full p-1 shadow-sm border border-gray-200 dark:border-dark-text-muted" title="Remove from this collection"><X size={11} /></button>
@@ -3610,7 +3611,7 @@ useEffect(() => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
                                                                 const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                                                const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false);
+                                                                const activeLines = sortLinesGradientFirst(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
                                                                         <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
@@ -3621,7 +3622,7 @@ useEffect(() => {
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{renderHealthColumnCell(animal)}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text whitespace-nowrap"><div>{formatLocalDate(animal.birthDate)}</div><div className="text-xs text-gray-400 dark:text-dark-text-muted">{ageStr}</div></td>
-                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
+                                                                        <td className="px-3 py-1.5">{activeLines.length > 0 ? (<div className="flex flex-wrap gap-1">{activeLines.map(l => (<span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-lg leading-none">{breedingLineGlyph(l.color)}</span>))}</div>) : <span className="text-gray-600 dark:text-dark-text">—</span>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-500 dark:text-dark-text">{(animal.tags && animal.tags.length > 0) ? animal.tags.join(', ') : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-right"><div className="relative inline-block text-left"><button onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }} className="p-1 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Plus size={16} /></button>{assigningCollectionAnimalId === animal.id_public && (<div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-dark-card-bg ring-1 ring-black dark:ring-dark-text-muted ring-opacity-5 z-30" onClick={e => e.stopPropagation()}><div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"><p className="text-xs font-semibold text-gray-600 dark:text-dark-text-secondary px-3 py-1">Add to collection:</p>{userCollections.map(col => (<button key={col.id} onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }} className="w-full text-left text-xs px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover flex items-center gap-1.5 text-gray-700 dark:text-dark-text">{React.createElement(getCollectionIcon(col.icon), { size: 11, style: { color: col.color || DEFAULT_COLLECTION_COLOR } })} {col.name}</button>))}</div></div>)}</div></td>
                                                                     </tr>
@@ -6323,7 +6324,7 @@ useEffect(() => {
                                     const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
                                     const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                     const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                    const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false);
+                                    const activeLines = sortLinesGradientFirst(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false));
 
                                     return (
                                         <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
@@ -6371,7 +6372,7 @@ useEffect(() => {
                                                 {activeLines.length > 0 ? (
                                                     <div className="flex flex-wrap gap-1">
                                                         {activeLines.map(l => (
-                                                            <span key={l.id} title={l.name} style={{ color: l.color }} className="text-lg leading-none">&#x25C6;</span>
+                                                            <span key={l.id} title={l.name} style={breedingLineTextStyle(l.color)} className="text-lg leading-none">{breedingLineGlyph(l.color)}</span>
                                                         ))}
                                                     </div>
                                                 ) : '—'}
