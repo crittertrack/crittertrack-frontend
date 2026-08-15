@@ -18,11 +18,11 @@ const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) 
       <div className="relative">
         <input
           type="text"
-          placeholder="Search by name or ID..."
+          placeholder={disabled ? 'Select a species above first...' : 'Search by name or ID...'}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           disabled={disabled}
-          className="w-full p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg"
+          className="w-full p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed dark:disabled:bg-dark-surface dark:disabled:text-dark-text-muted"
         />
         <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
       </div>
@@ -32,7 +32,7 @@ const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) 
             key={animal.id_public}
             onClick={() => onSelect(animal)}
             disabled={disabled}
-            className={`w-full text-left p-2 text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition ${selectedAnimal?.id_public === animal.id_public ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-900 dark:text-dark-primary font-semibold' : 'dark:text-dark-text'}`}
+            className={`w-full text-left p-2 text-sm hover:bg-blue-50 dark:hover:bg-dark-surface-hover transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent ${selectedAnimal?.id_public === animal.id_public ? 'bg-blue-100 dark:bg-dark-primary/20 text-blue-900 dark:text-dark-primary font-semibold' : 'dark:text-dark-text'}`}
           >
             {getFullName(animal)} ({animal.id_public})
           </button>
@@ -155,6 +155,11 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
             {!isSpeciesSupported && selectedSpecies !== 'All' && (
               <div className="mt-4 p-3 bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text rounded-lg text-sm">
                 <p>COI calculation is currently available for Fancy Mouse and Fancy Rat. Support for other species is in development!</p>
+              </div>
+            )}
+            {selectedSpecies === 'All' && (
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text rounded-lg text-sm">
+                <p>Select a specific species above to enable the sire/dam search fields below.</p>
               </div>
             )}
 
