@@ -28,7 +28,7 @@ import { SpeciesPickerModal } from '../Modals/SpeciesModals';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { prefetchPedigreeTree } from '../AnimalForm';
 import { ALERT_CATEGORIES } from '../../utils/alertCategories';
-import { breedingLineBgStyle, breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst } from '../../utils/breedingLineColor';
+import { breedingLineBgStyle, breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
 import { GROOMING_SCHEDULE_DEFS, TRAINING_SCHEDULE_DEFS } from '../../utils/scheduleFieldDefs';
 import { getUserKey } from '../../utils/userKey';
 
@@ -2910,7 +2910,7 @@ useEffect(() => {
                     {/* Breeding line diamonds */}
                     {!hideBreedingLines && (() => {
                         const assignedIds = animalBreedingLines[animal.id_public] || [];
-                        const activeLines = sortLinesGradientFirst(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false));
+                        const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                         if (activeLines.length === 0) return null;
                         return (
                             <div className="w-full px-2 pb-1 flex flex-wrap gap-0.5 justify-center">
@@ -3517,7 +3517,7 @@ useEffect(() => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
                                                                 const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                                                const activeLines = sortLinesGradientFirst(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false));
+                                                                const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
                                                                         <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
@@ -3611,7 +3611,7 @@ useEffect(() => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
                                                                 const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                                                const activeLines = sortLinesGradientFirst(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false));
+                                                                const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
                                                                         <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
@@ -6324,7 +6324,7 @@ useEffect(() => {
                                     const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
                                     const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
                                     const assignedIds = animalBreedingLines[animal.id_public] || [];
-                                    const activeLines = sortLinesGradientFirst(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false));
+                                    const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
 
                                     return (
                                         <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>

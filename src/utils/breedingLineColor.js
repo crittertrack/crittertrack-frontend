@@ -22,6 +22,13 @@ export const sortLinesGradientFirst = (lines) => lines
     .sort((a, b) => (isGradientColor(b.line.color) - isGradientColor(a.line.color)) || (a.idx - b.idx))
     .map(({ line }) => line);
 
+// Dev-only: once the combo "Legacy" star is assigned to an animal, the individual legacy
+// diamonds it was built from are redundant - hide them from read-only display lists.
+const LEGACY_TRIPLE_IDS = [0, 1, 2];
+export const hideRedundantLegacyLines = (lines) => lines.some(l => isGradientColor(l.color))
+    ? lines.filter(l => !LEGACY_TRIPLE_IDS.includes(l.id))
+    : lines;
+
 // Style for the assignable line "chip" button, which needs border/fill/text color together.
 export const breedingLineButtonStyle = (color, assigned) => {
     if (isGradientColor(color)) {
