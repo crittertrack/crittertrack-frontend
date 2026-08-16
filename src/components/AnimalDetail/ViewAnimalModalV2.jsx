@@ -660,8 +660,12 @@ const ViewAnimalModalV2 = ({
                             {(animalCOI != null || loadingCOI) && (
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-white dark:bg-dark-card-bg rounded-lg p-3 border border-gray-200 dark:border-dark-border">
-                                        <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2">
+                                        <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2 flex items-center gap-1">
                                             <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Coefficient of Inbreeding</h3>
+                                            <InfoButton title="Coefficient of Inbreeding (COI)" lessonId="animal-tab-view-only">
+                                                <p>When both parents are linked via "Link CTC" (not manually entered), this is automatically calculated from shared ancestors in the pedigree, plus how many common ancestors it was calculated from.</p>
+                                                <p>To test a hypothetical pairing before breeding two specific animals, use the standalone COI Calculator (My Tools) instead.</p>
+                                            </InfoButton>
                                         </div>
                                         {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating...</p>}
                                         {!loadingCOI && (
