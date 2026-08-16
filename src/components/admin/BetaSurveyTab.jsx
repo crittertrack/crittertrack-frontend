@@ -11,9 +11,9 @@ const QUESTION_LABELS = {
     q6_visualDesign: 'Visual design',
     q11_likelihoodToRecommend: 'Likelihood to recommend',
     q12_likelyToKeepUsing: 'Likely to keep using after beta',
-    q2_mostUsedFeature: 'Most-used feature',
-    q3_mostConfusingFeature: 'Most confusing feature',
-    q7_primarySpecies: 'Primary species managed',
+    q2_mostUsedFeature: 'Most-used features',
+    q3_mostConfusingFeature: 'Most confusing features',
+    q7_primarySpecies: 'Animal types managed',
     q8_primaryDevice: 'Primary device',
     q9_priorSolution: 'What did you use before',
     q10_howHeard: 'How did you hear about us'
@@ -359,11 +359,15 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                                 {!responseLoading && selectedResponse && (
                                     <div className="space-y-3 max-h-[28rem] overflow-y-auto">
                                         {[...STAR_QUESTIONS, ...CHOICE_QUESTIONS].map(q => (
-                                            selectedResponse[q] != null && (
+                                            selectedResponse[q] != null && !(Array.isArray(selectedResponse[q]) && selectedResponse[q].length === 0) && (
                                                 <div key={q} className="text-sm">
                                                     <span className="text-gray-500 dark:text-dark-text-secondary">{QUESTION_LABELS[q]}: </span>
                                                     <span className="text-gray-800 dark:text-dark-text font-medium">
-                                                        {STAR_QUESTIONS.includes(q) ? `${selectedResponse[q]} / 5` : selectedResponse[q]}
+                                                        {STAR_QUESTIONS.includes(q)
+                                                            ? `${selectedResponse[q]} / 5`
+                                                            : Array.isArray(selectedResponse[q])
+                                                                ? selectedResponse[q].join(', ')
+                                                                : selectedResponse[q]}
                                                     </span>
                                                 </div>
                                             )

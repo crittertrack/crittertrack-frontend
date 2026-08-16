@@ -15,7 +15,7 @@ const SPECIES_OPTIONS = [
     'Fish (Bettas, Guppies, Goldfish, etc.)',
     'Invertebrate (Tarantulas, Isopods, Mantises, etc.)',
     'Amphibian (Axolotls, Frogs, Salamanders, etc.)',
-    'Multiple categories', 'Other'
+    'Other'
 ];
 const DEVICE_OPTIONS = ['Desktop', 'Phone', 'Tablet', 'Mix'];
 const PRIOR_SOLUTION_OPTIONS = ['Spreadsheet', 'Paper or notebook', 'Another app', 'Nothing formal'];
@@ -24,14 +24,14 @@ const HOW_HEARD_OPTIONS = ['Social media', 'Friend or referral', 'Forum or commu
 // Question metadata, keyed by the field name sent to the backend
 const QUESTIONS_META = {
     q1_overallSatisfaction: { number: 1, type: 'star', text: 'Overall, how satisfied are you with CritterTrack?' },
-    q2_mostUsedFeature: { number: 2, type: 'choice', text: 'Which feature do you use the most?', options: FEATURE_OPTIONS },
-    q3_mostConfusingFeature: { number: 3, type: 'choice', text: 'Which feature do you find most confusing or hardest to use?', options: [...FEATURE_OPTIONS, 'None'] },
+    q2_mostUsedFeature: { number: 2, type: 'choice', multiple: true, text: 'Which features do you use the most?', options: FEATURE_OPTIONS },
+    q3_mostConfusingFeature: { number: 3, type: 'choice', multiple: true, exclusiveOption: 'None', text: 'Which features do you find most confusing or hardest to use?', options: [...FEATURE_OPTIONS, 'None'] },
     q4_appSpeed: { number: 4, type: 'star', text: "How would you rate the app's speed and responsiveness?" },
     q5_easeOfNavigation: { number: 5, type: 'star', text: 'How easy is it to navigate and find what you need?' },
     q6_visualDesign: { number: 6, type: 'star', text: 'How would you rate the visual design and overall look & feel?' },
-    q7_primarySpecies: { number: 7, type: 'choice', text: 'What type of animals do you primarily manage?', options: SPECIES_OPTIONS },
+    q7_primarySpecies: { number: 7, type: 'choice', multiple: true, text: 'What types of animals do you manage?', options: SPECIES_OPTIONS },
     q8_primaryDevice: { number: 8, type: 'choice', text: 'What device do you primarily use CritterTrack on?', options: DEVICE_OPTIONS },
-    q9_priorSolution: { number: 9, type: 'choice', text: 'What did you use to track your animals before CritterTrack?', options: PRIOR_SOLUTION_OPTIONS, hasOther: true },
+    q9_priorSolution: { number: 9, type: 'choice', multiple: true, hasOther: true, text: 'What did you use to track your animals before CritterTrack?', options: PRIOR_SOLUTION_OPTIONS },
     q10_howHeard: { number: 10, type: 'choice', text: 'How did you hear about CritterTrack?', options: HOW_HEARD_OPTIONS },
     q11_likelihoodToRecommend: { number: 11, type: 'star', text: 'How likely are you to recommend CritterTrack to a friend?' },
     q12_likelyToKeepUsing: { number: 12, type: 'star', text: 'How likely are you to keep using CritterTrack after the beta ends?' },
@@ -96,6 +96,43 @@ const RadioList = ({ options, value, onChange }) => (
     </div>
 );
 
+const CheckboxList = ({ options, values, onChange, exclusiveOption }) => {
+    const toggle = (opt) => {
+        if (exclusiveOption && opt === exclusiveOption) {
+            onChange(values.includes(opt) ? [] : [opt]);
+            return;
+        }
+        const withoutExclusive = exclusiveOption ? values.filter(v => v !== exclusiveOption) : values;
+        onChange(
+            withoutExclusive.includes(opt)
+                ? withoutExclusive.filter(v => v !== opt)
+                : [...withoutExclusive, opt]
+        );
+    };
+    return (
+        <div className="space-y-1.5">
+            {options.map(opt => (
+                <label
+                    key={opt}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition text-xs sm:text-sm ${
+                        values.includes(opt)
+                            ? 'border-accent dark:border-dark-accent bg-accent/5 dark:bg-dark-accent/10'
+                            : 'border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
+                    }`}
+                >
+                    <input
+                        type="checkbox"
+                        checked={values.includes(opt)}
+                        onChange={() => toggle(opt)}
+                        className="w-4 h-4 rounded accent-accent dark:accent-dark-accent flex-shrink-0"
+                    />
+                    <span className="text-gray-700 dark:text-dark-text">{opt}</span>
+                </label>
+            ))}
+        </div>
+    );
+};
+
 const textAreaClass = "w-full text-xs sm:text-sm rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-surface text-gray-800 dark:text-dark-text placeholder-gray-400 dark:placeholder-dark-text-muted p-2 focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-dark-accent resize-none";
 
 const QuestionCard = ({ meta, value, onChange, otherValue, onOtherChange }) => (
@@ -104,15 +141,26 @@ const QuestionCard = ({ meta, value, onChange, otherValue, onOtherChange }) => (
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent dark:bg-dark-accent text-white text-xs font-bold flex items-center justify-center">
                 {meta.number}
             </span>
-            <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-dark-text pt-0.5">{meta.text}</p>
+            <div className="pt-0.5">
+                <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-dark-text">{meta.text}</p>
+                {meta.type === 'choice' && (
+                    <p className="text-[11px] text-gray-400 dark:text-dark-text-muted mt-0.5">
+                        {meta.multiple ? 'Multiple choice — select all that apply' : 'Multiple choice — select one'}
+                    </p>
+                )}
+            </div>
         </div>
 
         {meta.type === 'star' && <StarRating value={value} onChange={onChange} />}
 
         {meta.type === 'choice' && (
             <>
-                <RadioList options={meta.options} value={value} onChange={onChange} />
-                {meta.hasOther && value === 'Another app' && (
+                {meta.multiple ? (
+                    <CheckboxList options={meta.options} values={value} onChange={onChange} exclusiveOption={meta.exclusiveOption} />
+                ) : (
+                    <RadioList options={meta.options} value={value} onChange={onChange} />
+                )}
+                {meta.hasOther && (meta.multiple ? value.includes('Another app') : value === 'Another app') && (
                     <input
                         type="text"
                         value={otherValue}
@@ -144,14 +192,14 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
     const [dismissing, setDismissing] = useState(false);
     const [answers, setAnswers] = useState({
         q1_overallSatisfaction: 0,
-        q2_mostUsedFeature: '',
-        q3_mostConfusingFeature: '',
+        q2_mostUsedFeature: [],
+        q3_mostConfusingFeature: [],
         q4_appSpeed: 0,
         q5_easeOfNavigation: 0,
         q6_visualDesign: 0,
-        q7_primarySpecies: '',
+        q7_primarySpecies: [],
         q8_primaryDevice: '',
-        q9_priorSolution: '',
+        q9_priorSolution: [],
         q9_priorSolutionOther: '',
         q10_howHeard: '',
         q11_likelihoodToRecommend: 0,
@@ -184,6 +232,11 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
         const value = answers[key];
         if (meta.type === 'star') return value > 0;
         if (meta.type === 'text') return true;
+        if (meta.multiple) {
+            if (!Array.isArray(value) || value.length === 0) return false;
+            if (meta.hasOther && value.includes('Another app')) return answers.q9_priorSolutionOther.trim() !== '';
+            return true;
+        }
         if (meta.hasOther && value === 'Another app') return answers.q9_priorSolutionOther.trim() !== '';
         return value !== '';
     };
