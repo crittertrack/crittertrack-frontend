@@ -231,7 +231,7 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                         <StatCard label="Skipped" value={stats.funnel.skipped} color="blue" />
                         <StatCard label="Dismissed" value={stats.funnel.dismissed} color="gray" />
                         <StatCard label="Completed" value={stats.funnel.completed} color="green" />
-                        <StatCard label="Total Responses" value={stats.totalResponses} />
+                        <StatCard label="Total Responses" value={stats.totalEngaged} />
                     </div>
 
                     <div className="bg-white dark:bg-dark-card-bg rounded-xl border border-gray-200 dark:border-dark-border p-6">
