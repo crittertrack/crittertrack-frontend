@@ -98,6 +98,8 @@ const AnimalModalV2 = ({
     const [mainImage, setMainImage] = useState(animal.imageUrl || animal.photoUrl);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [commonAncestorCount, setCommonAncestorCount] = useState(null);
+    const [avgKinship, setAvgKinship] = useState(null);
+    const [avkPopulationSize, setAvkPopulationSize] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownedAnimals, setOwnedAnimals] = useState([]); // Placeholder for owned animals
@@ -171,14 +173,24 @@ const AnimalModalV2 = ({
                         setAnimalCOI(response.data.inbreedingCoefficient);
                         setCommonAncestorCount(response.data.commonAncestorCount || null);
                     }
+                    if (response.data && response.data.avgKinship != null) {
+                        setAvgKinship(response.data.avgKinship);
+                        setAvkPopulationSize(response.data.avkPopulationSize || null);
+                    } else {
+                        setAvgKinship(null);
+                        setAvkPopulationSize(null);
+                    }
                 } catch (error) {
                     setAnimalCOI(null);
                     setCommonAncestorCount(null);
+                    setAvgKinship(null);
+                    setAvkPopulationSize(null);
                 } finally {
                     setLoadingCOI(false);
                 }
             } else {
                 setAnimalCOI(null);
+                setAvgKinship(null);
             }
         };
         fetchCOI();
@@ -671,13 +683,31 @@ const AnimalModalV2 = ({
                                     <div className="border-b border-gray-200 dark:border-dark-border pb-2 mb-2">
                                         <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase tracking-wide">Coefficient of Inbreeding (COI)</h3>
                                     </div>
-                                    {animalCOI != null && (
-                                        <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
-                                            <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
-                                            {commonAncestorCount != null && <span className="text-gray-600 dark:text-dark-text-secondary"> (calculated on {commonAncestorCount} common ancestor{commonAncestorCount !== 1 ? 's' : ''})</span>}
-                                        </p>
-                                    )}
                                     {loadingCOI && <p className="text-xs text-gray-400 dark:text-dark-text-muted">Calculating COI...</p>}
+                                    {!loadingCOI && (animalCOI != null || avgKinship != null) && (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-dark-text-muted">COI</p>
+                                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
+                                                    {animalCOI != null ? `${animalCOI.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    {commonAncestorCount != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">{commonAncestorCount} common ancestor{commonAncestorCount !== 1 ? 's' : ''}</span>}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-dark-text-muted flex items-center gap-1">
+                                                    AVK
+                                                    <InfoButton title="Average Kinship (AVK)">
+                                                        <p>A pedigree-based Average Kinship Value, showing how represented this animal's ancestry is within its owner's living, same-species population (not DNA/genomic data — calculated purely from recorded pedigree relationships).</p>
+                                                        <p>A lower AVK means this animal's lineage is less duplicated elsewhere in the population; a higher AVK means its ancestry is already heavily represented.</p>
+                                                    </InfoButton>
+                                                </p>
+                                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary">
+                                                    {avgKinship != null ? `${avgKinship.toFixed(2)}%` : <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    {avkPopulationSize != null && <span className="block text-xs text-gray-600 dark:text-dark-text-secondary">vs. {avkPopulationSize} animal{avkPopulationSize !== 1 ? 's' : ''}</span>}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/60">
