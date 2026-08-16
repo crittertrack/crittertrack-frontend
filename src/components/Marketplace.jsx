@@ -80,7 +80,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
     // Pagination
     const [pagination, setPagination] = useState({
         page: 1,
-        limit: 20,
+        limit: 21, // multiple of 3 so the lg:grid-cols-3 grid never ends on a partial row
         total: 0,
         totalPages: 0
     });
