@@ -40,17 +40,16 @@ const QUESTIONS_META = {
     q15_anythingElse: { number: 15, type: 'text', text: 'Anything else?' }
 };
 
-// One page per question, except consecutive star questions which are grouped up to 3-per-page
+// Ratings grouped 3-per-page (2 pages), then multiple choice and free text each get their own page
 const PAGES = [
-    ['q1_overallSatisfaction'],
+    ['q1_overallSatisfaction', 'q4_appSpeed', 'q5_easeOfNavigation'],
+    ['q6_visualDesign', 'q11_likelihoodToRecommend', 'q12_likelyToKeepUsing'],
     ['q2_mostUsedFeature'],
     ['q3_mostConfusingFeature'],
-    ['q4_appSpeed', 'q5_easeOfNavigation', 'q6_visualDesign'],
     ['q7_primarySpecies'],
     ['q8_primaryDevice'],
     ['q9_priorSolution'],
     ['q10_howHeard'],
-    ['q11_likelihoodToRecommend', 'q12_likelyToKeepUsing'],
     ['q13_bugsIssues'],
     ['q14_magicWandFeature'],
     ['q15_anythingElse']
@@ -228,7 +227,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
             <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-accent to-primary dark:from-dark-accent dark:to-dark-primary text-white p-3 sm:p-4 rounded-t-lg flex-shrink-0">
-                    <h2 className="text-lg sm:text-xl font-bold">Help us wrap up the beta! 📝</h2>
+                    <h2 className="text-lg sm:text-xl font-bold">CritterTrack Final Beta Survey 📝</h2>
                     <p className="text-xs sm:text-sm text-white/90">A few quick questions — everything here is optional.</p>
                 </div>
 
@@ -285,7 +284,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                             {/* Progress bar */}
                             <div className="mb-4">
                                 <div className="flex justify-between text-xs text-gray-500 dark:text-dark-text-secondary mb-1">
-                                    <span>Question {pageIndex + 1} of {PAGES.length}</span>
+                                    <span>Page {pageIndex + 1} of {PAGES.length}</span>
                                 </div>
                                 <div className="w-full h-1.5 bg-gray-200 dark:bg-dark-surface rounded-full overflow-hidden">
                                     <div
