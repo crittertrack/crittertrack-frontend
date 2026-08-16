@@ -3241,6 +3241,7 @@ useEffect(() => {
                 fetchAnimals={fetchAnimals}
                 MgmtAnimalCard={MgmtAnimalCard}
                 SectionHeader={SectionHeader}
+                userProfile={userProfile}
             />
         );
     };
@@ -3250,7 +3251,7 @@ useEffect(() => {
     const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size'];
     const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
 
-    const MgmtAnimalCard = ({ animal, extras }) => (
+    const MgmtAnimalCard = ({ animal, extras, middleContent }) => (
         <div
             className="flex items-center bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer gap-2"
             onClick={() => onViewAnimal && onViewAnimal(animal)}
@@ -3279,6 +3280,11 @@ useEffect(() => {
                         ) : null;
                     })()}
                 </div>
+                {middleContent && (
+                    <div className="hidden sm:block ml-auto shrink-0 max-w-[160px] text-right" title={middleContent}>
+                        <span className="text-xs text-gray-500 dark:text-dark-text-secondary truncate block">{middleContent}</span>
+                    </div>
+                )}
             </div>
             {extras && <div className="shrink-0 flex items-center">{extras}</div>}
         </div>

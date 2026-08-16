@@ -16,8 +16,11 @@ const ArchiveScreen = ({
     showModalMessage,
     fetchAnimals,
     MgmtAnimalCard,
-    SectionHeader
+    SectionHeader,
+    userProfile
 }) => {
+    // Temporary, single-user request — show the animal's own owner field on archived cards.
+    const showOwnerField = userProfile?.id_public === 'CTU2';
     const [archivedAnimals, setArchivedAnimals] = useState([]);
     const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);
     const [archiveLoading, setArchiveLoading] = useState(false);
@@ -250,6 +253,7 @@ const ArchiveScreen = ({
                                         <MgmtAnimalCard
                                             key={a._id || a.id_public}
                                             animal={a}
+                                            middleContent={showOwnerField ? a.manualownerName : null}
                                             extras={
                                                 <button
                                                     onClick={e => { e.stopPropagation(); handleUnarchive(a); }}
