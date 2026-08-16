@@ -359,25 +359,27 @@ const BetaSurveyTab = ({ API_BASE_URL, authToken }) => {
                                 {!responseLoading && selectedResponse && (
                                     <div className="space-y-3 max-h-[28rem] overflow-y-auto">
                                         {[...STAR_QUESTIONS, ...CHOICE_QUESTIONS].map(q => (
-                                            selectedResponse[q] != null && !(Array.isArray(selectedResponse[q]) && selectedResponse[q].length === 0) && (
-                                                <div key={q} className="text-sm">
-                                                    <span className="text-gray-500 dark:text-dark-text-secondary">{QUESTION_LABELS[q]}: </span>
-                                                    <span className="text-gray-800 dark:text-dark-text font-medium">
-                                                        {STAR_QUESTIONS.includes(q)
-                                                            ? `${selectedResponse[q]} / 5`
-                                                            : Array.isArray(selectedResponse[q])
-                                                                ? selectedResponse[q].join(', ')
-                                                                : selectedResponse[q]}
-                                                    </span>
-                                                </div>
-                                            )
+                                            <React.Fragment key={q}>
+                                                {selectedResponse[q] != null && !(Array.isArray(selectedResponse[q]) && selectedResponse[q].length === 0) && (
+                                                    <div className="text-sm">
+                                                        <span className="text-gray-500 dark:text-dark-text-secondary">{QUESTION_LABELS[q]}: </span>
+                                                        <span className="text-gray-800 dark:text-dark-text font-medium">
+                                                            {STAR_QUESTIONS.includes(q)
+                                                                ? `${selectedResponse[q]} / 5`
+                                                                : Array.isArray(selectedResponse[q])
+                                                                    ? selectedResponse[q].join(', ')
+                                                                    : selectedResponse[q]}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {q === 'q9_priorSolution' && selectedResponse.q9_priorSolutionOther && (
+                                                    <div className="text-sm">
+                                                        <span className="text-gray-500 dark:text-dark-text-secondary">Which app: </span>
+                                                        <span className="text-gray-800 dark:text-dark-text font-medium">{selectedResponse.q9_priorSolutionOther}</span>
+                                                    </div>
+                                                )}
+                                            </React.Fragment>
                                         ))}
-                                        {selectedResponse.q9_priorSolutionOther && (
-                                            <div className="text-sm">
-                                                <span className="text-gray-500 dark:text-dark-text-secondary">Which app: </span>
-                                                <span className="text-gray-800 dark:text-dark-text font-medium">{selectedResponse.q9_priorSolutionOther}</span>
-                                            </div>
-                                        )}
                                         {selectedResponse.q13_bugsIssues && (
                                             <div className="text-sm"><span className="text-gray-500 dark:text-dark-text-secondary block mb-1">Bugs/issues:</span> {selectedResponse.q13_bugsIssues}</div>
                                         )}
