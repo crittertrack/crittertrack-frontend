@@ -119,7 +119,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             axios.get(`${API_BASE_URL}/animals/${animal.id_public}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             }).then(res => {
-                setAnimalToEdit(res.data);
+                // Don't clobber if the user already cancelled/navigated away while this was in flight.
+                setAnimalToEdit(prev => (prev && prev.id_public === animal.id_public) ? res.data : prev);
             }).catch(err => {
                 console.warn('[handleEditAnimal] Failed to fetch full animal data:', err.message);
             });
@@ -401,13 +402,16 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         if (!animalToView?.id_public || !authToken) return;
         // Skip if we already fetched full data for this animal id
         if (lastFetchedIdRef.current === animalToView.id_public) return;
-        lastFetchedIdRef.current = animalToView.id_public; // Update ref before fetch
+        const fetchedId = animalToView.id_public;
+        lastFetchedIdRef.current = fetchedId; // Update ref before fetch
         // Use /any/ since animalToView is often a pedigree ancestor owned by someone else —
         // the ownership-only endpoint would 404 for those and skip the refresh entirely.
-        axios.get(`${API_BASE_URL}/animals/any/${animalToView.id_public}`, {
+        axios.get(`${API_BASE_URL}/animals/any/${fetchedId}`, {
             headers: { Authorization: `Bearer ${authToken}` }
         }).then(res => {
-            setAnimalToView(res.data);
+            // If the user already clicked Edit (or navigated away) while this was in flight,
+            // animalToView will have moved on (or been cleared) — don't clobber it with stale data.
+            setAnimalToView(prev => (prev && prev.id_public === fetchedId) ? res.data : prev);
         }).catch(err => {
             console.warn('[usePrivateAnimalNavigation] Failed to fetch full animal data:', err.message);
         });
