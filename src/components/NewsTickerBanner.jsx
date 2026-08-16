@@ -114,6 +114,18 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
             <span className="mx-4">|</span>
           </span>
         )}
+        {betaSurveyStatus === 'dismissed' && onReopenBetaSurvey && (
+          <span className="inline-flex items-center px-4 font-semibold">
+            <button
+              onClick={onReopenBetaSurvey}
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
+            >
+              <ClipboardList size={14} className="inline-block mr-1.5 text-orange-300 flex-shrink-0" />
+              Changed your mind? Click here for the beta survey!
+            </button>
+            <span className="mx-4">|</span>
+          </span>
+        )}
         {news.map((item, index) => (
           <span key={item._id} className="inline-flex items-center px-4">
             <button
