@@ -107,34 +107,23 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
             setNotFound(false);
             setFoundViaOwned(false);
             try {
-                // If authToken is available, try fetching from owned animals first
+                // /animals/any/:id already checks ownership (and view-only access) before
+                // falling back to public data, so it covers the owned case too — calling the
+                // owned-only endpoint first would just guarantee a noisy 404 for non-owned
+                // parents (e.g. sold/transferred animals) with no benefit.
                 if (authToken) {
                     try {
-                        const ownedResponse = await axios.get(`${API_BASE_URL}/animals/${parentId}`, {
+                        const anyResponse = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
-                        if (ownedResponse.data) {
-                            // Found in user's own animals – always show, even if private
-                            setParentData(ownedResponse.data);
-                            setFoundViaOwned(true);
+                        if (anyResponse.data) {
+                            setParentData(anyResponse.data);
+                            setFoundViaOwned(!!anyResponse.data._viewerHasAccess);
                             setLoading(false);
                             return;
                         }
-                    } catch (ownedError) {
-                        // Not in owned animals, try /animals/any for sold/transferred animals
-                        try {
-                            const anyResponse = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
-                                headers: { Authorization: `Bearer ${authToken}` }
-                            });
-                            if (anyResponse.data) {
-                                // Found via related (not owned) – respect isPrivate flag
-                                setParentData(anyResponse.data);
-                                setLoading(false);
-                                return;
-                            }
-                        } catch (anyError) {
-                            console.log(`${parentType} not in owned or related animals, checking public database`);
-                        }
+                    } catch (anyError) {
+                        console.log(`${parentType} not in owned or related animals, checking public database`);
                     }
                 }
 
