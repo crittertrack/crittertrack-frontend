@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Heart, Sparkles, MessageSquare } from 'lucide-react';
 
 const FEATURE_OPTIONS = [
     'My Animals (main list)', 'Collections', 'Enclosures',
@@ -235,12 +235,48 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                 {/* Content - Scrollable */}
                 <div ref={contentRef} className="p-3 sm:p-5 overflow-y-auto flex-1">
                     {phase === 'intro' && (
-                        <div className="py-4 sm:py-6 text-center sm:text-left">
-                            <p className="text-sm text-gray-700 dark:text-dark-text-secondary leading-relaxed">
-                                We're wrapping up the beta phase and would love your feedback to help shape what comes
-                                next. It only takes a couple of minutes, and every question along the way is optional —
-                                skip anything you'd rather not answer.
-                            </p>
+                        <div className="py-2 sm:py-3 space-y-3 sm:space-y-4">
+                            <div className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-dark-accent-purple-bg dark:to-dark-accent-purple-bg border border-purple-200 dark:border-dark-accent-purple/40 rounded-lg p-3 sm:p-4">
+                                <div className="flex gap-2.5 sm:gap-3 items-start">
+                                    <Heart className="text-purple-600 dark:text-dark-accent-purple flex-shrink-0" size={20} />
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800 dark:text-dark-text text-xs sm:text-sm mb-1">Thank you for testing CritterTrack!</h3>
+                                        <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed">
+                                            Every animal you've logged, every bug you've reported, and every bit of
+                                            patience with a work-in-progress app has directly shaped what CritterTrack
+                                            has become. We couldn't have gotten this far without breeders like you.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-blue-50 dark:bg-dark-info-blue/20 border-l-4 border-blue-500 dark:border-dark-info-blue rounded p-3 sm:p-4">
+                                <div className="flex gap-2.5 sm:gap-3 items-start">
+                                    <Sparkles className="text-blue-500 dark:text-dark-info-blue flex-shrink-0" size={20} />
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800 dark:text-dark-text text-xs sm:text-sm mb-1.5">Fun facts about CritterTrack</h3>
+                                        <ul className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed space-y-1 list-disc list-inside">
+                                            <li>70+ species supported across 6 categories — from Fancy Mice to Ball Pythons to Axolotls</li>
+                                            <li>10 major tool areas, including genetics calculators and a full Family Tree Explorer</li>
+                                            <li>You're one of the first breeders to ever use this app — beta testers shape the whole roadmap</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-r from-accent/10 to-primary/10 dark:from-dark-accent/20 dark:to-dark-primary/20 border border-accent/20 dark:border-dark-accent/30 rounded-lg p-3 sm:p-4">
+                                <div className="flex gap-2.5 sm:gap-3 items-start">
+                                    <MessageSquare className="text-accent dark:text-dark-accent flex-shrink-0" size={20} />
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800 dark:text-dark-text text-xs sm:text-sm mb-1">What happens with your answers?</h3>
+                                        <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed">
+                                            Your ratings and comments go straight into planning what gets polished or
+                                            built next. It only takes a couple of minutes, and every question along
+                                            the way is optional — skip anything you'd rather not answer.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 
