@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-    AlertTriangle, ArrowLeft, CheckCircle, ChevronDown, ChevronUp,
-    Download, Eye, EyeOff, FileText, Flame, Gem, Globe, Loader2, Mail, Plus, Save,
+    AlertTriangle, ArrowLeft, Check, CheckCircle, ChevronDown, ChevronUp,
+    Download, Eye, EyeOff, FileText, Flame, Gem, Globe, Loader2, Mail, Pencil, Plus, Save,
     Search, Settings, Star, TableOfContents, Trash2, Upload, User, X
 } from 'lucide-react';
 import { BreederDirectorySettings } from '../PublicProfile/BreederDirectory';
@@ -416,6 +416,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [appearanceOptions, setAppearanceOptions] = useState([]);
     const [appearanceOptionsLoading, setAppearanceOptionsLoading] = useState(false);
     const [appearanceOptionDeletingId, setAppearanceOptionDeletingId] = useState(null);
+    const [appearanceOptionSavingId, setAppearanceOptionSavingId] = useState(null);
+    const [aoSpecies, setAoSpecies] = useState('');
+    const [aoField, setAoField] = useState('');
+    const [aoSearch, setAoSearch] = useState('');
+    const [editingOptionId, setEditingOptionId] = useState(null);
+    const [editingValue, setEditingValue] = useState('');
 
     // Breeding lines — local draft state (not saved until user clicks Save)
     const [localBLDefs, setLocalBLDefs] = useState(breedingLineDefs);
@@ -945,6 +951,32 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             }
             return { ...prev, [section]: updated };
         });
+    };
+
+    // Derived filters for the "Dropdown Lists" management tab — keeps the list to one
+    // species/field at a time (plus optional text search) instead of showing everything at once.
+    const aoSpeciesList = [...new Set(appearanceOptions.map(o => o.species))].sort();
+    const aoFieldList = [...new Set(appearanceOptions.filter(o => !aoSpecies || o.species === aoSpecies).map(o => o.field))].sort();
+    const aoSearchLower = aoSearch.trim().toLowerCase();
+    const filteredAppearanceOptions = appearanceOptions.filter(o =>
+        (!aoSpecies || o.species === aoSpecies) &&
+        (!aoField || o.field === aoField) &&
+        (!aoSearchLower || o.value.toLowerCase().includes(aoSearchLower))
+    );
+
+    const handleRenameAppearanceOption = async (option) => {
+        const newValue = editingValue.trim();
+        if (!newValue) return;
+        setAppearanceOptionSavingId(option._id);
+        try {
+            const res = await axios.patch(`${API_BASE_URL}/appearance-options/${option._id}`, { value: newValue }, { headers: { Authorization: `Bearer ${authToken}` } });
+            setAppearanceOptions(prev => prev.map(o => o._id === option._id ? { ...o, value: res.data.value } : o));
+            setEditingOptionId(null);
+        } catch (error) {
+            showModalMessage('Error', error.response?.data?.message || 'Failed to rename option.');
+        } finally {
+            setAppearanceOptionSavingId(null);
+        }
     };
 
     return (
@@ -1496,51 +1528,103 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2">Dropdown Lists</h3>
                     <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                         Values you've typed into dropdown-style fields (like Color) on the Animal form get saved here per species, so they're
-                        suggested again next time. Remove typos or ones you no longer use — this only affects the suggestion list, it never
-                        changes any animal that already has that value.
+                        suggested again next time. Rename a typo to fix it everywhere (including any animals already using it), or remove a
+                        value you no longer want suggested.
                     </p>
+
                     {appearanceOptionsLoading ? (
                         <div className="flex justify-center py-8"><Loader2 className="animate-spin" size={28} /></div>
                     ) : appearanceOptions.length === 0 ? (
                         <p className="text-gray-500 dark:text-dark-text-muted text-sm py-4 text-center">No saved dropdown values yet.</p>
                     ) : (
-                        Object.entries(
-                            appearanceOptions.reduce((acc, opt) => {
-                                const key = opt.species;
-                                (acc[key] = acc[key] || []).push(opt);
-                                return acc;
-                            }, {})
-                        ).map(([species, opts]) => (
-                            <div key={species} className="bg-white dark:bg-dark-card-bg rounded-lg border dark:border-dark-text p-4">
-                                <h4 className="font-semibold text-gray-800 dark:text-dark-text mb-2">{species}</h4>
-                                {Object.entries(
-                                    opts.reduce((acc, opt) => {
-                                        (acc[opt.field] = acc[opt.field] || []).push(opt);
-                                        return acc;
-                                    }, {})
-                                ).map(([field, fieldOpts]) => (
-                                    <div key={field} className="mb-2 last:mb-0">
-                                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-dark-text-muted mb-1 capitalize">{field}</p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {fieldOpts.map(opt => (
-                                                <span key={opt._id} className="inline-flex items-center bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary text-xs font-medium pl-3 pr-2 py-1 rounded-full">
-                                                    {opt.value}
-                                                    <button
-                                                        type="button"
-                                                        disabled={appearanceOptionDeletingId === opt._id}
-                                                        onClick={() => handleDeleteAppearanceOption(opt)}
-                                                        className="ml-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 transition disabled:opacity-50"
-                                                        title="Remove"
-                                                    >
-                                                        {appearanceOptionDeletingId === opt._id ? <Loader2 className="animate-spin" size={12} /> : <Trash2 size={12} />}
-                                                    </button>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
+                        <>
+                            {/* Species/field pickers keep this to one small list at a time instead of dumping everything at once */}
+                            <div className="flex flex-wrap gap-3">
+                                <select
+                                    value={aoSpecies}
+                                    onChange={(e) => { setAoSpecies(e.target.value); setAoField(''); }}
+                                    className="p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                >
+                                    <option value="">All species ({appearanceOptions.length})</option>
+                                    {aoSpeciesList.map(sp => (
+                                        <option key={sp} value={sp}>{sp} ({appearanceOptions.filter(o => o.species === sp).length})</option>
+                                    ))}
+                                </select>
+                                <select
+                                    value={aoField}
+                                    onChange={(e) => setAoField(e.target.value)}
+                                    className="p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                >
+                                    <option value="">All fields</option>
+                                    {aoFieldList.map(f => (
+                                        <option key={f} value={f} className="capitalize">{f}</option>
+                                    ))}
+                                </select>
+                                <input
+                                    type="text"
+                                    value={aoSearch}
+                                    onChange={(e) => setAoSearch(e.target.value)}
+                                    placeholder="Search values..."
+                                    className="flex-1 min-w-[160px] p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-card-bg dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                />
                             </div>
-                        ))
+
+                            {filteredAppearanceOptions.length === 0 ? (
+                                <p className="text-gray-500 dark:text-dark-text-muted text-sm py-4 text-center">No values match your filters.</p>
+                            ) : (
+                                <div className="border dark:border-dark-border rounded-lg divide-y dark:divide-dark-border max-h-[28rem] overflow-y-auto">
+                                    {filteredAppearanceOptions.map(opt => (
+                                        <div key={opt._id} className="flex items-center gap-3 px-3 py-2 bg-white dark:bg-dark-card-bg text-sm">
+                                            <div className="min-w-0 shrink-0 w-40 text-xs text-gray-500 dark:text-dark-text-muted truncate">
+                                                {opt.species} <span className="mx-1">·</span> <span className="capitalize">{opt.field}</span>
+                                            </div>
+                                            {editingOptionId === opt._id ? (
+                                                <input
+                                                    type="text"
+                                                    autoFocus
+                                                    value={editingValue}
+                                                    onChange={(e) => setEditingValue(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') handleRenameAppearanceOption(opt);
+                                                        if (e.key === 'Escape') setEditingOptionId(null);
+                                                    }}
+                                                    className="flex-1 p-1.5 border border-primary rounded-lg dark:bg-dark-surface dark:text-dark-text text-sm"
+                                                />
+                                            ) : (
+                                                <span className="flex-1 text-gray-800 dark:text-dark-text truncate">{opt.value}</span>
+                                            )}
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                {editingOptionId === opt._id ? (
+                                                    <>
+                                                        <button type="button" disabled={appearanceOptionSavingId === opt._id}
+                                                            onClick={() => handleRenameAppearanceOption(opt)}
+                                                            className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-green-600 transition disabled:opacity-50" title="Save">
+                                                            {appearanceOptionSavingId === opt._id ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />}
+                                                        </button>
+                                                        <button type="button" onClick={() => setEditingOptionId(null)}
+                                                            className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-600 transition" title="Cancel">
+                                                            <X size={14} />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button type="button" onClick={() => { setEditingOptionId(opt._id); setEditingValue(opt.value); }}
+                                                            className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-primary transition" title="Rename">
+                                                            <Pencil size={14} />
+                                                        </button>
+                                                        <button type="button" disabled={appearanceOptionDeletingId === opt._id}
+                                                            onClick={() => handleDeleteAppearanceOption(opt)}
+                                                            className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 transition disabled:opacity-50" title="Remove">
+                                                            {appearanceOptionDeletingId === opt._id ? <Loader2 className="animate-spin" size={14} /> : <Trash2 size={14} />}
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             )}
