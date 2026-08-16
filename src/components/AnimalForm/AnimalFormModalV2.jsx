@@ -23,6 +23,10 @@ import InfoButton from '../shared/InfoButton';
 import ComboBoxField from '../shared/ComboBoxField';
 import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
 
+// Appearance fields that use the per-user/per-species dropdown-with-custom-entry pattern
+// (see appearanceOptionsMap / ComboBoxField below).
+const APPEARANCE_DROPDOWN_FIELDS = ['breed', 'color', 'coatPattern', 'coat', 'earset', 'morph', 'markings', 'eyeColor', 'nailColor'];
+
 const getSpeciesCategory = (species) => {
     if (!species) return 'Other';
     if (SPECIES_CATEGORY_MAP[species]) return SPECIES_CATEGORY_MAP[species];
@@ -2775,21 +2779,25 @@ const AnimalFormModalV2 = ({
     // (which produced dozens of false-positive "changes" from date/shape reformatting alone).
     const initialFormDataRef = useRef(formData);
 
-    // Per-user, per-species "Color" dropdown options (ZooEasy-style: pick existing or type new).
-    // Fetched fresh whenever the species changes; new values get persisted on successful save.
-    const [colorOptions, setColorOptions] = useState([]);
+    // Per-user, per-species dropdown-with-custom-entry options (ZooEasy-style: pick existing or
+    // type new) for every appearance field. Fetched fresh whenever the species changes; new
+    // values get persisted on successful save (see handleSubmit).
+    const [appearanceOptionsMap, setAppearanceOptionsMap] = useState({});
     useEffect(() => {
         if (!formData.species || !API_BASE_URL) {
-            setColorOptions([]);
+            setAppearanceOptionsMap({});
             return;
         }
         let cancelled = false;
-        axios.get(`${API_BASE_URL}/appearance-options`, {
-            params: { species: formData.species, field: 'color' },
-            headers: { Authorization: `Bearer ${authToken}` }
-        }).then(res => {
-            if (!cancelled) setColorOptions(res.data || []);
-        }).catch(err => console.error('[ComboBox] Failed to fetch color options:', err));
+        Promise.all(APPEARANCE_DROPDOWN_FIELDS.map(field =>
+            axios.get(`${API_BASE_URL}/appearance-options`, {
+                params: { species: formData.species, field },
+                headers: { Authorization: `Bearer ${authToken}` }
+            }).then(res => [field, res.data || []])
+                .catch(err => { console.error(`[ComboBox] Failed to fetch ${field} options:`, err); return [field, []]; })
+        )).then(pairs => {
+            if (!cancelled) setAppearanceOptionsMap(Object.fromEntries(pairs));
+        });
         return () => { cancelled = true; };
     }, [formData.species, API_BASE_URL, authToken]);
 
@@ -3615,15 +3623,19 @@ const AnimalFormModalV2 = ({
 
             const saveResponse = await onSave(method, url, payloadToSave, initialFormDataRef.current);
 
-            // Persist a brand-new Color value into the user's per-species dropdown list, so it's
-            // offered as a suggestion next time (fire-and-forget — never blocks the save).
-            const trimmedColor = formData.color?.trim();
-            if (trimmedColor && !colorOptions.some(opt => opt.toLowerCase() === trimmedColor.toLowerCase())) {
-                axios.post(`${API_BASE_URL}/appearance-options`, {
-                    species: formData.species, field: 'color', value: trimmedColor
-                }, { headers: { Authorization: `Bearer ${authToken}` } })
-                    .catch(err => console.error('[ComboBox] Failed to save new color option:', err));
-            }
+            // Persist any brand-new appearance values into the user's per-species dropdown
+            // lists, so they're offered as suggestions next time (fire-and-forget — never
+            // blocks the save).
+            APPEARANCE_DROPDOWN_FIELDS.forEach(field => {
+                const trimmedValue = formData[field]?.trim();
+                const existingOptions = appearanceOptionsMap[field] || [];
+                if (trimmedValue && !existingOptions.some(opt => opt.toLowerCase() === trimmedValue.toLowerCase())) {
+                    axios.post(`${API_BASE_URL}/appearance-options`, {
+                        species: formData.species, field, value: trimmedValue
+                    }, { headers: { Authorization: `Bearer ${authToken}` } })
+                        .catch(err => console.error(`[ComboBox] Failed to save new ${field} option:`, err));
+                }
+            });
 
             // Manually-picked Contacts with no linked CTUID aren't matched automatically by CTUID,
             // so record the assignment directly on the Contact so the animal shows under their
@@ -4078,8 +4090,11 @@ const AnimalFormModalV2 = ({
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('breed', 'Breed')}</label>
-                                                <input type="text" name="breed" value={formData.breed || ''} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
+                                                <ComboBoxField
+                                                    value={formData.breed || ''}
+                                                    onChange={(v) => setFormData(p => ({ ...p, breed: v }))}
+                                                    options={appearanceOptionsMap.breed}
+                                                />
                                             </div>
                                             {!hiddenField('strain') && <div className="md:col-span-2">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Strain</label>
@@ -4151,54 +4166,75 @@ const AnimalFormModalV2 = ({
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Color</label>
                                             <ComboBoxField
-                                                value={formData.color}
+                                                value={formData.color || ''}
                                                 onChange={(v) => setFormData(p => ({ ...p, color: v }))}
-                                                options={colorOptions}
+                                                options={appearanceOptionsMap.color}
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('coatPattern', 'Pattern')}</label>
-                                            <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
-                                                placeholder="e.g., Solid, Hooded, Brindle" />
+                                            <ComboBoxField
+                                                value={formData.coatPattern || ''}
+                                                onChange={(v) => setFormData(p => ({ ...p, coatPattern: v }))}
+                                                options={appearanceOptionsMap.coatPattern}
+                                                placeholder="e.g., Solid, Hooded, Brindle"
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('coat', 'Coat Type')}</label>
-                                            <input type="text" name="coat" value={formData.coat} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
-                                                placeholder="e.g., Short, Long, Rex" />
+                                            <ComboBoxField
+                                                value={formData.coat || ''}
+                                                onChange={(v) => setFormData(p => ({ ...p, coat: v }))}
+                                                options={appearanceOptionsMap.coat}
+                                                placeholder="e.g., Short, Long, Rex"
+                                            />
                                         </div>
                                         {(formData.species === 'Rat' || formData.species === 'Fancy Rat') && (
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Earset</label>
-                                                <input type="text" name="earset" value={formData.earset} onChange={handleChange}
-                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
-                                                    placeholder="e.g., Standard, Dumbo" />
+                                                <ComboBoxField
+                                                    value={formData.earset || ''}
+                                                    onChange={(v) => setFormData(p => ({ ...p, earset: v }))}
+                                                    options={appearanceOptionsMap.earset}
+                                                    placeholder="e.g., Standard, Dumbo"
+                                                />
                                             </div>
                                         )}
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Morph</label>
-                                            <input type="text" name="morph" value={formData.morph || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
-                                                placeholder="Mutation/Morph" />
+                                            <ComboBoxField
+                                                value={formData.morph || ''}
+                                                onChange={(v) => setFormData(p => ({ ...p, morph: v }))}
+                                                options={appearanceOptionsMap.morph}
+                                                placeholder="Mutation/Morph"
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Markings</label>
-                                            <input type="text" name="markings" value={formData.markings || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
-                                                placeholder="Body markings/patterns" />
+                                            <ComboBoxField
+                                                value={formData.markings || ''}
+                                                onChange={(v) => setFormData(p => ({ ...p, markings: v }))}
+                                                options={appearanceOptionsMap.markings}
+                                                placeholder="Body markings/patterns"
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Eye Color</label>
-                                            <input type="text" name="eyeColor" value={formData.eyeColor || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
-                                                placeholder="Eye color" />
+                                            <ComboBoxField
+                                                value={formData.eyeColor || ''}
+                                                onChange={(v) => setFormData(p => ({ ...p, eyeColor: v }))}
+                                                options={appearanceOptionsMap.eyeColor}
+                                                placeholder="Eye color"
+                                            />
                                         </div>
                                         {!hiddenField('nailColor') && <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Nail Color</label>
-                                            <input type="text" name="nailColor" value={formData.nailColor || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
-                                                placeholder="Nail/claw color" />
+                                            <ComboBoxField
+                                                value={formData.nailColor || ''}
+                                                onChange={(v) => setFormData(p => ({ ...p, nailColor: v }))}
+                                                options={appearanceOptionsMap.nailColor}
+                                                placeholder="Nail/claw color"
+                                            />
                                         </div>}
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Size</label>
