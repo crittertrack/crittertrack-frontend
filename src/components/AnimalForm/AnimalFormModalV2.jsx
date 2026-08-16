@@ -25,7 +25,7 @@ import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
 
 // Appearance fields that use the per-user/per-species dropdown-with-custom-entry pattern
 // (see appearanceOptionsMap / ComboBoxField below).
-const APPEARANCE_DROPDOWN_FIELDS = ['breed', 'color', 'coatPattern', 'coat', 'earset', 'morph', 'markings', 'eyeColor', 'nailColor'];
+const APPEARANCE_DROPDOWN_FIELDS = ['color', 'coatPattern', 'coat', 'earset', 'morph', 'markings', 'eyeColor', 'nailColor'];
 
 const getSpeciesCategory = (species) => {
     if (!species) return 'Other';
@@ -4090,11 +4090,8 @@ const AnimalFormModalV2 = ({
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('breed', 'Breed')}</label>
-                                                <ComboBoxField
-                                                    value={formData.breed || ''}
-                                                    onChange={(v) => setFormData(p => ({ ...p, breed: v }))}
-                                                    options={appearanceOptionsMap.breed}
-                                                />
+                                                <input type="text" name="breed" value={formData.breed || ''} onChange={handleChange}
+                                                    className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
                                             </div>
                                             {!hiddenField('strain') && <div className="md:col-span-2">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Strain</label>
