@@ -161,6 +161,13 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
         q15_anythingElse: ''
     });
 
+    const [communityStats, setCommunityStats] = useState(null);
+    useEffect(() => {
+        axios.get(`${API_BASE_URL}/public/community-stats`)
+            .then(res => setCommunityStats(res.data))
+            .catch(err => console.error('[BETA SURVEY] Failed to fetch community stats:', err));
+    }, [API_BASE_URL]);
+
     const contentRef = useRef(null);
     useEffect(() => {
         if (contentRef.current) contentRef.current.scrollTop = 0;
@@ -243,7 +250,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                                         <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed">
                                             Every animal you've logged, every bug you've reported, and every bit of
                                             patience with a work-in-progress app has directly shaped what CritterTrack
-                                            has become. We couldn't have gotten this far without breeders like you.
+                                            has become. We couldn't have gotten this far without keepers like you.
                                         </p>
                                     </div>
                                 </div>
@@ -255,9 +262,15 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                                     <div>
                                         <h3 className="font-semibold text-gray-800 dark:text-dark-text text-xs sm:text-sm mb-1.5">Fun facts about CritterTrack</h3>
                                         <ul className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed space-y-1 list-disc list-inside">
+                                            {communityStats && (
+                                                <>
+                                                    <li>{communityStats.totalUsers.toLocaleString()}+ animal keepers have joined CritterTrack</li>
+                                                    <li>{communityStats.totalAnimals.toLocaleString()}+ animals logged so far, across {communityStats.totalCountries} countries</li>
+                                                </>
+                                            )}
                                             <li>70+ species supported across 6 categories — from Fancy Mice to Ball Pythons to Axolotls</li>
                                             <li>10 major tool areas, including genetics calculators and a full Family Tree Explorer</li>
-                                            <li>You're one of the first breeders to ever use this app — beta testers shape the whole roadmap</li>
+                                            <li>You're one of the first people to ever use this app — beta testers shape the whole roadmap</li>
                                         </ul>
                                     </div>
                                 </div>
