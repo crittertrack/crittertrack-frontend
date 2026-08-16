@@ -3281,8 +3281,8 @@ useEffect(() => {
                     })()}
                 </div>
                 {middleContent && (
-                    <div className="hidden sm:block ml-auto shrink-0 max-w-[160px] text-right" title={middleContent}>
-                        <span className="text-xs text-gray-500 dark:text-dark-text-secondary truncate block">{middleContent}</span>
+                    <div className="hidden sm:flex flex-1 min-w-0 justify-center px-2" title={middleContent}>
+                        <span className="text-xs text-gray-500 dark:text-dark-text-secondary truncate max-w-full">{middleContent}</span>
                     </div>
                 )}
             </div>
