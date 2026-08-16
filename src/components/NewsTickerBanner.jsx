@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Rss, BarChart2, Info, Heart, AlertTriangle, BookOpen } from 'lucide-react';
+import { Rss, BarChart2, Info, Heart, AlertTriangle, BookOpen, ClipboardList } from 'lucide-react';
 import './NewsTickerBanner.css';
 
-const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
+const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenBetaSurvey }) => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -102,6 +102,18 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL }) => {
           </button>
           <span className="mx-4">|</span>
         </span>
+        {betaSurveyStatus === 'skipped' && onReopenBetaSurvey && (
+          <span className="inline-flex items-center px-4 font-semibold">
+            <button
+              onClick={onReopenBetaSurvey}
+              className="hover:underline bg-transparent border-none text-white p-0 cursor-pointer flex items-center"
+            >
+              <ClipboardList size={14} className="inline-block mr-1.5 text-orange-300 flex-shrink-0" />
+              Finish the Beta Survey
+            </button>
+            <span className="mx-4">|</span>
+          </span>
+        )}
         {news.map((item, index) => (
           <span key={item._id} className="inline-flex items-center px-4">
             <button
