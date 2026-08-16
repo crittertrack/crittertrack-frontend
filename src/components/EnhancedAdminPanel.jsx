@@ -3,7 +3,7 @@ import {
     X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
     ChevronDown, ChevronRight, ChevronLeft, CheckCircle, Clock, Flag, MessageSquare,
-    Dna, PawPrint, Database, PanelLeftClose, PanelLeft, LogOut, BookOpen
+    Dna, PawPrint, Database, PanelLeftClose, PanelLeft, LogOut, BookOpen, ClipboardList
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
@@ -11,6 +11,7 @@ import CommunicationTab from './admin/CommunicationTab';
 import SystemSettingsTab from './admin/SystemSettingsTab';
 import AnimalManagementPanel from './admin/AnimalManagementPanel';
 import FeedbackTab from './admin/FeedbackTab';
+import BetaSurveyTab from './admin/BetaSurveyTab';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
 import ResourcesManagementTab from './admin/ResourcesManagementTab';
 import BackupManagementTab from './admin/BackupManagementTab';
@@ -628,6 +629,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                     { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
                                     { id: 'resources-management', label: 'Resources Management', icon: BookOpen, requiredRole: 'admin' },
                                     { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
+                                    { id: 'beta-survey', label: 'Beta Survey', icon: ClipboardList },
                                     { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
                                 ]}
                                 activeSection={activeSection}
@@ -738,6 +740,16 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {activeSection === 'feedback' && (
                             <div className="p-8">
                                 <FeedbackTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            </div>
+                        )}
+
+                        {/* Beta Feedback Survey */}
+                        {activeSection === 'beta-survey' && (
+                            <div className="p-8">
+                                <BetaSurveyTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />

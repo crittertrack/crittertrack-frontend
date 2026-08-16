@@ -25,6 +25,7 @@ import MaintenanceMode from './MaintenanceMode';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import DatePicker from './components/DatePicker';
 import WelcomeGuideModal from './components/WelcomeGuideModal';
+import BetaSurveyModal from './components/BetaSurveyModal';
 import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import Marketplace from './components/Marketplace';
@@ -785,6 +786,8 @@ const App = () => {
     
     const [showWelcomeGuide, setShowWelcomeGuide] = useState(false);
     const [hasSeenWelcomeGuide, setHasSeenWelcomeGuide] = useState(false);
+
+    const [showBetaSurvey, setShowBetaSurvey] = useState(false);
     
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -1094,6 +1097,37 @@ const App = () => {
         }
     }, [authToken, userProfile]);
 
+    // Beta Feedback Survey — pop up once per session for pending/skipped users,
+    // throttled to once per calendar day once skipped (no date-window gating yet).
+    useEffect(() => {
+        if (!authToken || !userProfile) return;
+
+        const status = userProfile.betaSurveyStatus;
+        if (!status || status === 'dismissed' || status === 'completed') return;
+
+        const sessionKey = 'betaSurveyPromptedThisSession';
+        if (sessionStorage.getItem(sessionKey)) return;
+
+        if (status === 'pending') {
+            sessionStorage.setItem(sessionKey, 'true');
+            setShowBetaSurvey(true);
+            return;
+        }
+
+        if (status === 'skipped') {
+            const last = userProfile.betaSurveyLastPromptedAt ? new Date(userProfile.betaSurveyLastPromptedAt) : null;
+            const now = new Date();
+            const isSameDay = last &&
+                last.getFullYear() === now.getFullYear() &&
+                last.getMonth() === now.getMonth() &&
+                last.getDate() === now.getDate();
+            if (!isSameDay) {
+                sessionStorage.setItem(sessionKey, 'true');
+                setShowBetaSurvey(true);
+            }
+        }
+    }, [authToken, userProfile]);
+
     // Fetch animals for offspring calculator when needed
     useEffect(() => {
         const fetchAnimalsForCalculator = async () => {
@@ -1270,6 +1304,10 @@ const App = () => {
             // Still hide the modal even if save failed
             setShowWelcomeGuide(false);
         }
+    };
+
+    const handleCloseBetaSurvey = () => {
+        setShowBetaSurvey(false);
     };
 
     const handleLoginSuccess = (token) => {
@@ -1642,6 +1680,15 @@ const App = () => {
             {showWelcomeGuide && (
                 <WelcomeGuideModal 
                     onClose={handleDismissWelcomeGuide}
+                />
+            )}
+
+            {/* Beta Feedback Survey Modal */}
+            {showBetaSurvey && !showWelcomeGuide && (
+                <BetaSurveyModal
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                    onClose={handleCloseBetaSurvey}
                 />
             )}
             
