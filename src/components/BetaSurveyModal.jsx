@@ -179,6 +179,16 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
 
     const set = (key) => (value) => setAnswers(prev => ({ ...prev, [key]: value }));
 
+    const isAnswered = (key) => {
+        const meta = QUESTIONS_META[key];
+        const value = answers[key];
+        if (meta.type === 'star') return value > 0;
+        if (meta.type === 'text') return true;
+        if (meta.hasOther && value === 'Another app') return answers.q9_priorSolutionOther.trim() !== '';
+        return value !== '';
+    };
+    const isPageComplete = PAGES[pageIndex].every(isAnswered);
+
     const handleStart = () => {
         setPhase('survey');
         setPageIndex(0);
@@ -235,7 +245,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                 {/* Header */}
                 <div className="bg-gradient-to-r from-accent to-primary dark:from-dark-accent dark:to-dark-primary text-white p-3 sm:p-4 rounded-t-lg flex-shrink-0">
                     <h2 className="text-lg sm:text-xl font-bold">CritterTrack Final Beta Survey 📝</h2>
-                    <p className="text-xs sm:text-sm text-white/90">A few quick questions — everything here is optional.</p>
+                    <p className="text-xs sm:text-sm text-white/90">A few quick questions to help us wrap up the beta.</p>
                 </div>
 
                 {/* Content - Scrollable */}
@@ -283,8 +293,9 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                                         <h3 className="font-semibold text-gray-800 dark:text-dark-text text-xs sm:text-sm mb-1">What happens with your answers?</h3>
                                         <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed">
                                             Your ratings and comments go straight into planning what gets polished or
-                                            built next. It only takes a couple of minutes, and every question along
-                                            the way is optional — skip anything you'd rather not answer.
+                                            built next. It only takes a couple of minutes — the ratings and multiple-
+                                            choice questions help us the most, and the open-ended questions at the end
+                                            are optional if you're short on time.
                                         </p>
                                     </div>
                                 </div>
@@ -319,6 +330,12 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                                     />
                                 ))}
                             </div>
+
+                            {!isPageComplete && (
+                                <p className="text-xs text-amber-600 dark:text-dark-accent-purple mt-2 sm:mt-3">
+                                    Please answer every question above to continue.
+                                </p>
+                            )}
                         </>
                     )}
                 </div>
@@ -373,19 +390,11 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                                         Back
                                     </button>
                                 )}
-                                <button
-                                    type="button"
-                                    onClick={handleSkip}
-                                    disabled={busy}
-                                    className="px-3 sm:px-4 py-2.5 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-medium text-sm disabled:opacity-50"
-                                >
-                                    Skip for now
-                                </button>
                                 {isLastPage ? (
                                     <button
                                         type="button"
                                         onClick={handleSubmit}
-                                        disabled={busy}
+                                        disabled={busy || !isPageComplete}
                                         className="px-4 sm:px-6 py-2.5 bg-accent dark:bg-dark-accent text-white rounded-lg hover:bg-accent/90 dark:hover:bg-dark-accent/90 transition font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2"
                                     >
                                         {submitting ? (
@@ -401,7 +410,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                                     <button
                                         type="button"
                                         onClick={handleNext}
-                                        disabled={busy}
+                                        disabled={busy || !isPageComplete}
                                         className="px-4 sm:px-6 py-2.5 bg-accent dark:bg-dark-accent text-white rounded-lg hover:bg-accent/90 dark:hover:bg-dark-accent/90 transition font-medium text-sm disabled:opacity-50"
                                     >
                                         Next
