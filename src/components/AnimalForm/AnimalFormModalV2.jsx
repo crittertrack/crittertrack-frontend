@@ -179,6 +179,8 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
     const [contacts, setContacts] = useState([]);
     const [loadingContacts, setLoadingContacts] = useState(false);
     const [manualName, setManualName] = useState('');
+    const [contactTypeFilter, setContactTypeFilter] = useState('all'); // 'all', 'keeper', 'breeder'
+    const [showRetiredBreeders, setShowRetiredBreeders] = useState(false);
 
     useEffect(() => {
         if (mode === 'contact' && contacts.length === 0) {
@@ -200,6 +202,13 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
             console.error(err);
         } finally { setLoading(false); }
     };
+
+    const visibleContacts = contacts.filter(contact => {
+        if (contactTypeFilter === 'keeper' && !contact.isKeeper) return false;
+        if (contactTypeFilter === 'breeder' && !contact.isBreeder) return false;
+        if (!showRetiredBreeders && contact.isBreeder && (contact.breederStatus || 'active') === 'retired') return false;
+        return true;
+    });
 
     return (
         <div className="fixed inset-0 bg-black/50 z-[90] flex items-center justify-center p-4" onClick={onClose}>
@@ -230,13 +239,26 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
                         </div>
                     )}
                     {mode === 'contact' && (
-                        <div className="space-y-1">
-                            {loadingContacts ? <Loader2 className="animate-spin" /> : contacts.map(contact => (
-                                <div key={contact._id} onClick={() => onSelect({ name: getContactDisplayName(contact), userId: contact.linkedCTUID, contactInfo: getContactInfoString(contact), contactId: contact._id })} className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer">
-                                    <p className="font-semibold">{getContactDisplayName(contact)}</p>
-                                    {contact.linkedCTUID && <p className="text-xs text-gray-500 dark:text-dark-text-muted">{contact.linkedCTUID}</p>}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex gap-1">
+                                    <button type="button" onClick={() => setContactTypeFilter('all')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'all' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>All</button>
+                                    <button type="button" onClick={() => setContactTypeFilter('keeper')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'keeper' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Keepers</button>
+                                    <button type="button" onClick={() => setContactTypeFilter('breeder')} className={`px-2 py-1 text-xs font-medium rounded-full ${contactTypeFilter === 'breeder' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-surface'}`}>Breeders</button>
                                 </div>
-                            ))}
+                                <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-dark-text-secondary cursor-pointer">
+                                    <input type="checkbox" checked={showRetiredBreeders} onChange={e => setShowRetiredBreeders(e.target.checked)} className="h-3.5 w-3.5" />
+                                    Show retired breeders
+                                </label>
+                            </div>
+                            <div className="space-y-1">
+                                {loadingContacts ? <Loader2 className="animate-spin" /> : (visibleContacts.length > 0 ? visibleContacts.map(contact => (
+                                    <div key={contact._id} onClick={() => onSelect({ name: getContactDisplayName(contact), userId: contact.linkedCTUID, contactInfo: getContactInfoString(contact), contactId: contact._id })} className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-dark-surface-hover cursor-pointer">
+                                        <p className="font-semibold">{getContactDisplayName(contact)}</p>
+                                        {contact.linkedCTUID && <p className="text-xs text-gray-500 dark:text-dark-text-muted">{contact.linkedCTUID}</p>}
+                                    </div>
+                                )) : <p className="text-sm text-gray-500 dark:text-dark-text-muted p-2">No contacts match this filter.</p>)}
+                            </div>
                         </div>
                     )}
                     {mode === 'manual' && (
