@@ -28,6 +28,7 @@ import { RecordsTabContent } from './RecordsTabContent';
 import ReportButton from '../ReportButton';
 import InfoButton from '../shared/InfoButton';
 import { ANIMAL_VIEW_TAB_INFO } from '../../data/animalTabInfo';
+import { getCachedInbreeding, setCachedInbreeding } from '../../utils/animalDataCache';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -166,6 +167,14 @@ const ViewAnimalModalV2 = ({
             const damId = animal?.motherId_public || animal?.damId_public;
             
             if (animal?.id_public && sireId && damId) {
+                const cached = getCachedInbreeding(animal.id_public);
+                if (cached) {
+                    setAnimalCOI(cached.inbreedingCoefficient ?? null);
+                    setCommonAncestorCount(cached.commonAncestorCount || null);
+                    setAvgKinship(cached.avgKinship ?? null);
+                    setAvkPopulationSize(cached.avkPopulationSize || null);
+                    return;
+                }
                 setLoadingCOI(true);
                 try {
                     const response = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, { headers: { Authorization: `Bearer ${authToken}` } });
@@ -179,6 +188,9 @@ const ViewAnimalModalV2 = ({
                     } else {
                         setAvgKinship(null);
                         setAvkPopulationSize(null);
+                    }
+                    if (response.data) {
+                        setCachedInbreeding(animal.id_public, response.data);
                     }
                 } catch (error) {
                     setAnimalCOI(null);

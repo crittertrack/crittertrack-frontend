@@ -4,6 +4,7 @@ import { Heart, Cat, EyeOff, Eye, Hourglass, ScanHeart, Droplet, Loader2, Chevro
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
+import { getCachedParent, setCachedParent } from '../../utils/animalDataCache';
 
 // Utility to safely parse JSON fields
 export const parseJsonField = (data) => {
@@ -103,6 +104,13 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
         }
 
         const fetchParent = async () => {
+            const cached = getCachedParent(parentId);
+            if (cached) {
+                setParentData(cached.data);
+                setFoundViaOwned(cached.foundViaOwned);
+                setNotFound(cached.notFound);
+                return;
+            }
             setLoading(true);
             setNotFound(false);
             setFoundViaOwned(false);
@@ -120,6 +128,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                             setParentData(anyResponse.data);
                             setFoundViaOwned(!!anyResponse.data._viewerHasAccess);
                             setLoading(false);
+                            setCachedParent(parentId, { data: anyResponse.data, foundViaOwned: !!anyResponse.data._viewerHasAccess, notFound: false });
                             return;
                         }
                     } catch (anyError) {
@@ -131,9 +140,11 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                 const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
                 if (publicResponse.data && publicResponse.data.length > 0) {
                     setParentData(publicResponse.data[0]);
+                    setCachedParent(parentId, { data: publicResponse.data[0], foundViaOwned: false, notFound: false });
                 } else {
                     setNotFound(true);
                     setParentData(null);
+                    setCachedParent(parentId, { data: null, foundViaOwned: false, notFound: true });
                 }
             } catch (error) {
                 console.error(`Error fetching ${parentType}:`, error);
