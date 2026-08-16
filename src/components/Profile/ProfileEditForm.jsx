@@ -18,6 +18,7 @@ const SETTINGS_TAB_INFO = {
     'directory': { lessonId: 'settings-directory', body: <p>Control whether you're listed in the public Breeder Directory and how you appear there.</p> },
     'ratings': { lessonId: 'settings-ratings', body: <p>See ratings and reviews other users have left after transactions with you.</p> },
     'breeding-lines': { lessonId: 'settings-breeding-lines', body: <p>Define and color-code your own breeding line names, used to tag and filter animals across the app.</p> },
+    'appearance-options': { lessonId: 'settings-appearance-options', body: <p>Manage the values you've typed into dropdown fields (like Color) on the Animal form — remove typos or ones you no longer use.</p> },
     'data': { lessonId: 'settings-data-portability', body: <p>Export or import your CritterTrack data for backup or migration.</p> },
     'account': { lessonId: 'settings-account', body: <p>Manage your login email, password, and account security settings.</p> },
 };
@@ -411,6 +412,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [myReceivedRatings, setMyReceivedRatings] = useState(null);
     const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
 
+    // Appearance dropdown options (e.g. Color) — user-added values, viewable/removable here
+    const [appearanceOptions, setAppearanceOptions] = useState([]);
+    const [appearanceOptionsLoading, setAppearanceOptionsLoading] = useState(false);
+    const [appearanceOptionDeletingId, setAppearanceOptionDeletingId] = useState(null);
+
     // Breeding lines — local draft state (not saved until user clicks Save)
     const [localBLDefs, setLocalBLDefs] = useState(breedingLineDefs);
     const [blSaving, setBlSaving] = useState(false);
@@ -442,6 +448,21 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
     };
 
+    const handleDeleteAppearanceOption = async (option) => {
+        if (!window.confirm(`Remove "${option.value}" from your ${option.species} ${option.field} dropdown list? This does not change any animals already using this value.`)) {
+            return;
+        }
+        setAppearanceOptionDeletingId(option._id);
+        try {
+            await axios.delete(`${API_BASE_URL}/appearance-options/${option._id}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            setAppearanceOptions(prev => prev.filter(o => o._id !== option._id));
+        } catch (error) {
+            showModalMessage('Error', error.response?.data?.message || 'Failed to remove option.');
+        } finally {
+            setAppearanceOptionDeletingId(null);
+        }
+    };
+
     const location = useLocation();
     const pathSegments = location.pathname.split('/').filter(Boolean);
     const activeTab = pathSegments[pathSegments.length - 1] === 'settings' ? 'profile' : pathSegments[pathSegments.length - 1];
@@ -455,6 +476,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             .catch(() => setMyReceivedRatings({ ratings: [], average: 0, count: 0 }))
             .finally(() => setMyReceivedRatingsLoading(false));
     }, [activeTab, userProfile?.id_public]);
+
+    useEffect(() => {
+        if (activeTab !== 'appearance-options') return;
+        setAppearanceOptionsLoading(true);
+        axios.get(`${API_BASE_URL}/appearance-options`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(r => setAppearanceOptions(r.data || []))
+            .catch(() => setAppearanceOptions([]))
+            .finally(() => setAppearanceOptionsLoading(false));
+    }, [activeTab, API_BASE_URL, authToken]);
 
     useEffect(() => {
         if (activeTab !== 'data') return;
@@ -946,6 +976,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { id: 'directory',       label: 'Directory' },
                     { id: 'ratings',         label: 'Ratings' },
                     { id: 'breeding-lines',  label: 'Breeding Lines' },
+                    { id: 'appearance-options', label: 'Dropdown Lists' },
                     { id: 'data',            label: 'Data Portability' },
                     { id: 'account',         label: 'Account' },
                 ].map(tab => (
@@ -1457,6 +1488,60 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         </button>
                         {blSaved && <span className="text-sm text-green-600 font-medium">&#x2713; Saved to your account!</span>}
                     </div>
+                </div>
+            )}
+
+            {activeTab === 'appearance-options' && (
+                <div className="p-4 sm:p-6 border dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-surface space-y-4">
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-text border-b dark:border-dark-border pb-2">Dropdown Lists</h3>
+                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                        Values you've typed into dropdown-style fields (like Color) on the Animal form get saved here per species, so they're
+                        suggested again next time. Remove typos or ones you no longer use — this only affects the suggestion list, it never
+                        changes any animal that already has that value.
+                    </p>
+                    {appearanceOptionsLoading ? (
+                        <div className="flex justify-center py-8"><Loader2 className="animate-spin" size={28} /></div>
+                    ) : appearanceOptions.length === 0 ? (
+                        <p className="text-gray-500 dark:text-dark-text-muted text-sm py-4 text-center">No saved dropdown values yet.</p>
+                    ) : (
+                        Object.entries(
+                            appearanceOptions.reduce((acc, opt) => {
+                                const key = opt.species;
+                                (acc[key] = acc[key] || []).push(opt);
+                                return acc;
+                            }, {})
+                        ).map(([species, opts]) => (
+                            <div key={species} className="bg-white dark:bg-dark-card-bg rounded-lg border dark:border-dark-text p-4">
+                                <h4 className="font-semibold text-gray-800 dark:text-dark-text mb-2">{species}</h4>
+                                {Object.entries(
+                                    opts.reduce((acc, opt) => {
+                                        (acc[opt.field] = acc[opt.field] || []).push(opt);
+                                        return acc;
+                                    }, {})
+                                ).map(([field, fieldOpts]) => (
+                                    <div key={field} className="mb-2 last:mb-0">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-dark-text-muted mb-1 capitalize">{field}</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {fieldOpts.map(opt => (
+                                                <span key={opt._id} className="inline-flex items-center bg-gray-100 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary text-xs font-medium pl-3 pr-2 py-1 rounded-full">
+                                                    {opt.value}
+                                                    <button
+                                                        type="button"
+                                                        disabled={appearanceOptionDeletingId === opt._id}
+                                                        onClick={() => handleDeleteAppearanceOption(opt)}
+                                                        className="ml-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 transition disabled:opacity-50"
+                                                        title="Remove"
+                                                    >
+                                                        {appearanceOptionDeletingId === opt._id ? <Loader2 className="animate-spin" size={12} /> : <Trash2 size={12} />}
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))
+                    )}
                 </div>
             )}
 

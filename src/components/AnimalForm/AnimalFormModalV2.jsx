@@ -20,6 +20,7 @@ import LocationManagerModal from '../AnimalList/LocationManagerModal';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { isFieldHiddenForSpecies, getFieldLabel, SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import InfoButton from '../shared/InfoButton';
+import ComboBoxField from '../shared/ComboBoxField';
 import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
 
 const getSpeciesCategory = (species) => {
@@ -2774,6 +2775,24 @@ const AnimalFormModalV2 = ({
     // (which produced dozens of false-positive "changes" from date/shape reformatting alone).
     const initialFormDataRef = useRef(formData);
 
+    // Per-user, per-species "Color" dropdown options (ZooEasy-style: pick existing or type new).
+    // Fetched fresh whenever the species changes; new values get persisted on successful save.
+    const [colorOptions, setColorOptions] = useState([]);
+    useEffect(() => {
+        if (!formData.species || !API_BASE_URL) {
+            setColorOptions([]);
+            return;
+        }
+        let cancelled = false;
+        axios.get(`${API_BASE_URL}/appearance-options`, {
+            params: { species: formData.species, field: 'color' },
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => {
+            if (!cancelled) setColorOptions(res.data || []);
+        }).catch(err => console.error('[ComboBox] Failed to fetch color options:', err));
+        return () => { cancelled = true; };
+    }, [formData.species, API_BASE_URL, authToken]);
+
     const [galleryImages, setGalleryImages] = useState([]);
     const [imageEditorOpen, setImageEditorOpen] = useState(false);
     const [imagesToEdit, setImagesToEdit] = useState([]);
@@ -3596,6 +3615,16 @@ const AnimalFormModalV2 = ({
 
             const saveResponse = await onSave(method, url, payloadToSave, initialFormDataRef.current);
 
+            // Persist a brand-new Color value into the user's per-species dropdown list, so it's
+            // offered as a suggestion next time (fire-and-forget — never blocks the save).
+            const trimmedColor = formData.color?.trim();
+            if (trimmedColor && !colorOptions.some(opt => opt.toLowerCase() === trimmedColor.toLowerCase())) {
+                axios.post(`${API_BASE_URL}/appearance-options`, {
+                    species: formData.species, field: 'color', value: trimmedColor
+                }, { headers: { Authorization: `Bearer ${authToken}` } })
+                    .catch(err => console.error('[ComboBox] Failed to save new color option:', err));
+            }
+
             // Manually-picked Contacts with no linked CTUID aren't matched automatically by CTUID,
             // so record the assignment directly on the Contact so the animal shows under their
             // Owned/Bred Animals tabs — and fully unassign a contact that no longer holds either role.
@@ -4121,8 +4150,11 @@ const AnimalFormModalV2 = ({
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Color</label>
-                                            <input type="text" name="color" value={formData.color} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary" />
+                                            <ComboBoxField
+                                                value={formData.color}
+                                                onChange={(v) => setFormData(p => ({ ...p, color: v }))}
+                                                options={colorOptions}
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('coatPattern', 'Pattern')}</label>
