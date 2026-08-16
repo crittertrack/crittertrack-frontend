@@ -250,7 +250,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                                         <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed">
                                             Every animal you've logged, every bug you've reported, and every bit of
                                             patience with a work-in-progress app has directly shaped what CritterTrack
-                                            has become. We couldn't have gotten this far without keepers like you.
+                                            has become. We couldn't have gotten this far without people like you.
                                         </p>
                                     </div>
                                 </div>
