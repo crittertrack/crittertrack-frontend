@@ -23,21 +23,21 @@ const HOW_HEARD_OPTIONS = ['Social media', 'Friend or referral', 'Forum or commu
 
 // Question metadata, keyed by the field name sent to the backend
 const QUESTIONS_META = {
-    q1_overallSatisfaction: { number: 1, type: 'star', text: 'Overall satisfaction' },
-    q2_mostUsedFeature: { number: 2, type: 'choice', text: 'Most-used feature', options: FEATURE_OPTIONS },
-    q3_mostConfusingFeature: { number: 3, type: 'choice', text: 'Most confusing feature', options: [...FEATURE_OPTIONS, 'None'] },
-    q4_appSpeed: { number: 4, type: 'star', text: 'App speed/responsiveness' },
-    q5_easeOfNavigation: { number: 5, type: 'star', text: 'Ease of navigation/intuitiveness' },
-    q6_visualDesign: { number: 6, type: 'star', text: 'Visual design/look & feel' },
-    q7_primarySpecies: { number: 7, type: 'choice', text: 'Primary species managed', options: SPECIES_OPTIONS },
-    q8_primaryDevice: { number: 8, type: 'choice', text: 'Primary device', options: DEVICE_OPTIONS },
-    q9_priorSolution: { number: 9, type: 'choice', text: 'What did you use before CritterTrack?', options: PRIOR_SOLUTION_OPTIONS, hasOther: true },
+    q1_overallSatisfaction: { number: 1, type: 'star', text: 'Overall, how satisfied are you with CritterTrack?' },
+    q2_mostUsedFeature: { number: 2, type: 'choice', text: 'Which feature do you use the most?', options: FEATURE_OPTIONS },
+    q3_mostConfusingFeature: { number: 3, type: 'choice', text: 'Which feature do you find most confusing or hardest to use?', options: [...FEATURE_OPTIONS, 'None'] },
+    q4_appSpeed: { number: 4, type: 'star', text: "How would you rate the app's speed and responsiveness?" },
+    q5_easeOfNavigation: { number: 5, type: 'star', text: 'How easy is it to navigate and find what you need?' },
+    q6_visualDesign: { number: 6, type: 'star', text: 'How would you rate the visual design and overall look & feel?' },
+    q7_primarySpecies: { number: 7, type: 'choice', text: 'What type of animals do you primarily manage?', options: SPECIES_OPTIONS },
+    q8_primaryDevice: { number: 8, type: 'choice', text: 'What device do you primarily use CritterTrack on?', options: DEVICE_OPTIONS },
+    q9_priorSolution: { number: 9, type: 'choice', text: 'What did you use to track your animals before CritterTrack?', options: PRIOR_SOLUTION_OPTIONS, hasOther: true },
     q10_howHeard: { number: 10, type: 'choice', text: 'How did you hear about CritterTrack?', options: HOW_HEARD_OPTIONS },
-    q11_likelihoodToRecommend: { number: 11, type: 'star', text: 'Likelihood to recommend' },
-    q12_likelyToKeepUsing: { number: 12, type: 'star', text: 'Likely to keep using after beta' },
-    q13_bugsIssues: { number: 13, type: 'text', text: 'Any bugs or issues you ran into?' },
+    q11_likelihoodToRecommend: { number: 11, type: 'star', text: 'How likely are you to recommend CritterTrack to a friend?' },
+    q12_likelyToKeepUsing: { number: 12, type: 'star', text: 'How likely are you to keep using CritterTrack after the beta ends?' },
+    q13_bugsIssues: { number: 13, type: 'text', text: 'Did you run into any bugs or issues? If so, please describe them.' },
     q14_magicWandFeature: { number: 14, type: 'text', text: 'If you could wave a magic wand and add ONE thing to CritterTrack, no matter how unrealistic/impossible it might seem, what would it be?' },
-    q15_anythingElse: { number: 15, type: 'text', text: 'Anything else?' }
+    q15_anythingElse: { number: 15, type: 'text', text: "Is there anything else you'd like to share with us?" }
 };
 
 // Ratings grouped 3-per-page (2 pages), then multiple choice and free text each get their own page
