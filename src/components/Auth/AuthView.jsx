@@ -27,6 +27,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [banInfo, setBanInfo] = useState(null);
     const [suspensionLiftedNotification, setSuspensionLiftedNotification] = useState(null);
     const [maintenanceInfo, setMaintenanceInfo] = useState(null);
+    const [keepSignedIn, setKeepSignedIn] = useState(false);
 
     // Check maintenance status so we can warn users before they attempt to log in
     useEffect(() => {
@@ -230,7 +231,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         } else {
             // Login flow (unchanged)
             try {
-                const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+                const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password, keepSignedIn });
                 
                 // Clear any old suspension data on successful login
                 localStorage.removeItem('suspensionEndTime');
@@ -241,7 +242,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 setSuspensionTimeRemaining(null);
                 setBanInfo(null);
                 
-                onLoginSuccess(response.data.token);
+                onLoginSuccess(response.data.token, keepSignedIn);
             } catch (error) {
                 console.error('Login error:', error.response?.data || error.message);
                 
@@ -743,7 +744,19 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                             </span>
                         </label>
                     )}
-                    
+
+                    {!isRegister && (
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={keepSignedIn}
+                                onChange={(e) => setKeepSignedIn(e.target.checked)}
+                                className="h-4 w-4 text-primary rounded border-gray-300 dark:border-dark-text-muted focus:ring-primary cursor-pointer"
+                            />
+                            <span className="text-sm text-gray-700 dark:text-dark-text-secondary">Keep me signed in</span>
+                        </label>
+                    )}
+
                     <button
                         type="submit"
                         disabled={loading}

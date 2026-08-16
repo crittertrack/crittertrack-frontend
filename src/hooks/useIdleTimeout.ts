@@ -34,6 +34,9 @@ export function useIdleTimeout(
             clearTimeout(timeoutRef.current);
         }
 
+        // "Keep me signed in" (set at login) skips the inactivity auto-logout entirely
+        if (localStorage.getItem('keepSignedIn') === 'true') return;
+
         timeoutRef.current = setTimeout(() => {
             if (authToken) {
                 handleLogout(true); // true = session expired

@@ -837,6 +837,7 @@ const App = () => {
         setShowAdminPanel(false);
         localStorage.removeItem('authToken');
         localStorage.removeItem('moderationAuthenticated');
+        localStorage.removeItem('keepSignedIn');
         localStorage.removeItem('ct_bldefs');
         localStorage.removeItem('ct_blassign');
         setBreedingLineDefs(Array.from({ length: 10 }, (_, i) => ({ id: i, name: '', color: BL_PRESETS_APP[i] })));
@@ -1310,10 +1311,15 @@ const App = () => {
         setShowBetaSurvey(false);
     };
 
-    const handleLoginSuccess = (token) => {
+    const handleLoginSuccess = (token, keepSignedIn = false) => {
         setAuthToken(token);
         try {
             localStorage.setItem('authToken', token);
+            if (keepSignedIn) {
+                localStorage.setItem('keepSignedIn', 'true');
+            } else {
+                localStorage.removeItem('keepSignedIn');
+            }
         } catch (e) {
             console.warn('Could not persist authToken to localStorage', e);
         }
