@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Loader2 } from 'lucide-react';
 
@@ -21,6 +21,41 @@ const DEVICE_OPTIONS = ['Desktop', 'Phone', 'Tablet', 'Mix'];
 const PRIOR_SOLUTION_OPTIONS = ['Spreadsheet', 'Paper or notebook', 'Another app', 'Nothing formal'];
 const HOW_HEARD_OPTIONS = ['Social media', 'Friend or referral', 'Forum or community', 'Search', 'Other'];
 
+// Question metadata, keyed by the field name sent to the backend
+const QUESTIONS_META = {
+    q1_overallSatisfaction: { number: 1, type: 'star', text: 'Overall satisfaction' },
+    q2_mostUsedFeature: { number: 2, type: 'choice', text: 'Most-used feature', options: FEATURE_OPTIONS },
+    q3_mostConfusingFeature: { number: 3, type: 'choice', text: 'Most confusing feature', options: [...FEATURE_OPTIONS, 'None'] },
+    q4_appSpeed: { number: 4, type: 'star', text: 'App speed/responsiveness' },
+    q5_easeOfNavigation: { number: 5, type: 'star', text: 'Ease of navigation/intuitiveness' },
+    q6_visualDesign: { number: 6, type: 'star', text: 'Visual design/look & feel' },
+    q7_primarySpecies: { number: 7, type: 'choice', text: 'Primary species managed', options: SPECIES_OPTIONS },
+    q8_primaryDevice: { number: 8, type: 'choice', text: 'Primary device', options: DEVICE_OPTIONS },
+    q9_priorSolution: { number: 9, type: 'choice', text: 'What did you use before CritterTrack?', options: PRIOR_SOLUTION_OPTIONS, hasOther: true },
+    q10_howHeard: { number: 10, type: 'choice', text: 'How did you hear about CritterTrack?', options: HOW_HEARD_OPTIONS },
+    q11_likelihoodToRecommend: { number: 11, type: 'star', text: 'Likelihood to recommend' },
+    q12_likelyToKeepUsing: { number: 12, type: 'star', text: 'Likely to keep using after beta' },
+    q13_bugsIssues: { number: 13, type: 'text', text: 'Any bugs or issues you ran into?' },
+    q14_magicWandFeature: { number: 14, type: 'text', text: 'If you could wave a magic wand and add ONE thing to CritterTrack, no matter how unrealistic/impossible it might seem, what would it be?' },
+    q15_anythingElse: { number: 15, type: 'text', text: 'Anything else?' }
+};
+
+// One page per question, except consecutive star questions which are grouped up to 3-per-page
+const PAGES = [
+    ['q1_overallSatisfaction'],
+    ['q2_mostUsedFeature'],
+    ['q3_mostConfusingFeature'],
+    ['q4_appSpeed', 'q5_easeOfNavigation', 'q6_visualDesign'],
+    ['q7_primarySpecies'],
+    ['q8_primaryDevice'],
+    ['q9_priorSolution'],
+    ['q10_howHeard'],
+    ['q11_likelihoodToRecommend', 'q12_likelyToKeepUsing'],
+    ['q13_bugsIssues'],
+    ['q14_magicWandFeature'],
+    ['q15_anythingElse']
+];
+
 const StarRating = ({ value, onChange }) => (
     <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map(n => (
@@ -39,37 +74,72 @@ const StarRating = ({ value, onChange }) => (
     </div>
 );
 
-const ChoiceGroup = ({ options, value, onChange }) => (
-    <div className="flex flex-wrap gap-2">
+const RadioList = ({ options, value, onChange }) => (
+    <div className="space-y-1.5">
         {options.map(opt => (
-            <button
+            <label
                 key={opt}
-                type="button"
-                onClick={() => onChange(opt)}
-                className={`px-3 py-1.5 rounded-full text-xs sm:text-sm border transition ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition text-xs sm:text-sm ${
                     value === opt
-                        ? 'bg-accent dark:bg-dark-accent text-white border-accent dark:border-dark-accent'
-                        : 'bg-white dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary border-gray-300 dark:border-dark-border hover:border-accent dark:hover:border-dark-accent'
+                        ? 'border-accent dark:border-dark-accent bg-accent/5 dark:bg-dark-accent/10'
+                        : 'border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-surface-hover'
                 }`}
             >
-                {opt}
-            </button>
+                <input
+                    type="radio"
+                    checked={value === opt}
+                    onChange={() => onChange(opt)}
+                    className="w-4 h-4 accent-accent dark:accent-dark-accent flex-shrink-0"
+                />
+                <span className="text-gray-700 dark:text-dark-text">{opt}</span>
+            </label>
         ))}
-    </div>
-);
-
-const Question = ({ number, text, children }) => (
-    <div className="border-b border-gray-100 dark:border-dark-border pb-3 sm:pb-4 last:border-b-0 last:pb-0">
-        <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-dark-text mb-2">
-            {number}. {text}
-        </p>
-        {children}
     </div>
 );
 
 const textAreaClass = "w-full text-xs sm:text-sm rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-surface text-gray-800 dark:text-dark-text placeholder-gray-400 dark:placeholder-dark-text-muted p-2 focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-dark-accent resize-none";
 
+const QuestionCard = ({ meta, value, onChange, otherValue, onOtherChange }) => (
+    <div className="bg-gray-50 dark:bg-dark-surface rounded-xl border border-gray-100 dark:border-dark-border p-3 sm:p-4">
+        <div className="flex items-start gap-2.5 mb-3">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent dark:bg-dark-accent text-white text-xs font-bold flex items-center justify-center">
+                {meta.number}
+            </span>
+            <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-dark-text pt-0.5">{meta.text}</p>
+        </div>
+
+        {meta.type === 'star' && <StarRating value={value} onChange={onChange} />}
+
+        {meta.type === 'choice' && (
+            <>
+                <RadioList options={meta.options} value={value} onChange={onChange} />
+                {meta.hasOther && value === 'Another app' && (
+                    <input
+                        type="text"
+                        value={otherValue}
+                        onChange={(e) => onOtherChange(e.target.value)}
+                        placeholder="Which app?"
+                        className="mt-2 w-full text-xs sm:text-sm rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-surface text-gray-800 dark:text-dark-text placeholder-gray-400 dark:placeholder-dark-text-muted px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-dark-accent"
+                    />
+                )}
+            </>
+        )}
+
+        {meta.type === 'text' && (
+            <textarea
+                rows={2}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Optional"
+                className={textAreaClass}
+            />
+        )}
+    </div>
+);
+
 const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
+    const [phase, setPhase] = useState('intro'); // 'intro' | 'survey'
+    const [pageIndex, setPageIndex] = useState(0);
     const [submitting, setSubmitting] = useState(false);
     const [skipping, setSkipping] = useState(false);
     const [dismissing, setDismissing] = useState(false);
@@ -92,10 +162,24 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
         q15_anythingElse: ''
     });
 
+    const contentRef = useRef(null);
+    useEffect(() => {
+        if (contentRef.current) contentRef.current.scrollTop = 0;
+    }, [phase, pageIndex]);
+
     const busy = submitting || skipping || dismissing;
     const authHeader = { headers: { Authorization: `Bearer ${authToken}` } };
+    const isLastPage = pageIndex === PAGES.length - 1;
 
     const set = (key) => (value) => setAnswers(prev => ({ ...prev, [key]: value }));
+
+    const handleStart = () => {
+        setPhase('survey');
+        setPageIndex(0);
+    };
+
+    const handleBack = () => setPageIndex(i => Math.max(0, i - 1));
+    const handleNext = () => setPageIndex(i => Math.min(PAGES.length - 1, i + 1));
 
     const handleSkip = async () => {
         setSkipping(true);
@@ -141,7 +225,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col">
+            <div className="bg-white dark:bg-dark-card-bg rounded-lg shadow-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-accent to-primary dark:from-dark-accent dark:to-dark-primary text-white p-3 sm:p-4 rounded-t-lg flex-shrink-0">
                     <h2 className="text-lg sm:text-xl font-bold">Help us wrap up the beta! 📝</h2>
@@ -149,128 +233,135 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                 </div>
 
                 {/* Content - Scrollable */}
-                <div className="p-3 sm:p-5 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
-                    <Question number={1} text="Overall satisfaction">
-                        <StarRating value={answers.q1_overallSatisfaction} onChange={set('q1_overallSatisfaction')} />
-                    </Question>
+                <div ref={contentRef} className="p-3 sm:p-5 overflow-y-auto flex-1">
+                    {phase === 'intro' && (
+                        <div className="py-4 sm:py-6 text-center sm:text-left">
+                            <p className="text-sm text-gray-700 dark:text-dark-text-secondary leading-relaxed">
+                                We're wrapping up the beta phase and would love your feedback to help shape what comes
+                                next. It only takes a couple of minutes, and every question along the way is optional —
+                                skip anything you'd rather not answer.
+                            </p>
+                        </div>
+                    )}
 
-                    <Question number={2} text="Most-used feature">
-                        <ChoiceGroup options={FEATURE_OPTIONS} value={answers.q2_mostUsedFeature} onChange={set('q2_mostUsedFeature')} />
-                    </Question>
+                    {phase === 'survey' && (
+                        <>
+                            {/* Progress bar */}
+                            <div className="mb-4">
+                                <div className="flex justify-between text-xs text-gray-500 dark:text-dark-text-secondary mb-1">
+                                    <span>Question {pageIndex + 1} of {PAGES.length}</span>
+                                </div>
+                                <div className="w-full h-1.5 bg-gray-200 dark:bg-dark-surface rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-accent dark:bg-dark-accent rounded-full transition-all duration-300"
+                                        style={{ width: `${((pageIndex + 1) / PAGES.length) * 100}%` }}
+                                    />
+                                </div>
+                            </div>
 
-                    <Question number={3} text="Most confusing feature">
-                        <ChoiceGroup options={[...FEATURE_OPTIONS, 'None']} value={answers.q3_mostConfusingFeature} onChange={set('q3_mostConfusingFeature')} />
-                    </Question>
+                            <div className="space-y-3 sm:space-y-4">
+                                {PAGES[pageIndex].map(key => (
+                                    <QuestionCard
+                                        key={key}
+                                        meta={QUESTIONS_META[key]}
+                                        value={answers[key]}
+                                        onChange={set(key)}
+                                        otherValue={answers.q9_priorSolutionOther}
+                                        onOtherChange={set('q9_priorSolutionOther')}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
 
-                    <Question number={4} text="App speed/responsiveness">
-                        <StarRating value={answers.q4_appSpeed} onChange={set('q4_appSpeed')} />
-                    </Question>
-
-                    <Question number={5} text="Ease of navigation/intuitiveness">
-                        <StarRating value={answers.q5_easeOfNavigation} onChange={set('q5_easeOfNavigation')} />
-                    </Question>
-
-                    <Question number={6} text="Visual design/look & feel">
-                        <StarRating value={answers.q6_visualDesign} onChange={set('q6_visualDesign')} />
-                    </Question>
-
-                    <Question number={7} text="Primary species managed">
-                        <ChoiceGroup options={SPECIES_OPTIONS} value={answers.q7_primarySpecies} onChange={set('q7_primarySpecies')} />
-                    </Question>
-
-                    <Question number={8} text="Primary device">
-                        <ChoiceGroup options={DEVICE_OPTIONS} value={answers.q8_primaryDevice} onChange={set('q8_primaryDevice')} />
-                    </Question>
-
-                    <Question number={9} text="What did you use before CritterTrack?">
-                        <ChoiceGroup options={PRIOR_SOLUTION_OPTIONS} value={answers.q9_priorSolution} onChange={set('q9_priorSolution')} />
-                        {answers.q9_priorSolution === 'Another app' && (
-                            <input
-                                type="text"
-                                value={answers.q9_priorSolutionOther}
-                                onChange={(e) => set('q9_priorSolutionOther')(e.target.value)}
-                                placeholder="Which app?"
-                                className="mt-2 w-full text-xs sm:text-sm rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-surface text-gray-800 dark:text-dark-text placeholder-gray-400 dark:placeholder-dark-text-muted px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-dark-accent"
-                            />
-                        )}
-                    </Question>
-
-                    <Question number={10} text="How did you hear about CritterTrack?">
-                        <ChoiceGroup options={HOW_HEARD_OPTIONS} value={answers.q10_howHeard} onChange={set('q10_howHeard')} />
-                    </Question>
-
-                    <Question number={11} text="Likelihood to recommend">
-                        <StarRating value={answers.q11_likelihoodToRecommend} onChange={set('q11_likelihoodToRecommend')} />
-                    </Question>
-
-                    <Question number={12} text="Likely to keep using after beta">
-                        <StarRating value={answers.q12_likelyToKeepUsing} onChange={set('q12_likelyToKeepUsing')} />
-                    </Question>
-
-                    <Question number={13} text="Any bugs or issues you ran into?">
-                        <textarea
-                            rows={2}
-                            value={answers.q13_bugsIssues}
-                            onChange={(e) => set('q13_bugsIssues')(e.target.value)}
-                            placeholder="Optional"
-                            className={textAreaClass}
-                        />
-                    </Question>
-
-                    <Question number={14} text="If you could wave a magic wand and add ONE thing to CritterTrack, no matter how unrealistic/impossible it might seem, what would it be?">
-                        <textarea
-                            rows={2}
-                            value={answers.q14_magicWandFeature}
-                            onChange={(e) => set('q14_magicWandFeature')(e.target.value)}
-                            placeholder="Optional"
-                            className={textAreaClass}
-                        />
-                    </Question>
-
-                    <Question number={15} text="Anything else?">
-                        <textarea
-                            rows={2}
-                            value={answers.q15_anythingElse}
-                            onChange={(e) => set('q15_anythingElse')(e.target.value)}
-                            placeholder="Optional"
-                            className={textAreaClass}
-                        />
-                    </Question>
-
-                    {/* Action Buttons - Sticky for mobile */}
-                    <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2 sm:pt-1 sticky bottom-0 bg-white dark:bg-dark-card-bg pb-2 sm:pb-0 sm:static">
-                        <button
-                            type="button"
-                            onClick={handleDismiss}
-                            disabled={busy}
-                            className="px-4 py-2.5 text-gray-600 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition font-medium text-sm disabled:opacity-50"
-                        >
-                            Do not show again
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleSkip}
-                            disabled={busy}
-                            className="px-4 py-2.5 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-medium text-sm disabled:opacity-50"
-                        >
-                            Skip for now
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleSubmit}
-                            disabled={busy}
-                            className="px-4 sm:px-6 py-2.5 bg-accent dark:bg-dark-accent text-white rounded-lg hover:bg-accent/90 dark:hover:bg-dark-accent/90 transition font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2"
-                        >
-                            {submitting ? (
-                                <>
-                                    <Loader2 size={16} className="animate-spin" />
-                                    <span>Submitting...</span>
-                                </>
-                            ) : (
-                                'Finished'
-                            )}
-                        </button>
-                    </div>
+                {/* Footer */}
+                <div className="border-t border-gray-100 dark:border-dark-border p-3 sm:p-4 flex-shrink-0">
+                    {phase === 'intro' ? (
+                        <div className="flex flex-col sm:flex-row justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={handleDismiss}
+                                disabled={busy}
+                                className="px-4 py-2.5 text-gray-600 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg transition font-medium text-sm disabled:opacity-50"
+                            >
+                                Do not show again
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleSkip}
+                                disabled={busy}
+                                className="px-4 py-2.5 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-medium text-sm disabled:opacity-50"
+                            >
+                                Skip for now
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleStart}
+                                disabled={busy}
+                                className="px-4 sm:px-6 py-2.5 bg-accent dark:bg-dark-accent text-white rounded-lg hover:bg-accent/90 dark:hover:bg-dark-accent/90 transition font-medium text-sm disabled:opacity-50"
+                            >
+                                Start Survey
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-between gap-2">
+                            <button
+                                type="button"
+                                onClick={handleDismiss}
+                                disabled={busy}
+                                className="text-xs text-gray-400 dark:text-dark-text-muted hover:underline disabled:opacity-50"
+                            >
+                                Do not show again
+                            </button>
+                            <div className="flex items-center gap-2">
+                                {pageIndex > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={handleBack}
+                                        disabled={busy}
+                                        className="px-3 sm:px-4 py-2.5 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-medium text-sm disabled:opacity-50"
+                                    >
+                                        Back
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={handleSkip}
+                                    disabled={busy}
+                                    className="px-3 sm:px-4 py-2.5 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition font-medium text-sm disabled:opacity-50"
+                                >
+                                    Skip for now
+                                </button>
+                                {isLastPage ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmit}
+                                        disabled={busy}
+                                        className="px-4 sm:px-6 py-2.5 bg-accent dark:bg-dark-accent text-white rounded-lg hover:bg-accent/90 dark:hover:bg-dark-accent/90 transition font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {submitting ? (
+                                            <>
+                                                <Loader2 size={16} className="animate-spin" />
+                                                <span>Submitting...</span>
+                                            </>
+                                        ) : (
+                                            'Finished'
+                                        )}
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={handleNext}
+                                        disabled={busy}
+                                        className="px-4 sm:px-6 py-2.5 bg-accent dark:bg-dark-accent text-white rounded-lg hover:bg-accent/90 dark:hover:bg-dark-accent/90 transition font-medium text-sm disabled:opacity-50"
+                                    >
+                                        Next
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
