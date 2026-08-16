@@ -25,7 +25,7 @@ import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
 
 // Appearance fields that use the per-user/per-species dropdown-with-custom-entry pattern
 // (see appearanceOptionsMap / ComboBoxField below).
-const APPEARANCE_DROPDOWN_FIELDS = ['color', 'coatPattern', 'coat', 'earset', 'morph', 'markings', 'eyeColor', 'nailColor'];
+const APPEARANCE_DROPDOWN_FIELDS = ['color', 'markings', 'coat', 'earset', 'morph', 'eyeColor', 'size'];
 
 const getSpeciesCategory = (species) => {
     if (!species) return 'Other';
@@ -2417,11 +2417,9 @@ const AnimalFormModalV2 = ({
             eartagNumber: animalToEdit.eartagNumber || '',
             breed: animalToEdit.breed || '',
             strain: animalToEdit.strain || '',
-            coatPattern: animalToEdit.coatPattern || '',
             morph: animalToEdit.morph || '',
             markings: animalToEdit.markings || '',
             eyeColor: animalToEdit.eyeColor || '',
-            nailColor: animalToEdit.nailColor || '',
             size: animalToEdit.size || '',
             carrierTraits: animalToEdit.carrierTraits || '',
             bodyWeight: animalToEdit.bodyWeight || '',
@@ -2594,11 +2592,9 @@ const AnimalFormModalV2 = ({
             colonyId: '',
             breed: '',
             strain: '',
-            coatPattern: '',
             morph: '',
             markings: '',
             eyeColor: '',
-            nailColor: '',
             size: '',
             carrierTraits: '',
             bodyWeight: '',
@@ -3311,7 +3307,7 @@ const AnimalFormModalV2 = ({
     // Pedigree helper functions
     const mpEmptySlot = () => ({ mode: 'ctc', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
     const mpToSlot = (a) => {
-        const variety = ['color','coatPattern','coat','earset','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+        const variety = ['color','coat','earset','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
         return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
     };
     const mpFetchByCtc = async (id) => {
@@ -3351,7 +3347,7 @@ const AnimalFormModalV2 = ({
         const pedigree = animalToEdit?.manualPedigree || {};
 
         const toSlot = (a, notes = '') => {
-            const variety = ['color','coatPattern','coat','earset','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
+            const variety = ['color','coat','earset','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
             return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes };
         };
 
@@ -4169,11 +4165,11 @@ const AnimalFormModalV2 = ({
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('coatPattern', 'Pattern')}</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('markings', 'Markings')}</label>
                                             <ComboBoxField
-                                                value={formData.coatPattern || ''}
-                                                onChange={(v) => setFormData(p => ({ ...p, coatPattern: v }))}
-                                                options={appearanceOptionsMap.coatPattern}
+                                                value={formData.markings || ''}
+                                                onChange={(v) => setFormData(p => ({ ...p, markings: v }))}
+                                                options={appearanceOptionsMap.markings}
                                                 placeholder="e.g., Solid, Hooded, Brindle"
                                             />
                                         </div>
@@ -4197,7 +4193,7 @@ const AnimalFormModalV2 = ({
                                                 />
                                             </div>
                                         )}
-                                        <div>
+                                        {!hiddenField('morph') && <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Morph</label>
                                             <ComboBoxField
                                                 value={formData.morph || ''}
@@ -4205,16 +4201,7 @@ const AnimalFormModalV2 = ({
                                                 options={appearanceOptionsMap.morph}
                                                 placeholder="Mutation/Morph"
                                             />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Markings</label>
-                                            <ComboBoxField
-                                                value={formData.markings || ''}
-                                                onChange={(v) => setFormData(p => ({ ...p, markings: v }))}
-                                                options={appearanceOptionsMap.markings}
-                                                placeholder="Body markings/patterns"
-                                            />
-                                        </div>
+                                        </div>}
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Eye Color</label>
                                             <ComboBoxField
@@ -4224,20 +4211,14 @@ const AnimalFormModalV2 = ({
                                                 placeholder="Eye color"
                                             />
                                         </div>
-                                        {!hiddenField('nailColor') && <div>
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Nail Color</label>
-                                            <ComboBoxField
-                                                value={formData.nailColor || ''}
-                                                onChange={(v) => setFormData(p => ({ ...p, nailColor: v }))}
-                                                options={appearanceOptionsMap.nailColor}
-                                                placeholder="Nail/claw color"
-                                            />
-                                        </div>}
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Size</label>
-                                            <input type="text" name="size" value={formData.size || ''} onChange={handleChange}
-                                                className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text shadow-sm bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-primary focus:border-primary"
-                                                placeholder="e.g., Standard, Dwarf" />
+                                            <ComboBoxField
+                                                value={formData.size || ''}
+                                                onChange={(v) => setFormData(p => ({ ...p, size: v }))}
+                                                options={appearanceOptionsMap.size}
+                                                placeholder="e.g., Standard, Dwarf"
+                                            />
                                         </div>
 
                                         <div>

@@ -27,13 +27,11 @@ export const AppearanceTabContent = ({ animal }) => {
                 <InfoCard title="Appearance" icon={<Palette size={18} />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {animal.color && <InfoItem label="Color" value={animal.color} />}
-                        {animal.coatPattern && !hidden('coatPattern') && <InfoItem label={label('coatPattern', 'Pattern')} value={animal.coatPattern} />}
                         {animal.coat && !hidden('coat') && <InfoItem label={label('coat', 'Coat')} value={animal.coat} />}
                         {animal.earset && !hidden('earset') && <InfoItem label="Earset" value={animal.earset} />}
-                        {animal.morph && <InfoItem label="Morph" value={animal.morph} />}
-                        {animal.markings && <InfoItem label="Markings" value={animal.markings} />}
+                        {animal.morph && !hidden('morph') && <InfoItem label="Morph" value={animal.morph} />}
+                        {animal.markings && !hidden('markings') && <InfoItem label={label('markings', 'Markings')} value={animal.markings} />}
                         {animal.eyeColor && <InfoItem label="Eye Color" value={animal.eyeColor} />}
-                        {animal.nailColor && !hidden('nailColor') && <InfoItem label="Nail Color" value={animal.nailColor} />}
                         {animal.size && <InfoItem label="Size" value={animal.size} />}
                         {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
                     </div>

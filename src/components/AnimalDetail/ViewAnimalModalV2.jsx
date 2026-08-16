@@ -479,7 +479,7 @@ const ViewAnimalModalV2 = ({
                                             <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-2 sm:gap-y-4 text-xs">
                                                 {/* Row 1 */}
                                                 <InfoItem compact label="Variety">
-                                                    {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    {[animal.color, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.size].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
                                                 </InfoItem>
                                                 <InfoItem compact label="Carries" value={animal.carrierTraits} />
                                                 <InfoItem compact label="Genetics">
@@ -758,7 +758,7 @@ const ViewAnimalModalV2 = ({
                                                                             )}
                                                                             <div className="min-w-0">
                                                                                 <div className="text-sm font-medium text-gray-800 dark:text-dark-text truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
-                                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                                <div className="text-xs text-gray-500 dark:text-dark-text-muted">{rel.gender}{[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.markings, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex items-center gap-2 flex-shrink-0 ml-2">

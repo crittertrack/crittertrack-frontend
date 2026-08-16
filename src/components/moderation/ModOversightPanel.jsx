@@ -224,7 +224,7 @@ const getAnimalDetails = (report = {}) => {
             // Physical Info
             color: animal.color || null,
             coat: animal.coat || null,
-            coatPattern: animal.coatPattern || null,
+            markings: animal.markings || null,
             earset: animal.earset || null,
             breed: animal.breed || null,
             strain: animal.strain || null,
@@ -1021,8 +1021,8 @@ export default function ModOversightPanel({
                                                 {animal.coat && (
                                                     <div><strong>Coat:</strong> {animal.coat}</div>
                                                 )}
-                                                {animal.coatPattern && (
-                                                    <div><strong>Coat Pattern:</strong> {animal.coatPattern}</div>
+                                                {animal.markings && (
+                                                    <div><strong>Markings:</strong> {animal.markings}</div>
                                                 )}
                                                 {animal.earset && (
                                                     <div><strong>Earset:</strong> {animal.earset}</div>

@@ -62,7 +62,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
         'isNursing', 'nursingStartDate', 'weaningDate', 'heartwormStatus', 'hipElbowScores', 'eyeClearance',
         'cardiacClearance', 'reproductiveClearances', 'sheddingLevel', 'brushingFrequency', 'coatCareNotes',
         'brushingSchedule', 'freeFlightTrained', 'flightRiskTrainingSchedule', 'leashTrained', 'leashTrainingSchedule',
-        'crateTrained', 'crateTrainingSchedule', 'litterTrained', 'litterTrainingSchedule', 'nailColor', 'strain',
+        'crateTrained', 'crateTrainingSchedule', 'litterTrained', 'litterTrainingSchedule', 'strain',
         'pedigreeRegistrationId', 'tattooId', 'exerciseRequirements', 'dailyExerciseMinutes', 'trainingLevel',
         'trainingDisciplines', 'certifications', 'workingRole', 'workingRoleTrainingSchedule',
         'behavioralIssueTrainingSchedule', 'reactivityTrainingSchedule', 'exerciseSchedule', 'attachmentStyle',
@@ -75,7 +75,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
         'sheddingRecords', 'waterParameterChecks', 'brushingFrequency', 'coatCareNotes', 'brushingSchedule', 'strain', 'tattooId',
     ],
     Fish: [
-        'earset', 'heightAtWithers', 'eartagNumber', 'ringId', 'nailColor', 'heatStatus', 'lastHeatDate',
+        'earset', 'heightAtWithers', 'eartagNumber', 'ringId', 'heatStatus', 'lastHeatDate',
         'estrusCycleLength', 'isNursing', 'nursingStartDate', 'weaningDate', 'isNeutered', 'spayNeuterDate',
         'heartwormStatus', 'hipElbowScores', 'eyeClearance', 'cardiacClearance', 'reproductiveClearances',
         'sheddingRecords', 'moltingRecords', 'sheddingLevel', 'brushingFrequency', 'coatCareNotes', 'brushingSchedule',
@@ -87,7 +87,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
         'exerciseSchedule', 'attachmentStyle', 'bondingBehavior',
     ],
     Invertebrate: [
-        'earset', 'nailColor', 'heightAtWithers', 'eartagNumber', 'microchipNumber', 'heatStatus', 'lastHeatDate',
+        'earset', 'heightAtWithers', 'eartagNumber', 'microchipNumber', 'heatStatus', 'lastHeatDate',
         'estrusCycleLength', 'isNursing', 'nursingStartDate', 'weaningDate', 'isNeutered', 'spayNeuterDate',
         'artificialInseminationUsed', 'dewormingRecords', 'allergies', 'heartwormStatus', 'hipElbowScores',
         'eyeClearance', 'cardiacClearance', 'reproductiveClearances', 'dentalRecords', 'dentalCareRequirements', 'dentalCareSchedule',
@@ -101,7 +101,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
     ],
     Mammal: [
         'sheddingRecords', 'moltingRecords', 'waterParameterChecks', 'freeFlightTrained',
-        'flightRiskTrainingSchedule',
+        'flightRiskTrainingSchedule', 'morph',
     ],
     Reptile: [
         'earset', 'heightAtWithers', 'eartagNumber', 'heatStatus', 'lastHeatDate', 'estrusCycleLength',
@@ -132,7 +132,7 @@ const SPECIES_LABEL_OVERRIDES = {
 // Field label overrides by category - same underlying data slot, different display label.
 export const FIELD_LABEL_OVERRIDES = {
     coat: { Reptile: 'Scalation', Bird: 'Plumage', Amphibian: 'Skin', Fish: 'Skin', Invertebrate: 'Coloring' },
-    coatPattern: { Reptile: 'Scale Pattern', Bird: 'Plumage Pattern', Amphibian: 'Skin Pattern', Fish: 'Skin Pattern', Invertebrate: 'Skin Pattern' },
+    markings: { Reptile: 'Scale Pattern', Bird: 'Plumage Pattern', Amphibian: 'Skin Pattern', Fish: 'Skin Pattern', Invertebrate: 'Skin Pattern' },
     breed: { Amphibian: 'Subspecies', Invertebrate: 'Subspecies', Reptile: 'Subspecies' },
     chestGirth: { Fish: 'Body Girth', Invertebrate: 'Body Girth' },
     colonyId: { Invertebrate: 'Colony ID' },

@@ -1001,7 +1001,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         }
 
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const variety = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
+        const variety = [animal.color, animal.markings, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
         const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
         const handleClick = onClick && animal.id_public ? () => onClick(animal) : undefined;
 
@@ -1263,7 +1263,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             );
         }
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const variety = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
+        const variety = [animal.color, animal.markings, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
         const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
         const isMale = animal.gender === 'Male';
         const isFemale = animal.gender === 'Female';
@@ -1325,7 +1325,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
     const renderInlineSubjectCard = (animal) => {
         if (!animal) return null;
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const variety = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
+        const variety = [animal.color, animal.markings, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
         const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
         const isMale = animal.gender === 'Male';
         const isFemale = animal.gender === 'Female';

@@ -51,8 +51,8 @@ const keepAwayFromNode = (value, nodeTop, nodeBottom, gap = 6) => {
 };
 
 const VARIETY_KEYS = [
-    'color', 'coatPattern', 'coat', 'earset', 'morph',
-    'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size',
+    'color', 'coat', 'earset', 'morph',
+    'markings', 'eyeColor', 'carrierTraits', 'size',
 ];
 
 const getVarietyLabel = (animal = {}) => {
