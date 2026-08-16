@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, Loader2, Search, X } from 'lucide-react';
 import axios from 'axios';
 import InfoButton from './shared/InfoButton';
+import { STATUS_OPTIONS } from '../utils/constants';
 
 const ArchiveScreen = ({
     onBack,
@@ -21,6 +22,7 @@ const ArchiveScreen = ({
     const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);
     const [archiveLoading, setArchiveLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
 
     const fetchArchiveData = useCallback(async () => {
         if (!authToken) return;
@@ -57,13 +59,19 @@ const ArchiveScreen = ({
     }, []);
 
     const filteredArchivedAnimals = useMemo(
-        () => archivedAnimals.filter(a => matchesSearch(a, searchQuery)),
-        [archivedAnimals, searchQuery, matchesSearch]
+        () => archivedAnimals.filter(a => matchesSearch(a, searchQuery) && (!statusFilter || a.status === statusFilter)),
+        [archivedAnimals, searchQuery, statusFilter, matchesSearch]
     );
     const filteredSoldTransferredAnimals = useMemo(
-        () => soldTransferredAnimals.filter(a => matchesSearch(a, searchQuery)),
-        [soldTransferredAnimals, searchQuery, matchesSearch]
+        () => soldTransferredAnimals.filter(a => matchesSearch(a, searchQuery) && (!statusFilter || a.status === statusFilter)),
+        [soldTransferredAnimals, searchQuery, statusFilter, matchesSearch]
     );
+
+    // Only offer statuses that actually appear in the archive, not the full app-wide list.
+    const availableStatuses = useMemo(() => {
+        const all = [...archivedAnimals, ...soldTransferredAnimals].map(a => a.status).filter(Boolean);
+        return STATUS_OPTIONS.filter(s => all.includes(s));
+    }, [archivedAnimals, soldTransferredAnimals]);
 
     const handleUnarchive = async (animal) => {
         try {
@@ -113,23 +121,38 @@ const ArchiveScreen = ({
                 </InfoButton>
             </div>
 
-            <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
-                <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Search by name, prefix/suffix, or ID..."
-                    className="w-full pl-9 pr-8 py-1.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text placeholder:text-gray-400 dark:placeholder:text-dark-text-muted focus:ring-2 focus:ring-purple-300 dark:focus:ring-dark-accent-purple focus:border-purple-400 dark:focus:border-dark-accent-purple"
-                />
-                {searchQuery && (
-                    <button
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary"
-                        title="Clear search"
+            <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted" />
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        placeholder="Search by name, prefix/suffix, or ID..."
+                        className="w-full pl-9 pr-8 py-1.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text placeholder:text-gray-400 dark:placeholder:text-dark-text-muted focus:ring-2 focus:ring-purple-300 dark:focus:ring-dark-accent-purple focus:border-purple-400 dark:focus:border-dark-accent-purple"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary"
+                            title="Clear search"
+                        >
+                            <X size={14} />
+                        </button>
+                    )}
+                </div>
+                {availableStatuses.length > 0 && (
+                    <select
+                        value={statusFilter}
+                        onChange={e => setStatusFilter(e.target.value)}
+                        className="text-sm border border-gray-300 dark:border-dark-border rounded-lg px-2 py-1.5 bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-2 focus:ring-purple-300 dark:focus:ring-dark-accent-purple focus:border-purple-400 dark:focus:border-dark-accent-purple"
+                        title="Filter by status"
                     >
-                        <X size={14} />
-                    </button>
+                        <option value="">All statuses</option>
+                        {availableStatuses.map(s => (
+                            <option key={s} value={s}>{s}</option>
+                        ))}
+                    </select>
                 )}
             </div>
 

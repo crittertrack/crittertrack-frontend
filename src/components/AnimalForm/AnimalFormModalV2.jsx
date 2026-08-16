@@ -178,6 +178,7 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
     const [loading, setLoading] = useState(false);
     const [contacts, setContacts] = useState([]);
     const [loadingContacts, setLoadingContacts] = useState(false);
+    const [manualName, setManualName] = useState('');
 
     useEffect(() => {
         if (mode === 'contact' && contacts.length === 0) {
