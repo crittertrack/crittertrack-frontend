@@ -374,6 +374,8 @@ export function AppRoutes({
           setCachedLitters={setCachedLitters}
           litterCacheTimestamp={litterCacheTimestamp}
           setLitterCacheTimestamp={setLitterCacheTimestamp}
+          breedingLineDefs={breedingLineDefs}
+          animalBreedingLines={animalBreedingLines}
         />
       } />
 
@@ -425,6 +427,8 @@ export function AppRoutes({
           authToken={authToken}
           myAnimals={myAnimalsForCalculator}
           userProfile={userProfile}
+          breedingLineDefs={breedingLineDefs}
+          animalBreedingLines={animalBreedingLines}
         />
       } />
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Scale, Dna, Loader2, Search } from 'lucide-react';
+import { Scale, Dna, Loader2, Search, AlertTriangle } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
+import { getCommonBreedingLines } from '../../utils/breedingLineColor';
 
 // A simplified animal selector for the calculator
 const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) => {
@@ -45,7 +46,7 @@ const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) 
 /**
  * A dedicated page for calculating the Coefficient of Inbreeding (COI).
  */
-const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
+const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDefs = [], animalBreedingLines = {} }) => {
   const [sire, setSire] = useState(null);
   const [dam, setDam] = useState(null);
   const [coiResult, setCoiResult] = useState(null);
@@ -181,6 +182,19 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
               disabled={isLoading || !isSpeciesSupported}
             />
           </div>
+
+          {(() => {
+            const commonLines = getCommonBreedingLines(sire?.id_public, dam?.id_public, animalBreedingLines, breedingLineDefs);
+            if (commonLines.length === 0) return null;
+            return (
+              <div className="flex items-start gap-2 text-sm px-3 py-2 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-300">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+                <span>
+                  Sire and dam share {commonLines.length} assigned breeding line{commonLines.length !== 1 ? 's' : ''}: <span className="font-semibold">{commonLines.map(l => l.name).join(', ')}</span>. Consider whether this pairing crosses lines you intended to keep separate.
+                </span>
+              </div>
+            );
+          })()}
 
           <div className="text-center mb-6">
             <button

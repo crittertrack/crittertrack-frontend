@@ -29,6 +29,17 @@ export const hideRedundantLegacyLines = (lines) => lines.some(l => isGradientCol
     ? lines.filter(l => !LEGACY_TRIPLE_IDS.includes(l.id))
     : lines;
 
+// Breeding-line defs assigned to BOTH given animals (by id_public) - used to warn when a
+// sire/dam pairing shares a tracked line, since named lines are usually meant to stay separate.
+export const getCommonBreedingLines = (sireId, damId, animalBreedingLines = {}, breedingLineDefs = []) => {
+    if (!sireId || !damId) return [];
+    const sireLines = animalBreedingLines[sireId] || [];
+    const damLines = animalBreedingLines[damId] || [];
+    const commonIds = sireLines.filter(id => damLines.includes(id));
+    if (commonIds.length === 0) return [];
+    return breedingLineDefs.filter(l => commonIds.includes(l.id) && l.name && l.enabled !== false);
+};
+
 // Style for the assignable line "chip" button, which needs border/fill/text color together.
 export const breedingLineButtonStyle = (color, assigned) => {
     if (isGradientColor(color)) {

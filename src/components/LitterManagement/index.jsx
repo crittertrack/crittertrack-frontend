@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
 import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
+import { getCommonBreedingLines } from '../../utils/breedingLineColor';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
 import { matchFancyRatPhenotype } from '../../data/fancyRatPhenotypeRules';
@@ -482,7 +483,7 @@ const ParentSearchModal = ({
 
 // Litter Management Component
 
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, breedingLineDefs = [], animalBreedingLines = {} }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -2517,6 +2518,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
                                 </div>
 
+                                {/* Common breeding-line warning */}
+                                {(() => {
+                                    const commonLines = getCommonBreedingLines(formData.sireId_public, formData.damId_public, animalBreedingLines, breedingLineDefs);
+                                    if (commonLines.length === 0) return null;
+                                    return (
+                                        <div className="flex items-start gap-2 text-xs px-3 py-2 mb-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-300">
+                                            <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
+                                            <span>
+                                                Sire and dam share {commonLines.length} assigned breeding line{commonLines.length !== 1 ? 's' : ''}: <span className="font-semibold">{commonLines.map(l => l.name).join(', ')}</span>.
+                                            </span>
+                                        </div>
+                                    );
+                                })()}
+
                                 {/* Breeding Information */}
                                 <div className="mb-6 p-4 border border-purple-200 dark:border-purple-800/40 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                                     <h4 className="text-md font-semibold text-gray-700 dark:text-dark-text-secondary mb-4 flex items-center">
@@ -3385,6 +3400,19 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                     }
                                 </div>
                             )}
+                            {/* Common breeding-line warning */}
+                            {(() => {
+                                const commonLines = getCommonBreedingLines(matingData.sireId_public, matingData.damId_public, animalBreedingLines, breedingLineDefs);
+                                if (commonLines.length === 0) return null;
+                                return (
+                                    <div className="flex items-start gap-2 text-xs px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-300">
+                                        <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
+                                        <span>
+                                            Sire and dam share {commonLines.length} assigned breeding line{commonLines.length !== 1 ? 's' : ''}: <span className="font-semibold">{commonLines.map(l => l.name).join(', ')}</span>.
+                                        </span>
+                                    </div>
+                                );
+                            })()}
                             {/* Mating Date */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Mating Date</label>
