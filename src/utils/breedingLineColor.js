@@ -29,16 +29,26 @@ export const hideRedundantLegacyLines = (lines) => lines.some(l => isGradientCol
     ? lines.filter(l => !LEGACY_TRIPLE_IDS.includes(l.id))
     : lines;
 
+// Compares two animals' assigned breeding lines: which are shared vs. each side's own-only
+// lines - used to tell breeders whether a pairing stays within one tracked line (shared) or
+// crosses two distinct ones (own-only on both sides), rather than only warning on overlap.
+export const compareBreedingLines = (sireId, damId, animalBreedingLines = {}, breedingLineDefs = []) => {
+    if (!sireId || !damId) return { common: [], sireOnly: [], damOnly: [] };
+    const sireIds = animalBreedingLines[sireId] || [];
+    const damIds = animalBreedingLines[damId] || [];
+    const validDefs = breedingLineDefs.filter(l => l.name && l.enabled !== false);
+    const byIds = (ids) => validDefs.filter(l => ids.includes(l.id));
+    return {
+        common: byIds(sireIds.filter(id => damIds.includes(id))),
+        sireOnly: byIds(sireIds.filter(id => !damIds.includes(id))),
+        damOnly: byIds(damIds.filter(id => !sireIds.includes(id))),
+    };
+};
+
 // Breeding-line defs assigned to BOTH given animals (by id_public) - used to warn when a
 // sire/dam pairing shares a tracked line, since named lines are usually meant to stay separate.
-export const getCommonBreedingLines = (sireId, damId, animalBreedingLines = {}, breedingLineDefs = []) => {
-    if (!sireId || !damId) return [];
-    const sireLines = animalBreedingLines[sireId] || [];
-    const damLines = animalBreedingLines[damId] || [];
-    const commonIds = sireLines.filter(id => damLines.includes(id));
-    if (commonIds.length === 0) return [];
-    return breedingLineDefs.filter(l => commonIds.includes(l.id) && l.name && l.enabled !== false);
-};
+export const getCommonBreedingLines = (sireId, damId, animalBreedingLines = {}, breedingLineDefs = []) =>
+    compareBreedingLines(sireId, damId, animalBreedingLines, breedingLineDefs).common;
 
 // Style for the assignable line "chip" button, which needs border/fill/text color together.
 export const breedingLineButtonStyle = (color, assigned) => {

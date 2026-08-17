@@ -5,11 +5,11 @@ import {
     ChevronDown, ChevronUp, ClipboardList,
     Circle, Dna, Download, Edit, Eye, EyeOff, Fish, Hash, Heart, HeartOff,
     Images, Link, Loader2, Mars, PawPrint, Plus, RefreshCw, ScrollText, Search, Star,
-    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning,
+    Trash2, Turtle, Unlink, Venus, VenusAndMars, Worm, X, Droplet, ScanHeart, Hourglass, AlertTriangle, FileText, FilePlus, FileMinus, FileX, FileCheck, FileWarning, Info,
 } from 'lucide-react';
 import { formatDate, formatDateShort, parseLocalDate } from '../../utils/dateFormatter';
 import { resolveDuplicateLitter } from '../../utils/litterDuplicate';
-import { getCommonBreedingLines } from '../../utils/breedingLineColor';
+import { compareBreedingLines } from '../../utils/breedingLineColor';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
 import { matchFancyRatPhenotype } from '../../data/fancyRatPhenotypeRules';
@@ -2518,18 +2518,30 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
                                 </div>
 
-                                {/* Common breeding-line warning */}
+                                {/* Common breeding-line warning / different-lines info */}
                                 {(() => {
-                                    const commonLines = getCommonBreedingLines(formData.sireId_public, formData.damId_public, animalBreedingLines, breedingLineDefs);
-                                    if (commonLines.length === 0) return null;
-                                    return (
-                                        <div className="flex items-start gap-2 text-xs px-3 py-2 mb-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-300">
-                                            <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
-                                            <span>
-                                                Sire and dam share {commonLines.length} assigned breeding line{commonLines.length !== 1 ? 's' : ''}: <span className="font-semibold">{commonLines.map(l => l.name).join(', ')}</span>.
-                                            </span>
-                                        </div>
-                                    );
+                                    const { common, sireOnly, damOnly } = compareBreedingLines(formData.sireId_public, formData.damId_public, animalBreedingLines, breedingLineDefs);
+                                    if (common.length > 0) {
+                                        return (
+                                            <div className="flex items-start gap-2 text-xs px-3 py-2 mb-4 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
+                                                <Info size={14} className="flex-shrink-0 mt-0.5" />
+                                                <span>
+                                                    Sire and dam share {common.length} assigned breeding line{common.length !== 1 ? 's' : ''}: <span className="font-semibold">{common.map(l => l.name).join(', ')}</span>.
+                                                </span>
+                                            </div>
+                                        );
+                                    }
+                                    if (sireOnly.length > 0 && damOnly.length > 0) {
+                                        return (
+                                            <div className="flex items-start gap-2 text-xs px-3 py-2 mb-4 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
+                                                <Info size={14} className="flex-shrink-0 mt-0.5" />
+                                                <span>
+                                                    Sire and dam are from different breeding lines — Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>.
+                                                </span>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
                                 })()}
 
                                 {/* Breeding Information */}
@@ -3400,18 +3412,30 @@ className="rounded border-gray-300 dark:border-dark-text-muted text-primary focu
                                     }
                                 </div>
                             )}
-                            {/* Common breeding-line warning */}
+                            {/* Common breeding-line warning / different-lines info */}
                             {(() => {
-                                const commonLines = getCommonBreedingLines(matingData.sireId_public, matingData.damId_public, animalBreedingLines, breedingLineDefs);
-                                if (commonLines.length === 0) return null;
-                                return (
-                                    <div className="flex items-start gap-2 text-xs px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-300">
-                                        <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
-                                        <span>
-                                            Sire and dam share {commonLines.length} assigned breeding line{commonLines.length !== 1 ? 's' : ''}: <span className="font-semibold">{commonLines.map(l => l.name).join(', ')}</span>.
-                                        </span>
-                                    </div>
-                                );
+                                const { common, sireOnly, damOnly } = compareBreedingLines(matingData.sireId_public, matingData.damId_public, animalBreedingLines, breedingLineDefs);
+                                if (common.length > 0) {
+                                    return (
+                                        <div className="flex items-start gap-2 text-xs px-3 py-2 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
+                                            <Info size={14} className="flex-shrink-0 mt-0.5" />
+                                            <span>
+                                                Sire and dam share {common.length} assigned breeding line{common.length !== 1 ? 's' : ''}: <span className="font-semibold">{common.map(l => l.name).join(', ')}</span>.
+                                            </span>
+                                        </div>
+                                    );
+                                }
+                                if (sireOnly.length > 0 && damOnly.length > 0) {
+                                    return (
+                                        <div className="flex items-start gap-2 text-xs px-3 py-2 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
+                                            <Info size={14} className="flex-shrink-0 mt-0.5" />
+                                            <span>
+                                                Sire and dam are from different breeding lines — Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>.
+                                            </span>
+                                        </div>
+                                    );
+                                }
+                                return null;
                             })()}
                             {/* Mating Date */}
                             <div>

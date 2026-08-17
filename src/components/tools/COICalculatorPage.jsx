@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Scale, Dna, Loader2, Search, AlertTriangle } from 'lucide-react';
+import { Scale, Dna, Loader2, Search, Info } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
-import { getCommonBreedingLines } from '../../utils/breedingLineColor';
+import { compareBreedingLines } from '../../utils/breedingLineColor';
 
 // A simplified animal selector for the calculator
 const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) => {
@@ -184,16 +184,28 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDef
           </div>
 
           {(() => {
-            const commonLines = getCommonBreedingLines(sire?.id_public, dam?.id_public, animalBreedingLines, breedingLineDefs);
-            if (commonLines.length === 0) return null;
-            return (
-              <div className="flex items-start gap-2 text-sm px-3 py-2 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-300">
-                <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
-                <span>
-                  Sire and dam share {commonLines.length} assigned breeding line{commonLines.length !== 1 ? 's' : ''}: <span className="font-semibold">{commonLines.map(l => l.name).join(', ')}</span>. Consider whether this pairing crosses lines you intended to keep separate.
-                </span>
-              </div>
-            );
+            const { common, sireOnly, damOnly } = compareBreedingLines(sire?.id_public, dam?.id_public, animalBreedingLines, breedingLineDefs);
+            if (common.length > 0) {
+              return (
+                <div className="flex items-start gap-2 text-sm px-3 py-2 mb-6 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
+                  <Info size={16} className="flex-shrink-0 mt-0.5" />
+                  <span>
+                    Sire and dam share {common.length} assigned breeding line{common.length !== 1 ? 's' : ''}: <span className="font-semibold">{common.map(l => l.name).join(', ')}</span>.
+                  </span>
+                </div>
+              );
+            }
+            if (sireOnly.length > 0 && damOnly.length > 0) {
+              return (
+                <div className="flex items-start gap-2 text-sm px-3 py-2 mb-6 rounded-lg bg-blue-50 dark:bg-dark-info-blue/20 border border-blue-200 dark:border-dark-info-blue text-blue-800 dark:text-dark-text">
+                  <Info size={16} className="flex-shrink-0 mt-0.5" />
+                  <span>
+                    Sire and dam are from different breeding lines — Sire: <span className="font-semibold">{sireOnly.map(l => l.name).join(', ')}</span>, Dam: <span className="font-semibold">{damOnly.map(l => l.name).join(', ')}</span>. No shared lines detected.
+                  </span>
+                </div>
+              );
+            }
+            return null;
           })()}
 
           <div className="text-center mb-6">
