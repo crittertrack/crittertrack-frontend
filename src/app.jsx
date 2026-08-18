@@ -1,12 +1,9 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
-import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle, lazy, Suspense } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, HeartPulse, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets, Droplet, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal, ScanHeart } from 'lucide-react';
-import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
 import { formatDate, formatDateShort, formatDateDisplay, litterAge, formatTimeAgo } from './utils/dateFormatter';
 import { GENDER_OPTIONS, STATUS_OPTIONS, DEFAULT_SPECIES_OPTIONS } from './utils/constants';
@@ -14,52 +11,40 @@ import { getSpeciesDisplayName, getSpeciesLatinName } from './utils/speciesUtils
 import { getCountryFlag, getCountryName, US_STATES, getStateName, getCurrencySymbol } from './utils/locationUtils';
 import { getDonationBadge, DonationBadge } from './utils/donationUtils';
 import { getActionLabel, getActionColor } from './utils/activityUtils';
-import GeneticsCalculator from './components/GeneticsCalculator';
-import GeneticCodeBuilder from './components/GeneticCodeBuilder';
-import BudgetingTab from './components/BudgetingTab';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
-import InstallPWA from './components/InstallPWA';
 import AdminPanel from './components/EnhancedAdminPanel';
 import MaintenanceMode from './MaintenanceMode';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
-import DatePicker from './components/DatePicker';
 import WelcomeGuideModal from './components/WelcomeGuideModal';
 import BetaSurveyModal from './components/BetaSurveyModal';
-import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
-import Marketplace from './components/Marketplace';
-import LitterManagement from './components/LitterManagement';
-import AnimalForm, { PedigreeChart } from './components/AnimalForm';
-import AnimalList from './components/AnimalList';
 import AuthView from './components/Auth/AuthView';
 import { BroadcastPoll, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationBar from './components/Notifications/NotificationBar';
 import NotificationsHub from './components/Notifications/NotificationsHub';
 import NotificationPanel from './components/Notifications/NotificationPanel';
 import GlobalSearchBar from './components/PublicProfile/GlobalSearchBar';
-import PublicProfileView, { QRModal } from './components/PublicProfile/PublicProfileView';
-import BreederDirectory, { BreederDirectorySettings } from './components/PublicProfile/BreederDirectory';
-import ProfileEditForm from './components/Profile/ProfileEditForm';
-import ProfileView from './components/Profile/ProfileView';
-import UserProfileCard from './components/Profile/UserProfileCard';
+import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import LoadingSpinner from './components/shared/LoadingSpinner';
-import AnimalImage from './components/shared/AnimalImage';
 import AnimalImageUpload from './components/AnimalImageUpload';
 import { compressImageFile, compressImageToMaxSize, compressImageWithWorker } from './utils/imageCompression';
-import DonationView from './components/Donation/DonationView';
-import ResourcesPage from './components/tools/ResourcesPage';
-import CommunityPage from './components/Community/CommunityPage';
 import ThemeToggle from './components/ThemeToggle';
 import PushToggleButton from './components/PushToggleButton';
 
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
 import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
 import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
-import { OffspringSection } from './components/AnimalDetail/utils';
 import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Import the new modal
+
+// Lazy-loaded — these are only reachable from rarely-hit branches (logged-out
+// marketing views, non-owner edit fallback), so keep them out of the main bundle.
+const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'));
+const DonationView = lazy(() => import('./components/Donation/DonationView'));
+const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
+const AnimalForm = lazy(() => import('./components/AnimalForm'));
 
 // Phase 7: Modals & Messages
 import { ConflictResolutionModal, LitterSyncConflictModal } from './components/Modals/LitterConflictModals';
@@ -1465,11 +1450,13 @@ const App = () => {
                         />
                     )}
                     
-                    <GeneticsCalculator
-                        API_BASE_URL={API_BASE_URL}
-                        authToken={null}
-                        userRole={null}
-                    />
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <GeneticsCalculator
+                            API_BASE_URL={API_BASE_URL}
+                            authToken={null}
+                            userRole={null}
+                        />
+                    </Suspense>
                 </div>
             );
         }
@@ -1480,7 +1467,9 @@ const App = () => {
                 <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center justify-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
-                    <DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />
+                    </Suspense>
                 </div>
             );
         }
@@ -1501,7 +1490,9 @@ const App = () => {
                         </button>
                     </header>
 
-                    <ResourcesPage API_BASE_URL={API_BASE_URL} />
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <ResourcesPage API_BASE_URL={API_BASE_URL} />
+                    </Suspense>
                 </div>
             );
         }
@@ -2275,23 +2266,25 @@ const App = () => {
                                     STATUS_OPTIONS={STATUS_OPTIONS}
                                 />
                             ) : (
-                                <AnimalForm
-                                    formTitle={`Edit ${animalToEdit.name}`}
-                                    animalToEdit={animalToEdit}
-                                    species={animalToEdit.species}
-                                    onSave={handleSaveAnimalWithRefresh}
-                                    onCancel={handleCancelEditAnimal}
-                                    onDelete={handleDeleteAnimal}
-                                    authToken={authToken}
-                                    showModalMessage={showModalMessage}
-                                    API_BASE_URL={API_BASE_URL}
-                                    userProfile={userProfile}
-                                    X={X} Search={Search} Loader2={Loader2} LoadingSpinner={LoadingSpinner}
-                                    PlusCircle={PlusCircle} ArrowLeft={ArrowLeft} Save={Save} Trash2={Trash2} RotateCcw={RotateCcw}
-                                    GENDER_OPTIONS={GENDER_OPTIONS}
-                                    STATUS_OPTIONS={STATUS_OPTIONS}
-                                    AnimalImageUpload={AnimalImageUpload}
-                                />
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <AnimalForm
+                                        formTitle={`Edit ${animalToEdit.name}`}
+                                        animalToEdit={animalToEdit}
+                                        species={animalToEdit.species}
+                                        onSave={handleSaveAnimalWithRefresh}
+                                        onCancel={handleCancelEditAnimal}
+                                        onDelete={handleDeleteAnimal}
+                                        authToken={authToken}
+                                        showModalMessage={showModalMessage}
+                                        API_BASE_URL={API_BASE_URL}
+                                        userProfile={userProfile}
+                                        X={X} Search={Search} Loader2={Loader2} LoadingSpinner={LoadingSpinner}
+                                        PlusCircle={PlusCircle} ArrowLeft={ArrowLeft} Save={Save} Trash2={Trash2} RotateCcw={RotateCcw}
+                                        GENDER_OPTIONS={GENDER_OPTIONS}
+                                        STATUS_OPTIONS={STATUS_OPTIONS}
+                                        AnimalImageUpload={AnimalImageUpload}
+                                    />
+                                </Suspense>
                             )}
                         </div>
                     );
@@ -2301,6 +2294,7 @@ const App = () => {
             {/* Add Sibling overlay */}
             {siblingTemplate && (
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
+                    <Suspense fallback={<LoadingSpinner />}>
                     <AnimalForm
                         formTitle={`Add Sibling (${siblingTemplate.species})`}
                         animalToEdit={null}
@@ -2329,6 +2323,7 @@ const App = () => {
                         STATUS_OPTIONS={STATUS_OPTIONS}
                         AnimalImageUpload={AnimalImageUpload}
                     />
+                    </Suspense>
                 </div>
             )}
 
