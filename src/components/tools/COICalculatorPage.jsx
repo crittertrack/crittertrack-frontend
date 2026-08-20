@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Scale, Dna, Loader2, Search, Info } from 'lucide-react';
+import { Scale, Dna, Loader2, Search, Info, Network, ScrollText, X } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
 import { compareBreedingLines } from '../../utils/breedingLineColor';
+import FamilyTreeView from '../FamilyTree/FamilyTreeView';
+import { PedigreeChart } from '../AnimalForm';
+
+// Placeholder id for the hypothetical (not-yet-bred) offspring node used to anchor the
+// direct-lines family tree view around a sire/dam pairing that has no real litter yet.
+const PAIRING_PREVIEW_ID = '__coi_pairing_preview__';
 
 // A simplified animal selector for the calculator
 const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) => {
@@ -46,13 +52,15 @@ const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) 
 /**
  * A dedicated page for calculating the Coefficient of Inbreeding (COI).
  */
-const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDefs = [], animalBreedingLines = {} }) => {
+const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDefs = [], animalBreedingLines = {}, onViewAnimal }) => {
   const [sire, setSire] = useState(null);
   const [dam, setDam] = useState(null);
   const [coiResult, setCoiResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedSpecies, setSelectedSpecies] = useState('All');
+  const [showFamilyTree, setShowFamilyTree] = useState(false);
+  const [showPedigreeChart, setShowPedigreeChart] = useState(false);
   const isSpeciesSupported = useMemo(() => {
     // Currently, COI calculations are supported for Fancy Mouse and Fancy Rat.
     return ['Fancy Mouse', 'Fancy Rat'].includes(selectedSpecies);
@@ -73,6 +81,29 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDef
   }, [myAnimals, selectedSpecies]);
 
   const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
+
+  // Injects a placeholder "expected offspring" node whose sire/dam are the selected pair, so
+  // FamilyTreeView's direct-lineage traversal can be anchored on the pairing without a real litter.
+  const pairingPreviewAnimals = useMemo(() => {
+    if (!sire || !dam) return myAnimals || [];
+    const previewNode = {
+      id_public: PAIRING_PREVIEW_ID,
+      name: 'Expected Offspring',
+      prefix: '',
+      suffix: '',
+      species: sire.species || dam.species,
+      gender: 'Unknown',
+      sireId_public: sire.id_public,
+      damId_public: dam.id_public,
+    };
+    return [...(myAnimals || []), previewNode];
+  }, [myAnimals, sire, dam]);
+
+  const handleFamilyTreeNodeClick = (node) => {
+    const clickedAnimal = node?.data?.animal;
+    if (!clickedAnimal || clickedAnimal.id_public === PAIRING_PREVIEW_ID || !onViewAnimal) return;
+    onViewAnimal(clickedAnimal);
+  };
 
   const handleCalculate = async () => {
     if (!sire || !dam) {
@@ -228,6 +259,25 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDef
             </button>
           </div>
 
+          {sire && dam && (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+              <button
+                onClick={() => setShowFamilyTree(true)}
+                className="px-4 py-2 text-sm bg-white dark:bg-dark-card-bg border border-gray-300 dark:border-dark-text rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition flex items-center gap-2 font-semibold text-gray-700 dark:text-dark-text"
+              >
+                <Network size={16} />
+                See Entire Expected Family Tree
+              </button>
+              <button
+                onClick={() => setShowPedigreeChart(true)}
+                className="px-4 py-2 text-sm bg-white dark:bg-dark-card-bg border border-gray-300 dark:border-dark-text rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition flex items-center gap-2 font-semibold text-gray-700 dark:text-dark-text"
+              >
+                <ScrollText size={16} />
+                See Combined 4 Generations
+              </button>
+            </div>
+          )}
+
           {error && (
             <div className="p-4 mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-lg text-center">
               <p>{error}</p>
@@ -293,6 +343,42 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDef
           )}
         </div>
       </div>
+
+      {showFamilyTree && sire && dam && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-6xl h-[85vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-dark-text flex-shrink-0">
+              <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-dark-text flex items-center gap-2 truncate">
+                <Network size={18} className="flex-shrink-0" />
+                <span className="truncate">Expected Family Tree — {getFullName(sire)} &times; {getFullName(dam)}</span>
+              </h3>
+              <button onClick={() => setShowFamilyTree(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover rounded-lg flex-shrink-0" aria-label="Close">
+                <X size={20} className="text-gray-600 dark:text-dark-text-secondary" />
+              </button>
+            </div>
+            <div className="flex-1 min-h-0">
+              <FamilyTreeView
+                animals={pairingPreviewAnimals}
+                focusAnimalId={PAIRING_PREVIEW_ID}
+                onNodeClick={handleFamilyTreeNodeClick}
+                API_BASE_URL={API_BASE_URL}
+                authToken={authToken}
+                graphMode="direct"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPedigreeChart && sire && dam && (
+        <PedigreeChart
+          previewPairing={{ sireId: sire.id_public, damId: dam.id_public, coi: coiResult?.inbreedingCoefficient ?? null }}
+          onClose={() => setShowPedigreeChart(false)}
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          onViewAnimal={onViewAnimal}
+        />
+      )}
     </div>
   );
 };

@@ -268,7 +268,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
 };
 
 
-const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null, currentUserIdPublic = null, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
+const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null, previewPairing = null, currentUserIdPublic = null, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [currentViewingAnimal, setCurrentViewingAnimal] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null); // breeder (breederId_public)
@@ -404,7 +404,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         const fetchPedigreeData = async () => {
             const rootId = litterId || animalId || animalData?.id_public;
             const authScope = authToken ? 'auth' : 'public';
-            const cacheKey = rootId ? `${authScope}:${litterId ? 'litter:' : ''}${rootId}` : null;
+            // Hypothetical pairings are cheap to recompute and change often, so they're never cached.
+            const cacheKey = (!previewPairing && rootId) ? `${authScope}:${litterId ? 'litter:' : ''}${rootId}` : null;
             const cachedEntry = cacheKey ? pedigreeTreeCache.get(cacheKey) : null;
             if (cacheKey && isPedigreeCacheFresh(cachedEntry)) {
                 setPedigreeData(cachedEntry?.data || null);
@@ -559,7 +560,23 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                 };
 
                 let data;
-                if (litterId) {
+                if (previewPairing?.sireId && previewPairing?.damId) {
+                    // Hypothetical (not-yet-bred) pairing: build sire/dam ancestor trees directly,
+                    // skipping the /litters lookup since no litter record exists yet.
+                    const [sireTree, damTree] = await Promise.all([
+                        fetchAnimalWithFamily(previewPairing.sireId),
+                        fetchAnimalWithFamily(previewPairing.damId),
+                    ]);
+                    data = {
+                        id_public: 'pairing-preview',
+                        isPairingPreview: true,
+                        pairingInfo: { inbreedingCoefficient: previewPairing.coi ?? null },
+                        species: sireTree?.species || damTree?.species || null,
+                        father: sireTree,
+                        mother: damTree,
+                        breederId_public: null,
+                    };
+                } else if (litterId) {
                     // Litter root: fetch the litter record, then build full ancestor trees for its sire/dam
                     const litterResponse = await axios.get(`${API_BASE_URL}/litters/${litterId}`, {
                         headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
@@ -634,7 +651,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         };
 
         fetchPedigreeData();
-    }, [animalId, animalData?.id_public, litterId, currentUserIdPublic, API_BASE_URL, authToken]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [animalId, animalData?.id_public, litterId, previewPairing?.sireId, previewPairing?.damId, previewPairing?.coi, currentUserIdPublic, API_BASE_URL, authToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Re-fetch pedigree when clicking an ancestor (currentViewingAnimal changes)
     useEffect(() => {
@@ -1177,6 +1194,28 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
     };
     const renderCertMainCard = (animal) => {
         if (!animal) return null;
+        if (animal.isPairingPreview) {
+            const info = animal.pairingInfo || {};
+            const previewCardBg = themeColors['accent-purple-bg'];
+            const previewCardBorder = themeColors['accent-purple'];
+            return (
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: previewCardBg, border: `1px solid ${previewCardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ marginBottom: 4 }}>
+                            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: certFontColor }}>Expected Pairing (Preview)</span>
+                        </div>
+                        <table style={{ borderCollapse: 'collapse', fontSize: '0.7rem' }}>
+                            <tbody>
+                                <tr>
+                                    <td style={{ color: '#111827', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Predicted COI:</td>
+                                    <td style={{ color: certFontColor }}>{info.inbreedingCoefficient != null ? `${info.inbreedingCoefficient.toFixed(2)}%` : '—'}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        }
         if (animal.isLitterRoot) {
             const litter = animal.litterInfo || {};
             const imgSrc = litter.images?.[0]?.url || null;

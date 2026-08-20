@@ -429,6 +429,7 @@ export function AppRoutes({
           userProfile={userProfile}
           breedingLineDefs={breedingLineDefs}
           animalBreedingLines={animalBreedingLines}
+          onViewAnimal={handleViewAnimal}
         />
       } />
 
