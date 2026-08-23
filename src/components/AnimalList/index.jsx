@@ -6000,16 +6000,26 @@ useEffect(() => {
                         </button>
                         {isListLikeView && hasActiveFilters && (
                             <>
-                                <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
+                                {/* Desktop: separate badge + labeled button (unchanged) */}
+                                <span className="hidden sm:inline-flex bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
                                     Filtered
                                 </span>
                                 <button
                                     onClick={handleClearFilters}
-                                    className="flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-semibold px-3 py-1.5 rounded-lg transition shrink-0 border border-red-300 dark:border-red-800/60 sm:text-xs sm:font-medium sm:px-2 sm:py-1 sm:border-0"
+                                    className="hidden sm:flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs font-medium px-2 py-1 rounded-lg transition shrink-0"
                                     title="Clear all filters"
                                 >
                                     <X size={14} />
                                     <span>Clear Filters</span>
+                                </button>
+                                {/* Mobile: single tappable chip replaces the badge + separate button pair above */}
+                                <button
+                                    onClick={handleClearFilters}
+                                    className="sm:hidden flex items-center gap-1 bg-pink-500 hover:bg-pink-600 text-white text-xs font-semibold pl-2.5 pr-2 py-1 rounded-full transition shrink-0"
+                                    title="Clear all filters"
+                                >
+                                    <span>Filtered</span>
+                                    <X size={12} strokeWidth={3} />
                                 </button>
                             </>
                         )}
