@@ -1318,6 +1318,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             {l.expectedDueDate && !l.birthDate && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
                             {l.birthDate && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}{litterAge(l.birthDate) && <span className="ml-1 font-semibold text-blue-600 dark:text-blue-400">~ {litterAge(l.birthDate)}</span>}</span>}
                         </div>
+
+                        {/* Breeder notes on this pairing/litter */}
+                        {l.notes && (
+                            <p className="text-xs text-gray-600 dark:text-dark-text-secondary italic text-center border-t border-gray-100 dark:border-dark-border pt-2 whitespace-pre-wrap">
+                                {l.notes}
+                            </p>
+                        )}
                         
                         {/* CTL ID - bottom right corner */}
                         {l.litter_id_public && (

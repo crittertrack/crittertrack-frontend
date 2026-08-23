@@ -4244,8 +4244,8 @@ useEffect(() => {
                 </div>
 
                 <div className="sm:text-right flex items-center gap-1 justify-end">
-                    <button onClick={(e) => { e.stopPropagation(); onMarkDone(task); }} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
-                    {due && <button onClick={(e) => { e.stopPropagation(); onSkip(task); }} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
+                    <button onClick={(e) => { e.stopPropagation(); onMarkDone(task); }} title="Mark Done" className="p-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={14} /></button>
+                    {due && <button onClick={(e) => { e.stopPropagation(); onSkip(task); }} title="Skip" className="p-1.5 rounded-full bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={14} /></button>}
                     <button onClick={(e) => { e.stopPropagation(); onDelete(task); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete task"><Trash2 size={14} /></button>
                     <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
                 </div>
