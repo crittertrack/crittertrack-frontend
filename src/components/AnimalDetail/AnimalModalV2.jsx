@@ -488,7 +488,19 @@ const AnimalModalV2 = ({
                                         ) : null;
                                     })()}
                                     {onAddSibling && <button onClick={() => onAddSibling(animal)} className="p-2 bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-300 dark:hover:bg-dark-surface-hover transition"><Users size={16} /></button>}
-                                    {onArchive && <button onClick={() => onArchive(animal)} className="p-2 bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary rounded-lg hover:bg-gray-300 dark:hover:bg-dark-surface-hover transition"><Archive size={16} /></button>}
+                                    {onArchive && (
+                                        <button
+                                            onClick={() => onArchive(animal)}
+                                            title={animal.archived ? 'Archived' : 'Archive'}
+                                            className={`p-2 rounded-lg transition ${
+                                                animal.archived
+                                                    ? 'bg-amber-500 dark:bg-amber-600 text-white hover:bg-amber-600 dark:hover:bg-amber-700'
+                                                    : 'bg-gray-200 dark:bg-dark-surface text-gray-700 dark:text-dark-text-secondary hover:bg-gray-300 dark:hover:bg-dark-surface-hover'
+                                            }`}
+                                        >
+                                            <Archive size={16} />
+                                        </button>
+                                    )}
                                     <button onClick={onClose} className="p-2 text-gray-500 dark:text-dark-text-muted hover:text-gray-800 dark:hover:text-dark-text"><X size={20} /></button>
                                 </div>
                             </div>
