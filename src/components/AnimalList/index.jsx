@@ -7,7 +7,7 @@ import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
 import { SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
 import {
-    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, ArrowDown, ArrowUp, Ban, Info,
+    Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, Ban, Info,
     Bell, Bird, Bug, Bean, Building, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, Dna, Hourglass, Star,
     ChevronUp, MoreVertical, Circle, ClipboardList, Edit, Eye, EyeOff, Fish, Flag, FolderOpen, Heart, HeartOff, Settings, Users, PawPrint,
     Home, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Pin, Network, Droplet, ScanHeart, LampCeiling, BarChart2, Thermometer, Worm,
@@ -309,21 +309,13 @@ const AnimalList = ({
     const [sortConfig, setSortConfig] = useState(() => {
         try {
             const saved = localStorage.getItem(`ct_list_sort_config_${userKey}`);
-            return saved ? JSON.parse(saved) : { key: 'name', direction: 'ascending' };
+            return saved ? JSON.parse(saved) : { key: 'birthdate', direction: 'descending' };
         } catch {
-            return { key: 'name', direction: 'ascending' };
+            return { key: 'birthdate', direction: 'descending' };
         }
     });
 
-    const requestSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        } else if (sortConfig.key === key && sortConfig.direction === 'descending') {
-            direction = 'ascending';
-        } else if (key === 'birthdate') {
-            direction = 'descending'; // Default for birthdate is oldest first
-        }
+    const setSortOption = (key, direction) => {
         const newSortConfig = { key, direction };
         setSortConfig(newSortConfig);
         try { localStorage.setItem(`ct_list_sort_config_${userKey}`, JSON.stringify(newSortConfig)); } catch {}
@@ -5985,8 +5977,8 @@ useEffect(() => {
         <>
             {/* Animal List section */}
             <div className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
-                <div className="flex items-center justify-between w-full gap-2 min-w-0 mb-4 flex-wrap">
-                    <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-2 min-w-0 mb-4">
+                    <div className="flex items-center gap-2 min-w-0 flex-wrap w-full sm:w-auto sm:flex-1">
                         <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
                         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text truncate min-w-0" data-tutorial-target="my-animals-title">
                             {animalView === 'list' ? `My Animals` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
@@ -6007,13 +5999,23 @@ useEffect(() => {
                             <span className="hidden sm:inline">Refresh</span>
                         </button>
                         {isListLikeView && hasActiveFilters && (
-                            <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
-                                Filtered
-                            </span>
+                            <>
+                                <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
+                                    Filtered
+                                </span>
+                                <button
+                                    onClick={handleClearFilters}
+                                    className="flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs font-medium px-2 py-1 rounded-lg transition shrink-0"
+                                    title="Clear all filters"
+                                >
+                                    <X size={14} />
+                                    <span className="hidden sm:inline">Clear Filters</span>
+                                </button>
+                            </>
                         )}
                     </div>
                     {/* Right-aligned action buttons */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
+                    <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end w-full sm:w-auto">
                         {/* Find Duplicates */}
                         {!showArchiveScreen && (
                             <button
@@ -6268,12 +6270,22 @@ useEffect(() => {
                         <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
                         </div>
                         <span className="hidden sm:inline mx-1 text-gray-300 dark:text-dark-border">|</span>
-                        <button onClick={() => requestSort('name')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'name' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary'}`}>
-                            A-Z {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
-                        </button>
-                        <button onClick={() => requestSort('birthdate')} className={`flex items-center gap-1 text-sm p-2 rounded-lg ${sortConfig.key === 'birthdate' ? 'bg-primary dark:bg-dark-primary text-black' : 'bg-gray-200 dark:bg-dark-card-bg dark:text-dark-text-secondary'}`}>
-                            Age {sortConfig.key === 'birthdate' && (sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)}
-                        </button>
+                        <select
+                            value={sortConfig.key === 'name' ? sortConfig.direction : 'ascending'}
+                            onChange={(e) => setSortOption('name', e.target.value)}
+                            className={`p-2 text-sm border rounded-lg ${sortConfig.key === 'name' ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 text-gray-800 dark:text-dark-text' : 'border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text'}`}
+                        >
+                            <option value="ascending">Name: A-Z</option>
+                            <option value="descending">Name: Z-A</option>
+                        </select>
+                        <select
+                            value={sortConfig.key === 'birthdate' ? sortConfig.direction : 'ascending'}
+                            onChange={(e) => setSortOption('birthdate', e.target.value)}
+                            className={`p-2 text-sm border rounded-lg ${sortConfig.key === 'birthdate' ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 text-gray-800 dark:text-dark-text' : 'border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text'}`}
+                        >
+                            <option value="ascending">Age: Oldest First</option>
+                            <option value="descending">Age: Youngest First</option>
+                        </select>
                     </div>
             </div>
             )}
