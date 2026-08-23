@@ -6012,20 +6012,22 @@ useEffect(() => {
                                     <X size={14} />
                                     <span>Clear Filters</span>
                                 </button>
-                                {/* Mobile: single tappable chip replaces the badge + separate button pair above */}
-                                <button
-                                    onClick={handleClearFilters}
-                                    className="sm:hidden flex items-center gap-1 bg-pink-500 hover:bg-pink-600 text-white text-xs font-semibold pl-2.5 pr-2 py-1 rounded-full transition shrink-0"
-                                    title="Clear all filters"
-                                >
-                                    <span>Filtered</span>
-                                    <X size={12} strokeWidth={3} />
-                                </button>
                             </>
                         )}
                     </div>
                     {/* Right-aligned action buttons */}
                     <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end w-full sm:w-auto">
+                        {/* Mobile: single tappable chip, pushed left via mr-auto so action buttons stay right-aligned on the same row */}
+                        {isListLikeView && hasActiveFilters && (
+                            <button
+                                onClick={handleClearFilters}
+                                className="sm:hidden mr-auto flex items-center gap-1 bg-pink-500 hover:bg-pink-600 text-white text-xs font-semibold pl-2.5 pr-2 py-1 rounded-full transition shrink-0"
+                                title="Clear all filters"
+                            >
+                                <span>Filtered</span>
+                                <X size={12} strokeWidth={3} />
+                            </button>
+                        )}
                         {/* Find Duplicates */}
                         {!showArchiveScreen && (
                             <button
