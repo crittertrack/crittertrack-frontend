@@ -133,6 +133,11 @@ const GeneralTaskModal = ({ isOpen, onClose, onSave, task, animals = [] }) => {
                                     </label>
                                 ))}
                         </div>
+                        {filteredAnimals.length > 50 && (
+                            <div className="text-[11px] text-gray-400 dark:text-dark-text-muted text-center pt-1">
+                                Showing 50 of {filteredAnimals.length} — keep typing to narrow it down.
+                            </div>
+                        )}
                     </div>
                 </div>
 
