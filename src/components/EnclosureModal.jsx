@@ -399,7 +399,10 @@ const EnclosureModal = ({
                                         </select>
                                     </div>
                                     <button type="button" onClick={() => {
-                                        if (!newCleaningTaskName.trim()) return;
+                                        if (!newCleaningTaskName.trim()) {
+                                            showModalMessage('Task name required', 'Please enter a name for this task before adding it.');
+                                            return;
+                                        }
                                         const newTask = { taskName: newCleaningTaskName.trim(), type: newCleaningTaskType, frequency: newCleaningTaskFreq ? Number(newCleaningTaskFreq) : null, frequencyUnit: newCleaningTaskFreq ? newCleaningTaskFreqUnit : null, notes: newCleaningTaskNotes.trim() || null, assignedSupplies: newCleaningTaskSupplies, lastDoneDate: null };
                                         setNewEnclosureForm(p => ({ ...p, cleaningTasks: [...(p.cleaningTasks || []), newTask] }));
                                         setNewCleaningTaskName(''); setNewCleaningTaskFreq(''); setNewCleaningTaskFreqUnit('days'); setNewCleaningTaskNotes(''); setNewCleaningTaskSupplies([]); setNewCleaningTaskType('Cleaning');
