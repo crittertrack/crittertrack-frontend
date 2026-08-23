@@ -62,6 +62,7 @@ import { usePublicAnimalNavigation } from './hooks/usePublicAnimalNavigation.ts'
 import { usePrivateAnimalNavigation } from './hooks/usePrivateAnimalNavigation.ts';
 import { useTransferWorkflow } from './hooks/useTransferWorkflow.ts';
 import { useBreedingLines } from './hooks/useBreedingLines.ts';
+import { useGeneralTasks } from './hooks/useGeneralTasks.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
 import NewsTickerBanner from './components/NewsTickerBanner';
@@ -225,6 +226,9 @@ const App = () => {
     
     // Phase 10e: Breeding Lines
     const breedingLinesState = useBreedingLines(authTokenTemp, API_BASE_URL);
+
+    // Phase 10e-2: Standalone (not animal/enclosure-linked) Feeding & Care tasks
+    const generalTasksState = useGeneralTasks(authTokenTemp, API_BASE_URL);
     
     // Temporarily store auth for hook setup
     const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
@@ -2373,6 +2377,7 @@ const App = () => {
                   saveBreedingLineDefs={saveBreedingLineDefs}
                   toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                   BL_PRESETS_APP={BL_PRESETS_APP}
+                  generalTasksState={generalTasksState}
                   preSelectedTransferAnimal={preSelectedTransferAnimal}
                   preSelectedTransactionType={preSelectedTransactionType}
                   setPreSelectedTransferAnimal={setPreSelectedTransferAnimal}

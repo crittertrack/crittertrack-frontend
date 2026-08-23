@@ -157,6 +157,7 @@ export function AppRoutes({
   fetchLocations,
   toggleAnimalBreedingLine,
   BL_PRESETS_APP,
+  generalTasksState,
   
   // Transfer
   preSelectedTransferAnimal,
@@ -243,6 +244,7 @@ export function AppRoutes({
           speciesOptions={speciesOptions}
           locations={locations}
           fetchLocations={fetchLocations}
+          generalTasksState={generalTasksState}
         />
       } />
       
@@ -269,6 +271,7 @@ export function AppRoutes({
           speciesOptions={speciesOptions}
           locations={locations}
           fetchLocations={fetchLocations}
+          generalTasksState={generalTasksState}
         />
       } />
 

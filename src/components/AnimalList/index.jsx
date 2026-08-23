@@ -34,6 +34,7 @@ import { getUserKey } from '../../utils/userKey';
 
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 import InfoButton from '../shared/InfoButton';
+import GeneralTaskModal from '../GeneralTaskModal';
 
 const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
@@ -265,7 +266,9 @@ const AnimalList = ({
     onBreedingLinesUpdate,
     speciesOptions = [],
     locations,
-    fetchLocations
+    fetchLocations,
+    // Standalone (not animal/enclosure-linked) Feeding & Care tasks
+    generalTasksState
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
@@ -701,6 +704,10 @@ const AnimalList = ({
     const [showAssignHealthStatusModal, setShowAssignHealthStatusModal] = useState(false);
     const [assigningHealthStatus, setAssigningHealthStatus] = useState(false);
     const [selectedMatingSire, setSelectedMatingSire] = useState(null);
+
+    // Standalone (not animal/enclosure-linked) custom task modal state
+    const [showGeneralTaskModal, setShowGeneralTaskModal] = useState(false);
+    const [editingGeneralTask, setEditingGeneralTask] = useState(null);
     const [selectedMatingDam, setSelectedMatingDam] = useState(null);
     const [showMatingBreedingDetails, setShowMatingBreedingDetails] = useState(false);
     const [matingCOI, setMatingCOI] = useState(null);
@@ -2132,6 +2139,11 @@ useEffect(() => {
     }, [enclosures]);
     const enclosureCleaningDue = useMemo(() => enclosureCleaningFlat.filter(e => isTaskDue(e.task)), [enclosureCleaningFlat, isTaskDue]);
     const enclosureCleaningOk = useMemo(() => enclosureCleaningFlat.filter(e => !isTaskDue(e.task)), [enclosureCleaningFlat, isTaskDue]);
+
+    // Standalone (not animal/enclosure-linked) custom tasks for the Feeding & Care management tab.
+    const generalCareTasksList = generalTasksState?.generalCareTasks || [];
+    const generalTaskDue = useMemo(() => generalCareTasksList.filter(t => isTaskDue(t)), [generalCareTasksList, isTaskDue]);
+    const generalTaskOk = useMemo(() => generalCareTasksList.filter(t => !isTaskDue(t)), [generalCareTasksList, isTaskDue]);
 
     // The original 'allAnimals' variable (used for the main list and management views) remains unchanged.
     // Must exclude view-only animals (e.g. transferred away, kept only for pedigree/history access) —
@@ -4200,6 +4212,47 @@ useEffect(() => {
         );
     };
 
+    // Standalone (not animal/enclosure-linked) custom task row for the Feeding & Care tab —
+    // e.g. "Feed the mouse colony". Optional assignedAnimals is display-only context, not a
+    // per-animal schedule (the task itself has exactly one due date/one reminder).
+    const GeneralTaskBar = ({ task, onEdit, onMarkDone, onSkip, onDelete }) => {
+        const due = isTaskDue(task);
+        const freqLabel = task.frequency ? `Every ${task.frequency} ${task.frequencyUnit || 'days'}` : '—';
+        const assignedNames = (task.assignedAnimals || []).map(id => allAnimalsRaw.find(a => a.id_public === id)?.name || id);
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+                <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onEdit(task)}>
+                    <div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex items-center justify-center flex-shrink-0">
+                        <ClipboardList size={16} className="text-gray-400 dark:text-dark-text-muted" />
+                    </div>
+                    <div className="min-w-0">
+                        <div className="font-semibold text-sm text-gray-800 dark:text-dark-text truncate">{task.taskName}</div>
+                        <div className="text-xs text-gray-500 dark:text-dark-text-muted truncate">
+                            {task.type}{assignedNames.length > 0 ? ` · ${assignedNames.length} animal${assignedNames.length !== 1 ? 's' : ''}` : ''}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Last Done: </span>{task.lastDoneDate ? formatDateShort(task.lastDoneDate) : <span className="text-orange-500 dark:text-orange-400">Never</span>}</div>
+
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{freqLabel}</div>
+
+                <div className="sm:col-span-2 text-xs text-gray-400 dark:text-dark-text-muted truncate">{task.notes || '—'}</div>
+
+                <div className="text-center">
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${due ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>{due ? 'Due/Overdue' : 'Up to Date'}</span>
+                </div>
+
+                <div className="sm:text-right flex items-center gap-1 justify-end">
+                    <button onClick={(e) => { e.stopPropagation(); onMarkDone(task); }} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"><Check size={12} /> Done</button>
+                    {due && <button onClick={(e) => { e.stopPropagation(); onSkip(task); }} className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-100 dark:bg-dark-card-bg text-gray-500 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border border-gray-200 dark:border-dark-text-muted"><SkipForward size={12} /> Skip</button>}
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(task); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover" title="Delete task"><Trash2 size={14} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="p-1.5 text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text rounded-full hover:bg-gray-200 dark:hover:bg-dark-surface-hover"><Edit size={14} /></button>
+                </div>
+            </div>
+        );
+    };
+
     // -- For Sale Screen ----------------------------------------------------------
     const renderForSaleScreen = () => {
         const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
@@ -4855,14 +4908,24 @@ useEffect(() => {
                     <SectionHeader sectionKey="feedingCare"
                         icon={<Utensils size={18} className="text-green-600 dark:text-green-400" />}
                         title="Feeding & Care"
-                        count={(feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount + enclosureCleaningDue.length) > 0
-                            ? `${feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount + enclosureCleaningDue.length} due`
-                            : (feedDue.length + feedOk.length + groomingScheduleDue.length + groomingScheduleOk.length + trainingScheduleDue.length + trainingScheduleOk.length + animalsWithAnimalTasks.length + enclosureCleaningDue.length + enclosureCleaningOk.length)}
+                        count={(feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount + enclosureCleaningDue.length + generalTaskDue.length) > 0
+                            ? `${feedDue.length + groomingScheduleDue.length + trainingScheduleDue.length + scheduledCareDueCount + enclosureCleaningDue.length + generalTaskDue.length} due`
+                            : (feedDue.length + feedOk.length + groomingScheduleDue.length + groomingScheduleOk.length + trainingScheduleDue.length + trainingScheduleOk.length + animalsWithAnimalTasks.length + enclosureCleaningDue.length + enclosureCleaningOk.length + generalTaskDue.length + generalTaskOk.length)}
                         bgClass="bg-green-50 dark:bg-green-900/20" hideHeader={!!view} />
                     {(!collapsedMgmtSections['feedingCare'] || !!view) && (
                         <div className="p-3 space-y-4">
                             {(() => {
                                 const feedingCareSections = [
+                                    {
+                                        key: 'general', title: 'Custom Tasks', icon: <ClipboardList size={16} className="text-blue-700 dark:text-blue-300" />, headerClass: 'bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-900/40',
+                                        list: [...generalTaskDue, ...generalTaskOk], dueCount: generalTaskDue.length, colLabels: ['Last Done', 'Notes'], entityLabel: 'Task',
+                                        emptyText: "No custom tasks yet — use the \"Add Custom Task\" button above to create one not tied to a specific animal or enclosure.",
+                                        renderRow: task => <GeneralTaskBar key={task.id} task={task}
+                                            onEdit={t => { setEditingGeneralTask(t); setShowGeneralTaskModal(true); }}
+                                            onMarkDone={t => generalTasksState?.markGeneralTaskDone(t.id)}
+                                            onSkip={t => generalTasksState?.skipGeneralTask(t.id)}
+                                            onDelete={t => { if (window.confirm(`Delete "${t.taskName}"?`)) generalTasksState?.deleteGeneralTask(t.id); }} />,
+                                    },
                                     {
                                         key: 'feeding', title: 'Feeding', icon: <Utensils size={16} className="text-green-700 dark:text-green-300" />, headerClass: 'bg-green-50 dark:bg-green-900/20 border-b border-green-100 dark:border-green-900/40',
                                         list: [...feedDue, ...feedOk], dueCount: feedDue.length, colLabels: ['Last Fed', 'Diet'],
@@ -6048,7 +6111,11 @@ useEffect(() => {
                             <button onClick={() => setShowAssignHealthStatusModal(true)} className="flex bg-orange-600 dark:bg-orange-800 hover:bg-orange-700 dark:hover:bg-orange-700 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Assign Quarantine or Treatment">
                                 <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Assign Quarantine/Treatment</span>
                             </button>
-                        ) : animalView === 'feeding' ? null : (
+                        ) : animalView === 'feeding' ? (
+                            <button onClick={() => { setEditingGeneralTask(null); setShowGeneralTaskModal(true); }} className="flex bg-blue-600 dark:bg-dark-info-blue hover:bg-blue-700 dark:hover:bg-dark-info-blue-hover text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm" title="Add Custom Task">
+                                <Plus size={14} className="sm:w-4 sm:h-4" /> <span>Add Custom Task</span>
+                            </button>
+                        ) : (
                             <button
                                 onClick={() => openEnclosureModal()}
                                 className="flex bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
@@ -6657,6 +6724,18 @@ useEffect(() => {
                 onSubmit={handleAssignHealthStatus}
                 saving={assigningHealthStatus}
             />
+            {showGeneralTaskModal && (
+                <GeneralTaskModal
+                    isOpen={showGeneralTaskModal}
+                    onClose={() => { setShowGeneralTaskModal(false); setEditingGeneralTask(null); }}
+                    task={editingGeneralTask}
+                    animals={activeAnimalsForDashboard}
+                    onSave={(taskData) => {
+                        if (editingGeneralTask) generalTasksState?.updateGeneralTask(editingGeneralTask.id, taskData);
+                        else generalTasksState?.addGeneralTask(taskData);
+                    }}
+                />
+            )}
             {showAddMatingForm && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
                     <div className="bg-white dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-xl shadow-2xl w-full max-w-lg">
