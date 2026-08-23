@@ -6273,16 +6273,16 @@ useEffect(() => {
                             onChange={(e) => setSortOption('name', e.target.value)}
                             className={`p-2 text-sm border rounded-lg ${sortConfig.key === 'name' ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 text-gray-800 dark:text-dark-text' : 'border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text'}`}
                         >
-                            <option value="ascending">Name: A-Z</option>
-                            <option value="descending">Name: Z-A</option>
+                            <option value="ascending">A-Z</option>
+                            <option value="descending">Z-A</option>
                         </select>
                         <select
                             value={sortConfig.key === 'birthdate' ? sortConfig.direction : 'ascending'}
                             onChange={(e) => setSortOption('birthdate', e.target.value)}
                             className={`p-2 text-sm border rounded-lg ${sortConfig.key === 'birthdate' ? 'border-primary dark:border-dark-primary bg-primary/10 dark:bg-dark-primary/10 text-gray-800 dark:text-dark-text' : 'border-gray-300 dark:border-dark-text-muted dark:bg-dark-card-bg dark:text-dark-text'}`}
                         >
-                            <option value="ascending">Age: Oldest First</option>
-                            <option value="descending">Age: Youngest First</option>
+                            <option value="ascending">Oldest First</option>
+                            <option value="descending">Youngest First</option>
                         </select>
                     </div>
             </div>
