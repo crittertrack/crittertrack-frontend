@@ -6005,11 +6005,11 @@ useEffect(() => {
                                 </span>
                                 <button
                                     onClick={handleClearFilters}
-                                    className="flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs font-medium px-2 py-1 rounded-lg transition shrink-0"
+                                    className="flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-semibold px-3 py-1.5 rounded-lg transition shrink-0 border border-red-300 dark:border-red-800/60 sm:text-xs sm:font-medium sm:px-2 sm:py-1 sm:border-0"
                                     title="Clear all filters"
                                 >
                                     <X size={14} />
-                                    <span className="hidden sm:inline">Clear Filters</span>
+                                    <span>Clear Filters</span>
                                 </button>
                             </>
                         )}
@@ -6266,7 +6266,7 @@ useEffect(() => {
                             </select>
                         )}
                     </div>
-                    <div className="flex items-center gap-2 ml-auto flex-wrap">
+                    <div className="flex items-center gap-2 sm:ml-auto flex-wrap">
                         <span className="hidden sm:inline mx-1 text-gray-300 dark:text-dark-border">|</span>
                         <select
                             value={sortConfig.key === 'name' ? sortConfig.direction : 'ascending'}
