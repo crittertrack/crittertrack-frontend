@@ -13,7 +13,6 @@ import { getDonationBadge, DonationBadge } from './utils/donationUtils';
 import { getActionLabel, getActionColor } from './utils/activityUtils';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
-import AdminPanel from './components/EnhancedAdminPanel';
 import MaintenanceMode from './MaintenanceMode';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import WelcomeGuideModal from './components/WelcomeGuideModal';
@@ -45,6 +44,9 @@ const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'))
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const ResourcesPage = lazy(() => import('./components/tools/ResourcesPage'));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
+// Admin/moderator-only panel — pulls in recharts + ~10 admin tab components, so it
+// must never be part of the main bundle every visitor downloads.
+const AdminPanel = lazy(() => import('./components/EnhancedAdminPanel'));
 
 // Phase 7: Modals & Messages
 import { ConflictResolutionModal, LitterSyncConflictModal } from './components/Modals/LitterConflictModals';
@@ -2179,17 +2181,19 @@ const App = () => {
 
             {/* Moderation Panel - Opens while in Moderator Mode */}
             {showAdminPanel && inModeratorMode && ['admin', 'moderator'].includes(userProfile?.role) && (
-                <AdminPanel
-                    isOpen={showAdminPanel}
-                    onClose={() => setShowAdminPanel(false)}
-                    authToken={authToken}
-                    API_BASE_URL={API_BASE_URL}
-                    userRole={userProfile?.role}
-                    userEmail={userProfile?.email}
-                    userId={userProfile?.id_public}
-                    username={userProfile?.personalName}
-                    skipAuthentication={true}
-                />
+                <Suspense fallback={<LoadingSpinner />}>
+                    <AdminPanel
+                        isOpen={showAdminPanel}
+                        onClose={() => setShowAdminPanel(false)}
+                        authToken={authToken}
+                        API_BASE_URL={API_BASE_URL}
+                        userRole={userProfile?.role}
+                        userEmail={userProfile?.email}
+                        userId={userProfile?.id_public}
+                        username={userProfile?.personalName}
+                        skipAuthentication={true}
+                    />
+                </Suspense>
             )}
 
             {/* Animal detail overlay - renders on top of whatever route is active */}

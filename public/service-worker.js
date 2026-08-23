@@ -1,5 +1,5 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v32'; // Increment version to force cache update
+const CACHE_NAME = 'crittertrack-v33'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',
@@ -71,6 +71,12 @@ const fetchCacheFirst = async (request) => {
 const shouldUseNetworkFirst = (request, url) => {
   if (request.destination === 'document' || request.headers.get('accept')?.includes('text/html') || url.pathname === '/' || url.pathname.endsWith('.html')) {
     return true;
+  }
+  // CRA's /static/ build output is content-hashed and immutable per deploy — serve it
+  // cache-first so repeat visits/lazy route loads (especially on slower mobile networks)
+  // don't pay a full network round trip for a file that can never change.
+  if (url.pathname.startsWith('/static/')) {
+    return false;
   }
   if (request.destination === 'script' || request.destination === 'style' || request.destination === 'font') {
     return true;
