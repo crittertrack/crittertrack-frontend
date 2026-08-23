@@ -1,5 +1,11 @@
 /* c:\Projects\crittertrack-frontend\src\components\NewsTickerBanner.css */
 .news-ticker-container {
+  /* Must size to its own (nowrap) content, not the parent, since the translateX
+     keyframes below are percentages of THIS box's width — a block-level width
+     (= narrow parent width on mobile) cuts the sweep short before later items
+     (e.g. the beta survey message) ever scroll into view. */
+  display: inline-block;
+  width: max-content;
   animation: ticker-scroll linear infinite;
   animation-duration: 30s; /* Adjust speed as needed */
 }

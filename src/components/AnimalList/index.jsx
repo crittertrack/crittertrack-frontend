@@ -6142,7 +6142,7 @@ useEffect(() => {
             {isListLikeView && !showArchiveScreen && (
                 // Filter bar
                 <div className="flex flex-wrap items-center gap-2 mb-4 p-2 bg-gray-50 dark:bg-dark-card-bg border border-transparent dark:border-dark-text-muted rounded-lg">
-                    <div className="flex flex-wrap items-center gap-2 flex-grow">
+                    <div className="flex flex-wrap items-center gap-2">
                         <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
                             <button onClick={() => {
                                 if (isCollectionsView) { setCollectionsViewMode('cards'); } else {
@@ -6267,8 +6267,6 @@ useEffect(() => {
                         )}
                     </div>
                     <div className="flex items-center gap-2 ml-auto flex-wrap">
-                        <div className="flex border border-gray-200 dark:border-dark-text-muted rounded-lg overflow-hidden shrink-0">
-                        </div>
                         <span className="hidden sm:inline mx-1 text-gray-300 dark:text-dark-border">|</span>
                         <select
                             value={sortConfig.key === 'name' ? sortConfig.direction : 'ascending'}
