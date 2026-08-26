@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield, Info, AlertTriangle, CheckCircle, X,
-  Utensils, Scissors, Dumbbell, Heart, HeartPulse, Wrench, Package, Cake,
+  Utensils, Scissors, Dumbbell, Heart, HeartPulse, Wrench, Package, Cake, ClipboardList,
 } from 'lucide-react';
 import { useUnreadMessages, useUnreadNotifications } from '../../hooks/useNotificationCounts';
 import { getUserKey } from '../../utils/userKey';
@@ -97,6 +97,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   const [litters, setLitters] = useState([]);
   const [enclosures, setEnclosures] = useState([]);
   const [supplies, setSupplies] = useState([]);
+  const [generalCareTasks, setGeneralCareTasks] = useState([]);
   const [careDataLoaded, setCareDataLoaded] = useState(false);
   const [alertSettings, setAlertSettings] = useState(defaultAlertSettings);
   const [expandedId, setExpandedId] = useState(null); // which item's detail popover is open, if any
@@ -193,17 +194,19 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       // (AnimalList's activeAnimalsForDashboard) include every non-archived, non-view-only animal
       // regardless of ownership, so restricting to owned-only here silently hid alerts for
       // animals not marked "owned" and made the ticker disagree with the Dashboard.
-      const [ar, lr, er, sr] = await Promise.all([
+      const [ar, lr, er, sr, gr] = await Promise.all([
         axios.get(`${API_BASE_URL}/animals`, { headers }),
         axios.get(`${API_BASE_URL}/litters`, { headers }),
         axios.get(`${API_BASE_URL}/enclosures`, { headers }),
         axios.get(`${API_BASE_URL}/supplies`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${API_BASE_URL}/users/general-tasks`, { headers }).catch(() => ({ data: {} })),
       ]);
       const ownAnimals = (Array.isArray(ar.data) ? ar.data : []).filter(a => !a.isViewOnly && !a.archived);
       setAnimals(ownAnimals);
       setLitters(Array.isArray(lr.data) ? lr.data : []);
       setEnclosures(Array.isArray(er.data) ? er.data : []);
       setSupplies(Array.isArray(sr.data) ? sr.data : []);
+      setGeneralCareTasks(Array.isArray(gr.data?.generalCareTasks) ? gr.data.generalCareTasks : []);
     } catch (error) {
       console.error('Failed to fetch care data for alerts:', error);
     } finally {
@@ -238,6 +241,10 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       const names = new Set();
       animals.forEach(a => TRAINING_SCHEDULE_DEFS.forEach(def => { if (isTaskDue(a[def.key]?.lastDoneDate, a[def.key]?.frequencyDays)) { count++; names.add(animalDisplayName(a)); } }));
       if (count > 0) items.push({ id: 'training', icon: Dumbbell, iconColor: 'text-lime-300', text: `Training: ${count} session${count !== 1 ? 's' : ''} due ${formatNameList([...names])}`, onClick: () => navigate('/', { state: { animalView: 'feeding' } }) });
+    }
+    if (alertSettings.careTasks) {
+      const due = generalCareTasks.filter(t => isTaskDue(t.lastDoneDate, cleaningTaskFreqDays(t)));
+      if (due.length > 0) items.push({ id: 'careTasks', icon: ClipboardList, iconColor: 'text-blue-300', text: `Custom Tasks: ${due.length} task${due.length !== 1 ? 's' : ''} due ${formatNameList(due.map(t => t.taskName))}`, onClick: () => navigate('/', { state: { animalView: 'feeding' } }) });
     }
     if (alertSettings.reproduction) {
       let mated = 0, due = 0, weaned = 0;
@@ -285,7 +292,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
       if (due.length > 0) items.push({ id: 'birthdays', icon: Cake, iconColor: 'text-fuchsia-300', text: `Birthdays: ${due.length} animal${due.length !== 1 ? 's' : ''} today ${formatNameList(due.map(animalDisplayName))}`, onClick: () => navigate('/', { state: { animalView: 'list' } }) });
     }
     return items;
-  }, [careDataLoaded, alertSettings, animals, litters, enclosures, supplies, navigate]);
+  }, [careDataLoaded, alertSettings, animals, litters, enclosures, supplies, generalCareTasks, navigate]);
 
   useEffect(() => {
     const handleNotificationsChanged = () => {

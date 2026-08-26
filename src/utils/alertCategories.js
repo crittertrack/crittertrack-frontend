@@ -5,6 +5,7 @@ export const ALERT_CATEGORIES = {
     feeding: 'Feeding Due',
     grooming: 'Grooming / Special Care',
     training: 'Training Schedules',
+    careTasks: 'Custom Tasks',
     reproduction: 'Reproduction',
     health: 'Medical / Quarantine',
     maintenance: 'Enclosure Maintenance',
