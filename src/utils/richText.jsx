@@ -22,7 +22,7 @@ function renderInline(line, keyPrefix) {
 
 /**
  * Renders admin-authored broadcast/announcement text as React nodes (no dangerouslySetInnerHTML):
- * preserves line breaks and supports **bold** and *italic*/_italic_ inline markers.
+ * preserves line breaks and supports **bold** and *italic* (or _italic_) inline markers.
  */
 export function renderRichText(text) {
     if (!text) return null;
