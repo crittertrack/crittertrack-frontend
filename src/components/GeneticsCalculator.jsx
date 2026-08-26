@@ -3,6 +3,7 @@ import { X, Book, User, Search } from 'lucide-react';
 import InfoButton from './shared/InfoButton';
 import { matchFancyRatPhenotype, getFancyRatCarriers, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
 import { matchSyrianHamsterPhenotype, getSyrianHamsterCarriers, SYRIAN_HAMSTER_GENE_LOCI } from '../data/syrianHamsterPhenotypeRules';
+import { matchCampbellsDwarfHamsterPhenotype, getCampbellsDwarfHamsterCarriers, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
 
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
@@ -1507,9 +1508,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   // Fetch genetics data when species changes
   React.useEffect(() => {
     const fetchGeneticsData = async () => {
-      // For Fancy Mouse, Fancy Rat, and Syrian Hamster, use hardcoded data (fast, reliable, reviewed rule engines)
-      if (selectedSpecies === 'Fancy Mouse' || selectedSpecies === 'Fancy Rat' || selectedSpecies === 'Syrian Hamster') {
-        const loci = selectedSpecies === 'Fancy Mouse' ? GENE_LOCI : selectedSpecies === 'Fancy Rat' ? RAT_GENE_LOCI : SYRIAN_HAMSTER_GENE_LOCI;
+      // For Fancy Mouse, Fancy Rat, Syrian Hamster, and Campbell's Dwarf Hamster, use hardcoded data (fast, reliable, reviewed rule engines)
+      if (selectedSpecies === 'Fancy Mouse' || selectedSpecies === 'Fancy Rat' || selectedSpecies === 'Syrian Hamster' || selectedSpecies === 'Campbells Dwarf Hamster') {
+        const loci = selectedSpecies === 'Fancy Mouse' ? GENE_LOCI : selectedSpecies === 'Fancy Rat' ? RAT_GENE_LOCI : selectedSpecies === 'Syrian Hamster' ? SYRIAN_HAMSTER_GENE_LOCI : CAMPBELLS_DWARF_HAMSTER_GENE_LOCI;
         setGeneLoci(loci);
         const newDefaults = {};
         Object.keys(loci).forEach(locus => {
@@ -1917,7 +1918,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           ? (matchFancyRatPhenotype(partialGenotype) || { phenotype: 'Standard', carriers: getFancyRatCarriers(partialGenotype), hidden: [], notes: [] })
           : selectedSpecies === 'Syrian Hamster'
             ? matchSyrianHamsterPhenotype(partialGenotype)
-            : calculatePhenotypeDynamic(partialGenotype, geneLoci);
+            : selectedSpecies === 'Campbells Dwarf Hamster'
+              ? matchCampbellsDwarfHamsterPhenotype(partialGenotype)
+              : calculatePhenotypeDynamic(partialGenotype, geneLoci);
       const phenotype = result.phenotype;
       totalWeight += weight;
 
@@ -1982,7 +1985,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           ? (matchFancyRatPhenotype(parent1) || { phenotype: 'Standard', carriers: getFancyRatCarriers(parent1), hidden: [], notes: [] })
           : selectedSpecies === 'Syrian Hamster'
             ? matchSyrianHamsterPhenotype(parent1)
-            : calculatePhenotypeDynamic(parent1, geneLoci))
+            : selectedSpecies === 'Campbells Dwarf Hamster'
+              ? matchCampbellsDwarfHamsterPhenotype(parent1)
+              : calculatePhenotypeDynamic(parent1, geneLoci))
     : { phenotype: '', carriers: [], hidden: [] };
   const parent2Result = hasAnySelection(parent2)
     ? (selectedSpecies === 'Fancy Mouse'
@@ -1991,7 +1996,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           ? (matchFancyRatPhenotype(parent2) || { phenotype: 'Standard', carriers: getFancyRatCarriers(parent2), hidden: [], notes: [] })
           : selectedSpecies === 'Syrian Hamster'
             ? matchSyrianHamsterPhenotype(parent2)
-            : calculatePhenotypeDynamic(parent2, geneLoci))
+            : selectedSpecies === 'Campbells Dwarf Hamster'
+              ? matchCampbellsDwarfHamsterPhenotype(parent2)
+              : calculatePhenotypeDynamic(parent2, geneLoci))
     : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
@@ -2394,7 +2401,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               >
                 <option value="Fancy Mouse">Fancy Mouse</option>
                 <option value="Syrian Hamster">Syrian Hamster</option>
-                {availableSpecies.filter(s => s !== 'Fancy Mouse' && s !== 'Syrian Hamster').map(species => (
+                <option value="Campbells Dwarf Hamster">Campbells Dwarf Hamster</option>
+                {availableSpecies.filter(s => s !== 'Fancy Mouse' && s !== 'Syrian Hamster' && s !== 'Campbells Dwarf Hamster').map(species => (
                   <option key={species} value={species}>{species}</option>
                 ))}
               </select>

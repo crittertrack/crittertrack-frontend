@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
 import { calculatePhenotype, GENE_LOCI } from './GeneticsCalculator';
 import { matchFancyRatPhenotype, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
 import { matchSyrianHamsterPhenotype, SYRIAN_HAMSTER_GENE_LOCI } from '../data/syrianHamsterPhenotypeRules';
+import { matchCampbellsDwarfHamsterPhenotype, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
 
 const RAT_GENE_ORDER = ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'Dw', 'H', 'Hs', 'Ma', 'Ro', 'Sf', 'Wh', 'Ws', 'Re', 'Ve', 'Sm', 'Lu', 'Sy', 'Sk', 'hr', 'hrl', 'sa', 'nz', 'fz', 'pw', 'Du', 'dr', 'Mx'];
 
@@ -48,6 +49,30 @@ function parseHamsterGeneticCode(codeString) {
 
 function buildHamsterGeneticCode(genotype) {
   return HAMSTER_GENE_ORDER
+    .filter(locus => genotype[locus] && genotype[locus] !== '')
+    .map(locus => genotype[locus])
+    .join(' ');
+}
+
+const CAMPBELLS_GENE_ORDER = ['a', 'b', 'd', 'p', 'c', 'di', 'dg', 'u', 'mo', 'mi', 'si', 'rx', 'sa', 'wa'];
+
+function parseCampbellsGeneticCode(codeString) {
+  if (!codeString) return {};
+  const genotype = {};
+  codeString.trim().split(/[\s,]+/).forEach(part => {
+    if (!part.match(/^[A-Za-z]+\/[A-Za-z]+$/)) return;
+    const [a, b] = part.split('/');
+    const reversed = `${b}/${a}`;
+    for (const [locus, data] of Object.entries(CAMPBELLS_DWARF_HAMSTER_GENE_LOCI)) {
+      if (data.combinations.includes(part)) { genotype[locus] = part; return; }
+      if (data.combinations.includes(reversed)) { genotype[locus] = reversed; return; }
+    }
+  });
+  return genotype;
+}
+
+function buildCampbellsGeneticCode(genotype) {
+  return CAMPBELLS_GENE_ORDER
     .filter(locus => genotype[locus] && genotype[locus] !== '')
     .map(locus => genotype[locus])
     .join(' ');
@@ -130,6 +155,9 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   const [showHamsterBuilderModal, setShowHamsterBuilderModal] = useState(false);
   const [hamsterMode, setHamsterMode] = useState('visual');
   const [hamsterGenotype, setHamsterGenotype] = useState(() => parseHamsterGeneticCode(value));
+  const [showCampbellsBuilderModal, setShowCampbellsBuilderModal] = useState(false);
+  const [campbellsMode, setCampbellsMode] = useState('visual');
+  const [campbellsGenotype, setCampbellsGenotype] = useState(() => parseCampbellsGeneticCode(value));
 
   // Get valid combinations for a locus based on gender
   const getValidCombinations = (locus) => {
@@ -708,6 +736,183 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                         <Info size={18} className="flex-shrink-0 mt-0.5" />
                         <div>
                           Enter genetic code manually in format: <code className="bg-white dark:bg-dark-card-bg px-1 rounded">a/a d/d To/to</code>
+                          <br />Use the Visual mode for easier selection with dropdowns.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  // For Campbell's Dwarf Hamster: full visual builder (mirrors Syrian Hamster)
+  if (species === 'Campbells Dwarf Hamster') {
+    const CAMPBELLS_GENE_GROUPS = [
+      { label: 'Color Genes',   loci: ['a', 'b', 'd', 'p', 'c', 'di', 'dg'] },
+      { label: 'Pattern Genes', loci: ['u', 'mo', 'mi', 'si'] },
+      { label: 'Coat Genes',    loci: ['rx', 'sa', 'wa'] },
+    ];
+
+    const handleCampbellsGeneChange = (locus, combination) => {
+      setCampbellsGenotype(prev => ({ ...prev, [locus]: combination }));
+    };
+
+    const handleCampbellsSave = () => {
+      onChange(buildCampbellsGeneticCode(campbellsGenotype));
+      setShowCampbellsBuilderModal(false);
+    };
+
+    const handleCampbellsManualChange = (e) => {
+      setCampbellsGenotype(parseCampbellsGeneticCode(e.target.value));
+    };
+
+    return (
+      <>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
+          <div className="flex gap-2">
+            <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
+              {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCampbellsBuilderModal(true)}
+              className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded font-medium transition whitespace-nowrap"
+            >
+              {value ? 'Edit Genes' : 'Add'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
+        </div>
+
+        {showCampbellsBuilderModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+
+              {/* Header */}
+              <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder — Campbell's Dwarf Hamster</h2>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCampbellsMode(campbellsMode === 'visual' ? 'manual' : 'visual')}
+                    className="px-4 py-2 bg-gray-100 dark:bg-dark-surface hover:bg-gray-200 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
+                  >
+                    {campbellsMode === 'visual' ? 'Switch to Manual' : 'Switch to Visual'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCampbellsBuilderModal(false)}
+                    className="px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCampbellsSave}
+                    className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-semibold transition"
+                  >
+                    Save Genetics
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {campbellsMode === 'visual' ? (
+                  <div className="space-y-6">
+
+                    {/* Phenotype preview */}
+                    <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-2">
+                      {(() => {
+                        const campbellsCode = buildCampbellsGeneticCode(campbellsGenotype);
+                        const result = campbellsCode ? matchCampbellsDwarfHamsterPhenotype(campbellsGenotype) : null;
+                        return (
+                          <>
+                            {result?.phenotype && (
+                              <div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                                <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{result.phenotype}</div>
+                              </div>
+                            )}
+                            <div>
+                              <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Genotype:</div>
+                              <div className="font-mono text-base text-blue-800 dark:text-blue-200">{campbellsCode || 'Select genes below…'}</div>
+                            </div>
+                            {result?.carriers && result.carriers.length > 0 && (
+                              <div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                                <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Gene groups */}
+                    {CAMPBELLS_GENE_GROUPS.map(group => (
+                      <div key={group.label}>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-3">{group.label}</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {group.loci.map(locus => (
+                            <div key={locus} className="bg-white dark:bg-dark-surface p-3 rounded border border-gray-200 dark:border-dark-border h-48 flex flex-col">
+                              <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">
+                                {CAMPBELLS_DWARF_HAMSTER_GENE_LOCI[locus].name} ({locus})
+                              </label>
+                              {CAMPBELLS_DWARF_HAMSTER_GENE_LOCI[locus].description && (
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2 leading-snug flex-1 overflow-hidden">
+                                  {CAMPBELLS_DWARF_HAMSTER_GENE_LOCI[locus].description}
+                                </p>
+                              )}
+                              <select
+                                value={campbellsGenotype[locus] || ''}
+                                onChange={(e) => handleCampbellsGeneChange(locus, e.target.value)}
+                                className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
+                              >
+                                <option value="">—</option>
+                                {CAMPBELLS_DWARF_HAMSTER_GENE_LOCI[locus].combinations.map(combo => (
+                                  <option key={combo} value={combo}>{combo}</option>
+                                ))}
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded text-sm text-blue-800 dark:text-blue-300">
+                      <div className="flex items-start gap-2">
+                        <Info size={18} className="flex-shrink-0 mt-0.5" />
+                        <div>
+                          <strong>Tip:</strong> Select the genotype for each gene that applies to your animal.
+                          Leave genes blank if unknown or not applicable. The genetic code is generated automatically.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">Manual Entry</label>
+                      <textarea
+                        value={buildCampbellsGeneticCode(campbellsGenotype)}
+                        onChange={handleCampbellsManualChange}
+                        placeholder="e.g., a/a d/d Mo/mo"
+                        className="w-full p-3 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent font-mono text-sm"
+                        rows="4"
+                      />
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded text-sm text-amber-800 dark:text-amber-300">
+                      <div className="flex items-start gap-2">
+                        <Info size={18} className="flex-shrink-0 mt-0.5" />
+                        <div>
+                          Enter genetic code manually in format: <code className="bg-white dark:bg-dark-card-bg px-1 rounded">a/a d/d Mo/mo</code>
                           <br />Use the Visual mode for easier selection with dropdowns.
                         </div>
                       </div>
