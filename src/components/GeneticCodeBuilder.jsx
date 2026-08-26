@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
 import { calculatePhenotype, GENE_LOCI } from './GeneticsCalculator';
 import { matchFancyRatPhenotype, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
+import { matchSyrianHamsterPhenotype, SYRIAN_HAMSTER_GENE_LOCI } from '../data/syrianHamsterPhenotypeRules';
 
 const RAT_GENE_ORDER = ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'Dw', 'H', 'Hs', 'Ma', 'Ro', 'Sf', 'Wh', 'Ws', 'Re', 'Ve', 'Sm', 'Lu', 'Sy', 'Sk', 'hr', 'hrl', 'sa', 'nz', 'fz', 'pw', 'Du', 'dr', 'Mx'];
 
@@ -22,6 +23,31 @@ function parseRatGeneticCode(codeString) {
 
 function buildRatGeneticCode(genotype) {
   return RAT_GENE_ORDER
+    .filter(locus => genotype[locus] && genotype[locus] !== '')
+    .map(locus => genotype[locus])
+    .join(' ');
+}
+
+const HAMSTER_GENE_ORDER = ['a', 'b', 'cd', 'ce', 'd', 'dg', 'e', 'p', 'sg', 'lg', 'u', 'ba', 'ds', 'wh', 's', 'rd', 'hr', 'l', 'rx', 'sa', 'to'];
+
+function parseHamsterGeneticCode(codeString) {
+  if (!codeString) return {};
+  const genotype = {};
+  codeString.trim().split(/[\s,]+/).forEach(part => {
+    if (!part.match(/^[A-Za-z]+\/[A-Za-z]+$/)) return;
+    const [a, b] = part.split('/');
+    const reversed = `${b}/${a}`;
+    for (const [locus, data] of Object.entries(SYRIAN_HAMSTER_GENE_LOCI)) {
+      const allCombos = data.maleCombinations ? [...data.combinations, ...data.maleCombinations] : data.combinations;
+      if (allCombos.includes(part)) { genotype[locus] = part; return; }
+      if (allCombos.includes(reversed)) { genotype[locus] = reversed; return; }
+    }
+  });
+  return genotype;
+}
+
+function buildHamsterGeneticCode(genotype) {
+  return HAMSTER_GENE_ORDER
     .filter(locus => genotype[locus] && genotype[locus] !== '')
     .map(locus => genotype[locus])
     .join(' ');
@@ -101,6 +127,9 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   const [showRatBuilderModal, setShowRatBuilderModal] = useState(false);
   const [ratMode, setRatMode] = useState('visual');
   const [ratGenotype, setRatGenotype] = useState(() => parseRatGeneticCode(value));
+  const [showHamsterBuilderModal, setShowHamsterBuilderModal] = useState(false);
+  const [hamsterMode, setHamsterMode] = useState('visual');
+  const [hamsterGenotype, setHamsterGenotype] = useState(() => parseHamsterGeneticCode(value));
 
   // Get valid combinations for a locus based on gender
   const getValidCombinations = (locus) => {
@@ -488,6 +517,197 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                         <Info size={18} className="flex-shrink-0 mt-0.5" />
                         <div>
                           Enter genetic code manually in format: <code className="bg-white dark:bg-dark-card-bg px-1 rounded">a/a m/m h/h</code>
+                          <br />Use the Visual mode for easier selection with dropdowns.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  // For Syrian Hamster: full visual builder (mirrors Fancy Rat)
+  if (species === 'Syrian Hamster') {
+    const HAMSTER_GENE_GROUPS = [
+      { label: 'Color Genes',   loci: ['a', 'b', 'cd', 'ce', 'd', 'dg', 'e', 'p', 'sg', 'lg', 'u'] },
+      { label: 'Marking Genes', loci: ['ba', 'ds', 'wh', 's', 'rd'] },
+      { label: 'Coat Genes',    loci: ['hr', 'l', 'rx', 'sa'] },
+      { label: 'Sex-Linked',    loci: ['to'] },
+    ];
+
+    // 'to' is sex-linked: males can only be to/Y or To/Y
+    const getValidHamsterCombinations = (locus) => {
+      const geneData = SYRIAN_HAMSTER_GENE_LOCI[locus];
+      if (!geneData) return [];
+      if (locus === 'to' && gender === 'Male' && geneData.maleCombinations) {
+        return geneData.maleCombinations;
+      }
+      return geneData.combinations;
+    };
+
+    const handleHamsterGeneChange = (locus, combination) => {
+      setHamsterGenotype(prev => ({ ...prev, [locus]: combination }));
+    };
+
+    const handleHamsterSave = () => {
+      onChange(buildHamsterGeneticCode(hamsterGenotype));
+      setShowHamsterBuilderModal(false);
+    };
+
+    const handleHamsterManualChange = (e) => {
+      setHamsterGenotype(parseHamsterGeneticCode(e.target.value));
+    };
+
+    return (
+      <>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
+          <div className="flex gap-2">
+            <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
+              {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowHamsterBuilderModal(true)}
+              className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded font-medium transition whitespace-nowrap"
+            >
+              {value ? 'Edit Genes' : 'Add'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
+        </div>
+
+        {showHamsterBuilderModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+
+              {/* Header */}
+              <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder — Syrian Hamster</h2>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setHamsterMode(hamsterMode === 'visual' ? 'manual' : 'visual')}
+                    className="px-4 py-2 bg-gray-100 dark:bg-dark-surface hover:bg-gray-200 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
+                  >
+                    {hamsterMode === 'visual' ? 'Switch to Manual' : 'Switch to Visual'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowHamsterBuilderModal(false)}
+                    className="px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleHamsterSave}
+                    className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-semibold transition"
+                  >
+                    Save Genetics
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {hamsterMode === 'visual' ? (
+                  <div className="space-y-6">
+
+                    {/* Phenotype preview */}
+                    <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-2">
+                      {(() => {
+                        const hamsterCode = buildHamsterGeneticCode(hamsterGenotype);
+                        const result = hamsterCode ? matchSyrianHamsterPhenotype(hamsterGenotype) : null;
+                        return (
+                          <>
+                            {result?.phenotype && (
+                              <div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                                <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{result.phenotype}</div>
+                              </div>
+                            )}
+                            <div>
+                              <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Genotype:</div>
+                              <div className="font-mono text-base text-blue-800 dark:text-blue-200">{hamsterCode || 'Select genes below…'}</div>
+                            </div>
+                            {result?.carriers && result.carriers.length > 0 && (
+                              <div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                                <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
+                              </div>
+                            )}
+                            {result?.notes && result.notes.length > 0 && (
+                              <div className="text-xs text-orange-600 dark:text-orange-400 italic">Note: {result.notes.join('; ')}</div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Gene groups */}
+                    {HAMSTER_GENE_GROUPS.map(group => (
+                      <div key={group.label}>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-3">{group.label}</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {group.loci.map(locus => (
+                            <div key={locus} className="bg-white dark:bg-dark-surface p-3 rounded border border-gray-200 dark:border-dark-border h-48 flex flex-col">
+                              <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">
+                                {SYRIAN_HAMSTER_GENE_LOCI[locus].name} ({locus})
+                              </label>
+                              {SYRIAN_HAMSTER_GENE_LOCI[locus].description && (
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2 leading-snug flex-1 overflow-hidden">
+                                  {SYRIAN_HAMSTER_GENE_LOCI[locus].description}
+                                </p>
+                              )}
+                              <select
+                                value={hamsterGenotype[locus] || ''}
+                                onChange={(e) => handleHamsterGeneChange(locus, e.target.value)}
+                                className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
+                              >
+                                <option value="">—</option>
+                                {getValidHamsterCombinations(locus).map(combo => (
+                                  <option key={combo} value={combo}>{combo}</option>
+                                ))}
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded text-sm text-blue-800 dark:text-blue-300">
+                      <div className="flex items-start gap-2">
+                        <Info size={18} className="flex-shrink-0 mt-0.5" />
+                        <div>
+                          <strong>Tip:</strong> Select the genotype for each gene that applies to your animal.
+                          Leave genes blank if unknown or not applicable. The genetic code is generated automatically.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">Manual Entry</label>
+                      <textarea
+                        value={buildHamsterGeneticCode(hamsterGenotype)}
+                        onChange={handleHamsterManualChange}
+                        placeholder="e.g., a/a d/d To/to Ba/ba"
+                        className="w-full p-3 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent font-mono text-sm"
+                        rows="4"
+                      />
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded text-sm text-amber-800 dark:text-amber-300">
+                      <div className="flex items-start gap-2">
+                        <Info size={18} className="flex-shrink-0 mt-0.5" />
+                        <div>
+                          Enter genetic code manually in format: <code className="bg-white dark:bg-dark-card-bg px-1 rounded">a/a d/d To/to</code>
                           <br />Use the Visual mode for easier selection with dropdowns.
                         </div>
                       </div>

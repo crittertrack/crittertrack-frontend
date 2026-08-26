@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Book, User, Search } from 'lucide-react';
 import InfoButton from './shared/InfoButton';
 import { matchFancyRatPhenotype, getFancyRatCarriers, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
+import { matchSyrianHamsterPhenotype, getSyrianHamsterCarriers, SYRIAN_HAMSTER_GENE_LOCI } from '../data/syrianHamsterPhenotypeRules';
 
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
@@ -1506,9 +1507,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   // Fetch genetics data when species changes
   React.useEffect(() => {
     const fetchGeneticsData = async () => {
-      // For Fancy Mouse and Fancy Rat, use hardcoded data (fast, reliable, reviewed rule engines)
-      if (selectedSpecies === 'Fancy Mouse' || selectedSpecies === 'Fancy Rat') {
-        const loci = selectedSpecies === 'Fancy Mouse' ? GENE_LOCI : RAT_GENE_LOCI;
+      // For Fancy Mouse, Fancy Rat, and Syrian Hamster, use hardcoded data (fast, reliable, reviewed rule engines)
+      if (selectedSpecies === 'Fancy Mouse' || selectedSpecies === 'Fancy Rat' || selectedSpecies === 'Syrian Hamster') {
+        const loci = selectedSpecies === 'Fancy Mouse' ? GENE_LOCI : selectedSpecies === 'Fancy Rat' ? RAT_GENE_LOCI : SYRIAN_HAMSTER_GENE_LOCI;
         setGeneLoci(loci);
         const newDefaults = {};
         Object.keys(loci).forEach(locus => {
@@ -1914,7 +1915,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         ? calculatePhenotype(completeGenotype, selectedGenotype)
         : selectedSpecies === 'Fancy Rat'
           ? (matchFancyRatPhenotype(partialGenotype) || { phenotype: 'Standard', carriers: getFancyRatCarriers(partialGenotype), hidden: [], notes: [] })
-          : calculatePhenotypeDynamic(partialGenotype, geneLoci);
+          : selectedSpecies === 'Syrian Hamster'
+            ? matchSyrianHamsterPhenotype(partialGenotype)
+            : calculatePhenotypeDynamic(partialGenotype, geneLoci);
       const phenotype = result.phenotype;
       totalWeight += weight;
 
@@ -1977,14 +1980,18 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         ? calculatePhenotype(applyDefaults(parent1), parent1)
         : selectedSpecies === 'Fancy Rat'
           ? (matchFancyRatPhenotype(parent1) || { phenotype: 'Standard', carriers: getFancyRatCarriers(parent1), hidden: [], notes: [] })
-          : calculatePhenotypeDynamic(parent1, geneLoci))
+          : selectedSpecies === 'Syrian Hamster'
+            ? matchSyrianHamsterPhenotype(parent1)
+            : calculatePhenotypeDynamic(parent1, geneLoci))
     : { phenotype: '', carriers: [], hidden: [] };
   const parent2Result = hasAnySelection(parent2)
     ? (selectedSpecies === 'Fancy Mouse'
         ? calculatePhenotype(applyDefaults(parent2), parent2)
         : selectedSpecies === 'Fancy Rat'
           ? (matchFancyRatPhenotype(parent2) || { phenotype: 'Standard', carriers: getFancyRatCarriers(parent2), hidden: [], notes: [] })
-          : calculatePhenotypeDynamic(parent2, geneLoci))
+          : selectedSpecies === 'Syrian Hamster'
+            ? matchSyrianHamsterPhenotype(parent2)
+            : calculatePhenotypeDynamic(parent2, geneLoci))
     : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
@@ -2386,7 +2393,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 disabled={loadingGenetics}
               >
                 <option value="Fancy Mouse">Fancy Mouse</option>
-                {availableSpecies.filter(s => s !== 'Fancy Mouse').map(species => (
+                <option value="Syrian Hamster">Syrian Hamster</option>
+                {availableSpecies.filter(s => s !== 'Fancy Mouse' && s !== 'Syrian Hamster').map(species => (
                   <option key={species} value={species}>{species}</option>
                 ))}
               </select>
