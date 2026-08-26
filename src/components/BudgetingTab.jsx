@@ -769,8 +769,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                     type="text"
                                                     value={animalSearchQuery}
                                                     onChange={(e) => setAnimalSearchQuery(e.target.value)}
-                                                    onFocus={() => setShowAnimalDropdown(true)}
-                                                    onBlur={() => setTimeout(() => setShowAnimalDropdown(false), 150)}
                                                     placeholder={animalsLoading ? 'Loading animals...' : 'Search by name or ID...'}
                                                     disabled={animalsLoading}
                                                     className="w-full p-2 border border-gray-300 dark:border-dark-text dark:bg-dark-surface dark:text-dark-text dark:placeholder-dark-text-muted rounded-lg focus:ring-primary focus:border-primary"
@@ -790,7 +788,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                                     type="button"
                                                                     onMouseDown={() => {
                                                                         handleAnimalSelect(animal.id_public);
-                                                                        setShowAnimalDropdown(false);
                                                                     }}
                                                                     className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-surface-hover border-b border-gray-50 dark:border-dark-border last:border-b-0"
                                                                 >

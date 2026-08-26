@@ -1,7 +1,169 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Target, Dna, Loader2, Search, Settings, Palette, PlusCircle, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { GENE_LOCI as MOUSE_GENE_LOCI } from '../GeneticsCalculator';
+import { matchFancyRatPhenotype, RAT_GENE_LOCI as SHARED_RAT_GENE_LOCI } from '../../data/fancyRatPhenotypeRules';
 import InfoButton from '../shared/InfoButton';
+
+// ---------------------------------------------------------------------------
+// Fancy Rat trait chips — generated directly from fancyRatPhenotypeRules.js so
+// this page can never drift out of sync with the real genetics rules again.
+// Multiple genotype combinations that produce the *same* phenotype label
+// (e.g. "Badger" from both White Spot and Headspot) are automatically merged
+// into a single dropdown entry backed by all matching alternatives — the
+// probability calculation considers every alternative, not just one.
+// ---------------------------------------------------------------------------
+const RAT_BASE_GENOTYPE = { A: 'a/a', C: 'C/C' };
+const RAT_LETHAL_EXCLUSIONS = { H: ['Hre/Hre'], Ws: ['Ws/Ws'], Mx: ['Mx/Mx'], Pe: ['Pe/Pe'] };
+
+function ratCombosFor(locus) {
+  const excluded = new Set(RAT_LETHAL_EXCLUSIONS[locus] || []);
+  return SHARED_RAT_GENE_LOCI[locus].combinations.filter(c => !excluded.has(c));
+}
+
+function ratCartesian(lociMap) {
+  let patches = [{}];
+  for (const [locus, combos] of Object.entries(lociMap)) {
+    const next = [];
+    for (const patch of patches) for (const combo of combos) next.push({ ...patch, [locus]: combo });
+    patches = next;
+  }
+  return patches;
+}
+
+function stripRatColorPrefix(phenotype) {
+  return (phenotype || '').replace(/^Black\s*/, '').trim();
+}
+
+function groupRatPatchesByLabel(patches, groups, { includeEmpty = false } = {}) {
+  for (const patch of patches) {
+    const result = matchFancyRatPhenotype({ ...RAT_BASE_GENOTYPE, ...patch });
+    const label = stripRatColorPrefix(result?.phenotype);
+    const key = label || (includeEmpty ? 'Self' : null);
+    if (key === null) continue;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(patch);
+  }
+  return groups;
+}
+
+// Drop alternatives that are a strict superset of a simpler alternative already
+// producing the same label (e.g. an unrelated locus tagging along for the ride
+// without actually affecting the phenotype) — keeps the probability calculation
+// honest and avoids flagging pairings as "unconfirmed" over irrelevant loci.
+function pruneRedundantRatAlternatives(groups) {
+  for (const label of Object.keys(groups)) {
+    const patches = groups[label];
+    groups[label] = patches.filter(p => {
+      const pKeys = Object.keys(p);
+      return !patches.some(q => {
+        if (q === p) return false;
+        const qKeys = Object.keys(q);
+        if (qKeys.length >= pKeys.length) return false;
+        return qKeys.every(k => p[k] === q[k]);
+      });
+    });
+  }
+  return groups;
+}
+
+function ratDefsFromGroups(groups, group, idPrefix) {
+  return Object.entries(groups).map(([label, alternatives]) => ({
+    id: `${idPrefix}-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
+    label,
+    group,
+    alternatives,
+  }));
+}
+
+function buildRatMarkingTraitDefs() {
+  const hCombos = ratCombosFor('H');
+  const groups = {};
+  groupRatPatchesByLabel(ratCartesian({ H: hCombos }), groups, { includeEmpty: true });
+  groupRatPatchesByLabel(ratCartesian({ Dal: ['Dal/Dal', 'Dal/dal'], H: hCombos }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Wh: ['wh/wh'], H: hCombos }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Ro: ['ro/ro'], H: hCombos }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Ws: ['Ws/w'], H: hCombos }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Hs: ['hs/hs'], H: hCombos }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Dw: ['Dw/Dw', 'Dw/dw'], H: hCombos }), groups);
+  groupRatPatchesByLabel([{ Sf: 'sf/sf' }], groups);
+  groupRatPatchesByLabel([{ Ma: 'Ma/Ma' }, { Ma: 'Ma/ma' }], groups);
+  pruneRedundantRatAlternatives(groups);
+  return ratDefsFromGroups(groups, 'Marking', 'rat-marking');
+}
+
+function buildRatCoatTraitDefs() {
+  const groups = {};
+  const reCombos = ['Re/Re', 'Re/re'];
+  const veCombos = ['Ve/Ve', 'Ve/ve'];
+  groupRatPatchesByLabel(ratCartesian({ Re: reCombos }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Ve: veCombos }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Re: reCombos, Ve: veCombos }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Sm: ['Sm/Sm', 'Sm/sm'] }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Lu: ['Lu/Lu', 'Lu/lu'] }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Sy: ['Sy/Sy', 'Sy/sy'] }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Sk: ['Sk/Sk', 'Sk/sk'] }), groups);
+  groupRatPatchesByLabel([{ sa: 'sa/sa' }], groups);
+  groupRatPatchesByLabel([{ hrl: 'hrl/hrl' }], groups);
+  groupRatPatchesByLabel([{ hr: 'hr/hr' }], groups);
+  groupRatPatchesByLabel([{ nz: 'nz/nz' }], groups);
+  groupRatPatchesByLabel([{ fz: 'fz/fz' }], groups);
+  groupRatPatchesByLabel([{ pw: 'pw/pw' }], groups);
+  pruneRedundantRatAlternatives(groups);
+  return ratDefsFromGroups(groups, 'Coat & Texture', 'rat-coat');
+}
+
+function buildRatEarTraitDefs() {
+  const groups = {};
+  groupRatPatchesByLabel([{ Du: 'du/du' }], groups);
+  return ratDefsFromGroups(groups, 'Ear Type', 'rat-ear');
+}
+
+function buildRatBodyTraitDefs() {
+  const groups = {};
+  groupRatPatchesByLabel([{ dr: 'dr/dr' }], groups);
+  groupRatPatchesByLabel([{ Mx: 'Mx/mx' }], groups);
+  return ratDefsFromGroups(groups, 'Body Type', 'rat-body');
+}
+
+function buildRatModifierTraitDefs() {
+  const groups = {};
+  groupRatPatchesByLabel([{ M: 'm/m', Pe: 'Pe/pe' }], groups);
+  groupRatPatchesByLabel([{ M: 'm/m', Me: 'Me/me' }, { M: 'm/m', Me: 'Me/Me' }], groups);
+  return ratDefsFromGroups(groups, 'Modifiers', 'rat-modifier');
+}
+
+const RAT_COLOR_TRAIT_DEFS = [
+  { id: 'rat-black',         label: 'Black',               group: 'Base Color — Black',  alternatives: [{ A: 'a/a' }] },
+  { id: 'rat-chocolate',     label: 'Chocolate',           group: 'Base Color — Black',  alternatives: [{ A: 'a/a', B: 'b/b' }] },
+  { id: 'rat-russian-blue',  label: 'Russian Blue',        group: 'Base Color — Black',  alternatives: [{ A: 'a/a', D: 'd/d' }] },
+  { id: 'rat-american-blue', label: 'American Blue',       group: 'Base Color — Black',  alternatives: [{ A: 'a/a', G: 'g/g' }] },
+  { id: 'rat-mink',          label: 'Mink',                group: 'Base Color — Black',  alternatives: [{ A: 'a/a', M: 'm/m' }] },
+  { id: 'rat-champagne',     label: 'Champagne',           group: 'Base Color — Black',  alternatives: [{ A: 'a/a', P: 'p/p' }] },
+  { id: 'rat-beige',         label: 'Beige',               group: 'Base Color — Black',  alternatives: [{ A: 'a/a', R: 'r/r' }] },
+  { id: 'rat-agouti',        label: 'Agouti',              group: 'Base Color — Agouti', alternatives: [{ A: 'A/A' }] },
+  { id: 'rat-choc-agouti',   label: 'Chocolate Agouti',    group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', B: 'b/b' }] },
+  { id: 'rat-rub-agouti',    label: 'Russian Blue Agouti', group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', D: 'd/d' }] },
+  { id: 'rat-opal',          label: 'Opal',                group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', G: 'g/g' }] },
+  { id: 'rat-cinnamon',      label: 'Cinnamon',            group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', M: 'm/m' }] },
+  { id: 'rat-silver-fawn',   label: 'Silver Fawn',         group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', P: 'p/p' }] },
+  { id: 'rat-topaz',         label: 'Topaz',               group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', R: 'r/r' }] },
+  { id: 'rat-albino',        label: 'Albino',              group: 'C-locus & Color Modifier', alternatives: [{ C: 'c/c' }] },
+  { id: 'rat-himalayan',     label: 'Himalayan',           group: 'C-locus & Color Modifier', alternatives: [{ C: 'ch/c' }] },
+  { id: 'rat-siamese',       label: 'Siamese',             group: 'C-locus & Color Modifier', alternatives: [{ C: 'ch/ch' }] },
+  { id: 'rat-tonkinese',     label: 'Tonkinese',           group: 'C-locus & Color Modifier', alternatives: [{ C: 'ct/ct' }] },
+  { id: 'rat-marten',        label: 'Ivory Marten',        group: 'C-locus & Color Modifier', alternatives: [{ C: 'cm/c' }] },
+  { id: 'rat-burmese',       label: 'Burmese',             group: 'C-locus & Color Modifier', alternatives: [{ Bu: 'Bu/bu', C: 'ct/ct' }] },
+  { id: 'rat-sable',         label: 'Sable',               group: 'C-locus & Color Modifier', alternatives: [{ Bu: 'Bu/Bu', C: 'ct/ct' }] },
+];
+
+const RAT_TRAIT_DEFS = [
+  ...RAT_COLOR_TRAIT_DEFS,
+  ...buildRatMarkingTraitDefs(),
+  ...buildRatCoatTraitDefs(),
+  ...buildRatEarTraitDefs(),
+  ...buildRatBodyTraitDefs(),
+  ...buildRatModifierTraitDefs(),
+];
 
 const TARGET_OUTCOME_TRAIT_CHIPS = {
     'Fancy Mouse': [
@@ -106,74 +268,12 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         // Dominant Hairless
         { id: 'dom-hairless',       label: 'Dominant Hairless', code: 'Nu/-',           group: 'Dominant Hairless' },
     ],
-    'Fancy Rat': [
-        // Base Color — Black series
-        { id: 'rat-black',         label: 'Black',               code: 'a/a',          group: 'Base Color — Black' },
-        { id: 'rat-chocolate',     label: 'Chocolate',           code: 'a/a b/b',      group: 'Base Color — Black' },
-        { id: 'rat-russian-blue',  label: 'Russian Blue',        code: 'a/a d/d',      group: 'Base Color — Black' },
-        { id: 'rat-american-blue', label: 'American Blue',       code: 'a/a g/g',      group: 'Base Color — Black' },
-        { id: 'rat-mink',          label: 'Mink',                code: 'a/a m/m',      group: 'Base Color — Black' },
-        { id: 'rat-champagne',     label: 'Champagne',           code: 'a/a p/p',      group: 'Base Color — Black' },
-        { id: 'rat-beige',         label: 'Beige',               code: 'a/a r/r',      group: 'Base Color — Black' },
-        // Base Color — Agouti series
-        { id: 'rat-agouti',        label: 'Agouti',              code: 'A/A',          group: 'Base Color — Agouti' },
-        { id: 'rat-choc-agouti',   label: 'Chocolate Agouti',   code: 'A/A b/b',      group: 'Base Color — Agouti' },
-        { id: 'rat-rub-agouti',    label: 'Russian Blue Agouti', code: 'A/A d/d',     group: 'Base Color — Agouti' },
-        { id: 'rat-opal',          label: 'Opal',                code: 'A/A g/g',      group: 'Base Color — Agouti' },
-        { id: 'rat-cinnamon',      label: 'Cinnamon',            code: 'A/A m/m',      group: 'Base Color — Agouti' },
-        { id: 'rat-silver-fawn',   label: 'Silver Fawn',         code: 'A/A p/p',      group: 'Base Color — Agouti' },
-        { id: 'rat-topaz',         label: 'Topaz',               code: 'A/A r/r',      group: 'Base Color — Agouti' },
-        // C-locus & Color Modifier
-        { id: 'rat-albino',        label: 'Albino',              code: 'c/c',          group: 'C-locus & Color Modifier' },
-        { id: 'rat-himalayan',     label: 'Himalayan',           code: 'ch/c',         group: 'C-locus & Color Modifier' },
-        { id: 'rat-siamese',       label: 'Siamese',             code: 'ch/ch',        group: 'C-locus & Color Modifier' },
-        { id: 'rat-tonkinese',     label: 'Tonkinese',           code: 'ct/ct',        group: 'C-locus & Color Modifier' },
-        { id: 'rat-marten',        label: 'Ivory Marten',        code: 'cm/c',         group: 'C-locus & Color Modifier' },
-        { id: 'rat-burmese',       label: 'Burmese',             code: 'Bu/bu + ct',   group: 'C-locus & Color Modifier' },
-        { id: 'rat-sable',         label: 'Sable',               code: 'Bu/Bu + ct',   group: 'C-locus & Color Modifier' },
-        // Marking
-        { id: 'rat-self',          label: 'Self',                code: 'H/H',          group: 'Marking' },
-        { id: 'rat-berkshire',     label: 'Berkshire',           code: 'H/h',          group: 'Marking' },
-        { id: 'rat-bareback',      label: 'Bareback',            code: 'H/hi',         group: 'Marking' },
-        { id: 'rat-capped',        label: 'Capped',              code: 'Hre/h',        group: 'Marking' },
-        { id: 'rat-variegated',    label: 'Variegated',          code: 'H/he',         group: 'Marking' },
-        { id: 'rat-hooded',        label: 'Hooded',              code: 'h/h',          group: 'Marking' },
-        { id: 'rat-dalmatian',     label: 'Dalmatian',           code: 'Dal/dal',      group: 'Marking' },
-        { id: 'rat-roan',          label: 'Roan',                code: 'ro/ro',        group: 'Marking' },
-        { id: 'rat-whiteside',     label: 'Whiteside',           code: 'wh/wh',        group: 'Marking' },
-        { id: 'rat-white-spot',    label: 'White Spot',          code: 'Ws/w',         group: 'Marking' },
-        { id: 'rat-marble',        label: 'Marble',              code: 'Ma/ma',        group: 'Marking' },
-        // Coat & Texture
-        { id: 'rat-rex',           label: 'Rex',                 code: 'Re/re',        group: 'Coat & Texture' },
-        { id: 'rat-double-rex',    label: 'Double Rex',          code: 'Re/Re',        group: 'Coat & Texture' },
-        { id: 'rat-velveteen',     label: 'Velveteen',           code: 'Ve/ve',        group: 'Coat & Texture' },
-        { id: 'rat-bristle',       label: 'Bristle',             code: 'Br/br',        group: 'Coat & Texture' },
-        // Ear Type
-        { id: 'rat-dumbo',         label: 'Dumbo',               code: 'du/du',        group: 'Ear Type' },
-    ],
+    'Fancy Rat': RAT_TRAIT_DEFS,
 };
 
-// Simplified rat loci for the parser. A more robust solution would import this from a shared file.
-const RAT_GENE_LOCI = {
-    A: { combinations: ['a/a', 'A/A', 'A/a'] },
-    B: { combinations: ['b/b', 'B/B', 'B/b'] },
-    Bu: { combinations: ['Bu/bu', 'Bu/Bu', 'bu/bu'] },
-    C: { combinations: ['c/c', 'ch/c', 'ch/ch', 'ct/ct', 'cm/c'] },
-    D: { combinations: ['d/d', 'D/D', 'D/d'] },
-    G: { combinations: ['g/g', 'G/G', 'G/g'] },
-    M: { combinations: ['m/m', 'M/M', 'M/m'] },
-    P: { combinations: ['p/p', 'P/P', 'P/p'] },
-    R: { combinations: ['r/r', 'R/R', 'R/r'] },
-    H: { combinations: ['H/H', 'H/h', 'H/hi', 'Hre/h', 'H/he', 'h/h'] },
-    Dal: { combinations: ['Dal/dal', 'dal/dal'] },
-    Ro: { combinations: ['ro/ro', 'Ro/Ro', 'Ro/ro'] },
-    Wh: { combinations: ['wh/wh', 'Wh/Wh', 'Wh/wh'] },
-    Ws: { combinations: ['Ws/w', 'w/w'] },
-    Ma: { combinations: ['Ma/ma', 'ma/ma'] },
-    Re: { combinations: ['Re/re', 'Re/Re', 're/re'] },
-    Ve: { combinations: ['Ve/ve', 've/ve'] },
-    Br: { combinations: ['Br/br', 'br/br'] },
-    Du: { combinations: ['du/du', 'Du/Du', 'Du/du'] },
+const getLociForSpecies = (species) => {
+  if (species === 'Fancy Rat') return SHARED_RAT_GENE_LOCI;
+  return MOUSE_GENE_LOCI; // Default to mouse
 };
 
 const TraitSelector = ({ species, selectedTraits, onTraitChange, disabled }) => {
@@ -202,11 +302,6 @@ const TraitSelector = ({ species, selectedTraits, onTraitChange, disabled }) => 
       ))}
     </div>
   );
-};
-
-const getLociForSpecies = (species) => {
-  if (species === 'Fancy Rat') return RAT_GENE_LOCI;
-  return MOUSE_GENE_LOCI; // Default to mouse
 };
 
 const parseGeneticCode = (codeString, species) => {
@@ -248,56 +343,18 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
     const assumptions = [];
 
     if (species === 'Fancy Rat') {
+        const selectedAlternatives = [];
         selectedTraits.forEach((id) => {
-            switch (id) {
-                // Black series
-                case 'rat-black':         genotype.A = 'a/a'; break;
-                case 'rat-chocolate':     genotype.A = 'a/a'; genotype.B = 'b/b'; break;
-                case 'rat-russian-blue':  genotype.A = 'a/a'; genotype.D = 'd/d'; break;
-                case 'rat-american-blue': genotype.A = 'a/a'; genotype.G = 'g/g'; break;
-                case 'rat-mink':          genotype.A = 'a/a'; genotype.M = 'm/m'; break;
-                case 'rat-champagne':     genotype.A = 'a/a'; genotype.P = 'p/p'; break;
-                case 'rat-beige':         genotype.A = 'a/a'; genotype.R = 'r/r'; break;
-                // Agouti series
-                case 'rat-agouti':        genotype.A = 'A/A'; break;
-                case 'rat-choc-agouti':   genotype.A = 'A/A'; genotype.B = 'b/b'; break;
-                case 'rat-rub-agouti':    genotype.A = 'A/A'; genotype.D = 'd/d'; break;
-                case 'rat-opal':          genotype.A = 'A/A'; genotype.G = 'g/g'; break;
-                case 'rat-cinnamon':      genotype.A = 'A/A'; genotype.M = 'm/m'; break;
-                case 'rat-silver-fawn':   genotype.A = 'A/A'; genotype.P = 'p/p'; break;
-                case 'rat-topaz':         genotype.A = 'A/A'; genotype.R = 'r/r'; break;
-                // C-locus
-                case 'rat-albino':        genotype.C = 'c/c'; break;
-                case 'rat-himalayan':     genotype.C = 'ch/c'; break;
-                case 'rat-siamese':       genotype.C = 'ch/ch'; break;
-                case 'rat-tonkinese':     genotype.C = 'ct/ct'; break;
-                case 'rat-marten':        genotype.C = 'cm/c'; break;
-                case 'rat-burmese':       genotype.Bu = 'Bu/bu'; genotype.C = 'ct/ct'; break;
-                case 'rat-sable':         genotype.Bu = 'Bu/Bu'; genotype.C = 'ct/ct'; break;
-                // Marking — H locus
-                case 'rat-self':          genotype.H = 'H/H'; break;
-                case 'rat-berkshire':     genotype.H = 'H/h'; break;
-                case 'rat-bareback':      genotype.H = 'H/hi'; break;
-                case 'rat-capped':        genotype.H = 'Hre/h'; break;
-                case 'rat-variegated':    genotype.H = 'H/he'; break;
-                case 'rat-hooded':        genotype.H = 'h/h'; break;
-                // Marking — other
-                case 'rat-dalmatian':     genotype.Dal = 'Dal/dal'; break;
-                case 'rat-roan':          genotype.Ro = 'ro/ro'; break;
-                case 'rat-whiteside':     genotype.Wh = 'wh/wh'; break;
-                case 'rat-white-spot':    genotype.Ws = 'Ws/w'; break;
-                case 'rat-marble':        genotype.Ma = 'Ma/ma'; break;
-                // Coat
-                case 'rat-rex':           genotype.Re = 'Re/re'; break;
-                case 'rat-double-rex':    genotype.Re = 'Re/Re'; break;
-                case 'rat-velveteen':     genotype.Ve = 'Ve/ve'; break;
-                case 'rat-bristle':       genotype.Br = 'Br/br'; break;
-                // Ear
-                case 'rat-dumbo':         genotype.Du = 'du/du'; break;
-                default: break;
-            }
+            const def = RAT_TRAIT_DEFS.find(d => d.id === id);
+            if (!def) return;
+            selectedAlternatives.push({ id, label: def.label, alternatives: def.alternatives });
+            // Merge the first alternative into the flat genotype — used only as a representative
+            // example (e.g. for anything that just wants "a" matching genotype), never for the
+            // actual probability calculation, which considers every alternative via
+            // `selectedAlternatives` instead.
+            Object.assign(genotype, def.alternatives[0]);
         });
-        return { genotype, assumptions };
+        return { genotype, selectedAlternatives, assumptions };
     }
 
     selectedTraits.forEach((id) => {
@@ -361,8 +418,111 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
     return { genotype, assumptions };
 };
 
+// Rat-specific pairing engine: unlike the mouse flow (one flat target genotype), each selected
+// rat trait may be backed by MULTIPLE alternative genotype patches that all produce the same
+// phenotype label (see RAT_TRAIT_DEFS above). A pairing's probability for a given trait is the
+// SUM of the probabilities across all of that trait's alternatives (OR-semantics), and the overall
+// pairing probability is the PRODUCT across all independently-selected traits (AND-semantics).
+const findRatTraitPairings = (allAnimals, selectedAlternatives) => {
+  if (!selectedAlternatives || selectedAlternatives.length === 0) {
+    return Promise.resolve({ pairings: [], unconfirmedPairings: [], targetLoci: {} });
+  }
+
+  // Flat union of every locus referenced by any alternative of any selected trait — used only by
+  // ResultCard to decide which loci to bold in the displayed genotype, not for probability math.
+  const targetLoci = {};
+  selectedAlternatives.forEach(({ alternatives }) => {
+    alternatives.forEach(patch => {
+      Object.keys(patch).forEach((locus) => { targetLoci[locus] = true; });
+    });
+  });
+
+  const getAlleleProbability = (parentAlleles, desiredAllele) => {
+    if (!parentAlleles) return 0;
+    const count = parentAlleles.filter(a => a === desiredAllele).length;
+    return count / 2;
+  };
+
+  const calculateLocusProbability = (sireAlleles, damAlleles, targetAlleles) => {
+    const [t1, t2] = targetAlleles;
+    const p_t1_sire = getAlleleProbability(sireAlleles, t1);
+    const p_t2_sire = getAlleleProbability(sireAlleles, t2);
+    const p_t1_dam = getAlleleProbability(damAlleles, t1);
+    const p_t2_dam = getAlleleProbability(damAlleles, t2);
+    if (t1 === t2) return p_t1_sire * p_t1_dam;
+    return p_t1_sire * p_t2_dam + p_t2_sire * p_t1_dam;
+  };
+
+  // Probability that a single trait (one or more alternative genotype patches) is produced by a
+  // given sire x dam pairing. Returns { probability, unknown } where probability is null when
+  // every alternative was unresolvable (missing locus data), and unknown flags a partially-known
+  // result so the caller can bucket the pairing as "needs confirmation" instead of silently
+  // reporting a possibly-inflated/deflated number.
+  const calculateTraitProbability = (alternatives, sireLoci, damLoci) => {
+    let total = 0;
+    let anyKnownNonZero = false;
+    let anyUnknown = false;
+    for (const patch of alternatives) {
+      let patchProbability = 1;
+      let patchUnknown = false;
+      for (const [locus, comboStr] of Object.entries(patch)) {
+        const targetAlleles = comboStr.split('/');
+        const sireAlleles = sireLoci[locus];
+        const damAlleles = damLoci[locus];
+        if (!sireAlleles || !damAlleles || sireAlleles.includes('-') || damAlleles.includes('-')) {
+          patchUnknown = true;
+          continue;
+        }
+        patchProbability *= calculateLocusProbability(sireAlleles, damAlleles, targetAlleles);
+      }
+      if (patchUnknown) { anyUnknown = true; continue; }
+      total += patchProbability;
+      if (patchProbability > 0) anyKnownNonZero = true;
+    }
+    if (!anyKnownNonZero) return { probability: anyUnknown ? null : 0, unknown: anyUnknown };
+    return { probability: total, unknown: anyUnknown };
+  };
+
+  const sires = allAnimals.filter(a => a.gender === 'Male');
+  const dams = allAnimals.filter(a => a.gender === 'Female');
+  const pairings = [];
+  const unconfirmedPairings = [];
+
+  for (const sire of sires) {
+    for (const dam of dams) {
+      const sireLoci = parseGeneticCode(sire.geneticCode, 'Fancy Rat');
+      const damLoci = parseGeneticCode(dam.geneticCode, 'Fancy Rat');
+      let totalProbability = 1;
+      let possible = true;
+      let hasUnknownLocus = false;
+
+      for (const { alternatives } of selectedAlternatives) {
+        const { probability, unknown } = calculateTraitProbability(alternatives, sireLoci, damLoci);
+        if (probability === null) { hasUnknownLocus = true; continue; }
+        if (probability === 0) { possible = false; break; }
+        if (unknown) hasUnknownLocus = true;
+        totalProbability *= probability;
+      }
+      if (!possible) continue;
+      if (hasUnknownLocus) {
+        unconfirmedPairings.push({ sire, dam });
+      } else if (totalProbability > 0) {
+        pairings.push({ sire, dam, probability: totalProbability });
+      }
+    }
+  }
+
+  pairings.sort((a, b) => b.probability - a.probability);
+  return new Promise(resolve => setTimeout(() => resolve({ pairings, unconfirmedPairings, targetLoci }), 250));
+};
+
 const findPotentialPairings = (allAnimals, target, mode, species) => {
   console.log(`Finding pairings for ${mode}:`, target);
+
+  if (mode === 'traits' && species === 'Fancy Rat') {
+    const { selectedAlternatives } = buildPrototypeGenotypeFromTraits(target, species);
+    return findRatTraitPairings(allAnimals, selectedAlternatives);
+  }
 
   let targetLoci;
 

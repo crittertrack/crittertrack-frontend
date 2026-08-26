@@ -1308,9 +1308,6 @@ const ViewAnimalModalV2 = ({
                             <RecordsTabContent animal={animal} API_BASE_URL={API_BASE_URL} />
                         </div>
                     )}
-                    {activeTab === 'logs' && isPrivate && (
-                        <LogsTabContent animal={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} />
-                    )}
                     {/* Placeholder for other tabs */}
                     {activeTab !== 'dashboard' &&
                         activeTab !== 'identification' &&

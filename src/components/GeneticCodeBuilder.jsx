@@ -3,15 +3,18 @@ import { ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
 import { calculatePhenotype, GENE_LOCI } from './GeneticsCalculator';
 import { matchFancyRatPhenotype, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
 
-const RAT_GENE_ORDER = ['A', 'B', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'H', 'Ma', 'Ro', 'Wh', 'Ws', 'Re', 'Ve', 'Br', 'wo', 'Wa', 'Ki', 'Sh', 'hr', 'hrl', 'sa', 'Du'];
+const RAT_GENE_ORDER = ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'Dw', 'H', 'Hs', 'Ma', 'Ro', 'Sf', 'Wh', 'Ws', 'Re', 'Ve', 'Sm', 'Lu', 'Sy', 'Sk', 'hr', 'hrl', 'sa', 'nz', 'fz', 'pw', 'Du', 'dr', 'Mx'];
 
 function parseRatGeneticCode(codeString) {
   if (!codeString) return {};
   const genotype = {};
   codeString.trim().split(/[\s,]+/).forEach(part => {
     if (!part.match(/^[A-Za-z]+\/[A-Za-z]+$/)) return;
+    const [a, b] = part.split('/');
+    const reversed = `${b}/${a}`;
     for (const [locus, data] of Object.entries(RAT_GENE_LOCI)) {
       if (data.combinations.includes(part)) { genotype[locus] = part; return; }
+      if (data.combinations.includes(reversed)) { genotype[locus] = reversed; return; }
     }
   });
   return genotype;
@@ -315,10 +318,11 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   // For Fancy Rat: full visual builder (mirrors Fancy Mouse)
   if (species === 'Fancy Rat') {
     const RAT_GENE_GROUPS = [
-      { label: 'Color Genes',   loci: ['A', 'B', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me'] },
-      { label: 'Marking Genes', loci: ['Dal', 'H', 'Ma', 'Ro', 'Wh', 'Ws'] },
-      { label: 'Coat Genes',    loci: ['Re', 'Ve', 'Br', 'wo', 'Wa', 'Ki', 'Sh', 'hr', 'hrl', 'sa'] },
+      { label: 'Color Genes',   loci: ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me'] },
+      { label: 'Marking Genes', loci: ['Dal', 'Dw', 'H', 'Hs', 'Ma', 'Ro', 'Sf', 'Wh', 'Ws'] },
+      { label: 'Coat Genes',    loci: ['Re', 'Ve', 'Sm', 'Lu', 'Sy', 'Sk', 'hr', 'hrl', 'sa', 'nz', 'fz', 'pw'] },
       { label: 'Ear Type',      loci: ['Du'] },
+      { label: 'Body Type',     loci: ['dr', 'Mx'] },
     ];
 
     const handleRatGeneChange = (locus, combination) => {
@@ -403,10 +407,21 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                                 <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{result.phenotype}</div>
                               </div>
                             )}
+                            {result?.alternates && result.alternates.length > 0 && (
+                              <div className="text-xs text-blue-700 dark:text-blue-400 italic">
+                                Also known as: {result.alternates.join(', ')}
+                              </div>
+                            )}
                             <div>
                               <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Genotype:</div>
                               <div className="font-mono text-base text-blue-800 dark:text-blue-200">{ratCode || 'Select genes below…'}</div>
                             </div>
+                            {result?.carriers && result.carriers.length > 0 && (
+                              <div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                                <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
+                              </div>
+                            )}
                             {result?.notes && (
                               <div className="text-xs text-orange-600 dark:text-orange-400 italic">Note: {result.notes}</div>
                             )}

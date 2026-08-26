@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Book, User, Search } from 'lucide-react';
 import InfoButton from './shared/InfoButton';
+import { matchFancyRatPhenotype, getFancyRatCarriers, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
 
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
@@ -1505,10 +1506,14 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   // Fetch genetics data when species changes
   React.useEffect(() => {
     const fetchGeneticsData = async () => {
-      // For Fancy Mouse, use hardcoded data (fast, reliable)
-      if (selectedSpecies === 'Fancy Mouse') {
-        setGeneLoci(GENE_LOCI);
-        const newDefaults = createDefaultGenotype();
+      // For Fancy Mouse and Fancy Rat, use hardcoded data (fast, reliable, reviewed rule engines)
+      if (selectedSpecies === 'Fancy Mouse' || selectedSpecies === 'Fancy Rat') {
+        const loci = selectedSpecies === 'Fancy Mouse' ? GENE_LOCI : RAT_GENE_LOCI;
+        setGeneLoci(loci);
+        const newDefaults = {};
+        Object.keys(loci).forEach(locus => {
+          newDefaults[locus] = '';
+        });
         setParent1(newDefaults);
         setParent2(newDefaults);
         setOffspringResults(null);
@@ -1907,7 +1912,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       const completeGenotype = selectedSpecies === 'Fancy Mouse' ? applyDefaults(partialGenotype) : partialGenotype;
       const result = selectedSpecies === 'Fancy Mouse'
         ? calculatePhenotype(completeGenotype, selectedGenotype)
-        : calculatePhenotypeDynamic(partialGenotype, geneLoci);
+        : selectedSpecies === 'Fancy Rat'
+          ? (matchFancyRatPhenotype(partialGenotype) || { phenotype: 'Standard', carriers: getFancyRatCarriers(partialGenotype), hidden: [], notes: [] })
+          : calculatePhenotypeDynamic(partialGenotype, geneLoci);
       const phenotype = result.phenotype;
       totalWeight += weight;
 
@@ -1916,6 +1923,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           phenotype: phenotype,
           carriers: result.carriers || [],
           notes: result.notes || [],
+          alternates: result.alternates || [],
           genotypes: [],
           genotypeKeys: new Set(),
           count: 0
@@ -1965,10 +1973,18 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   };
 
   const parent1Result = hasAnySelection(parent1)
-    ? (selectedSpecies === 'Fancy Mouse' ? calculatePhenotype(applyDefaults(parent1), parent1) : calculatePhenotypeDynamic(parent1, geneLoci))
+    ? (selectedSpecies === 'Fancy Mouse'
+        ? calculatePhenotype(applyDefaults(parent1), parent1)
+        : selectedSpecies === 'Fancy Rat'
+          ? (matchFancyRatPhenotype(parent1) || { phenotype: 'Standard', carriers: getFancyRatCarriers(parent1), hidden: [], notes: [] })
+          : calculatePhenotypeDynamic(parent1, geneLoci))
     : { phenotype: '', carriers: [], hidden: [] };
   const parent2Result = hasAnySelection(parent2)
-    ? (selectedSpecies === 'Fancy Mouse' ? calculatePhenotype(applyDefaults(parent2), parent2) : calculatePhenotypeDynamic(parent2, geneLoci))
+    ? (selectedSpecies === 'Fancy Mouse'
+        ? calculatePhenotype(applyDefaults(parent2), parent2)
+        : selectedSpecies === 'Fancy Rat'
+          ? (matchFancyRatPhenotype(parent2) || { phenotype: 'Standard', carriers: getFancyRatCarriers(parent2), hidden: [], notes: [] })
+          : calculatePhenotypeDynamic(parent2, geneLoci))
     : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
@@ -2390,6 +2406,18 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 <span className="hidden sm:inline">Reset</span>
                 <span className="sm:hidden">Reset</span>
               </button>
+              <a
+                href="https://ratvarietyguide.weebly.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Rat Variety Guide (ratvarietyguide.weebly.com) — used as a reference"
+              >
+                <img
+                  src="/images/rvg-logo-dec23-2.png"
+                  alt="Rat Variety Guide — reference used for Fancy Rat phenotypes"
+                  className="h-8 sm:h-10 w-auto rounded"
+                />
+              </a>
               {selectedSpecies === 'Fancy Mouse' && (
                 <button
                   onClick={() => setShowExamples(true)}
@@ -2448,6 +2476,11 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Phenotype: </span>
               {parent1Result.phenotype}
             </p>
+            {parent1Result.alternates && parent1Result.alternates.length > 0 && (
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary italic mb-1 sm:mb-2">
+                Also known as: {parent1Result.alternates.join(', ')}
+              </p>
+            )}
             {parent1Result.notes && parent1Result.notes.length > 0 && (
               <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 italic mb-1 sm:mb-2">
                 Note: {parent1Result.notes.join('; ')}
@@ -2514,6 +2547,11 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Phenotype: </span>
               {parent2Result.phenotype}
             </p>
+            {parent2Result.alternates && parent2Result.alternates.length > 0 && (
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary italic mb-1 sm:mb-2">
+                Also known as: {parent2Result.alternates.join(', ')}
+              </p>
+            )}
             {parent2Result.notes && parent2Result.notes.length > 0 && (
               <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 italic mb-1 sm:mb-2">
                 Note: {parent2Result.notes.join('; ')}
@@ -2598,6 +2636,11 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                             {result.percentage}%
                           </span>
                         </div>
+                        {result.alternates && result.alternates.length > 0 && (
+                          <p className="text-sm text-gray-600 dark:text-dark-text-secondary italic mt-1">
+                            Also known as: {result.alternates.join(', ')}
+                          </p>
+                        )}
                         {result.notes && result.notes.length > 0 && (
                           <p className="text-sm text-blue-700 dark:text-blue-400 italic mt-1">
                             Note: {result.notes.join('; ')}
