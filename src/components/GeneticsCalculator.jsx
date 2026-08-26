@@ -2406,18 +2406,22 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 <span className="hidden sm:inline">Reset</span>
                 <span className="sm:hidden">Reset</span>
               </button>
-              <a
-                href="https://ratvarietyguide.weebly.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Rat Variety Guide (ratvarietyguide.weebly.com) — used as a reference"
-              >
-                <img
-                  src="/images/rvg-logo-dec23-2.png"
-                  alt="Rat Variety Guide — reference used for Fancy Rat phenotypes"
-                  className="h-8 sm:h-10 w-auto rounded"
-                />
-              </a>
+              {selectedSpecies === 'Fancy Rat' && (
+                <a
+                  href="https://ratvarietyguide.weebly.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Rat Variety Guide (ratvarietyguide.weebly.com) — used as a reference"
+                  className="flex items-center gap-1.5"
+                >
+                  <img
+                    src="/images/rvg-logo-dec23-2.png"
+                    alt="Rat Variety Guide — reference used for Fancy Rat phenotypes"
+                    className="h-10 sm:h-14 w-auto rounded"
+                  />
+                  <span className="text-xs text-gray-600 dark:text-dark-text-muted">as a reference</span>
+                </a>
+              )}
               {selectedSpecies === 'Fancy Mouse' && (
                 <button
                   onClick={() => setShowExamples(true)}

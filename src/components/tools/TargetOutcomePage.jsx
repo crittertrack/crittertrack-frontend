@@ -79,16 +79,53 @@ function buildRatMarkingTraitDefs() {
   const hCombos = ratCombosFor('H');
   const groups = {};
   groupRatPatchesByLabel(ratCartesian({ H: hCombos }), groups, { includeEmpty: true });
-  groupRatPatchesByLabel(ratCartesian({ Dal: ['Dal/Dal', 'Dal/dal'], H: hCombos }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Dal: ['Dal/dal'], H: hCombos }), groups); // Dal/Dal is lethal, excluded
   groupRatPatchesByLabel(ratCartesian({ Wh: ['wh/wh'], H: hCombos }), groups);
   groupRatPatchesByLabel(ratCartesian({ Ro: ['ro/ro'], H: hCombos }), groups);
   groupRatPatchesByLabel(ratCartesian({ Ws: ['Ws/w'], H: hCombos }), groups);
   groupRatPatchesByLabel(ratCartesian({ Hs: ['hs/hs'], H: hCombos }), groups);
   groupRatPatchesByLabel(ratCartesian({ Dw: ['Dw/Dw', 'Dw/dw'], H: hCombos }), groups);
   groupRatPatchesByLabel([{ Sf: 'sf/sf' }], groups);
-  groupRatPatchesByLabel([{ Ma: 'Ma/Ma' }, { Ma: 'Ma/ma' }], groups);
+  groupRatPatchesByLabel([{ Ma: 'Ma/ma' }], groups); // Ma/Ma is possibly lethal, excluded
   pruneRedundantRatAlternatives(groups);
-  return ratDefsFromGroups(groups, 'Marking', 'rat-marking');
+
+  // Split single-locus results (own dropdown per trait) from compounds. A
+  // compound goes into its own locus-named dropdown (Dalmatian/Whiteside/Roan/
+  // White Spot/Headspot/Downunder) unless its alternatives genuinely span more
+  // than one of those extra loci (e.g. "Badger" from both Ws and Hs) — those
+  // stay in the shared "Marking Combinations" dropdown since they're not
+  // reducible to a single locus.
+  const EXTRA_LOCUS_GROUP_NAMES = { Dal: 'Dalmatian', Wh: 'Whiteside', Ro: 'Roan', Ws: 'White Spot', Hs: 'Headspot', Dw: 'Downunder' };
+  const singleByLocus = { H: {}, Sf: {}, Ma: {} };
+  const compoundByLocus = {};
+  const ambiguousCompoundGroups = {};
+  for (const [label, alternatives] of Object.entries(groups)) {
+    const extraLoci = new Set();
+    for (const patch of alternatives) {
+      for (const locus of Object.keys(EXTRA_LOCUS_GROUP_NAMES)) if (locus in patch) extraLoci.add(locus);
+    }
+    if (extraLoci.size === 0) {
+      const locus = Object.keys(alternatives[0])[0];
+      singleByLocus[locus][label] = alternatives;
+    } else if (extraLoci.size === 1) {
+      const locus = [...extraLoci][0];
+      (compoundByLocus[locus] || (compoundByLocus[locus] = {}))[label] = alternatives;
+    } else {
+      ambiguousCompoundGroups[label] = alternatives;
+    }
+  }
+
+  const compoundDefs = Object.entries(compoundByLocus).flatMap(([locus, g]) =>
+    ratDefsFromGroups(g, EXTRA_LOCUS_GROUP_NAMES[locus], `rat-marking-${locus.toLowerCase()}`)
+  );
+
+  return [
+    ...ratDefsFromGroups(singleByLocus.H, 'Hooded', 'rat-marking-hooded'),
+    ...ratDefsFromGroups(singleByLocus.Sf, 'Snowflake', 'rat-marking-snowflake'),
+    ...ratDefsFromGroups(singleByLocus.Ma, 'Marble', 'rat-marking-marble'),
+    ...compoundDefs,
+    ...ratDefsFromGroups(ambiguousCompoundGroups, 'Marking Combinations', 'rat-marking-compound'),
+  ];
 }
 
 function buildRatCoatTraitDefs() {
@@ -98,7 +135,7 @@ function buildRatCoatTraitDefs() {
   groupRatPatchesByLabel(ratCartesian({ Re: reCombos }), groups);
   groupRatPatchesByLabel(ratCartesian({ Ve: veCombos }), groups);
   groupRatPatchesByLabel(ratCartesian({ Re: reCombos, Ve: veCombos }), groups);
-  groupRatPatchesByLabel(ratCartesian({ Sm: ['Sm/Sm', 'Sm/sm'] }), groups);
+  groupRatPatchesByLabel(ratCartesian({ Sm: ['Sm/sm'] }), groups); // Sm/Sm is suspected lethal in utero, excluded
   groupRatPatchesByLabel(ratCartesian({ Lu: ['Lu/Lu', 'Lu/lu'] }), groups);
   groupRatPatchesByLabel(ratCartesian({ Sy: ['Sy/Sy', 'Sy/sy'] }), groups);
   groupRatPatchesByLabel(ratCartesian({ Sk: ['Sk/Sk', 'Sk/sk'] }), groups);
@@ -109,7 +146,29 @@ function buildRatCoatTraitDefs() {
   groupRatPatchesByLabel([{ fz: 'fz/fz' }], groups);
   groupRatPatchesByLabel([{ pw: 'pw/pw' }], groups);
   pruneRedundantRatAlternatives(groups);
-  return ratDefsFromGroups(groups, 'Coat & Texture', 'rat-coat');
+
+  // Same split as markings: one dropdown per single-locus coat trait, plus a
+  // shared dropdown for genuine multi-locus compounds (e.g. Re+Ve = Teddy Rex).
+  const COAT_LOCUS_GROUP_NAMES = {
+    Re: 'Rex', Ve: 'Velveteen', Sm: 'Silvermane', Lu: 'Lux', Sy: 'Silky', Sk: 'Silk',
+    sa: 'Satin', hrl: 'Harley', hr: 'Hairless', nz: 'Angora', fz: 'Fuzz', pw: 'Werewolf',
+  };
+  const singleByLocus = {};
+  const compoundGroups = {};
+  for (const [label, alternatives] of Object.entries(groups)) {
+    if (alternatives.some(patch => Object.keys(patch).length > 1)) {
+      compoundGroups[label] = alternatives;
+    } else {
+      const locus = Object.keys(alternatives[0])[0];
+      (singleByLocus[locus] || (singleByLocus[locus] = {}))[label] = alternatives;
+    }
+  }
+
+  const singleDefs = Object.entries(singleByLocus).flatMap(([locus, g]) =>
+    ratDefsFromGroups(g, COAT_LOCUS_GROUP_NAMES[locus] || locus, `rat-coat-${locus.toLowerCase()}`)
+  );
+  const compoundDefs = ratDefsFromGroups(compoundGroups, 'Coat Combinations', 'rat-coat-compound');
+  return [...singleDefs, ...compoundDefs];
 }
 
 function buildRatEarTraitDefs() {
@@ -133,20 +192,20 @@ function buildRatModifierTraitDefs() {
 }
 
 const RAT_COLOR_TRAIT_DEFS = [
-  { id: 'rat-black',         label: 'Black',               group: 'Base Color — Black',  alternatives: [{ A: 'a/a' }] },
-  { id: 'rat-chocolate',     label: 'Chocolate',           group: 'Base Color — Black',  alternatives: [{ A: 'a/a', B: 'b/b' }] },
-  { id: 'rat-russian-blue',  label: 'Russian Blue',        group: 'Base Color — Black',  alternatives: [{ A: 'a/a', D: 'd/d' }] },
-  { id: 'rat-american-blue', label: 'American Blue',       group: 'Base Color — Black',  alternatives: [{ A: 'a/a', G: 'g/g' }] },
-  { id: 'rat-mink',          label: 'Mink',                group: 'Base Color — Black',  alternatives: [{ A: 'a/a', M: 'm/m' }] },
-  { id: 'rat-champagne',     label: 'Champagne',           group: 'Base Color — Black',  alternatives: [{ A: 'a/a', P: 'p/p' }] },
-  { id: 'rat-beige',         label: 'Beige',               group: 'Base Color — Black',  alternatives: [{ A: 'a/a', R: 'r/r' }] },
-  { id: 'rat-agouti',        label: 'Agouti',              group: 'Base Color — Agouti', alternatives: [{ A: 'A/A' }] },
-  { id: 'rat-choc-agouti',   label: 'Chocolate Agouti',    group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', B: 'b/b' }] },
-  { id: 'rat-rub-agouti',    label: 'Russian Blue Agouti', group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', D: 'd/d' }] },
-  { id: 'rat-opal',          label: 'Opal',                group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', G: 'g/g' }] },
-  { id: 'rat-cinnamon',      label: 'Cinnamon',            group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', M: 'm/m' }] },
-  { id: 'rat-silver-fawn',   label: 'Silver Fawn',         group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', P: 'p/p' }] },
-  { id: 'rat-topaz',         label: 'Topaz',               group: 'Base Color — Agouti', alternatives: [{ A: 'A/A', R: 'r/r' }] },
+  { id: 'rat-black',         label: 'Black',               group: 'Base Color',  alternatives: [{ A: 'a/a' }] },
+  { id: 'rat-agouti',        label: 'Agouti',              group: 'Base Color', alternatives: [{ A: 'A/A' }] },
+  { id: 'rat-chocolate',     label: 'Chocolate',           group: 'Brown Dilute',  alternatives: [{ A: 'a/a', B: 'b/b' }] },
+  { id: 'rat-choc-agouti',   label: 'Chocolate Agouti',    group: 'Brown Dilute', alternatives: [{ A: 'A/A', B: 'b/b' }] },
+  { id: 'rat-russian-blue',  label: 'Russian Blue',        group: 'Russian Blue Dilute',  alternatives: [{ A: 'a/a', D: 'd/d' }] },
+  { id: 'rat-rub-agouti',    label: 'Russian Blue Agouti', group: 'Russian Blue Dilute', alternatives: [{ A: 'A/A', D: 'd/d' }] },
+  { id: 'rat-american-blue', label: 'American Blue',       group: 'American Blue Dilute',  alternatives: [{ A: 'a/a', G: 'g/g' }] },
+  { id: 'rat-opal',          label: 'Opal',                group: 'American Blue Dilute', alternatives: [{ A: 'A/A', G: 'g/g' }] },
+  { id: 'rat-mink',          label: 'Mink',                group: 'Mink Dilute',  alternatives: [{ A: 'a/a', M: 'm/m' }] },
+  { id: 'rat-cinnamon',      label: 'Cinnamon',            group: 'Mink Dilute', alternatives: [{ A: 'A/A', M: 'm/m' }] },
+  { id: 'rat-champagne',     label: 'Champagne',           group: 'Champagne Dilute',  alternatives: [{ A: 'a/a', P: 'p/p' }] },
+  { id: 'rat-silver-fawn',   label: 'Silver Fawn',         group: 'Champagne Dilute', alternatives: [{ A: 'A/A', P: 'p/p' }] },
+  { id: 'rat-beige',         label: 'Beige',               group: 'Beige Dilute',  alternatives: [{ A: 'a/a', R: 'r/r' }] },
+  { id: 'rat-topaz',         label: 'Topaz',               group: 'Beige Dilute', alternatives: [{ A: 'A/A', R: 'r/r' }] },
   { id: 'rat-albino',        label: 'Albino',              group: 'C-locus & Color Modifier', alternatives: [{ C: 'c/c' }] },
   { id: 'rat-himalayan',     label: 'Himalayan',           group: 'C-locus & Color Modifier', alternatives: [{ C: 'ch/c' }] },
   { id: 'rat-siamese',       label: 'Siamese',             group: 'C-locus & Color Modifier', alternatives: [{ C: 'ch/ch' }] },
