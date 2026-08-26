@@ -188,7 +188,17 @@ function buildRatModifierTraitDefs() {
   const groups = {};
   groupRatPatchesByLabel([{ M: 'm/m', Pe: 'Pe/pe' }], groups);
   groupRatPatchesByLabel([{ M: 'm/m', Me: 'Me/me' }, { M: 'm/m', Me: 'Me/Me' }], groups);
-  return ratDefsFromGroups(groups, 'Modifiers', 'rat-modifier');
+  const defs = ratDefsFromGroups(groups, 'Modifiers', 'rat-modifier');
+  // Be is dominant and hypostatic to the C-locus, so it prefixes ANY base color
+  // with "Black Eyed" (e.g. a/a Be/be = "Black Eyed Black") — except over
+  // Albino, where it derives "Ivory" instead. Labeled directly here rather
+  // than via matchFancyRatPhenotype since the generic stripRatColorPrefix
+  // helper would otherwise mangle "Black Eyed Black" into "Eyed Black".
+  defs.push(
+    { id: 'rat-modifier-black-eyed', label: 'Black Eyed', group: 'Modifiers', alternatives: [{ Be: 'Be/be' }, { Be: 'Be/Be' }] },
+    { id: 'rat-modifier-ivory', label: 'Ivory', group: 'Modifiers', alternatives: [{ Be: 'Be/be', C: 'c/c' }, { Be: 'Be/Be', C: 'c/c' }] },
+  );
+  return defs;
 }
 
 const RAT_COLOR_TRAIT_DEFS = [

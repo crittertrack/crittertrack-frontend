@@ -1,6 +1,6 @@
 # Fancy Rat — Target Outcome Dropdown Groups
 
-_Auto-generated reference — 114 total trait options across 34 dropdowns._
+_Auto-generated reference — 116 total trait options across 34 dropdowns._
 
 ## Base Color (2)
 - Black
@@ -179,8 +179,10 @@ _Auto-generated reference — 114 total trait options across 34 dropdowns._
 - Dwarf
 - Manx
 
-## Modifiers (3)
+## Modifiers (5)
 - Mink Pearl
 - Mink Merle
 - Mink Extreme Merle
+- Black Eyed
+- Ivory
 
