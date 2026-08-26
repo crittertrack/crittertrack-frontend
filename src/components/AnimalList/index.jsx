@@ -2097,6 +2097,24 @@ useEffect(() => {
         return nextDue <= today;
     }, []);
 
+    // Next due date for a task, for display purposes (e.g. the Custom Tasks "Next Due" column).
+    // Returns null if the task has no frequency set (one-off/no schedule).
+    const getTaskNextDueDate = useCallback((task) => {
+        let frequencyInDays = task.frequencyDays;
+        if (!frequencyInDays && task.frequency) {
+            if (task.frequencyUnit === 'weeks') frequencyInDays = task.frequency * 7;
+            else if (task.frequencyUnit === 'months') frequencyInDays = task.frequency * 30;
+            else if (task.frequencyUnit === 'years') frequencyInDays = task.frequency * 365;
+            else frequencyInDays = task.frequency; // 'days'
+        }
+        if (!frequencyInDays) return null;
+
+        const base = task.lastDoneDate ? parseLocalDate(task.lastDoneDate) : new Date();
+        const nextDue = new Date(base);
+        nextDue.setDate(nextDue.getDate() + Number(frequencyInDays));
+        return nextDue;
+    }, []);
+
     const enclosureMaintenanceDueCount = useMemo(() => {
         return enclosures.reduce((count, enc) => {
             const hasDueTask = (enc.cleaningTasks || []).some(isTaskDue);
@@ -2328,6 +2346,8 @@ useEffect(() => {
             .filter(t => isDue(t.lastDoneDate, t.frequencyDays))
             .map(t => ({ animal: a, reason: `${t.taskName} due` }))
         ),
+        // Standalone (not animal-linked) custom tasks — no `animal`, keyed/clicked by task id instead.
+        ...generalTaskDue.map(t => ({ animal: null, task: t, reason: `${t.taskName} due` })),
     ];
     const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
     const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
@@ -3897,9 +3917,9 @@ useEffect(() => {
                             <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm max-h-60 overflow-y-auto">
                                 <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Due Now</h4>
                                 <ul className="text-xs space-y-1.5">
-                                    {feedingCareNeedsAttentionList.map(({ animal, reason }, idx) => (
-                                        <li key={`${animal.id_public}-${reason}-${idx}`} className="flex flex-col gap-0.5 p-1.5 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => onViewAnimal(animal)}>
-                                            <span className="text-gray-700 dark:text-dark-text-secondary font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
+                                    {feedingCareNeedsAttentionList.map(({ animal, task, reason }, idx) => (
+                                        <li key={`${animal?.id_public || task?.id}-${reason}-${idx}`} className="flex flex-col gap-0.5 p-1.5 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => animal ? onViewAnimal(animal) : setAnimalView('feeding')}>
+                                            <span className="text-gray-700 dark:text-dark-text-secondary font-semibold truncate">{animal ? [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') : task?.taskName}</span>
                                             <span className="font-medium text-orange-700 dark:text-orange-400">{reason}</span>
                                         </li>
                                     ))}
@@ -4218,9 +4238,10 @@ useEffect(() => {
     const GeneralTaskBar = ({ task, onEdit, onMarkDone, onSkip, onDelete }) => {
         const due = isTaskDue(task);
         const freqLabel = task.frequency ? `Every ${task.frequency} ${task.frequencyUnit || 'days'}` : '—';
+        const nextDueDate = getTaskNextDueDate(task);
         const assignedNames = (task.assignedAnimals || []).map(id => allAnimalsRaw.find(a => a.id_public === id)?.name || id);
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-8 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
+            <div className="grid grid-cols-1 sm:grid-cols-9 items-center gap-2 sm:gap-4 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-dark-text-muted sm:border sm:border-b sm:border-transparent sm:hover:border-gray-200 dark:sm:hover:border-dark-border">
                 <div className="sm:col-span-2 flex items-center gap-3 cursor-pointer" onClick={() => onEdit(task)}>
                     <div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex items-center justify-center flex-shrink-0">
                         <ClipboardList size={16} className="text-gray-400 dark:text-dark-text-muted" />
@@ -4234,6 +4255,8 @@ useEffect(() => {
                 </div>
 
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Last Done: </span>{task.lastDoneDate ? formatDateShort(task.lastDoneDate) : <span className="text-orange-500 dark:text-orange-400">Never</span>}</div>
+
+                <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Next Due: </span>{nextDueDate ? formatDateShort(nextDueDate) : '—'}</div>
 
                 <div className="text-xs text-gray-600 dark:text-dark-text-secondary"><span className="sm:hidden font-semibold">Frequency: </span>{freqLabel}</div>
 
@@ -4978,9 +5001,10 @@ useEffect(() => {
                                                             <div className="text-center text-sm text-gray-400 dark:text-dark-text-muted py-4">{section.emptyText}</div>
                                                         ) : (
                                                             <>
-                                                                <div className="hidden sm:grid grid-cols-8 items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted">
+                                                                <div className={`hidden sm:grid ${section.key === 'general' ? 'grid-cols-9' : 'grid-cols-8'} items-center gap-4 px-3 py-1 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase border-b border-gray-100 dark:border-dark-text-muted`}>
                                                                     <div className="col-span-2">{section.entityLabel || 'Animal'}</div>
                                                                     <div>{section.colLabels[0]}</div>
+                                                                    {section.key === 'general' && <div>Next Due</div>}
                                                                     <div>Frequency</div>
                                                                     <div className="col-span-2">{section.colLabels[1]}</div>
                                                                     <div className="text-center">Status</div>
@@ -5854,7 +5878,7 @@ useEffect(() => {
                     {/* Column 5: Needs Attention */}
                     <div className="flex flex-col gap-2">
                         {(() => {
-                            const totalAttention = feedingCareDueDashboard.length + healthNeedsAttentionList.length + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
+                            const totalAttention = feedingCareDueDashboard.length + generalTaskDue.length + healthNeedsAttentionList.length + reproNeedsAttentionList.length + enclosureMaintenanceDueCount;
                             return (
                                 <>
                                     <StatCard
@@ -5870,17 +5894,23 @@ useEffect(() => {
                                         <div className="bg-white dark:bg-dark-card-bg border border-gray-200 dark:border-dark-text-muted rounded-lg p-3 -mt-1 shadow-sm">
                                             <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text mb-2">Needs Attention Breakdown</h4>
                                             <ul className="text-sm space-y-1">
-                                                {feedingCareDueDashboard.length > 0 && (
+                                                {(feedingCareDueDashboard.length > 0 || generalTaskDue.length > 0) && (
                                                     <>
                                                         <li className="flex justify-between items-center p-1 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-surface-hover" onClick={() => setAnimalView('feeding')}>
                                                             <span className="flex items-center gap-1.5 text-red-700 dark:text-red-300"><Utensils size={14} /> Feeding & Care</span>
-                                                            <span className="font-medium">{feedingCareDueDashboard.length}</span>
+                                                            <span className="font-medium">{feedingCareDueDashboard.length + generalTaskDue.length}</span>
                                                         </li>
                                                         <ul className="pl-6 space-y-1 text-xs">
                                                             {feedingCareDueDashboard.map(({ animal, reasons }) => (
                                                                 <li key={animal.id_public} className="flex justify-between items-center gap-2 text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => onViewAnimal(animal)}>
                                                                     <span className="font-semibold truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>
                                                                     <span className="whitespace-nowrap">{reasons.length} task(s)</span>
+                                                                </li>
+                                                            ))}
+                                                            {generalTaskDue.map(t => (
+                                                                <li key={t.id} className="flex justify-between items-center gap-2 text-gray-600 dark:text-dark-text-secondary p-1 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-border" onClick={() => setAnimalView('feeding')}>
+                                                                    <span className="font-semibold truncate">{t.taskName}</span>
+                                                                    <span className="whitespace-nowrap">Due</span>
                                                                 </li>
                                                             ))}
                                                         </ul>

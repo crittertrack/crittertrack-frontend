@@ -51,6 +51,9 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const [supplies, setSupplies] = useState(() => {
         try { return JSON.parse(localStorage.getItem('ct_hub_supplies') || '[]'); } catch { return []; }
     });
+    const [generalCareTasks, setGeneralCareTasks] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_hub_general_tasks') || '[]'); } catch { return []; }
+    });
     const [mgmtLoading, setMgmtLoading] = useState(true);
 
     // -- Broadcasts --------------------------------------------------
@@ -83,16 +86,19 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } }),
             axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } }),
             axios.get(`${API_BASE_URL}/supplies`, { headers: { Authorization: `Bearer ${authToken}` } }),
+            axios.get(`${API_BASE_URL}/users/general-tasks`, { headers: { Authorization: `Bearer ${authToken}` } }),
         ])
-            .then(([ar, er, sr]) => {
+            .then(([ar, er, sr, gr]) => {
                 const a = (Array.isArray(ar.data) ? ar.data : []).filter(x => !x.isViewOnly && !x.archived);
                 const e = Array.isArray(er.data) ? er.data : [];
                 const s = Array.isArray(sr.data) ? sr.data : [];
-                setAnimals(a); setEnclosures(e); setSupplies(s);
+                const g = Array.isArray(gr.data?.generalCareTasks) ? gr.data.generalCareTasks : [];
+                setAnimals(a); setEnclosures(e); setSupplies(s); setGeneralCareTasks(g);
                 try {
                     localStorage.setItem('ct_hub_animals', JSON.stringify(a));
                     localStorage.setItem('ct_hub_enclosures', JSON.stringify(e));
                     localStorage.setItem('ct_hub_supplies', JSON.stringify(s));
+                    localStorage.setItem('ct_hub_general_tasks', JSON.stringify(g));
                 } catch {}
             })
             .catch(() => {})
@@ -206,6 +212,8 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             careDueCount += (a.animalCareTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
             careDueCount += SCHEDULE_FIELD_KEYS.filter(key => isTaskDue(a[key]?.lastDoneDate, a[key]?.frequencyDays)).length;
         });
+        // Standalone (not animal-linked) custom tasks store frequency+frequencyUnit, not frequencyDays.
+        careDueCount += generalCareTasks.filter(t => isTaskDue(t.lastDoneDate, cleaningTaskFreqDays(t))).length;
         if (careDueCount > 0) {
             const key = 'mgmt-care';
             if (!mgmtDismissed[key]) mgmtItems.push({ key, type: 'care', label: 'Animal Care', icon: '\uD83E\uDDF4', description: `${careDueCount} task${careDueCount !== 1 ? 's' : ''} due` });
