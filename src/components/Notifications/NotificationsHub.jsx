@@ -6,6 +6,7 @@ import {
     UtensilsCrossed, Wrench, X, XCircle
 } from 'lucide-react';
 import { formatDate, parseLocalDate } from '../../utils/dateFormatter';
+import { renderRichText } from '../../utils/richText';
 import { BroadcastPoll } from './Banners';
 
 const API_BASE_URL = '/api';
@@ -417,7 +418,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                                     )}
                                                 </>
                                             ) : broadcast.message && (
-                                                <p className={`text-xs ${styles.text} line-clamp-4 leading-snug mb-1`}>{broadcast.message}</p>
+                                                <p className={`text-xs ${styles.text} line-clamp-4 leading-snug mb-1`}>{renderRichText(broadcast.message)}</p>
                                             )}
                                             <p className={`text-xs ${styles.sub} mt-auto`}>{new Date(broadcast.createdAt).toLocaleDateString()}</p>
                                         </div>
@@ -449,7 +450,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                             <button onClick={() => setSelectedBroadcast(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2"><X size={18} /></button>
                         </div>
                         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-                            {selectedBroadcast.message && <p className={`text-sm ${styles.text}`}>{selectedBroadcast.message}</p>}
+                            {selectedBroadcast.message && <p className={`text-sm ${styles.text}`}>{renderRichText(selectedBroadcast.message)}</p>}
                             {selectedBroadcast.broadcastType === 'poll' && selectedBroadcast.pollQuestion && (
                                 <BroadcastPoll
                                     poll={selectedBroadcast}

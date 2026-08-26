@@ -4,6 +4,7 @@ import {
     AlertCircle, AlertTriangle, Baby, Check, CheckCircle,
     Info, Loader2, PawPrint, Shield, XCircle, X
 } from 'lucide-react';
+import { renderRichText } from '../../utils/richText';
 
 const API_BASE_URL = '/api';
 
@@ -362,7 +363,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                                         </button>
                                     </div>
                                     {broadcast.message && (
-                                        <p className={`mt-1.5 ${styles.text} text-sm`}>{broadcast.message}</p>
+                                        <p className={`mt-1.5 ${styles.text} text-sm`}>{renderRichText(broadcast.message)}</p>
                                     )}
                                     
                                     {broadcast.broadcastType === 'poll' && broadcast.pollQuestion && (
@@ -469,7 +470,7 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                             {urgentBroadcast.title || 'System Message'}
                         </h4>
                         <p className={`mt-3 ${textColor} text-sm leading-relaxed`}>
-                            {urgentBroadcast.message}
+                            {renderRichText(urgentBroadcast.message)}
                         </p>
                         <p className={`mt-3 text-xs ${iconColor}`}>
                             {new Date(urgentBroadcast.createdAt).toLocaleString()}

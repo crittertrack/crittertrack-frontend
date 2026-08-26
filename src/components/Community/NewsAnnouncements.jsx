@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { BroadcastPoll } from './Banners';
+import { renderRichText } from '../../utils/richText';
 
 const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
     const [items, setItems] = useState([]);
@@ -130,7 +131,7 @@ const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
                                 {isPoll ? (
                                     <BroadcastPoll broadcast={item} authToken={authToken} API_BASE_URL={API_BASE_URL} isEmbedded={true} />
                                 ) : (
-                                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.message || item.content || ''}</p>
+                                    <p className="text-sm text-gray-700">{renderRichText(item.message || item.content || '')}</p>
                                 )}
                             </div>
                         )}

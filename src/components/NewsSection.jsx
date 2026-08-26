@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Loader2, Rss, ChevronDown, ChevronUp, BarChart2, Info } from 'lucide-react';
 import { BroadcastPoll } from './Community/Banners';
+import { renderRichText } from '../utils/richText';
 
 const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
     const isPoll = item.broadcastType === 'poll' || item.type === 'poll';
@@ -64,7 +65,7 @@ const NewsItem = ({ item, isExpanded, onToggle, API_BASE_URL, authToken }) => {
                         <BroadcastPoll broadcast={item} authToken={authToken} API_BASE_URL={API_BASE_URL} isEmbedded={true} hideTitle={true} />
                     ) : (
                         <>
-                            <div className="text-xs text-gray-700 dark:text-dark-text-secondary prose max-w-none" dangerouslySetInnerHTML={{ __html: item.message || item.content }} />
+                            <div className="text-xs text-gray-700 dark:text-dark-text-secondary max-w-none">{renderRichText(item.message || item.content)}</div>
                             {item.link && (
                                 <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline mt-2 inline-block">
                                     Read more

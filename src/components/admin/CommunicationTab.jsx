@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './CommunicationTab.css';
 import DatePicker from '../DatePicker';
 
@@ -11,6 +11,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     // Broadcast state
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
+    const messageTextareaRef = useRef(null);
     const [recipientType, setRecipientType] = useState('all');
     const [country, setCountry] = useState('');
     const [broadcastType, setBroadcastType] = useState('info');
@@ -207,6 +208,20 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Wraps the current textarea selection (or inserts placeholder text) with **bold**/*italic* markers
+    const applyMessageFormat = (marker) => {
+        const textarea = messageTextareaRef.current;
+        if (!textarea) return;
+        const { selectionStart, selectionEnd } = textarea;
+        const selected = message.slice(selectionStart, selectionEnd) || 'text';
+        const next = message.slice(0, selectionStart) + marker + selected + marker + message.slice(selectionEnd);
+        setMessage(next);
+        requestAnimationFrame(() => {
+            textarea.focus();
+            textarea.setSelectionRange(selectionStart + marker.length, selectionStart + marker.length + selected.length);
+        });
     };
 
     const handleSendBroadcast = async (e) => {
@@ -767,7 +782,28 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                 {/* Regular Message Field */}
                                 <div className="form-group">
                                     <label>Message *</label>
+                                    <div className="format-toolbar">
+                                        <button
+                                            type="button"
+                                            className="format-btn"
+                                            onClick={() => applyMessageFormat('**')}
+                                            disabled={loading}
+                                            title="Bold"
+                                        >
+                                            <strong>B</strong>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="format-btn"
+                                            onClick={() => applyMessageFormat('*')}
+                                            disabled={loading}
+                                            title="Italic"
+                                        >
+                                            <em>I</em>
+                                        </button>
+                                    </div>
                                     <textarea
+                                        ref={messageTextareaRef}
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         placeholder="Your announcement message..."
@@ -776,6 +812,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                         maxLength="1000"
                                     />
                                     <span className="char-count">{message.length}/1000</span>
+                                    <small>Select text and click B/I, or type **bold** and *italic* directly.</small>
                                 </div>
                             </>
                         )}
