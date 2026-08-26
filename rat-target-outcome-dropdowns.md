@@ -1,6 +1,6 @@
 # Fancy Rat — Target Outcome Dropdown Groups
 
-_Auto-generated reference — 113 total trait options across 34 dropdowns._
+_Auto-generated reference — 114 total trait options across 34 dropdowns._
 
 ## Base Color (2)
 - Black
@@ -8,7 +8,7 @@ _Auto-generated reference — 113 total trait options across 34 dropdowns._
 
 ## Brown Dilute (2)
 - Chocolate
-- Chocolate Agouti
+- Chocolate Agouti (Sienna)
 
 ## Russian Blue Dilute (2)
 - Russian Blue
@@ -27,15 +27,16 @@ _Auto-generated reference — 113 total trait options across 34 dropdowns._
 - Silver Fawn
 
 ## Beige Dilute (2)
-- Beige
-- Topaz
+- Beige (Buff)
+- Topaz (Fawn)
 
-## C-locus & Color Modifier (7)
+## C-locus & Color Modifier (8)
 - Albino
 - Himalayan
 - Siamese
 - Tonkinese
-- Ivory Marten
+- Marten (Devil)
+- Pointed Marten (Pointed Devil)
 - Burmese
 - Sable
 
