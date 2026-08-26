@@ -4,6 +4,7 @@ import InfoButton from './shared/InfoButton';
 import { matchFancyRatPhenotype, getFancyRatCarriers, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
 import { matchSyrianHamsterPhenotype, getSyrianHamsterCarriers, SYRIAN_HAMSTER_GENE_LOCI } from '../data/syrianHamsterPhenotypeRules';
 import { matchCampbellsDwarfHamsterPhenotype, getCampbellsDwarfHamsterCarriers, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
+import { matchRussianDwarfHamsterPhenotype, getRussianDwarfHamsterCarriers, RUSSIAN_DWARF_HAMSTER_GENE_LOCI } from '../data/russianDwarfHamsterPhenotypeRules';
 
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
@@ -1508,9 +1509,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   // Fetch genetics data when species changes
   React.useEffect(() => {
     const fetchGeneticsData = async () => {
-      // For Fancy Mouse, Fancy Rat, Syrian Hamster, and Campbell's Dwarf Hamster, use hardcoded data (fast, reliable, reviewed rule engines)
-      if (selectedSpecies === 'Fancy Mouse' || selectedSpecies === 'Fancy Rat' || selectedSpecies === 'Syrian Hamster' || selectedSpecies === 'Campbells Dwarf Hamster') {
-        const loci = selectedSpecies === 'Fancy Mouse' ? GENE_LOCI : selectedSpecies === 'Fancy Rat' ? RAT_GENE_LOCI : selectedSpecies === 'Syrian Hamster' ? SYRIAN_HAMSTER_GENE_LOCI : CAMPBELLS_DWARF_HAMSTER_GENE_LOCI;
+      // For Fancy Mouse, Fancy Rat, Syrian Hamster, Campbell's Dwarf Hamster, and Russian Dwarf Hamster, use hardcoded data (fast, reliable, reviewed rule engines)
+      if (selectedSpecies === 'Fancy Mouse' || selectedSpecies === 'Fancy Rat' || selectedSpecies === 'Syrian Hamster' || selectedSpecies === 'Campbells Dwarf Hamster' || selectedSpecies === 'Russian Dwarf Hamster') {
+        const loci = selectedSpecies === 'Fancy Mouse' ? GENE_LOCI : selectedSpecies === 'Fancy Rat' ? RAT_GENE_LOCI : selectedSpecies === 'Syrian Hamster' ? SYRIAN_HAMSTER_GENE_LOCI : selectedSpecies === 'Campbells Dwarf Hamster' ? CAMPBELLS_DWARF_HAMSTER_GENE_LOCI : RUSSIAN_DWARF_HAMSTER_GENE_LOCI;
         setGeneLoci(loci);
         const newDefaults = {};
         Object.keys(loci).forEach(locus => {
@@ -1920,7 +1921,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
             ? matchSyrianHamsterPhenotype(partialGenotype)
             : selectedSpecies === 'Campbells Dwarf Hamster'
               ? matchCampbellsDwarfHamsterPhenotype(partialGenotype)
-              : calculatePhenotypeDynamic(partialGenotype, geneLoci);
+              : selectedSpecies === 'Russian Dwarf Hamster'
+                ? matchRussianDwarfHamsterPhenotype(partialGenotype)
+                : calculatePhenotypeDynamic(partialGenotype, geneLoci);
       const phenotype = result.phenotype;
       totalWeight += weight;
 
@@ -1987,7 +1990,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
             ? matchSyrianHamsterPhenotype(parent1)
             : selectedSpecies === 'Campbells Dwarf Hamster'
               ? matchCampbellsDwarfHamsterPhenotype(parent1)
-              : calculatePhenotypeDynamic(parent1, geneLoci))
+              : selectedSpecies === 'Russian Dwarf Hamster'
+                ? matchRussianDwarfHamsterPhenotype(parent1)
+                : calculatePhenotypeDynamic(parent1, geneLoci))
     : { phenotype: '', carriers: [], hidden: [] };
   const parent2Result = hasAnySelection(parent2)
     ? (selectedSpecies === 'Fancy Mouse'
@@ -1998,7 +2003,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
             ? matchSyrianHamsterPhenotype(parent2)
             : selectedSpecies === 'Campbells Dwarf Hamster'
               ? matchCampbellsDwarfHamsterPhenotype(parent2)
-              : calculatePhenotypeDynamic(parent2, geneLoci))
+              : selectedSpecies === 'Russian Dwarf Hamster'
+                ? matchRussianDwarfHamsterPhenotype(parent2)
+                : calculatePhenotypeDynamic(parent2, geneLoci))
     : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
@@ -2402,7 +2409,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                 <option value="Fancy Mouse">Fancy Mouse</option>
                 <option value="Syrian Hamster">Syrian Hamster</option>
                 <option value="Campbells Dwarf Hamster">Campbells Dwarf Hamster</option>
-                {availableSpecies.filter(s => s !== 'Fancy Mouse' && s !== 'Syrian Hamster' && s !== 'Campbells Dwarf Hamster').map(species => (
+                <option value="Russian Dwarf Hamster">Russian Dwarf Hamster</option>
+                {availableSpecies.filter(s => s !== 'Fancy Mouse' && s !== 'Syrian Hamster' && s !== 'Campbells Dwarf Hamster' && s !== 'Russian Dwarf Hamster').map(species => (
                   <option key={species} value={species}>{species}</option>
                 ))}
               </select>
