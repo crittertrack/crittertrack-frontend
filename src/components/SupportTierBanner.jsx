@@ -54,7 +54,7 @@ const SupportTierBanner = () => {
     return (
         <div
             onClick={() => window.open(MINI_SUPPORTER_URL, '_blank', 'noopener,noreferrer')}
-            className="max-w-xl mx-auto mb-3 cursor-pointer bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-lg shadow-md px-4 py-2 flex items-center justify-between gap-3 hover:from-blue-600 hover:to-blue-800 transition"
+            className="max-w-7xl mx-auto mb-3 cursor-pointer bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-lg shadow-md px-4 py-2 flex items-center justify-between gap-3 hover:from-blue-600 hover:to-blue-800 transition"
         >
             <span>
                 Enjoying CritterTrack? Consider supporting development — 🌰 <strong>Mini Supporter</strong> starts at just{' '}
