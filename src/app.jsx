@@ -66,6 +66,7 @@ import { useGeneralTasks } from './hooks/useGeneralTasks.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
 import NewsTickerBanner from './components/NewsTickerBanner';
+import SupportTierBanner from './components/SupportTierBanner';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
 import FinanceDropdown from './components/FinanceDropdown';
@@ -2037,6 +2038,8 @@ const App = () => {
                     </nav>
                 </div>
             </header>
+
+            <SupportTierBanner />
 
             {/* Unified alerts/notifications banner — unread messages/notifications, moderator
                 warnings/notices, and optional care/breeding alerts. Shown on every page. */}

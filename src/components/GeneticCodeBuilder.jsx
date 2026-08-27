@@ -5,6 +5,7 @@ import { matchFancyRatPhenotype, RAT_GENE_LOCI } from '../data/fancyRatPhenotype
 import { matchSyrianHamsterPhenotype, SYRIAN_HAMSTER_GENE_LOCI } from '../data/syrianHamsterPhenotypeRules';
 import { matchCampbellsDwarfHamsterPhenotype, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
 import { matchRussianDwarfHamsterPhenotype, RUSSIAN_DWARF_HAMSTER_GENE_LOCI } from '../data/russianDwarfHamsterPhenotypeRules';
+import { matchBallPythonPhenotype, BALL_PYTHON_GENE_LOCI } from '../data/ballPythonPhenotypeRules';
 
 const RAT_GENE_ORDER = ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'Dw', 'H', 'Hs', 'Ma', 'Ro', 'Sf', 'Wh', 'Ws', 'Re', 'Ve', 'Sm', 'Lu', 'Sy', 'Sk', 'hr', 'hrl', 'sa', 'nz', 'fz', 'pw', 'Du', 'dr', 'Mx'];
 
@@ -103,6 +104,30 @@ function buildRussianDwarfGeneticCode(genotype) {
     .join(' ');
 }
 
+const BALL_PYTHON_GENE_ORDER = ['cinBp', 'ban', 'cg', 'pas', 'en', 'fi', 'cho', 'van', 'pin', 'puz', 'wom', 'sab', 'od', 'yb', 'grv', 'spc', 'rus', 'spe', 'mys', 'chn', 'hon', 'bam', 'sch', 'spn', 'asp', 'jol', 'lor', 'raz', 'bon', 'cha', 'sp', 'les', 'moj', 'but', 'pha', 'pi', 'cl', 'gs', 'albCdy', 'lacGhi', 'ax', 'hy', 'cml', 'dg', 'sun', 'rax', 'tof', 'lav', 'ult', 'leo', 'cry', 'mig'];
+
+function parseBallPythonGeneticCode(codeString) {
+  if (!codeString) return {};
+  const genotype = {};
+  codeString.trim().split(/[\s,]+/).forEach(part => {
+    if (!part.match(/^[A-Za-z]+\/[A-Za-z]+$/)) return;
+    const [a, b] = part.split('/');
+    const reversed = `${b}/${a}`;
+    for (const [locus, data] of Object.entries(BALL_PYTHON_GENE_LOCI)) {
+      if (data.combinations.includes(part)) { genotype[locus] = part; return; }
+      if (data.combinations.includes(reversed)) { genotype[locus] = reversed; return; }
+    }
+  });
+  return genotype;
+}
+
+function buildBallPythonGeneticCode(genotype) {
+  return BALL_PYTHON_GENE_ORDER
+    .filter(locus => genotype[locus] && genotype[locus] !== '')
+    .map(locus => genotype[locus])
+    .join(' ');
+}
+
 const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityForm }) => {
   const [showBuilderModal, setShowBuilderModal] = useState(false);
   const [mode, setMode] = useState('visual'); // 'visual' or 'manual'
@@ -186,6 +211,9 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   const [showRussianDwarfBuilderModal, setShowRussianDwarfBuilderModal] = useState(false);
   const [russianDwarfMode, setRussianDwarfMode] = useState('visual');
   const [russianDwarfGenotype, setRussianDwarfGenotype] = useState(() => parseRussianDwarfGeneticCode(value));
+  const [showBallPythonBuilderModal, setShowBallPythonBuilderModal] = useState(false);
+  const [ballPythonMode, setBallPythonMode] = useState('visual');
+  const [ballPythonGenotype, setBallPythonGenotype] = useState(() => parseBallPythonGeneticCode(value));
 
   // Get valid combinations for a locus based on gender
   const getValidCombinations = (locus) => {
@@ -1118,6 +1146,187 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                         <Info size={18} className="flex-shrink-0 mt-0.5" />
                         <div>
                           Enter genetic code manually in format: <code className="bg-white dark:bg-dark-card-bg px-1 rounded">a/a d/d Ma/ma</code>
+                          <br />Use the Visual mode for easier selection with dropdowns.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  // For Ball Python: full visual builder (mirrors Russian Dwarf Hamster)
+  if (species === 'Ball Python') {
+    const BALL_PYTHON_GENE_GROUPS = [
+      { label: 'Cinnamon / Black Pastel (multi-allelic)', loci: ['cinBp'] },
+      { label: 'Incomplete Dominant Genes',                loci: ['pas', 'en', 'fi', 'cho', 'van', 'pin', 'puz', 'wom', 'sab', 'od', 'ban', 'cg', 'yb', 'grv', 'spc', 'rus', 'spe', 'mys', 'chn', 'hon', 'bam', 'sch', 'spn', 'asp', 'jol', 'lor', 'raz', 'bon', 'cha'] },
+      { label: 'Dominant Genes',                            loci: ['sp'] },
+      { label: 'BEL Complex (Lesser/Mojave/Butter/Phantom)', loci: ['les', 'moj', 'but', 'pha'] },
+      { label: 'Albino / Candy (multi-allelic)',            loci: ['albCdy'] },
+      { label: 'Lace / GHI (multi-allelic)',                 loci: ['lacGhi'] },
+      { label: 'Recessive Genes',                            loci: ['pi', 'cl', 'gs', 'ax', 'hy', 'cml', 'dg', 'sun', 'rax', 'tof', 'lav', 'ult', 'leo', 'cry', 'mig'] },
+    ];
+
+    const handleBallPythonGeneChange = (locus, combination) => {
+      setBallPythonGenotype(prev => ({ ...prev, [locus]: combination }));
+    };
+
+    const handleBallPythonSave = () => {
+      onChange(buildBallPythonGeneticCode(ballPythonGenotype));
+      setShowBallPythonBuilderModal(false);
+    };
+
+    const handleBallPythonManualChange = (e) => {
+      setBallPythonGenotype(parseBallPythonGeneticCode(e.target.value));
+    };
+
+    return (
+      <>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
+          <div className="flex gap-2">
+            <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
+              {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowBallPythonBuilderModal(true)}
+              className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded font-medium transition whitespace-nowrap"
+            >
+              {value ? 'Edit Genes' : 'Add'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
+        </div>
+
+        {showBallPythonBuilderModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+
+              {/* Header */}
+              <div className="flex justify-between items-center border-b dark:border-dark-border p-6">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Genetic Code Builder — Ball Python</h2>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBallPythonMode(ballPythonMode === 'visual' ? 'manual' : 'visual')}
+                    className="px-4 py-2 bg-gray-100 dark:bg-dark-surface hover:bg-gray-200 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
+                  >
+                    {ballPythonMode === 'visual' ? 'Switch to Manual' : 'Switch to Visual'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowBallPythonBuilderModal(false)}
+                    className="px-4 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded-lg transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBallPythonSave}
+                    className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-semibold transition"
+                  >
+                    Save Genetics
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {ballPythonMode === 'visual' ? (
+                  <div className="space-y-6">
+
+                    {/* Phenotype preview */}
+                    <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-2">
+                      {(() => {
+                        const ballPythonCode = buildBallPythonGeneticCode(ballPythonGenotype);
+                        const result = ballPythonCode ? matchBallPythonPhenotype(ballPythonGenotype) : null;
+                        return (
+                          <>
+                            {result?.phenotype && (
+                              <div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                                <div className={`text-base font-semibold ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800 dark:text-blue-200'}`}>{result.phenotype}</div>
+                              </div>
+                            )}
+                            <div>
+                              <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Genotype:</div>
+                              <div className="font-mono text-base text-blue-800 dark:text-blue-200">{ballPythonCode || 'Select genes below…'}</div>
+                            </div>
+                            {result?.carriers && result.carriers.length > 0 && (
+                              <div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                                <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Gene groups */}
+                    {BALL_PYTHON_GENE_GROUPS.map(group => (
+                      <div key={group.label}>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text mb-3">{group.label}</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {group.loci.map(locus => (
+                            <div key={locus} className="bg-white dark:bg-dark-surface p-3 rounded border border-gray-200 dark:border-dark-border h-48 flex flex-col">
+                              <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-1">
+                                {BALL_PYTHON_GENE_LOCI[locus].name} ({locus})
+                              </label>
+                              {BALL_PYTHON_GENE_LOCI[locus].description && (
+                                <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-2 leading-snug flex-1 overflow-hidden">
+                                  {BALL_PYTHON_GENE_LOCI[locus].description}
+                                </p>
+                              )}
+                              <select
+                                value={ballPythonGenotype[locus] || ''}
+                                onChange={(e) => handleBallPythonGeneChange(locus, e.target.value)}
+                                className="w-full p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent mt-auto"
+                              >
+                                <option value="">—</option>
+                                {BALL_PYTHON_GENE_LOCI[locus].combinations.map(combo => (
+                                  <option key={combo} value={combo}>{combo}</option>
+                                ))}
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-4 rounded text-sm text-blue-800 dark:text-blue-300">
+                      <div className="flex items-start gap-2">
+                        <Info size={18} className="flex-shrink-0 mt-0.5" />
+                        <div>
+                          <strong>Tip:</strong> Select the genotype for each gene that applies to your animal.
+                          Leave genes blank if unknown or not applicable. The genetic code is generated automatically.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">Manual Entry</label>
+                      <textarea
+                        value={buildBallPythonGeneticCode(ballPythonGenotype)}
+                        onChange={handleBallPythonManualChange}
+                        placeholder="e.g., Pas/pas Sp/sp pi/pi"
+                        className="w-full p-3 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent font-mono text-sm"
+                        rows="4"
+                      />
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded text-sm text-amber-800 dark:text-amber-300">
+                      <div className="flex items-start gap-2">
+                        <Info size={18} className="flex-shrink-0 mt-0.5" />
+                        <div>
+                          Enter genetic code manually in format: <code className="bg-white dark:bg-dark-card-bg px-1 rounded">Pas/pas Sp/sp pi/pi</code>
                           <br />Use the Visual mode for easier selection with dropdowns.
                         </div>
                       </div>
