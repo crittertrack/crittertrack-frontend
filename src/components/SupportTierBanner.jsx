@@ -57,8 +57,8 @@ const SupportTierBanner = () => {
             className="max-w-xl mx-auto mb-3 cursor-pointer bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-lg shadow-md px-4 py-2 flex items-center justify-between gap-3 hover:from-blue-600 hover:to-blue-800 transition"
         >
             <span>
-                🌰 Did you know you can support CritterTrack? The lowest tier, <strong>Mini Supporter</strong>, is just{' '}
-                <strong>{formatLocalPrice()}/month</strong> — click here to support.
+                Enjoying CritterTrack? Consider supporting development — 🌰 <strong>Mini Supporter</strong> starts at just{' '}
+                <strong>{formatLocalPrice()}/month</strong>.
             </span>
             <button
                 onClick={dismiss}
