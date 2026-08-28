@@ -33,7 +33,7 @@ export const AppearanceTabContent = ({ animal }) => {
                         {animal.coat && !hidden('coat') && <InfoItem label={label('coat', 'Coat')} value={animal.coat} />}
                         {animal.eyeColor && <InfoItem label="Eye Color" value={animal.eyeColor} />}
                         {animal.body && <InfoItem label="Body" value={animal.body} />}
-                        {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
+                        {animal.carrierTraits && <InfoItem label="Carried Genes" value={animal.carrierTraits} />}
                     </div>
                 </InfoCard>
                 <InfoCard title="Genetic Info" icon={<Dna size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
@@ -47,10 +47,10 @@ export const AppearanceTabContent = ({ animal }) => {
                                     </InfoItem>
                                 )}
                                 {carriers.length > 0 && (
-                                    <InfoItem label="Carries" value={carriers.join(', ')} />
+                                    <InfoItem label="Carried Genes" value={carriers.join(', ')} />
                                 )}
                                 {possibleCarriers && possibleCarriers.length > 0 && (
-                                    <InfoItem label="Possible carrier of" value={possibleCarriers.join(', ')} />
+                                    <InfoItem label="Possible Carried Genes" value={possibleCarriers.join(', ')} />
                                 )}
                                 <InfoItem label="Genotype">
                                     <span className="font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</span>

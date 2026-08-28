@@ -367,13 +367,13 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                 )}
                 {result.carriers && result.carriers.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                   </div>
                 )}
                 {hetNotes.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
@@ -445,7 +445,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                           )}
                           {result.carriers && result.carriers.length > 0 && (
                             <div>
-                              <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                              <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                               <div className="text-sm text-blue-700 dark:text-blue-300">
                                 {result.carriers.join(', ')}
                               </div>
@@ -603,13 +603,13 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                 )}
                 {result.carriers && result.carriers.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                   </div>
                 )}
                 {hetNotes.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
@@ -681,7 +681,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                             </div>
                             {result?.carriers && result.carriers.length > 0 && (
                               <div>
-                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                                 <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                               </div>
                             )}
@@ -840,13 +840,13 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                 )}
                 {result.carriers && result.carriers.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                   </div>
                 )}
                 {hetNotes.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
@@ -913,7 +913,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                             </div>
                             {result?.carriers && result.carriers.length > 0 && (
                               <div>
-                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                                 <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                               </div>
                             )}
@@ -1061,13 +1061,13 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                 )}
                 {result.carriers && result.carriers.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                   </div>
                 )}
                 {hetNotes.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
@@ -1134,7 +1134,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                             </div>
                             {result?.carriers && result.carriers.length > 0 && (
                               <div>
-                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                                 <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                               </div>
                             )}
@@ -1279,13 +1279,13 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                 )}
                 {result.carriers && result.carriers.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                   </div>
                 )}
                 {hetNotes.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
@@ -1352,7 +1352,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                             </div>
                             {result?.carriers && result.carriers.length > 0 && (
                               <div>
-                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                                 <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                               </div>
                             )}
@@ -1517,7 +1517,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                 )}
                 {hetNotes.length > 0 && (
                   <div>
-                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carried Genes:</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
@@ -1588,7 +1588,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                             </div>
                             {result?.carriers && result.carriers.length > 0 && (
                               <div>
-                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                                <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carried Genes:</div>
                                 <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
                               </div>
                             )}

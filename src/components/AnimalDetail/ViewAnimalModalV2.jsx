@@ -482,7 +482,7 @@ const ViewAnimalModalV2 = ({
                                                 <InfoItem compact label="Variety">
                                                     {[animal.color, animal.markings, animal.earset, animal.coat, animal.eyeColor, animal.body].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
                                                 </InfoItem>
-                                                <InfoItem compact label="Carries" value={animal.carrierTraits} />
+                                                <InfoItem compact label="Carried Genes" value={animal.carrierTraits} />
                                                 <InfoItem compact label="Genetics">
                                                     {animal.geneticCode && (
                                                         animal.species === 'Ball Python'
