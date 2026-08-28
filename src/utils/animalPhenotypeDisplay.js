@@ -8,18 +8,14 @@ import { matchCampbellsDwarfHamsterPhenotype, CAMPBELLS_DWARF_HAMSTER_POSSIBLE_H
 import { matchRussianDwarfHamsterPhenotype, RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI } from '../data/russianDwarfHamsterPhenotypeRules';
 import { parseBallPythonGeneticCode, matchBallPythonPhenotype, getBallPythonDisplayPhenotype } from '../data/ballPythonPhenotypeRules';
 
-const EMPTY = { phenotype: '', carriers: [] };
+const EMPTY = { phenotype: '', carriers: [], possibleCarriers: [] };
 
-// Appends unconfirmed "possible het" % notes (e.g. "66% Het. Piebald") onto a computed phenotype,
-// matching real-world hobbyist notation. Shared across every species except Ball Python, which has
-// its own getBallPythonDisplayPhenotype (kept as-is for backward compatibility).
-function withPossibleHetNotes(phenotype, possibleHets, hetLociList) {
-  const notes = (possibleHets || [])
+// Formats a rodent's "possible het" entries as plain trait names (no "Het" wording or percentage),
+// kept separate from the computed phenotype string — e.g. "Fuzz" for a "Possible carrier of: Fuzz" note.
+function possibleHetLabels(possibleHets, hetLociList) {
+  return (possibleHets || [])
     .filter(h => h && h.locus && h.percent)
-    .map(h => `${h.percent}% Het. ${hetLociList.find(l => l.locus === h.locus)?.name || h.locus}`);
-  if (notes.length === 0) return phenotype;
-  const base = phenotype ? [phenotype] : [];
-  return [...base, ...notes].join(' ');
+    .map(h => hetLociList.find(l => l.locus === h.locus)?.name || h.locus);
 }
 
 // Returns { phenotype, carriers } for the given animal, or EMPTY if the species/geneticCode isn't supported.
@@ -33,8 +29,9 @@ export function getAnimalPhenotypeDisplay(animal) {
         if (Object.keys(g).length === 0) return EMPTY;
         const result = calculatePhenotype(g, g);
         return {
-          phenotype: withPossibleHetNotes(result?.phenotype || '', animal.possibleHets, MOUSE_POSSIBLE_HET_LOCI),
-          carriers: result?.carriers || []
+          phenotype: result?.phenotype || '',
+          carriers: result?.carriers || [],
+          possibleCarriers: possibleHetLabels(animal.possibleHets, MOUSE_POSSIBLE_HET_LOCI)
         };
       }
       case 'Fancy Rat': {
@@ -42,8 +39,9 @@ export function getAnimalPhenotypeDisplay(animal) {
         if (Object.keys(g).length === 0) return EMPTY;
         const result = matchFancyRatPhenotype(g);
         return {
-          phenotype: withPossibleHetNotes(result?.phenotype || '', animal.possibleHets, RAT_POSSIBLE_HET_LOCI),
-          carriers: result?.carriers || []
+          phenotype: result?.phenotype || '',
+          carriers: result?.carriers || [],
+          possibleCarriers: possibleHetLabels(animal.possibleHets, RAT_POSSIBLE_HET_LOCI)
         };
       }
       case 'Syrian Hamster': {
@@ -51,8 +49,9 @@ export function getAnimalPhenotypeDisplay(animal) {
         if (Object.keys(g).length === 0) return EMPTY;
         const result = matchSyrianHamsterPhenotype(g);
         return {
-          phenotype: withPossibleHetNotes(result?.phenotype || '', animal.possibleHets, SYRIAN_HAMSTER_POSSIBLE_HET_LOCI),
-          carriers: result?.carriers || []
+          phenotype: result?.phenotype || '',
+          carriers: result?.carriers || [],
+          possibleCarriers: possibleHetLabels(animal.possibleHets, SYRIAN_HAMSTER_POSSIBLE_HET_LOCI)
         };
       }
       case 'Campbells Dwarf Hamster': {
@@ -60,8 +59,9 @@ export function getAnimalPhenotypeDisplay(animal) {
         if (Object.keys(g).length === 0) return EMPTY;
         const result = matchCampbellsDwarfHamsterPhenotype(g);
         return {
-          phenotype: withPossibleHetNotes(result?.phenotype || '', animal.possibleHets, CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI),
-          carriers: result?.carriers || []
+          phenotype: result?.phenotype || '',
+          carriers: result?.carriers || [],
+          possibleCarriers: possibleHetLabels(animal.possibleHets, CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI)
         };
       }
       case 'Russian Dwarf Hamster': {
@@ -69,14 +69,15 @@ export function getAnimalPhenotypeDisplay(animal) {
         if (Object.keys(g).length === 0) return EMPTY;
         const result = matchRussianDwarfHamsterPhenotype(g);
         return {
-          phenotype: withPossibleHetNotes(result?.phenotype || '', animal.possibleHets, RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI),
-          carriers: result?.carriers || []
+          phenotype: result?.phenotype || '',
+          carriers: result?.carriers || [],
+          possibleCarriers: possibleHetLabels(animal.possibleHets, RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI)
         };
       }
       case 'Ball Python': {
         const phenotype = getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets);
         const carriers = matchBallPythonPhenotype(parseBallPythonGeneticCode(animal.geneticCode))?.carriers || [];
-        return { phenotype, carriers };
+        return { phenotype, carriers, possibleCarriers: [] };
       }
       default:
         return EMPTY;

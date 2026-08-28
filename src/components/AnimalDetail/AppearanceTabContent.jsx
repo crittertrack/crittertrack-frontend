@@ -39,7 +39,7 @@ export const AppearanceTabContent = ({ animal }) => {
                 </InfoCard>
                 <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {(() => {
-                        const { phenotype, carriers } = getAnimalPhenotypeDisplay(animal);
+                        const { phenotype, carriers, possibleCarriers } = getAnimalPhenotypeDisplay(animal);
                         return (
                             <div className="space-y-3">
                                 {phenotype && (
@@ -49,6 +49,9 @@ export const AppearanceTabContent = ({ animal }) => {
                                 )}
                                 {carriers.length > 0 && (
                                     <InfoItem label="Carries" value={carriers.join(', ')} />
+                                )}
+                                {possibleCarriers && possibleCarriers.length > 0 && (
+                                    <InfoItem label="Possible carrier of" value={possibleCarriers.join(', ')} />
                                 )}
                                 <InfoItem label="Genotype">
                                     <span className="font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</span>
