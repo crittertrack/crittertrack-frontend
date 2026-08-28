@@ -28,6 +28,9 @@ export const SPECIES_CATEGORY_MAP = {
     'Smooth Isopod': 'Invertebrate', 'Stick Insect': 'Invertebrate', 'Tarantula': 'Invertebrate',
     // Invertebrate - casing aliases seen in live data (DB entries don't exactly match the catalogued names)
     'Plum isopod': 'Invertebrate', 'Roly-Poly isopod': 'Invertebrate', 'Pill millipede': 'Invertebrate',
+    // Invertebrate - custom species added by users (baboon spider/tarantula common names)
+    'Bronze baboon': 'Invertebrate', 'kigoma baboon': 'Invertebrate', 'Rear-Horned Baboon': 'Invertebrate',
+    'pumpkin patch': 'Invertebrate',
     // Mammal
     'African Pygmy Dormouse': 'Mammal', 'African Pygmy Mouse': 'Mammal', 'Campbells Dwarf Hamster': 'Mammal',
     'Cat': 'Mammal', 'Chinchilla': 'Mammal', 'Chinese Dwarf Hamster': 'Mammal', 'Deer Mouse': 'Mammal',
@@ -45,6 +48,8 @@ export const SPECIES_CATEGORY_MAP = {
     'Crested Gecko': 'Reptile', 'Eastern Kingsnake': 'Reptile', 'Gargoyle Gecko': 'Reptile',
     'Giant Day Gecko': 'Reptile', 'Leopard Gecko': 'Reptile', 'Pilbara Knobtail Gecko': 'Reptile',
     'Red-Eared Slider': 'Reptile', 'Russian Tortoise': 'Reptile', 'Thicktail Gecko': 'Reptile',
+    // Reptile - custom species added by users
+    'Green iguana': 'Reptile',
     // Other
     'Other': 'Other',
 };
