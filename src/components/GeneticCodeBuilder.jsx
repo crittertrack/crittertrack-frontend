@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
-import { calculatePhenotype, GENE_LOCI, MOUSE_POSSIBLE_HET_LOCI } from './GeneticsCalculator';
+import { calculatePhenotype, GENE_LOCI, MOUSE_POSSIBLE_HET_LOCI, getLastMousePhenotypeBreakdown } from './GeneticsCalculator';
 import { matchFancyRatPhenotype, RAT_GENE_LOCI, RAT_POSSIBLE_HET_LOCI } from '../data/fancyRatPhenotypeRules';
 import { matchSyrianHamsterPhenotype, SYRIAN_HAMSTER_GENE_LOCI, SYRIAN_HAMSTER_POSSIBLE_HET_LOCI } from '../data/syrianHamsterPhenotypeRules';
 import { matchCampbellsDwarfHamsterPhenotype, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI, CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
@@ -234,7 +234,7 @@ export function parseMouseGeneticCode(codeString) {
   return genotype;
 }
 
-const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityForm, possibleHets, onPossibleHetsChange }) => {
+const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityForm, possibleHets, onPossibleHetsChange, onSeedAppearance }) => {
   const [showBuilderModal, setShowBuilderModal] = useState(false);
   const [mode, setMode] = useState('visual'); // 'visual' or 'manual'
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -308,6 +308,23 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     }
   };
   
+  // Small "Seed to Appearance" button shown under the Phenotype/Carries preview box for
+  // rodent species. Copies the categorized breakdown into the Appearance tab's fields.
+  const renderSeedAppearanceButton = (breakdown, carrierTraits) => {
+    if (!onSeedAppearance) return null;
+    return (
+      <div className="pt-1">
+        <button
+          type="button"
+          onClick={() => onSeedAppearance({ ...breakdown, carrierTraits })}
+          className="px-2 py-1 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded transition"
+        >
+          Seed to Appearance
+        </button>
+      </div>
+    );
+  };
+
   // For Fancy Mouse: show button to open builder
   if (species === 'Fancy Mouse') {
     return (
@@ -335,9 +352,10 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
 
           {value && (() => {
             const result = calculatePhenotype(parseMouseGeneticCode(value), parseMouseGeneticCode(value));
+            const breakdown = getLastMousePhenotypeBreakdown();
             const hetNotes = mousePossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `${h.percent}% Het. ${MOUSE_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => `Het. ${MOUSE_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
@@ -359,6 +377,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
+                {renderSeedAppearanceButton(breakdown, (result.carriers || []).join(', '))}
               </div>
             );
           })()}
@@ -569,9 +588,10 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
           </div>
           {value && (() => {
             const result = matchFancyRatPhenotype(parseRatGeneticCode(value));
+            const breakdown = result.breakdown || {};
             const hetNotes = ratPossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `${h.percent}% Het. ${RAT_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => `Het. ${RAT_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
@@ -593,6 +613,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
+                {renderSeedAppearanceButton(breakdown, (result.carriers || []).join(', '))}
               </div>
             );
           })()}
@@ -804,9 +825,10 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
           </div>
           {value && (() => {
             const result = matchSyrianHamsterPhenotype(parseHamsterGeneticCode(value));
+            const breakdown = result.breakdown || {};
             const hetNotes = hamsterPossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `${h.percent}% Het. ${SYRIAN_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => `Het. ${SYRIAN_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
@@ -828,6 +850,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
+                {renderSeedAppearanceButton(breakdown, (result.carriers || []).join(', '))}
               </div>
             );
           })()}
@@ -1023,9 +1046,10 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
           </div>
           {value && (() => {
             const result = matchCampbellsDwarfHamsterPhenotype(parseCampbellsGeneticCode(value));
+            const breakdown = result.breakdown || {};
             const hetNotes = campbellsPossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `${h.percent}% Het. ${CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => `Het. ${CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
@@ -1047,6 +1071,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
+                {renderSeedAppearanceButton(breakdown, (result.carriers || []).join(', '))}
               </div>
             );
           })()}
@@ -1239,9 +1264,10 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
           </div>
           {value && (() => {
             const result = matchRussianDwarfHamsterPhenotype(parseRussianDwarfGeneticCode(value));
+            const breakdown = result.breakdown || {};
             const hetNotes = russianDwarfPossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `${h.percent}% Het. ${RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => `Het. ${RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
@@ -1263,6 +1289,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
+                {renderSeedAppearanceButton(breakdown, (result.carriers || []).join(', '))}
               </div>
             );
           })()}

@@ -584,6 +584,7 @@ const MX_PHENOTYPES = { 'Mx/mx': 'Manx' };
  */
 function applyModifiers(rule, genotype) {
   let phenotype = rule.phenotype;
+  const colorEnd = phenotype.length;
 
   // --- Hooded locus (Self = no marking, skip) ---
   const hLabel = H_PHENOTYPES[genotype.H];
@@ -693,6 +694,7 @@ function applyModifiers(rule, genotype) {
   const hasVelveteen = genotype.Ve === 'Ve/Ve' || genotype.Ve === 'Ve/ve';
   const teddyRex = hasRex && hasVelveteen;
   if (teddyRex) phenotype += ' Teddy Rex';
+  const markingsEnd = phenotype.length;
 
   // --- Coat genes ---
   for (const [locus, map] of Object.entries(COAT_PHENOTYPES)) {
@@ -718,10 +720,12 @@ function applyModifiers(rule, genotype) {
 
   const pwLabel = PW_PHENOTYPES[genotype.pw];
   if (pwLabel) phenotype += ` ${pwLabel}`;
+  const coatEnd = phenotype.length;
 
   // --- Ear type ---
   const duLabel = DU_PHENOTYPES[genotype.Du];
   if (duLabel) phenotype += ` ${duLabel}`;
+  const earEnd = phenotype.length;
 
   // --- Body type ---
   const drLabel = DR_PHENOTYPES[genotype.dr];
@@ -729,6 +733,7 @@ function applyModifiers(rule, genotype) {
 
   const mxLabel = MX_PHENOTYPES[genotype.Mx];
   if (mxLabel) phenotype += ` ${mxLabel}`;
+  const bodyEnd = phenotype.length;
 
   // --- Pearl / Merle (only when m/m present) ---
   if (genotype.M === 'm/m') {
@@ -737,7 +742,17 @@ function applyModifiers(rule, genotype) {
     else if (genotype.Me === 'Me/Me') phenotype += ' Extreme Merle';
   }
 
-  return { ...rule, phenotype };
+  // Categorized breakdown for the "Seed to Appearance" feature — derived via
+  // string-length checkpoints above, without altering any derivation logic.
+  const breakdown = {
+    color: phenotype.slice(0, colorEnd).trim(),
+    markings: `${phenotype.slice(colorEnd, markingsEnd)} ${phenotype.slice(bodyEnd)}`.trim().replace(/\s+/g, ' '),
+    coat: phenotype.slice(markingsEnd, coatEnd).trim(),
+    earset: phenotype.slice(coatEnd, earEnd).trim(),
+    body: phenotype.slice(earEnd, bodyEnd).trim(),
+  };
+
+  return { ...rule, phenotype, breakdown };
 }
 
 // ---------------------------------------------------------------------------

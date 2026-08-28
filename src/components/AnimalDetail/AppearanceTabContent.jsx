@@ -33,7 +33,7 @@ export const AppearanceTabContent = ({ animal }) => {
                         {animal.morph && !hidden('morph') && <InfoItem label="Morph" value={animal.morph} />}
                         {animal.markings && !hidden('markings') && <InfoItem label={label('markings', 'Markings')} value={animal.markings} />}
                         {animal.eyeColor && <InfoItem label="Eye Color" value={animal.eyeColor} />}
-                        {animal.size && <InfoItem label="Size" value={animal.size} />}
+                        {animal.body && <InfoItem label="Body" value={animal.body} />}
                         {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
                     </div>
                 </InfoCard>

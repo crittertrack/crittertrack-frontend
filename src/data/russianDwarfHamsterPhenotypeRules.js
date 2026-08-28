@@ -185,16 +185,23 @@ export function matchRussianDwarfHamsterPhenotype(genotype) {
     return { phenotype: 'LETHAL (Wh/Wh)', carriers: getRussianDwarfHamsterCarriers(genotype), notes: [] };
   }
 
-  let phenotype = computeBasePhenotype(genotype);
-  phenotype = applyPearl(phenotype, genotype);
+  const colorPart = computeBasePhenotype(genotype);
+  let phenotype = applyPearl(colorPart, genotype);
   phenotype = applyMerle(phenotype, genotype);
   phenotype = applyUmbrous(phenotype, genotype);
   phenotype = applyRubyEyedMottled(phenotype, genotype);
   phenotype = applyPied(phenotype, genotype);
   phenotype = applyImperial(phenotype, genotype);
+  const markingsPart = phenotype.slice(colorPart.length).trim();
+  const beforeCoat = phenotype;
   phenotype = applyCoatGenes(phenotype, genotype);
+  const coatPart = phenotype.slice(beforeCoat.length).trim();
 
-  return { phenotype, carriers: getRussianDwarfHamsterCarriers(genotype), notes: [] };
+  // Categorized breakdown for the "Seed to Appearance" feature, derived from
+  // the same sequential build above (no change to the derivation logic).
+  const breakdown = { color: colorPart, markings: markingsPart, coat: coatPart, body: '' };
+
+  return { phenotype, carriers: getRussianDwarfHamsterCarriers(genotype), notes: [], breakdown };
 }
 
 // ---------------------------------------------------------------------------

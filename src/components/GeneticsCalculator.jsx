@@ -241,8 +241,19 @@ const calculatePhenotypeDynamic = (genotype, geneLociData) => {
   };
 };
 
+// Categorized breakdown (color/markings/coat) for the last calculatePhenotype()
+// call — used by the "Seed to Appearance" feature. Mouse's phenotype string is
+// built via ~50 early-return branches that all funnel through
+// addMarkingsAndTexture(), so rather than touching every return site, that
+// function stashes its computed fragments here as a side effect. Safe in
+// practice: calculatePhenotype() is synchronous and never called concurrently
+// with itself in this single-threaded UI.
+let lastMousePhenotypeBreakdown = { color: '', markings: '', coat: '', body: '' };
+export const getLastMousePhenotypeBreakdown = () => lastMousePhenotypeBreakdown;
+
 // Calculate phenotype from genotype
 const calculatePhenotype = (genotype, originalGenotype = null) => {
+  lastMousePhenotypeBreakdown = { color: '', markings: '', coat: '', body: '' };
   // Parse allele combinations
   const parsed = {};
   Object.keys(GENE_LOCI).forEach(locus => {
@@ -410,7 +421,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Helper function to add markings to phenotype
   const addMarkingsAndTexture = (phenotype) => {
-    if (phenotype === 'Albino') return phenotype;
+    lastMousePhenotypeBreakdown.color = phenotype;
+    if (phenotype === 'Albino') { lastMousePhenotypeBreakdown.markings = ''; lastMousePhenotypeBreakdown.coat = ''; return phenotype; }
     
     let result = phenotype;
     
@@ -470,6 +482,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       if (hasFuzz) textureComponents.push('Fuzz');
     }
     
+    // Capture the markings fragment added so far (before texture) for the
+    // categorized breakdown, applying the same Tricolor swap it will get below.
+    let markingsAdded = result.slice(phenotype.length).trim();
+    if (markingsAdded.includes('Splashed') && markingsAdded.includes('Pied')) {
+      markingsAdded = markingsAdded.replace('Splashed', 'Tricolor').replace('Pied', '').replace(/\s+/g, ' ').trim();
+    }
+    lastMousePhenotypeBreakdown.markings = markingsAdded;
+    lastMousePhenotypeBreakdown.coat = textureComponents.join(' ');
+
     if (textureComponents.length > 0) {
       result += ' ' + textureComponents.join(' ');
     }

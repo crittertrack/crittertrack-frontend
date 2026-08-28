@@ -293,12 +293,19 @@ export function matchSyrianHamsterPhenotype(genotype) {
     return { phenotype: 'LETHAL (Lg/Lg)', carriers: getSyrianHamsterCarriers(genotype), notes: [] };
   }
 
-  let phenotype = computeBasePhenotype(genotype);
-  phenotype = applyMarkings(phenotype, genotype);
+  const colorPart = computeBasePhenotype(genotype);
+  let phenotype = applyMarkings(colorPart, genotype);
+  const markingsPart = phenotype.slice(colorPart.length).trim();
   const notes = [];
+  const beforeCoat = phenotype;
   phenotype = applyCoatGenes(phenotype, genotype, notes);
+  const coatPart = phenotype.slice(beforeCoat.length).trim();
 
-  return { phenotype, carriers: getSyrianHamsterCarriers(genotype), notes };
+  // Categorized breakdown for the "Seed to Appearance" feature, derived from
+  // the same sequential build above (no change to the derivation logic).
+  const breakdown = { color: colorPart, markings: markingsPart, coat: coatPart, body: '' };
+
+  return { phenotype, carriers: getSyrianHamsterCarriers(genotype), notes, breakdown };
 }
 
 // ---------------------------------------------------------------------------

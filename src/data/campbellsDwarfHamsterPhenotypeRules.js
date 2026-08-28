@@ -187,11 +187,19 @@ export function matchCampbellsDwarfHamsterPhenotype(genotype) {
 
   let phenotype = computeBasePhenotype(genotype);
   phenotype = applyDilutePrefix(phenotype, genotype);
+  const colorPart = phenotype;
   phenotype = applyUmbrous(phenotype, genotype);
   phenotype = applyMottled(phenotype, genotype);
+  const markingsPart = phenotype.slice(colorPart.length).trim();
+  const beforeCoat = phenotype;
   phenotype = applyCoatGenes(phenotype, genotype);
+  const coatPart = phenotype.slice(beforeCoat.length).trim();
 
-  return { phenotype, carriers: getCampbellsDwarfHamsterCarriers(genotype), notes: [] };
+  // Categorized breakdown for the "Seed to Appearance" feature, derived from
+  // the same sequential build above (no change to the derivation logic).
+  const breakdown = { color: colorPart, markings: markingsPart, coat: coatPart, body: '' };
+
+  return { phenotype, carriers: getCampbellsDwarfHamsterCarriers(genotype), notes: [], breakdown };
 }
 
 // ---------------------------------------------------------------------------
