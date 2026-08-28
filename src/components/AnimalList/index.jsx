@@ -3273,7 +3273,7 @@ useEffect(() => {
 
     // -- Shared Management Components ------------------------------------------
     // All appearance fields that make up "Variety" — same set as Tab 3 / Appearance section
-    const VARIETY_KEYS = ['color', 'markings', 'earset', 'morph', 'coat', 'eyeColor', 'carrierTraits', 'body'];
+    const VARIETY_KEYS = ['color', 'markings', 'earset', 'coat', 'eyeColor', 'carrierTraits', 'body'];
     const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
 
     const MgmtAnimalCard = ({ animal, extras, middleContent }) => (
@@ -3546,7 +3546,7 @@ useEffect(() => {
                                                         <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
                                                             {colAnimals.map(animal => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
+                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                                                 const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
@@ -3640,7 +3640,7 @@ useEffect(() => {
                                                         <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
                                                             {uncategorized.map(animal => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
+                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                                                 const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
@@ -6448,7 +6448,7 @@ useEffect(() => {
                                 return displayedAnimalsForList.map(animal => {
                                     const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
                                     const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                    const varietyStr = [animal.color, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
+                                    const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
                                     const assignedIds = animalBreedingLines[animal.id_public] || [];
                                     const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
 

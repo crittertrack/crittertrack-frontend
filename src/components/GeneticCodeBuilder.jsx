@@ -1521,6 +1521,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
                   </div>
                 )}
+                {renderSeedAppearanceButton({ color: displayName || '' }, hetNotes.join(', '))}
               </div>
             );
           })()}

@@ -269,7 +269,7 @@ const ANIMAL_RECORD_TAB_LESSONS = [
       {
         stepNumber: 1,
         title: 'Appearance fields',
-        content: 'Color, Coat Type, Morph, Markings, Eye Color, Size, and Carrier Traits are free text so you can describe your animal however your species/hobby community does. A few fields are species-specific and only appear when relevant — e.g. Earset only shows up for Rats.',
+        content: 'Color, Coat Type, Markings, Eye Color, Size, and Carrier Traits are free text so you can describe your animal however your species/hobby community does. A few fields are species-specific and only appear when relevant — e.g. Earset only shows up for Rats.',
       },
       {
         stepNumber: 2,

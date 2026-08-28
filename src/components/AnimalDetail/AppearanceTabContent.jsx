@@ -27,10 +27,9 @@ export const AppearanceTabContent = ({ animal }) => {
         <div className="space-y-6">
                 <InfoCard title="Appearance" icon={<Palette size={18} />}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {animal.color && <InfoItem label="Color" value={animal.color} />}
+                        {animal.color && <InfoItem label={label('color', 'Color')} value={animal.color} />}
                         {animal.markings && !hidden('markings') && <InfoItem label={label('markings', 'Markings')} value={animal.markings} />}
                         {animal.earset && !hidden('earset') && <InfoItem label="Earset" value={animal.earset} />}
-                        {animal.morph && !hidden('morph') && <InfoItem label="Morph" value={animal.morph} />}
                         {animal.coat && !hidden('coat') && <InfoItem label={label('coat', 'Coat')} value={animal.coat} />}
                         {animal.eyeColor && <InfoItem label="Eye Color" value={animal.eyeColor} />}
                         {animal.body && <InfoItem label="Body" value={animal.body} />}

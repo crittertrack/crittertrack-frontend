@@ -66,7 +66,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
         'pedigreeRegistrationId', 'tattooId', 'exerciseRequirements', 'dailyExerciseMinutes', 'trainingLevel',
         'trainingDisciplines', 'certifications', 'workingRole', 'workingRoleTrainingSchedule',
         'behavioralIssueTrainingSchedule', 'reactivityTrainingSchedule', 'exerciseSchedule', 'attachmentStyle',
-        'bondingBehavior',
+        'bondingBehavior', // no live entries for this category
     ],
     Bird: [
         'earset', 'heightAtWithers', 'eartagNumber', 'heatStatus', 'lastHeatDate', 'estrusCycleLength',
@@ -84,7 +84,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
         'pedigreeRegistrationId', 'tattooId', 'studFeeCurrency', 'studFeeAmount', 'exerciseRequirements',
         'dailyExerciseMinutes', 'trainingLevel', 'trainingDisciplines', 'certifications', 'workingRole',
         'workingRoleTrainingSchedule', 'behavioralIssueTrainingSchedule', 'reactivityTrainingSchedule',
-        'exerciseSchedule', 'attachmentStyle', 'bondingBehavior',
+        'exerciseSchedule', 'attachmentStyle', 'bondingBehavior', // no live entries for this category
     ],
     Invertebrate: [
         'earset', 'heightAtWithers', 'eartagNumber', 'microchipNumber', 'heatStatus', 'lastHeatDate',
@@ -101,7 +101,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
     ],
     Mammal: [
         'sheddingRecords', 'moltingRecords', 'waterParameterChecks', 'freeFlightTrained',
-        'flightRiskTrainingSchedule', 'morph',
+        'flightRiskTrainingSchedule',
     ],
     Reptile: [
         'earset', 'heightAtWithers', 'eartagNumber', 'heatStatus', 'lastHeatDate', 'estrusCycleLength',
@@ -131,6 +131,7 @@ const SPECIES_LABEL_OVERRIDES = {
 
 // Field label overrides by category - same underlying data slot, different display label.
 export const FIELD_LABEL_OVERRIDES = {
+    color: { Reptile: 'Morph', Amphibian: 'Morph', Fish: 'Morph', Invertebrate: 'Morph' },
     coat: { Reptile: 'Scalation', Bird: 'Plumage', Amphibian: 'Skin', Fish: 'Skin', Invertebrate: 'Coloring' },
     markings: { Reptile: 'Scale Pattern', Bird: 'Plumage Pattern', Amphibian: 'Skin Pattern', Fish: 'Skin Pattern', Invertebrate: 'Skin Pattern' },
     breed: { Amphibian: 'Subspecies', Invertebrate: 'Subspecies', Reptile: 'Subspecies' },

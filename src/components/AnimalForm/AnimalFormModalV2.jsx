@@ -25,7 +25,7 @@ import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
 
 // Appearance fields that use the per-user/per-species dropdown-with-custom-entry pattern
 // (see appearanceOptionsMap / ComboBoxField below).
-const APPEARANCE_DROPDOWN_FIELDS = ['color', 'markings', 'coat', 'earset', 'morph', 'eyeColor', 'body'];
+const APPEARANCE_DROPDOWN_FIELDS = ['color', 'markings', 'coat', 'earset', 'eyeColor', 'body'];
 
 const getSpeciesCategory = (species) => {
     if (!species) return 'Other';
@@ -2418,7 +2418,6 @@ const AnimalFormModalV2 = ({
             eartagNumber: animalToEdit.eartagNumber || '',
             breed: animalToEdit.breed || '',
             strain: animalToEdit.strain || '',
-            morph: animalToEdit.morph || '',
             markings: animalToEdit.markings || '',
             eyeColor: animalToEdit.eyeColor || '',
             body: animalToEdit.body || '',
@@ -2594,7 +2593,6 @@ const AnimalFormModalV2 = ({
             colonyId: '',
             breed: '',
             strain: '',
-            morph: '',
             markings: '',
             eyeColor: '',
             size: '',
@@ -3333,7 +3331,7 @@ const AnimalFormModalV2 = ({
     // Pedigree helper functions
     const mpEmptySlot = () => ({ mode: 'ctc', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
     const mpToSlot = (a) => {
-        const variety = ['color','coat','earset','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+        const variety = ['color','coat','earset','markings'].map(k => a[k]).filter(Boolean).join(' ');
         return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
     };
     const mpFetchByCtc = async (id) => {
@@ -3373,7 +3371,7 @@ const AnimalFormModalV2 = ({
         const pedigree = animalToEdit?.manualPedigree || {};
 
         const toSlot = (a, notes = '') => {
-            const variety = ['color','coat','earset','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
+            const variety = ['color','coat','earset','markings'].map(f => a[f]).filter(Boolean).join(' ');
             return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes };
         };
 
@@ -4183,7 +4181,7 @@ const AnimalFormModalV2 = ({
                                 <FormSection title="Appearance" icon={<Palette size={16} />} initiallyOpen>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Color</label>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">{fieldLabel('color', 'Color')}</label>
                                             <ComboBoxField
                                                 value={formData.color || ''}
                                                 onChange={(v) => setFormData(p => ({ ...p, color: v }))}
@@ -4219,15 +4217,6 @@ const AnimalFormModalV2 = ({
                                                 />
                                             </div>
                                         )}
-                                        {!hiddenField('morph') && <div>
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Morph</label>
-                                            <ComboBoxField
-                                                value={formData.morph || ''}
-                                                onChange={(v) => setFormData(p => ({ ...p, morph: v }))}
-                                                options={appearanceOptionsMap.morph}
-                                                placeholder="Mutation/Morph"
-                                            />
-                                        </div>}
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Eye Color</label>
                                             <ComboBoxField
