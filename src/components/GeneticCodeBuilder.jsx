@@ -10,11 +10,11 @@ import { matchBallPythonPhenotype, BALL_PYTHON_GENE_LOCI, getBallPythonComboLabe
 // Shared "Possible Hets" (unconfirmed/probability-based carrier) editor used across every species'
 // genetic code builder modal. Lets a breeder note e.g. "66% Het. Clown" without asserting a
 // confirmed genotype.
-function PossibleHetsEditor({ possibleHets, lociList, onAdd, onChange, onRemove }) {
+function PossibleHetsEditor({ possibleHets, lociList, onAdd, onChange, onRemove, title = 'Possible Hets' }) {
   return (
     <div className="bg-white dark:bg-dark-surface p-4 rounded border border-gray-200 dark:border-dark-border">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">Possible Hets</h3>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text">{title}</h3>
         <button
           type="button"
           onClick={onAdd}
@@ -24,7 +24,7 @@ function PossibleHetsEditor({ possibleHets, lociList, onAdd, onChange, onRemove 
         </button>
       </div>
       <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-3">
-        Unconfirmed carrier status (e.g. from a Het. x Het. pairing) — not a confirmed genotype, just a breeding-record note like "66% Het. Clown".
+        Unconfirmed carrier status (e.g. from a Het. x Het. pairing) — not a confirmed genotype, just a breeding-record note like "Het. Blue".
       </p>
       {possibleHets.length === 0 ? (
         <p className="text-sm text-gray-400 dark:text-dark-text-muted">None added.</p>
@@ -39,15 +39,6 @@ function PossibleHetsEditor({ possibleHets, lociList, onAdd, onChange, onRemove 
               >
                 {lociList.map(({ locus, name }) => (
                   <option key={locus} value={locus}>{name}</option>
-                ))}
-              </select>
-              <select
-                value={entry.percent}
-                onChange={(e) => onChange(index, 'percent', e.target.value)}
-                className="w-28 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text focus:ring-accent focus:border-accent"
-              >
-                {[100, 66, 50, 25].map(p => (
-                  <option key={p} value={p}>{p}%</option>
                 ))}
               </select>
               <button
@@ -83,7 +74,7 @@ function removePossibleHetEntry(setter, index) {
   setter(prev => prev.filter((_, i) => i !== index));
 }
 
-const RAT_GENE_ORDER = ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'Dw', 'H', 'Hs', 'Ma', 'Ro', 'Sf', 'Wh', 'Ws', 'Re', 'Ve', 'Sm', 'Lu', 'Sy', 'Sk', 'hr', 'hrl', 'sa', 'nz', 'fz', 'pw', 'Du', 'dr', 'Mx'];
+const RAT_GENE_ORDER = ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'Mo', 'P', 'Pe', 'R', 'Me', 'Dal', 'Dw', 'H', 'Hs', 'Ma', 'Ro', 'Sf', 'Wh', 'Ws', 'Re', 'Ve', 'Sm', 'Lu', 'Sy', 'Sk', 'hr', 'hrl', 'sa', 'nz', 'fz', 'pw', 'Du', 'dr', 'Mx'];
 
 export function parseRatGeneticCode(codeString) {
   if (!codeString) return {};
@@ -431,6 +422,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                   <PossibleHetsEditor
                     possibleHets={mousePossibleHets}
                     lociList={MOUSE_POSSIBLE_HET_LOCI}
+                    title="Possible Carried Genes"
                     onAdd={() => addPossibleHetEntry(setMousePossibleHets, MOUSE_POSSIBLE_HET_LOCI)}
                     onChange={(index, field, val) => changePossibleHetEntry(setMousePossibleHets, index, field, val)}
                     onRemove={(index) => removePossibleHetEntry(setMousePossibleHets, index)}
@@ -509,7 +501,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   // For Fancy Rat: full visual builder (mirrors Fancy Mouse)
   if (species === 'Fancy Rat') {
     const RAT_GENE_GROUPS = [
-      { label: 'Color Genes',   loci: ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me'] },
+      { label: 'Color Genes',   loci: ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'Mo', 'P', 'Pe', 'R', 'Me'] },
       { label: 'Marking Genes', loci: ['Dal', 'Dw', 'H', 'Hs', 'Ma', 'Ro', 'Sf', 'Wh', 'Ws'] },
       { label: 'Coat Genes',    loci: ['Re', 'Ve', 'Sm', 'Lu', 'Sy', 'Sk', 'hr', 'hrl', 'sa', 'nz', 'fz', 'pw'] },
       { label: 'Ear Type',      loci: ['Du'] },
@@ -625,6 +617,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <PossibleHetsEditor
                       possibleHets={ratPossibleHets}
                       lociList={RAT_POSSIBLE_HET_LOCI}
+                      title="Possible Carried Genes"
                       onAdd={() => addPossibleHetEntry(setRatPossibleHets, RAT_POSSIBLE_HET_LOCI)}
                       onChange={(index, field, val) => changePossibleHetEntry(setRatPossibleHets, index, field, val)}
                       onRemove={(index) => removePossibleHetEntry(setRatPossibleHets, index)}
@@ -825,6 +818,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <PossibleHetsEditor
                       possibleHets={hamsterPossibleHets}
                       lociList={SYRIAN_HAMSTER_POSSIBLE_HET_LOCI}
+                      title="Possible Carried Genes"
                       onAdd={() => addPossibleHetEntry(setHamsterPossibleHets, SYRIAN_HAMSTER_POSSIBLE_HET_LOCI)}
                       onChange={(index, field, val) => changePossibleHetEntry(setHamsterPossibleHets, index, field, val)}
                       onRemove={(index) => removePossibleHetEntry(setHamsterPossibleHets, index)}
@@ -1011,6 +1005,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <PossibleHetsEditor
                       possibleHets={campbellsPossibleHets}
                       lociList={CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI}
+                      title="Possible Carried Genes"
                       onAdd={() => addPossibleHetEntry(setCampbellsPossibleHets, CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI)}
                       onChange={(index, field, val) => changePossibleHetEntry(setCampbellsPossibleHets, index, field, val)}
                       onRemove={(index) => removePossibleHetEntry(setCampbellsPossibleHets, index)}
@@ -1197,6 +1192,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <PossibleHetsEditor
                       possibleHets={russianDwarfPossibleHets}
                       lociList={RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI}
+                      title="Possible Carried Genes"
                       onAdd={() => addPossibleHetEntry(setRussianDwarfPossibleHets, RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI)}
                       onChange={(index, field, val) => changePossibleHetEntry(setRussianDwarfPossibleHets, index, field, val)}
                       onRemove={(index) => removePossibleHetEntry(setRussianDwarfPossibleHets, index)}

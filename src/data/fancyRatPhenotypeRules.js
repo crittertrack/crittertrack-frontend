@@ -491,6 +491,7 @@ const WS_PHENOTYPES = {
 // Ro and Wh are recessive — only express when homozygous recessive
 const RO_PHENOTYPES  = { 'ro/ro': 'Roan (Husky)' };
 const WH_PHENOTYPES  = { 'wh/wh': 'Whiteside' };
+const HS_PHENOTYPES  = { 'hs/hs': 'Headspot' };
 
 // Sf (Snowflake) — recessive, simply appends to whatever marking phenotype already exists, no compounds
 const SF_PHENOTYPES  = { 'sf/sf': 'Snowflake' };
@@ -678,6 +679,7 @@ function applyModifiers(rule, genotype) {
   else if (wsLabel) phenotype += ` ${wsLabel}`;
 
   if (hsCompound) phenotype += ` ${hsCompound}`;
+  else if (HS_PHENOTYPES[genotype.Hs]) phenotype += ` ${HS_PHENOTYPES[genotype.Hs]}`;
 
   const dwLabel = DW_PHENOTYPES[genotype.Dw];
   if (dwCompound) phenotype += ` ${dwCompound}`;
@@ -825,6 +827,7 @@ const SIMPLE_RECESSIVE_CARRIERS = {
   D: { het: 'D/d', trait: 'Russian Blue' },
   G: { het: 'G/g', trait: 'American Blue' },
   M: { het: 'M/m', trait: 'Mink' },
+  Mo: { het: 'Mo/mo', trait: 'Mock Mink' },
   P: { het: 'P/p', trait: 'Champagne' },
   R: { het: 'R/r', trait: 'Beige' },
   Ro: { het: 'Ro/ro', trait: 'Roan' },
@@ -892,6 +895,12 @@ export function matchFancyRatPhenotype(genotype) {
   return { ...result, carriers: getFancyRatCarriers(genotype) };
 }
 
+// Mo (Mock Mink) is a separate, non-complementary locus that phenocopies Mink/Cinnamon —
+// treat mo/mo as M's m/m for phenotype-matching purposes only (carrier detection stays separate).
+function withMockMinkPhenocopy(genotype) {
+  return genotype.Mo === 'mo/mo' ? { ...genotype, M: 'm/m' } : genotype;
+}
+
 function computeBasePhenotype(genotype) {
   // Bu (Burmese) derivation must run before the generic C-locus rules below —
   // those rules don't check Bu and would otherwise swallow every Bu match.
@@ -934,7 +943,7 @@ function computeBasePhenotype(genotype) {
 }
 
 function matchFancyRatPhenotypeCore(genotype) {
-  const base = computeBasePhenotype(genotype);
+  const base = computeBasePhenotype(withMockMinkPhenocopy(genotype));
   if (!base) return null;
 
   const isBe = genotype.Be === 'Be/be' || genotype.Be === 'Be/Be';
@@ -964,6 +973,7 @@ export const RAT_GENE_LOCI = {
   D:   { name: 'Dilute (Russian Blue)', description: 'd/d = Russian Blue (Black) or Russian Blue Agouti', combinations: ['D/D', 'D/d', 'd/d'] },
   G:   { name: 'Gray (American Blue)', description: 'g/g = American Blue (Black) or Opal (Agouti)', combinations: ['G/G', 'G/g', 'g/g'] },
   M:   { name: 'Mink',                description: 'm/m = Mink (Black) or Cinnamon (Agouti). Required for Pearl/Merle to express.', combinations: ['M/M', 'M/m', 'm/m'] },
+  Mo:  { name: 'Mock Mink',           description: 'Recessive, separate locus from Mink (M). mo/mo is visually identical to Mink/Cinnamon but does not complement with M — a non-carrier at M paired with mo/mo still shows Mink/Cinnamon.', combinations: ['Mo/Mo', 'Mo/mo', 'mo/mo'] },
   P:   { name: 'Pink-eyed Dilution',  description: 'p/p = Champagne (Black) or Amber (Agouti)', combinations: ['P/P', 'P/p', 'p/p'] },
   Pe:  { name: 'Pearl',               description: 'Pe/pe appends Pearl when m/m present. Pe/Pe is lethal.', combinations: ['Pe/Pe', 'Pe/pe', 'pe/pe'] },
   R:   { name: 'Red-eye Dilution',    description: 'r/r = Beige (Black) or Topaz (Agouti)', combinations: ['R/R', 'R/r', 'r/r'] },

@@ -149,9 +149,9 @@ function applyCoatGenes(phenotype, genotype) {
 
 const SIMPLE_RECESSIVE_CARRIERS = {
   a:  { het: 'A/a', trait: 'Black' },
-  d:  { het: 'D/d', trait: 'Sapphire/Russian Blue' },
-  p:  { het: 'P/p', trait: 'Yellow Agouti/Dove' },
-  m:  { het: 'M/m', trait: 'Brown/Chocolate' },
+  d:  { het: 'D/d', trait: 'Sapphire' },
+  p:  { het: 'P/p', trait: 'Dove' },
+  m:  { het: 'M/m', trait: 'Chocolate' },
   s:  { het: 'S/s', trait: 'Pied' },
   rx: { het: 'Rx/rx', trait: 'Rex' },
   sa: { het: 'Sa/sa', trait: 'Satin' },
@@ -205,9 +205,9 @@ export function matchRussianDwarfHamsterPhenotype(genotype) {
 export const RUSSIAN_DWARF_HAMSTER_GENE_LOCI = {
   // --- Color genes ---
   a:  { name: 'Black/Agouti',   description: 'A/- = Agouti, a/a = Black.', combinations: ['A/A', 'A/a', 'a/a'] },
-  d:  { name: 'Sapphire/Russian Blue (Dilution)', description: 'Recessive. d/d = Sapphire (Agouti base) or Russian Blue (Black base).', combinations: ['D/D', 'D/d', 'd/d'] },
-  p:  { name: 'Yellow Agouti/Dove (Pink Eye Dilute)', description: 'Recessive. p/p = Yellow Agouti (Agouti base) or Dove (Black base).', combinations: ['P/P', 'P/p', 'p/p'] },
-  m:  { name: 'Brown/Chocolate', description: 'Recessive. m/m = Brown (Agouti base) or Chocolate (Black base).', combinations: ['M/M', 'M/m', 'm/m'] },
+  d:  { name: 'Sapphire (Dilution)', description: 'Recessive. d/d = Sapphire (Agouti base) or Russian Blue (Black base).', combinations: ['D/D', 'D/d', 'd/d'] },
+  p:  { name: 'Dove (Pink Eye Dilute)', description: 'Recessive. p/p = Yellow Agouti (Agouti base) or Dove (Black base).', combinations: ['P/P', 'P/p', 'p/p'] },
+  m:  { name: 'Chocolate', description: 'Recessive. m/m = Brown (Agouti base) or Chocolate (Black base).', combinations: ['M/M', 'M/m', 'm/m'] },
   ma: { name: 'Mandarin', description: 'Dominant. Ma/ma or Ma/Ma overrides the base color entirely with its own named series (Mandarin, Camel, Pink Eyed Mandarin, etc.), regardless of A/a.', combinations: ['ma/ma', 'Ma/ma', 'Ma/Ma'] },
   // --- Pattern/marking genes ---
   pe: { name: 'Pearl', description: 'Dominant. Pe/pe or Pe/Pe = " Pearl" suffix onto the base color.', combinations: ['pe/pe', 'Pe/pe', 'Pe/Pe'] },

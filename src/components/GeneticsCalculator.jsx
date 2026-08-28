@@ -1998,8 +1998,18 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
         activeHetEntries.forEach((entry, i) => {
           const combos = geneLoci[entry.locus]?.combinations || [];
-          const wildtype = combos[0];
-          const het = combos[1];
+          // Find wildtype (homozygous dominant) and het combos by allele case rather than array
+          // position — different species order their combinations arrays differently (e.g. Ball
+          // Python lists wildtype first, Fancy Mouse lists the recessive mutant first).
+          const wildtype = combos.find(c => {
+            const [a, b] = c.split('/');
+            return a === b && a[0] === a[0].toUpperCase();
+          });
+          const het = combos.find(c => {
+            const [a, b] = c.split('/');
+            if (a === b) return false;
+            return (a[0] === a[0].toUpperCase()) !== (b[0] === b[0].toUpperCase());
+          });
           const isCarrierBranch = (mask >> i) & 1;
           const p = Math.min(Math.max(entry.percent, 0), 100) / 100;
           branchProbability *= isCarrierBranch ? p : (1 - p);
@@ -2634,7 +2644,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           {possibleHetLoci.length > 0 && (
             <div className="mt-2 p-2 bg-white dark:bg-dark-card-bg rounded-lg border border-blue-300 dark:border-blue-700/60">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Possible Hets</span>
+                <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">{['Fancy Mouse', 'Fancy Rat', 'Syrian Hamster', 'Campbells Dwarf Hamster', 'Russian Dwarf Hamster'].includes(selectedSpecies) ? 'Possible Carried Genes' : 'Possible Hets'}</span>
                 <button
                   type="button"
                   onClick={() => addPossibleHet(setParent1PossibleHets, possibleHetLoci)}
@@ -2658,14 +2668,18 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                           <option key={l.locus} value={l.locus}>{l.name}</option>
                         ))}
                       </select>
-                      <input
-                        type="number"
-                        min="1"
-                        max="100"
-                        value={entry.percent}
-                        onChange={(e) => changePossibleHet(setParent1PossibleHets, index, 'percent', e.target.value)}
-                        className="w-14 px-1 py-0.5 text-xs border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
-                      />
+                      {selectedSpecies === 'Ball Python' ? (
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={entry.percent}
+                          onChange={(e) => changePossibleHet(setParent1PossibleHets, index, 'percent', e.target.value)}
+                          className="w-14 px-1 py-0.5 text-xs border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                        />
+                      ) : (
+                        <span className="w-14 text-xs text-gray-600 dark:text-dark-text-secondary">50</span>
+                      )}
                       <span className="text-xs text-gray-500 dark:text-dark-text-muted">%</span>
                       <button type="button" onClick={() => removePossibleHet(setParent1PossibleHets, index)} className="text-xs text-red-600 hover:text-red-800 px-1">✕</button>
                       {parent1[entry.locus] && (
@@ -2757,7 +2771,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           {possibleHetLoci.length > 0 && (
             <div className="mt-2 p-2 bg-white dark:bg-dark-card-bg rounded-lg border border-pink-300 dark:border-pink-700/60">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Possible Hets</span>
+                <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">{['Fancy Mouse', 'Fancy Rat', 'Syrian Hamster', 'Campbells Dwarf Hamster', 'Russian Dwarf Hamster'].includes(selectedSpecies) ? 'Possible Carried Genes' : 'Possible Hets'}</span>
                 <button
                   type="button"
                   onClick={() => addPossibleHet(setParent2PossibleHets, possibleHetLoci)}
@@ -2781,14 +2795,18 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                           <option key={l.locus} value={l.locus}>{l.name}</option>
                         ))}
                       </select>
-                      <input
-                        type="number"
-                        min="1"
-                        max="100"
-                        value={entry.percent}
-                        onChange={(e) => changePossibleHet(setParent2PossibleHets, index, 'percent', e.target.value)}
-                        className="w-14 px-1 py-0.5 text-xs border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
-                      />
+                      {selectedSpecies === 'Ball Python' ? (
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={entry.percent}
+                          onChange={(e) => changePossibleHet(setParent2PossibleHets, index, 'percent', e.target.value)}
+                          className="w-14 px-1 py-0.5 text-xs border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                        />
+                      ) : (
+                        <span className="w-14 text-xs text-gray-600 dark:text-dark-text-secondary">50</span>
+                      )}
                       <span className="text-xs text-gray-500 dark:text-dark-text-muted">%</span>
                       <button type="button" onClick={() => removePossibleHet(setParent2PossibleHets, index)} className="text-xs text-red-600 hover:text-red-800 px-1">✕</button>
                       {parent2[entry.locus] && (
