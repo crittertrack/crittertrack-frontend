@@ -662,6 +662,49 @@ export function getBallPythonCarriers(genotype) {
   return carriers;
 }
 
+/**
+ * Human-readable label for a single locus+combination, matching real-world
+ * ball python hobby convention (e.g. "Het Clown" instead of "Cl/cl", plain
+ * "Pastel" instead of "Pas/pas" for Incomplete Dominant genes since a single
+ * copy is already visually the named morph). Purely a display helper — the
+ * underlying stored genotype value/parsing is untouched.
+ */
+export function getBallPythonComboLabel(locus, combo) {
+  const noTrait = `No ${BALL_PYTHON_GENE_LOCI[locus]?.name || locus}`;
+
+  if (locus === 'cinBp') return BLACK_COMPLEX_NAMES[combo] || noTrait;
+  if (locus === 'albCdy') {
+    return ALBINO_COMPLEX_NAMES[combo] || (ALBINO_COMPLEX_CARRIERS[combo] ? `Het ${ALBINO_COMPLEX_CARRIERS[combo]}` : noTrait);
+  }
+  if (locus === 'lacGhi') return LACE_GHI_NAMES[combo] || noTrait;
+  if (locus === 'cha') return combo === 'Cha/cha' ? 'Champagne' : noTrait;
+  if (locus === 'sp') return (combo === 'Sp/sp' || combo === 'Sp/Sp') ? 'Spider' : noTrait;
+
+  const belMember = BEL_COMPLEX_MEMBERS.find((m) => m.locus === locus);
+  if (belMember) {
+    if (combo === `${belMember.symbol}/${belMember.symbol}`) return `Super ${belMember.name}`;
+    if (combo === `${belMember.symbol}/${belMember.locus}`) return belMember.name;
+    return noTrait;
+  }
+
+  const idRule = SIMPLE_INCOMPLETE_DOMINANT_RULES.find((r) => r.locus === locus);
+  if (idRule) {
+    if (combo === idRule.homo) return idRule.homoName;
+    if (combo === idRule.het) return idRule.hetName;
+    return noTrait;
+  }
+
+  const recRule = RECESSIVE_RULES.find((r) => r.locus === locus);
+  if (recRule) {
+    if (combo === recRule.homo) return recRule.name;
+    const carrier = SIMPLE_RECESSIVE_CARRIERS[locus];
+    if (carrier && combo === carrier.het) return `Het ${carrier.trait}`;
+    return noTrait;
+  }
+
+  return combo;
+}
+
 // =========================================================
 // "DESIGNER" COMBO ALIASES — same mechanic as Blue+Chocolate="Lilac" in the
 // hamster rule files: two independent genes stacked together get their own
@@ -1119,6 +1162,53 @@ export function matchBallPythonPhenotype(genotype) {
   const phenotype = traits.length ? traits.join(' ') : 'Normal';
 
   return { phenotype, carriers: getBallPythonCarriers(genotype), notes: [] };
+}
+
+/**
+ * Parse a stored Ball Python geneticCode string (e.g. "Pas/pas Cl/cl") back
+ * into a { locus: combo } genotype object, matching each token against every
+ * locus's known `combinations` (forward or reversed notation).
+ */
+export function parseBallPythonGeneticCode(codeString) {
+  if (!codeString) return {};
+  const genotype = {};
+  codeString.trim().split(/[\s,]+/).forEach(part => {
+    if (!part.match(/^[A-Za-z]+\/[A-Za-z]+$/)) return;
+    const [a, b] = part.split('/');
+    const reversed = `${b}/${a}`;
+    for (const [locus, data] of Object.entries(BALL_PYTHON_GENE_LOCI)) {
+      if (data.combinations.includes(part)) { genotype[locus] = part; return; }
+      if (data.combinations.includes(reversed)) { genotype[locus] = reversed; return; }
+    }
+  });
+  return genotype;
+}
+
+// Recessive loci eligible for "possible het" (unconfirmed/probability-based carrier) notes —
+// only recessive-shaped genes are ever ambiguous this way, since Incomplete Dominant genes are
+// always visually confirmable with a single copy.
+export const BALL_PYTHON_POSSIBLE_HET_LOCI = RECESSIVE_RULES.map(({ locus, name }) => ({ locus, name }));
+
+/**
+ * Build the full human-readable display string for a Ball Python's genetics —
+ * the computed phenotype name (e.g. "Pastel Het Piebald") plus any unconfirmed
+ * "possible het" notes (e.g. "66% Het Clown") appended at the end, matching
+ * real-world hobbyist notation. Used everywhere geneticCode would otherwise be
+ * shown raw (animal cards, modals, lists, certificates).
+ */
+export function getBallPythonDisplayPhenotype(geneticCode, possibleHets = []) {
+  const genotype = parseBallPythonGeneticCode(geneticCode);
+  const { phenotype } = matchBallPythonPhenotype(genotype);
+
+  const hetNotes = (possibleHets || [])
+    .filter(h => h && h.locus && h.percent)
+    .map(h => {
+      const rule = RECESSIVE_RULES.find(r => r.locus === h.locus);
+      return `${h.percent}% Het ${rule ? rule.name : h.locus}`;
+    });
+
+  const parts = phenotype && phenotype !== 'Normal' ? [phenotype, ...hetNotes] : hetNotes;
+  return parts.length ? parts.join(' ') : 'Normal';
 }
 
 // ---------------------------------------------------------------------------

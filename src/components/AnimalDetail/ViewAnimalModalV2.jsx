@@ -11,6 +11,7 @@ import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
+import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import axios from 'axios';
 import { ViewOnlyParentCard, computeRelationships } from './utils';
 import { CareTabContent } from './CareTabContent';
@@ -483,7 +484,11 @@ const ViewAnimalModalV2 = ({
                                                 </InfoItem>
                                                 <InfoItem compact label="Carries" value={animal.carrierTraits} />
                                                 <InfoItem compact label="Genetics">
-                                                    {animal.geneticCode && <code className="font-mono">{animal.geneticCode}</code>}
+                                                    {animal.geneticCode && (
+                                                        animal.species === 'Ball Python'
+                                                            ? <span>{getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets)}</span>
+                                                            : <code className="font-mono">{animal.geneticCode}</code>
+                                                    )}
                                                 </InfoItem>
 
                                                 {/* Row 2 */}

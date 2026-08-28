@@ -2365,6 +2365,7 @@ const AnimalFormModalV2 = ({
             remarks: animalToEdit.remarks || '',
             tags: animalToEdit.tags || [],
             geneticCode: animalToEdit.geneticCode || '',
+            possibleHets: animalToEdit.possibleHets || [],
             fatherId_public: getIdValue(animalToEdit, 'fatherId_public', 'sireId_public'),
             motherId_public: getIdValue(animalToEdit, 'motherId_public', 'damId_public'),
             breederId_public: animalToEdit.breederId_public || null,
@@ -2569,6 +2570,7 @@ const AnimalFormModalV2 = ({
             remarks: '',
             tags: [],
             geneticCode: '',
+            possibleHets: [],
             fatherId_public: initialValues?.fatherId_public || null,
             motherId_public: initialValues?.motherId_public || null,
             breederId_public: initialValues?.breederId_public || null,
@@ -4230,7 +4232,7 @@ const AnimalFormModalV2 = ({
                                     </div>
                                 </FormSection>
                                 <FormSection title="Genetic Code" icon={<Dna size={16} />}>
-                                    <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)} />
+                                    <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} possibleHets={formData.possibleHets} onPossibleHetsChange={(v) => setFormData(p => ({ ...p, possibleHets: v }))} onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)} />
                                 </FormSection>
                                 <FormSection title={fieldLabel('lifeStage', 'Life Stage')} icon={<Sprout size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import './ModOversightPanel.css';
 import themeColors from '../../utils/themeColors';
+import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 
 const REPORT_TYPES = [
     { value: 'all', label: 'All Types' },
@@ -1042,8 +1043,8 @@ export default function ModOversightPanel({
                                             {animal.geneticCode && (
                                                 <div style={{ marginTop: '8px', fontSize: '13px' }}>
                                                     <strong>Genetic Code:</strong>
-                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', marginTop: '4px', fontFamily: 'monospace', fontSize: '12px' }}>
-                                                        {animal.geneticCode}
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', marginTop: '4px', fontFamily: animal.species === 'Ball Python' ? 'inherit' : 'monospace', fontSize: '12px' }}>
+                                                        {animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}
                                                     </div>
                                                 </div>
                                             )}

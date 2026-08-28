@@ -5,7 +5,7 @@ import { matchFancyRatPhenotype, getFancyRatCarriers, RAT_GENE_LOCI } from '../d
 import { matchSyrianHamsterPhenotype, getSyrianHamsterCarriers, SYRIAN_HAMSTER_GENE_LOCI } from '../data/syrianHamsterPhenotypeRules';
 import { matchCampbellsDwarfHamsterPhenotype, getCampbellsDwarfHamsterCarriers, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
 import { matchRussianDwarfHamsterPhenotype, getRussianDwarfHamsterCarriers, RUSSIAN_DWARF_HAMSTER_GENE_LOCI } from '../data/russianDwarfHamsterPhenotypeRules';
-import { matchBallPythonPhenotype, getBallPythonCarriers, BALL_PYTHON_GENE_LOCI } from '../data/ballPythonPhenotypeRules';
+import { matchBallPythonPhenotype, getBallPythonCarriers, BALL_PYTHON_GENE_LOCI, getBallPythonComboLabel, getBallPythonDisplayPhenotype } from '../data/ballPythonPhenotypeRules';
 
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
@@ -2499,7 +2499,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                   <option value="">{locus} - {data.name}</option>
                   {validCombinations.map((combo) => (
                     <option key={combo} value={combo}>
-                      {combo}
+                      {selectedSpecies === 'Ball Python' ? getBallPythonComboLabel(locus, combo) : combo}
                     </option>
                   ))}
                 </select>
@@ -2571,7 +2571,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                   <option value="">{locus} - {data.name}</option>
                   {data.combinations.map((combo) => (
                     <option key={combo} value={combo}>
-                      {combo}
+                      {selectedSpecies === 'Ball Python' ? getBallPythonComboLabel(locus, combo) : combo}
                     </option>
                   ))}
                 </select>
@@ -2905,7 +2905,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                           <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{animal.id_public} • {animal.species}</p>
                           {animal.geneticCode ? (
                             <p className="text-xs text-gray-500 dark:text-dark-text-muted font-mono mt-1 truncate">
-                              {animal.geneticCode}
+                              {animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}
                             </p>
                           ) : (
                             <p className="text-xs text-red-600 dark:text-red-400 italic mt-1">
