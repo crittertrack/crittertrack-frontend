@@ -119,11 +119,10 @@ const GENE_LOCI = {
   },
   Mobr: {
     name: 'xbrindle',
-    description: 'Sex-linked brindle — X-linked dominant gene. Females (Mobr/mobr) express brindling due to mosaic X-inactivation; males (Mobr/Y) also express it but are born with copper deficiency.',
+    description: 'Sex-linked brindle — X-linked dominant gene. Females (Mobr/mobr) express brindling due to mosaic X-inactivation; Mobr/Mobr does not occur (always lethal). Males (Mobr/Y) also express it with copper deficiency but only survive ~2 weeks, so they can never sire offspring.',
     combinations: [
       'mobr/mobr',
-      'Mobr/mobr',
-      'Mobr/Mobr'
+      'Mobr/mobr'
     ],
     maleCombinations: [
       'mobr/Y',
@@ -2638,11 +2637,13 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(geneLoci).map(([locus, data]) => {
-              // For Sire/Father, filter out Mobr combinations (males can't carry Mobr). Also hide the
-              // '/-' wildcard option everywhere — old saved genotypes with '/-' still parse/display
-              // fine, it's just no longer offered here.
+              // A Mobr/Y male only survives ~2 weeks (copper deficiency) and can never reach
+              // breeding age, so he's excluded as a Sire option here — still valid on an
+              // individual animal's own record, just not selectable as a cross parent. Also hide
+              // the '/-' wildcard option everywhere — old saved genotypes with '/-' still
+              // parse/display fine, it's just no longer offered here.
               const validCombinations = (data.maleCombinations || data.combinations)
-                .filter(combo => !combo.endsWith('/-'));
+                .filter(combo => !combo.endsWith('/-') && combo !== 'Mobr/Y');
               return (
               <div key={locus}>
                 <select
