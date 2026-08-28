@@ -315,7 +315,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
       <>
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
-            Genetic Code
+            Genetic Info
           </label>
           
           {/* Display current value + button */}
@@ -532,7 +532,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -744,7 +744,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -940,7 +940,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -1133,7 +1133,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -1346,7 +1346,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -1565,7 +1565,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
-        Genetic Code
+        Genetic Info
       </label>
       
       <input

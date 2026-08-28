@@ -37,7 +37,7 @@ export const AppearanceTabContent = ({ animal }) => {
                         {animal.carrierTraits && <InfoItem label="Carries" value={animal.carrierTraits} />}
                     </div>
                 </InfoCard>
-                <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
+                <InfoCard title="Genetic Info" icon={<Dna size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
                     {(() => {
                         const { phenotype, carriers, possibleCarriers } = getAnimalPhenotypeDisplay(animal);
                         return (
