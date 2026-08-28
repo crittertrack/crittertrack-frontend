@@ -194,8 +194,8 @@ const GENE_LOCI = {
 // dropdown option. Excludes multi-allelic loci (A, C, S, W) and dominant-trait loci (Re, Spl, Nu,
 // U) whose '/-' ambiguity is about dosage of a *visible* trait, not a hidden carrier.
 const MOUSE_POSSIBLE_HET_LOCI = [
-  { locus: 'B', name: 'Brown' },
-  { locus: 'D', name: 'Dilute' },
+  { locus: 'B', name: 'Chocolate' },
+  { locus: 'D', name: 'Blue' },
   { locus: 'E', name: 'Recessive Red' },
   { locus: 'Ln', name: 'Leaden' },
   { locus: 'P', name: 'Pink-eye' },
