@@ -110,8 +110,8 @@ const GENE_LOCI = {
     ]
   },
   Si: {
-    name: 'Silver',
-    description: 'Recessive. Silvering/ticking on coat. e.g. Pearl, Silvered',
+    name: 'Silvered',
+    description: 'Recessive. Silvering/ticking on coat. e.g. Pearl, Silvered. Not to be confused with the separate "Silver" phenotype (a/a d/d p/p).',
     combinations: [
       'si/si',
       'Si/si', 'Si/Si', 'Si/-'
@@ -204,7 +204,7 @@ const MOUSE_POSSIBLE_HET_LOCI = [
   { locus: 'Rst', name: 'Rosette' },
   { locus: 'Fz', name: 'Fuzz' },
   { locus: 'Rn', name: 'Roan' },
-  { locus: 'Si', name: 'Silver' },
+  { locus: 'Si', name: 'Silvered' },
 ];
 
 // Which species currently support the "possible het" probability system, and the recessive loci

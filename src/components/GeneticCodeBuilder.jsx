@@ -333,7 +333,14 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             </button>
             </div>
           </div>
-          
+
+          {value && (() => {
+            const result = calculatePhenotype(parseMouseGeneticCode(value), parseMouseGeneticCode(value));
+            return result.phenotype ? (
+              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
+            ) : null;
+          })()}
+
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">
             Click the button to use the visual gene selector
           </p>
@@ -538,6 +545,12 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
               {value ? 'Edit Genes' : 'Add'}
             </button>
           </div>
+          {value && (() => {
+            const result = matchFancyRatPhenotype(parseRatGeneticCode(value));
+            return result.phenotype ? (
+              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
+            ) : null;
+          })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
 
@@ -744,6 +757,12 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
               {value ? 'Edit Genes' : 'Add'}
             </button>
           </div>
+          {value && (() => {
+            const result = matchSyrianHamsterPhenotype(parseHamsterGeneticCode(value));
+            return result.phenotype ? (
+              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
+            ) : null;
+          })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
 
@@ -934,6 +953,12 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
               {value ? 'Edit Genes' : 'Add'}
             </button>
           </div>
+          {value && (() => {
+            const result = matchCampbellsDwarfHamsterPhenotype(parseCampbellsGeneticCode(value));
+            return result.phenotype ? (
+              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
+            ) : null;
+          })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
 
@@ -1121,6 +1146,12 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
               {value ? 'Edit Genes' : 'Add'}
             </button>
           </div>
+          {value && (() => {
+            const result = matchRussianDwarfHamsterPhenotype(parseRussianDwarfGeneticCode(value));
+            return result.phenotype ? (
+              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
+            ) : null;
+          })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
 
@@ -1328,6 +1359,12 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
               {value ? 'Edit Genes' : 'Add'}
             </button>
           </div>
+          {value && (() => {
+            const result = matchBallPythonPhenotype(parseBallPythonGeneticCode(value));
+            return result.phenotype && result.phenotype !== 'Normal' ? (
+              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
+            ) : null;
+          })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
 
