@@ -338,16 +338,28 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const hetNotes = mousePossibleHets
               .filter(h => h && h.locus && h.percent)
               .map(h => `${h.percent}% Het. ${MOUSE_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
-              <>
-                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+              <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
+                {result.phenotype && (
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                    <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{result.phenotype}</div>
+                  </div>
+                )}
                 {result.carriers && result.carriers.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
+                  </div>
                 )}
                 {hetNotes.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
+                  </div>
                 )}
-              </>
+              </div>
             );
           })()}
 
@@ -560,16 +572,28 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const hetNotes = ratPossibleHets
               .filter(h => h && h.locus && h.percent)
               .map(h => `${h.percent}% Het. ${RAT_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
-              <>
-                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+              <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
+                {result.phenotype && (
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                    <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{result.phenotype}</div>
+                  </div>
+                )}
                 {result.carriers && result.carriers.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
+                  </div>
                 )}
                 {hetNotes.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
+                  </div>
                 )}
-              </>
+              </div>
             );
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
@@ -783,16 +807,28 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const hetNotes = hamsterPossibleHets
               .filter(h => h && h.locus && h.percent)
               .map(h => `${h.percent}% Het. ${SYRIAN_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
-              <>
-                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+              <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
+                {result.phenotype && (
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                    <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{result.phenotype}</div>
+                  </div>
+                )}
                 {result.carriers && result.carriers.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
+                  </div>
                 )}
                 {hetNotes.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
+                  </div>
                 )}
-              </>
+              </div>
             );
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
@@ -990,16 +1026,28 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const hetNotes = campbellsPossibleHets
               .filter(h => h && h.locus && h.percent)
               .map(h => `${h.percent}% Het. ${CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
-              <>
-                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+              <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
+                {result.phenotype && (
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                    <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{result.phenotype}</div>
+                  </div>
+                )}
                 {result.carriers && result.carriers.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
+                  </div>
                 )}
                 {hetNotes.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
+                  </div>
                 )}
-              </>
+              </div>
             );
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
@@ -1194,16 +1242,28 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const hetNotes = russianDwarfPossibleHets
               .filter(h => h && h.locus && h.percent)
               .map(h => `${h.percent}% Het. ${RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
-              <>
-                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+              <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
+                {result.phenotype && (
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                    <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{result.phenotype}</div>
+                  </div>
+                )}
                 {result.carriers && result.carriers.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{result.carriers.join(', ')}</div>
+                  </div>
                 )}
                 {hetNotes.length > 0 && (
-                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
+                  </div>
                 )}
-              </>
+              </div>
             );
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
@@ -1418,10 +1478,24 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const hetNotes = ballPythonPossibleHets
               .filter(h => h && h.locus && h.percent)
               .map(h => `${h.percent}% Het. ${BALL_PYTHON_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
-            const displayName = [result.phenotype && result.phenotype !== 'Normal' ? result.phenotype : null, ...hetNotes].filter(Boolean).join(' ');
-            return displayName ? (
-              <p className="text-sm font-semibold text-accent">Phenotype: {displayName}</p>
-            ) : null;
+            const displayName = result.phenotype && result.phenotype !== 'Normal' ? result.phenotype : null;
+            if (!displayName && hetNotes.length === 0) return null;
+            return (
+              <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
+                {displayName && (
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Phenotype:</div>
+                    <div className="text-base font-semibold text-blue-800 dark:text-blue-200">{displayName}</div>
+                  </div>
+                )}
+                {hetNotes.length > 0 && (
+                  <div>
+                    <div className="text-sm font-medium text-blue-900 dark:text-blue-300">Possible Carries:</div>
+                    <div className="text-sm text-blue-700 dark:text-blue-300">{hetNotes.join(', ')}</div>
+                  </div>
+                )}
+              </div>
+            );
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
