@@ -104,7 +104,7 @@ function buildRussianDwarfGeneticCode(genotype) {
     .join(' ');
 }
 
-const BALL_PYTHON_GENE_ORDER = ['cinBp', 'ban', 'cg', 'pas', 'en', 'fi', 'cho', 'van', 'pin', 'puz', 'wom', 'sab', 'od', 'yb', 'grv', 'spc', 'rus', 'spe', 'mys', 'chn', 'hon', 'bam', 'sch', 'spn', 'asp', 'jol', 'lor', 'raz', 'bon', 'cha', 'sp', 'les', 'moj', 'but', 'pha', 'pi', 'cl', 'gs', 'albCdy', 'lacGhi', 'ax', 'hy', 'cml', 'dg', 'sun', 'rax', 'tof', 'lav', 'ult', 'leo', 'cry', 'mig'];
+const BALL_PYTHON_GENE_ORDER = ['cinBp', 'ban', 'cg', 'pas', 'en', 'fi', 'cho', 'van', 'pin', 'puz', 'wom', 'sab', 'od', 'yb', 'grv', 'spc', 'rus', 'spe', 'mys', 'chn', 'hon', 'bam', 'sch', 'spn', 'asp', 'jol', 'lor', 'raz', 'bon', 'jav', 'bld', 'cal', 'dst', 'dsc', 'bh', 'spk', 'jag', 'krg', 'ahi', 'dot', 'web', 'acd', 'bng', 'caf', 'gob', 'grm', 'jed', 'nov', 'bad', 'bgo', 'blz', 'blt', 'crm', 'gnx', 'nya', 'orb', 'pxl', 'qke', 'sat', 'hur', 'cpr', 'fsn', 'ksm', 'rpr', 'stc', 'trj', 'wke', 'zwd', 'mar', 'pch', 'rvn', 'sgr', 'vdo', 'mos', 'rgn', 'rhd', 'stk', 'tar', 'mck', 'stg', 'nny', 'cha', 'sp', 'les', 'moj', 'but', 'pha', 'pi', 'cl', 'gs', 'albCdy', 'lacGhi', 'ax', 'hy', 'cml', 'dg', 'sun', 'rax', 'tof', 'lav', 'ult', 'leo', 'cry', 'mig', 'vnt', 'zbr', 'shr', 'rbw', 'snt', 'spd', 'pnt'];
 
 function parseBallPythonGeneticCode(codeString) {
   if (!codeString) return {};
@@ -1164,12 +1164,12 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   if (species === 'Ball Python') {
     const BALL_PYTHON_GENE_GROUPS = [
       { label: 'Cinnamon / Black Pastel (multi-allelic)', loci: ['cinBp'] },
-      { label: 'Incomplete Dominant Genes',                loci: ['pas', 'en', 'fi', 'cho', 'van', 'pin', 'puz', 'wom', 'sab', 'od', 'ban', 'cg', 'yb', 'grv', 'spc', 'rus', 'spe', 'mys', 'chn', 'hon', 'bam', 'sch', 'spn', 'asp', 'jol', 'lor', 'raz', 'bon', 'cha'] },
-      { label: 'Dominant Genes',                            loci: ['sp'] },
+      { label: 'Incomplete Dominant Genes',                loci: ['pas', 'en', 'fi', 'cho', 'van', 'pin', 'puz', 'wom', 'sab', 'od', 'ban', 'cg', 'yb', 'grv', 'spc', 'rus', 'spe', 'mys', 'chn', 'hon', 'bam', 'sch', 'spn', 'asp', 'jol', 'lor', 'raz', 'bon', 'jav', 'bld', 'dsc', 'bh', 'spk', 'jag', 'dot', 'bng', 'gob', 'grm', 'jed', 'blt', 'crm', 'gnx', 'orb', 'pxl', 'qke', 'sat', 'hur', 'cpr', 'fsn', 'ksm', 'rpr', 'trj', 'wke', 'zwd', 'mar', 'pch', 'rvn', 'vdo', 'mos', 'rhd', 'stk', 'tar', 'mck', 'nny', 'cha'] },
+      { label: 'Dominant Genes',                            loci: ['sp', 'cal', 'dst', 'krg', 'ahi', 'web', 'acd', 'caf', 'nov', 'bad', 'bgo', 'blz', 'nya', 'stc', 'sgr', 'rgn', 'stg'] },
       { label: 'BEL Complex (Lesser/Mojave/Butter/Phantom)', loci: ['les', 'moj', 'but', 'pha'] },
       { label: 'Albino / Candy (multi-allelic)',            loci: ['albCdy'] },
       { label: 'Lace / GHI (multi-allelic)',                 loci: ['lacGhi'] },
-      { label: 'Recessive Genes',                            loci: ['pi', 'cl', 'gs', 'ax', 'hy', 'cml', 'dg', 'sun', 'rax', 'tof', 'lav', 'ult', 'leo', 'cry', 'mig'] },
+      { label: 'Recessive Genes',                            loci: ['pi', 'cl', 'gs', 'ax', 'hy', 'cml', 'dg', 'sun', 'rax', 'tof', 'lav', 'ult', 'leo', 'cry', 'mig', 'vnt', 'zbr', 'shr', 'rbw', 'snt', 'spd', 'pnt'] },
     ];
 
     const handleBallPythonGeneChange = (locus, combination) => {
