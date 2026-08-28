@@ -314,7 +314,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
       <>
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
-            Genetic Info
+            Genetic Code
           </label>
           
           {/* Display current value + button */}
@@ -335,9 +335,20 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
 
           {value && (() => {
             const result = calculatePhenotype(parseMouseGeneticCode(value), parseMouseGeneticCode(value));
-            return result.phenotype ? (
-              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
-            ) : null;
+            const hetNotes = mousePossibleHets
+              .filter(h => h && h.locus && h.percent)
+              .map(h => `${h.percent}% Het. ${MOUSE_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            return (
+              <>
+                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+                {result.carriers && result.carriers.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                )}
+                {hetNotes.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                )}
+              </>
+            );
           })()}
 
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">
@@ -531,7 +542,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -546,9 +557,20 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
           </div>
           {value && (() => {
             const result = matchFancyRatPhenotype(parseRatGeneticCode(value));
-            return result.phenotype ? (
-              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
-            ) : null;
+            const hetNotes = ratPossibleHets
+              .filter(h => h && h.locus && h.percent)
+              .map(h => `${h.percent}% Het. ${RAT_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            return (
+              <>
+                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+                {result.carriers && result.carriers.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                )}
+                {hetNotes.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                )}
+              </>
+            );
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
@@ -743,7 +765,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -758,9 +780,20 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
           </div>
           {value && (() => {
             const result = matchSyrianHamsterPhenotype(parseHamsterGeneticCode(value));
-            return result.phenotype ? (
-              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
-            ) : null;
+            const hetNotes = hamsterPossibleHets
+              .filter(h => h && h.locus && h.percent)
+              .map(h => `${h.percent}% Het. ${SYRIAN_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            return (
+              <>
+                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+                {result.carriers && result.carriers.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                )}
+                {hetNotes.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                )}
+              </>
+            );
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
@@ -939,7 +972,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -954,9 +987,20 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
           </div>
           {value && (() => {
             const result = matchCampbellsDwarfHamsterPhenotype(parseCampbellsGeneticCode(value));
-            return result.phenotype ? (
-              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
-            ) : null;
+            const hetNotes = campbellsPossibleHets
+              .filter(h => h && h.locus && h.percent)
+              .map(h => `${h.percent}% Het. ${CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            return (
+              <>
+                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+                {result.carriers && result.carriers.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                )}
+                {hetNotes.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                )}
+              </>
+            );
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
@@ -1132,7 +1176,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -1147,9 +1191,20 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
           </div>
           {value && (() => {
             const result = matchRussianDwarfHamsterPhenotype(parseRussianDwarfGeneticCode(value));
-            return result.phenotype ? (
-              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
-            ) : null;
+            const hetNotes = russianDwarfPossibleHets
+              .filter(h => h && h.locus && h.percent)
+              .map(h => `${h.percent}% Het. ${RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            return (
+              <>
+                {result.phenotype && <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>}
+                {result.carriers && result.carriers.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Carries: {result.carriers.join(', ')}</p>
+                )}
+                {hetNotes.length > 0 && (
+                  <p className="text-xs text-gray-600 dark:text-dark-text-muted">Possible Carries: {hetNotes.join(', ')}</p>
+                )}
+              </>
+            );
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
         </div>
@@ -1345,7 +1400,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     return (
       <>
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Info</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Genetic Code</label>
           <div className="flex gap-2">
             <div className="flex-1 p-2 border border-gray-300 dark:border-dark-text-muted rounded bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-dark-text font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400 dark:text-dark-text-muted">Not set</span>}
@@ -1360,8 +1415,12 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
           </div>
           {value && (() => {
             const result = matchBallPythonPhenotype(parseBallPythonGeneticCode(value));
-            return result.phenotype && result.phenotype !== 'Normal' ? (
-              <p className="text-sm font-semibold text-accent">Phenotype: {result.phenotype}</p>
+            const hetNotes = ballPythonPossibleHets
+              .filter(h => h && h.locus && h.percent)
+              .map(h => `${h.percent}% Het. ${BALL_PYTHON_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+            const displayName = [result.phenotype && result.phenotype !== 'Normal' ? result.phenotype : null, ...hetNotes].filter(Boolean).join(' ');
+            return displayName ? (
+              <p className="text-sm font-semibold text-accent">Phenotype: {displayName}</p>
             ) : null;
           })()}
           <p className="text-xs text-gray-500 dark:text-dark-text-muted">Click the button to use the visual gene selector</p>
@@ -1564,7 +1623,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
-        Genetic Info
+        Genetic Code
       </label>
       
       <input

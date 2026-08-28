@@ -4231,7 +4231,7 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
-                                <FormSection title="Genetic Code" icon={<Dna size={16} />}>
+                                <FormSection title="Genetic Info" icon={<Dna size={16} />}>
                                     <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} possibleHets={formData.possibleHets} onPossibleHetsChange={(v) => setFormData(p => ({ ...p, possibleHets: v }))} onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)} />
                                 </FormSection>
                                 <FormSection title={fieldLabel('lifeStage', 'Life Stage')} icon={<Sprout size={16} />}>
