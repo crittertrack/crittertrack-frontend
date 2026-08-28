@@ -875,9 +875,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
-    // Handle pink-eye modifier
+    // Handle pink-eye modifier — named "Dominant Fawn" (not bare "Fawn") to distinguish it from
+    // the e/e-based "Recessive Fawn" combo, which shares the same visible look via a different route.
     if (isPinkEye) {
-      color = isTanVariant ? 'Fawn Tan' : 'Fawn';
+      color = isTanVariant ? 'Dominant Fawn Tan' : 'Dominant Fawn';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
@@ -2969,13 +2970,17 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                     {expandedPhenotypes[idx] && (
                       <div className="mt-3 pt-3 border-t border-purple-100 dark:border-dark-accent-purple/30">
                         {/* Carrier explanation for beginners — generateCarrierExplanation only understands
-                            Fancy Mouse loci, so it never has anything useful to say for Ball Python
-                            (which already surfaces confirmed carriers via result.carriers instead). */}
+                            Fancy Mouse loci, so every other species falls back to the already-correct
+                            per-genotype carriers list from its own phenotype match instead. Ball Python
+                            skips this box entirely since it already surfaces carriers via result.carriers
+                            merged into the phenotype line above. */}
                         {selectedSpecies !== 'Ball Python' && (
                           <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg">
                             <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Possible Carriers:</h4>
                             {(() => {
-                              const carriers = generateCarrierExplanation(result.genotypes);
+                              const carriers = selectedSpecies === 'Fancy Mouse'
+                                ? generateCarrierExplanation(result.genotypes)
+                                : (result.carriers || []);
                               return carriers.length > 0 ? (
                                 <div className="text-sm text-blue-700 dark:text-blue-400">
                                   <p className="mb-2">Some offspring may carry hidden genes for:</p>

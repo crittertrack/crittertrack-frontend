@@ -179,6 +179,13 @@ function applyMarkings(phenotype, genotype) {
   const hasRd = genotype.rd === 'rd/rd';
   const isTort = genotype.to === 'To/to';
 
+  // The base color rules already bake "Tortoiseshell" into the phenotype name for To/to females;
+  // strip it here so the suffixes below can supply the correct combined wording (Tricolor /
+  // Tortoiseshell Recessive Dappled / plain Tortoiseshell) exactly once instead of duplicating it.
+  if (isTort) {
+    phenotype = phenotype.replace(/\s*Tortoiseshell\b/, '').trim();
+  }
+
   const suffixes = [];
 
   const triColor = isTort && (hasBa || hasDs || hasS);
@@ -190,7 +197,11 @@ function applyMarkings(phenotype, genotype) {
     if (hasS) suffixes.push('Pied');
   }
 
-  if (hasRd) suffixes.push(isTort ? 'Tortoiseshell Recessive Dappled' : 'Recessive Dappled');
+  if (hasRd) {
+    suffixes.push(isTort ? 'Tortoiseshell Recessive Dappled' : 'Recessive Dappled');
+  } else if (isTort && !triColor) {
+    suffixes.push('Tortoiseshell');
+  }
 
   if (genotype.wh === 'Wh/wh') {
     suffixes.push(genotype.e === 'e/e' ? 'Roan' : 'White Bellied');
