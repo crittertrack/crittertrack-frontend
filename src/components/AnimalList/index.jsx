@@ -3273,7 +3273,7 @@ useEffect(() => {
 
     // -- Shared Management Components ------------------------------------------
     // All appearance fields that make up "Variety" — same set as Tab 3 / Appearance section
-    const VARIETY_KEYS = ['color', 'coat', 'earset', 'morph', 'markings', 'eyeColor', 'carrierTraits', 'body'];
+    const VARIETY_KEYS = ['color', 'markings', 'earset', 'morph', 'coat', 'eyeColor', 'carrierTraits', 'body'];
     const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
 
     const MgmtAnimalCard = ({ animal, extras, middleContent }) => (

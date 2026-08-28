@@ -513,7 +513,7 @@ const AnimalModalV2 = ({
                                             <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-2 sm:gap-y-4 text-xs">
                                                 {/* Row 1 */}
                                                 <InfoItem compact label="Variety">
-                                                    {[animal.color, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
+                                                    {[animal.color, animal.markings, animal.earset, animal.morph, animal.coat, animal.eyeColor, animal.body].filter(Boolean).join(' ') || <span className="text-gray-400 dark:text-dark-text-muted">N/A</span>}
                                                 </InfoItem>
                                                 <InfoItem compact label="Carries" value={animal.carrierTraits} />
                                                 <InfoItem compact label="Genetics">
