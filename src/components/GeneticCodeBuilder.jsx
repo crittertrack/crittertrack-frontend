@@ -282,10 +282,9 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
       ? geneData.maleCombinations
       : geneData.combinations;
 
-    // Hide the '/-' wildcard option for loci that now have a "Possible Hets" % entry instead —
-    // old saved genotypes with '/-' still parse/display fine, just not offered here anymore.
-    const hasPossibleHet = MOUSE_POSSIBLE_HET_LOCI.some(l => l.locus === locus);
-    return hasPossibleHet ? combos.filter(combo => !combo.endsWith('/-')) : combos;
+    // Hide the '/-' wildcard option everywhere — old saved genotypes with '/-' still parse/display
+    // fine, it's just no longer offered here.
+    return combos.filter(combo => !combo.endsWith('/-'));
   };
   
   // Handle dropdown change

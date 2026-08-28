@@ -2639,11 +2639,10 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(geneLoci).map(([locus, data]) => {
               // For Sire/Father, filter out Mobr combinations (males can't carry Mobr). Also hide the
-              // '/-' wildcard option for loci that now have a "Possible Hets" % entry instead — old
-              // saved genotypes with '/-' still parse/display fine, it's just no longer offered here.
-              const hasPossibleHet = possibleHetLoci.some(l => l.locus === locus);
+              // '/-' wildcard option everywhere — old saved genotypes with '/-' still parse/display
+              // fine, it's just no longer offered here.
               const validCombinations = (data.maleCombinations || data.combinations)
-                .filter(combo => !hasPossibleHet || !combo.endsWith('/-'));
+                .filter(combo => !combo.endsWith('/-'));
               return (
               <div key={locus}>
                 <select
@@ -2767,10 +2766,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(geneLoci).map(([locus, data]) => {
-              // Hide the '/-' wildcard option for loci that now have a "Possible Hets" % entry
-              // instead — old saved genotypes with '/-' still parse/display fine, just not offered here.
-              const hasPossibleHet = possibleHetLoci.some(l => l.locus === locus);
-              const validCombinations = data.combinations.filter(combo => !hasPossibleHet || !combo.endsWith('/-'));
+              // Hide the '/-' wildcard option everywhere — old saved genotypes with '/-' still
+              // parse/display fine, just not offered here.
+              const validCombinations = data.combinations.filter(combo => !combo.endsWith('/-'));
               return (
               <div key={locus}>
                 <select
