@@ -149,14 +149,17 @@ function applyCoatGenes(phenotype, genotype) {
 
 const SIMPLE_RECESSIVE_CARRIERS = {
   a:  { het: 'A/a', trait: 'Black' },
-  d:  { het: 'D/d', trait: 'Sapphire/Russian Blue' },
-  p:  { het: 'P/p', trait: 'Yellow Agouti/Dove' },
-  m:  { het: 'M/m', trait: 'Brown/Chocolate' },
+  d:  { het: 'D/d', trait: 'Sapphire' },
+  p:  { het: 'P/p', trait: 'Dove' },
+  m:  { het: 'M/m', trait: 'Chocolate' },
   s:  { het: 'S/s', trait: 'Pied' },
   rx: { het: 'Rx/rx', trait: 'Rex' },
   sa: { het: 'Sa/sa', trait: 'Satin' },
   wa: { het: 'Wa/wa', trait: 'Wavy' },
 };
+
+// Recessive loci eligible for "possible het" (unconfirmed/probability-based carrier) notes.
+export const RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI = Object.entries(SIMPLE_RECESSIVE_CARRIERS).map(([locus, { trait }]) => ({ locus, name: trait }));
 
 export function getRussianDwarfHamsterCarriers(genotype) {
   genotype = normalizeRussianDwarfGenotype(genotype);
@@ -182,16 +185,23 @@ export function matchRussianDwarfHamsterPhenotype(genotype) {
     return { phenotype: 'LETHAL (Wh/Wh)', carriers: getRussianDwarfHamsterCarriers(genotype), notes: [] };
   }
 
-  let phenotype = computeBasePhenotype(genotype);
-  phenotype = applyPearl(phenotype, genotype);
+  const colorPart = computeBasePhenotype(genotype);
+  let phenotype = applyPearl(colorPart, genotype);
   phenotype = applyMerle(phenotype, genotype);
   phenotype = applyUmbrous(phenotype, genotype);
   phenotype = applyRubyEyedMottled(phenotype, genotype);
   phenotype = applyPied(phenotype, genotype);
   phenotype = applyImperial(phenotype, genotype);
+  const markingsPart = phenotype.slice(colorPart.length).trim();
+  const beforeCoat = phenotype;
   phenotype = applyCoatGenes(phenotype, genotype);
+  const coatPart = phenotype.slice(beforeCoat.length).trim();
 
-  return { phenotype, carriers: getRussianDwarfHamsterCarriers(genotype), notes: [] };
+  // Categorized breakdown for the "Seed to Appearance" feature, derived from
+  // the same sequential build above (no change to the derivation logic).
+  const breakdown = { color: colorPart, markings: markingsPart, coat: coatPart, body: '' };
+
+  return { phenotype, carriers: getRussianDwarfHamsterCarriers(genotype), notes: [], breakdown };
 }
 
 // ---------------------------------------------------------------------------
@@ -202,9 +212,9 @@ export function matchRussianDwarfHamsterPhenotype(genotype) {
 export const RUSSIAN_DWARF_HAMSTER_GENE_LOCI = {
   // --- Color genes ---
   a:  { name: 'Black/Agouti',   description: 'A/- = Agouti, a/a = Black.', combinations: ['A/A', 'A/a', 'a/a'] },
-  d:  { name: 'Sapphire/Russian Blue (Dilution)', description: 'Recessive. d/d = Sapphire (Agouti base) or Russian Blue (Black base).', combinations: ['D/D', 'D/d', 'd/d'] },
-  p:  { name: 'Yellow Agouti/Dove (Pink Eye Dilute)', description: 'Recessive. p/p = Yellow Agouti (Agouti base) or Dove (Black base).', combinations: ['P/P', 'P/p', 'p/p'] },
-  m:  { name: 'Brown/Chocolate', description: 'Recessive. m/m = Brown (Agouti base) or Chocolate (Black base).', combinations: ['M/M', 'M/m', 'm/m'] },
+  d:  { name: 'Sapphire (Dilution)', description: 'Recessive. d/d = Sapphire (Agouti base) or Russian Blue (Black base).', combinations: ['D/D', 'D/d', 'd/d'] },
+  p:  { name: 'Dove (Pink Eye Dilute)', description: 'Recessive. p/p = Yellow Agouti (Agouti base) or Dove (Black base).', combinations: ['P/P', 'P/p', 'p/p'] },
+  m:  { name: 'Chocolate', description: 'Recessive. m/m = Brown (Agouti base) or Chocolate (Black base).', combinations: ['M/M', 'M/m', 'm/m'] },
   ma: { name: 'Mandarin', description: 'Dominant. Ma/ma or Ma/Ma overrides the base color entirely with its own named series (Mandarin, Camel, Pink Eyed Mandarin, etc.), regardless of A/a.', combinations: ['ma/ma', 'Ma/ma', 'Ma/Ma'] },
   // --- Pattern/marking genes ---
   pe: { name: 'Pearl', description: 'Dominant. Pe/pe or Pe/Pe = " Pearl" suffix onto the base color.', combinations: ['pe/pe', 'Pe/pe', 'Pe/Pe'] },

@@ -179,6 +179,13 @@ function applyMarkings(phenotype, genotype) {
   const hasRd = genotype.rd === 'rd/rd';
   const isTort = genotype.to === 'To/to';
 
+  // The base color rules already bake "Tortoiseshell" into the phenotype name for To/to females;
+  // strip it here so the suffixes below can supply the correct combined wording (Tricolor /
+  // Tortoiseshell Recessive Dappled / plain Tortoiseshell) exactly once instead of duplicating it.
+  if (isTort) {
+    phenotype = phenotype.replace(/\s*Tortoiseshell\b/, '').trim();
+  }
+
   const suffixes = [];
 
   const triColor = isTort && (hasBa || hasDs || hasS);
@@ -190,7 +197,11 @@ function applyMarkings(phenotype, genotype) {
     if (hasS) suffixes.push('Pied');
   }
 
-  if (hasRd) suffixes.push(isTort ? 'Tortoiseshell Recessive Dappled' : 'Recessive Dappled');
+  if (hasRd) {
+    suffixes.push(isTort ? 'Tortoiseshell Recessive Dappled' : 'Recessive Dappled');
+  } else if (isTort && !triColor) {
+    suffixes.push('Tortoiseshell');
+  }
 
   if (genotype.wh === 'Wh/wh') {
     suffixes.push(genotype.e === 'e/e' ? 'Roan' : 'White Bellied');
@@ -252,6 +263,9 @@ const SIMPLE_RECESSIVE_CARRIERS = {
   rd: { het: 'Rd/rd', trait: 'Recessive Dappled' },
 };
 
+// Recessive loci eligible for "possible het" (unconfirmed/probability-based carrier) notes.
+export const SYRIAN_HAMSTER_POSSIBLE_HET_LOCI = Object.entries(SIMPLE_RECESSIVE_CARRIERS).map(([locus, { trait }]) => ({ locus, name: trait }));
+
 export function getSyrianHamsterCarriers(genotype) {
   genotype = normalizeHamsterGenotype(genotype);
   const carriers = [];
@@ -279,12 +293,19 @@ export function matchSyrianHamsterPhenotype(genotype) {
     return { phenotype: 'LETHAL (Lg/Lg)', carriers: getSyrianHamsterCarriers(genotype), notes: [] };
   }
 
-  let phenotype = computeBasePhenotype(genotype);
-  phenotype = applyMarkings(phenotype, genotype);
+  const colorPart = computeBasePhenotype(genotype);
+  let phenotype = applyMarkings(colorPart, genotype);
+  const markingsPart = phenotype.slice(colorPart.length).trim();
   const notes = [];
+  const beforeCoat = phenotype;
   phenotype = applyCoatGenes(phenotype, genotype, notes);
+  const coatPart = phenotype.slice(beforeCoat.length).trim();
 
-  return { phenotype, carriers: getSyrianHamsterCarriers(genotype), notes };
+  // Categorized breakdown for the "Seed to Appearance" feature, derived from
+  // the same sequential build above (no change to the derivation logic).
+  const breakdown = { color: colorPart, markings: markingsPart, coat: coatPart, body: '' };
+
+  return { phenotype, carriers: getSyrianHamsterCarriers(genotype), notes, breakdown };
 }
 
 // ---------------------------------------------------------------------------

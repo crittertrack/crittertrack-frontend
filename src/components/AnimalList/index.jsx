@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ArchiveScreen from '../ArchiveScreen';
@@ -6,6 +6,7 @@ import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
 import AnimalImage from '../shared/AnimalImage';
 import { SPECIES_CATEGORY_MAP } from '../../utils/speciesFieldTemplates';
+import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight, Ban, Info,
     Bell, Bird, Bug, Bean, Building, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, Dna, Hourglass, Star,
@@ -3272,7 +3273,7 @@ useEffect(() => {
 
     // -- Shared Management Components ------------------------------------------
     // All appearance fields that make up "Variety" — same set as Tab 3 / Appearance section
-    const VARIETY_KEYS = ['color', 'coat', 'earset', 'morph', 'markings', 'eyeColor', 'carrierTraits', 'size'];
+    const VARIETY_KEYS = ['color', 'markings', 'earset', 'coat', 'eyeColor', 'carrierTraits', 'body'];
     const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
 
     const MgmtAnimalCard = ({ animal, extras, middleContent }) => (
@@ -3545,14 +3546,14 @@ useEffect(() => {
                                                         <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
                                                             {colAnimals.map(animal => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.size].filter(Boolean).join(' ') || '—';
+                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                                                 const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
                                                                         <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</div>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{animal.geneticCode}</div>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>
@@ -3639,14 +3640,14 @@ useEffect(() => {
                                                         <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
                                                             {uncategorized.map(animal => {
                                                                 const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.size].filter(Boolean).join(' ') || '—';
+                                                                const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
                                                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                                                 const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
                                                                 return (
                                                                     <tr key={animal.id_public} className="hover:bg-gray-50 dark:hover:bg-dark-surface-hover cursor-pointer" onClick={() => onViewAnimal(animal)}>
                                                                         <td className="px-3 py-1.5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-dark-card-bg flex-shrink-0 overflow-hidden"><AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} iconSize={20} /></div><div><div className="font-medium text-gray-800 dark:text-dark-text flex items-center gap-1.5 text-sm"><span>{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</span>{animal.gender === 'Male' ? <Mars className="w-3.5 h-3.5 text-primary" /> : animal.gender === 'Female' ? <Venus className="w-3.5 h-3.5 text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3.5 h-3.5 text-purple-500" /> : null}</div><div className="text-xs text-gray-500 dark:text-dark-text-muted font-mono">{animal.id_public}</div></div></div></td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text-muted">{getSpeciesLatinName(animal.species)}</div>}</td>
-                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{animal.geneticCode}</div>}</td>
+                                                                        <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text-muted font-mono">{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '—'}</td>
                                                                         <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>
@@ -6447,7 +6448,7 @@ useEffect(() => {
                                 return displayedAnimalsForList.map(animal => {
                                     const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
                                     const ageStr = calculateBreedingAge(animal.birthDate, animal.deceasedDate);
-                                    const varietyStr = [animal.color, animal.coat, animal.earset, animal.morph, animal.markings, animal.eyeColor, animal.size].filter(Boolean).join(' ') || '—';
+                                    const varietyStr = [animal.color, animal.coat, animal.earset, animal.markings, animal.eyeColor, animal.body].filter(Boolean).join(' ') || '—';
                                     const assignedIds = animalBreedingLines[animal.id_public] || [];
                                     const activeLines = sortLinesGradientFirst(hideRedundantLegacyLines(breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name && l.enabled !== false)));
 
@@ -6481,7 +6482,7 @@ useEffect(() => {
                                             </td>
                                         )}
                                         {listViewColumns.species && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{animal.species || '—'}</div>{getSpeciesLatinName(animal.species) && <div className="text-xs text-gray-400 dark:text-dark-text">{getSpeciesLatinName(animal.species)}</div>}</td>}
-                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text font-mono">{animal.geneticCode}</div>}</td>}
+                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text"><div>{varietyStr}</div>{animal.geneticCode && <div className="text-xs text-gray-400 dark:text-dark-text font-mono">{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}</td>}
                                         {listViewColumns.enclosure && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.enclosureId ? enclosureMap.get(animal.enclosureId) || 'N/A' : '—'}</td>}
                                         {listViewColumns.lifeStage && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text">{animal.lifeStage || '—'}</td>}
                                         {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 dark:text-dark-text text-xs">{animal.status || '—'}</td>}

@@ -491,6 +491,7 @@ const WS_PHENOTYPES = {
 // Ro and Wh are recessive — only express when homozygous recessive
 const RO_PHENOTYPES  = { 'ro/ro': 'Roan (Husky)' };
 const WH_PHENOTYPES  = { 'wh/wh': 'Whiteside' };
+const HS_PHENOTYPES  = { 'hs/hs': 'Headspot' };
 
 // Sf (Snowflake) — recessive, simply appends to whatever marking phenotype already exists, no compounds
 const SF_PHENOTYPES  = { 'sf/sf': 'Snowflake' };
@@ -583,6 +584,7 @@ const MX_PHENOTYPES = { 'Mx/mx': 'Manx' };
  */
 function applyModifiers(rule, genotype) {
   let phenotype = rule.phenotype;
+  const colorEnd = phenotype.length;
 
   // --- Hooded locus (Self = no marking, skip) ---
   const hLabel = H_PHENOTYPES[genotype.H];
@@ -678,6 +680,7 @@ function applyModifiers(rule, genotype) {
   else if (wsLabel) phenotype += ` ${wsLabel}`;
 
   if (hsCompound) phenotype += ` ${hsCompound}`;
+  else if (HS_PHENOTYPES[genotype.Hs]) phenotype += ` ${HS_PHENOTYPES[genotype.Hs]}`;
 
   const dwLabel = DW_PHENOTYPES[genotype.Dw];
   if (dwCompound) phenotype += ` ${dwCompound}`;
@@ -691,6 +694,7 @@ function applyModifiers(rule, genotype) {
   const hasVelveteen = genotype.Ve === 'Ve/Ve' || genotype.Ve === 'Ve/ve';
   const teddyRex = hasRex && hasVelveteen;
   if (teddyRex) phenotype += ' Teddy Rex';
+  const markingsEnd = phenotype.length;
 
   // --- Coat genes ---
   for (const [locus, map] of Object.entries(COAT_PHENOTYPES)) {
@@ -716,10 +720,12 @@ function applyModifiers(rule, genotype) {
 
   const pwLabel = PW_PHENOTYPES[genotype.pw];
   if (pwLabel) phenotype += ` ${pwLabel}`;
+  const coatEnd = phenotype.length;
 
   // --- Ear type ---
   const duLabel = DU_PHENOTYPES[genotype.Du];
   if (duLabel) phenotype += ` ${duLabel}`;
+  const earEnd = phenotype.length;
 
   // --- Body type ---
   const drLabel = DR_PHENOTYPES[genotype.dr];
@@ -727,6 +733,7 @@ function applyModifiers(rule, genotype) {
 
   const mxLabel = MX_PHENOTYPES[genotype.Mx];
   if (mxLabel) phenotype += ` ${mxLabel}`;
+  const bodyEnd = phenotype.length;
 
   // --- Pearl / Merle (only when m/m present) ---
   if (genotype.M === 'm/m') {
@@ -735,7 +742,17 @@ function applyModifiers(rule, genotype) {
     else if (genotype.Me === 'Me/Me') phenotype += ' Extreme Merle';
   }
 
-  return { ...rule, phenotype };
+  // Categorized breakdown for the "Seed to Appearance" feature — derived via
+  // string-length checkpoints above, without altering any derivation logic.
+  const breakdown = {
+    color: phenotype.slice(0, colorEnd).trim(),
+    markings: `${phenotype.slice(colorEnd, markingsEnd)} ${phenotype.slice(bodyEnd)}`.trim().replace(/\s+/g, ' '),
+    coat: phenotype.slice(markingsEnd, coatEnd).trim(),
+    earset: phenotype.slice(coatEnd, earEnd).trim(),
+    body: phenotype.slice(earEnd, bodyEnd).trim(),
+  };
+
+  return { ...rule, phenotype, breakdown };
 }
 
 // ---------------------------------------------------------------------------
@@ -825,6 +842,7 @@ const SIMPLE_RECESSIVE_CARRIERS = {
   D: { het: 'D/d', trait: 'Russian Blue' },
   G: { het: 'G/g', trait: 'American Blue' },
   M: { het: 'M/m', trait: 'Mink' },
+  Mo: { het: 'Mo/mo', trait: 'Mock Mink' },
   P: { het: 'P/p', trait: 'Champagne' },
   R: { het: 'R/r', trait: 'Beige' },
   Ro: { het: 'Ro/ro', trait: 'Roan' },
@@ -846,6 +864,10 @@ const SIMPLE_RECESSIVE_CARRIERS = {
  * Dominant-in-heterozygote traits (Bu, Pe, Me, Dal, Ma, Ws, coat genes, H-series)
  * are excluded since they always visibly express and are never "hidden".
  */
+// Recessive loci eligible for "possible het" (unconfirmed/probability-based carrier) notes —
+// same simple-biallelic set used by getFancyRatCarriers, minus the C-locus (multi-allelic).
+export const RAT_POSSIBLE_HET_LOCI = Object.entries(SIMPLE_RECESSIVE_CARRIERS).map(([locus, { trait }]) => ({ locus, name: trait }));
+
 export function getFancyRatCarriers(genotype) {
   genotype = normalizeRatGenotype(genotype);
   const carriers = [];
@@ -886,6 +908,12 @@ export function matchFancyRatPhenotype(genotype) {
   const result = matchFancyRatPhenotypeCore(genotype);
   if (!result) return null;
   return { ...result, carriers: getFancyRatCarriers(genotype) };
+}
+
+// Mo (Mock Mink) is a separate, non-complementary locus that phenocopies Mink/Cinnamon —
+// treat mo/mo as M's m/m for phenotype-matching purposes only (carrier detection stays separate).
+function withMockMinkPhenocopy(genotype) {
+  return genotype.Mo === 'mo/mo' ? { ...genotype, M: 'm/m' } : genotype;
 }
 
 function computeBasePhenotype(genotype) {
@@ -930,7 +958,7 @@ function computeBasePhenotype(genotype) {
 }
 
 function matchFancyRatPhenotypeCore(genotype) {
-  const base = computeBasePhenotype(genotype);
+  const base = computeBasePhenotype(withMockMinkPhenocopy(genotype));
   if (!base) return null;
 
   const isBe = genotype.Be === 'Be/be' || genotype.Be === 'Be/Be';
@@ -960,6 +988,7 @@ export const RAT_GENE_LOCI = {
   D:   { name: 'Dilute (Russian Blue)', description: 'd/d = Russian Blue (Black) or Russian Blue Agouti', combinations: ['D/D', 'D/d', 'd/d'] },
   G:   { name: 'Gray (American Blue)', description: 'g/g = American Blue (Black) or Opal (Agouti)', combinations: ['G/G', 'G/g', 'g/g'] },
   M:   { name: 'Mink',                description: 'm/m = Mink (Black) or Cinnamon (Agouti). Required for Pearl/Merle to express.', combinations: ['M/M', 'M/m', 'm/m'] },
+  Mo:  { name: 'Mock Mink',           description: 'Recessive, separate locus from Mink (M). mo/mo is visually identical to Mink/Cinnamon but does not complement with M — a non-carrier at M paired with mo/mo still shows Mink/Cinnamon.', combinations: ['Mo/Mo', 'Mo/mo', 'mo/mo'] },
   P:   { name: 'Pink-eyed Dilution',  description: 'p/p = Champagne (Black) or Amber (Agouti)', combinations: ['P/P', 'P/p', 'p/p'] },
   Pe:  { name: 'Pearl',               description: 'Pe/pe appends Pearl when m/m present. Pe/Pe is lethal.', combinations: ['Pe/Pe', 'Pe/pe', 'pe/pe'] },
   R:   { name: 'Red-eye Dilution',    description: 'r/r = Beige (Black) or Topaz (Agouti)', combinations: ['R/R', 'R/r', 'r/r'] },

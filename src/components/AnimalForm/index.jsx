@@ -2,6 +2,7 @@
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
+import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import themeColors from '../../utils/themeColors';
 import AnimalImage from '../shared/AnimalImage';
 import {
@@ -1052,7 +1053,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                             <>
                                 <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, overflowWrap: 'anywhere' }}>{fullName}</div>
                                 {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere' }}>{variety}</div>}
-                                {animal.geneticCode && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere' }}>{animal.geneticCode}</div>}
+                                {animal.geneticCode && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere' }}>{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</div>}
                                 {animal.birthDate && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
                                 {animal.breederName && animal.breederName !== 'Anonymous Breeder' && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.15, overflowWrap: 'anywhere' }}>{animal.breederName}</div>}
                             </>
@@ -1335,8 +1336,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                             </tr>
                             {animal.geneticCode && (
                                 <tr>
-                                    <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Genotype:</td>
-                                    <td style={{ color: certFontColor, fontFamily: 'monospace', wordBreak: 'break-word' }}>{animal.geneticCode}</td>
+                                    <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>{animal.species === 'Ball Python' ? 'Genetics:' : 'Genotype:'}</td>
+                                    <td style={{ color: certFontColor, fontFamily: animal.species === 'Ball Python' ? 'inherit' : 'monospace', wordBreak: 'break-word' }}>{animal.species === 'Ball Python' ? getBallPythonDisplayPhenotype(animal.geneticCode, animal.possibleHets) : animal.geneticCode}</td>
                                 </tr>
                             )}
                             <tr>

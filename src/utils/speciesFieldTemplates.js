@@ -28,6 +28,9 @@ export const SPECIES_CATEGORY_MAP = {
     'Smooth Isopod': 'Invertebrate', 'Stick Insect': 'Invertebrate', 'Tarantula': 'Invertebrate',
     // Invertebrate - casing aliases seen in live data (DB entries don't exactly match the catalogued names)
     'Plum isopod': 'Invertebrate', 'Roly-Poly isopod': 'Invertebrate', 'Pill millipede': 'Invertebrate',
+    // Invertebrate - custom species added by users (baboon spider/tarantula common names)
+    'Bronze baboon': 'Invertebrate', 'kigoma baboon': 'Invertebrate', 'Rear-Horned Baboon': 'Invertebrate',
+    'pumpkin patch': 'Invertebrate',
     // Mammal
     'African Pygmy Dormouse': 'Mammal', 'African Pygmy Mouse': 'Mammal', 'Campbells Dwarf Hamster': 'Mammal',
     'Cat': 'Mammal', 'Chinchilla': 'Mammal', 'Chinese Dwarf Hamster': 'Mammal', 'Deer Mouse': 'Mammal',
@@ -45,6 +48,8 @@ export const SPECIES_CATEGORY_MAP = {
     'Crested Gecko': 'Reptile', 'Eastern Kingsnake': 'Reptile', 'Gargoyle Gecko': 'Reptile',
     'Giant Day Gecko': 'Reptile', 'Leopard Gecko': 'Reptile', 'Pilbara Knobtail Gecko': 'Reptile',
     'Red-Eared Slider': 'Reptile', 'Russian Tortoise': 'Reptile', 'Thicktail Gecko': 'Reptile',
+    // Reptile - custom species added by users
+    'Green iguana': 'Reptile',
     // Other
     'Other': 'Other',
 };
@@ -66,7 +71,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
         'pedigreeRegistrationId', 'tattooId', 'exerciseRequirements', 'dailyExerciseMinutes', 'trainingLevel',
         'trainingDisciplines', 'certifications', 'workingRole', 'workingRoleTrainingSchedule',
         'behavioralIssueTrainingSchedule', 'reactivityTrainingSchedule', 'exerciseSchedule', 'attachmentStyle',
-        'bondingBehavior',
+        'bondingBehavior', // no live entries for this category
     ],
     Bird: [
         'earset', 'heightAtWithers', 'eartagNumber', 'heatStatus', 'lastHeatDate', 'estrusCycleLength',
@@ -84,7 +89,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
         'pedigreeRegistrationId', 'tattooId', 'studFeeCurrency', 'studFeeAmount', 'exerciseRequirements',
         'dailyExerciseMinutes', 'trainingLevel', 'trainingDisciplines', 'certifications', 'workingRole',
         'workingRoleTrainingSchedule', 'behavioralIssueTrainingSchedule', 'reactivityTrainingSchedule',
-        'exerciseSchedule', 'attachmentStyle', 'bondingBehavior',
+        'exerciseSchedule', 'attachmentStyle', 'bondingBehavior', // no live entries for this category
     ],
     Invertebrate: [
         'earset', 'heightAtWithers', 'eartagNumber', 'microchipNumber', 'heatStatus', 'lastHeatDate',
@@ -101,7 +106,7 @@ export const HIDDEN_FIELDS_BY_CATEGORY = {
     ],
     Mammal: [
         'sheddingRecords', 'moltingRecords', 'waterParameterChecks', 'freeFlightTrained',
-        'flightRiskTrainingSchedule', 'morph',
+        'flightRiskTrainingSchedule',
     ],
     Reptile: [
         'earset', 'heightAtWithers', 'eartagNumber', 'heatStatus', 'lastHeatDate', 'estrusCycleLength',
@@ -131,6 +136,7 @@ const SPECIES_LABEL_OVERRIDES = {
 
 // Field label overrides by category - same underlying data slot, different display label.
 export const FIELD_LABEL_OVERRIDES = {
+    color: { Reptile: 'Morph', Amphibian: 'Morph', Fish: 'Morph', Invertebrate: 'Morph' },
     coat: { Reptile: 'Scalation', Bird: 'Plumage', Amphibian: 'Skin', Fish: 'Skin', Invertebrate: 'Coloring' },
     markings: { Reptile: 'Scale Pattern', Bird: 'Plumage Pattern', Amphibian: 'Skin Pattern', Fish: 'Skin Pattern', Invertebrate: 'Skin Pattern' },
     breed: { Amphibian: 'Subspecies', Invertebrate: 'Subspecies', Reptile: 'Subspecies' },
