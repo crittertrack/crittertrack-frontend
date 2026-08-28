@@ -1251,7 +1251,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                         const result = ballPythonCode ? matchBallPythonPhenotype(ballPythonGenotype) : null;
                         const hetNotes = ballPythonPossibleHets
                           .filter(h => h && h.locus && h.percent)
-                          .map(h => `${h.percent}% Het ${BALL_PYTHON_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+                          .map(h => `${h.percent}% Het. ${BALL_PYTHON_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
                         const displayName = [result?.phenotype && result.phenotype !== 'Normal' ? result.phenotype : null, ...hetNotes].filter(Boolean).join(' ') || (hetNotes.length ? hetNotes.join(' ') : null);
                         return (
                           <>
@@ -1289,7 +1289,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                         </button>
                       </div>
                       <p className="text-xs text-gray-500 dark:text-dark-text-muted mb-3">
-                        Unconfirmed carrier status (e.g. from a het x het pairing) — not a confirmed genotype, just a breeding-record note like "66% Het Clown".
+                        Unconfirmed carrier status (e.g. from a Het. x Het. pairing) — not a confirmed genotype, just a breeding-record note like "66% Het. Clown".
                       </p>
                       {ballPythonPossibleHets.length === 0 ? (
                         <p className="text-sm text-gray-400 dark:text-dark-text-muted">None added.</p>

@@ -674,7 +674,7 @@ export function getBallPythonComboLabel(locus, combo) {
 
   if (locus === 'cinBp') return BLACK_COMPLEX_NAMES[combo] || noTrait;
   if (locus === 'albCdy') {
-    return ALBINO_COMPLEX_NAMES[combo] || (ALBINO_COMPLEX_CARRIERS[combo] ? `Het ${ALBINO_COMPLEX_CARRIERS[combo]}` : noTrait);
+    return ALBINO_COMPLEX_NAMES[combo] || (ALBINO_COMPLEX_CARRIERS[combo] ? `Het. ${ALBINO_COMPLEX_CARRIERS[combo]}` : noTrait);
   }
   if (locus === 'lacGhi') return LACE_GHI_NAMES[combo] || noTrait;
   if (locus === 'cha') return combo === 'Cha/cha' ? 'Champagne' : noTrait;
@@ -698,7 +698,7 @@ export function getBallPythonComboLabel(locus, combo) {
   if (recRule) {
     if (combo === recRule.homo) return recRule.name;
     const carrier = SIMPLE_RECESSIVE_CARRIERS[locus];
-    if (carrier && combo === carrier.het) return `Het ${carrier.trait}`;
+    if (carrier && combo === carrier.het) return `Het. ${carrier.trait}`;
     return noTrait;
   }
 
@@ -1204,7 +1204,7 @@ export function getBallPythonDisplayPhenotype(geneticCode, possibleHets = []) {
     .filter(h => h && h.locus && h.percent)
     .map(h => {
       const rule = RECESSIVE_RULES.find(r => r.locus === h.locus);
-      return `${h.percent}% Het ${rule ? rule.name : h.locus}`;
+      return `${h.percent}% Het. ${rule ? rule.name : h.locus}`;
     });
 
   const parts = phenotype && phenotype !== 'Normal' ? [phenotype, ...hetNotes] : hetNotes;
