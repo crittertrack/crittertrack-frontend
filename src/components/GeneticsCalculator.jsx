@@ -1823,8 +1823,22 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
   // Function to get possible alleles from a genotype combination
   const getAlleles = (combination) => {
+    if (!combination) return ['-', '-'];
     const cleaned = combination.replace(' (lethal)', '');
     return cleaned.split('/');
+  };
+
+  // A parent left this locus blank while the other parent selected it — fall back to the locus's
+  // wildtype (homozygous dominant) combo rather than an empty string, e.g. treating an unselected
+  // 'B' as 'B/B' so the cross math has real alleles to work with.
+  const resolveLocusValue = (value, locus) => {
+    if (value) return value;
+    const combos = geneLoci[locus]?.combinations || [];
+    const wildtype = combos.find(c => {
+      const [a, b] = c.split('/');
+      return a === b && a[0] === a[0].toUpperCase();
+    });
+    return wildtype || combos[0] || '';
   };
 
   // Function to apply defaults to genotype
@@ -1897,8 +1911,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     let map = { '': { genotype: {}, weight: 1 } };
 
     for (const locus of loci) {
-      const parent1Alleles = getAlleles(p1Concrete[locus]);
-      const parent2Alleles = getAlleles(p2Concrete[locus]);
+      const parent1Alleles = getAlleles(resolveLocusValue(p1Concrete[locus], locus));
+      const parent2Alleles = getAlleles(resolveLocusValue(p2Concrete[locus], locus));
 
       const locusWeights = {};
       for (const a1 of parent1Alleles) {
