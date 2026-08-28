@@ -158,6 +158,9 @@ const SIMPLE_RECESSIVE_CARRIERS = {
   wa: { het: 'Wa/wa', trait: 'Wavy' },
 };
 
+// Recessive loci eligible for "possible het" (unconfirmed/probability-based carrier) notes.
+export const RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI = Object.entries(SIMPLE_RECESSIVE_CARRIERS).map(([locus, { trait }]) => ({ locus, name: trait }));
+
 export function getRussianDwarfHamsterCarriers(genotype) {
   genotype = normalizeRussianDwarfGenotype(genotype);
   const carriers = [];

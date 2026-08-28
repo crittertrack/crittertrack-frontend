@@ -846,6 +846,10 @@ const SIMPLE_RECESSIVE_CARRIERS = {
  * Dominant-in-heterozygote traits (Bu, Pe, Me, Dal, Ma, Ws, coat genes, H-series)
  * are excluded since they always visibly express and are never "hidden".
  */
+// Recessive loci eligible for "possible het" (unconfirmed/probability-based carrier) notes —
+// same simple-biallelic set used by getFancyRatCarriers, minus the C-locus (multi-allelic).
+export const RAT_POSSIBLE_HET_LOCI = Object.entries(SIMPLE_RECESSIVE_CARRIERS).map(([locus, { trait }]) => ({ locus, name: trait }));
+
 export function getFancyRatCarriers(genotype) {
   genotype = normalizeRatGenotype(genotype);
   const carriers = [];

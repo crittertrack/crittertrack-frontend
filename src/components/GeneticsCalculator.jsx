@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { X, Book, User, Search } from 'lucide-react';
 import InfoButton from './shared/InfoButton';
-import { matchFancyRatPhenotype, getFancyRatCarriers, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
-import { matchSyrianHamsterPhenotype, getSyrianHamsterCarriers, SYRIAN_HAMSTER_GENE_LOCI } from '../data/syrianHamsterPhenotypeRules';
-import { matchCampbellsDwarfHamsterPhenotype, getCampbellsDwarfHamsterCarriers, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
-import { matchRussianDwarfHamsterPhenotype, getRussianDwarfHamsterCarriers, RUSSIAN_DWARF_HAMSTER_GENE_LOCI } from '../data/russianDwarfHamsterPhenotypeRules';
-import { matchBallPythonPhenotype, getBallPythonCarriers, BALL_PYTHON_GENE_LOCI, getBallPythonComboLabel, getBallPythonDisplayPhenotype } from '../data/ballPythonPhenotypeRules';
+import { matchFancyRatPhenotype, getFancyRatCarriers, RAT_GENE_LOCI, RAT_POSSIBLE_HET_LOCI } from '../data/fancyRatPhenotypeRules';
+import { matchSyrianHamsterPhenotype, getSyrianHamsterCarriers, SYRIAN_HAMSTER_GENE_LOCI, SYRIAN_HAMSTER_POSSIBLE_HET_LOCI } from '../data/syrianHamsterPhenotypeRules';
+import { matchCampbellsDwarfHamsterPhenotype, getCampbellsDwarfHamsterCarriers, CAMPBELLS_DWARF_HAMSTER_GENE_LOCI, CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI } from '../data/campbellsDwarfHamsterPhenotypeRules';
+import { matchRussianDwarfHamsterPhenotype, getRussianDwarfHamsterCarriers, RUSSIAN_DWARF_HAMSTER_GENE_LOCI, RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI } from '../data/russianDwarfHamsterPhenotypeRules';
+import { matchBallPythonPhenotype, getBallPythonCarriers, BALL_PYTHON_GENE_LOCI, getBallPythonComboLabel, getBallPythonDisplayPhenotype, BALL_PYTHON_POSSIBLE_HET_LOCI } from '../data/ballPythonPhenotypeRules';
 
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
@@ -186,6 +186,36 @@ const GENE_LOCI = {
       'Nu/nu', 'Nu/Nu', 'Nu/-'
     ]
   }
+};
+
+// Simple single-mutant recessive loci eligible for "possible het" (unconfirmed/probability-based
+// carrier) notes — the same concept as the '/-' wildcard combos above (a wildtype-phenotype animal
+// whose second allele is unconfirmed), just expressed as a breeding-record percentage instead of a
+// dropdown option. Excludes multi-allelic loci (A, C, S, W) and dominant-trait loci (Re, Spl, Nu,
+// U) whose '/-' ambiguity is about dosage of a *visible* trait, not a hidden carrier.
+const MOUSE_POSSIBLE_HET_LOCI = [
+  { locus: 'B', name: 'Brown' },
+  { locus: 'D', name: 'Dilute' },
+  { locus: 'E', name: 'Recessive Red' },
+  { locus: 'Ln', name: 'Leaden' },
+  { locus: 'P', name: 'Pink-eye' },
+  { locus: 'Go', name: 'Longhair' },
+  { locus: 'Sa', name: 'Satin' },
+  { locus: 'Rst', name: 'Rosette' },
+  { locus: 'Fz', name: 'Fuzz' },
+  { locus: 'Rn', name: 'Roan' },
+  { locus: 'Si', name: 'Silver' },
+];
+
+// Which species currently support the "possible het" probability system, and the recessive loci
+// eligible for it in each. Empty/absent species fall back to the old fixed-genotype behavior.
+const POSSIBLE_HET_LOCI_BY_SPECIES = {
+  'Fancy Mouse': MOUSE_POSSIBLE_HET_LOCI,
+  'Fancy Rat': RAT_POSSIBLE_HET_LOCI,
+  'Syrian Hamster': SYRIAN_HAMSTER_POSSIBLE_HET_LOCI,
+  'Campbells Dwarf Hamster': CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI,
+  'Russian Dwarf Hamster': RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI,
+  'Ball Python': BALL_PYTHON_POSSIBLE_HET_LOCI,
 };
 
 // Calculate phenotype for dynamically loaded species (non-Fancy Mouse) using DB-stored phenotype data
@@ -1477,6 +1507,9 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
   const [parent1, setParent1] = useState(defaultGenotype);
   const [parent2, setParent2] = useState(defaultGenotype);
+  // Unconfirmed carrier notes (Ball Python only): [{ locus, percent }] — blended into the cross as a weighted probability, not a fixed genotype.
+  const [parent1PossibleHets, setParent1PossibleHets] = useState([]);
+  const [parent2PossibleHets, setParent2PossibleHets] = useState([]);
   const [showExamples, setShowExamples] = useState(false);
   const [activeTab, setActiveTab] = useState('self');
   const [offspringResults, setOffspringResults] = useState(null);
@@ -1520,6 +1553,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         });
         setParent1(newDefaults);
         setParent2(newDefaults);
+        setParent1PossibleHets([]);
+        setParent2PossibleHets([]);
         setOffspringResults(null);
         return;
       }
@@ -1539,6 +1574,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           });
           setParent1(newDefaults);
           setParent2(newDefaults);
+          setParent1PossibleHets([]);
+          setParent2PossibleHets([]);
           setOffspringResults(null);
         } else {
           console.error('Failed to fetch genetics data, falling back to Fancy Mouse');
@@ -1639,6 +1676,8 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     const newDefaults = createDefaultGenotype();
     setParent1(newDefaults);
     setParent2(newDefaults);
+    setParent1PossibleHets([]);
+    setParent2PossibleHets([]);
     setActiveTab('self');
     setOffspringResults(null);
     setShowWildcardNote(false);
@@ -1659,6 +1698,22 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
   const updateParent2 = (locus, value) => {
     setParent2({ ...parent2, [locus]: value });
+  };
+
+  const addPossibleHet = (setPossibleHets, possibleHetLoci) => {
+    const firstLocus = possibleHetLoci[0]?.locus;
+    if (!firstLocus) return;
+    setPossibleHets(prev => [...prev, { locus: firstLocus, percent: 50 }]);
+  };
+
+  const changePossibleHet = (setPossibleHets, index, field, val) => {
+    setPossibleHets(prev => prev.map((entry, i) => (
+      i === index ? { ...entry, [field]: field === 'percent' ? Number(val) : val } : entry
+    )));
+  };
+
+  const removePossibleHet = (setPossibleHets, index) => {
+    setPossibleHets(prev => prev.filter((_, i) => i !== index));
   };
 
   const togglePhenotype = (index) => {
@@ -1747,6 +1802,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     
     if (selectingForParent === 'parent1') {
       setParent1({ ...newDefaults, ...parsedGenotype });
+      setParent1PossibleHets((POSSIBLE_HET_LOCI_BY_SPECIES[selectedSpecies] || []).length ? (animal.possibleHets || []) : []);
       if (process.env.NODE_ENV !== 'production') {
         setTimeout(() => {
           console.log('DEBUG: parent1.Sa after select:', parsedGenotype.Sa);
@@ -1754,6 +1810,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       }
     } else if (selectingForParent === 'parent2') {
       setParent2({ ...newDefaults, ...parsedGenotype });
+      setParent2PossibleHets((POSSIBLE_HET_LOCI_BY_SPECIES[selectedSpecies] || []).length ? (animal.possibleHets || []) : []);
       if (process.env.NODE_ENV !== 'production') {
         setTimeout(() => {
           console.log('DEBUG: parent2.Sa after select:', parsedGenotype.Sa);
@@ -1833,15 +1890,71 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     return filled;
   };
 
+  // Compute a probability-weighted map of offspring genotype combinations for one locus set.
+  // Deduplicates genotype combinations per locus to avoid exponential blowup (e.g. Aa×Aa →
+  // {AA:1, Aa:2, aa:1} instead of 4 branches). weightedMap: { genotypeKey -> { genotype, weight } }
+  const computeWeightedMap = (p1Concrete, p2Concrete, loci) => {
+    let map = { '': { genotype: {}, weight: 1 } };
+
+    for (const locus of loci) {
+      const parent1Alleles = getAlleles(p1Concrete[locus]);
+      const parent2Alleles = getAlleles(p2Concrete[locus]);
+
+      const locusWeights = {};
+      for (const a1 of parent1Alleles) {
+        for (const a2 of parent2Alleles) {
+          const alleles = [a1, a2].sort((a, b) => {
+            if (a[0] === a[0].toUpperCase() && b[0] === b[0].toLowerCase()) return -1;
+            if (a[0] === a[0].toLowerCase() && b[0] === b[0].toUpperCase()) return 1;
+            return a.localeCompare(b);
+          });
+          const combo = `${alleles[0]}/${alleles[1]}`;
+          locusWeights[combo] = (locusWeights[combo] || 0) + 1;
+        }
+      }
+
+      const newMap = {};
+      for (const [key, { genotype, weight }] of Object.entries(map)) {
+        for (const [combo, comboWeight] of Object.entries(locusWeights)) {
+          const newKey = key ? `${key}|${combo}` : combo;
+          newMap[newKey] = {
+            genotype: { ...genotype, [locus]: combo },
+            weight: weight * comboWeight
+          };
+        }
+      }
+      map = newMap;
+    }
+
+    return map;
+  };
+
   // Function to calculate offspring outcomes
   const calculateOffspring = () => {
     // Apply defaults to both parents before calculating (mouse only — other species use genotype as-is)
     const p1 = selectedSpecies === 'Fancy Mouse' ? applyDefaults(parent1) : parent1;
     const p2 = selectedSpecies === 'Fancy Mouse' ? applyDefaults(parent2) : parent2;
-    
-    // Only calculate for loci where at least one parent has a selection
+
+    // Unconfirmed "possible het" % notes get blended into the cross as weighted branches (parent
+    // assumed carrier vs. non-carrier) rather than a fixed genotype, for any species with recessive
+    // loci eligible for it (see POSSIBLE_HET_LOCI_BY_SPECIES). Only applies to loci the parent left
+    // unselected in the dropdown (a real selection wins).
+    const possibleHetLoci = POSSIBLE_HET_LOCI_BY_SPECIES[selectedSpecies] || [];
+    const activeHetEntries = possibleHetLoci.length
+      ? [
+          ...(parent1PossibleHets || [])
+            .filter(h => h && h.locus && !parent1[h.locus] && h.percent > 0 && h.percent <= 100)
+            .map(h => ({ ...h, parentKey: 'p1' })),
+          ...(parent2PossibleHets || [])
+            .filter(h => h && h.locus && !parent2[h.locus] && h.percent > 0 && h.percent <= 100)
+            .map(h => ({ ...h, parentKey: 'p2' })),
+        ]
+      : [];
+
+    // Only calculate for loci where at least one parent has a selection (or a possible het targets it)
     const selectedLoci = Object.keys(geneLoci).filter(locus => 
-      (parent1[locus] && parent1[locus] !== '') || (parent2[locus] && parent2[locus] !== '')
+      (parent1[locus] && parent1[locus] !== '') || (parent2[locus] && parent2[locus] !== '') ||
+      activeHetEntries.some(h => h.locus === locus)
     );
     
     // If no loci selected, don't calculate
@@ -1868,45 +1981,48 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         selectedGenotype[locus] = 'selected';
       }
     });
-    
-    // Probability-weighted map approach: deduplicate genotype combinations per locus
-    // to avoid exponential blowup (e.g. Aa×Aa → {AA:1, Aa:2, aa:1} instead of 4 branches)
-    // Worst case is (unique combos per locus)^N instead of 4^N — up to 56× faster for 14 loci
-    //
-    // weightedMap: { genotypeKey -> { genotype: {}, weight: number } }
-    let weightedMap = { '': { genotype: {}, weight: 1 } };
 
-    for (const locus of selectedLoci) {
-      const parent1Alleles = getAlleles(p1[locus]);
-      const parent2Alleles = getAlleles(p2[locus]);
+    // Probability-weighted map approach — see computeWeightedMap. When there are no active
+    // possible-het entries this is a single pass; otherwise we run one pass per het
+    // carrier/non-carrier branch combination and blend the results by branch probability.
+    let weightedMap;
+    if (activeHetEntries.length === 0) {
+      weightedMap = computeWeightedMap(p1, p2, selectedLoci);
+    } else {
+      const n = activeHetEntries.length;
+      const combined = {};
+      for (let mask = 0; mask < (1 << n); mask++) {
+        const p1b = { ...p1 };
+        const p2b = { ...p2 };
+        let branchProbability = 1;
 
-      // Compute per-locus unique combinations with probability weights
-      const locusWeights = {};
-      for (const a1 of parent1Alleles) {
-        for (const a2 of parent2Alleles) {
-          const alleles = [a1, a2].sort((a, b) => {
-            if (a[0] === a[0].toUpperCase() && b[0] === b[0].toLowerCase()) return -1;
-            if (a[0] === a[0].toLowerCase() && b[0] === b[0].toUpperCase()) return 1;
-            return a.localeCompare(b);
-          });
-          const combo = `${alleles[0]}/${alleles[1]}`;
-          locusWeights[combo] = (locusWeights[combo] || 0) + 1;
+        activeHetEntries.forEach((entry, i) => {
+          const combos = geneLoci[entry.locus]?.combinations || [];
+          const wildtype = combos[0];
+          const het = combos[1];
+          const isCarrierBranch = (mask >> i) & 1;
+          const p = Math.min(Math.max(entry.percent, 0), 100) / 100;
+          branchProbability *= isCarrierBranch ? p : (1 - p);
+
+          const target = entry.parentKey === 'p1' ? p1b : p2b;
+          target[entry.locus] = isCarrierBranch ? het : wildtype;
+
+          // Assume the other parent is non-carrier at this locus unless it has a real selection.
+          const other = entry.parentKey === 'p1' ? p2b : p1b;
+          if (!other[entry.locus]) other[entry.locus] = wildtype;
+        });
+
+        if (branchProbability <= 0) continue;
+
+        const branchMap = computeWeightedMap(p1b, p2b, selectedLoci);
+        for (const [key, { genotype, weight }] of Object.entries(branchMap)) {
+          if (!combined[key]) combined[key] = { genotype, weight: 0 };
+          combined[key].weight += weight * branchProbability;
         }
       }
-
-      // Cross-product with existing weighted map, keeping unique combined keys
-      const newMap = {};
-      for (const [key, { genotype, weight }] of Object.entries(weightedMap)) {
-        for (const [combo, comboWeight] of Object.entries(locusWeights)) {
-          const newKey = key ? `${key}|${combo}` : combo;
-          newMap[newKey] = {
-            genotype: { ...genotype, [locus]: combo },
-            weight: weight * comboWeight
-          };
-        }
-      }
-      weightedMap = newMap;
+      weightedMap = combined;
     }
+
 
     // Group by phenotype using weighted counts (single calculatePhenotype pass)
     const phenotypeMap = {};
@@ -1983,6 +2099,10 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   const hasAnySelection = (parent) => {
     return Object.values(parent).some(value => value !== '');
   };
+
+  // Recessive loci eligible for "possible het" notes for the currently selected species (empty for
+  // species that don't support it yet).
+  const possibleHetLoci = POSSIBLE_HET_LOCI_BY_SPECIES[selectedSpecies] || [];
 
   const parent1Result = hasAnySelection(parent1)
     ? (selectedSpecies === 'Fancy Mouse'
@@ -2487,8 +2607,12 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(geneLoci).map(([locus, data]) => {
-              // For Sire/Father, filter out Mobr combinations (males can't carry Mobr)
-              const validCombinations = data.maleCombinations || data.combinations;
+              // For Sire/Father, filter out Mobr combinations (males can't carry Mobr). Also hide the
+              // '/-' wildcard option for loci that now have a "Possible Hets" % entry instead — old
+              // saved genotypes with '/-' still parse/display fine, it's just no longer offered here.
+              const hasPossibleHet = possibleHetLoci.some(l => l.locus === locus);
+              const validCombinations = (data.maleCombinations || data.combinations)
+                .filter(combo => !hasPossibleHet || !combo.endsWith('/-'));
               return (
               <div key={locus}>
                 <select
@@ -2507,6 +2631,52 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               );
             })}
           </div>
+          {possibleHetLoci.length > 0 && (
+            <div className="mt-2 p-2 bg-white dark:bg-dark-card-bg rounded-lg border border-blue-300 dark:border-blue-700/60">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Possible Hets</span>
+                <button
+                  type="button"
+                  onClick={() => addPossibleHet(setParent1PossibleHets, possibleHetLoci)}
+                  className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-dark-surface hover:bg-gray-200 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded transition"
+                >
+                  + Add
+                </button>
+              </div>
+              {parent1PossibleHets.length === 0 ? (
+                <p className="text-xs text-gray-400 dark:text-dark-text-muted">None added.</p>
+              ) : (
+                <div className="space-y-1">
+                  {parent1PossibleHets.map((entry, index) => (
+                    <div key={index} className="flex gap-1 items-center">
+                      <select
+                        value={entry.locus}
+                        onChange={(e) => changePossibleHet(setParent1PossibleHets, index, 'locus', e.target.value)}
+                        className="flex-1 px-1 py-0.5 text-xs border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                      >
+                        {possibleHetLoci.map(l => (
+                          <option key={l.locus} value={l.locus}>{l.name}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={entry.percent}
+                        onChange={(e) => changePossibleHet(setParent1PossibleHets, index, 'percent', e.target.value)}
+                        className="w-14 px-1 py-0.5 text-xs border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                      />
+                      <span className="text-xs text-gray-500 dark:text-dark-text-muted">%</span>
+                      <button type="button" onClick={() => removePossibleHet(setParent1PossibleHets, index)} className="text-xs text-red-600 hover:text-red-800 px-1">✕</button>
+                      {parent1[entry.locus] && (
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400">(ignored — confirmed above)</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white dark:bg-dark-card-bg rounded-lg border-2 border-blue-500 dark:border-blue-700/60">
             <p className={`text-base sm:text-lg font-semibold ${parent1Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800 dark:text-blue-300'} mb-1 sm:mb-2`}>
               <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Phenotype: </span>
@@ -2561,7 +2731,12 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
             )}
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            {Object.entries(geneLoci).map(([locus, data]) => (
+            {Object.entries(geneLoci).map(([locus, data]) => {
+              // Hide the '/-' wildcard option for loci that now have a "Possible Hets" % entry
+              // instead — old saved genotypes with '/-' still parse/display fine, just not offered here.
+              const hasPossibleHet = possibleHetLoci.some(l => l.locus === locus);
+              const validCombinations = data.combinations.filter(combo => !hasPossibleHet || !combo.endsWith('/-'));
+              return (
               <div key={locus}>
                 <select
                   value={parent2[locus]}
@@ -2569,15 +2744,62 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                   className="w-full px-2 py-1 text-xs sm:text-sm border border-gray-300 dark:border-dark-text rounded-lg bg-white dark:bg-dark-card-bg dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
                   <option value="">{locus} - {data.name}</option>
-                  {data.combinations.map((combo) => (
+                  {validCombinations.map((combo) => (
                     <option key={combo} value={combo}>
                       {selectedSpecies === 'Ball Python' ? getBallPythonComboLabel(locus, combo) : combo}
                     </option>
                   ))}
                 </select>
               </div>
-            ))}
+              );
+            })}
           </div>
+          {possibleHetLoci.length > 0 && (
+            <div className="mt-2 p-2 bg-white dark:bg-dark-card-bg rounded-lg border border-pink-300 dark:border-pink-700/60">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs font-semibold text-gray-700 dark:text-dark-text-secondary">Possible Hets</span>
+                <button
+                  type="button"
+                  onClick={() => addPossibleHet(setParent2PossibleHets, possibleHetLoci)}
+                  className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-dark-surface hover:bg-gray-200 dark:hover:bg-dark-surface-hover text-gray-800 dark:text-dark-text rounded transition"
+                >
+                  + Add
+                </button>
+              </div>
+              {parent2PossibleHets.length === 0 ? (
+                <p className="text-xs text-gray-400 dark:text-dark-text-muted">None added.</p>
+              ) : (
+                <div className="space-y-1">
+                  {parent2PossibleHets.map((entry, index) => (
+                    <div key={index} className="flex gap-1 items-center">
+                      <select
+                        value={entry.locus}
+                        onChange={(e) => changePossibleHet(setParent2PossibleHets, index, 'locus', e.target.value)}
+                        className="flex-1 px-1 py-0.5 text-xs border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                      >
+                        {possibleHetLoci.map(l => (
+                          <option key={l.locus} value={l.locus}>{l.name}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={entry.percent}
+                        onChange={(e) => changePossibleHet(setParent2PossibleHets, index, 'percent', e.target.value)}
+                        className="w-14 px-1 py-0.5 text-xs border border-gray-300 dark:border-dark-text rounded bg-white dark:bg-dark-card-bg dark:text-dark-text"
+                      />
+                      <span className="text-xs text-gray-500 dark:text-dark-text-muted">%</span>
+                      <button type="button" onClick={() => removePossibleHet(setParent2PossibleHets, index)} className="text-xs text-red-600 hover:text-red-800 px-1">✕</button>
+                      {parent2[entry.locus] && (
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400">(ignored — confirmed above)</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white dark:bg-dark-card-bg rounded-lg border-2 border-pink-500 dark:border-pink-700/60">
             <p className={`text-base sm:text-lg font-semibold ${parent2Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800 dark:text-pink-300'} mb-1 sm:mb-2`}>
               <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary">Phenotype: </span>
@@ -2944,4 +3166,4 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 };
 
 export default GeneticsCalculator;
-export { calculatePhenotype, GENE_LOCI };
+export { calculatePhenotype, GENE_LOCI, MOUSE_POSSIBLE_HET_LOCI };

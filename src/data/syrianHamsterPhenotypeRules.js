@@ -252,6 +252,9 @@ const SIMPLE_RECESSIVE_CARRIERS = {
   rd: { het: 'Rd/rd', trait: 'Recessive Dappled' },
 };
 
+// Recessive loci eligible for "possible het" (unconfirmed/probability-based carrier) notes.
+export const SYRIAN_HAMSTER_POSSIBLE_HET_LOCI = Object.entries(SIMPLE_RECESSIVE_CARRIERS).map(([locus, { trait }]) => ({ locus, name: trait }));
+
 export function getSyrianHamsterCarriers(genotype) {
   genotype = normalizeHamsterGenotype(genotype);
   const carriers = [];
