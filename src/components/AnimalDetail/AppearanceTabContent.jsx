@@ -4,6 +4,7 @@ import { InfoCard, InfoItem } from './DashboardComponents';
 import { formatDate } from '../../utils/dateFormatter';
 import { isFieldHiddenForSpecies, getFieldLabel } from '../../utils/speciesFieldTemplates';
 import themeColors from '../../utils/themeColors';
+import { getAnimalPhenotypeDisplay } from '../../utils/animalPhenotypeDisplay';
 
 const parseJsonArrayField = (data) => {
     if (!data) return [];
@@ -37,7 +38,24 @@ export const AppearanceTabContent = ({ animal }) => {
                     </div>
                 </InfoCard>
                 <InfoCard title="Genetic Code" icon={<Dna size={18} className="text-gray-400 dark:text-dark-text-muted" />}>
-                    <p className="text-gray-700 dark:text-dark-text-secondary font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
+                    {(() => {
+                        const { phenotype, carriers } = getAnimalPhenotypeDisplay(animal);
+                        return (
+                            <div className="space-y-3">
+                                {phenotype && (
+                                    <InfoItem label="Phenotype">
+                                        <span className={phenotype.includes('LETHAL') ? 'text-red-600 dark:text-red-400 font-semibold' : ''}>{phenotype}</span>
+                                    </InfoItem>
+                                )}
+                                {carriers.length > 0 && (
+                                    <InfoItem label="Carries" value={carriers.join(', ')} />
+                                )}
+                                <InfoItem label="Genotype">
+                                    <span className="font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</span>
+                                </InfoItem>
+                            </div>
+                        );
+                    })()}
                 </InfoCard>
                 <InfoCard title={label('lifeStage', 'Life Stage')} icon={<Sprout size={18} />}>
                     <p className="text-gray-700 dark:text-dark-text">{animal.lifeStage || 'Not specified'}</p>

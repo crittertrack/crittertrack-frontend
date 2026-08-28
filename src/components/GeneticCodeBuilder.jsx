@@ -9,7 +9,7 @@ import { matchBallPythonPhenotype, BALL_PYTHON_GENE_LOCI, getBallPythonComboLabe
 
 const RAT_GENE_ORDER = ['A', 'B', 'Be', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'Dw', 'H', 'Hs', 'Ma', 'Ro', 'Sf', 'Wh', 'Ws', 'Re', 'Ve', 'Sm', 'Lu', 'Sy', 'Sk', 'hr', 'hrl', 'sa', 'nz', 'fz', 'pw', 'Du', 'dr', 'Mx'];
 
-function parseRatGeneticCode(codeString) {
+export function parseRatGeneticCode(codeString) {
   if (!codeString) return {};
   const genotype = {};
   codeString.trim().split(/[\s,]+/).forEach(part => {
@@ -33,7 +33,7 @@ function buildRatGeneticCode(genotype) {
 
 const HAMSTER_GENE_ORDER = ['a', 'b', 'cd', 'ce', 'd', 'dg', 'e', 'p', 'sg', 'lg', 'u', 'ba', 'ds', 'wh', 's', 'rd', 'hr', 'l', 'rx', 'sa', 'to'];
 
-function parseHamsterGeneticCode(codeString) {
+export function parseHamsterGeneticCode(codeString) {
   if (!codeString) return {};
   const genotype = {};
   codeString.trim().split(/[\s,]+/).forEach(part => {
@@ -58,7 +58,7 @@ function buildHamsterGeneticCode(genotype) {
 
 const CAMPBELLS_GENE_ORDER = ['a', 'b', 'd', 'p', 'c', 'di', 'dg', 'u', 'mo', 'mi', 'si', 'rx', 'sa', 'wa'];
 
-function parseCampbellsGeneticCode(codeString) {
+export function parseCampbellsGeneticCode(codeString) {
   if (!codeString) return {};
   const genotype = {};
   codeString.trim().split(/[\s,]+/).forEach(part => {
@@ -82,7 +82,7 @@ function buildCampbellsGeneticCode(genotype) {
 
 const RUSSIAN_DWARF_GENE_ORDER = ['a', 'd', 'p', 'm', 'ma', 'pe', 'me', 'u', 'mi', 's', 'wh', 'rx', 'sa', 'wa'];
 
-function parseRussianDwarfGeneticCode(codeString) {
+export function parseRussianDwarfGeneticCode(codeString) {
   if (!codeString) return {};
   const genotype = {};
   codeString.trim().split(/[\s,]+/).forEach(part => {
@@ -113,64 +113,64 @@ function buildBallPythonGeneticCode(genotype) {
     .join(' ');
 }
 
+// Parse a Fancy Mouse genetic code string into a { locus: 'X/x' } genotype object.
+export function parseMouseGeneticCode(codeString) {
+  if (!codeString) return {};
+
+  const genotype = {};
+  const parts = codeString.replace(/,/g, ' ').trim().split(/\s+/);
+
+  parts.forEach(part => {
+    let match = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
+    let allele1, allele2;
+
+    if (match) {
+      allele1 = match[1];
+      allele2 = match[2];
+    } else {
+      match = part.match(/^([A-Za-z])([A-Za-z])$/);
+      if (match) {
+        allele1 = match[1];
+        allele2 = match[2];
+      }
+    }
+
+    if (allele1 && allele2) {
+      // First, try to find an exact match (preserving case)
+      const exactMatch = `${allele1}/${allele2}`;
+
+      for (const [locus, data] of Object.entries(GENE_LOCI)) {
+        const found = data.combinations.find(combo => combo === exactMatch);
+
+        if (found) {
+          genotype[locus] = found;
+          return; // Exit early if exact match found
+        }
+      }
+
+      // If no exact match, try case-insensitive matching
+      const normalized = `${allele1.toLowerCase()}/${allele2.toLowerCase()}`;
+
+      for (const [locus, data] of Object.entries(GENE_LOCI)) {
+        const matchingCombo = data.combinations.find(combo =>
+          combo.toLowerCase() === normalized
+        );
+
+        if (matchingCombo) {
+          genotype[locus] = matchingCombo; // Use the properly formatted version from GENE_LOCI
+          break;
+        }
+      }
+    }
+  });
+
+  return genotype;
+}
+
 const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityForm, possibleHets, onPossibleHetsChange }) => {
   const [showBuilderModal, setShowBuilderModal] = useState(false);
   const [mode, setMode] = useState('visual'); // 'visual' or 'manual'
   const [showAdvanced, setShowAdvanced] = useState(false);
-  
-  // Parse current value into genotype object
-  const parseGeneticCode = (codeString) => {
-    if (!codeString) return {};
-    
-    const genotype = {};
-    const parts = codeString.replace(/,/g, ' ').trim().split(/\s+/);
-    
-    parts.forEach(part => {
-      let match = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
-      let allele1, allele2;
-      
-      if (match) {
-        allele1 = match[1];
-        allele2 = match[2];
-      } else {
-        match = part.match(/^([A-Za-z])([A-Za-z])$/);
-        if (match) {
-          allele1 = match[1];
-          allele2 = match[2];
-        }
-      }
-      
-      if (allele1 && allele2) {
-        // First, try to find an exact match (preserving case)
-        const exactMatch = `${allele1}/${allele2}`;
-        
-        for (const [locus, data] of Object.entries(GENE_LOCI)) {
-          const found = data.combinations.find(combo => combo === exactMatch);
-          
-          if (found) {
-            genotype[locus] = found;
-            return; // Exit early if exact match found
-          }
-        }
-        
-        // If no exact match, try case-insensitive matching
-        const normalized = `${allele1.toLowerCase()}/${allele2.toLowerCase()}`;
-        
-        for (const [locus, data] of Object.entries(GENE_LOCI)) {
-          const matchingCombo = data.combinations.find(combo => 
-            combo.toLowerCase() === normalized
-          );
-          
-          if (matchingCombo) {
-            genotype[locus] = matchingCombo; // Use the properly formatted version from GENE_LOCI
-            break;
-          }
-        }
-      }
-    });
-    
-    return genotype;
-  };
   
   // Build genetic code string from genotype object
   const buildGeneticCode = (genotype) => {
@@ -183,7 +183,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
       .join(' ');
   };
   
-  const [genotype, setGenotype] = useState(() => parseGeneticCode(value));
+  const [genotype, setGenotype] = useState(() => parseMouseGeneticCode(value));
   const [showRatBuilderModal, setShowRatBuilderModal] = useState(false);
   const [ratMode, setRatMode] = useState('visual');
   const [ratGenotype, setRatGenotype] = useState(() => parseRatGeneticCode(value));
@@ -230,7 +230,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   const handleManualChange = (e) => {
     const newValue = e.target.value;
     if (mode === 'visual') {
-      setGenotype(parseGeneticCode(newValue));
+      setGenotype(parseMouseGeneticCode(newValue));
     }
   };
   
