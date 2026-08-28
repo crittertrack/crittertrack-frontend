@@ -355,7 +355,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const breakdown = getLastMousePhenotypeBreakdown();
             const hetNotes = mousePossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `Het. ${MOUSE_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => MOUSE_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
@@ -591,7 +591,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const breakdown = result.breakdown || {};
             const hetNotes = ratPossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `Het. ${RAT_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => RAT_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
@@ -828,7 +828,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const breakdown = result.breakdown || {};
             const hetNotes = hamsterPossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `Het. ${SYRIAN_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => SYRIAN_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
@@ -1049,7 +1049,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const breakdown = result.breakdown || {};
             const hetNotes = campbellsPossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `Het. ${CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => CAMPBELLS_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">
@@ -1267,7 +1267,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             const breakdown = result.breakdown || {};
             const hetNotes = russianDwarfPossibleHets
               .filter(h => h && h.locus && h.percent)
-              .map(h => `Het. ${RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus}`);
+              .map(h => RUSSIAN_DWARF_HAMSTER_POSSIBLE_HET_LOCI.find(l => l.locus === h.locus)?.name || h.locus);
             if (!result.phenotype && (!result.carriers || result.carriers.length === 0) && hetNotes.length === 0) return null;
             return (
               <div className="bg-blue-50 dark:bg-dark-info-blue/20 p-3 rounded-lg border border-blue-200 dark:border-dark-info-blue/60 space-y-1">

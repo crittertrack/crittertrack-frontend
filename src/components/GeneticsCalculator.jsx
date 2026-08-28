@@ -861,13 +861,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // Handle dilute + pink-eye combination
     if (isDilute && isPinkEye) {
-      color = 'Fawn Amber';
+      color = 'Dominant Fawn Amber';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
     // Handle brown + pink-eye combination
     if (isBrown && isPinkEye) {
-      color = 'Fawn Chocolate';
+      color = 'Dominant Fawn Chocolate';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
@@ -885,7 +885,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // Handle dilute modifier
     if (isDilute) {
-      color = isTanVariant ? 'Amber Tan' : 'Amber';
+      color = isTanVariant ? 'Dominant Amber Tan' : 'Dominant Amber';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
 
@@ -908,11 +908,17 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Recessive red (e/e) - but still process all other traits
   if (genotype.E === 'e/e') {
-    let baseColor = 'Recessive Red';
-    if (genotype.A && genotype.A.includes('at')) {
-      baseColor = 'Recessive Red Tan';
-    }
-    
+    const isTanVariant = genotype.A && genotype.A.includes('at');
+    const isDilute = genotype.D === 'd/d';
+    const isPinkEye = genotype.P === 'p/p';
+
+    let baseColor;
+    if (isPinkEye && isDilute) baseColor = 'Recessive Fawn Amber';
+    else if (isPinkEye) baseColor = 'Recessive Fawn';
+    else if (isDilute) baseColor = 'Recessive Amber';
+    else baseColor = 'Recessive Red';
+    if (isTanVariant) baseColor += ' Tan';
+
     // Process all markings and coat textures for recessive red
     // Continue processing instead of returning early
     color = baseColor;
