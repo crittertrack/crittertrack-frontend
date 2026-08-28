@@ -2070,8 +2070,14 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       const phenotype = result.phenotype;
       totalWeight += weight;
 
-      if (!phenotypeMap[phenotype]) {
-        phenotypeMap[phenotype] = {
+      // Ball Python: two genotypes can share a visible phenotype name (e.g. "Bumblebee") while
+      // carrying different invisible recessive hets — group those separately so each carrier
+      // combination gets its own outcome entry instead of being silently merged into one.
+      const carriersKey = selectedSpecies === 'Ball Python' ? [...(result.carriers || [])].sort().join(',') : '';
+      const groupKey = selectedSpecies === 'Ball Python' ? `${phenotype}::${carriersKey}` : phenotype;
+
+      if (!phenotypeMap[groupKey]) {
+        phenotypeMap[groupKey] = {
           phenotype: phenotype,
           carriers: result.carriers || [],
           notes: result.notes || [],
@@ -2091,12 +2097,12 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       // Create a unique key for this genotype to avoid duplicates
       const genotypeKey = selectedLoci.map(locus => completeGenotype[locus]).join('|');
 
-      if (!phenotypeMap[phenotype].genotypeKeys.has(genotypeKey)) {
-        phenotypeMap[phenotype].genotypes.push(displayGenotype);
-        phenotypeMap[phenotype].genotypeKeys.add(genotypeKey);
+      if (!phenotypeMap[groupKey].genotypeKeys.has(genotypeKey)) {
+        phenotypeMap[groupKey].genotypes.push(displayGenotype);
+        phenotypeMap[groupKey].genotypeKeys.add(genotypeKey);
       }
 
-      phenotypeMap[phenotype].count += weight;
+      phenotypeMap[groupKey].count += weight;
     }
 
     const totalCount = totalWeight;
@@ -2907,11 +2913,15 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               )}
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => {
-                  // For offspring display: if phenotype is empty but has carriers, show carrier status
-                  const displayPhenotype = result.phenotype || 
-                    (result.carriers && result.carriers.length > 0 
-                      ? result.carriers.map(c => `${c} Carrier`).join(', ') 
-                      : '');
+                  // For offspring display: if phenotype is empty but has carriers, show carrier status.
+                  // Ball Python always folds confirmed carriers into the phenotype line (e.g. "Bumblebee
+                  // Het. Piebald Het. Clown") instead of a separate line, matching the builder's convention.
+                  const displayPhenotype = selectedSpecies === 'Ball Python'
+                    ? [result.phenotype, ...((result.carriers || []).map(c => `Het. ${c}`))].filter(Boolean).join(' ')
+                    : result.phenotype ||
+                      (result.carriers && result.carriers.length > 0
+                        ? result.carriers.map(c => `${c} Carrier`).join(', ')
+                        : '');
                   
                   return (
                   <div key={idx} className="bg-white dark:bg-dark-card-bg p-4 rounded-lg border border-purple-200 dark:border-dark-accent-purple/40">
@@ -2958,27 +2968,31 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                     
                     {expandedPhenotypes[idx] && (
                       <div className="mt-3 pt-3 border-t border-purple-100 dark:border-dark-accent-purple/30">
-                        {/* Carrier explanation for beginners */}
-                        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg">
-                          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Possible Carriers:</h4>
-                          {(() => {
-                            const carriers = generateCarrierExplanation(result.genotypes);
-                            return carriers.length > 0 ? (
-                              <div className="text-sm text-blue-700 dark:text-blue-400">
-                                <p className="mb-2">Some offspring may carry hidden genes for:</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {carriers.map((carrier, cIdx) => (
-                                    <span key={cIdx} className="bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 px-2 py-1 rounded text-xs">
-                                      {carrier}
-                                    </span>
-                                  ))}
+                        {/* Carrier explanation for beginners — generateCarrierExplanation only understands
+                            Fancy Mouse loci, so it never has anything useful to say for Ball Python
+                            (which already surfaces confirmed carriers via result.carriers instead). */}
+                        {selectedSpecies !== 'Ball Python' && (
+                          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg">
+                            <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Possible Carriers:</h4>
+                            {(() => {
+                              const carriers = generateCarrierExplanation(result.genotypes);
+                              return carriers.length > 0 ? (
+                                <div className="text-sm text-blue-700 dark:text-blue-400">
+                                  <p className="mb-2">Some offspring may carry hidden genes for:</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {carriers.map((carrier, cIdx) => (
+                                      <span key={cIdx} className="bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 px-2 py-1 rounded text-xs">
+                                        {carrier}
+                                      </span>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            ) : (
-                              <p className="text-sm text-blue-700 dark:text-blue-400">No recessive carriers in this combination</p>
-                            );
-                          })()}
-                        </div>
+                              ) : (
+                                <p className="text-sm text-blue-700 dark:text-blue-400">No recessive carriers in this combination</p>
+                              );
+                            })()}
+                          </div>
+                        )}
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                           {result.genotypes.map((genotype, gIdx) => (
