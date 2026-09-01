@@ -4,8 +4,7 @@ import axios from 'axios';
 import { Loader2, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle, Bug, Lightbulb, MessageSquare, ArrowLeft, Clock, XCircle } from 'lucide-react';
 import { compressImageToMaxSize } from '../utils/imageCompression';
 import InfoButton from './shared/InfoButton';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 const CATEGORY_OPTIONS = [
     { value: 'Bug', label: 'Bug Report', icon: <Bug size={16} />, description: 'Something is not working correctly' },

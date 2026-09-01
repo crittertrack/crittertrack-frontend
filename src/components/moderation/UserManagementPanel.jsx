@@ -7,8 +7,9 @@ import axios from 'axios';
 import { parseApiError, withRetry } from '../../utils/errorHandler';
 import './UserManagementPanel.css';
 import themeColors from '../../utils/themeColors';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
-const API_URL = process.env.REACT_APP_API_URL || '/api';
+const API_URL = process.env.REACT_APP_API_URL || API_BASE_URL;
 
 const UserManagementPanel = () => {
     const [users, setUsers] = useState([]);

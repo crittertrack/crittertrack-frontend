@@ -36,8 +36,8 @@ import { getUserKey } from '../../utils/userKey';
 import AnimalModalV2 from '../AnimalDetail/AnimalModalV2';
 import InfoButton from '../shared/InfoButton';
 import GeneralTaskModal from '../GeneralTaskModal';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
-const API_BASE_URL = '/api';
 const FAMILY_TREE_MIN_WIDTH = 900;
 
 const GENDER_OPTIONS = ['All Genders', 'Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];

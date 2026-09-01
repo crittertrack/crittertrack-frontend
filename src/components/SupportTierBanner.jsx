@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { openExternalLink } from '../utils/externalLink';
 
 const MINI_SUPPORTER_URL = 'https://ko-fi.com/summary/7c3baac5-0a8b-4d13-bb94-148065db7506';
 
@@ -53,7 +54,7 @@ const SupportTierBanner = () => {
 
     return (
         <div
-            onClick={() => window.open(MINI_SUPPORTER_URL, '_blank', 'noopener,noreferrer')}
+            onClick={() => openExternalLink(MINI_SUPPORTER_URL)}
             className="max-w-7xl mx-auto mb-3 cursor-pointer bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-lg shadow-md px-4 py-2 flex items-center justify-between gap-3 hover:from-blue-600 hover:to-blue-800 transition"
         >
             <span>

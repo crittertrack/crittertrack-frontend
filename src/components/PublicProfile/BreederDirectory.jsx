@@ -3,8 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Flame, Gem, Loader2, Moon, Save, Search, Star, User } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {

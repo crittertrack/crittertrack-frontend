@@ -5,8 +5,7 @@ import 'flag-icons/css/flag-icons.min.css';
 import ViewAnimalModalV2 from './AnimalDetail/ViewAnimalModalV2';
 import { getCountryFlag, getCountryName, US_STATES, getStateName } from '../utils/locationUtils';
 import InfoButton from './shared/InfoButton';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 // Currency symbols
 const currencySymbols = {

@@ -3,6 +3,7 @@ import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, 
 import axios from 'axios';
 import DatePicker from './DatePicker';
 import InfoButton from './shared/InfoButton';
+import { downloadBlob } from '../utils/nativeDownload';
 
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAnimal = null, preSelectedType = null, onAddModalOpen = null }) => {
     const [transactions, setTransactions] = useState([]);
@@ -348,12 +349,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         ].join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
+        downloadBlob(blob, `transactions_${new Date().toISOString().split('T')[0]}.csv`);
     };
 
     if (loading) {

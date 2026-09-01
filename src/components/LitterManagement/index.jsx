@@ -16,6 +16,7 @@ import { matchFancyRatPhenotype } from '../../data/fancyRatPhenotypeRules';
 import { PedigreeChart } from '../AnimalForm';
 import InfoButton from '../shared/InfoButton';
 import { SpeciesPickerModal } from '../Modals/SpeciesModals';
+import { downloadBlob } from '../../utils/nativeDownload';
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
@@ -549,14 +550,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         try {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = `crittertrack-litter-${Date.now()}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
+            await downloadBlob(blob, `crittertrack-litter-${Date.now()}.jpg`);
         } catch (error) {
             console.error('Failed to download image:', error);
         }

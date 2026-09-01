@@ -5,7 +5,8 @@ import { Loader2, XCircle, Download, X, Lock } from 'lucide-react';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from './utils/apiConfig';
+import { downloadBlob } from './utils/nativeDownload';
 
 const PrivateAnimalScreen = ({ onBack }) => {
     return (
@@ -57,14 +58,7 @@ const PublicAnimalPage = () => {
         try {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = `crittertrack-image-${Date.now()}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
+            await downloadBlob(blob, `crittertrack-image-${Date.now()}.jpg`);
         } catch (error) {
             console.error('Failed to download image:', error);
         }

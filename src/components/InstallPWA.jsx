@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Share, X } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isSafari = () => /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -22,6 +23,9 @@ const InstallPWA = () => {
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
+
+  // Already running as the installed native app — no "Install App" prompt to show.
+  if (Capacitor.isNativePlatform()) return null;
 
   const handleInstallClick = async () => {
     if (isIOS() || isSafari()) {

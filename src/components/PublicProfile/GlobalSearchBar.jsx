@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Flame, Gem, Loader2, Search, User, Cat } from 'lucide-react';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
 const getDonationBadge = (user) => {
     if (!user) return null;

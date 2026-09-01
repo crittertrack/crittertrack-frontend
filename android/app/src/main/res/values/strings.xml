@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CritterTrack</string>
+    <string name="title_activity_main">CritterTrack</string>
+    <string name="package_name">com.crittertrack.app</string>
+    <string name="custom_url_scheme">com.crittertrack.app</string>
+</resources>

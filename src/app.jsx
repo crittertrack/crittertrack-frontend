@@ -66,14 +66,14 @@ import { useGeneralTasks } from './hooks/useGeneralTasks.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
 import NewsTickerBanner from './components/NewsTickerBanner';
-import SupportTierBanner from './components/SupportTierBanner';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
 import FinanceDropdown from './components/FinanceDropdown';
-
-// const API_BASE_URL = 'http://localhost:5000/api'; // Local development
-// const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
-const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
+import { API_BASE_URL } from './utils/apiConfig';
+import { downloadBlob } from './utils/nativeDownload';
+import { openExternalLink } from './utils/externalLink';
+import { Capacitor } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
 
 // App version for cache invalidation - increment to force cache clear
 const APP_VERSION = '7.0.6';
@@ -736,14 +736,7 @@ const App = () => {
         try {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = `crittertrack-image-${Date.now()}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
+            await downloadBlob(blob, `crittertrack-image-${Date.now()}.jpg`);
         } catch (error) {
             console.error('Failed to download image:', error);
         }
@@ -1511,20 +1504,22 @@ const App = () => {
                 
                 {/* Public navigation header */}
                 <header className="w-full max-w-7xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
-                    <CustomAppLogo size="w-10 h-10" />
-                    <div className="flex items-center gap-2">
+                    <div className="flex-shrink-0">
+                        <CustomAppLogo size="w-8 h-8" />
+                    </div>
+                    <div className="flex items-center gap-1.5">
                         <ThemeToggle />
                         <button 
                             onClick={() => navigate('/resources')}
-                            className="px-3 py-2 bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-semibold rounded-lg transition flex items-center"
+                            className="px-2.5 py-1.5 text-sm bg-gray-200 dark:bg-dark-surface hover:bg-gray-300 dark:hover:bg-dark-surface-hover text-gray-700 dark:text-dark-text font-semibold rounded-lg transition flex items-center"
                         >
-                            <BookOpen size={18} className="mr-1" /> Resources
+                            <BookOpen size={16} className="mr-1" /> Resources
                         </button>
                         <button 
                             onClick={() => navigate('/calculator')}
-                            className="px-3 py-2 bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                            className="px-2.5 py-1.5 text-sm bg-primary dark:bg-dark-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
                         >
-                            <Cat size={18} className="mr-1" /> Offspring Calculator
+                            <Cat size={16} className="mr-1" /> {Capacitor.getPlatform() === 'android' ? 'Calculator' : 'Offspring Calculator'}
                         </button>
                     </div>
                 </header>
@@ -2039,8 +2034,6 @@ const App = () => {
                 </div>
             </header>
 
-            <SupportTierBanner />
-
             {/* Unified alerts/notifications banner — unread messages/notifications, moderator
                 warnings/notices, and optional care/breeding alerts. Shown on every page. */}
             <NotificationBar
@@ -2464,6 +2457,42 @@ const AppRouter = () => {
         setModalMessage({ title, message });
         setShowModal(true);
     }, []);
+
+    // Native Android only: route target="_blank" link clicks through the system browser —
+    // the WebView used by Capacitor has no browser chrome, so target="_blank" is otherwise a no-op.
+    useEffect(() => {
+        if (!Capacitor.isNativePlatform()) return;
+        const handleExternalLinkClick = (e) => {
+            const anchor = e.target.closest('a[target="_blank"]');
+            if (!anchor?.href) return;
+            e.preventDefault();
+            openExternalLink(anchor.href);
+        };
+        document.addEventListener('click', handleExternalLinkClick);
+        return () => document.removeEventListener('click', handleExternalLinkClick);
+    }, []);
+
+    // Native Android only: the hardware back button goes back through the SPA's own route
+    // history (shares the same history stack react-router uses) when possible; at the root,
+    // require a second press within 2s before exiting so one stray press doesn't kill the app.
+    useEffect(() => {
+        if (!Capacitor.isNativePlatform()) return;
+        let lastBackPress = 0;
+        const listenerPromise = CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+            if (canGoBack) {
+                window.history.back();
+                return;
+            }
+            const now = Date.now();
+            if (now - lastBackPress < 2000) {
+                CapacitorApp.exitApp();
+            } else {
+                lastBackPress = now;
+                showModalMessage('Exit CritterTrack?', 'Press back again to exit.');
+            }
+        });
+        return () => { listenerPromise.then(l => l.remove()); };
+    }, [showModalMessage]);
 
     useEffect(() => {
         const getClientIp = async () => {
