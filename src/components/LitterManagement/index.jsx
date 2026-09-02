@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import {
     Baby, Bird, BookOpen, Bug, Calendar, Camera, Cat, CheckCircle,
     ChevronDown, ChevronUp, ClipboardList,
@@ -347,9 +347,7 @@ const ParentSearchModal = ({
                     ? `${API_BASE_URL}/animals?id_public=${encodeURIComponent(idValue)}`
                     : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
-                const localResponse = await axios.get(localUrl, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const localResponse = await apiClient.get(localUrl);
                 // Filter out current animal and females deceased before offspring birth date
                 const filteredLocal = localResponse.data.filter(a => {
                     if (a.id_public === currentId) return false;
@@ -382,7 +380,7 @@ const ParentSearchModal = ({
                     ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idValue)}`
                     : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
-                const globalResponse = await axios.get(globalUrl);
+                const globalResponse = await apiClient.get(globalUrl);
                 // Filter out current animal and females deceased before offspring birth date
                 const filteredGlobal = globalResponse.data.filter(a => {
                     if (a.id_public === currentId) return false;
@@ -676,9 +674,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         if (litterOffspringMap[expandedLitter] !== undefined) return; // already loaded
         const litter = litters.find(l => l._id === expandedLitter);
         if (!litter) return;
-        axios.get(`${API_BASE_URL}/litters/${litter.litter_id_public}/offspring`, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        }).then(res => {
+        apiClient.get(`/litters/${litter.litter_id_public}/offspring`).then(res => {
             setLitterOffspringMap(prev => ({ ...prev, [expandedLitter]: res.data || [] }));
         }).catch(() => {
             setLitterOffspringMap(prev => ({ ...prev, [expandedLitter]: [] }));
@@ -713,9 +709,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         try {
             setLoading(true);
             for (const id of selectedIds) {
-                await axios.delete(`${API_BASE_URL}/animals/${id}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.delete(`/animals/${id}`);
             }
             showModalMessage('Success', `Successfully deleted ${selectedIds.length} offspring animal(s).`);
             setBulkDeleteMode(prev => ({ ...prev, [litterId]: false }));
@@ -745,8 +739,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 setLitterOffspringMap({});
             }
             setOffspringRefetchToken(t => t + 1);
-            const response = await axios.get(`${API_BASE_URL}/litters`, {
-                headers: { Authorization: `Bearer ${authToken}` },
+            const response = await apiClient.get(`/litters`, {
                 signal: controller.signal
             });
             if (!Array.isArray(response.data)) {
@@ -787,17 +780,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const coiController = new AbortController();
                     const timeout = setTimeout(() => coiController.abort(), 15000);
                     try {
-                        const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
+                        const coiResponse = await apiClient.get(`/animals/inbreeding/pairing`, {
                             params: { sireId: litter.sireId_public, damId: litter.damId_public, generations: 20 },
-                            headers: { Authorization: `Bearer ${authToken}` },
                             signal: coiController.signal,
                         });
                         const coi = coiResponse.data.inbreedingCoefficient ?? 0;
                         coiCacheRef.current[cacheKey] = coi;
                         setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, inbreedingCoefficient: coi } : l));
-                        axios.put(`${API_BASE_URL}/litters/${litter._id}`, { inbreedingCoefficient: coi }, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        }).catch(() => {});
+                        apiClient.put(`/litters/${litter._id}`, { inbreedingCoefficient: coi })
+                            .catch(() => {});
                     } catch { coiCacheRef.current[cacheKey] = 0; /* prevent retry loops on error */ }
                     finally {
                         clearTimeout(timeout);
@@ -808,9 +799,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             // Fetch offspring for all litters in parallel right away (no need to wait for expand)
             littersData.forEach(litter => {
-                axios.get(`${API_BASE_URL}/litters/${litter.litter_id_public}/offspring`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                }).then(res => {
+                apiClient.get(`/litters/${litter.litter_id_public}/offspring`).then(res => {
                     const offspring = Array.isArray(res.data) ? res.data : [];
                     setLitterOffspringMap(prev => ({ ...prev, [litter._id]: offspring }));
 
@@ -830,7 +819,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     if (newBorn !== storedBorn) {
                         const patch = { litterSizeBorn: newBorn || null, numberBorn: newBorn || null };
                         setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, ...patch } : l));
-                        axios.put(`${API_BASE_URL}/litters/${litter._id}`, patch, { headers: { Authorization: `Bearer ${authToken}` } }).catch(() => {});
+                        apiClient.put(`/litters/${litter._id}`, patch).catch(() => {});
                     }
                 }).catch(() => {
                     setLitterOffspringMap(prev => ({ ...prev, [litter._id]: [] }));
@@ -844,9 +833,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const fetchMyAnimals = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/animals`);
             const animalsData = response.data || [];
             
             // Set animals immediately so UI can render
@@ -858,9 +845,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 for (const animal of animalsData) {
                     if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public)) {
                         try {
-                            const coiResponse = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
-                                params: { generations: 50 },
-                                headers: { Authorization: `Bearer ${authToken}` }
+                            const coiResponse = await apiClient.get(`/animals/${animal.id_public}/inbreeding`, {
+                                params: { generations: 50 }
                             });
                             animal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
                         } catch (error) {
@@ -914,9 +900,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         setMatingCOI(null);
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 15000);
-        axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
+        apiClient.get(`/animals/inbreeding/pairing`, {
             params: { sireId, damId, generations: 20 },
-            headers: { Authorization: `Bearer ${authToken}` },
             signal: controller.signal,
         }).then(res => {
             const val = res.data.inbreedingCoefficient ?? 0;
@@ -983,15 +968,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             };
             let litterBackendId;
             if (editingMatingId) {
-                await axios.put(`${API_BASE_URL}/litters/${editingMatingId}`, payload, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.put(`/litters/${editingMatingId}`, payload);
                 litterBackendId = editingMatingId;
             } else {
                 try {
-                    const resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    const resp = await apiClient.post(`/litters`, payload);
                     litterBackendId = resp.data.litterId_backend;
                 } catch (createError) {
                     const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
@@ -1005,9 +986,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         return;
                     }
                     if (resolution.action === 'create-anyway') {
-                        const retryResp = await axios.post(`${API_BASE_URL}/litters`, { ...payload, confirmDuplicate: true }, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        const retryResp = await apiClient.post(`/litters`, { ...payload, confirmDuplicate: true });
                         litterBackendId = retryResp.data.litterId_backend;
                     } else {
                         return;
@@ -1015,9 +994,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 }
             }
             if (matingCOI != null) {
-                axios.put(`${API_BASE_URL}/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI }, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                }).catch(() => {});
+                apiClient.put(`/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI })
+                    .catch(() => {});
             }
             showModalMessage('Success', editingMatingId ? 'Planned mating updated!' : 'Planned mating recorded! Edit the entry to add birth details when the litter arrives.');
             setShowAddMatingForm(false);
@@ -1032,9 +1010,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleMarkAsMated = async (litter) => {
         const today = new Date().toISOString().split('T')[0];
         try {
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { matingDate: today, isPlanned: false }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put(`/litters/${litter._id}`, { matingDate: today, isPlanned: false });
             // Auto-dismiss the "mating due today" urgency notification for this litter
             try {
                 const key = `${litter._id}-mated-${today}`;
@@ -1060,12 +1036,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         try {
             // Set pregnancyDate on litter and mark dam as pregnant (clear isInMating)
             await Promise.all([
-                axios.put(`${API_BASE_URL}/litters/${litter._id}`, { pregnancyDate: today }, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                }),
-                axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isPregnant: true, isInMating: false }, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                })
+                apiClient.put(`/litters/${litter._id}`, { pregnancyDate: today }),
+                apiClient.put(`/animals/${litter.damId_public}`, { isPregnant: true, isInMating: false })
             ]);
             await Promise.all([fetchLitters(), fetchMyAnimals()]);
             // Small delay to allow React to process state updates before dispatching event
@@ -1079,9 +1051,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleBornToday = async (litter) => {
         const today = new Date().toISOString().split('T')[0];
         try {
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { birthDate: today }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put(`/litters/${litter._id}`, { birthDate: today });
             // Sync dam to nursing state
             await syncDamPostBirth(litter.damId_public);
             await fetchLitters();
@@ -1098,9 +1068,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const syncDamPostBirth = async (damId_public) => {
         if (!damId_public) return;
         try {
-            await axios.put(`${API_BASE_URL}/animals/${damId_public}`, { isPregnant: false, isNursing: true }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put(`/animals/${damId_public}`, { isPregnant: false, isNursing: true });
             await fetchMyAnimals();
             // Small delay to allow React to process state updates
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -1115,13 +1083,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleMarkAsWeaned = async (litter) => {
         const today = new Date().toISOString().split('T')[0];
         try {
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { weaningDate: today, weaningConfirmed: true }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put(`/litters/${litter._id}`, { weaningDate: today, weaningConfirmed: true });
             if (litter.damId_public) {
-                await axios.put(`${API_BASE_URL}/animals/${litter.damId_public}`, { isNursing: false }, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.put(`/animals/${litter.damId_public}`, { isNursing: false });
             }
             await Promise.all([fetchLitters(), fetchMyAnimals()]);
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -1248,9 +1212,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             let litterResponse;
             try {
-                litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                litterResponse = await apiClient.post(`/litters`, litterPayload);
             } catch (createError) {
                 const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
                 if (!duplicate) throw createError;
@@ -1263,9 +1225,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     return;
                 }
                 if (resolution.action === 'create-anyway') {
-                    litterResponse = await axios.post(`${API_BASE_URL}/litters`, { ...litterPayload, confirmDuplicate: true }, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    litterResponse = await apiClient.post(`/litters`, { ...litterPayload, confirmDuplicate: true });
                 } else {
                     return; // user cancelled
                 }
@@ -1285,9 +1245,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
                         const fd = new FormData();
                         fd.append('image', compressedBlob, file.name || 'litter-photo.jpg');
-                        const imgResp = await axios.post(`${API_BASE_URL}/litters/${litterId}/images`, fd, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        const imgResp = await apiClient.post(`/litters/${litterId}/images`, fd);
                         litterResponse.data.images = imgResp.data.images;
                     } catch (err) {
                         console.error('Failed to upload litter image:', err);
@@ -1300,15 +1258,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setLitters(prev => [litterResponse.data, ...prev]);
 
             // Calculate inbreeding coefficient in the background (non-blocking)
-            axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-                params: { sireId: formData.sireId_public, damId: formData.damId_public, generations: 20 },
-                headers: { Authorization: `Bearer ${authToken}` }
+            apiClient.get(`/animals/inbreeding/pairing`, {
+                params: { sireId: formData.sireId_public, damId: formData.damId_public, generations: 20 }
             }).then(coiResponse => {
                 const coi = coiResponse.data.inbreedingCoefficient;
                 if (coi != null) {
-                    axios.put(`${API_BASE_URL}/litters/${litterId}`, { inbreedingCoefficient: coi }, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    }).catch(() => {});
+                    apiClient.put(`/litters/${litterId}`, { inbreedingCoefficient: coi })
+                        .catch(() => {});
                     // Patch the optimistic entry with the COI once it arrives
                     setLitters(prev => prev.map(l => l.litterId_backend === litterId ? { ...l, inbreedingCoefficient: coi } : l));
                 }
@@ -1327,17 +1283,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 
                 // Create males
                 for (let i = 1; i <= parseInt(createOffspringCounts.males || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: sire.species, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(apiClient.post(`/animals`, { name: `M${i}`, species: sire.species, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }));
                 }
                 
                 // Create females
                 for (let i = 1; i <= parseInt(createOffspringCounts.females || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: sire.species, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(apiClient.post(`/animals`, { name: `F${i}`, species: sire.species, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }));
                 }
 
                 // Create unknown/intersex
                 for (let i = 1; i <= parseInt(createOffspringCounts.unknown || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: sire.species, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(apiClient.post(`/animals`, { name: `U${i}`, species: sire.species, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }));
                 }
             }
             
@@ -1351,18 +1307,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             // Calculate inbreeding for each NEW offspring in the background (non-blocking)
             newOffspringIds.forEach(animalId => {
-                axios.get(`${API_BASE_URL}/animals/${animalId}/inbreeding`, {
-                    params: { generations: 20 },
-                    headers: { Authorization: `Bearer ${authToken}` }
+                apiClient.get(`/animals/${animalId}/inbreeding`, {
+                    params: { generations: 20 }
                 }).catch(() => {});
             });
             
             // Update litter with all offspring
-            await axios.put(`${API_BASE_URL}/litters/${litterId}`, {
+            await apiClient.put(`/litters/${litterId}`, {
                 offspringIds_public: allOffspringIds,
                 numberBorn: allOffspringIds.length
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
 
             // COI will arrive and patch state via the background request fired above
@@ -1484,20 +1437,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
             // Update the litter's offspring list
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
+            await apiClient.put(`/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
                 litterSizeBorn: newBorn || null,
                 numberBorn: newBorn || null,
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
             
             // Update the animal's parents to match the litter's parents
             if (addedAnimal) {
                 const parentPatch = { sireId_public: litter.sireId_public || null, damId_public: litter.damId_public || null };
-                await axios.put(`${API_BASE_URL}/animals/${addedAnimal.id_public}`, parentPatch, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.put(`/animals/${addedAnimal.id_public}`, parentPatch);
                 window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: addedAnimal.id_public, ...parentPatch } }));
             }
             
@@ -1542,12 +1491,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Only bump total born if linked count exceeds stored value — never touch gender counts
             const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
+            await apiClient.put(`/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
                 litterSizeBorn: newBorn || null,
                 numberBorn: newBorn || null,
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
             
             // Optimistically add all to offspring list immediately
@@ -1579,10 +1526,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const updatedOffspringIds = (litter.offspringIds_public || []).filter(id => id !== animalId_public);
             const remainingOffspring = (litterOffspringMap[litter._id] || []).filter(a => a.id_public !== animalId_public);
             // Only update the link list — never modify gender counts or total born on unlink
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
+            await apiClient.put(`/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
             // Optimistic update
             setLitterOffspringMap(prev => ({
@@ -1603,9 +1548,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }));
         window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId_public, isOwned: newOwnedValue } }));
         try {
-            await axios.put(`${API_BASE_URL}/animals/${animalId_public}`, { isOwned: newOwnedValue }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put(`/animals/${animalId_public}`, { isOwned: newOwnedValue });
         } catch (error) {
             console.error('Error updating owned status:', error);
             setLitterOffspringMap(prev => ({
@@ -1623,9 +1566,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }));
         window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId_public, isDisplay: newPrivacyValue } }));
         try {
-            await axios.put(`${API_BASE_URL}/animals/${animalId_public}`, { isDisplay: newPrivacyValue }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put(`/animals/${animalId_public}`, { isDisplay: newPrivacyValue });
         } catch (error) {
             console.error('Error updating privacy setting:', error);
             setLitterOffspringMap(prev => ({
@@ -1642,9 +1583,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            await axios.delete(`${API_BASE_URL}/litters/${litterId}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.delete(`/litters/${litterId}`);
             
             showModalMessage('Success', 'Litter deleted successfully!');
             await fetchLitters();
@@ -1675,9 +1614,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     litter.unknownCount !== counts.unknownCount;
 
                 if (needsUpdate) {
-                    await axios.put(`${API_BASE_URL}/litters/${litter._id}`, counts, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    await apiClient.put(`/litters/${litter._id}`, counts);
                     updatedCount++;
                 }
             }
@@ -1701,9 +1638,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         try {
             await Promise.all(
                 filteredLitters.map(l =>
-                    axios.put(`${API_BASE_URL}/litters/${l._id}`, { isDisplayLitter: newVal }, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    })
+                    apiClient.put(`/litters/${l._id}`, { isDisplayLitter: newVal })
                 )
             );
         } catch (err) {
@@ -1718,9 +1653,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const newVal = !litter.isDisplayLitter;
         setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, isDisplayLitter: newVal } : l));
         try {
-            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { isDisplayLitter: newVal }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put(`/litters/${litter._id}`, { isDisplayLitter: newVal });
         } catch (err) {
             // Revert on failure
             setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, isDisplayLitter: !newVal } : l));
@@ -1800,9 +1733,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
             const fd = new FormData();
             fd.append('image', compressedBlob, file.name || 'litter-photo.jpg');
-            const resp = await axios.post(`${API_BASE_URL}/litters/${editingLitter}/images`, fd, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const resp = await apiClient.post(`/litters/${editingLitter}/images`, fd);
             URL.revokeObjectURL(localPreview);
             setLitterImages(resp.data.images || []);
             setLitters(prev => prev.map(l => l._id === editingLitter || l.litterId_backend === editingLitter ? { ...l, images: resp.data.images } : l));
@@ -1817,9 +1748,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const handleLitterImageDelete = async (r2Key) => {
         try {
-            const resp = await axios.delete(`${API_BASE_URL}/litters/${editingLitter}/images/${encodeURIComponent(r2Key)}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const resp = await apiClient.delete(`/litters/${editingLitter}/images/${encodeURIComponent(r2Key)}`);
             setLitterImages(resp.data.images || []);
             setLitters(prev => prev.map(l => l._id === editingLitter || l.litterId_backend === editingLitter ? { ...l, images: resp.data.images } : l));
         } catch (err) {
@@ -1855,13 +1784,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 }
                 
                 for (let i = 1; i <= parseInt(createOffspringCounts.males || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `M${i}`, species: offspringSpecies, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(apiClient.post(`/animals`, { name: `M${i}`, species: offspringSpecies, gender: 'Male', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }));
                 }
                 for (let i = 1; i <= parseInt(createOffspringCounts.females || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `F${i}`, species: offspringSpecies, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(apiClient.post(`/animals`, { name: `F${i}`, species: offspringSpecies, gender: 'Female', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }));
                 }
                 for (let i = 1; i <= parseInt(createOffspringCounts.unknown || 0); i++) {
-                    offspringPromises.push(axios.post(`${API_BASE_URL}/animals`, { name: `U${i}`, species: offspringSpecies, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }, { headers: { Authorization: `Bearer ${authToken}` } }));
+                    offspringPromises.push(apiClient.post(`/animals`, { name: `U${i}`, species: offspringSpecies, gender: 'Unknown', birthDate: formData.birthDate, status: 'Pet', sireId_public: formData.sireId_public, damId_public: formData.damId_public, isOwned: true, breederId_public: userProfile.id_public, creatorId_public: userProfile.id_public }));
                 }
             }
             
@@ -1882,7 +1811,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const originalLitter = litters.find(l => l._id === editingLitter);
             const isNewBirth = !!formData.birthDate && !originalLitter?.birthDate;
 
-            await axios.put(`${API_BASE_URL}/litters/${editingLitter}`, {
+            await apiClient.put(`/litters/${editingLitter}`, {
                 breedingPairCodeName: formData.breedingPairCodeName,
                 sireId_public: formData.sireId_public,
                 damId_public: formData.damId_public,
@@ -1914,8 +1843,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 maleLossesCount: formData.maleLosses || null,
                 femaleLossesCount: formData.femaleLosses || null,
                 unknownLossesCount: formData.unknownLosses || null
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
 
             // First-time birth recorded on this litter — dam transitions Pregnant -> Nursing
@@ -1930,9 +1857,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             if (linkedOffspringIds.length > 0) {
                 const parentPatch = { sireId_public: formData.sireId_public || null, damId_public: formData.damId_public || null };
                 const updateOffspringPromises = linkedOffspringIds.map(offspringId =>
-                    axios.put(`${API_BASE_URL}/animals/${offspringId}`, parentPatch, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    }).then(() => window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: offspringId, ...parentPatch } })))
+                    apiClient.put(`/animals/${offspringId}`, parentPatch)
+                        .then(() => window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: offspringId, ...parentPatch } })))
                       .catch(err => console.warn(`[updateLitter] Could not update parent links for offspring ${offspringId} (may no longer be owned):`, err?.response?.data?.message || err?.message))
                 );
                 await Promise.allSettled(updateOffspringPromises);
@@ -2022,16 +1948,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 creatorId_public: userProfile.id_public
             };
 
-            const response = await axios.post(`${API_BASE_URL}/animals`, animalData, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.post(`/animals`, animalData);
 
             const newAnimalId = response.data.id_public;
 
             // Calculate inbreeding coefficient in the background — don't block the save
-            axios.get(`${API_BASE_URL}/animals/${newAnimalId}/inbreeding`, {
-                params: { generations: 50 },
-                headers: { Authorization: `Bearer ${authToken}` }
+            apiClient.get(`/animals/${newAnimalId}/inbreeding`, {
+                params: { generations: 50 }
             }).catch(() => {});
 
             // Link to litter and recalculate gender + total counts
@@ -2040,11 +1963,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const allLinked = [...existingOffspring, { gender: newOffspringData.gender }];
             const counts = calcLitterCounts(addingOffspring, allLinked);
 
-            await axios.put(`${API_BASE_URL}/litters/${addingOffspring._id}`, {
+            await apiClient.put(`/litters/${addingOffspring._id}`, {
                 offspringIds_public: updatedOffspringIds,
                 ...counts
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
 
             // Optimistically add the new animal to the offspring list immediately
