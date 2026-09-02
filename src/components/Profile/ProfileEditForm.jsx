@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
     AlertTriangle, ArrowLeft, Check, CheckCircle, ChevronDown, ChevronUp,
@@ -460,7 +460,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
         setAppearanceOptionDeletingId(option._id);
         try {
-            await axios.delete(`${API_BASE_URL}/appearance-options/${option._id}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.delete(`/appearance-options/${option._id}`);
             setAppearanceOptions(prev => prev.filter(o => o._id !== option._id));
         } catch (error) {
             showModalMessage('Error', error.response?.data?.message || 'Failed to remove option.');
@@ -477,7 +477,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     useEffect(() => {
         if (activeTab !== 'ratings' || !userProfile?.id_public) return;
         setMyReceivedRatingsLoading(true);
-        axios.get(`${API_BASE_URL}/public/ratings/${userProfile.id_public}`)
+        apiClient.get(`/public/ratings/${userProfile.id_public}`)
             .then(r => setMyReceivedRatings(r.data))
             .catch(() => setMyReceivedRatings({ ratings: [], average: 0, count: 0 }))
             .finally(() => setMyReceivedRatingsLoading(false));
@@ -486,23 +486,23 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     useEffect(() => {
         if (activeTab !== 'appearance-options') return;
         setAppearanceOptionsLoading(true);
-        axios.get(`${API_BASE_URL}/appearance-options`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get('/appearance-options')
             .then(r => setAppearanceOptions(r.data || []))
             .catch(() => setAppearanceOptions([]))
             .finally(() => setAppearanceOptionsLoading(false));
-    }, [activeTab, API_BASE_URL, authToken]);
+    }, [activeTab]);
 
     useEffect(() => {
         if (activeTab !== 'data') return;
-        axios.get(`${API_BASE_URL}/species`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get('/species')
             .then(r => setZeSpeciesList(Array.isArray(r.data) ? r.data : []))
             .catch(() => {});
-    }, [activeTab, API_BASE_URL, authToken]);
+    }, [activeTab]);
 
     useEffect(() => {
         if (activeTab !== 'profile' || !pushSupported) return;
         isSubscribedOnThisDevice().then(setPushSubscribed).catch(() => {});
-        axios.get(`${API_BASE_URL}/push/preferences`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get('/push/preferences')
             .then(r => {
                 setPushCategories(r.data.categories || []);
                 setPushPreferences(r.data.preferences || {});
@@ -530,7 +530,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const handleTogglePushCategory = async (categoryId, value) => {
         setPushPreferences(prev => ({ ...prev, [categoryId]: value }));
         try {
-            await axios.put(`${API_BASE_URL}/push/preferences`, { [categoryId]: value }, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.put('/push/preferences', { [categoryId]: value });
         } catch (err) {
             setPushPreferences(prev => ({ ...prev, [categoryId]: !value }));
             showModalMessage('Error', 'Failed to save that preference.');
@@ -680,7 +680,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     fd.append('file', profileImageFile);
                     fd.append('type', 'profile');
                     console.log('Profile: attempting upload to', `${API_BASE_URL}/upload`);
-                    const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { Authorization: `Bearer ${authToken}` } });
+                    const uploadResp = await apiClient.post('/upload', fd);
                     console.log('Profile upload response:', uploadResp.status, uploadResp.data);
                     if (uploadResp?.data) {
                         uploadData = uploadResp.data;
@@ -702,9 +702,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
             if (uploadSucceeded) {
                 console.log('Profile: sending JSON profile update with image URL', payload.profileImageUrl);
-                const resp = await axios.put(`${API_BASE_URL}/users/profile`, payload, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const resp = await apiClient.put('/users/profile', payload);
                 // Try to obtain updated user object from response
                 const updatedUser = resp?.data?.user || resp?.data || null;
                 if (onSaveSuccess) await onSaveSuccess(updatedUser);
@@ -718,9 +716,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         if (payload[k] !== undefined && payload[k] !== null) form.append(k, payload[k]);
                     });
                     console.log('Profile: attempting multipart PUT to users/profile with form keys:', Array.from(form.keys()));
-                    const profileResp = await axios.put(`${API_BASE_URL}/users/profile`, form, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    const profileResp = await apiClient.put('/users/profile', form);
                     console.log('Profile multipart PUT response:', profileResp.status, profileResp.data);
                     const updatedUser = profileResp?.data?.user || profileResp?.data || null;
                     if (onSaveSuccess) await onSaveSuccess(updatedUser);
@@ -730,9 +726,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     throw fmErr;
                 }
             } else {
-                const resp = await axios.put(`${API_BASE_URL}/users/profile`, payload, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const resp = await apiClient.put('/users/profile', payload);
                 const updatedUser = resp?.data?.user || resp?.data || null;
                 if (onSaveSuccess) await onSaveSuccess(updatedUser);
             }
@@ -751,9 +745,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         e.preventDefault();
         setBreederInfoLoading(true);
         try {
-            await axios.put(`${API_BASE_URL}/users/profile`, { breederInfo }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put('/users/profile', { breederInfo });
             showModalMessage('Success', 'Info & Adoption page saved successfully.');
             if (onSaveSuccess) await onSaveSuccess();
         } catch (error) {
@@ -771,7 +763,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
         setSecurityLoading(true);
         try {
-            await axios.put(`${API_BASE_URL}/auth/change-email`, { newEmail: email }, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.put('/auth/change-email', { newEmail: email });
             showModalMessage('Email Changed', 'Your email has been updated. You may need to log in again with the new email.');
             await onSaveSuccess(); 
         } catch (error) {
@@ -795,7 +787,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
         setPasswordLoading(true);
         try {
-            await axios.put(`${API_BASE_URL}/auth/change-password`, { currentPassword, newPassword }, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.put('/auth/change-password', { currentPassword, newPassword });
             showModalMessage('Success', 'Your password has been changed successfully. You will need to re-login with the new password.');
             setCurrentPassword('');
             setNewPassword('');
@@ -816,9 +808,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         
         setDeleteLoading(true);
         try {
-            await axios.delete(`${API_BASE_URL}/users/account`, { 
-                headers: { Authorization: `Bearer ${authToken}` } 
-            });
+            await apiClient.delete('/users/account');
             showModalMessage('Account Deleted', 'Your account and all data have been permanently deleted.');
             // Clear token and redirect to home
             localStorage.removeItem('authToken');
@@ -876,9 +866,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         try {
             const formData = new FormData();
             formData.append('file', importFile);
-            const resp = await axios.post(`${API_BASE_URL}/import`, formData, {
-                headers: { Authorization: `Bearer ${authToken}` },
-            });
+            const resp = await apiClient.post('/import', formData);
             const preview = resp.data.preview || {};
             setImportPreview(preview);
             // Default all conflicts to 'skip'
@@ -915,9 +903,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             formData.append('file', importFile);
             formData.append('confirm', 'true');
             formData.append('conflictResolutions', JSON.stringify(importConflictResolutions));
-            const resp = await axios.post(`${API_BASE_URL}/import`, formData, {
-                headers: { Authorization: `Bearer ${authToken}` },
-            });
+            const resp = await apiClient.post('/import', formData);
             setImportResult(resp.data);
             setImportPreview(null);
             setImportFile(null);
@@ -963,7 +949,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         if (!newValue) return;
         setAppearanceOptionSavingId(option._id);
         try {
-            const res = await axios.patch(`${API_BASE_URL}/appearance-options/${option._id}`, { value: newValue }, { headers: { Authorization: `Bearer ${authToken}` } });
+            const res = await apiClient.patch(`/appearance-options/${option._id}`, { value: newValue });
             setAppearanceOptions(prev => prev.map(o => o._id === option._id ? { ...o, value: res.data.value } : o));
             setEditingOptionId(null);
         } catch (error) {
@@ -1938,9 +1924,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         const name = zeNewSpeciesName.trim();
                                         if (!name) return;
                                         try {
-                                            const resp = await axios.post(`${API_BASE_URL}/species`,
-                                                { name, category: 'Mammal' },
-                                                { headers: { Authorization: `Bearer ${authToken}` } }
+                                            const resp = await apiClient.post('/species',
+                                                { name, category: 'Mammal' }
                                             );
                                             const added = resp.data.species;
                                             setZeSpeciesList(prev => [...prev, added]);
@@ -2009,9 +1994,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     if (zeAnimalsFile) fd.append('animals', zeAnimalsFile);
                                     if (zePairsFile) fd.append('breedingpairs', zePairsFile);
                                     fd.append('species', zeSpecies.trim());
-                                    const resp = await axios.post(`${API_BASE_URL}/import/zooeasy`, fd, {
-                                        headers: { Authorization: `Bearer ${authToken}` },
-                                    });
+                                    const resp = await apiClient.post('/import/zooeasy', fd);
                                     const preview = resp.data.preview || {};
                                     setZePreview(preview);
                                     // Select all animals by default
@@ -2157,8 +2140,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                         if (!q.trim()) { setZeMappingSearch(prev => ({ ...prev, loading: false })); return; }
                                                                                                         try {
                                                                                                             const [privateRes, publicRes] = await Promise.allSettled([
-                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
-                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                                apiClient.get('/animals', { params: { name: q } }),
+                                                                                                                apiClient.get('/public/global/animals', { params: { name: q, limit: 10 } }),
                                                                                                             ]);
                                                                                                             const own = privateRes.status === 'fulfilled' ? privateRes.value.data : [];
                                                                                                             const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
@@ -2338,9 +2321,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 finalResolutions[regNum] = `map_to:${mapping.id_public}`;
                                             }
                                             fd.append('conflictResolutions', JSON.stringify(finalResolutions));
-                                            const resp = await axios.post(`${API_BASE_URL}/import/zooeasy`, fd, {
-                                                headers: { Authorization: `Bearer ${authToken}` },
-                                            });
+                                            const resp = await apiClient.post('/import/zooeasy', fd);
                                             setZeResult(resp.data);
                                             setZePreview(null);
                                             setZeAnimalsFile(null);
@@ -2436,9 +2417,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         const name = ktkNewSpeciesName.trim();
                                         if (!name) return;
                                         try {
-                                            const resp = await axios.post(`${API_BASE_URL}/species`,
-                                                { name, category: 'Mammal' },
-                                                { headers: { Authorization: `Bearer ${authToken}` } }
+                                            const resp = await apiClient.post('/species',
+                                                { name, category: 'Mammal' }
                                             );
                                             const added = resp.data.species;
                                             setZeSpeciesList(prev => [...prev, added]);
@@ -2499,9 +2479,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     if (ktkAnimalsFile) fd.append('animals', ktkAnimalsFile);
                                     if (ktkBreedingFile) fd.append('breedingrecords', ktkBreedingFile);
                                     fd.append('species', ktkSpecies.trim());
-                                    const resp = await axios.post(`${API_BASE_URL}/import/kintraks`, fd, {
-                                        headers: { Authorization: `Bearer ${authToken}` },
-                                    });
+                                    const resp = await apiClient.post('/import/kintraks', fd);
                                     const preview = resp.data.preview || {};
                                     setKtkPreview(preview);
                                     setKtkSelectedAnimals(new Set((preview.animals?.items || []).map(a => a.registration || a.kintrakId).filter(Boolean)));
@@ -2641,8 +2619,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                         if (!q.trim()) { setKtkMappingSearch(prev => ({ ...prev, loading: false })); return; }
                                                                                                         try {
                                                                                                             const [privateRes, publicRes] = await Promise.allSettled([
-                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
-                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                                apiClient.get('/animals', { params: { name: q } }),
+                                                                                                                apiClient.get('/public/global/animals', { params: { name: q, limit: 10 } }),
                                                                                                             ]);
                                                                                                             const own = privateRes.status === 'fulfilled' ? privateRes.value.data : [];
                                                                                                             const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
@@ -2828,8 +2806,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                         if (!q.trim()) { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); return; }
                                                                                                         try {
                                                                                                             const [pr, pub] = await Promise.allSettled([
-                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
-                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                                apiClient.get('/animals', { params: { name: q } }),
+                                                                                                                apiClient.get('/public/global/animals', { params: { name: q, limit: 10 } }),
                                                                                                             ]);
                                                                                                             const own = pr.status === 'fulfilled' ? pr.value.data : [];
                                                                                                             const pub2 = pub.status === 'fulfilled' ? pub.value.data : [];
@@ -2886,8 +2864,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                         if (!q.trim()) { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); return; }
                                                                                                         try {
                                                                                                             const [pr, pub] = await Promise.allSettled([
-                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
-                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                                apiClient.get('/animals', { params: { name: q } }),
+                                                                                                                apiClient.get('/public/global/animals', { params: { name: q, limit: 10 } }),
                                                                                                             ]);
                                                                                                             const own = pr.status === 'fulfilled' ? pr.value.data : [];
                                                                                                             const pub2 = pub.status === 'fulfilled' ? pub.value.data : [];
@@ -2956,9 +2934,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 finalResolutions[reg] = `map_to:${mapping.id_public}`;
                                             }
                                             fd.append('conflictResolutions', JSON.stringify(finalResolutions));
-                                            const resp = await axios.post(`${API_BASE_URL}/import/kintraks`, fd, {
-                                                headers: { Authorization: `Bearer ${authToken}` },
-                                            });
+                                            const resp = await apiClient.post('/import/kintraks', fd);
                                             setKtkResult(resp.data);
                                             setKtkPreview(null);
                                             setKtkAnimalsFile(null);
@@ -3035,7 +3011,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         if (e.key !== 'Enter' || sbPreviewLoading || !sbUrl.trim()) return;
                                         setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({});
                                         try {
-                                            const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
+                                            const r = await apiClient.post('/import/simplebreed/preview', { profileUrl: sbUrl.trim() });
                                             setSbPreview(r.data);
                                             setSbSelectedIds(new Set((r.data.items || []).map(a => a.sbId)));
                                             const defaults = {};
@@ -3050,7 +3026,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         if (!sbUrl.trim() || sbPreviewLoading) return;
                                         setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({});
                                         try {
-                                            const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
+                                            const r = await apiClient.post('/import/simplebreed/preview', { profileUrl: sbUrl.trim() });
                                             setSbPreview(r.data);
                                             setSbSelectedIds(new Set((r.data.items || []).map(a => a.sbId)));
                                             const defaults = {};
@@ -3255,8 +3231,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                     if (q.length < 2) { setSbMappingSearch(prev => ({ ...prev, loading: false })); return; }
                                                                                                     try {
                                                                                                         const [privateRes, publicRes] = await Promise.allSettled([
-                                                                                                            axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
-                                                                                                            axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                            apiClient.get('/animals', { params: { name: q } }),
+                                                                                                            apiClient.get('/public/global/animals', { params: { name: q, limit: 10 } }),
                                                                                                         ]);
                                                                                                         const own = privateRes.status === 'fulfilled' ? privateRes.value.data : [];
                                                                                                         const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
@@ -3353,12 +3329,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                     ...sbSpeciesOverrides,
                                                 };
                                                 const selectedNewIds = [...sbSelectedIds].filter(id => selectableIds.has(id));
-                                                const r = await axios.post(`${API_BASE_URL}/import/simplebreed/import`, {
+                                                const r = await apiClient.post('/import/simplebreed/import', {
                                                     selectedIds: selectedNewIds,
                                                     conflictResolutions: finalResolutions,
                                                     speciesMap,
                                                     confirm: true,
-                                                }, { headers: { Authorization: `Bearer ${authToken}` } });
+                                                });
                                                 setSbResult(r.data);
                                                 setSbPreview(null);
                                                 if (typeof fetchAnimals === 'function') fetchAnimals(); // eslint-disable-line no-undef
