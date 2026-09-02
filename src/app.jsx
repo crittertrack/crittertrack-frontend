@@ -66,7 +66,7 @@ import { useGeneralTasks } from './hooks/useGeneralTasks.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
 import NewsTickerBanner from './components/NewsTickerBanner';
-import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
+import { PublicAnimalPage, PublicProfilePage, PrivacyPolicyPage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
 import FinanceDropdown from './components/FinanceDropdown';
 import { API_BASE_URL } from './utils/apiConfig';
@@ -2524,6 +2524,7 @@ const AppRouter = () => {
     return (
         <>
             <Routes>
+                <Route path="/privacypolicy" element={<PrivacyPolicyPage />} />
                 <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
                 <Route path="/user/:userId/*" element={
                     <PublicProfilePage
