@@ -32,6 +32,7 @@ import AnimalImageUpload from './components/AnimalImageUpload';
 import { compressImageFile, compressImageToMaxSize, compressImageWithWorker } from './utils/imageCompression';
 import ThemeToggle from './components/ThemeToggle';
 import PushToggleButton from './components/PushToggleButton';
+import { registerNativePush, initNativePushListeners } from './utils/nativePush';
 
 import AnimalModalV2 from './components/AnimalDetail/AnimalModalV2';
 import AnimalFormModalV2 from './components/AnimalForm/AnimalFormModalV2';
@@ -310,7 +311,18 @@ const App = () => {
     useEffect(() => {
         if (authToken) fetchLocations();
     }, [authToken, fetchLocations]);
-    
+
+    // Native (Capacitor) FCM push registration — no-op on web, where Web Push (PushToggleButton) is used instead.
+    useEffect(() => {
+        if (!authToken) return;
+        let cleanup = () => {};
+        (async () => {
+            cleanup = await initNativePushListeners(authToken, API_BASE_URL);
+            await registerNativePush();
+        })();
+        return () => cleanup();
+    }, [authToken]);
+
     // Detect mobile/app environment
     React.useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
