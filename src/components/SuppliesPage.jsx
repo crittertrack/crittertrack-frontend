@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Package, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info, Loader2, Save, ShoppingBag, RefreshCw, AlertTriangle, Check, ChevronDown, ChevronUp } from 'lucide-react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import DatePicker from './DatePicker';
 import { parseLocalDate } from '../utils/dateFormatter';
 import InfoButton from './shared/InfoButton';
@@ -53,9 +53,7 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         if (!authToken) return;
         setSuppliesLoading(true);
         try {
-            const res = await axios.get(`${API_BASE_URL}/supplies`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const res = await apiClient.get(`/supplies`);
             setSupplies(res.data || []);
         } catch (err) { console.error('[fetchSupplies]', err); }
         setSuppliesLoading(false);
@@ -86,10 +84,10 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         setSupplySaving(true);
         try {
             if (editingSupplyId) {
-                const res = await axios.patch(`${API_BASE_URL}/supplies/${editingSupplyId}`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
+                const res = await apiClient.patch(`/supplies/${editingSupplyId}`, supplyForm);
                 setSupplies(prev => prev.map(s => s._id === editingSupplyId ? res.data : s));
             } else {
-                const res = await axios.post(`${API_BASE_URL}/supplies`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
+                const res = await apiClient.post(`/supplies`, supplyForm);
                 setSupplies(prev => [...prev, res.data]);
             }
             setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
@@ -102,7 +100,7 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const handleSupplyDelete = async (id) => {
         if (!window.confirm('Delete this supply item?')) return;
         try {
-            await axios.delete(`${API_BASE_URL}/supplies/${id}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.delete(`/supplies/${id}`);
             setSupplies(prev => prev.filter(s => s._id !== id));
         } catch (err) { console.error(err); }
     };
@@ -150,18 +148,17 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                 else if (item.orderFrequencyUnit === 'months') base.setMonth(base.getMonth() + Number(item.orderFrequency));
                 stockPatch.nextOrderDate = base.toISOString().split('T')[0];
             }
-            const supplyRes = await axios.patch(
-                `${API_BASE_URL}/supplies/${item._id}`,
-                stockPatch,
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            const supplyRes = await apiClient.patch(
+                `/supplies/${item._id}`,
+                stockPatch
             );
             setSupplies(prev => prev.map(s => s._id === item._id ? supplyRes.data : s));
 
             const feederLabel = item.isFeederAnimal && (item.feederType || item.feederSize)
                 ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}`
                 : '';
-            await axios.post(
-                `${API_BASE_URL}/budget/transactions`,
+            await apiClient.post(
+                `/budget/transactions`,
                 {
                     type: 'expense',
                     price: cost,
@@ -169,8 +166,7 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
                     category: BUDGET_CATEGORY_MAP[item.category] || 'other',
                     description: `Supplies restock: ${item.name}${feederLabel} (${qty}${item.unit ? ' ' + item.unit : ''})`,
                     notes: restockForm.notes || null,
-                },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+                }
             );
             setRestockingSupplyId(null);
         } catch (err) { console.error(err); }
