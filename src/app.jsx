@@ -28,6 +28,7 @@ import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import LoadingSpinner from './components/shared/LoadingSpinner';
+import OfflineBanner from './components/shared/OfflineBanner';
 import AnimalImageUpload from './components/AnimalImageUpload';
 import { compressImageFile, compressImageToMaxSize, compressImageWithWorker } from './utils/imageCompression';
 import ThemeToggle from './components/ThemeToggle';
@@ -2558,6 +2559,7 @@ const AppRouter = () => {
 
     return (
         <>
+            <OfflineBanner />
             <Routes>
                 <Route path="/privacypolicy" element={<PrivacyPolicyPage />} />
                 <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
