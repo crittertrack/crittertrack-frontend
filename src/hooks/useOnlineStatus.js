@@ -1,21 +1,38 @@
 // Tracks whether the app currently has a working connection to the API.
-// Combines the browser's `online`/`offline` events (fast, but only knows about the local
-// network interface — a phone can show "online" while connected to Wi-Fi with no real
-// internet) with live signal from actual API calls via apiClient's response interceptor,
-// which is a much more reliable indicator of "can we actually reach the backend".
+// On native (Capacitor Android), `navigator.onLine`/`online`/`offline` events are known to be
+// unreliable in some Android WebView versions (can report "online" while on Wi-Fi with no real
+// internet, or fail to fire at all), so we prefer the Capacitor Network plugin there — it talks
+// to the OS's actual connectivity manager. On web/PWA we fall back to the browser APIs, combined
+// with live signal from actual API calls via apiClient's response interceptor (a much more
+// reliable indicator of "can we actually reach the backend" than either navigator.onLine or
+// the OS-level connectivity state, since a device can have a network connection with no route
+// to our specific server).
 import { useEffect, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { Network } from '@capacitor/network';
 
 export default function useOnlineStatus() {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
 
     useEffect(() => {
+        const onApiNetworkStatus = (e) => setIsOnline(e.detail.online);
+        window.addEventListener('api-network-status', onApiNetworkStatus);
+
+        if (Capacitor.isNativePlatform()) {
+            let listenerHandle;
+            Network.getStatus().then((status) => setIsOnline(status.connected));
+            Network.addListener('networkStatusChange', (status) => setIsOnline(status.connected))
+                .then((handle) => { listenerHandle = handle; });
+            return () => {
+                window.removeEventListener('api-network-status', onApiNetworkStatus);
+                listenerHandle?.remove();
+            };
+        }
+
         const goOnline = () => setIsOnline(true);
         const goOffline = () => setIsOnline(false);
-        const onApiNetworkStatus = (e) => setIsOnline(e.detail.online);
-
         window.addEventListener('online', goOnline);
         window.addEventListener('offline', goOffline);
-        window.addEventListener('api-network-status', onApiNetworkStatus);
         return () => {
             window.removeEventListener('online', goOnline);
             window.removeEventListener('offline', goOffline);
