@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 // Define interfaces for better type safety
 interface Animal {
@@ -24,9 +24,7 @@ export function useArchive(authToken: string | null, API_BASE_URL: string) {
         if (!authToken) return;
         setArchiveLoading(true);
         try {
-            const response = await axios.get(`${API_BASE_URL}/animals/archived`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get('/animals/archived');
             const data = response.data || {};
 
             // Defensively handle cases where the API might return an object instead of an array

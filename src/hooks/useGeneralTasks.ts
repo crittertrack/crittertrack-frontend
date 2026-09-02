@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 /**
  * useGeneralTasks - Manages standalone Feeding & Care tasks that are NOT tied to any single
@@ -18,7 +18,7 @@ export function useGeneralTasks(authToken: string | null, API_BASE_URL: string) 
     useEffect(() => {
         if (!authToken) return;
         setLoadingGeneralTasks(true);
-        axios.get(`${API_BASE_URL}/users/general-tasks`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get('/users/general-tasks')
             .then(res => {
                 setGeneralCareTasks(Array.isArray(res.data?.generalCareTasks) ? res.data.generalCareTasks : []);
             })
@@ -28,9 +28,8 @@ export function useGeneralTasks(authToken: string | null, API_BASE_URL: string) 
 
     const saveGeneralTasks = useCallback((tasks: any[]) => {
         if (!authToken) return Promise.resolve();
-        return axios.put(`${API_BASE_URL}/users/general-tasks`, { generalCareTasks: tasks }, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        }).catch(err => console.error('[GENERAL TASKS] Failed to save to backend:', err));
+        return apiClient.put('/users/general-tasks', { generalCareTasks: tasks })
+            .catch(err => console.error('[GENERAL TASKS] Failed to save to backend:', err));
     }, [authToken, API_BASE_URL]);
 
     const addGeneralTask = useCallback((task: any) => {

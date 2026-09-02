@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 export const useUnreadNotifications = (authToken, API_BASE_URL) => {
   const [data, setData] = useState({ count: 0, isLoading: true });
@@ -12,9 +12,7 @@ export const useUnreadNotifications = (authToken, API_BASE_URL) => {
     }
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      const response = await apiClient.get('/notifications/unread-count');
       setData({ count: response.data?.count || 0, isLoading: false });
     } catch (error) {
       // Silently fail, as this is a non-critical UI element
@@ -45,9 +43,7 @@ export const useUnreadMessages = (authToken, API_BASE_URL) => {
 
         try {
             // Assuming an endpoint that returns a simple count object: { count: 5 }
-            const response = await axios.get(`${API_BASE_URL}/messages/unread-count`, {
-                headers: { Authorization: `Bearer ${authToken}` },
-            });
+            const response = await apiClient.get('/messages/unread-count');
             const responseData = response.data || {};
             let count = 0;
             if (typeof responseData.count === 'number') {

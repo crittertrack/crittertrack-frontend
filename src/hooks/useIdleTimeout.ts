@@ -1,5 +1,6 @@
 import { useRef, useCallback, useEffect } from 'react';
 import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 // 30 minutes in milliseconds
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
@@ -56,30 +57,32 @@ export function useIdleTimeout(
             // Listen for user activity to reset idle timer
             ACTIVE_EVENTS.forEach(event => window.addEventListener(event, resetIdleTimer));
 
-            // Add axios response interceptor to catch suspension/ban
-            const interceptor = axios.interceptors.response.use(
-                response => response,
-                error => {
-                    if (error.response?.status === 403 && error.response?.data?.forceLogout) {
-                        const accountStatus = error.response?.data?.accountStatus;
-                        const message = error.response?.data?.message || 'Your account status has changed.';
+            // Add axios response interceptor to catch suspension/ban — registered on both the
+            // global axios instance and apiClient (separate instance, own interceptor stack).
+            const onResponse = (response: any) => response;
+            const onError = (error: any) => {
+                if (error.response?.status === 403 && error.response?.data?.forceLogout) {
+                    const accountStatus = error.response?.data?.accountStatus;
+                    const message = error.response?.data?.message || 'Your account status has changed.';
 
-                        console.log('[AUTH] Force logout triggered:', { accountStatus, message });
+                    console.log('[AUTH] Force logout triggered:', { accountStatus, message });
 
-                        // Clear auth and show message
-                        handleLogout(false); // false = not expired, but forced
-                        showModalMessage(
-                            accountStatus === 'suspended' ? 'Account Suspended' : 'Account Status Changed',
-                            message
-                        );
-                    }
-                    return Promise.reject(error);
+                    // Clear auth and show message
+                    handleLogout(false); // false = not expired, but forced
+                    showModalMessage(
+                        accountStatus === 'suspended' ? 'Account Suspended' : 'Account Status Changed',
+                        message
+                    );
                 }
-            );
+                return Promise.reject(error);
+            };
+            const interceptor = axios.interceptors.response.use(onResponse, onError);
+            const apiClientInterceptor = apiClient.interceptors.response.use(onResponse, onError);
 
             return () => {
                 // Clean up response interceptor
                 axios.interceptors.response.eject(interceptor);
+                apiClient.interceptors.response.eject(apiClientInterceptor);
 
                 // Remove event listeners
                 ACTIVE_EVENTS.forEach(event => window.removeEventListener(event, resetIdleTimer));
