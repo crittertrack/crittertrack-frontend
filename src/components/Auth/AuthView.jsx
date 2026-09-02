@@ -5,8 +5,7 @@ import {
     Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, UserPlus, Users, Wrench
 } from 'lucide-react';
 import InstallPWA from '../InstallPWA';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
 const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle, onShowTerms, onShowPrivacy, userCount }) => {
     const [email, setEmail] = useState('');

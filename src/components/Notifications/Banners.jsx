@@ -5,8 +5,7 @@ import {
     Info, Loader2, PawPrint, Shield, XCircle, X
 } from 'lucide-react';
 import { renderRichText } from '../../utils/richText';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
 
 // Poll Component for Broadcasts

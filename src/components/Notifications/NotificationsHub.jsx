@@ -8,8 +8,7 @@ import {
 import { formatDate, parseLocalDate } from '../../utils/dateFormatter';
 import { renderRichText } from '../../utils/richText';
 import { BroadcastPoll } from './Banners';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
 // Dedicated, individually-tracked Grooming/Special Care & Training schedule fields
 // ({ lastDoneDate, frequencyDays }) — see AnimalList/index.jsx GROOMING_SCHEDULE_DEFS/TRAINING_SCHEDULE_DEFS.

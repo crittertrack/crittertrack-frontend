@@ -5,6 +5,7 @@ import {
     FileJson, Shield, Loader2, ChevronDown, ChevronUp
 } from 'lucide-react';
 import './BackupManagementTab.css';
+import { downloadBlob } from '../../utils/nativeDownload';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://crittertrack-pedigree-production.up.railway.app';
 
@@ -119,14 +120,7 @@ const BackupManagementTab = ({ authToken }) => {
             }
 
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${backupId}.json`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+            await downloadBlob(blob, `${backupId}.json`);
         } catch (err) {
             console.error('Download backup error:', err);
             setError(err.message || 'Failed to download backup');

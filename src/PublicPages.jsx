@@ -5,7 +5,8 @@ import { Loader2, XCircle, Download, X, Lock } from 'lucide-react';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from './utils/apiConfig';
+import { downloadBlob } from './utils/nativeDownload';
 
 const PrivateAnimalScreen = ({ onBack }) => {
     return (
@@ -57,14 +58,7 @@ const PublicAnimalPage = () => {
         try {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = `crittertrack-image-${Date.now()}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
+            await downloadBlob(blob, `crittertrack-image-${Date.now()}.jpg`);
         } catch (error) {
             console.error('Failed to download image:', error);
         }
@@ -337,5 +331,162 @@ const PublicProfilePage = ({ onOpenMessages }) => {
     );
 };
 
+// Standalone Privacy Policy page — same content as the login-flow PrivacyPolicy modal,
+// but at its own public URL (no auth, no modal backdrop) so it can be linked from the
+// Play Store listing / app store metadata, which requires a directly-loadable page.
+const PrivacyPolicyPage = () => {
+    const navigate = useNavigate();
+    const authToken = localStorage.getItem('authToken');
+
+    return (
+        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center p-6">
+            <header className="w-full max-w-4xl bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                <CustomAppLogo size="w-10 h-10" />
+                <button
+                    onClick={() => navigate('/')}
+                    className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+                >
+                    {authToken ? 'Dashboard' : 'Home'}
+                </button>
+            </header>
+            <div className="bg-white dark:bg-dark-card-bg rounded-xl shadow-2xl max-w-4xl w-full mb-8">
+                <div className="p-6 border-b border-gray-200 dark:border-dark-border">
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text">Privacy Policy</h1>
+                </div>
+
+                <div className="p-6 space-y-6 text-gray-700 dark:text-dark-text-secondary">
+                    <p className="text-sm text-gray-500 dark:text-dark-text-muted">Last Updated: December 7, 2025</p>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">1. Information We Collect</h2>
+                        <p className="mb-2">We collect the following types of information:</p>
+                        <ul className="list-disc ml-6 space-y-2">
+                            <li><strong>Account Information:</strong> Email address, personal name, breeder name</li>
+                            <li><strong>Profile Information:</strong> Profile images, breeder information, public display preferences</li>
+                            <li><strong>Animal Records:</strong> Animal data, photos, pedigree information, genetic codes</li>
+                            <li><strong>Usage Data:</strong> Pages visited, features used, feedback submissions</li>
+                            <li><strong>Technical Data:</strong> IP address, browser type, device information</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">2. How We Use Your Information</h2>
+                        <p className="mb-2">We use your information to:</p>
+                        <ul className="list-disc ml-6 space-y-2">
+                            <li>Provide and maintain the CritterTrack service</li>
+                            <li>Create and manage your account</li>
+                            <li>Store and display your animal records and pedigrees</li>
+                            <li>Send you important account notifications (email verification, password resets)</li>
+                            <li>Respond to your feedback and support requests</li>
+                            <li>Improve our services and develop new features</li>
+                            <li>Prevent fraud and ensure service security</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">3. Information Sharing and Public Data</h2>
+                        <ul className="list-disc ml-6 space-y-2">
+                            <li><strong>Public Profiles:</strong> If you enable "Show Public Profile," your breeder name and selected animals may be visible to other users</li>
+                            <li><strong>Public Animals:</strong> Animals marked as "Display" may appear in public searches</li>
+                            <li><strong>Private by Default:</strong> Your email address and personal information are never publicly displayed</li>
+                            <li><strong>No Third-Party Selling:</strong> We do not sell your personal information to third parties</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">4. Data Storage and Security</h2>
+                        <p>
+                            Your data is stored securely on MongoDB Atlas cloud database with encryption. We use industry-standard
+                            security measures including password hashing, JWT authentication, and HTTPS encryption. However, no method
+                            of transmission over the internet is 100% secure.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">5. Email Communications</h2>
+                        <p className="mb-2">We send emails for:</p>
+                        <ul className="list-disc ml-6 space-y-2">
+                            <li>Email verification during registration</li>
+                            <li>Password reset requests</li>
+                            <li>Important account or service updates</li>
+                        </ul>
+                        <p className="mt-2">
+                            We do not send marketing emails. All service emails are sent from noreply@crittertrack.net.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">6. Cookies and Tracking</h2>
+                        <p>
+                            We use localStorage to store your authentication token for login persistence. We do not use third-party
+                            tracking cookies or analytics services.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">7. Your Rights</h2>
+                        <p className="mb-2">You have the right to:</p>
+                        <ul className="list-disc ml-6 space-y-2">
+                            <li>Access your personal information through your profile</li>
+                            <li>Update or correct your information at any time</li>
+                            <li>Delete your account and associated data</li>
+                            <li>Control public visibility of your profile and animals</li>
+                            <li>Request a copy of your data</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">8. Data Retention</h2>
+                        <p>
+                            We retain your data for as long as your account is active. If you delete your account, we will delete
+                            your personal information within 30 days. Some data may be retained for legal or security purposes.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">9. Children's Privacy</h2>
+                        <p>
+                            CritterTrack is intended for users 13 years and older. We do not knowingly collect information from
+                            children under 13. If you believe we have collected such information, please contact us immediately.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">10. Third-Party Services</h2>
+                        <p className="mb-2">We use the following third-party services:</p>
+                        <ul className="list-disc ml-6 space-y-2">
+                            <li><strong>MongoDB Atlas:</strong> Database hosting (data stored securely in the cloud)</li>
+                            <li><strong>Railway:</strong> Backend server hosting</li>
+                            <li><strong>Vercel:</strong> Frontend hosting</li>
+                            <li><strong>Resend:</strong> Transactional email delivery</li>
+                        </ul>
+                        <p className="mt-2">
+                            These services have their own privacy policies and security measures.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">11. Changes to Privacy Policy</h2>
+                        <p>
+                            We may update this Privacy Policy from time to time. We will notify you of significant changes by
+                            email or through the service. Continued use after changes constitutes acceptance.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-dark-text mb-3">12. Contact Us</h2>
+                        <p>
+                            If you have questions about this Privacy Policy or how we handle your data, please contact us at{' '}
+                            <a href="mailto:crittertrackowner@gmail.com" className="text-primary hover:underline">
+                                crittertrackowner@gmail.com
+                            </a>
+                        </p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Router Wrapper Component
-export { PublicAnimalPage, PublicProfilePage };
+export { PublicAnimalPage, PublicProfilePage, PrivacyPolicyPage };

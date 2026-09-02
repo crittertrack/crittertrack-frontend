@@ -51,7 +51,7 @@ const TutorialsPage = () => {
   };
 
   return (
-        <div className="w-full h-full bg-white dark:bg-dark-card-bg rounded-xl shadow-lg flex flex-col overflow-hidden">
+        <div className="w-full min-h-full sm:h-full bg-white dark:bg-dark-card-bg rounded-xl shadow-lg flex flex-col overflow-visible sm:overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-dark-text flex-shrink-0 bg-gradient-to-r from-primary/10 to-accent/10">
             <div className="flex items-center gap-3">
@@ -77,11 +77,11 @@ const TutorialsPage = () => {
           </div>
 
           {/* Main Content: Sidebar + Details */}
-          <div className="flex-1 flex overflow-hidden relative">
+          <div className="flex-1 flex flex-col sm:flex-row overflow-visible sm:overflow-hidden relative">
             {/* Left Sidebar - Lesson List (collapsible on mobile) */}
             <div className={`${
-              isLeftPanelOpen ? 'absolute sm:relative inset-0 z-10' : 'hidden'
-            } sm:block w-full sm:w-80 md:w-96 border-r border-gray-200 dark:border-dark-text overflow-y-auto bg-gray-50 dark:bg-dark-card-bg`}>
+              isLeftPanelOpen ? 'block' : 'hidden'
+            } sm:block w-full sm:w-80 md:w-96 border-r border-gray-200 dark:border-dark-text overflow-visible sm:overflow-y-auto bg-gray-50 dark:bg-dark-card-bg`}>
 
               {sections.map((section) => (
                 <div key={section.id} className="border-b border-gray-300 dark:border-dark-text">
@@ -112,7 +112,7 @@ const TutorialsPage = () => {
             </div>
 
             {/* Right Side - Lesson Details */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-white dark:bg-dark-card-bg">
+            <div className="flex-1 overflow-visible sm:overflow-y-auto p-4 sm:p-6 bg-white dark:bg-dark-card-bg">
               {selectedLesson ? (
                 <div className="max-w-7xl mx-auto">
                   {/* Mobile back button */}
@@ -304,8 +304,8 @@ const TutorialsPage = () => {
                 <div className="h-full flex items-center justify-center">
                   <div className="text-center text-gray-400 dark:text-dark-text-muted">
                     <BookOpen size={64} className="mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium">Coming Soon</p>
-                    <p className="text-sm mt-2">Tutorials and guides are being reworked — check back soon!</p>
+                    <p className="text-lg font-medium">Pick a Lesson to Get Started</p>
+                    <p className="text-sm mt-2">Choose a topic from the list to view its step-by-step guide.</p>
                   </div>
                 </div>
               )}

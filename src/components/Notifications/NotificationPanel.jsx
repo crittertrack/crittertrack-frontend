@@ -6,8 +6,7 @@ import {
 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import InfoButton from '../shared/InfoButton';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
 const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage, onNotificationChange, onViewAnimal }) => {
     const [notifications, setNotifications] = useState([]);

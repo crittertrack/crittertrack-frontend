@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatDate, litterAge } from '../../utils/dateFormatter';
+import { openExternalLink } from '../../utils/externalLink';
 import { getCurrencySymbol } from '../../utils/locationUtils';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
@@ -1014,7 +1015,7 @@ const ViewAnimalModalV2 = ({
                                                                                 <div className="flex flex-wrap gap-2">
                                                                                     {litter.images.map((img, idx) => (
                                                                                         <div key={img.r2Key || idx} className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-border">
-                                                                                            <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => window.open(img.url, '_blank')} />
+                                                                                            <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => openExternalLink(img.url)} />
                                                                                         </div>
                                                                                     ))}
                                                                                 </div>

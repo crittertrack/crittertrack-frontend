@@ -4,10 +4,10 @@ import { Loader2, ZoomIn, ZoomOut, Home, Cat } from 'lucide-react';
 import dagre from 'dagre';
 import { formatDate } from '../../utils/dateFormatter';
 import themeColors from '../../utils/themeColors';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
 const NODE_W = 96;
 const NODE_H = 92;
-const API_BASE_URL = '/api';
 const MIN_ZOOM = 20;
 const MAX_ZOOM = 180;
 

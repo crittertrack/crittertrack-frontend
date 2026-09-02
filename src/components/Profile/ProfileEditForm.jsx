@@ -10,6 +10,8 @@ import { BreederDirectorySettings } from '../PublicProfile/BreederDirectory';
 import InfoButton from '../shared/InfoButton';
 import { isPushSupported, getPushPermission, subscribeToPush, unsubscribeFromPush, isSubscribedOnThisDevice } from '../../utils/pushNotifications';
 import { breedingLineTextStyle, breedingLineGlyph } from '../../utils/breedingLineColor';
+import { API_BASE_URL } from '../../utils/apiConfig';
+import { downloadBlob } from '../../utils/nativeDownload';
 
 // Short contextual hints for the Settings page-header info button, keyed by tab id.
 const SETTINGS_TAB_INFO = {
@@ -22,8 +24,6 @@ const SETTINGS_TAB_INFO = {
     'data': { lessonId: 'settings-data-portability', body: <p>Export or import your CritterTrack data for backup or migration.</p> },
     'account': { lessonId: 'settings-account', body: <p>Manage your login email, password, and account security settings.</p> },
 };
-
-const API_BASE_URL = '/api';
 
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
@@ -857,15 +857,9 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 throw new Error(err.message || `Export failed (${response.status})`);
             }
             const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
             const ts = new Date().toISOString().slice(0, 10);
-            a.download = exportFormat === 'csv' ? `crittertrack_export_${ts}.zip` : `crittertrack_export_${ts}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const filename = exportFormat === 'csv' ? `crittertrack_export_${ts}.zip` : `crittertrack_export_${ts}.json`;
+            await downloadBlob(blob, filename);
         } catch (err) {
             showModalMessage('Export Failed', err.message);
         } finally {

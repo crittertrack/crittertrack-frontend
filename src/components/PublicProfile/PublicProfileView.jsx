@@ -12,8 +12,7 @@ import { formatDate } from '../../utils/dateFormatter';
 import { getSpeciesCategory } from '../../utils/speciesFieldTemplates';
 import ReportButton from '../ReportButton';
 import InfoButton from '../shared/InfoButton';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../../utils/apiConfig';
 
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
