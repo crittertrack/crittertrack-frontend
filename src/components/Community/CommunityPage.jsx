@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { Users, Loader2, User, ScrollText, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import MyFeed from './MyFeed'; // Assuming MyFeed is in the same directory
@@ -23,7 +23,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
     useEffect(() => {
         const fetchCommunityUsers = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/public/users/active?minutes=60&limit=5`);
+                const response = await apiClient.get(`/public/users/active?minutes=60&limit=5`);
                 let active = response.data || [];
                 
                 const clean = active.filter(u => u.id_public && u.accountStatus !== 'banned' && u.id_public !== 'CTU1' && hasVisibleName(u));
@@ -36,7 +36,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
 
         const fetchNewUsers = async () => {
             try {
-                const newUsersRes = await axios.get(`${API_BASE_URL}/public/users/newest?limit=25`).catch(() => ({ data: [] }));
+                const newUsersRes = await apiClient.get(`/public/users/newest?limit=25`).catch(() => ({ data: [] }));
                 // Filter new users to only show public ones
                 const publicUsers = (newUsersRes.data || []).filter(u => 
                     u.id_public && 

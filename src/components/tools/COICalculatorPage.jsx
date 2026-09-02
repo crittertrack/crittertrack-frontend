@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Scale, Dna, Loader2, Search, Info, Network, ScrollText, X } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
 import { compareBreedingLines } from '../../utils/breedingLineColor';
@@ -114,9 +114,8 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL, breedingLineDef
     setIsLoading(true);
     setCoiResult(null);
     try {
-      const response = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-        params: { sireId: sire.id_public, damId: dam.id_public, generations: 50, includeAncestors: true },
-        headers: { Authorization: `Bearer ${authToken}` }
+      const response = await apiClient.get(`/animals/inbreeding/pairing`, {
+        params: { sireId: sire.id_public, damId: dam.id_public, generations: 50, includeAncestors: true }
       });
       console.log('COI API Response:', JSON.stringify(response.data, null, 2)); // For debugging
       const rawResult = response.data;

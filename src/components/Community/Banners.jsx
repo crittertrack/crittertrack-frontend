@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Check, Loader2 } from 'lucide-react';
 
 export const BroadcastPoll = ({ broadcast, isEmbedded, authToken, API_BASE_URL, hideTitle = false }) => {
@@ -40,11 +40,9 @@ export const BroadcastPoll = ({ broadcast, isEmbedded, authToken, API_BASE_URL, 
         setSubmitting(true);
         setError('');
         try {
-            const response = await axios.post(`${API_BASE_URL}/moderation/poll/vote`, {
+            const response = await apiClient.post(`/moderation/poll/vote`, {
                 notificationId: broadcast._id,
                 selectedOptions
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
             setHasVoted(true);
             setPollResults(response.data.pollResults);

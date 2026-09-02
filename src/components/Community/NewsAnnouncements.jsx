@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { BroadcastPoll } from './Banners';
 import { renderRichText } from '../../utils/richText';
@@ -25,9 +25,7 @@ const NewsAnnouncements = ({ API_BASE_URL, authToken }) => {
             }
             try {
                 // Fetch all notifications and filter for public broadcasts, similar to NotificationsHub
-                const response = await axios.get(`${API_BASE_URL}/notifications`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get(`/notifications`);
                 const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
 
                 const publicBroadcasts = allNotifications.filter(n => {

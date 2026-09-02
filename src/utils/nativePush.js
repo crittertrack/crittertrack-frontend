@@ -2,7 +2,7 @@
 // Web builds keep using the existing Web Push flow in pushNotifications.js — this is native-only.
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
-import axios from 'axios';
+import apiClient from './apiClient';
 
 // google-services.json is present and the backend has FIREBASE_SERVICE_ACCOUNT configured.
 const FIREBASE_CONFIGURED = true;
@@ -33,7 +33,7 @@ export const initNativePushListeners = async (authToken, API_BASE_URL) => {
     const handles = await Promise.all([
         PushNotifications.addListener('registration', async (token) => {
             try {
-                await axios.post(`${API_BASE_URL}/push/register-device`, { token: token.value, platform: 'android' }, authHeaders(authToken));
+                await apiClient.post(`/push/register-device`, { token: token.value, platform: 'android' });
             } catch (err) {
                 console.error('[push] Failed to register device token with backend:', err);
             }

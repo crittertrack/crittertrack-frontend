@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Flame, Gem, Star, User } from 'lucide-react';
 import { API_BASE_URL } from '../../utils/apiConfig';
 
@@ -62,7 +62,7 @@ const UserProfileCard = ({ userProfile, API_BASE_URL }) => {
 
     useEffect(() => {
         if (!API_BASE_URL || !userProfile?.id_public) return;
-        axios.get(`${API_BASE_URL}/public/ratings/${userProfile.id_public}`)
+        apiClient.get(`/public/ratings/${userProfile.id_public}`)
             .then(r => {
                 setAvgRating(r.data?.average ?? 0);
                 setRatingCount(r.data?.count ?? 0);
