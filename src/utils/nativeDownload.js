@@ -14,6 +14,8 @@ const blobToBase64 = (blob) => new Promise((resolve, reject) => {
 // image downloads never actually save anything there. On native, write the file to the
 // app's cache dir instead and hand it to the OS share sheet (lets the user save it to
 // Downloads, Drive, etc). Web keeps the exact original anchor-click download behavior.
+const BRIDGE_CHUNK_SIZE = 8_000_000; // base64 chars per bridge call (multiple of 4)
+
 export const downloadBlob = async (blob, filename) => {
     if (!Capacitor.isNativePlatform()) {
         const url = URL.createObjectURL(blob);
@@ -28,10 +30,32 @@ export const downloadBlob = async (blob, filename) => {
     }
 
     const base64Data = await blobToBase64(blob);
-    const { uri } = await Filesystem.writeFile({
+
+    // The JS<->native bridge JSON-serializes the whole call payload in one shot, and
+    // large certificates/PDFs produce multi-MB base64 strings that OOM-crash the WebView
+    // during that serialization. Writing in bounded chunks keeps each bridge call small.
+    if (base64Data.length <= BRIDGE_CHUNK_SIZE) {
+        const { uri } = await Filesystem.writeFile({
+            path: filename,
+            data: base64Data,
+            directory: Directory.Cache,
+        });
+        await Share.share({ url: uri });
+        return;
+    }
+
+    await Filesystem.writeFile({
         path: filename,
-        data: base64Data,
+        data: base64Data.slice(0, BRIDGE_CHUNK_SIZE),
         directory: Directory.Cache,
     });
+    for (let offset = BRIDGE_CHUNK_SIZE; offset < base64Data.length; offset += BRIDGE_CHUNK_SIZE) {
+        await Filesystem.appendFile({
+            path: filename,
+            data: base64Data.slice(offset, offset + BRIDGE_CHUNK_SIZE),
+            directory: Directory.Cache,
+        });
+    }
+    const { uri } = await Filesystem.getUri({ path: filename, directory: Directory.Cache });
     await Share.share({ url: uri });
 };

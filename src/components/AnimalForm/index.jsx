@@ -42,6 +42,7 @@ const isPedigreeCacheFresh = (cached) => !!cached && Date.now() - (cached.timest
 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { downloadBlob } from '../../utils/nativeDownload';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';
 import AnimalImageUpload from '../AnimalImageUpload';
@@ -862,7 +863,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
         try {
             await new Promise(r => setTimeout(r, 150));
             return await html2canvas(clone, {
-                scale: 3,
+                scale: 2,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
@@ -895,8 +896,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             const ratio = drawW / srcCanvas.width;
             const drawH = srcCanvas.height * ratio;
             const pdf = new jsPDF({ orientation: vertical ? 'portrait' : 'landscape', unit: 'mm', format: [pageW, drawH + padMm * 2] });
-            pdf.addImage(srcCanvas.toDataURL('image/png'), 'PNG', padMm, padMm, drawW, drawH);
-            pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
+            // JPEG instead of lossless PNG - the full-res PNG embed was ~47MB, making save/share crawl
+            pdf.addImage(srcCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', padMm, padMm, drawW, drawH);
+            await downloadBlob(pdf.output('blob'), `pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
         } finally {
@@ -925,10 +927,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
             ctx.fillRect(0, 0, out.width, out.height);
             ctx.drawImage(srcCanvas, pad, pad, drawW, drawH);
 
-            const link = document.createElement('a');
-            link.download = `pedigree-${pedigreeData?.name || 'chart'}.png`;
-            link.href = out.toDataURL('image/png');
-            link.click();
+            const blob = await new Promise((resolve) => out.toBlob(resolve, 'image/png'));
+            if (!blob) return;
+            await downloadBlob(blob, `pedigree-${pedigreeData?.name || 'chart'}.png`);
         } catch (error) {
             console.error('Error generating image:', error);
         } finally {
@@ -1918,12 +1919,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         <div className="flex items-center gap-1 sm:gap-2">
                             <button
                                 onClick={downloadPDF}
-                                disabled={!imagesLoaded}
+                                disabled={!imagesLoaded || isSaving}
                                 data-tutorial-target="download-pdf-btn"
-                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${imagesLoaded ? 'bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-                                title={!imagesLoaded ? 'Waiting for images to load...' : 'Download PDF'}
+                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${imagesLoaded && !isSaving ? 'bg-primary dark:bg-dark-primary hover:bg-primary/90 text-black cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                                title={!imagesLoaded ? 'Waiting for images to load...' : isSaving ? 'Generating pedigree PDF...' : 'Download PDF'}
                             >
-                                <Download size={16} />
+                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                                 <span className="hidden sm:inline">{isSaving ? 'Saving...' : imagesLoaded ? 'Save PDF' : 'Loading...'}</span>
                                 <span className="sm:hidden">{isSaving ? '...' : imagesLoaded ? 'PDF' : '...'}</span>
                             </button>
@@ -1931,9 +1932,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                                 onClick={downloadImage}
                                 disabled={!imagesLoaded || isSaving}
                                 className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${imagesLoaded && !isSaving ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-                                title={!imagesLoaded ? 'Waiting for images to load...' : `Save as Image (A4 ${vertical ? 'Portrait' : 'Landscape'})`}
+                                title={!imagesLoaded ? 'Waiting for images to load...' : isSaving ? 'Generating pedigree image...' : `Save as Image (A4 ${vertical ? 'Portrait' : 'Landscape'})`}
                             >
-                                <Images size={16} />
+                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Images size={16} />}
                                 <span className="hidden sm:inline">{isSaving ? 'Saving...' : imagesLoaded ? 'Save Image' : 'Loading...'}</span>
                                 <span className="sm:hidden">{isSaving ? '...' : imagesLoaded ? 'Img' : '...'}</span>
                             </button>
