@@ -10,6 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:largeHeap="true"
         android:windowOptOutEdgeToEdgeEnforcement="true">
         <!-- Android 15+ (targetSdk 35) forces edge-to-edge by default, drawing the WebView
              behind the status/navigation bars — the app has no inset-padding handling for

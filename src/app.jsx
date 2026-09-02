@@ -1569,8 +1569,8 @@ const App = () => {
                 
                 {/* 3-Column Layout: Donation | Auth Form | Features */}
                 <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                    {/* LEFT: Donation Section */}
-                    <div className="bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg">
+                    {/* LEFT: Donation Section — condensed on the native Android app, which links straight to Ko-fi and drops the Mouse Magic upsell */}
+                    <div className={Capacitor.isNativePlatform() ? "bg-white dark:bg-dark-card-bg p-4 rounded-xl shadow-lg" : "bg-white dark:bg-dark-card-bg p-6 rounded-xl shadow-lg"}>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="bg-gradient-to-r from-pink-500 to-red-500 p-2.5 rounded-full">
                                 <Heart size={24} className="text-white fill-current" />
@@ -1578,33 +1578,56 @@ const App = () => {
                             <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text">Support CritterTrack</h3>
                         </div>
                         
-                        <p className="text-sm text-gray-700 dark:text-dark-text-secondary leading-relaxed mb-4">
-                            CritterTrack is <strong>completely free</strong> and developed by a single independent developer 
-                            passionate about helping breeders and keepers manage their animals.
-                        </p>
+                        {!Capacitor.isNativePlatform() && (
+                            <>
+                                <p className="text-sm text-gray-700 dark:text-dark-text-secondary leading-relaxed mb-4">
+                                    CritterTrack is <strong>completely free</strong> and developed by a single independent developer 
+                                    passionate about helping breeders and keepers manage their animals.
+                                </p>
+                                
+                                <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-6">
+                                    Your support helps cover server costs and enables continuous improvements. Every contribution, 
+                                    no matter the size, makes a difference!
+                                </p>
+                            </>
+                        )}
                         
-                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-6">
-                            Your support helps cover server costs and enables continuous improvements. Every contribution, 
-                            no matter the size, makes a difference!
-                        </p>
+                        {Capacitor.isNativePlatform() && (
+                            <p className="text-sm text-gray-600 dark:text-dark-text-secondary leading-relaxed mb-4">
+                                CritterTrack is completely free — your support helps keep it that way!
+                            </p>
+                        )}
                         
-                        <RouterLink
-                            to="/donation"
-                            className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
-                        >
-                            <Heart size={18} className="fill-current" />
-                            Learn More & Donate
-                        </RouterLink>
-                        
-                        <a
-                            href="https://ko-fi.com/mousemagic/shop"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full mt-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
-                        >
-                            <ShoppingBag size={18} />
-                            Buy Mouse Magic Genetics Guide
-                        </a>
+                        {Capacitor.isNativePlatform() ? (
+                            <button
+                                type="button"
+                                onClick={() => openExternalLink('https://ko-fi.com/crittertrack')}
+                                className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
+                            >
+                                <Heart size={18} className="fill-current" />
+                                Support CritterTrack
+                            </button>
+                        ) : (
+                            <>
+                                <RouterLink
+                                    to="/donation"
+                                    className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
+                                >
+                                    <Heart size={18} className="fill-current" />
+                                    Learn More & Donate
+                                </RouterLink>
+                                
+                                <a
+                                    href="https://ko-fi.com/mousemagic/shop"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full mt-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
+                                >
+                                    <ShoppingBag size={18} />
+                                    Buy Mouse Magic Genetics Guide
+                                </a>
+                            </>
+                        )}
                     </div>
                     
                     {/* MIDDLE: Auth Form */}
