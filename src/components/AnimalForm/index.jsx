@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import ReactDOM from 'react-dom';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
 import themeColors from '../../utils/themeColors';
@@ -86,18 +86,14 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
                 const isPublicId = /^CTC\d+|^\d+$/.test(id);
                 if (!isPublicId) {
                     try {
-                        const response = await axios.get(`${API_BASE_URL}/animals/${id}`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        const response = await apiClient.get(`/animals/${id}`);
                         animalInfo = response.data;
                     } catch (error) {}
                 }
 
                 if (!animalInfo) {
                     try {
-                        const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        const response = await apiClient.get(`/animals/any/${id}`);
                         animalInfo = response.data;
                     } catch (error2) {}
                 }
@@ -105,7 +101,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
 
             if (!animalInfo) {
                 try {
-                    const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${id}`);
+                    const publicResponse = await apiClient.get(`/public/global/animals?id_public=${id}`);
                     if (publicResponse.data && publicResponse.data.length > 0) {
                         animalInfo = publicResponse.data[0];
                     }
@@ -120,8 +116,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
                 animalInfo.breederName = animalInfo.manualBreederName;
             } else if (animalInfo.breederId_public) {
                 try {
-                    const breederResponse = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
+                    const breederResponse = await apiClient.get(
+                        `/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
                     );
                     if (breederResponse.data && breederResponse.data.length > 0) {
                         const breeder = breederResponse.data[0];
@@ -236,8 +232,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         let fetchedOwnerProfile = null;
         if (data?.breederId_public) {
             try {
-                const ownerResponse = await axios.get(
-                    `${API_BASE_URL}/public/profiles/search?query=${data.breederId_public}&limit=1`
+                const ownerResponse = await apiClient.get(
+                    `/public/profiles/search?query=${data.breederId_public}&limit=1`
                 );
                 if (ownerResponse.data && ownerResponse.data.length > 0) {
                     fetchedOwnerProfile = ownerResponse.data[0];
@@ -456,9 +452,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         if (!isPublicId) {
                             try {
                                 // Try /animals/:id_backend endpoint for backend ObjectIds (owned animals)
-                                const response = await axios.get(`${API_BASE_URL}/animals/${id}`, {
-                                    headers: { Authorization: `Bearer ${authToken}` }
-                                });
+                                const response = await apiClient.get(`/animals/${id}`);
                                 animalInfo = response.data;
                                 foundViaOwned = true; // Only set when truly owned by the user
                             } catch (error) {
@@ -469,9 +463,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         // Try /animals/any endpoint for public IDs or related animals
                         if (!animalInfo) {
                             try {
-                                const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
-                                    headers: { Authorization: `Bearer ${authToken}` }
-                                });
+                                const response = await apiClient.get(`/animals/any/${id}`);
                                 animalInfo = response.data;
                                 // Do NOT set foundViaOwned = true here — animal is accessible but not owned.
                                 // This ensures the isDisplay check below still applies,
@@ -485,7 +477,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     // If not found in owned, try public database
                     if (!animalInfo) {
                         try {
-                            const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${id}`);
+                            const publicResponse = await apiClient.get(`/public/global/animals?id_public=${id}`);
                             if (publicResponse.data && publicResponse.data.length > 0) {
                                 animalInfo = publicResponse.data[0];
                             }
@@ -513,8 +505,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                         animalInfo.breederName = animalInfo.manualBreederName;
                     } else if (animalInfo.breederId_public) {
                         try {
-                            const breederResponse = await axios.get(
-                                `${API_BASE_URL}/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
+                            const breederResponse = await apiClient.get(
+                                `/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
                             );
                             if (breederResponse.data && breederResponse.data.length > 0) {
                                 const breeder = breederResponse.data[0];
@@ -580,9 +572,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                     };
                 } else if (litterId) {
                     // Litter root: fetch the litter record, then build full ancestor trees for its sire/dam
-                    const litterResponse = await axios.get(`${API_BASE_URL}/litters/${litterId}`, {
-                        headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
-                    });
+                    const litterResponse = await apiClient.get(`/litters/${litterId}`);
                     const litterInfo = litterResponse.data;
                     const [sireTree, damTree] = await Promise.all([
                         litterInfo?.sireId_public ? fetchAnimalWithFamily(litterInfo.sireId_public) : null,
@@ -608,8 +598,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                 if (data?.breederId_public) {
                     try {
                         const breederId = data.breederId_public;
-                        const ownerResponse = await axios.get(
-                            `${API_BASE_URL}/public/profiles/search?query=${breederId}&limit=1`
+                        const ownerResponse = await apiClient.get(
+                            `/public/profiles/search?query=${breederId}&limit=1`
                         );
                         if (ownerResponse.data && ownerResponse.data.length > 0) {
                             const profile = ownerResponse.data[0];
@@ -630,8 +620,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                 let fetchedCurrentOwnerProfile = null;
                 if (data?.creatorId_public && data.creatorId_public !== data?.breederId_public) {
                     try {
-                        const ownerResponse = await axios.get(
-                            `${API_BASE_URL}/public/profiles/search?query=${data.creatorId_public}&limit=1`
+                        const ownerResponse = await apiClient.get(
+                            `/public/profiles/search?query=${data.creatorId_public}&limit=1`
                         );
                         if (ownerResponse.data && ownerResponse.data.length > 0) {
                             fetchedCurrentOwnerProfile = ownerResponse.data[0];
@@ -694,25 +684,21 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                 const isPublicId = /^CTC\d+|^\d+$/.test(id);
                 if (!isPublicId) {
                     try {
-                        const response = await axios.get(`${API_BASE_URL}/animals/${id}`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        const response = await apiClient.get(`/animals/${id}`);
                         animalInfo = response.data;
                         foundViaOwned = true;
                     } catch (error) {}
                 }
                 if (!animalInfo) {
                     try {
-                        const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        const response = await apiClient.get(`/animals/any/${id}`);
                         animalInfo = response.data;
                     } catch (error2) {}
                 }
             }
             if (!animalInfo) {
                 try {
-                    const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${id}`);
+                    const publicResponse = await apiClient.get(`/public/global/animals?id_public=${id}`);
                     if (publicResponse.data && publicResponse.data.length > 0) {
                         animalInfo = publicResponse.data[0];
                     }
@@ -726,8 +712,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                 animalInfo.breederName = animalInfo.manualBreederName;
             } else if (animalInfo.breederId_public) {
                 try {
-                    const breederResponse = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
+                    const breederResponse = await apiClient.get(
+                        `/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
                     );
                     if (breederResponse.data && breederResponse.data.length > 0) {
                         const breeder = breederResponse.data[0];
@@ -768,7 +754,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                 // Fetch breeder profile for the ancestor
                 if (data?.breederId_public) {
                     try {
-                        const r = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${data.breederId_public}&limit=1`);
+                        const r = await apiClient.get(`/public/profiles/search?query=${data.breederId_public}&limit=1`);
                         if (r.data?.[0]) {
                             fetchedOwnerProfile = r.data[0];
                             setOwnerProfile(r.data[0]);
@@ -786,7 +772,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, litterId = null,
                 let fetchedCurrentOwnerProfile = null;
                 if (data?.creatorId_public && data.creatorId_public !== data?.breederId_public) {
                     try {
-                        const r = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${data.creatorId_public}&limit=1`);
+                        const r = await apiClient.get(`/public/profiles/search?query=${data.creatorId_public}&limit=1`);
                         if (r.data?.[0]) {
                             fetchedCurrentOwnerProfile = r.data[0];
                             setCurrentOwnerProfile(r.data[0]);

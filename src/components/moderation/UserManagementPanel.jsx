@@ -3,13 +3,10 @@ import {
     Shield, AlertTriangle, Eye, Search, Filter, X, Ban, Clock, CheckCircle, UserCog, RefreshCw,
     ChevronUp, ChevronDown, Users, Calendar, MessageSquare, PawPrint, Activity, LogIn
 } from 'lucide-react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { parseApiError, withRetry } from '../../utils/errorHandler';
 import './UserManagementPanel.css';
 import themeColors from '../../utils/themeColors';
-import { API_BASE_URL } from '../../utils/apiConfig';
-
-const API_URL = process.env.REACT_APP_API_URL || API_BASE_URL;
 
 const UserManagementPanel = () => {
     const [users, setUsers] = useState([]);
@@ -34,10 +31,7 @@ const UserManagementPanel = () => {
 
     const fetchCurrentUserRole = async () => {
         try {
-            const token = localStorage.getItem('authToken');
-            const response = await axios.get(`${API_URL}/moderation/me`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await apiClient.get('/moderation/me');
             setCurrentUserRole(response.data?.role || 'user');
         } catch (err) {
             console.error('Error fetching current user role:', err);
@@ -47,10 +41,7 @@ const UserManagementPanel = () => {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('authToken');
-            const response = await axios.get(`${API_URL}/admin/users/moderation-overview`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await apiClient.get('/admin/users/moderation-overview');
             const usersData = response.data?.users || response.data;
             setUsers(Array.isArray(usersData) ? usersData : []);
             setError('');
@@ -64,16 +55,11 @@ const UserManagementPanel = () => {
 
     const handleDonationBadge = async (userId, type) => {
         try {
-            const token = localStorage.getItem('authToken');
             const body = { type };
             if (type === 'monthly') {
                 body.monthlyDonationActive = !badgeUser?.monthlyDonationActive;
             }
-            const response = await axios.patch(
-                `${API_URL}/admin/users/${userId}/donation-badge`,
-                body,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            const response = await apiClient.patch(`/admin/users/${userId}/donation-badge`, body);
             await fetchUsers();
             // Update badgeUser with the latest user data from response
             if (response.data && response.data.user) {
@@ -86,13 +72,8 @@ const UserManagementPanel = () => {
 
     const handleWarnUser = async (userId, reason, category) => {
         try {
-            const token = localStorage.getItem('authToken');
             await withRetry(async () => {
-                await axios.post(
-                    `${API_URL}/moderation/users/${userId}/warn`,
-                    { reason, category },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
+                await apiClient.post(`/moderation/users/${userId}/warn`, { reason, category });
             });
             await fetchUsers();
             return { success: true };
@@ -109,13 +90,8 @@ const UserManagementPanel = () => {
 
     const handleSuspendUser = async (userId, reason, durationDays) => {
         try {
-            const token = localStorage.getItem('authToken');
             await withRetry(async () => {
-                await axios.post(
-                    `${API_URL}/moderation/users/${userId}/status`,
-                    { status: 'suspended', reason, durationDays: parseInt(durationDays) },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
+                await apiClient.post(`/moderation/users/${userId}/status`, { status: 'suspended', reason, durationDays: parseInt(durationDays) });
             });
             await fetchUsers();
             return { success: true };
@@ -132,13 +108,8 @@ const UserManagementPanel = () => {
 
     const handleBanUser = async (userId, reason, ipBan = false) => {
         try {
-            const token = localStorage.getItem('authToken');
             await withRetry(async () => {
-                await axios.post(
-                    `${API_URL}/moderation/users/${userId}/status`,
-                    { status: 'banned', reason, ipBan },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
+                await apiClient.post(`/moderation/users/${userId}/status`, { status: 'banned', reason, ipBan });
             });
             await fetchUsers();
             return { success: true };
@@ -156,12 +127,7 @@ const UserManagementPanel = () => {
     const handleLiftSuspension = async (userId) => {
         if (!window.confirm('Are you sure you want to lift this suspension?')) return;
         try {
-            const token = localStorage.getItem('authToken');
-            await axios.post(
-                `${API_URL}/moderation/users/${userId}/status`,
-                { status: 'normal', reason: 'Suspension lifted by moderator' },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await apiClient.post(`/moderation/users/${userId}/status`, { status: 'normal', reason: 'Suspension lifted by moderator' });
             await fetchUsers();
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to lift suspension');
@@ -171,12 +137,7 @@ const UserManagementPanel = () => {
     const handleLiftBan = async (userId) => {
         if (!window.confirm('Are you sure you want to lift this ban?')) return;
         try {
-            const token = localStorage.getItem('authToken');
-            await axios.post(
-                `${API_URL}/moderation/users/${userId}/status`,
-                { status: 'normal', reason: 'Ban lifted by moderator' },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await apiClient.post(`/moderation/users/${userId}/status`, { status: 'normal', reason: 'Ban lifted by moderator' });
             await fetchUsers();
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to lift ban');
@@ -185,12 +146,7 @@ const UserManagementPanel = () => {
 
     const handleLiftWarning = async (userId, warningIndex) => {
         try {
-            const token = localStorage.getItem('authToken');
-            await axios.post(
-                `${API_URL}/moderation/users/${userId}/lift-warning`,
-                { warningIndex, reason: 'Warning lifted by moderator' },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await apiClient.post(`/moderation/users/${userId}/lift-warning`, { warningIndex, reason: 'Warning lifted by moderator' });
             await fetchUsers();
             return { success: true };
         } catch (err) {
@@ -200,12 +156,7 @@ const UserManagementPanel = () => {
 
     const handleChangeRole = async (userId, newRole) => {
         try {
-            const token = localStorage.getItem('authToken');
-            await axios.patch(
-                `${API_URL}/admin/users/${userId}/role`,
-                { role: newRole },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await apiClient.patch(`/admin/users/${userId}/role`, { role: newRole });
             await fetchUsers();
             return { success: true };
         } catch (err) {
