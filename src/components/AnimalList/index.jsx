@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import ArchiveScreen from '../ArchiveScreen';
 import NotificationPanel from '../Notifications/NotificationPanel';
 import EnclosureDetailModal from '../EnclosureDetailModal'; // Import new modal
@@ -296,9 +296,7 @@ const AnimalList = ({
         }
 
         try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/withdraw`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/transfers/${transferId}/withdraw`, {});
             showModalMessage('Success', 'Transfer request has been withdrawn.');
             // Optimistically update the viewing animal to remove the pending transfer state
             if (onUpdateAnimal) {
@@ -308,7 +306,7 @@ const AnimalList = ({
             console.error('Failed to withdraw transfer:', err);
             showModalMessage('Error', `Failed to withdraw transfer: ${err.response?.data?.message || err.message}`);
         }
-    }, [API_BASE_URL, authToken, showModalMessage, viewingAnimal, onUpdateAnimal]);
+    }, [showModalMessage, viewingAnimal, onUpdateAnimal]);
 
     const [sortConfig, setSortConfig] = useState(() => {
         try {
@@ -459,9 +457,7 @@ const AnimalList = ({
     const fetchLitters = useCallback(async () => {
         if (!authToken) return;
         try {
-            const res = await axios.get(`${API_BASE_URL}/litters`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const res = await apiClient.get(`/litters`);
             setLitters(res.data || []);
         } catch (err) {
             console.error('[AnimalList] Failed to fetch litters:', err);
@@ -472,7 +468,7 @@ const AnimalList = ({
         // Two-phase fetch: fast owned-only first, then all animals in background
         try {
             // Phase 1: fetch owned animals quickly to get content on screen
-            const ownedRes = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const ownedRes = await apiClient.get(`/animals?isOwned=true`);
             let ownedData = (ownedRes.data || []).filter(a => !a.isViewOnly);
 
             // Cache-bust images ONLY once per session startup
@@ -497,7 +493,7 @@ const AnimalList = ({
             // Phase 2: background-fetch ALL animals so unowned toggle works instantly
             // slim=true strips heavy fields (breedingRecords, health, etc.) — list cards don't need them
             try {
-                const allRes = await axios.get(`${API_BASE_URL}/animals?slim=true`, { headers: { Authorization: `Bearer ${authToken}` } });
+                const allRes = await apiClient.get(`/animals?slim=true`);
                 let allData = (allRes.data || []).filter(a => !a.isViewOnly);
                 // Preserve cache-busted image URLs from phase 1
                 const ownedMap = new Map(ownedData.map(a => [a.id_public || a._id, a]));
@@ -533,13 +529,10 @@ const AnimalList = ({
     const fetchAllAnimals = useCallback(async () => {
         if (!authToken) return;
         try {
-            const res = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` },
+            const res = await apiClient.get(`/animals`, {
                 params: { slim: 'true' }
             });
-            const archivedRes = await axios.get(`${API_BASE_URL}/animals/archived`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const archivedRes = await apiClient.get(`/animals/archived`);
             // Manually add `archived: true` to animals from the archived list,
             // as the backend doesn't seem to include this flag, which breaks counter logic.
             const archivedData = (archivedRes.data?.archived || []).map(a => ({ ...a, archived: true }));
@@ -550,39 +543,35 @@ const AnimalList = ({
             const uniqueData = Array.from(new Map(combinedData.map(item => [item.id_public || item._id, item])).values());
             setAllAnimalsRaw(uniqueData);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
-    }, [authToken, API_BASE_URL]);
+    }, [authToken]);
 
     // Fetch ALL animals created by this user with status=Available (ignores ownership filter)
     const fetchAvailableAnimals = useCallback(async () => {
         if (!authToken) return;
         try {
-            const res = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` },
+            const res = await apiClient.get(`/animals`, {
                 params: { status: 'Available' }
             });
             setAvailableAnimalsRaw((res.data || []).filter(a => !a.isViewOnly));
         } catch (err) { console.error('[fetchAvailableAnimals]', err); }
-    }, [authToken, API_BASE_URL]);
+    }, [authToken]);
 
     // Fetch view-only/transferred animals — these are animals the user sold/transferred but retains view-only access to
     const fetchSoldTransferred = useCallback(async () => {
         if (!authToken) return;
         try {
             // Fetch without isOwned filter so the backend returns both owned + view-only animals
-            const res = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const res = await apiClient.get(`/animals`);
             // Only keep view-only entries (creatorId !== current user)
             setSoldTransferredRaw((res.data || []).filter(a => a.isViewOnly));
         } catch (err) { console.error('[fetchSoldTransferred]', err); }
-    }, [authToken, API_BASE_URL]);
+    }, [authToken]);
 
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
         if (!authToken) return;
-        axios.put(`${API_BASE_URL}/collections`, { collections: cols, animalMap: map }, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        }).catch(err => console.warn('[collections sync]', err));
+        apiClient.put(`/collections`, { collections: cols, animalMap: map })
+            .catch(err => console.warn('[collections sync]', err));
     };
     const _saveCollections = (cols, mapOverride) => {
         const map = mapOverride !== undefined ? mapOverride : animalCollections;
@@ -876,22 +865,18 @@ const AnimalList = ({
         if (!authToken) return;
         setSuppliesLoading(true);
         try {
-            const res = await axios.get(`${API_BASE_URL}/supplies`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const res = await apiClient.get(`/supplies`);
             setSupplies(res.data || []);
         } catch (err) { console.error('[fetchSupplies]', err); }
         setSuppliesLoading(false);
-    }, [authToken, API_BASE_URL]);
+    }, [authToken]);
 
     useEffect(() => { fetchSupplies(); }, [fetchSupplies]);
 
     
     const fetchEnclosures = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/enclosures`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const res = await apiClient.get(`/enclosures`);
             setEnclosures(res.data);
         } catch (err) { console.error('[fetchEnclosures]', err); }
     }, [authToken]);
@@ -1027,8 +1012,8 @@ const AnimalList = ({
                 const uploadFormData = new FormData();
                 uploadFormData.append('file', imageFileToSave);
                 uploadFormData.append('type', 'enclosure'); // Add type for backend processing
-                const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
-                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
+                const res = await apiClient.post(`/upload`, uploadFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 console.log('[AnimalList] Image upload response data:', res.data); // Log the full response data for debugging
                 payload.imageUrl = res.data.url; // Use 'url' to be consistent with other uploads
@@ -1048,11 +1033,9 @@ const AnimalList = ({
             }
 
             if (enclosureIdToSave) {
-                await axios.put(`${API_BASE_URL}/enclosures/${enclosureIdToSave}`, payload,
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                await apiClient.put(`/enclosures/${enclosureIdToSave}`, payload);
             } else {
-                await axios.post(`${API_BASE_URL}/enclosures`, payload,
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                await apiClient.post(`/enclosures`, payload);
             }
             handleCloseEnclosureModal();
             fetchEnclosures();
@@ -1062,7 +1045,7 @@ const AnimalList = ({
             setEnclosureSaving(false);
             isSavingEnclosureRef.current = false;
         }
-    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, handleCloseEnclosureModal]);
+    }, [enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, handleCloseEnclosureModal]);
     
     const handleDeleteEnclosure = useCallback(async () => {
         if (!editingEnclosureId) return;
@@ -1072,9 +1055,7 @@ const AnimalList = ({
         }
 
         try {
-            await axios.delete(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.delete(`/enclosures/${editingEnclosureId}`);
             showModalMessageRef.current('Success', 'Enclosure deleted. Any animals assigned to it have been unassigned.');
             fetchEnclosures();
             fetchAllAnimals(); // Refresh animal list so UI shows animals as unassigned
@@ -1082,7 +1063,7 @@ const AnimalList = ({
         } catch (err) {
             showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to delete enclosure.');
         }
-    }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, fetchAllAnimals, handleCloseEnclosureModal]);
+    }, [editingEnclosureId, fetchEnclosures, fetchAllAnimals, handleCloseEnclosureModal]);
 
     const getLocationPath = useCallback((buildingId, roomId, allLocations) => {
         if (!buildingId || !allLocations.length) return '';
@@ -1106,9 +1087,9 @@ const AnimalList = ({
         try {
             if (id) {
                 // Ensure parentLocationId is null if it's an empty string
-                await axios.put(`${API_BASE_URL}/locations/${id}`, { ...data, parentLocationId: data.parentLocationId || null }, { headers: { Authorization: `Bearer ${authToken}` } });
+                await apiClient.put(`/locations/${id}`, { ...data, parentLocationId: data.parentLocationId || null });
             } else {
-                await axios.post(`${API_BASE_URL}/locations`, data, { headers: { Authorization: `Bearer ${authToken}` } });
+                await apiClient.post(`/locations`, data);
             }
             fetchLocations();
         } catch (err) {
@@ -1116,12 +1097,12 @@ const AnimalList = ({
         } finally {
             setLocationSaving(false);
         }
-    }, [authToken, API_BASE_URL, fetchLocations]);
+    }, [fetchLocations]);
 
     const handleDeleteLocation = useCallback(async (id) => {
         setLocationSaving(true);
         try {
-            await axios.delete(`${API_BASE_URL}/locations/${id}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.delete(`/locations/${id}`);
             fetchLocations();
             fetchEnclosures(); // Refetch enclosures as their location might be cleared
         } catch (err) {
@@ -1129,7 +1110,7 @@ const AnimalList = ({
         } finally {
             setLocationSaving(false);
         }
-    }, [authToken, API_BASE_URL, fetchLocations, fetchEnclosures]);
+    }, [fetchLocations, fetchEnclosures]);
 
     // Base list for "active" animals (not sold or archived) for dashboard counts.
     const activeAnimalsForDashboard = useMemo(() => {
@@ -1370,9 +1351,7 @@ useEffect(() => {
 
         try {
             // Assumes a backend endpoint that clears the name and unassigns from all animals.
-            await axios.delete(`${API_BASE_URL}/breeding-lines/${lineId}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.delete(`/breeding-lines/${lineId}`);
 
             showModalMessageRef.current('Success', `Breeding line "${lineToClear.name}" has been cleared.`);
 
@@ -1460,7 +1439,7 @@ useEffect(() => {
         // Reset to empty immediately so a user with no collections doesn't see a previous user's data
         setUserCollections([]);
         setAnimalCollections({});
-        axios.get(`${API_BASE_URL}/collections`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get(`/collections`)
             .then(res => {
                 const { collections, animalMap } = res.data || {};
                 const cols = Array.isArray(collections) ? collections : [];
@@ -1583,13 +1562,13 @@ useEffect(() => {
     
             // Use a PATCH request with MongoDB's $push operator to safely append to the history array.
             // This is more efficient and avoids race conditions from a GET-then-PUT approach.
-            await axios.patch(`${API_BASE_URL}/enclosures/${enclosureId}`, { '$push': { history: newHistoryEntry } }, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.patch(`/enclosures/${enclosureId}`, { '$push': { history: newHistoryEntry } });
     
             fetchEnclosures();
         } catch (error) {
             console.error('Failed to log enclosure history:', error);
         }
-    }, [authToken, API_BASE_URL, userProfile, fetchEnclosures]);
+    }, [userProfile, fetchEnclosures]);
 
     const handleAssignAnimalInModal = useCallback(async (animalToAssign, enclosureToAssignTo) => {
         if (!animalToAssign || !enclosureToAssignTo) return;
@@ -1601,9 +1580,8 @@ useEffect(() => {
         setEnclosureAnimals(prev => [...prev, { ...animalToAssign, enclosureId }]);
 
         try {
-            await axios.patch(`${API_BASE_URL}/enclosures/assign-animal`,
-                { animalId_public: animalIdPublic, enclosureId: enclosureId },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }
+            await apiClient.patch(`/enclosures/assign-animal`,
+                { animalId_public: animalIdPublic, enclosureId: enclosureId }
             );
             logEnclosureHistory(enclosureId, 'assign_animal', {
                 animalId: animalIdPublic,
@@ -1618,7 +1596,7 @@ useEffect(() => {
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: null } : a));
             setEnclosureAnimals(prev => prev.filter(a => a.id_public !== animalIdPublic));
         }
-    }, [API_BASE_URL, authToken, logEnclosureHistory]);
+    }, [logEnclosureHistory]);
 
     const handleUnassignAnimalInModal = useCallback(async (animalToUnassign) => {
         if (!animalToUnassign) return;
@@ -1630,7 +1608,7 @@ useEffect(() => {
         setEnclosureAnimals(prev => prev.filter(a => a.id_public !== animalIdPublic));
 
         try {
-            await axios.patch(`${API_BASE_URL}/enclosures/assign-animal`, { animalId_public: animalIdPublic, enclosureId: null }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+            await apiClient.patch(`/enclosures/assign-animal`, { animalId_public: animalIdPublic, enclosureId: null });
             logEnclosureHistory(originalEnclosureId, 'unassign_animal', {
                 animalId: animalIdPublic,
                 animalName: animalToUnassign.name,
@@ -1644,7 +1622,7 @@ useEffect(() => {
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: originalEnclosureId } : a));
             setEnclosureAnimals(prev => [...prev, animalToUnassign]);
         }
-    }, [API_BASE_URL, authToken, logEnclosureHistory]);
+    }, [logEnclosureHistory]);
 
     const handleOpenDetail = (enclosure) => {
         setSelectedEnclosure(enclosure);
@@ -1702,9 +1680,7 @@ useEffect(() => {
     useEffect(() => {
         const fetchSpeciesOrder = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/users/species-order`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get(`/users/species-order`);
                 if (response.data && Array.isArray(response.data.speciesOrder)) {
                     setUserSpeciesOrder(response.data.speciesOrder);
                 }
@@ -1715,7 +1691,7 @@ useEffect(() => {
         if (authToken) {
             fetchSpeciesOrder();
         }
-    }, [authToken, API_BASE_URL]);
+    }, [authToken]);
 
     const groupedAnimals = useMemo(() => {
         let source = animals;
@@ -1916,11 +1892,10 @@ useEffect(() => {
         setUserSpeciesOrder(newOrder);
 
         if (authToken) {
-            axios.post(`${API_BASE_URL}/users/species-order`, { speciesOrder: newOrder }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            }).catch(error => console.error('[SPECIES ORDER] Error saving:', error));
+            apiClient.post(`/users/species-order`, { speciesOrder: newOrder })
+                .catch(error => console.error('[SPECIES ORDER] Error saving:', error));
         }
-    }, [speciesNames, authToken, API_BASE_URL]);
+    }, [speciesNames, authToken]);
 
     const allSpeciesCategories = useMemo(() => {
         const categories = new Set(allUserSpecies.map(getSpeciesCategory));
@@ -2467,8 +2442,7 @@ useEffect(() => {
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public, ...patch } }));
 
-            await axios.put(`${API_BASE_URL}/animals/${id_public}`, patch,
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+            await apiClient.put(`/animals/${id_public}`, patch);
         }));
 
         setAssigningHealthStatus(false);
@@ -2740,9 +2714,7 @@ useEffect(() => {
         try {
             setLoading(true);
             for (const id of selectedIds) {
-                await axios.delete(`${API_BASE_URL}/animals/${id}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.delete(`/animals/${id}`);
             }
             showModalMessage('Success', `Successfully deleted ${selectedIds.length} animal(s).`);
             setBulkDeleteMode(prev => ({ ...prev, [species]: false }));
@@ -2772,9 +2744,7 @@ useEffect(() => {
             for (const id of selectedIds) {
                 // Archive endpoint is a RESTful PUT with { archived: true } on the animal resource
                 // itself — there is no separate POST /:id/archive command endpoint on the backend.
-                await axios.put(`${API_BASE_URL}/animals/${id}`, { archived: true }, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.put(`/animals/${id}`, { archived: true });
             }
             window.dispatchEvent(new Event('animals-changed'));
             showModalMessage('Success', `Successfully archived ${selectedIds.length} animal(s).`);
@@ -3032,12 +3002,10 @@ useEffect(() => {
     const fetchDuplicates = async () => {
         setDuplicatesLoading(true);
         try {
-            const url = `${API_BASE_URL}/animals/duplicates`;
+            const url = `/animals/duplicates`;
             console.log('[Duplicates] Fetching from:', url);
             console.log('[Duplicates] Auth token:', authToken ? 'Present' : 'Missing');
-            const res = await axios.get(url, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const res = await apiClient.get(url);
             console.log('Duplicates response:', res.data);
             const groups = res.data.groups || [];
             
@@ -3079,9 +3047,8 @@ useEffect(() => {
             
             try {
                 console.log('Dismissing duplicate pair:', { id1, id2 });
-                await axios.post(`${API_BASE_URL}/animals/duplicates/dismiss`, 
-                    { id1, id2 },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
+                await apiClient.post(`/animals/duplicates/dismiss`, 
+                    { id1, id2 }
                 );
                 // Remove from UI
                 setDuplicateGroups(prev => prev.map(group => ({
@@ -3117,9 +3084,8 @@ useEffect(() => {
 
             try {
                 console.log('Merging animals:', { keepId, deleteId });
-                const res = await axios.post(`${API_BASE_URL}/animals/duplicates/merge`,
-                    { keepId, deleteId },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
+                const res = await apiClient.post(`/animals/duplicates/merge`,
+                    { keepId, deleteId }
                 );
                 showModalMessage('Success', res.data.message || 'Animals merged successfully');
                 // Remove merged pair from UI
@@ -4285,8 +4251,7 @@ useEffect(() => {
             if (!window.confirm(`Mark ${animal.name || 'this animal'} as Rehomed? This will change their status to "Rehomed".`)) return;
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Rehomed' } : a));
             setAvailableAnimalsRaw(prev => prev.filter(a => a.id_public !== animal.id_public));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { status: 'Rehomed' },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, { status: 'Rehomed' })
                 .catch(err => { console.error('Mark rehomed failed:', err); fetchAnimals(); });
         };
         return (
@@ -4362,8 +4327,7 @@ useEffect(() => {
             if (!window.confirm('Delete this enclosure? Animals inside will become unassigned.')) return;
             const encToDelete = enclosures.find(e => e._id === encId);
             try {
-                await axios.delete(`${API_BASE_URL}/enclosures/${encId}`,
-                    { headers: { 'Authorization': `Bearer ${authToken}` } });
+                await apiClient.delete(`/enclosures/${encId}`);
                 fetchEnclosures();
                 fetchAnimals();
             } catch (err) {
@@ -4378,9 +4342,8 @@ useEffect(() => {
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: newEnclosureId } : a));
             setAssigningAnimalId(null);
-            axios.patch(`${API_BASE_URL}/enclosures/assign-animal`,
-                { animalId_public: animalIdPublic, enclosureId: newEnclosureId },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.patch(`/enclosures/assign-animal`,
+                { animalId_public: animalIdPublic, enclosureId: newEnclosureId })
                 .catch(err => {
                     console.error('Assign enclosure failed:', err);
                     setAllAnimalsRaw(prevRaw);
@@ -4412,8 +4375,7 @@ useEffect(() => {
                     if (feedingForm.updateStock) body.quantity = Number(feedingForm.qty) || 1;
                 }
                 if (feedingForm.notes.trim()) body.notes = feedingForm.notes.trim();
-                const res = await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/feeding`, body,
-                    { headers: { Authorization: `Bearer ${authToken}` } });
+                const res = await apiClient.post(`/animals/${animal.id_public}/feeding`, body);
                 // Update supply stock in state
                 if (res.data.supply) setSupplies(prev => prev.map(s => s._id === res.data.supply._id ? res.data.supply : s));
                 const supplyItem = feedingForm.supplyId ? supplies.find(s => s._id === feedingForm.supplyId) : null;
@@ -4421,13 +4383,11 @@ useEffect(() => {
                 setTaskUndoStack(prev => ({ ...prev, [`feed_${animal.id_public}`]: async () => {
                     setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: prevLastFedDate } : a));
                     window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastFedDate: prevLastFedDate } }));
-                    await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { lastFedDate: prevLastFedDate },
-                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                    await apiClient.put(`/animals/${animal.id_public}`, { lastFedDate: prevLastFedDate })
                         .catch(err => console.error('Revert feeding date failed:', err));
                     if (supplyIdUsed && qtyUsed > 0 && postFeedStock != null) {
                         try {
-                            const res2 = await axios.patch(`${API_BASE_URL}/supplies/${supplyIdUsed}`, { currentStock: postFeedStock + qtyUsed },
-                                { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` } });
+                            const res2 = await apiClient.patch(`/supplies/${supplyIdUsed}`, { currentStock: postFeedStock + qtyUsed });
                             setSupplies(p => p.map(s => s._id === supplyIdUsed ? res2.data : s));
                         } catch (err) { console.error('Revert feeding stock failed:', err); }
                     }
@@ -4446,14 +4406,12 @@ useEffect(() => {
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: now } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastFedDate: now } }));
             try {
-                await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/feeding`,
-                    { skipped: true },
-                    { headers: { Authorization: `Bearer ${authToken}` } });
+                await apiClient.post(`/animals/${animal.id_public}/feeding`,
+                    { skipped: true });
                 setTaskUndoStack(prev => ({ ...prev, [`feed_${animal.id_public}`]: async () => {
                     setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: prevLastFedDate } : a));
                     window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastFedDate: prevLastFedDate } }));
-                    await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { lastFedDate: prevLastFedDate },
-                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                    await apiClient.put(`/animals/${animal.id_public}`, { lastFedDate: prevLastFedDate })
                         .catch(err => console.error('Revert skip feeding failed:', err));
                 } }));
             } catch (err) {
@@ -4469,14 +4427,12 @@ useEffect(() => {
             const prevInterval = animal.feedingIntervalHours;
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, feedingIntervalHours: null } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, feedingIntervalHours: null } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { feedingIntervalHours: null },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, { feedingIntervalHours: null })
                 .catch(err => { console.error('Delete feeding schedule failed:', err); fetchAllAnimals(); });
             setTaskUndoStack(prev => ({ ...prev, [`feed_${animal.id_public}`]: async () => {
                 setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, feedingIntervalHours: prevInterval } : a));
                 window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, feedingIntervalHours: prevInterval } }));
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { feedingIntervalHours: prevInterval },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                await apiClient.put(`/animals/${animal.id_public}`, { feedingIntervalHours: prevInterval })
                     .catch(err => { console.error('Revert delete feeding schedule failed:', err); fetchAllAnimals(); });
             } }));
         };
@@ -4488,14 +4444,12 @@ useEffect(() => {
             const updated = prevTasks.map(t => t._id === taskId ? { ...t, lastDoneDate: new Date().toISOString() } : t);
             setEnclosures(prev => prev.map(enc => enc._id === enclosure._id ? { ...enc, cleaningTasks: updated } : enc));
             const historyEntry = { timestamp: new Date().toISOString(), userId: userProfile?._id, userName: userProfile?.personalName || userProfile?.breederName || 'User', action: 'task_complete', details: { taskName: prevTask?.taskName, taskType: prevTask?.type || 'Other' } };
-            axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id}`, { cleaningTasks: updated, $push: { history: historyEntry } },
-                { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` } })
+            apiClient.patch(`/enclosures/${enclosure._id}`, { cleaningTasks: updated, $push: { history: historyEntry } })
                 .catch(err => { console.error('Mark enclosure task done failed:', err); fetchEnclosures(); });
             setTaskUndoStack(prev => ({ ...prev, [`enc_${enclosure._id}_${taskId}`]: async () => {
                 const reverted = updated.map(t => t._id === taskId ? prevTask : t);
                 setEnclosures(p => p.map(enc => enc._id === enclosure._id ? { ...enc, cleaningTasks: reverted } : enc));
-                await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id}`, { cleaningTasks: reverted },
-                    { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` } })
+                await apiClient.patch(`/enclosures/${enclosure._id}`, { cleaningTasks: reverted })
                     .catch(err => { console.error('Revert enclosure task failed:', err); fetchEnclosures(); });
             } }));
         };
@@ -4507,14 +4461,12 @@ useEffect(() => {
             if (!window.confirm(`Delete the cleaning task "${prevTask?.taskName || 'this task'}" from ${enclosure.name}?`)) return;
             const updated = prevTasks.filter(t => t._id !== taskId);
             setEnclosures(prev => prev.map(enc => enc._id === enclosure._id ? { ...enc, cleaningTasks: updated } : enc));
-            axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id}`, { cleaningTasks: updated },
-                { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` } })
+            apiClient.patch(`/enclosures/${enclosure._id}`, { cleaningTasks: updated })
                 .catch(err => { console.error('Delete enclosure task failed:', err); fetchEnclosures(); });
             setTaskUndoStack(prev => ({ ...prev, [`enc_${enclosure._id}_${taskId}`]: async () => {
                 const reverted = [...updated, prevTask];
                 setEnclosures(p => p.map(enc => enc._id === enclosure._id ? { ...enc, cleaningTasks: reverted } : enc));
-                await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id}`, { cleaningTasks: reverted },
-                    { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` } })
+                await apiClient.patch(`/enclosures/${enclosure._id}`, { cleaningTasks: reverted })
                     .catch(err => { console.error('Revert delete enclosure task failed:', err); fetchEnclosures(); });
             } }));
         };
@@ -4526,8 +4478,7 @@ useEffect(() => {
             setAvailableAnimalsRaw(prev => prev.filter(a => a.id_public !== animal.id_public));
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Rehomed' } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed' } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { status: 'Rehomed' },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, { status: 'Rehomed' })
                 .catch(err => {
                     console.error('Mark rehomed failed:', err);
                     // Rollback
@@ -4545,16 +4496,14 @@ useEffect(() => {
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: updated })
                 .catch(err => { console.error('Mark animal care task done failed:', err); fetchAllAnimals(); });
             setTaskUndoStack(prev => ({ ...prev, [`care_${animal.id_public}_${taskIdx}`]: async () => {
                 const reverted = [...updated];
                 reverted[taskIdx] = prevList[taskIdx];
                 setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: reverted } : a));
                 window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: reverted } }));
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: reverted },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                await apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: reverted })
                     .catch(err => { console.error('Revert animal care task failed:', err); fetchAllAnimals(); });
             } }));
         };
@@ -4569,16 +4518,14 @@ useEffect(() => {
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: updated })
                 .catch(err => { console.error('Skip animal care task failed:', err); fetchAllAnimals(); });
             setTaskUndoStack(prev => ({ ...prev, [`care_${animal.id_public}_${taskIdx}`]: async () => {
                 const reverted = [...updated];
                 reverted[taskIdx] = prevList[taskIdx];
                 setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: reverted } : a));
                 window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: reverted } }));
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: reverted },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                await apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: reverted })
                     .catch(err => { console.error('Revert animal care task failed:', err); fetchAllAnimals(); });
             } }));
         };
@@ -4592,16 +4539,14 @@ useEffect(() => {
             const updated = prevList.filter((_, i) => i !== taskIdx);
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: updated })
                 .catch(err => { console.error('Delete animal care task failed:', err); fetchAllAnimals(); });
             setTaskUndoStack(prev => ({ ...prev, [`care_${animal.id_public}_${taskIdx}`]: async () => {
                 const reverted = [...updated];
                 reverted.splice(taskIdx, 0, prevList[taskIdx]);
                 setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: reverted } : a));
                 window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: reverted } }));
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: reverted },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                await apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: reverted })
                     .catch(err => { console.error('Revert delete animal care task failed:', err); fetchAllAnimals(); });
             } }));
         };
@@ -4614,14 +4559,12 @@ useEffect(() => {
             const updated = { ...prevValue, lastDoneDate: new Date().toISOString() };
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: updated })
                 .catch(err => { console.error('Mark schedule done failed:', err); fetchAllAnimals(); });
             setTaskUndoStack(prev => ({ ...prev, [`sched_${animal.id_public}_${fieldName}`]: async () => {
                 setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: prevValue } : a));
                 window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: prevValue } }));
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: prevValue },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                await apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: prevValue })
                     .catch(err => { console.error('Revert schedule task failed:', err); fetchAllAnimals(); });
             } }));
         };
@@ -4632,14 +4575,12 @@ useEffect(() => {
             const updated = { ...prevValue, lastDoneDate: new Date().toISOString(), lastSkipped: true };
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: updated })
                 .catch(err => { console.error('Skip schedule task failed:', err); fetchAllAnimals(); });
             setTaskUndoStack(prev => ({ ...prev, [`sched_${animal.id_public}_${fieldName}`]: async () => {
                 setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: prevValue } : a));
                 window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: prevValue } }));
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: prevValue },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                await apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: prevValue })
                     .catch(err => { console.error('Revert schedule task failed:', err); fetchAllAnimals(); });
             } }));
         };
@@ -4651,14 +4592,12 @@ useEffect(() => {
             const prevValue = animal[fieldName] || null;
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: null } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: null } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: null },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: null })
                 .catch(err => { console.error('Delete schedule task failed:', err); fetchAllAnimals(); });
             setTaskUndoStack(prev => ({ ...prev, [`sched_${animal.id_public}_${fieldName}`]: async () => {
                 setAllAnimalsRaw(p => p.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: prevValue } : a));
                 window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: prevValue } }));
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: prevValue },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                await apiClient.put(`/animals/${animal.id_public}`, { [fieldName]: prevValue })
                     .catch(err => { console.error('Revert delete schedule task failed:', err); fetchAllAnimals(); });
             } }));
         };
@@ -4672,8 +4611,7 @@ useEffect(() => {
             // Optimistic update
             setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, patch)
                 .catch(err => { console.error('Unquarantine failed:', err); setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...prev } : a)); });
         };
 
@@ -4696,8 +4634,7 @@ useEffect(() => {
             const prev = { isInTreatment: animal.isInTreatment, medications: animal.medications };
             setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, patch)
                 .catch(err => { console.error('End treatment failed:', err); setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...prev } : a)); });
         };
 
@@ -4735,8 +4672,7 @@ useEffect(() => {
             const patch = { medications: updatedMeds, isInTreatment: newIsInTreatment };
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, patch)
                 .catch(err => { console.error('Medication action failed:', err); fetchAllAnimals(); });
         };
 
@@ -4759,14 +4695,13 @@ useEffect(() => {
             }
 
             if (litterPatch && animal._litterId) {
-                axios.put(`${API_BASE_URL}/litters/${animal._litterId}`, litterPatch, { headers: { Authorization: `Bearer ${authToken}` } })
+                apiClient.put(`/litters/${animal._litterId}`, litterPatch)
                     .then(() => fetchLitters()) // Refetch litters to update the UI
                     .catch(err => console.error('Failed to update litter record:', err));
             }
 
             // The animal update is always performed
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.put(`/animals/${animal.id_public}`, patch)
                 .catch(err => { console.error('Repro status update failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...Object.fromEntries(Object.keys(patch).map(k => [k, animal[k]])) } : a)); });
         };
 
@@ -5364,9 +5299,8 @@ useEffect(() => {
             const prevRaw = allAnimalsRaw;
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: newEnclosureId } : a));
             setAssigningAnimalId(null);
-            axios.patch(`${API_BASE_URL}/enclosures/assign-animal`,
-                { animalId_public: animalIdPublic, enclosureId: newEnclosureId },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+            apiClient.patch(`/enclosures/assign-animal`,
+                { animalId_public: animalIdPublic, enclosureId: newEnclosureId })
                 .catch(err => {
                     console.error('Assign enclosure failed:', err);
                     setAllAnimalsRaw(prevRaw);
@@ -5376,7 +5310,7 @@ useEffect(() => {
         const handleDeleteEnclosureInline = async (encId) => {
             if (!window.confirm('Delete this enclosure? Animals inside will become unassigned.')) return;
             try {
-                await axios.delete(`${API_BASE_URL}/enclosures/${encId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                await apiClient.delete(`/enclosures/${encId}`);
                 fetchEnclosures();
                 fetchAllAnimals();
             } catch (err) {
@@ -5591,7 +5525,7 @@ useEffect(() => {
             if (scope === 'local' || scope === 'both') {
                 try {
                     const localUrl = isIdSearch ? `${API_BASE_URL}/animals?id_public=${encodeURIComponent(idValue)}` : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
-                    const localResponse = await axios.get(localUrl, { headers: { Authorization: `Bearer ${authToken}` } });
+                    const localResponse = await apiClient.get(localUrl);
                     const filteredLocal = localResponse.data.filter(a => {
                         if (a.id_public === currentId) return false;
                         if (birthDate && a.deceasedDate && (a.gender === 'Female' || a.gender === 'Intersex')) { const offspringBirth = new Date(birthDate); const parentDeceased = new Date(a.deceasedDate); if (parentDeceased < offspringBirth) return false; }
@@ -5603,7 +5537,7 @@ useEffect(() => {
             if (scope === 'global' || scope === 'both') {
                 try {
                     const globalUrl = isIdSearch ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idValue)}` : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
-                    const globalResponse = await axios.get(globalUrl);
+                    const globalResponse = await apiClient.get(globalUrl);
                     const filteredGlobal = globalResponse.data.filter(a => {
                         if (a.id_public === currentId) return false;
                         if (birthDate && a.deceasedDate && (a.gender === 'Female' || a.gender === 'Intersex')) { const offspringBirth = new Date(birthDate); const parentDeceased = new Date(a.deceasedDate); if (parentDeceased < offspringBirth) return false; }
@@ -5655,16 +5589,15 @@ useEffect(() => {
         setMatingCOI(null);
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 15000);
-        axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
+        apiClient.get(`/animals/inbreeding/pairing`, {
             params: { sireId, damId, generations: 20 },
-            headers: { Authorization: `Bearer ${authToken}` },
             signal: controller.signal,
         }).then(res => {
             const val = res.data.inbreedingCoefficient ?? 0;
             coiCacheRef.current[cacheKey] = val;
             setMatingCOI(val);
         }).catch(() => {}).finally(() => { clearTimeout(timeout); setMatingCalcCOI(false); });
-    }, [matingData.sireId_public, matingData.damId_public, authToken, API_BASE_URL]);
+    }, [matingData.sireId_public, matingData.damId_public, authToken]);
 
     const resetMatingForm = () => {
         setMatingData({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
@@ -5704,9 +5637,7 @@ useEffect(() => {
             };
             let resp;
             try {
-                resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                resp = await apiClient.post(`/litters`, payload);
             } catch (createError) {
                 const duplicate = createError.response?.status === 409 && createError.response.data?.duplicate;
                 if (!duplicate) throw createError;
@@ -5719,18 +5650,15 @@ useEffect(() => {
                     return;
                 }
                 if (resolution.action === 'create-anyway') {
-                    resp = await axios.post(`${API_BASE_URL}/litters`, { ...payload, confirmDuplicate: true }, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    resp = await apiClient.post(`/litters`, { ...payload, confirmDuplicate: true });
                 } else {
                     return;
                 }
             }
             const litterBackendId = resp.data.litterId_backend;
             if (matingCOI != null) {
-                axios.put(`${API_BASE_URL}/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI }, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                }).catch(() => {});
+                apiClient.put(`/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI })
+                    .catch(() => {});
             }
             showModalMessage('Success', 'Planned mating recorded!');
             setShowAddMatingForm(false);
