@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield, Info, AlertTriangle, CheckCircle, X,
@@ -119,9 +119,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   const fetchModMessages = useCallback(async () => {
     if (!authToken) return;
     try {
-      const response = await axios.get(`${API_BASE_URL}/notifications`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      const response = await apiClient.get(`/notifications`);
       const all = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
       setModMessages(all.filter(n => n.type === 'moderator_message' && n.status === 'pending'));
       // Backend already sorts newest-first — grab the most recent unread, non-admin notification
@@ -143,9 +141,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   const fetchMessagePreview = useCallback(async () => {
     if (!authToken) return;
     try {
-      const response = await axios.get(`${API_BASE_URL}/messages/conversations`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      const response = await apiClient.get(`/messages/conversations`);
       const conversations = Array.isArray(response.data) ? response.data : [];
       const unreadConvos = conversations
         .filter(c => c.unreadCount > 0)
@@ -173,9 +169,7 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   const handleAcknowledgeModMessage = async (id) => {
     setProcessingModMessage(id);
     try {
-      await axios.post(`${API_BASE_URL}/notifications/${id}/approve`, {}, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      await apiClient.post(`/notifications/${id}/approve`, {});
       setModMessages(prev => prev.filter(m => m._id !== id));
       setExpandedId(null);
     } catch (error) {
@@ -189,17 +183,16 @@ const NotificationBar = ({ authToken, API_BASE_URL, userProfile, setShowNotifica
   const fetchCareData = useCallback(async () => {
     if (!authToken) return;
     try {
-      const headers = { Authorization: `Bearer ${authToken}` };
       // Deliberately NOT passing isOwned=true — the Dashboard's own "Needs Attention" widgets
       // (AnimalList's activeAnimalsForDashboard) include every non-archived, non-view-only animal
       // regardless of ownership, so restricting to owned-only here silently hid alerts for
       // animals not marked "owned" and made the ticker disagree with the Dashboard.
       const [ar, lr, er, sr, gr] = await Promise.all([
-        axios.get(`${API_BASE_URL}/animals`, { headers }),
-        axios.get(`${API_BASE_URL}/litters`, { headers }),
-        axios.get(`${API_BASE_URL}/enclosures`, { headers }),
-        axios.get(`${API_BASE_URL}/supplies`, { headers }).catch(() => ({ data: [] })),
-        axios.get(`${API_BASE_URL}/users/general-tasks`, { headers }).catch(() => ({ data: {} })),
+        apiClient.get(`/animals`),
+        apiClient.get(`/litters`),
+        apiClient.get(`/enclosures`),
+        apiClient.get(`/supplies`).catch(() => ({ data: [] })),
+        apiClient.get(`/users/general-tasks`).catch(() => ({ data: {} })),
       ]);
       const ownAnimals = (Array.isArray(ar.data) ? ar.data : []).filter(a => !a.isViewOnly && !a.archived);
       setAnimals(ownAnimals);

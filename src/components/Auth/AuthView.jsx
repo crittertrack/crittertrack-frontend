@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import {
     AlertCircle, Ban, Bean, Cat, CheckCircle, Eye, EyeOff,
     Heart, HeartOff, Hourglass, Loader2, LogIn, Mail, Milk, UserPlus, Users, Wrench
 } from 'lucide-react';
 import InstallPWA from '../InstallPWA';
-import { API_BASE_URL } from '../../utils/apiConfig';
 
 const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle, onShowTerms, onShowPrivacy, userCount }) => {
     const [email, setEmail] = useState('');
@@ -32,7 +31,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     useEffect(() => {
         const checkMaintenanceStatus = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/auth/maintenance-status`);
+                const response = await apiClient.get(`/auth/maintenance-status`);
                 if (response.data?.active) {
                     setMaintenanceInfo({ message: response.data.message });
                 } else {
@@ -190,7 +189,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 return;
             }
             try {
-                await axios.post(`${API_BASE_URL}/auth/register-request`, {
+                await apiClient.post(`/auth/register-request`, {
                     email,
                     password,
                     personalName
@@ -209,7 +208,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         } else if (isRegister && verificationStep) {
             // Step 2: Verify code and complete registration
             try {
-                const response = await axios.post(`${API_BASE_URL}/auth/verify-email`, {
+                const response = await apiClient.post(`/auth/verify-email`, {
                     email,
                     code: verificationCode
                 });
@@ -230,7 +229,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         } else {
             // Login flow (unchanged)
             try {
-                const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password, keepSignedIn });
+                const response = await apiClient.post(`/auth/login`, { email, password, keepSignedIn });
                 
                 // Clear any old suspension data on successful login
                 localStorage.removeItem('suspensionEndTime');
@@ -394,7 +393,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             // Step 1: Request password reset
             setLoading(true);
             try {
-                await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email: resetEmail });
+                await apiClient.post(`/auth/forgot-password`, { email: resetEmail });
                 showModalMessage('Check Your Email', 'A password reset email has been sent. Click the button in the email to continue.');
                 setForgotPasswordStep(2);
             } catch (error) {
@@ -418,7 +417,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             }
             setLoading(true);
             try {
-                await axios.post(`${API_BASE_URL}/auth/reset-password`, {
+                await apiClient.post(`/auth/reset-password`, {
                     email: resetEmail,
                     token: resetCode,
                     newPassword
@@ -452,7 +451,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const handleResendCode = async () => {
         setLoading(true);
         try {
-            await axios.post(`${API_BASE_URL}/auth/resend-verification`, { email });
+            await apiClient.post(`/auth/resend-verification`, { email });
             showModalMessage('Code Resent', 'A new verification code has been sent to your email.');
         } catch (error) {
             console.error('Resend error:', error.response?.data || error.message);

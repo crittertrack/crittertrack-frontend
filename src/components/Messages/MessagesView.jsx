@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { X, Loader2, MessageSquare, User, ArrowLeft, Ban, Flag, Trash2, ImagePlus, Maximize2 } from 'lucide-react';
 import { DonationBadge, getDonationBadge } from '../../utils/donationUtils';
 import { compressImageFile } from '../../utils/imageCompression';
@@ -63,9 +63,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
     const fetchConversations = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/messages/conversations`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/messages/conversations`);
             setConversations(response.data || []);
         } catch (error) {
             console.error('Error fetching conversations:', error);
@@ -76,9 +74,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
     const fetchMessages = async (otherUserId) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/messages/conversation/${otherUserId}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/messages/conversation/${otherUserId}`);
             setMessages(response.data.messages || []);
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -96,9 +92,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
     const handleDeleteMessage = async (messageId) => {
         if (!window.confirm('Delete this message?')) return;
         try {
-            await axios.delete(`${API_BASE_URL}/messages/${messageId}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.delete(`/messages/${messageId}`);
             await fetchMessages(selectedConversation.otherUserId);
         } catch (error) {
             showModalMessage && showModalMessage('Error', 'Failed to delete message');
@@ -108,9 +102,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
     const handleDeleteConversation = async () => {
         if (!window.confirm('Delete entire conversation? This cannot be undone.')) return;
         try {
-            await axios.delete(`${API_BASE_URL}/messages/conversation/${selectedConversation.otherUserId}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.delete(`/messages/conversation/${selectedConversation.otherUserId}`);
             setSelectedConversation(null);
             await fetchConversations();
             showModalMessage && showModalMessage('Success', 'Conversation deleted');
@@ -122,9 +114,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
     const handleBlockUser = async () => {
         if (!window.confirm(`Block ${getDisplayName(selectedConversation.otherUser)}?`)) return;
         try {
-            await axios.post(`${API_BASE_URL}/messages/block/${selectedConversation.otherUserId}`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/messages/block/${selectedConversation.otherUserId}`, {});
             setSelectedConversation(null);
             await fetchConversations();
             showModalMessage && showModalMessage('Success', 'User blocked');
@@ -152,13 +142,11 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                     createdAt: msg.createdAt
                 }));
             
-            await axios.post(`${API_BASE_URL}/reports/message`, {
+            await apiClient.post(`/reports/message`, {
                 conversationUserId: selectedConversation.otherUserId,
                 reportedUserId: selectedConversation.otherUserId,
                 reason: reason.trim(),
                 recentMessages: recentMessages
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
             showModalMessage && showModalMessage('Success', 'Report submitted to support team');
         } catch (error) {
@@ -174,12 +162,10 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
             return;
         }
         try {
-            await axios.post(`${API_BASE_URL}/reports/message`, {
+            await apiClient.post(`/reports/message`, {
                 messageId: messageId,
                 reportedUserId: selectedConversation.otherUserId,
                 reason: reason.trim()
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
             showModalMessage && showModalMessage('Success', 'Message reported to support team');
         } catch (error) {
@@ -224,9 +210,8 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
         const compressedBlob = await compressImageFile(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
         const formData = new FormData();
         formData.append('file', compressedBlob, file.name);
-        const uploadRes = await axios.post(`${API_BASE_URL}/upload`, formData, {
+        const uploadRes = await apiClient.post(`/upload`, formData, {
             headers: {
-                Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'multipart/form-data'
             }
         });
@@ -258,9 +243,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                 images: imageUrls
             };
 
-            await axios.post(`${API_BASE_URL}/messages/send`, payload, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/messages/send`, payload);
             
             // Clean up previews
             imagePreviews.forEach(url => URL.revokeObjectURL(url));

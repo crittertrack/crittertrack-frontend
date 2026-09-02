@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import {
     Calendar, ChevronLeft, ChevronRight, Search, X,
     CalendarPlus, Hourglass, BellRing, Cake, Rainbow,
@@ -62,15 +62,14 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
 
     useEffect(() => {
         if (!authToken) return;
-        const headers = { Authorization: `Bearer ${authToken}` };
         setLoading(true);
         Promise.all([
-            axios.get(`${API_BASE_URL}/litters`, { headers }),
+            apiClient.get(`/litters`),
             // No isOwned filter — matches the Dashboard's Needs Attention widgets, which include
             // every non-archived, non-view-only animal regardless of ownership.
-            axios.get(`${API_BASE_URL}/animals`, { headers }),
-            axios.get(`${API_BASE_URL}/supplies`, { headers }),
-            axios.get(`${API_BASE_URL}/enclosures`, { headers }),
+            apiClient.get(`/animals`),
+            apiClient.get(`/supplies`),
+            apiClient.get(`/enclosures`),
         ]).then(([l, a, s, e]) => {
             setLitters(Array.isArray(l.data) ? l.data : []);
             setAnimals((Array.isArray(a.data) ? a.data : []).filter(x => !x.isViewOnly && !x.archived));

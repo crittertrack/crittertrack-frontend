@@ -1,10 +1,9 @@
 import React, { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Loader2, ZoomIn, ZoomOut, Home, Cat } from 'lucide-react';
 import dagre from 'dagre';
 import { formatDate } from '../../utils/dateFormatter';
 import themeColors from '../../utils/themeColors';
-import { API_BASE_URL } from '../../utils/apiConfig';
 
 const NODE_W = 96;
 const NODE_H = 92;
@@ -164,9 +163,7 @@ const FamilyTreeView = ({
                 if (localAnimal) return localAnimal;
                 if (nodes[id]) return nodes[id];
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    const response = await apiClient.get(`/animals/any/${id}`);
                     return response.data;
                 } catch (e) {
                     console.warn(`Could not fetch animal ${id}`);
@@ -226,9 +223,7 @@ const FamilyTreeView = ({
                 try {
                     // includeManaged: siblings/offspring recorded via Litter Management would
                     // otherwise be silently excluded by this endpoint.
-                    const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalId}/offspring?includeManaged=true`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    const offspringResponse = await apiClient.get(`/animals/${animalId}/offspring?includeManaged=true`);
                     const litters = offspringResponse.data || [];
                     for (const litter of litters) {
                         // Add other parent if not already present (endpoint already resolves this)
@@ -269,9 +264,7 @@ const FamilyTreeView = ({
               const localAnimal = (animals || []).find(a => a.id_public === id);
               if (localAnimal) return localAnimal;
               try {
-                  const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
-                      headers: { Authorization: `Bearer ${authToken}` }
-                  });
+                  const response = await apiClient.get(`/animals/any/${id}`);
                   return response.data;
               } catch (e) {
                   console.warn(`Could not fetch animal ${id}`);
@@ -299,9 +292,7 @@ const FamilyTreeView = ({
                   const animalData = await fetchAnimalData(currentId);
                   let litters = [];
                   try {
-                      const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${currentId}/offspring?includeManaged=true`, {
-                          headers: { Authorization: `Bearer ${authToken}` }
-                      });
+                      const offspringResponse = await apiClient.get(`/animals/${currentId}/offspring?includeManaged=true`);
                       litters = offspringResponse.data || [];
                   } catch (e) {
                       if (e.response?.status !== 404) {

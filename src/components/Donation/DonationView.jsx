@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import { ArrowLeft, Heart } from 'lucide-react';
 
 const DonationView = ({ onBack, authToken, userProfile, API_BASE_URL }) => {
