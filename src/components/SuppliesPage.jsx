@@ -85,7 +85,9 @@ const SuppliesPage = ({ authToken, API_BASE_URL, showModalMessage }) => {
         try {
             if (editingSupplyId) {
                 const res = await apiClient.patch(`/supplies/${editingSupplyId}`, supplyForm);
-                setSupplies(prev => prev.map(s => s._id === editingSupplyId ? res.data : s));
+                // Merge, don't replace \u2014 a queued (offline) patch only echoes back the sent
+                // fields, which lack _id and would otherwise break future edits/deletes on this item.
+                setSupplies(prev => prev.map(s => s._id === editingSupplyId ? { ...s, ...res.data } : s));
             } else {
                 const res = await apiClient.post(`/supplies`, supplyForm);
                 setSupplies(prev => [...prev, res.data]);

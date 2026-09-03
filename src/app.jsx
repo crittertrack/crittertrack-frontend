@@ -29,6 +29,9 @@ import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import OfflineBanner from './components/shared/OfflineBanner';
+import SyncFailureBanner from './components/shared/SyncFailureBanner';
+import { prefetchAppData } from './utils/prefetchOfflineData';
+import { warmImageCache } from './utils/offlineImageCache';
 import AnimalImageUpload from './components/AnimalImageUpload';
 import { compressImageFile, compressImageToMaxSize, compressImageWithWorker } from './utils/imageCompression';
 import ThemeToggle from './components/ThemeToggle';
@@ -319,6 +322,26 @@ const App = () => {
         })();
         return () => cleanup();
     }, [authToken]);
+
+    // Load the core app datasets (and their photos) into the offline cache as soon as the user
+    // is signed in — up front, not lazily whenever a screen happens to be opened — so the app
+    // still works offline even for screens never visited yet. Re-runs on reconnect so the
+    // cache stays fresh. See utils/prefetchOfflineData.js.
+    const wasOnlineRef = useRef(true);
+    useEffect(() => {
+        if (!authToken) return;
+        prefetchAppData();
+        const onNetworkStatus = (e) => {
+            if (e.detail.online && !wasOnlineRef.current) prefetchAppData();
+            wasOnlineRef.current = e.detail.online;
+        };
+        window.addEventListener('api-network-status', onNetworkStatus);
+        return () => window.removeEventListener('api-network-status', onNetworkStatus);
+    }, [authToken]);
+
+    useEffect(() => {
+        if (userProfile?.profileImage) warmImageCache(userProfile.profileImage);
+    }, [userProfile?.profileImage]);
 
     // Detect mobile/app environment
     React.useEffect(() => {
@@ -2530,6 +2553,7 @@ const AppRouter = () => {
     return (
         <>
             <OfflineBanner />
+            <SyncFailureBanner />
             <Routes>
                 <Route path="/privacypolicy" element={<PrivacyPolicyPage />} />
                 <Route path="/animal/:animalId" element={<PublicAnimalPage />} />

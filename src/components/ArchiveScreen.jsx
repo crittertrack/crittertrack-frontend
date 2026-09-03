@@ -77,7 +77,10 @@ const ArchiveScreen = ({
     const handleUnarchive = async (animal) => {
         try {
             const res = await apiClient.put(`/animals/${animal.id_public}`, { archived: false });
-            const updatedAnimal = res.data?.animal || res.data || { ...animal, archived: false };
+            // Merge onto the known animal instead of trusting res.data alone \u2014 a queued
+            // (offline) write only echoes back { archived: false }, missing id_public and
+            // every other field, which would otherwise silently break the animal-updated merge.
+            const updatedAnimal = { ...animal, ...(res.data?.animal || res.data), id_public: animal.id_public, archived: false };
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: updatedAnimal }));
             window.dispatchEvent(new Event('animals-changed'));
             showModalMessage('Success', 'Animal unarchived');
