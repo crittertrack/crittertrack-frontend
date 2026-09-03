@@ -1,7 +1,7 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle, lazy, Suspense } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from './utils/apiClient';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, HeartPulse, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Stethoscope, UtensilsCrossed, Droplets, Droplet, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal, ScanHeart } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import 'flag-icons/css/flag-icons.min.css';
@@ -28,6 +28,10 @@ import PublicProfileView from './components/PublicProfile/PublicProfileView';
 import ModalMessage from './components/shared/ModalMessage';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import LoadingSpinner from './components/shared/LoadingSpinner';
+import OfflineBanner from './components/shared/OfflineBanner';
+import SyncFailureBanner from './components/shared/SyncFailureBanner';
+import { prefetchAppData } from './utils/prefetchOfflineData';
+import { warmImageCache } from './utils/offlineImageCache';
 import AnimalImageUpload from './components/AnimalImageUpload';
 import { compressImageFile, compressImageToMaxSize, compressImageWithWorker } from './utils/imageCompression';
 import ThemeToggle from './components/ThemeToggle';
@@ -100,9 +104,7 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
             try {
                 // Try to fetch from authenticated endpoint (can access any animal globally)
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    const response = await apiClient.get(`/animals/any/${parentId}`);
                     if (response.data) {
                         setParentData(response.data);
                         setLoading(false);
@@ -113,7 +115,7 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
                 }
 
                 // Try fetching from global public animals database
-                const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
+                const publicResponse = await apiClient.get(`/public/global/animals?id_public=${parentId}`);
                 if (publicResponse.data && publicResponse.data.length > 0) {
                     setParentData(publicResponse.data[0]);
                 } else {
@@ -298,9 +300,7 @@ const App = () => {
     const fetchLocations = useCallback(async () => {
         if (!authToken) return;
         try {
-            const res = await axios.get(`${API_BASE_URL}/locations`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const res = await apiClient.get(`/locations`);
             setLocations(res.data || []);
         } catch (err) {
             console.error('[fetchLocations]', err);
@@ -322,6 +322,26 @@ const App = () => {
         })();
         return () => cleanup();
     }, [authToken]);
+
+    // Load the core app datasets (and their photos) into the offline cache as soon as the user
+    // is signed in — up front, not lazily whenever a screen happens to be opened — so the app
+    // still works offline even for screens never visited yet. Re-runs on reconnect so the
+    // cache stays fresh. See utils/prefetchOfflineData.js.
+    const wasOnlineRef = useRef(true);
+    useEffect(() => {
+        if (!authToken) return;
+        prefetchAppData();
+        const onNetworkStatus = (e) => {
+            if (e.detail.online && !wasOnlineRef.current) prefetchAppData();
+            wasOnlineRef.current = e.detail.online;
+        };
+        window.addEventListener('api-network-status', onNetworkStatus);
+        return () => window.removeEventListener('api-network-status', onNetworkStatus);
+    }, [authToken]);
+
+    useEffect(() => {
+        if (userProfile?.profileImage) warmImageCache(userProfile.profileImage);
+    }, [userProfile?.profileImage]);
 
     // Detect mobile/app environment
     React.useEffect(() => {
@@ -371,9 +391,7 @@ const App = () => {
                 const localFavorites = JSON.parse(localStorage.getItem('speciesFavorites') || '[]');
                 
                 // Fetch from backend
-                const response = await axios.get(`${API_BASE_URL}/users/species-favorites`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get(`/users/species-favorites`);
                 
                 const backendFavorites = response.data?.speciesFavorites || [];
                 
@@ -388,9 +406,8 @@ const App = () => {
                 // below) — union-merging backend favorites back in here would resurrect species the
                 // user had just unfavorited. Only push local -> backend to repair any drift.
                 if (JSON.stringify(localFavorites) !== JSON.stringify(backendFavorites)) {
-                    await axios.post(`${API_BASE_URL}/users/species-favorites`, 
-                        { speciesFavorites: localFavorites },
-                        { headers: { Authorization: `Bearer ${authToken}` } }
+                    await apiClient.post(`/users/species-favorites`, 
+                        { speciesFavorites: localFavorites }
                     );
                 }
             } catch (error) {
@@ -409,9 +426,8 @@ const App = () => {
         const syncToBackend = async (e) => {
             try {
                 const favorites = e.detail; // from custom event
-                await axios.post(`${API_BASE_URL}/users/species-favorites`, 
-                    { speciesFavorites: favorites },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
+                await apiClient.post(`/users/species-favorites`, 
+                    { speciesFavorites: favorites }
                 );
             } catch (error) {
                 console.error('[SPECIES FAVORITES] Failed to sync to backend:', error);
@@ -514,9 +530,7 @@ const App = () => {
         window.dispatchEvent(new CustomEvent('animal-updated', { detail: patch }));
         // Persist
         try {
-            await axios.put(`${API_BASE_URL}/animals/${animalId}`, { isOwned: newOwnedValue }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put(`/animals/${animalId}`, { isOwned: newOwnedValue });
         } catch (err) {
             // Revert
             const revert = { id_public: animalId, isOwned: !newOwnedValue };
@@ -576,8 +590,7 @@ const App = () => {
                 // Fetch parents using /any/ endpoint to get parents regardless of ownership
                 if (sireId) {
                     try {
-                        const response = await axios.get(`${API_BASE_URL}/animals/any/${sireId}`, {
-                            headers: { Authorization: `Bearer ${authToken}` },
+                        const response = await apiClient.get(`/animals/any/${sireId}`, {
                             signal: controller.signal
                         });
                         if (!controller.signal.aborted) {
@@ -592,8 +605,7 @@ const App = () => {
                 
                 if (damId) {
                     try {
-                        const response = await axios.get(`${API_BASE_URL}/animals/any/${damId}`, {
-                            headers: { Authorization: `Bearer ${authToken}` },
+                        const response = await apiClient.get(`/animals/any/${damId}`, {
                             signal: controller.signal
                         });
                         if (!controller.signal.aborted) {
@@ -608,8 +620,7 @@ const App = () => {
                 
                 // Fetch offspring using the dedicated offspring endpoint
                 try {
-                    const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}/offspring`, {
-                        headers: { Authorization: `Bearer ${authToken}` },
+                    const offspringResponse = await apiClient.get(`/animals/${animalToView.id_public}/offspring`, {
                         signal: controller.signal
                     });
                     
@@ -664,8 +675,7 @@ const App = () => {
         const controller = new AbortController();
         fullAnimalAbortControllerRef.current = controller;
 
-        axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
-            headers: { Authorization: `Bearer ${authToken}` },
+        apiClient.get(`/animals/${animalToView.id_public}`, {
             signal: controller.signal
         })
         .then(res => {
@@ -698,8 +708,7 @@ const App = () => {
 
         const refetchCurrentAnimal = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
-                    headers: { Authorization: `Bearer ${authToken}` },
+                const response = await apiClient.get(`/animals/${animalToView.id_public}`, {
                     signal: controller.signal
                 });
                 // Update the animal state with fresh data from server
@@ -767,7 +776,7 @@ const App = () => {
             const idx = parseInt(idxStr);
             const record = animalToView.breedingRecords[idx];
             if (!record?.litterId || breedingRecordLitters[record.litterId] !== undefined) return;
-            axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
+            apiClient.get(`/litters`)
                 .then(res => {
                     const litter = res.data.find(l => l.litter_id_public === record.litterId);
                     if (litter) setBreedingRecordLitters(prev => ({ ...prev, [record.litterId]: litter }));
@@ -868,9 +877,7 @@ const App = () => {
 
         const pollForUpdates = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/admin/maintenance-status`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get(`/admin/maintenance-status`);
                 const data = response.data;
                 
                 if (data.active && !currentMaintenanceMode) {
@@ -932,9 +939,7 @@ const App = () => {
 
         const pollUserStatus = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/auth/status`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get(`/auth/status`);
                 consecutiveAuthErrors.current = 0; // reset on successful response
                 const data = response.data;
                 
@@ -1020,12 +1025,11 @@ const App = () => {
         }
     }, [currentView]);
 
-    // Auth token effect - set up axios defaults
+    // Auth token effect - clear localStorage/state on logout (apiClient reads token from localStorage directly)
     useEffect(() => {
         if (authToken) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+            // no-op: apiClient's interceptor reads the token from localStorage on each request
         } else {
-            delete axios.defaults.headers.common['Authorization'];
             localStorage.removeItem('authToken');
             setUserProfile(null);
             // Only redirect to home if not on a public route. Note: /calculator is the Offspring Calculator.
@@ -1049,7 +1053,7 @@ const App = () => {
             window.history.replaceState({}, '', window.location.pathname);
             
             // Fetch the user's profile to get their name
-            axios.get(`${API_BASE_URL}/public/profile/${messageUserId}`)
+            apiClient.get(`/public/profile/${messageUserId}`)
                 .then(res => {
                     const targetProfile = res.data;
                     setSelectedConversation({
@@ -1131,9 +1135,7 @@ const App = () => {
         const fetchAnimalsForCalculator = async () => {
             if ((currentView === 'calculator' || currentView === 'coi' || currentView === 'pedigree' || currentView === 'target') && authToken) {
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true&slim=false`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    const response = await apiClient.get(`/animals?isOwned=true&slim=false`);
                     setMyAnimalsForCalculator(response.data || []);
 
                 } catch (error) {
@@ -1151,8 +1153,8 @@ const App = () => {
         const fetchViewBreederInfo = async () => {
             if (animalToView?.breederId_public && currentView === 'view-animal') {
                 try {
-                    const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animalToView.breederId_public}&limit=1`
+                    const response = await apiClient.get(
+                        `/public/profiles/search?query=${animalToView.breederId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setViewAnimalBreederInfo(response.data[0]);
@@ -1171,9 +1173,7 @@ const App = () => {
     const fetchNotificationCount = useCallback(async () => {
         if (!authToken) return;
         try {
-            const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/notifications/unread-count`);
             setNotificationCount(response.data?.count || 0);
         } catch (error) {
             console.error('Failed to fetch notification count:', error);
@@ -1183,9 +1183,7 @@ const App = () => {
     const fetchUnreadMessageCount = useCallback(async () => {
         if (!authToken) return;
         try {
-            const response = await axios.get(`${API_BASE_URL}/messages/unread-count`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/messages/unread-count`);
             setUnreadMessageCount(response.data?.count || 0);
             setUnreadAdminMessageCount(response.data?.adminCount || 0);
         } catch (error) {
@@ -1233,7 +1231,7 @@ const App = () => {
     useEffect(() => {
         const fetchSpeciesAndConfigs = async () => {
             try {
-                const speciesResponse = await axios.get(`${API_BASE_URL}/species`);
+                const speciesResponse = await apiClient.get(`/species`);
                 setSpeciesOptions(speciesResponse.data);
             } catch (error) {
                 console.error('Failed to fetch species:', error);
@@ -1258,14 +1256,13 @@ const App = () => {
         
         setFeedbackSubmitting(true);
         try {
-            await axios.post(
-                `${API_BASE_URL}/feedback/species`,
+            await apiClient.post(
+                `/feedback/species`,
                 {
                     species: feedbackSpecies,
                     feedback: feedbackText.trim(),
                     type: 'species-customization'
-                },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+                }
             );
             
             showModalMessage('Feedback Sent', 'Thank you! Your feedback will help us improve species customization.');
@@ -1283,10 +1280,9 @@ const App = () => {
     const handleDismissWelcomeGuide = async () => {
         try {
             // Save to database
-            await axios.post(
-                `${API_BASE_URL}/users/dismiss-profile-setup-guide`,
-                {},
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            await apiClient.post(
+                `/users/dismiss-profile-setup-guide`,
+                {}
             );
             
             // Update state
@@ -2094,9 +2090,7 @@ const App = () => {
                     showModalMessage={showModalMessage}
                     onViewAnimal={(animalId_public, viewFromNotification) => {
                         // Fetch animal with notification flag to override private animal access
-                        axios.get(`${API_BASE_URL}/animals/any/${animalId_public}?viewFromNotification=${viewFromNotification}`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        })
+                        apiClient.get(`/animals/any/${animalId_public}?viewFromNotification=${viewFromNotification}`)
                             .then(res => {
                                 setAnimalToView(res.data);
                                 navigate('/view-animal');
@@ -2532,7 +2526,7 @@ const AppRouter = () => {
     useEffect(() => {
         const getClientIp = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/client-ip`);
+                const response = await apiClient.get(`/client-ip`);
                 const detectedIp = response.data.ip || response.data.clientIp;
                 setClientIp(detectedIp);
             } catch (error) {
@@ -2558,6 +2552,8 @@ const AppRouter = () => {
 
     return (
         <>
+            <OfflineBanner />
+            <SyncFailureBanner />
             <Routes>
                 <Route path="/privacypolicy" element={<PrivacyPolicyPage />} />
                 <Route path="/animal/:animalId" element={<PublicAnimalPage />} />

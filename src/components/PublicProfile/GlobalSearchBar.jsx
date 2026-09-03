@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Flame, Gem, Loader2, Search, User, Cat } from 'lucide-react';
-import { API_BASE_URL } from '../../utils/apiConfig';
 
 const getDonationBadge = (user) => {
     if (!user) return null;
@@ -142,18 +141,18 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
             
             if (hasCTU && numericId) {
                 // CTU1279 - only search users
-                userUrl = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(`CTU${numericId}`)}&limit=10`;
+                userUrl = `/public/profiles/search?query=${encodeURIComponent(`CTU${numericId}`)}&limit=10`;
             } else if (hasCTC && numericId) {
                 // CTC1279 - only search animals
-                animalUrl = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
+                animalUrl = `/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
             } else if ((hasCT || isNumericOnly) && numericId) {
                 // CT1279 or 1279 - search both
-                userUrl = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(`CTU${numericId}`)}&limit=10`;
-                animalUrl = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
+                userUrl = `/public/profiles/search?query=${encodeURIComponent(`CTU${numericId}`)}&limit=10`;
+                animalUrl = `/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
             } else {
                 // Regular text search - search both by name/species
-                userUrl = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(trimmedTerm)}&limit=10`;
-                animalUrl = `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}&limit=10`;
+                userUrl = `/public/profiles/search?query=${encodeURIComponent(trimmedTerm)}&limit=10`;
+                animalUrl = `/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}&limit=10`;
             }
             
             console.log('User URL:', userUrl);
@@ -161,10 +160,10 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
             
             // Only make the requests that are needed
             const promises = [];
-            if (userUrl) promises.push(axios.get(userUrl));
+            if (userUrl) promises.push(apiClient.get(userUrl));
             else promises.push(Promise.resolve({ data: [] }));
             
-            if (animalUrl) promises.push(axios.get(animalUrl));
+            if (animalUrl) promises.push(apiClient.get(animalUrl));
             else promises.push(Promise.resolve({ data: [] }));
             
             const [usersResponse, animalsResponse] = await Promise.all(promises);

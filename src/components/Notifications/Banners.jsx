@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import {
     AlertCircle, AlertTriangle, Baby, Check, CheckCircle,
     Info, Loader2, PawPrint, Shield, XCircle, X
 } from 'lucide-react';
 import { renderRichText } from '../../utils/richText';
-import { API_BASE_URL } from '../../utils/apiConfig';
 
 
 // Poll Component for Broadcasts
@@ -139,9 +138,8 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles, authToken, API_BASE_URL
                                 setIsSuggesting(true);
                                 setSuggestError('');
                                 try {
-                                    const res = await axios.post(`${API_BASE_URL}/moderation/poll/suggest-option`,
-                                        { notificationId, optionText: suggestionText.trim() },
-                                        { headers: { Authorization: `Bearer ${authToken}` } }
+                                    const res = await apiClient.post(`/moderation/poll/suggest-option`,
+                                        { notificationId, optionText: suggestionText.trim() }
                                     );
                                     setSuggestionText('');
                                     if (onOptionsUpdated) onOptionsUpdated(res.data.pollOptions);
@@ -192,9 +190,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
         const fetchBroadcasts = async () => {
             if (!authToken) return;
             try {
-                const response = await axios.get(`${API_BASE_URL}/notifications`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get(`/notifications`);
             const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
                 // Filter for broadcast/announcement types that are NOT warning/alert (show info, announcement, or undefined)
             const broadcastNotifications = allNotifications.filter(n => {
@@ -255,10 +251,9 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
         try {
             console.log('[POLL] Voting:', { notificationId, selectedOptions });
             
-            const response = await axios.post(
-                `${API_BASE_URL}/moderation/poll/vote`,
-                { notificationId, selectedOptions },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            const response = await apiClient.post(
+                `/moderation/poll/vote`,
+                { notificationId, selectedOptions }
             );
             
             console.log('[POLL] Vote response:', response.data);
@@ -403,9 +398,7 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
         const fetchUrgentBroadcasts = async () => {
             if (!authToken) return;
             try {
-                const response = await axios.get(`${API_BASE_URL}/notifications`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get(`/notifications`);
             const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
                 // Filter for urgent broadcast types (warning/alert) - these MUST have explicit broadcastType
                 // "read" is the durable, server-side record of acknowledgement (survives logout/login and
@@ -439,9 +432,8 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
             localStorage.setItem('acknowledgedUrgentBroadcasts', JSON.stringify(newAcknowledged));
             setUrgentBroadcast(null);
             // Persist server-side so it stays acknowledged after signing out/in or on another device.
-            axios.patch(`${API_BASE_URL}/notifications/${urgentBroadcast._id}/read`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            }).catch(error => console.error('Failed to persist broadcast acknowledgement:', error));
+            apiClient.patch(`/notifications/${urgentBroadcast._id}/read`, {})
+                .catch(error => console.error('Failed to persist broadcast acknowledgement:', error));
         }
     };
 

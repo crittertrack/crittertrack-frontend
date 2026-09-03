@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import {
     AlertTriangle, Baby, Bell, CheckCircle, ChevronDown, ChevronUp,
     Droplets, Egg, Heart, Loader2, Milk, Package, PawPrint, Shield,
@@ -8,7 +8,6 @@ import {
 import { formatDate, parseLocalDate } from '../../utils/dateFormatter';
 import { renderRichText } from '../../utils/richText';
 import { BroadcastPoll } from './Banners';
-import { API_BASE_URL } from '../../utils/apiConfig';
 
 // Dedicated, individually-tracked Grooming/Special Care & Training schedule fields
 // ({ lastDoneDate, frequencyDays }) — see AnimalList/index.jsx GROOMING_SCHEDULE_DEFS/TRAINING_SCHEDULE_DEFS.
@@ -67,7 +66,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     // -- Data Fetching -----------------------------------------------
     useEffect(() => {
         if (!authToken) return;
-        axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get(`/litters`)
             .then(res => {
                 const data = Array.isArray(res.data) ? res.data : [];
                 setLitters(data);
@@ -82,10 +81,10 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         Promise.all([
             // No isOwned filter — matches the Dashboard's Needs Attention widgets, which include
             // every non-archived, non-view-only animal regardless of ownership.
-            axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } }),
-            axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } }),
-            axios.get(`${API_BASE_URL}/supplies`, { headers: { Authorization: `Bearer ${authToken}` } }),
-            axios.get(`${API_BASE_URL}/users/general-tasks`, { headers: { Authorization: `Bearer ${authToken}` } }),
+            apiClient.get(`/animals`),
+            apiClient.get(`/enclosures`),
+            apiClient.get(`/supplies`),
+            apiClient.get(`/users/general-tasks`),
         ])
             .then(([ar, er, sr, gr]) => {
                 const a = (Array.isArray(ar.data) ? ar.data : []).filter(x => !x.isViewOnly && !x.archived);
@@ -108,9 +107,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         const fetchBroadcasts = async () => {
             if (!authToken) return;
             try {
-                const response = await axios.get(`${API_BASE_URL}/notifications`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get(`/notifications`);
             const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
             const broadcastNotifications = allNotifications.filter(n => {
                     const isBroadcastType = n.type === 'broadcast' || n.type === 'announcement';
@@ -138,11 +135,16 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             const dn = [l.dam?.prefix, l.dam?.name || l.damId_public || '?', l.dam?.suffix].filter(Boolean).join(' ');
             const sireDam = `${sn} \u00d7 ${dn}`;
             const callId = l.litter_id_public;
-            if (l.matingDate && !l.birthDate) {
+            // isPlanned is the actual source of truth for "still needs to be marked mated" (it
+            // only clears via the explicit Mated Today action — see reproStatusSync.js). Without
+            // this check, marking a planned mating done from ANY client (e.g. the Lite app, which
+            // has no access to this browser's localStorage dismissal) would leave a phantom
+            // "mated today" reminder here forever, since matingDate now equals today.
+            if (l.isPlanned && l.matingDate && !l.pregnancyDate && !l.birthDate) {
                 const mated = parseLocalDate(l.matingDate);
                 if (mated) {
                     const diff = Math.round((mated - today) / 86400000);
-                    if (diff === 0) {
+                    if (diff <= 0) {
                         const key = `${l._id}-mated-${todayStr}`;
                         if (!breedingDismissed[key]) breedingItems.push({ key, type: 'mated', pairName, sireDam, callId, diff });
                     }
@@ -243,7 +245,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     };
     const dismissWeaningPermanently = async (litterId, key) => {
         try {
-            await axios.put(`${API_BASE_URL}/litters/${litterId}`, { weaningDismissed: true }, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.put(`/litters/${litterId}`, { weaningDismissed: true });
             setLitters(prev => prev.map(l => l._id === litterId ? { ...l, weaningDismissed: true } : l));
         } catch { /* fall back to local dismiss */ }
         dismissBreeding(key);
@@ -273,10 +275,9 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             return broadcast;
         }));
         try {
-            const response = await axios.post(
-                `${API_BASE_URL}/moderation/poll/vote`,
-                { notificationId, selectedOptions },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            const response = await apiClient.post(
+                `/moderation/poll/vote`,
+                { notificationId, selectedOptions }
             );
             setBroadcasts(prev => prev.map(broadcast =>
                 broadcast._id === notificationId

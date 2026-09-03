@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, X, Filter, ChevronLeft, ChevronRight, DollarSign, Heart, Mail, MapPin, Loader2, ShoppingBag, Tag, MessageSquare, Send } from 'lucide-react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import 'flag-icons/css/flag-icons.min.css';
 import ViewAnimalModalV2 from './AnimalDetail/ViewAnimalModalV2';
 import { getCountryFlag, getCountryName, US_STATES, getStateName } from '../utils/locationUtils';
@@ -89,8 +89,8 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         const fetchFilterOptions = async () => {
             try {
                 const [speciesResponse, countriesResponse] = await Promise.all([
-                    axios.get(`${API_BASE_URL}/public/marketplace/species`),
-                    axios.get(`${API_BASE_URL}/public/marketplace/countries`)
+                    apiClient.get(`/public/marketplace/species`),
+                    apiClient.get(`/public/marketplace/countries`)
                 ]);
                 setSpeciesOptions(speciesResponse.data || []);
                 setCountryOptions(countriesResponse.data || []);
@@ -128,7 +128,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                 params.append('state', selectedState);
             }
 
-            const response = await axios.get(`${API_BASE_URL}/public/marketplace?${params.toString()}`, {
+            const response = await apiClient.get(`/public/marketplace?${params.toString()}`, {
                 headers: {
                     'Cache-Control': 'no-cache',
                     'Pragma': 'no-cache'
@@ -247,7 +247,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         setSendingInquiry(true);
         try {
             // Get the owner's backend user ID
-            const ownerResponse = await axios.get(`${API_BASE_URL}/public/profile/${inquiryAnimal.ownerInfo.id_public}`);
+            const ownerResponse = await apiClient.get(`/public/profile/${inquiryAnimal.ownerInfo.id_public}`);
             const ownerBackendId = ownerResponse.data.userId_backend;
             
             if (!ownerBackendId) {
@@ -262,11 +262,9 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
             }
 
             // Send the message
-            await axios.post(`${API_BASE_URL}/messages/send`, {
+            await apiClient.post(`/messages/send`, {
                 receiverId: ownerBackendId,
                 message: inquiryMessage.trim()
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
             });
 
             showModalMessage?.('Success', 'Your inquiry has been sent! Check your messages for a reply.');

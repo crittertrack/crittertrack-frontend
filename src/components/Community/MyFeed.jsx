@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { Users, Star, Edit, ShoppingBag, UserPlus, Search, Loader2, Cat, Mars, Venus, VenusAndMars, Circle, User } from 'lucide-react';
 import { getCurrencySymbol } from '../../utils/locationUtils';
@@ -19,13 +19,9 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
                 setLoading(true);
                 const [favAnimalsRes, favUsersRes] = await Promise.all([
                     // Fetch favorite animals
-                    axios.get(`${API_BASE_URL}/favorites/animals`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    }).catch(() => ({ data: [] })),
+                    apiClient.get(`/favorites/animals`).catch(() => ({ data: [] })),
                     // Fetch favorite users
-                    axios.get(`${API_BASE_URL}/favorites/users`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    }).catch(() => ({ data: [] })),
+                    apiClient.get(`/favorites/users`).catch(() => ({ data: [] })),
                 ]);
 
                 const favAnimals = favAnimalsRes.data || [];
@@ -49,18 +45,12 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
         try {
             const isFavorited = favoriteAnimals.some(a => a.id_public === animalId);
             if (isFavorited) {
-                await axios.delete(`${API_BASE_URL}/favorites/animals/${animalId}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.delete(`/favorites/animals/${animalId}`);
                 setFavoriteAnimals(prev => prev.filter(a => a.id_public !== animalId));
             } else {
-                await axios.post(`${API_BASE_URL}/favorites/animals/${animalId}`, {}, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.post(`/favorites/animals/${animalId}`, {});
                 // Refetch to get full animal data
-                const res = await axios.get(`${API_BASE_URL}/favorites/animals`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const res = await apiClient.get(`/favorites/animals`);
                 setFavoriteAnimals(res.data || []);
             }
         } catch (error) {
@@ -72,18 +62,12 @@ const MyFeed = ({ authToken, API_BASE_URL }) => {
         try {
             const isFavorited = favoriteUsers.some(u => u.id_public === userId);
             if (isFavorited) {
-                await axios.delete(`${API_BASE_URL}/favorites/users/${userId}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.delete(`/favorites/users/${userId}`);
                 setFavoriteUsers(prev => prev.filter(u => u.id_public !== userId));
             } else {
-                await axios.post(`${API_BASE_URL}/favorites/users/${userId}`, {}, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.post(`/favorites/users/${userId}`, {});
                 // Refetch to get full user data
-                const res = await axios.get(`${API_BASE_URL}/favorites/users`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const res = await apiClient.get(`/favorites/users`);
                 setFavoriteUsers(res.data || []);
             }
         } catch (error) {

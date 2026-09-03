@@ -1,10 +1,9 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import { Loader2, X, Upload, Image as ImageIcon, AlertCircle, CheckCircle, Bug, Lightbulb, MessageSquare, ArrowLeft, Clock, XCircle } from 'lucide-react';
 import { compressImageToMaxSize } from '../utils/imageCompression';
 import InfoButton from './shared/InfoButton';
-import { API_BASE_URL } from '../utils/apiConfig';
 
 const CATEGORY_OPTIONS = [
     { value: 'Bug', label: 'Bug Report', icon: <Bug size={16} />, description: 'Something is not working correctly' },
@@ -50,9 +49,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
     const fetchMyReports = useCallback(async () => {
         if (!authToken) return;
         try {
-            const response = await axios.get(`${API_BASE_URL}/bug-reports/my-reports`, {
-                headers: { Authorization: `Bearer ${authToken}` },
-            });
+            const response = await apiClient.get(`/bug-reports/my-reports`);
             setMyReports(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
             console.error('[ReportPage] Failed to fetch my reports:', err);
@@ -134,9 +131,8 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
             formData.append('file', compressedFile);
             formData.append('type', 'report');
 
-            const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
+            const response = await apiClient.post(`/upload`, formData, {
                 headers: {
-                    'Authorization': `Bearer ${authToken}`,
                     'Content-Type': 'multipart/form-data',
                 },
                 timeout: 30000,
@@ -213,12 +209,7 @@ export default function ReportPage({ authToken, userProfile, showModalMessage })
                 browserInfo: getBrowserInfo(),
             };
 
-            const response = await axios.post(`${API_BASE_URL}/bug-reports`, payload, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiClient.post(`/bug-reports`, payload);
 
             if (response.status === 201) {
                 setSubmitted(true);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Heart, Cat, EyeOff, Eye, Hourglass, ScanHeart, Droplet, Loader2, ChevronDown, ChevronRight, Mars, Venus, VenusAndMars, Circle } from 'lucide-react';
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
@@ -121,9 +121,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                 // parents (e.g. sold/transferred animals) with no benefit.
                 if (authToken) {
                     try {
-                        const anyResponse = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        const anyResponse = await apiClient.get(`/animals/any/${parentId}`);
                         if (anyResponse.data) {
                             setParentData(anyResponse.data);
                             setFoundViaOwned(!!anyResponse.data._viewerHasAccess);
@@ -137,7 +135,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                 }
 
                 // Try fetching from global public animals database
-                const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
+                const publicResponse = await apiClient.get(`/public/global/animals?id_public=${parentId}`);
                 if (publicResponse.data && publicResponse.data.length > 0) {
                     setParentData(publicResponse.data[0]);
                     setCachedParent(parentId, { data: publicResponse.data[0], foundViaOwned: false, notFound: false });
@@ -298,20 +296,14 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
         
         setLoading(true);
         try {
-            const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
-            
             // Fetch offspring - only available for authenticated users
             if (authToken) {
-                const offspringEndpoint = `${API_BASE_URL}/animals/${animalId}/offspring`;
-                const offspringResponse = await axios.get(offspringEndpoint, { headers });
+                const offspringResponse = await apiClient.get(`/animals/${animalId}/offspring`);
                 setOffspring(offspringResponse.data || []);
                 
                 // Fetch current animal to know which parent we are
                 try {
-                    const animalResponse = await axios.get(
-                        `${API_BASE_URL}/animals/any/${animalId}`,
-                        { headers }
-                    );
+                    const animalResponse = await apiClient.get(`/animals/any/${animalId}`);
                     setCurrentAnimal(animalResponse.data);
                 } catch (err) {
                     console.error('Error fetching current animal:', err);
@@ -323,9 +315,7 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
                 
                 // Still fetch the current animal for display
                 try {
-                    const publicResponse = await axios.get(
-                        `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
-                    );
+                    const publicResponse = await apiClient.get(`/public/global/animals?id_public=${animalId}`);
                     setCurrentAnimal(publicResponse.data?.[0] || null);
                 } catch (err) {
                     console.error('Error fetching current animal:', err);

@@ -103,16 +103,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Not intercepted: let the browser make the real network request directly. A GET /api/
+  // failure needs to surface to axios as a genuine network error (no `error.response`) so
+  // apiClient's own offline cache/write-queue layer (see src/utils/apiClient.js) can handle
+  // it — this used to fake a 503 JSON response here instead, which masked every /api/ network
+  // failure from that layer (axios saw `error.response` present and never took the offline
+  // path). PUT/PATCH/DELETE requests never reach here at all (returned above, method !== GET).
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .then(response => response)
-        .catch(() => new Response(JSON.stringify({ error: 'Network error' }), {
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: { 'Content-Type': 'application/json' }
-        }))
-    );
     return;
   }
 

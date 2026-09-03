@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { BookOpen, Plus, Trash2, Edit2, X, Loader2, Search, RefreshCw, Inbox, ExternalLink } from 'lucide-react';
 
 const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
@@ -26,9 +26,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
         setLoading(true);
         setError(null);
         try {
-            const res = await axios.get(`${API_BASE_URL}/admin/resources`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const res = await apiClient.get(`/admin/resources`);
             setResources(res.data);
         } catch (err) {
             console.error('Error fetching resources:', err);
@@ -41,7 +39,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
     useEffect(() => {
         if (!authToken) return;
         fetchResources();
-        axios.get(`${API_BASE_URL}/admin/species`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get(`/admin/species`)
             .then(res => setSpeciesOptions((res.data || []).map(s => s.name)))
             .catch(err => console.error('Error fetching species for resources form:', err));
     }, [authToken, API_BASE_URL]);
@@ -50,9 +48,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
         setLoadingSuggestions(true);
         setErrorSuggestions(null);
         try {
-            const res = await axios.get(`${API_BASE_URL}/admin/resource-suggestions`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const res = await apiClient.get(`/admin/resource-suggestions`);
             setSuggestions(res.data);
         } catch (err) {
             console.error('Error fetching resource suggestions:', err);
@@ -70,9 +66,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
     const handleDeleteSuggestion = async (suggestion) => {
         if (!window.confirm('Remove this suggestion from the list?')) return;
         try {
-            await axios.delete(`${API_BASE_URL}/admin/resource-suggestions/${suggestion._id}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.delete(`/admin/resource-suggestions/${suggestion._id}`);
             setSuggestions(prev => prev.filter(s => s._id !== suggestion._id));
         } catch (err) {
             alert(err.response?.data?.error || 'Failed to delete suggestion');
@@ -128,9 +122,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
         }
         setSaving(true);
         try {
-            await axios.post(`${API_BASE_URL}/admin/resources`, buildPayload(), {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/admin/resources`, buildPayload());
             await fetchResources();
             setShowAddModal(false);
         } catch (err) {
@@ -147,9 +139,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
         }
         setSaving(true);
         try {
-            await axios.patch(`${API_BASE_URL}/admin/resources/${selectedResource._id}`, buildPayload(), {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.patch(`/admin/resources/${selectedResource._id}`, buildPayload());
             await fetchResources();
             setShowEditModal(false);
             setSelectedResource(null);
@@ -163,9 +153,7 @@ const ResourcesManagementTab = ({ API_BASE_URL, authToken }) => {
     const handleDelete = async (resource) => {
         if (!window.confirm(`Delete "${resource.title}"? This cannot be undone.`)) return;
         try {
-            await axios.delete(`${API_BASE_URL}/admin/resources/${resource._id}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.delete(`/admin/resources/${resource._id}`);
             await fetchResources();
         } catch (err) {
             alert(err.response?.data?.error || 'Failed to delete resource');

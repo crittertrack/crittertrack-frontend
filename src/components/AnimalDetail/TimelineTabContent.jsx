@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Calendar, Clock, Star, MessageSquare, Heart, Stethoscope, Droplets, Shield, Users, User, Target, Trash2, Trophy, UtensilsCrossed, FileEdit } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 
@@ -480,7 +480,7 @@ export const useAnimalTimelineEvents = (animal, API_BASE_URL, authToken) => {
         // endpoint requires a valid token anyway, so this avoids a guaranteed 401 on every load.
         if (!animal?.id_public || !API_BASE_URL || !authToken) return;
         let cancelled = false;
-        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get(`/animals/${animal.id_public}/logs`)
             .then(res => { if (!cancelled) setAnimalLogs(Array.isArray(res.data) ? res.data : []); })
             .catch(err => console.error('Failed to fetch animal logs for timeline:', err));
         return () => { cancelled = true; };

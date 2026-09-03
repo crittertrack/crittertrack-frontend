@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import { Loader2, Heart, Sparkles, MessageSquare } from 'lucide-react';
 
 const FEATURE_OPTIONS = [
@@ -211,7 +211,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
 
     const [communityStats, setCommunityStats] = useState(null);
     useEffect(() => {
-        axios.get(`${API_BASE_URL}/public/community-stats`)
+        apiClient.get(`/public/community-stats`)
             .then(res => setCommunityStats(res.data))
             .catch(err => console.error('[BETA SURVEY] Failed to fetch community stats:', err));
     }, [API_BASE_URL]);
@@ -253,7 +253,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
     const handleSkip = async () => {
         setSkipping(true);
         try {
-            await axios.post(`${API_BASE_URL}/beta-survey/skip`, {}, authHeader);
+            await apiClient.post(`/beta-survey/skip`, {});
         } catch (error) {
             console.error('[BETA SURVEY] Failed to skip:', error);
         } finally {
@@ -265,7 +265,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
     const handleDismiss = async () => {
         setDismissing(true);
         try {
-            await axios.post(`${API_BASE_URL}/beta-survey/dismiss`, {}, authHeader);
+            await apiClient.post(`/beta-survey/dismiss`, {});
         } catch (error) {
             console.error('[BETA SURVEY] Failed to dismiss:', error);
         } finally {
@@ -283,7 +283,7 @@ const BetaSurveyModal = ({ API_BASE_URL, authToken, onClose }) => {
                 .forEach(key => { if (!payload[key]) payload[key] = null; });
             Object.keys(payload).forEach(key => { if (payload[key] === '') payload[key] = null; });
 
-            await axios.post(`${API_BASE_URL}/beta-survey/submit`, payload, authHeader);
+            await apiClient.post(`/beta-survey/submit`, payload);
         } catch (error) {
             console.error('[BETA SURVEY] Failed to submit:', error);
         } finally {

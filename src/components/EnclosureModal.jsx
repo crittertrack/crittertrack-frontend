@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { X, Home, Trash2, Save, Loader2, Search, Package, RefreshCw, Wrench, Settings, Utensils, Info } from 'lucide-react';
-import axios from 'axios';
 import { SpeciesPickerModal } from './Modals/SpeciesModals';
 
 const EnclosureModal = ({

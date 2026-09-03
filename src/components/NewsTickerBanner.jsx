@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { Rss, BarChart2, Info, Heart, AlertTriangle, BookOpen, ClipboardList } from 'lucide-react';
 import './NewsTickerBanner.css';
@@ -17,9 +17,7 @@ const NewsTickerBanner = ({ authToken, API_BASE_URL, betaSurveyStatus, onReopenB
         return;
       }
       try {
-        const response = await axios.get(`${API_BASE_URL}/notifications`, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
+        const response = await apiClient.get(`/notifications`);
         const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
         
         const dismissedBroadcasts = JSON.parse(localStorage.getItem('dismissedBroadcasts') || '[]');

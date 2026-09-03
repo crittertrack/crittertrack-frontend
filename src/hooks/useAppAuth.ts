@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 const decodeJwtPayload = (token: string) => {
     try {
@@ -97,27 +98,34 @@ export function useAppAuth(
     }, [authToken]);
 
     useEffect(() => {
-        const interceptor = axios.interceptors.response.use(
-            (response) => response,
-            (error) => {
-                const status = error?.response?.status;
-                const message = String(error?.response?.data?.message || error?.message || '').toLowerCase();
-                const tokenExpired = status === 401 && (
-                    error?.response?.data?.expired === true ||
-                    message.includes('token expired') ||
-                    message.includes('jwt expired') ||
-                    message.includes('session expired')
-                );
+        // Registered on BOTH the global axios instance (for any not-yet-migrated raw axios
+        // call sites) and apiClient (its own instance, doesn't inherit global interceptors),
+        // so token-expiry logout works regardless of which one a component uses.
+        const onResponse = (response: any) => response;
+        const onError = (error: any) => {
+            const status = error?.response?.status;
+            const message = String(error?.response?.data?.message || error?.message || '').toLowerCase();
+            const tokenExpired = status === 401 && (
+                error?.response?.data?.expired === true ||
+                message.includes('token expired') ||
+                message.includes('jwt expired') ||
+                message.includes('session expired')
+            );
 
-                if (tokenExpired) {
-                    clearAuthState(true);
-                }
-
-                return Promise.reject(error);
+            if (tokenExpired) {
+                clearAuthState(true);
             }
-        );
 
-        return () => axios.interceptors.response.eject(interceptor);
+            return Promise.reject(error);
+        };
+
+        const interceptor = axios.interceptors.response.use(onResponse, onError);
+        const apiClientInterceptor = apiClient.interceptors.response.use(onResponse, onError);
+
+        return () => {
+            axios.interceptors.response.eject(interceptor);
+            apiClient.interceptors.response.eject(apiClientInterceptor);
+        };
     }, [clearAuthState]);
 
     // Fetch user profile from API
@@ -127,9 +135,7 @@ export function useAppAuth(
             if (!token) return;
 
             try {
-                const response = await axios.get(`${API_BASE_URL}/users/profile`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const response = await apiClient.get('/users/profile');
 
                 // Normalize profile image keys for UI compatibility and add cache-busting query
                 const user = response.data || {};

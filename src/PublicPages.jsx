@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from './utils/apiClient';
 import { Loader2, XCircle, Download, X, Lock } from 'lucide-react';
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import ViewAnimalModalV2 from './components/AnimalDetail/ViewAnimalModalV2';
@@ -68,7 +68,7 @@ const PublicAnimalPage = () => {
         const fetchAnimal = async () => {
             try {
                 // First try to fetch from public animals
-                const response = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${animalId}`);
+                const response = await apiClient.get(`/public/global/animals?id_public=${animalId}`);
                 if (response.data?.[0]) {
                     setAnimal(response.data[0]);
                     setLoading(false);
@@ -78,10 +78,7 @@ const PublicAnimalPage = () => {
                 // If not found in public, try to fetch from private to determine if it's private or truly not found
                 if (authToken) {
                     try {
-                        const privateResponse = await axios.get(
-                            `${API_BASE_URL}/animals/${animalId}`,
-                            { headers: { Authorization: `Bearer ${authToken}` } }
-                        );
+                        const privateResponse = await apiClient.get(`/animals/${animalId}`);
                         if (privateResponse.data) {
                             // Animal exists but is private
                             setIsPrivate(true);
@@ -231,9 +228,7 @@ const PublicProfilePage = ({ onOpenMessages }) => {
         const fetchUserProfile = async () => {
             if (authToken) {
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/users/profile`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    const response = await apiClient.get(`/users/profile`);
                     setUserProfile(response.data);
                 } catch (error) {
                     console.error('Error fetching user profile:', error);
@@ -246,7 +241,7 @@ const PublicProfilePage = ({ onOpenMessages }) => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/public/profile/${userId}`);
+                const response = await apiClient.get(`/public/profile/${userId}`);
                 setProfile(response.data);
                 setLoading(false);
             } catch (error) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Save, X, User, Loader2, Search } from 'lucide-react';
 import { UserSearchModal } from '../Modals/SearchModals';
 import InfoButton from '../shared/InfoButton';
@@ -18,9 +18,7 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
         const fetchContact = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${API_BASE_URL}/contacts/${contactId}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get(`/contacts/${contactId}`);
                 setFormData({
                     ...response.data,
                     breederStatus: response.data.breederStatus === 'retired' ? 'retired' : 'active',
@@ -39,7 +37,7 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
 
     useEffect(() => {
         if (formData?.linkedCTUID) {
-            axios.get(`${API_BASE_URL}/public/profiles/search?query=${formData.linkedCTUID}&limit=1`)
+            apiClient.get(`/public/profiles/search?query=${formData.linkedCTUID}&limit=1`)
                 .then(res => {
                     const user = res.data?.[0];
                     if (user) {
@@ -105,9 +103,7 @@ const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfil
 
         setIsSaving(true);
         try {
-            await axios.put(`${API_BASE_URL}/contacts/${contactId}`, formData, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.put(`/contacts/${contactId}`, formData);
             showModalMessage('Success', 'Contact updated successfully!');
             navigate(`/contacts/${contactId}/overview`);
         } catch (error) {

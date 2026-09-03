@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Users, Plus, Search, UserCheck, Loader2, Cat, Heart, MapPin } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
 
@@ -27,9 +27,7 @@ const ContactsListPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
     const fetchContacts = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${API_BASE_URL}/contacts`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/contacts`);
             setContacts(response.data);
         } catch (error) {
             console.error('Error fetching contacts:', error);

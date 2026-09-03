@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import {
     ArrowLeft, ArrowDown, ArrowUp, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
@@ -12,7 +12,6 @@ import { formatDate } from '../../utils/dateFormatter';
 import { getSpeciesCategory } from '../../utils/speciesFieldTemplates';
 import ReportButton from '../ReportButton';
 import InfoButton from '../shared/InfoButton';
-import { API_BASE_URL } from '../../utils/apiConfig';
 
 const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Mixed', 'Unknown'];
@@ -350,9 +349,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             if (currentUserIdPublic === profile.id_public) return;
             
             try {
-                const res = await axios.get(`${API_BASE_URL}/favorites/users`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const res = await apiClient.get(`/favorites/users`);
                 const favorited = (res.data || []).some(u => u.id_public === profile.id_public);
                 setIsFavorited(favorited);
             } catch (error) {
@@ -369,14 +366,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         setFavoritePending(true);
         try {
             if (isFavorited) {
-                await axios.delete(`${API_BASE_URL}/favorites/users/${profile.id_public}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.delete(`/favorites/users/${profile.id_public}`);
                 setIsFavorited(false);
             } else {
-                await axios.post(`${API_BASE_URL}/favorites/users/${profile.id_public}`, {}, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                await apiClient.post(`/favorites/users/${profile.id_public}`, {});
                 setIsFavorited(true);
             }
         } catch (error) {
@@ -391,13 +384,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         setSubmittingRating(true);
         setRatingError('');
         try {
-            const resp = await axios.post(
-                `${API_BASE_URL}/ratings/${freshProfile?.id_public || profile.id_public}`,
-                { score: ratingForm.score, comment: ratingForm.comment },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            const resp = await apiClient.post(
+                `/ratings/${freshProfile?.id_public || profile.id_public}`,
+                { score: ratingForm.score, comment: ratingForm.comment }
             );
             setMyRating(resp.data?.rating || { score: ratingForm.score, comment: ratingForm.comment });
-            const pub = await axios.get(`${API_BASE_URL}/public/ratings/${freshProfile?.id_public || profile.id_public}`);
+            const pub = await apiClient.get(`/public/ratings/${freshProfile?.id_public || profile.id_public}`);
             setRatingData({
                 average: pub.data?.average ?? 0,
                 count: pub.data?.count ?? 0,
@@ -416,13 +408,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         setSubmittingRating(true);
         setRatingError('');
         try {
-            await axios.delete(
-                `${API_BASE_URL}/ratings/${freshProfile?.id_public || profile.id_public}`,
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            await apiClient.delete(
+                `/ratings/${freshProfile?.id_public || profile.id_public}`
             );
             setMyRating(null);
             setRatingForm({ score: 0, comment: '' });
-            const pub = await axios.get(`${API_BASE_URL}/public/ratings/${freshProfile?.id_public || profile.id_public}`);
+            const pub = await apiClient.get(`/public/ratings/${freshProfile?.id_public || profile.id_public}`);
             setRatingData({
                 average: pub.data?.average ?? 0,
                 count: pub.data?.count ?? 0,
@@ -441,11 +432,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         if (!reportRatingReason.trim()) return;
         setReportRatingLoading(true);
         try {
-            await axios.post(`${API_BASE_URL}/reports/rating`, {
+            await apiClient.post(`/reports/rating`, {
                 ratingId,
                 targetId_public: freshProfile?.id_public || profile.id_public,
                 reason: reportRatingReason.trim()
-            }, { headers: { Authorization: `Bearer ${authToken}` } });
+            });
             setReportingRating(null);
             setReportRatingReason('');
             setReportRatingSuccess(ratingId);
@@ -461,10 +452,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         if (!window.confirm('Remove this rating? This cannot be undone.')) return;
         setRemovingRatingId(ratingId);
         try {
-            await axios.delete(`${API_BASE_URL}/moderation/ratings/${ratingId}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            const pub = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
+            await apiClient.delete(`/moderation/ratings/${ratingId}`);
+            const pub = await apiClient.get(`/public/ratings/${profile.id_public}`);
             setRatingData({
                 average: pub.data?.average ?? 0,
                 count: pub.data?.count ?? 0,
@@ -500,7 +489,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         const fetchProfile = async () => {
             if (!profile?.id_public) return;
             try {
-                const resp = await axios.get(`${API_BASE_URL}/public/profile/${profile.id_public}`);
+                const resp = await apiClient.get(`/public/profile/${profile.id_public}`);
                 setFreshProfile(resp.data || profile);
             } catch (err) {
                 console.warn('Failed to refresh public profile, using provided profile', err);
@@ -522,7 +511,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         const fetchPublicAnimals = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${API_BASE_URL}/public/animals/${profile.id_public}`);
+                const response = await apiClient.get(`/public/animals/${profile.id_public}`);
                 setAnimals(response.data || []);
             } catch (error) {
                 console.error('Error fetching public animals:', error);
@@ -541,7 +530,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         const fetchPublicLitters = async () => {
             if (!profile?.id_public) return;
             try {
-                const resp = await axios.get(`${API_BASE_URL}/public/litters/user/${profile.id_public}`);
+                const resp = await apiClient.get(`/public/litters/user/${profile.id_public}`);
                 setPublicLitters(resp.data || []);
             } catch {
                 setPublicLitters([]);
@@ -554,7 +543,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         const fetchRatings = async () => {
             if (!profile?.id_public) return;
             try {
-                const resp = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
+                const resp = await apiClient.get(`/public/ratings/${profile.id_public}`);
                 const data = resp.data || {};
                 setRatingData({
                     average: data.average ?? 0,
@@ -572,9 +561,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             // If authenticated, fetch own existing rating for this breeder
             if (authToken) {
                 try {
-                    const resp = await axios.get(`${API_BASE_URL}/ratings/${profile.id_public}/mine`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
+                    const resp = await apiClient.get(`/ratings/${profile.id_public}/mine`);
                     if (resp.data?.score) {
                         setMyRating(resp.data);
                         setRatingForm({ score: resp.data.score, comment: resp.data.comment || '' });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import {
     ArrowLeft, ClipboardList, Dna, FileText, Home, Hospital, Images, Clock, Shield, Pill, Microscope, Stethoscope, Scissors, MessageSquare, AlertTriangle, Activity, Cat,
     Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit, Users, HeartPulse,
@@ -190,18 +190,18 @@ const AssignContactModal = ({ isOpen, onClose, onSelect, target, API_BASE_URL, a
     useEffect(() => {
         if (mode === 'contact' && contacts.length === 0) {
             setLoadingContacts(true);
-            axios.get(`${API_BASE_URL}/contacts`, { headers: { Authorization: `Bearer ${authToken}` } })
+            apiClient.get(`/contacts`)
                 .then(res => setContacts(res.data || []))
                 .catch(err => console.error(err))
                 .finally(() => setLoadingContacts(false));
         }
-    }, [mode, authToken, API_BASE_URL, contacts.length]);
+    }, [mode, contacts.length]);
 
     const handleUserSearch = async () => {
         if (!searchTerm.trim()) return;
         setLoading(true);
         try {
-            const res = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchTerm.trim())}&limit=20`);
+            const res = await apiClient.get(`/public/profiles/search?query=${encodeURIComponent(searchTerm.trim())}&limit=20`);
             setSearchResults(res.data || []);
         } catch (err) {
             console.error(err);
@@ -343,9 +343,9 @@ const ParentSearchModal = ({
         if (scope === 'local' || scope === 'both') {
             try {
                 const localUrl = isIdSearch
-                    ? `${API_BASE_URL}/animals?id_public=${encodeURIComponent(idValue)}`
-                    : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${speciesQuery}`;
-                const localResponse = await axios.get(localUrl, { headers: { Authorization: `Bearer ${authToken}` } });
+                    ? `/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${speciesQuery}`;
+                const localResponse = await apiClient.get(localUrl);
                 setLocalAnimals(localResponse.data.filter(a => a.id_public !== currentId));
             } catch (error) {
                 showModalMessage('Search Error', 'Failed to search your animals.');
@@ -358,9 +358,9 @@ const ParentSearchModal = ({
         if (scope === 'global' || scope === 'both') {
             try {
                 const globalUrl = isIdSearch
-                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idValue)}`
-                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${speciesQuery}`;
-                const globalResponse = await axios.get(globalUrl);
+                    ? `/public/global/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${speciesQuery}`;
+                const globalResponse = await apiClient.get(globalUrl);
                 setGlobalAnimals(globalResponse.data.filter(a => a.id_public !== currentId));
             } catch (error) {
                 setGlobalAnimals([]);
@@ -1057,9 +1057,7 @@ const AssignEnclosureModal = ({ isOpen, onClose, onSelect, availableEnclosures, 
                 enrichment: newEnclosureData.enrichment,
             };
 
-            const response = await axios.post(`${API_BASE_URL}/enclosures`, payload, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.post(`/enclosures`, payload);
             if (response.data) {
                 onSelect(response.data);
                 onClose();
@@ -1681,30 +1679,30 @@ const AnimalFormModalV2 = ({
         if (!authToken) return;
         setLoadingEnclosures(true);
         try {
-            const res = await axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const res = await apiClient.get(`/enclosures`);
             setAvailableEnclosures(res.data || []);
         } catch (err) {
             console.error('Failed to fetch enclosures:', err);
         } finally {
             setLoadingEnclosures(false);
         }
-    }, [authToken, API_BASE_URL]);
+    }, [authToken]);
 
     const fetchLocations = useCallback(async () => {
         if (!authToken) return;
         try {
-            const res = await axios.get(`${API_BASE_URL}/locations`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const res = await apiClient.get(`/locations`);
             setLocations(res.data || []);
         } catch (err) { console.error('Failed to fetch locations:', err); }
-    }, [authToken, API_BASE_URL]);
+    }, [authToken]);
 
     const fetchSupplies = useCallback(async () => {
         if (!authToken) return;
         try {
-            const res = await axios.get(`${API_BASE_URL}/supplies`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const res = await apiClient.get(`/supplies`);
             setSupplies(res.data || []);
         } catch (err) { console.error('Failed to fetch supplies:', err); }
-    }, [authToken, API_BASE_URL]);
+    }, [authToken]);
 
     useEffect(() => {
         fetchEnclosures();
@@ -1762,18 +1760,18 @@ const AnimalFormModalV2 = ({
                 const uploadFormData = new FormData();
                 uploadFormData.append('file', enclosureImageFile);
                 uploadFormData.append('type', 'enclosure');
-                const res = await axios.post(`${API_BASE_URL}/upload`, uploadFormData, {
-                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
+                const res = await apiClient.post(`/upload`, uploadFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 payload.imageUrl = res.data.url;
             }
 
             let savedEnclosure;
             if (editingEnclosureId) {
-                const res = await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, payload, { headers: { Authorization: `Bearer ${authToken}` } });
+                const res = await apiClient.put(`/enclosures/${editingEnclosureId}`, payload);
                 savedEnclosure = res.data;
             } else {
-                const res = await axios.post(`${API_BASE_URL}/enclosures`, payload, { headers: { Authorization: `Bearer ${authToken}` } });
+                const res = await apiClient.post(`/enclosures`, payload);
                 savedEnclosure = res.data;
             }
 
@@ -1789,21 +1787,21 @@ const AnimalFormModalV2 = ({
         } finally {
             setEnclosureSaving(false);
         }
-    }, [authToken, API_BASE_URL, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, handleCloseEnclosureModal, showModalMessage]);
+    }, [authToken, enclosureFormData, enclosureImageFile, editingEnclosureId, fetchEnclosures, handleCloseEnclosureModal, showModalMessage]);
 
     const handleDeleteEnclosure = useCallback(async () => {
         if (!editingEnclosureId) return;
         if (!window.confirm('Are you sure you want to permanently delete this enclosure?')) return;
 
         try {
-            await axios.delete(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.delete(`/enclosures/${editingEnclosureId}`);
             showModalMessage('Success', 'Enclosure deleted.');
             fetchEnclosures();
             handleCloseEnclosureModal();
         } catch (err) {
             showModalMessage('Error', err.response?.data?.message || 'Failed to delete enclosure.');
         }
-    }, [editingEnclosureId, API_BASE_URL, authToken, fetchEnclosures, handleCloseEnclosureModal, showModalMessage]);
+    }, [editingEnclosureId, fetchEnclosures, handleCloseEnclosureModal, showModalMessage]);
 
     const openEnclosureModal = useCallback((enclosure) => {
         if (enclosure) {
@@ -1850,9 +1848,9 @@ const AnimalFormModalV2 = ({
         setLocationSaving(true);
         try {
             if (id) {
-                await axios.put(`${API_BASE_URL}/locations/${id}`, { ...data, parentLocationId: data.parentLocationId || null }, { headers: { Authorization: `Bearer ${authToken}` } });
+                await apiClient.put(`/locations/${id}`, { ...data, parentLocationId: data.parentLocationId || null });
             } else {
-                await axios.post(`${API_BASE_URL}/locations`, data, { headers: { Authorization: `Bearer ${authToken}` } });
+                await apiClient.post(`/locations`, data);
             }
             fetchLocations();
         } catch (err) {
@@ -1860,12 +1858,12 @@ const AnimalFormModalV2 = ({
         } finally {
             setLocationSaving(false);
         }
-    }, [authToken, API_BASE_URL, fetchLocations, showModalMessage]);
+    }, [fetchLocations, showModalMessage]);
 
     const handleDeleteLocation = useCallback(async (id) => {
         setLocationSaving(true);
         try {
-            await axios.delete(`${API_BASE_URL}/locations/${id}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.delete(`/locations/${id}`);
             fetchLocations();
             fetchEnclosures();
         } catch (err) {
@@ -1873,7 +1871,7 @@ const AnimalFormModalV2 = ({
         } finally {
             setLocationSaving(false);
         }
-    }, [authToken, API_BASE_URL, fetchLocations, fetchEnclosures, showModalMessage]);
+    }, [fetchLocations, fetchEnclosures, showModalMessage]);
 
     const speciesOptionsForEnclosureModal = React.useMemo(() => {
         const favoriteSpecies = userProfile?.favoriteSpecies || [];
@@ -1954,7 +1952,7 @@ const AnimalFormModalV2 = ({
     useEffect(() => {
         if (!animalToEdit?.id_public || !API_BASE_URL || !authToken) return;
         let cancelled = false;
-        axios.get(`${API_BASE_URL}/animals/${animalToEdit.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get(`/animals/${animalToEdit.id_public}/logs`)
             .then(res => { if (!cancelled) setAnimalLogs(Array.isArray(res.data) ? res.data : []); })
             .catch(err => console.error('Failed to fetch animal logs for timeline:', err));
         return () => { cancelled = true; };
@@ -2786,9 +2784,8 @@ const AnimalFormModalV2 = ({
         }
         let cancelled = false;
         Promise.all(APPEARANCE_DROPDOWN_FIELDS.map(field =>
-            axios.get(`${API_BASE_URL}/appearance-options`, {
-                params: { species: formData.species, field },
-                headers: { Authorization: `Bearer ${authToken}` }
+            apiClient.get(`/appearance-options`, {
+                params: { species: formData.species, field }
             }).then(res => [field, res.data || []])
                 .catch(err => { console.error(`[ComboBox] Failed to fetch ${field} options:`, err); return [field, []]; })
         )).then(pairs => {
@@ -2864,7 +2861,7 @@ const AnimalFormModalV2 = ({
 
     useEffect(() => {
         if (formData.breederId_public) {
-            axios.get(`${API_BASE_URL}/public/profiles/search?query=${formData.breederId_public}&limit=1`)
+            apiClient.get(`/public/profiles/search?query=${formData.breederId_public}&limit=1`)
                 .then(res => {
                     if (res.data && res.data.length > 0) {
                         setBreederInfo(res.data[0]);
@@ -2880,7 +2877,7 @@ const AnimalFormModalV2 = ({
     // manual breeder/owner link (no CTUID) is reflected on open and can be diffed against on save.
     useEffect(() => {
         if (!animalToEdit?.id_public) return;
-        axios.get(`${API_BASE_URL}/contacts`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get(`/contacts`)
             .then(res => {
                 const contacts = res.data || [];
                 const breederContact = contacts.find(c => (c.assignedAnimals || []).some(a => a.animalId_public === animalToEdit.id_public && (a.role === 'breeder' || a.role === 'both')));
@@ -2895,7 +2892,7 @@ const AnimalFormModalV2 = ({
 
     useEffect(() => {
         if (formData.ownerId_public) {
-            axios.get(`${API_BASE_URL}/public/profiles/search?query=${formData.ownerId_public}&limit=1`)
+            apiClient.get(`/public/profiles/search?query=${formData.ownerId_public}&limit=1`)
                 .then(res => {
                     if (res.data && res.data.length > 0) {
                         setOwnerInfo(res.data[0]);
@@ -3078,8 +3075,8 @@ const AnimalFormModalV2 = ({
         try {
             const fd = new FormData();
             fd.append('file', file);
-            const res = await axios.post(`${API_BASE_URL}/upload-document`, fd, {
-                headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
+            const res = await apiClient.post(`/upload-document`, fd, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             setFormData(prev => ({
                 ...prev,
@@ -3336,7 +3333,7 @@ const AnimalFormModalV2 = ({
     };
     const mpFetchByCtc = async (id) => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const res = await apiClient.get(`/animals/any/${encodeURIComponent(id)}`);
             return res.data || null;
         } catch { return null; }
     };
@@ -3376,7 +3373,7 @@ const AnimalFormModalV2 = ({
         };
 
         const fetchAnimal = (ctcId) =>
-            axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } })
+            apiClient.get(`/animals/any/${encodeURIComponent(ctcId)}`)
                 .then(r => r.data || null).catch(() => null);
 
         const updates = {};
@@ -3421,13 +3418,13 @@ const AnimalFormModalV2 = ({
         };
 
         processQueue();
-    }, [activeTab, authToken, API_BASE_URL, animalToEdit?.manualPedigree, initialValues]);
+    }, [activeTab, authToken, animalToEdit?.manualPedigree, initialValues]);
 
     // Fetch medication supplies when switching to supply mode
     useEffect(() => {
         if (medicationMode === 'supply' && availableMedicationSupplies.length === 0 && !loadingMedicationSupplies) {
             setLoadingMedicationSupplies(true);
-            axios.get(`${API_BASE_URL}/supplies?category=medication`, { headers: { Authorization: `Bearer ${authToken}` } })
+            apiClient.get(`/supplies?category=medication`)
                 .then(res => {
                     setAvailableMedicationSupplies(res.data || []);
                 })
@@ -3437,7 +3434,7 @@ const AnimalFormModalV2 = ({
                 })
                 .finally(() => setLoadingMedicationSupplies(false));
         }
-    }, [medicationMode, availableMedicationSupplies.length, loadingMedicationSupplies, API_BASE_URL, authToken, showModalMessage]);
+    }, [medicationMode, availableMedicationSupplies.length, loadingMedicationSupplies, showModalMessage]);
 
     // Reset form when switching medication mode
     useEffect(() => {
@@ -3452,7 +3449,7 @@ const AnimalFormModalV2 = ({
     useEffect(() => {
         if (dietMode === 'supply' && availableDietSupplies.length === 0 && !loadingDietSupplies) {
             setLoadingDietSupplies(true);
-            axios.get(`${API_BASE_URL}/supplies?category=diet`, { headers: { Authorization: `Bearer ${authToken}` } })
+            apiClient.get(`/supplies?category=diet`)
                 .then(res => {
                     setAvailableDietSupplies(res.data || []);
                 })
@@ -3462,7 +3459,7 @@ const AnimalFormModalV2 = ({
                 })
                 .finally(() => setLoadingDietSupplies(false));
         }
-    }, [dietMode, availableDietSupplies.length, loadingDietSupplies, API_BASE_URL, authToken, showModalMessage]);
+    }, [dietMode, availableDietSupplies.length, loadingDietSupplies, showModalMessage]);
 
     // Reset form when switching diet mode
     useEffect(() => {
@@ -3474,7 +3471,7 @@ const AnimalFormModalV2 = ({
     useEffect(() => {
         if (supplementMode === 'supply' && availableSupplementSupplies.length === 0 && !loadingSupplementSupplies) {
             setLoadingSupplementSupplies(true);
-            axios.get(`${API_BASE_URL}/supplies?category=supplement`, { headers: { Authorization: `Bearer ${authToken}` } })
+            apiClient.get(`/supplies?category=supplement`)
                 .then(res => {
                     setAvailableSupplementSupplies(res.data || []);
                 })
@@ -3484,7 +3481,7 @@ const AnimalFormModalV2 = ({
                 })
                 .finally(() => setLoadingSupplementSupplies(false));
         }
-    }, [supplementMode, availableSupplementSupplies.length, loadingSupplementSupplies, API_BASE_URL, authToken, showModalMessage]);
+    }, [supplementMode, availableSupplementSupplies.length, loadingSupplementSupplies, showModalMessage]);
 
     // Reset form when switching supplement mode
     useEffect(() => {
@@ -3510,7 +3507,7 @@ const AnimalFormModalV2 = ({
     useEffect(() => {
         if (showEnclosureModal && availableEnclosures.length === 0 && !loadingEnclosures) {
             setLoadingEnclosures(true);
-            axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } })
+            apiClient.get(`/enclosures`)
                 .then(res => {
                     setAvailableEnclosures(res.data || []);
                 })
@@ -3520,7 +3517,7 @@ const AnimalFormModalV2 = ({
                 })
                 .finally(() => setLoadingEnclosures(false));
         }
-    }, [showEnclosureModal, availableEnclosures.length, loadingEnclosures, API_BASE_URL, authToken]);
+    }, [showEnclosureModal, availableEnclosures.length, loadingEnclosures]);
 
     const deleteImage = (id) => {
         setGalleryImages(prevImages => prevImages.filter(img => img.id !== id));
@@ -3570,8 +3567,8 @@ const AnimalFormModalV2 = ({
                 const fd = new FormData();
                 fd.append('file', img.file);
                 fd.append('type', 'animal');
-                return axios.post(`${API_BASE_URL}/upload`, fd, {
-                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` }
+                return apiClient.post(`/upload`, fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 }).then(res => ({
                     id: img.id,
                     url: res.data.url
@@ -3650,9 +3647,9 @@ const AnimalFormModalV2 = ({
                 const trimmedValue = formData[field]?.trim();
                 const existingOptions = appearanceOptionsMap[field] || [];
                 if (trimmedValue && !existingOptions.some(opt => opt.toLowerCase() === trimmedValue.toLowerCase())) {
-                    axios.post(`${API_BASE_URL}/appearance-options`, {
+                    apiClient.post(`/appearance-options`, {
                         species: formData.species, field, value: trimmedValue
-                    }, { headers: { Authorization: `Bearer ${authToken}` } })
+                    })
                         .catch(err => console.error(`[ComboBox] Failed to save new ${field} option:`, err));
                 }
             });
@@ -3665,7 +3662,6 @@ const AnimalFormModalV2 = ({
                 || saveResponse?.data?.data?.id_public
                 || saveResponse?.data?.id_public;
             if (savedAnimalIdPublic) {
-                const authHeaders = { headers: { Authorization: `Bearer ${authToken}` } };
                 const affectedContactIds = new Set([
                     initialBreederContactIdRef.current,
                     initialOwnerContactIdRef.current,
@@ -3677,14 +3673,14 @@ const AnimalFormModalV2 = ({
                     const isBreeder = breederContactId === contactId;
                     const isOwner = ownerContactId === contactId;
                     if (isBreeder && isOwner) {
-                        return axios.post(`${API_BASE_URL}/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'both' }, authHeaders);
+                        return apiClient.post(`/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'both' });
                     } else if (isBreeder) {
-                        return axios.post(`${API_BASE_URL}/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'breeder' }, authHeaders);
+                        return apiClient.post(`/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'breeder' });
                     } else if (isOwner) {
-                        return axios.post(`${API_BASE_URL}/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'keeper' }, authHeaders);
+                        return apiClient.post(`/contacts/${contactId}/assign-animal`, { animalId_public: savedAnimalIdPublic, role: 'keeper' });
                     }
                     // No longer breeder or owner for this contact — remove the assignment entirely.
-                    return axios.delete(`${API_BASE_URL}/contacts/${contactId}/assign-animal/${savedAnimalIdPublic}`, authHeaders);
+                    return apiClient.delete(`/contacts/${contactId}/assign-animal/${savedAnimalIdPublic}`);
                 });
                 await Promise.all(ops.map(p => p.catch(err => console.error('[assign-animal] Failed to sync contact assignment:', err))));
 
@@ -6226,7 +6222,7 @@ const AnimalFormModalV2 = ({
                                                                 // Simplified image compression - using standard fetch
                                                                 const fd = new FormData();
                                                                 fd.append('file', file);
-                                                                const up = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' } });
+                                                                const up = await apiClient.post(`/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
                                                                 setSlotField(slotKey, 'imageUrl', up.data.url);
                                                             } catch { showModalMessage('Upload failed', 'Could not upload ancestor image. Please try again.'); }
                                                             setMpSlotUploading(p => ({ ...p, [slotKey]: false }));
@@ -6629,7 +6625,7 @@ const AnimalFormModalV2 = ({
                                                         if (!ohUserSearch.trim()) return;
                                                         setOhSearching(true);
                                                         try {
-                                                            const res = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(ohUserSearch.trim())}&limit=10`);
+                                                            const res = await apiClient.get(`/public/profiles/search?query=${encodeURIComponent(ohUserSearch.trim())}&limit=10`);
                                                             setOhUserResults(res.data || []);
                                                         } catch(e) {}
                                                         setOhSearching(false);

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import { withRetry } from '../utils/errorHandler'; // Assuming errorHandler.js is in src/utils
 
 // Define interfaces for better type safety
@@ -86,12 +87,9 @@ const [abortController, setAbortController] = useState<AbortController | null>(n
 
             try {
     const response = await withRetry(async () => {
-        return await axios.get(`${API_BASE_URL}/public/profiles/search`, {
+        return await apiClient.get('/public/profiles/search', {
             params: {
                 query: transferUserQuery
-            },
-            headers: {
-                Authorization: `Bearer ${authToken}`
             },
             signal: abortController?.signal
         });
@@ -160,11 +158,10 @@ setTransferUserResults(response.data || []);
 
                 // Submit to backend
                 const response = await withRetry(async () => {
-                    return await axios.post(
-                        `${API_BASE_URL}/transfers`, // Corrected API endpoint
+                    return await apiClient.post(
+                        '/transfers', // Corrected API endpoint
                         payload,
                         {
-                            headers: { Authorization: `Bearer ${authToken}` },
                             signal: abortController?.signal // Pass abort signal
                         }
                     );
@@ -255,9 +252,7 @@ showModalMessage('Request Sent', messageText);
         }
 
         try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/withdraw`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/transfers/${transferId}/withdraw`, {});
             showModalMessage('Success', 'Transfer request has been withdrawn.');
             window.dispatchEvent(new Event('animals-changed'));
         } catch (err: unknown) {
@@ -280,9 +275,7 @@ showModalMessage('Request Sent', messageText);
         }
 
         try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/accept`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/transfers/${transferId}/accept`, {});
             showModalMessage('Success', 'Transfer accepted. You are now the owner of this animal.');
             window.dispatchEvent(new Event('animals-changed'));
         } catch (err: unknown) {
@@ -305,9 +298,7 @@ showModalMessage('Request Sent', messageText);
         }
 
         try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/decline`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/transfers/${transferId}/decline`, {});
             showModalMessage('Success', 'Transfer request declined.');
             window.dispatchEvent(new Event('animals-changed'));
         } catch (err: unknown) {
@@ -333,9 +324,7 @@ showModalMessage('Request Sent', messageText);
 
         setReturningAnimal(true);
         try {
-            await axios.post(`${API_BASE_URL}/transfers/return`, { animalId_public: id }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post('/transfers/return', { animalId_public: id });
             showModalMessage('Success', 'Return request sent to the original breeder.');
             window.dispatchEvent(new Event('animals-changed'));
         } catch (err: unknown) {

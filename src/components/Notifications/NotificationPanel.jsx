@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import {
     AlertCircle, AlertTriangle, Baby, Bell, Check, CheckCircle, ChevronDown, ChevronUp,
     Loader2, PawPrint, Shield, Sparkles, Trash2, X, XCircle
 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 import InfoButton from '../shared/InfoButton';
-import { API_BASE_URL } from '../../utils/apiConfig';
 
 const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage, onNotificationChange, onViewAnimal }) => {
     const [notifications, setNotifications] = useState([]);
@@ -53,10 +52,8 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
 
     const fetchNotifications = async () => {
         try {
-            console.log('[Notifications] Fetching from:', `${API_BASE_URL}/notifications`);
-            const response = await axios.get(`${API_BASE_URL}/notifications`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            console.log('[Notifications] Fetching from:', `/notifications`);
+            const response = await apiClient.get(`/notifications`);
             console.log('[Notifications] Received:', response.data);
             
             // Fetch missing animal images for notifications that don't have them
@@ -65,9 +62,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                     // If animalImageUrl is missing, try to fetch the animal details
                     if (!notification.animalImageUrl && notification.animalId_public) {
                         try {
-                            const animalRes = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${notification.animalId_public}`, {
-                                headers: { Authorization: `Bearer ${authToken}` }
-                            });
+                            const animalRes = await apiClient.get(`/public/global/animals?id_public=${notification.animalId_public}`);
                             if (animalRes.data?.length > 0) {
                                 notification.animalImageUrl = animalRes.data[0].imageUrl || '';
                             }
@@ -90,9 +85,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
     const handleReject = async (notificationId) => {
         setProcessing(notificationId);
         try {
-            await axios.post(`${API_BASE_URL}/notifications/${notificationId}/reject`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/notifications/${notificationId}/reject`, {});
             showModalMessage('Rejected', 'Request rejected and link removed');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
@@ -110,9 +103,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
     const handleAcceptTransfer = async (transferId) => {
         setProcessing(transferId);
         try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/accept`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/transfers/${transferId}/accept`, {});
             showModalMessage('Success', 'Transfer accepted! Animal has been added to your account.');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
@@ -128,9 +119,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
     const handleDeclineTransfer = async (transferId) => {
         setProcessing(transferId);
         try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/decline`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/transfers/${transferId}/decline`, {});
             showModalMessage('Declined', 'Transfer declined');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
@@ -146,9 +135,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
     const handleAcceptViewOnly = async (transferId) => {
         setProcessing(transferId);
         try {
-            await axios.post(`${API_BASE_URL}/transfers/${transferId}/accept-view-only`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/transfers/${transferId}/accept-view-only`, {});
             showModalMessage('Success', 'View-only access accepted');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
@@ -164,9 +151,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
     const handleDelete = async (notificationId) => {
         try {
             console.log('[handleDelete] Deleting notification:', notificationId);
-            await axios.delete(`${API_BASE_URL}/notifications/${notificationId}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.delete(`/notifications/${notificationId}`);
             
             // Wait for the backend to process before refreshing
             await fetchNotifications();
@@ -184,9 +169,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
     const handleApprove = async (notificationId) => {
         setProcessing(notificationId);
         try {
-            await axios.post(`${API_BASE_URL}/notifications/${notificationId}/approve`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/notifications/${notificationId}/approve`, {});
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
         } catch (error) {

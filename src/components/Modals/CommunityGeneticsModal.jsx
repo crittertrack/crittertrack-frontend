@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { X, Loader2 } from 'lucide-react';
 
 // ==================== COMMUNITY GENETICS MODAL ====================
@@ -18,14 +18,13 @@ const CommunityGeneticsModal = ({ species, onClose, authToken, API_BASE_URL, sho
         setSubmitting(true);
         
         try {
-            await axios.post(
-                `${API_BASE_URL}/species-genetics-feedback`,
+            await apiClient.post(
+                `/species-genetics-feedback`,
                 {
                     species,
                     ...formData,
                     submittedAt: new Date().toISOString()
-                },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+                }
             );
             
             showModalMessage('Thank you for your contribution! Our team will review your submission.');

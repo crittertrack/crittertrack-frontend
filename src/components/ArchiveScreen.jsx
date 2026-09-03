@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, Loader2, Search, X } from 'lucide-react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import InfoButton from './shared/InfoButton';
 import { STATUS_OPTIONS } from '../utils/constants';
 
@@ -31,9 +31,7 @@ const ArchiveScreen = ({
         if (!authToken) return;
         setArchiveLoading(true);
         try {
-            const response = await axios.get(`${API_BASE_URL}/animals/archived`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get('/animals/archived');
             const data = response.data || {};
 
             const archived = Array.isArray(data.archived) ? data.archived : Object.values(data.archived || {});
@@ -78,10 +76,11 @@ const ArchiveScreen = ({
 
     const handleUnarchive = async (animal) => {
         try {
-            const res = await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { archived: false }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            const updatedAnimal = res.data?.animal || res.data || { ...animal, archived: false };
+            const res = await apiClient.put(`/animals/${animal.id_public}`, { archived: false });
+            // Merge onto the known animal instead of trusting res.data alone \u2014 a queued
+            // (offline) write only echoes back { archived: false }, missing id_public and
+            // every other field, which would otherwise silently break the animal-updated merge.
+            const updatedAnimal = { ...animal, ...(res.data?.animal || res.data), id_public: animal.id_public, archived: false };
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: updatedAnimal }));
             window.dispatchEvent(new Event('animals-changed'));
             showModalMessage('Success', 'Animal unarchived');

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Edit, ArrowLeft } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
 
@@ -19,13 +19,10 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
         const fetchContactData = async () => {
             try {
                 setLoading(true);
-                const config = {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                };
                 const [detailsRes, ownedRes, bredRes] = await Promise.all([
-                    axios.get(`${API_BASE_URL}/contacts/${contactId}`, config),
-                    axios.get(`${API_BASE_URL}/contacts/${contactId}/own-animals`, config),
-                    axios.get(`${API_BASE_URL}/contacts/${contactId}/bred-animals`, config)
+                    apiClient.get(`/contacts/${contactId}`),
+                    apiClient.get(`/contacts/${contactId}/own-animals`),
+                    apiClient.get(`/contacts/${contactId}/bred-animals`)
                 ]);
 
                 setContactData({

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info } from 'lucide-react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import DatePicker from './DatePicker';
 import InfoButton from './shared/InfoButton';
 import { downloadBlob } from '../utils/nativeDownload';
@@ -97,9 +97,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
     const fetchUserProfile = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/users/profile`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/users/profile`);
             setUserProfile(response.data);
         } catch (error) {
             console.error('Error fetching user profile:', error);
@@ -108,9 +106,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
     const fetchTransactions = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/budget/transactions`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/budget/transactions`);
             setTransactions(response.data || []);
         } catch (error) {
             console.error('Error fetching transactions:', error);
@@ -132,9 +128,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     const fetchAnimals = async () => {
         setAnimalsLoading(true);
         try {
-            const response = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/animals`);
             setAnimals(response.data || []);
         } catch (error) {
             console.error('Error fetching animals:', error);
@@ -212,17 +206,15 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             }
 
             if (editingTransaction) {
-                await axios.put(
-                    `${API_BASE_URL}/budget/transactions/${editingTransaction._id}`,
-                    transactionData,
-                    { headers: { Authorization: `Bearer ${authToken}` } }
+                await apiClient.put(
+                    `/budget/transactions/${editingTransaction._id}`,
+                    transactionData
                 );
                 showModalMessage('Success', 'Transaction updated successfully');
             } else {
-                await axios.post(
-                    `${API_BASE_URL}/budget/transactions`,
-                    transactionData,
-                    { headers: { Authorization: `Bearer ${authToken}` } }
+                await apiClient.post(
+                    `/budget/transactions`,
+                    transactionData
                 );
                 showModalMessage('Success', 'Transaction added successfully');
 
@@ -231,10 +223,9 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                 if (transactionData.type === 'sale' && formData.animalId) {
                     if (window.confirm(`You've logged a sale for ${formData.animalName || formData.animalId}. Would you also like to mark it as Rehomed and archive it so it moves out of your main animal list?`)) {
                         try {
-                            await axios.put(
-                                `${API_BASE_URL}/animals/${formData.animalId}`,
-                                { status: 'Rehomed', archived: true },
-                                { headers: { Authorization: `Bearer ${authToken}` } }
+                            await apiClient.put(
+                                `/animals/${formData.animalId}`,
+                                { status: 'Rehomed', archived: true }
                             );
                             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: formData.animalId, status: 'Rehomed', archived: true } }));
                             window.dispatchEvent(new Event('animals-changed'));
@@ -262,9 +253,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         }
 
         try {
-            await axios.delete(`${API_BASE_URL}/budget/transactions/${id}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.delete(`/budget/transactions/${id}`);
             showModalMessage('Success', 'Transaction deleted successfully');
             fetchTransactions();
         } catch (error) {

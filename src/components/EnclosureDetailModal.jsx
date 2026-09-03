@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import {
     X, Home, Cat, MapPin, Thermometer, Droplets, Calendar, CheckCircle, PlusCircle,
     AlertCircle, Users, Wrench, MessageSquare, Clock, Edit, Package, ClipboardList, Utensils,
@@ -327,10 +327,8 @@ const EnclosureDetailModal = ({
     const handleDeleteNote = async (noteId) => {
         if (!window.confirm('Delete this note?')) return;
         try {
-            await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id || enclosure.id}`, {
+            await apiClient.patch(`/enclosures/${enclosure._id || enclosure.id}`, {
                 $pull: { notesHistory: { id: noteId } }
-            }, {
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` }
             });
             setNotes(notes.filter(n => n.id !== noteId));
         } catch (err) {
@@ -351,10 +349,8 @@ const EnclosureDetailModal = ({
         try {
             // Use PATCH with $push so only the notesHistory array is updated
             // (PUT would replace all fields and miss notesHistory entirely)
-            await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id || enclosure.id}`, {
+            await apiClient.patch(`/enclosures/${enclosure._id || enclosure.id}`, {
                 $push: { notesHistory: noteEntry }
-            }, {
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` }
             });
             setNotes([...notes, noteEntry]);
             setNewNote('');
@@ -393,11 +389,9 @@ const EnclosureDetailModal = ({
             };
 
             // Use PATCH (now supported on backend) for partial updates
-            await axios.patch(`${API_BASE_URL}/enclosures/${enclosure._id}`, {
+            await apiClient.patch(`/enclosures/${enclosure._id}`, {
                 cleaningTasks: updatedTasks,
                 $push: { history: historyEntry }
-            }, {
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` }
             });
             onRefresh?.();
         } catch (err) {

@@ -13,7 +13,7 @@ import { getCurrencySymbol } from '../../utils/locationUtils';
 import { remapLegacyHealthStatus } from '../../utils/medicalStatus';
 import { breedingLineTextStyle, breedingLineGlyph, sortLinesGradientFirst, hideRedundantLegacyLines } from '../../utils/breedingLineColor';
 import { getBallPythonDisplayPhenotype } from '../../data/ballPythonPhenotypeRules';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { ViewOnlyParentCard, computeRelationships } from './utils';
 import { CareTabContent } from './CareTabContent';
 import { PedigreeTabContent } from './PedigreeTabContent';
@@ -130,7 +130,7 @@ const ViewAnimalModalV2 = ({
         const fetchBreeder = async () => {
             if (animal?.breederId_public) {
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${animal.breederId_public}&limit=1`);
+                    const response = await apiClient.get(`/public/profiles/search?query=${animal.breederId_public}&limit=1`);
                     if (response.data && response.data.length > 0) setBreederInfo(response.data[0]);
                 } catch (error) { setBreederInfo(null); }
             } else { setBreederInfo(null); }
@@ -142,7 +142,7 @@ const ViewAnimalModalV2 = ({
         const fetchOwner = async () => {
             if (animal?.ownerId_public) {
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`);
+                    const response = await apiClient.get(`/public/profiles/search?query=${animal.ownerId_public}&limit=1`);
                     if (response.data && response.data.length > 0) setOwnerInfo(response.data[0]);
                     else setOwnerInfo(null);
                 } catch { setOwnerInfo(null); }
@@ -155,7 +155,7 @@ const ViewAnimalModalV2 = ({
         const fetchEnclosure = async () => {
             if (animal?.enclosureId && authToken) {
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/enclosures/${animal.enclosureId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                    const response = await apiClient.get(`/enclosures/${animal.enclosureId}`);
                     setEnclosureInfo(response.data);
                 } catch { setEnclosureInfo(null); }
             } else { setEnclosureInfo(null); }
@@ -179,7 +179,7 @@ const ViewAnimalModalV2 = ({
                 }
                 setLoadingCOI(true);
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, { headers: { Authorization: `Bearer ${authToken}` } });
+                    const response = await apiClient.get(`/animals/${animal.id_public}/inbreeding`);
                     if (response.data && response.data.inbreedingCoefficient != null) {
                         setAnimalCOI(response.data.inbreedingCoefficient);
                         setCommonAncestorCount(response.data.commonAncestorCount || null);
@@ -221,11 +221,11 @@ const ViewAnimalModalV2 = ({
         const run = async () => {
             setGlobalRelsLoading(true);
             try {
-                const animalsRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
+                const animalsRes = await apiClient.get('/animals');
                 setOwnedAnimals(animalsRes.data || []);
                 setOwnedAnimalsLoaded(true);
 
-                const relsRes = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, { headers: { Authorization: `Bearer ${authToken}` } });
+                const relsRes = await apiClient.get(`/animals/${animal.id_public}/relationships`);
                 setGlobalRels(relsRes.data || null);
             } catch { /* no-op */ }
             finally { setGlobalRelsLoading(false); }
@@ -238,7 +238,7 @@ const ViewAnimalModalV2 = ({
     useEffect(() => {
         if (!animal?.id_public || !authToken) return;
         let cancelled = false;
-        axios.get(`${API_BASE_URL}/litters/for-animal/${animal.id_public}`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get(`/litters/for-animal/${animal.id_public}`)
             .then(res => {
                 if (cancelled) return;
                 const linked = res.data || [];
@@ -250,7 +250,7 @@ const ViewAnimalModalV2 = ({
                         setBreedingRecordOffspring(prev => ({ ...prev, [lid]: [] }));
                         return;
                     }
-                    axios.get(`${API_BASE_URL}/litters/${lid}/offspring`, { headers: { Authorization: `Bearer ${authToken}` } })
+                    apiClient.get(`/litters/${lid}/offspring`)
                         .then(r => { if (!cancelled) setBreedingRecordOffspring(prev => ({ ...prev, [lid]: r.data })); })
                         .catch(() => { if (!cancelled) setBreedingRecordOffspring(prev => ({ ...prev, [lid]: [] })); });
                 });
@@ -263,7 +263,7 @@ const ViewAnimalModalV2 = ({
     useEffect(() => {
         if (!animal?.id_public || !authToken) return;
         let cancelled = false;
-        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/offspring`, { headers: { Authorization: `Bearer ${authToken}` } })
+        apiClient.get(`/animals/${animal.id_public}/offspring`)
             .then(res => {
                 if (cancelled) return;
                 const unmanaged = (res.data || []).filter(l => !l.litter_id_public);

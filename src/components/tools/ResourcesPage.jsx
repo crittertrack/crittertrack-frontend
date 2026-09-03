@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { BookOpen, Search, ExternalLink, X, Loader2, Tag, ChevronDown, ChevronUp, Send } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
 
@@ -21,7 +21,7 @@ const ResourcesPage = ({ API_BASE_URL, authToken }) => {
     useEffect(() => {
         const fetchResources = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/public/resources`);
+                const res = await apiClient.get(`/public/resources`);
                 setResources(Array.isArray(res.data) ? res.data : []);
             } catch (err) {
                 console.error('Failed to fetch resources:', err);

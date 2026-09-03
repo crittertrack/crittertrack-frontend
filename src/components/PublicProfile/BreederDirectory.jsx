@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { ArrowLeft, Flame, Gem, Loader2, Moon, Save, Search, Star, User } from 'lucide-react';
 import InfoButton from '../shared/InfoButton';
-import { API_BASE_URL } from '../../utils/apiConfig';
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -131,15 +130,11 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
     const fetchData = async () => {
         try {
             // Fetch user's animals
-            const animalsResponse = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const animalsResponse = await apiClient.get(`/animals`);
             setUserAnimals(animalsResponse.data || []);
 
             // Fetch breeding status
-            const statusResponse = await axios.get(`${API_BASE_URL}/users/breeding-status`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const statusResponse = await apiClient.get(`/users/breeding-status`);
             setBreedingStatus(statusResponse.data.breedingStatus || {});
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -175,10 +170,9 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
     const handleSave = async () => {
         setLoading(true);
         try {
-            await axios.put(
-                `${API_BASE_URL}/users/breeding-status`,
-                { breedingStatus },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            await apiClient.put(
+                `/users/breeding-status`,
+                { breedingStatus }
             );
             showModalMessage('Success', 'Breeding status updated successfully.');
         } catch (error) {
@@ -295,9 +289,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     const fetchBreeders = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${API_BASE_URL}/users/breeder-directory`, {
-                headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
-            });
+            const response = await apiClient.get(`/users/breeder-directory`);
             setBreeders(response.data || []);
             
             // Extract unique species from all breeders

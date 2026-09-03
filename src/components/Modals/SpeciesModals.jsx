@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { X, Search, Loader2, Settings, PlusCircle, ArrowLeft, Mail, Globe, Lock, Star, Cat, Turtle, Bird, Worm, Fish, Bug, PawPrint } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
 
@@ -191,14 +191,13 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
         
         setLoading(true);
         try {
-            const response = await axios.post(
-                `${API_BASE_URL}/species`,
+            const response = await apiClient.post(
+                `/species`,
                 { 
                     name: trimmedName, 
                     latinName: newSpeciesLatinName.trim() || null,
                     category: selectedCategory 
-                },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+                }
             );
             
             // Add to local state
@@ -224,14 +223,13 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
         
         setFeedbackSubmitting(true);
         try {
-            await axios.post(
-                `${API_BASE_URL}/feedback/species`,
+            await apiClient.post(
+                `/feedback/species`,
                 {
                     species: feedbackSpecies,
                     feedback: feedbackText.trim(),
                     type: 'species-customization'
-                },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+                }
             );
             
             showModalMessage('Feedback Sent', 'Thank you! Your feedback will help us improve species customization.');

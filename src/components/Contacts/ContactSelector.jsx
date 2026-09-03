@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { X, Search, Loader2, User, Plus } from 'lucide-react';
 
 const ContactSelector = ({ onClose, onSelect, API_BASE_URL, authToken }) => {
@@ -59,9 +59,7 @@ const ContactSelector = ({ onClose, onSelect, API_BASE_URL, authToken }) => {
     const fetchContacts = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${API_BASE_URL}/contacts`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const response = await apiClient.get(`/contacts`);
             setContacts(response.data || []);
             setFilteredContacts(response.data || []);
         } catch (error) {

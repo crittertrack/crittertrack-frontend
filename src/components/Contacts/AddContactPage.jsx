@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Save, X, UserPlus, Loader2, User, Search } from 'lucide-react';
 import { UserSearchModal } from '../Modals/SearchModals';
 import InfoButton from '../shared/InfoButton';
@@ -32,7 +32,7 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
 
     useEffect(() => {
         if (formData.linkedCTUID) {
-            axios.get(`${API_BASE_URL}/public/profiles/search?query=${formData.linkedCTUID}&limit=1`)
+            apiClient.get(`/public/profiles/search?query=${formData.linkedCTUID}&limit=1`)
                 .then(res => {
                     const user = res.data?.[0];
                     if (user) {
@@ -99,9 +99,7 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
 
         setIsSaving(true);
         try {
-            await axios.post(`${API_BASE_URL}/contacts`, formData, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            await apiClient.post(`/contacts`, formData);
             showModalMessage('Success', 'Contact added successfully!');
             navigate('/contacts');
         } catch (error) {

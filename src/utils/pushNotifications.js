@@ -1,5 +1,5 @@
 // Web Push subscribe/unsubscribe helpers (browser-side).
-import axios from 'axios';
+import apiClient from './apiClient';
 
 const urlBase64ToUint8Array = (base64String) => {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -32,17 +32,16 @@ export const subscribeToPush = async (authToken, API_BASE_URL) => {
     const permission = await window.Notification.requestPermission();
     if (permission !== 'granted') throw new Error('Notification permission was not granted.');
 
-    const { data } = await axios.get(`${API_BASE_URL}/push/vapid-public-key`);
+    const { data } = await apiClient.get(`/push/vapid-public-key`);
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(data.publicKey)
     });
 
-    await axios.post(
-        `${API_BASE_URL}/push/subscribe`,
-        { subscription: subscription.toJSON() },
-        { headers: { Authorization: `Bearer ${authToken}` } }
+    await apiClient.post(
+        `/push/subscribe`,
+        { subscription: subscription.toJSON() }
     );
 
     return subscription;
@@ -56,9 +55,8 @@ export const unsubscribeFromPush = async (authToken, API_BASE_URL) => {
 
     const endpoint = subscription.endpoint;
     await subscription.unsubscribe();
-    await axios.post(
-        `${API_BASE_URL}/push/unsubscribe`,
-        { endpoint },
-        { headers: { Authorization: `Bearer ${authToken}` } }
+    await apiClient.post(
+        `/push/unsubscribe`,
+        { endpoint }
     );
 };

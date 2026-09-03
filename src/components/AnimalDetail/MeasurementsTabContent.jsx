@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Ruler, Plus, Trash2 } from 'lucide-react';
 import { formatDate } from '../../utils/dateFormatter';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { InfoCard } from './DashboardComponents';
 import { parseJsonField } from './utils';
 import themeColors from '../../utils/themeColors';
@@ -81,7 +81,7 @@ export const MeasurementsTabContent = ({ animal, onUpdateAnimal, authToken, API_
         try {
             onUpdateAnimal({ ...animal, growthRecords: updatedRecords });
             setNewRecord({ date: new Date().toISOString().slice(0, 10), weight: '', length: '', height: '', bcs: '', notes: '' });
-            await axios.put(`${API_BASE_URL}/animals/${animal._id}`, { growthRecords: updatedRecords }, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.put(`/animals/${animal._id}`, { growthRecords: updatedRecords });
         } catch (error) {
             onUpdateAnimal({ ...animal, growthRecords }); 
             alert('Failed to save measurement. Please try again.');
@@ -92,7 +92,7 @@ export const MeasurementsTabContent = ({ animal, onUpdateAnimal, authToken, API_
         const updatedRecords = growthRecords.filter((_, i) => i !== index);
         try {
             onUpdateAnimal({ ...animal, growthRecords: updatedRecords });
-            await axios.put(`${API_BASE_URL}/animals/${animal._id}`, { growthRecords: updatedRecords }, { headers: { Authorization: `Bearer ${authToken}` } });
+            await apiClient.put(`/animals/${animal._id}`, { growthRecords: updatedRecords });
         } catch (error) {
             onUpdateAnimal({ ...animal, growthRecords });
             alert('Failed to delete measurement. Please try again.');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { Loader2, ScrollText, Mars, Venus } from 'lucide-react';
 import { PedigreeChart } from '../AnimalForm';
 import { formatDate } from '../../utils/dateFormatter';
@@ -44,7 +44,7 @@ export const PedigreeTabContent = ({ animal, API_BASE_URL, authToken, onViewAnim
             const fetchOne = async (id) => {
                 if (!id) return null;
                 try {
-                    const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                    const r = await apiClient.get(`/animals/any/${encodeURIComponent(id)}`);
                     return r.data || null;
                 } catch {
                     return null;

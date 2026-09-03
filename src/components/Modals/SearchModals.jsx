@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/apiClient';
 import { X, Search, Loader2, User, Cat } from 'lucide-react';
 import AnimalImage from '../shared/AnimalImage';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
@@ -98,12 +98,10 @@ const ParentSearchModal = ({
         if (scope === 'local' || scope === 'both') {
             try {
                 const localUrl = isIdSearch
-                    ? `${API_BASE_URL}/animals?id_public=${encodeURIComponent(idValue)}`
-                    : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
+                    ? `/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
-                const localResponse = await axios.get(localUrl, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const localResponse = await apiClient.get(localUrl);
                 // Filter out current animal and females deceased before offspring birth date
                 const filteredLocal = localResponse.data.filter(a => {
                     if (a.id_public === currentId) return false;
@@ -133,10 +131,10 @@ const ParentSearchModal = ({
         if (scope === 'global' || scope === 'both') {
             try {
                 const globalUrl = isIdSearch
-                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idValue)}`
-                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
+                    ? `/public/global/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
-                const globalResponse = await axios.get(globalUrl);
+                const globalResponse = await apiClient.get(globalUrl);
                 // Filter out current animal and females deceased before offspring birth date
                 const filteredGlobal = globalResponse.data.filter(a => {
                     if (a.id_public === currentId) return false;
@@ -274,9 +272,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
         // --- Search Local Animals Only ---
         setLoadingLocal(true);
         try {
-            const localResponse = await axios.get(`${API_BASE_URL}/animals?name=${trimmedSearchTerm}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const localResponse = await apiClient.get(`/animals?name=${trimmedSearchTerm}`);
             let filteredLocal = localResponse.data.filter(a => a.id_public !== currentId);
             
             // Apply gender filter if specified
@@ -388,8 +384,8 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                     searchQuery = `CTU${numericId}`;
                 }
                 
-                const url = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchQuery)}&limit=50`;
-                const response = await axios.get(url);
+                const url = `/public/profiles/search?query=${encodeURIComponent(searchQuery)}&limit=50`;
+                const response = await apiClient.get(url);
                 
                 // Filter out completely anonymous users (both names hidden/unavailable)
                 const filteredUsers = (response.data || []).filter(user => {
@@ -418,11 +414,11 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 let url;
                 if ((hasCTC || hasCT || isNumericOnly) && numericId) {
                     // Format the ID as CTCXXX
-                    url = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
+                    url = `/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
                 } else {
-                    url = `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}`;
+                    url = `/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}`;
                 }
-                const response = await axios.get(url);
+                const response = await apiClient.get(url);
                 setAnimalResults(response.data || []);
                 setUserResults([]);
             }

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient from './apiClient';
 
 /**
  * Walks the user through resolving a 409 duplicate-litter response from POST /litters.
@@ -25,9 +25,7 @@ export const resolveDuplicateLitter = async ({ duplicate, authToken, API_BASE_UR
         `Adopt it into your own Litter Management instead of creating a new one? You'll get full edit access.`
     );
     if (adopt) {
-        const resp = await axios.post(`${API_BASE_URL}/litters/${duplicate.litterId_backend}/adopt`, {}, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        });
+        const resp = await apiClient.post(`/litters/${duplicate.litterId_backend}/adopt`, {});
         return { action: 'adopted', litter: resp.data.litter };
     }
 

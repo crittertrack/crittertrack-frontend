@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 // Define interfaces for better type safety
 interface Animal {
@@ -90,9 +90,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             // Use /any/ since this is also the entry point for viewing pedigree ancestors
             // and other public animals the current user doesn't own.
             if (animal.id_public && authToken) {
-                axios.get(`${API_BASE_URL}/animals/any/${animal.id_public}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                }).then(res => {
+                apiClient.get(`/animals/any/${animal.id_public}`).then(res => {
                     setAnimalToView(prev => (prev && prev.id_public === animal.id_public) ? res.data : prev);
                 }).catch(err => {
                     console.warn('[handleViewAnimal] Failed to fetch full animal data:', err.message);
@@ -116,9 +114,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
 
         // Fetch full record in background (list uses slim projection which omits many fields)
         if (animal.id_public && authToken) {
-            axios.get(`${API_BASE_URL}/animals/${animal.id_public}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            }).then(res => {
+            apiClient.get(`/animals/${animal.id_public}`).then(res => {
                 // Don't clobber if the user already cancelled/navigated away while this was in flight.
                 setAnimalToEdit(prev => (prev && prev.id_public === animal.id_public) ? res.data : prev);
             }).catch(err => {
@@ -195,10 +191,9 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         try {
             // The API endpoint for archiving has been updated from a command-style POST
             // to a more RESTful PUT on the animal resource itself.
-            await axios.put(
-                `${API_BASE_URL}/animals/${animal.id_public}`,
-                { archived: isArchiving },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            await apiClient.put(
+                `/animals/${animal.id_public}`,
+                { archived: isArchiving }
             );
 
             // Update viewed animal if currently viewing it
@@ -242,14 +237,13 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             }
 
             // Make the API request
-            const response = await axios({
+            // `url` here is a full absolute URL built by the caller (AnimalFormModalV2) that
+            // already includes API_BASE_URL, so apiClient's baseURL is safely ignored by axios
+            // for absolute URLs — apiClient still auto-injects the Authorization header.
+            const response = await apiClient({
                 method,
                 url,
-                data,
-                headers: {
-                    Authorization: `Bearer ${authToken}`
-                    // Don't set Content-Type - let axios handle it automatically for JSON
-                }
+                data
             });
 
             const serverResponse = response?.data?.animal || response?.data?.data || response?.data;
@@ -300,9 +294,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         if (!id_public || !authToken) return;
 
         try {
-            const response = await axios.delete(
-                `${API_BASE_URL}/animals/${id_public}`,
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            const response = await apiClient.delete(
+                `/animals/${id_public}`
             );
 
             // Close all animal views
@@ -329,10 +322,9 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         if (!animalId || !authToken) return;
 
         try {
-            await axios.put(
-                `${API_BASE_URL}/animals/${animalId}`,
-                { isOwned: newOwnedValue },
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            await apiClient.put(
+                `/animals/${animalId}`,
+                { isOwned: newOwnedValue }
             );
 
             // Update viewed animal if currently viewing it
@@ -358,10 +350,9 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         if (!id_public || !authToken) return;
 
         try {
-            const response = await axios.post(
-                `${API_BASE_URL}/animals/${id_public}/restore`,
-                {},
-                { headers: { Authorization: `Bearer ${authToken}` } }
+            const response = await apiClient.post(
+                `/animals/${id_public}/restore`,
+                {}
             );
 
             window.dispatchEvent(new Event('animals-changed'));
@@ -406,9 +397,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         lastFetchedIdRef.current = fetchedId; // Update ref before fetch
         // Use /any/ since animalToView is often a pedigree ancestor owned by someone else —
         // the ownership-only endpoint would 404 for those and skip the refresh entirely.
-        axios.get(`${API_BASE_URL}/animals/any/${fetchedId}`, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        }).then(res => {
+        apiClient.get(`/animals/any/${fetchedId}`).then(res => {
             // If the user already clicked Edit (or navigated away) while this was in flight,
             // animalToView will have moved on (or been cleared) — don't clobber it with stale data.
             setAnimalToView(prev => (prev && prev.id_public === fetchedId) ? res.data : prev);
@@ -445,9 +434,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                 // Fetch parents using /any/ endpoint to get parents regardless of ownership
                 if (sireId) {
                     try {
-                        const response = await axios.get<Animal>(`${API_BASE_URL}/animals/any/${sireId}`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        const response = await apiClient.get<Animal>(`/animals/any/${sireId}`);
                         setSireData(response.data);
                     } catch (e: any) {
                         console.warn('Failed to fetch sire data:', e.message);
@@ -457,9 +444,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
 
                 if (damId) {
                     try {
-                        const response = await axios.get<Animal>(`${API_BASE_URL}/animals/any/${damId}`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        const response = await apiClient.get<Animal>(`/animals/any/${damId}`);
                         setDamData(response.data);
                     } catch (e: any) {
                         console.warn('Failed to fetch dam data:', e.message);
@@ -469,11 +454,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
 
                 // Fetch offspring using dedicated endpoint
                 try {
-                    const offspringResponse = await axios.get(
-                        `${API_BASE_URL}/animals/${animalToView.id_public}/offspring`,
-                        {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        }
+                    const offspringResponse = await apiClient.get(
+                        `/animals/${animalToView.id_public}/offspring`
                     );
                     // Assuming offspringResponse.data is an array of litter objects, each with an offspring array
                     const litters = offspringResponse.data || [];

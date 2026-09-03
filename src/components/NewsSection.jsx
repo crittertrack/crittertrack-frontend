@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import { Loader2, Rss, ChevronDown, ChevronUp, BarChart2, Info } from 'lucide-react';
 import { BroadcastPoll } from './Community/Banners';
 import { renderRichText } from '../utils/richText';
@@ -99,9 +99,7 @@ const NewsSection = ({ API_BASE_URL, authToken }) => {
                 return;
             }
             try {
-                const response = await axios.get(`${API_BASE_URL}/notifications`, {
-                    headers: { Authorization: `Bearer ${authToken}` },
-                });
+                const response = await apiClient.get(`/notifications`);
                 const allNotifications = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
 
                 const publicBroadcasts = allNotifications.filter(n => {

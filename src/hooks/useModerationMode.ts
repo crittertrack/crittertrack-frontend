@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 /**
  * useModerationMode - Manages moderation/admin panel toggle and auth
@@ -87,12 +87,9 @@ export function useModerationMode(
     const handleModerationAuth = useCallback(
         async (code: string) => {
             try {
-                const response = await axios.post(
-                    `${API_BASE_URL}/admin/mod-auth`,
-                    { code },
-                    {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    }
+                const response = await apiClient.post(
+                    '/admin/mod-auth',
+                    { code }
                 );
 
                 if (response.data.success) {

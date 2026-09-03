@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 /**
  * useBreedingLines - Manages color-coded breeding line definitions and animal assignments
@@ -55,9 +55,7 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
 
         const loadBreedingLinesFromBackend = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/users/breeding-lines`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await apiClient.get('/users/breeding-lines');
 
                 console.log('[BREEDING LINES] Loaded from backend');
 
@@ -111,15 +109,12 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
             }
 
             if (authToken) {
-                return axios
+                return apiClient
                     .put(
-                        `${API_BASE_URL}/users/breeding-lines`,
+                        '/users/breeding-lines',
                         {
                             breedingLineDefs: defs,
                             animalBreedingLines: currentAssignments
-                        },
-                        {
-                            headers: { Authorization: `Bearer ${authToken}` }
                         }
                     )
                     .catch(err => {
@@ -152,15 +147,12 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
                 }
 
                 if (authToken) {
-                    axios
+                    apiClient
                         .put(
-                            `${API_BASE_URL}/users/breeding-lines`,
+                            '/users/breeding-lines',
                             {
                                 breedingLineDefs: breedingLineDefsRef.current,
                                 animalBreedingLines: next
-                            },
-                            {
-                                headers: { Authorization: `Bearer ${authToken}` }
                             }
                         )
                         .then(() => console.log('[BREEDING LINES] Toggle saved to backend'))
@@ -201,15 +193,12 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
                 }
 
                 if (authToken) {
-                    axios
+                    apiClient
                         .put(
-                            `${API_BASE_URL}/users/breeding-lines`,
+                            '/users/breeding-lines',
                             {
                                 breedingLineDefs: breedingLineDefsRef.current,
                                 animalBreedingLines: next
-                            },
-                            {
-                                headers: { Authorization: `Bearer ${authToken}` }
                             }
                         )
                         .catch(err => console.error('[BREEDING LINES] Failed to clear assignments:', err));
@@ -236,15 +225,12 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
                 }
 
                 if (authToken) {
-                    axios
+                    apiClient
                         .put(
-                            `${API_BASE_URL}/users/breeding-lines`,
+                            '/users/breeding-lines',
                             {
                                 breedingLineDefs: breedingLineDefsRef.current,
                                 animalBreedingLines: next
-                            },
-                            {
-                                headers: { Authorization: `Bearer ${authToken}` }
                             }
                         )
                         .catch(err => console.error('[BREEDING LINES] Failed to save direct assignment:', err));
