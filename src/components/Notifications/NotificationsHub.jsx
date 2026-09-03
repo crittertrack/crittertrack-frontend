@@ -135,11 +135,16 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             const dn = [l.dam?.prefix, l.dam?.name || l.damId_public || '?', l.dam?.suffix].filter(Boolean).join(' ');
             const sireDam = `${sn} \u00d7 ${dn}`;
             const callId = l.litter_id_public;
-            if (l.matingDate && !l.birthDate) {
+            // isPlanned is the actual source of truth for "still needs to be marked mated" (it
+            // only clears via the explicit Mated Today action — see reproStatusSync.js). Without
+            // this check, marking a planned mating done from ANY client (e.g. the Lite app, which
+            // has no access to this browser's localStorage dismissal) would leave a phantom
+            // "mated today" reminder here forever, since matingDate now equals today.
+            if (l.isPlanned && l.matingDate && !l.pregnancyDate && !l.birthDate) {
                 const mated = parseLocalDate(l.matingDate);
                 if (mated) {
                     const diff = Math.round((mated - today) / 86400000);
-                    if (diff === 0) {
+                    if (diff <= 0) {
                         const key = `${l._id}-mated-${todayStr}`;
                         if (!breedingDismissed[key]) breedingItems.push({ key, type: 'mated', pairName, sireDam, callId, diff });
                     }
