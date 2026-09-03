@@ -3557,7 +3557,9 @@ const AnimalFormModalV2 = ({
         }
 
         const method = animalToEdit ? 'put' : 'post';
-        const url = animalToEdit ? `${API_BASE_URL}/animals/${animalToEdit.id_public}` : `${API_BASE_URL}/animals`;
+        // Relative path only — onSave (handleSaveAnimal) calls apiClient, whose baseURL already
+        // includes API_BASE_URL, so prefixing it here too caused a double /api/api/... 404.
+        const url = animalToEdit ? `/animals/${animalToEdit.id_public}` : `/animals`;
 
         try {
             const newImagesToUpload = galleryImages.filter(img => img.file);

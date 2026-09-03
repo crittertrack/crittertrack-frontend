@@ -237,9 +237,9 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             }
 
             // Make the API request
-            // `url` here is a full absolute URL built by the caller (AnimalFormModalV2) that
-            // already includes API_BASE_URL, so apiClient's baseURL is safely ignored by axios
-            // for absolute URLs — apiClient still auto-injects the Authorization header.
+            // `url` here is a relative path built by the caller (AnimalFormModalV2) — apiClient's
+            // own baseURL already includes API_BASE_URL, so the caller must NOT prefix it again
+            // (doing so previously caused a double /api/api/... 404).
             const response = await apiClient({
                 method,
                 url,
