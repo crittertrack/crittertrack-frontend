@@ -344,8 +344,8 @@ const ParentSearchModal = ({
         if (scope === 'local' || scope === 'both') {
             try {
                 const localUrl = isIdSearch
-                    ? `${API_BASE_URL}/animals?id_public=${encodeURIComponent(idValue)}`
-                    : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
+                    ? `/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
                 const localResponse = await apiClient.get(localUrl);
                 // Filter out current animal and females deceased before offspring birth date
@@ -377,8 +377,8 @@ const ParentSearchModal = ({
         if (scope === 'global' || scope === 'both') {
             try {
                 const globalUrl = isIdSearch
-                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idValue)}`
-                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
+                    ? `/public/global/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
                 const globalResponse = await apiClient.get(globalUrl);
                 // Filter out current animal and females deceased before offspring birth date

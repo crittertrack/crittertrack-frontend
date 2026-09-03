@@ -5524,7 +5524,7 @@ useEffect(() => {
             setLoadingGlobal(scope === 'global' || scope === 'both');
             if (scope === 'local' || scope === 'both') {
                 try {
-                    const localUrl = isIdSearch ? `${API_BASE_URL}/animals?id_public=${encodeURIComponent(idValue)}` : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
+                    const localUrl = isIdSearch ? `/animals?id_public=${encodeURIComponent(idValue)}` : `/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
                     const localResponse = await apiClient.get(localUrl);
                     const filteredLocal = localResponse.data.filter(a => {
                         if (a.id_public === currentId) return false;
@@ -5536,7 +5536,7 @@ useEffect(() => {
             } else { setLocalAnimals([]); setLoadingLocal(false); }
             if (scope === 'global' || scope === 'both') {
                 try {
-                    const globalUrl = isIdSearch ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idValue)}` : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
+                    const globalUrl = isIdSearch ? `/public/global/animals?id_public=${encodeURIComponent(idValue)}` : `/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
                     const globalResponse = await apiClient.get(globalUrl);
                     const filteredGlobal = globalResponse.data.filter(a => {
                         if (a.id_public === currentId) return false;
