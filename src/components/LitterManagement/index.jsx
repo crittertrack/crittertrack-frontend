@@ -1022,6 +1022,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             await fetchLitters();
             // Small delay to allow React to process state updates
             await new Promise(resolve => setTimeout(resolve, 100));
+            // Other mounted components (e.g. AnimalList's reproNeedsAttentionList) keep their own
+            // stale litters snapshot until told to refetch — without this, the "mating due today"
+            // reminder there would keep showing since it only re-fetches on 'animals-changed'.
+            window.dispatchEvent(new Event('animals-changed'));
         } catch (err) {
             showModalMessage('Error', 'Failed to mark as mated');
         }
@@ -1092,6 +1096,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             if (litter.damId_public) {
                 window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: litter.damId_public, isNursing: false } }));
             }
+            // Refresh other mounted components' own litters snapshots (e.g. AnimalList's
+            // reproNeedsAttentionList) so a stale weaningDate/weaningConfirmed doesn't keep the
+            // "weaning due today" reminder showing after it's been handled here.
+            window.dispatchEvent(new Event('animals-changed'));
         } catch (err) {
             showModalMessage('Error', 'Failed to mark as weaned');
         }
