@@ -513,7 +513,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         stillbornCount: null,
         lossesCount: null,
         expectedDueDate: '',
-        weaningDate: ''
+        weaningDate: '',
+        weaningConfirmed: false
     });
     const [createOffspringCounts, setCreateOffspringCounts] = useState({
         males: 0,
@@ -1205,6 +1206,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 stillbornCount: formData.stillbornCount || null,
                 lossesCount: formData.lossesCount || null,
                 weaningDate: formData.weaningDate || null,
+                weaningConfirmed: formData.weaningConfirmed || false,
                 // Extraction flags
                 extractStillbornFromTotal: formData.extractStillbornFromTotal || false,
                 extractLossesFromTotal: formData.extractLossesFromTotal || false,
@@ -1722,7 +1724,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             femaleLosses: litter.femaleLossesCount || null,
             unknownLosses: litter.unknownLossesCount || null,
             expectedDueDate: formatDateForInput(litter.expectedDueDate),
-            weaningDate: formatDateForInput(litter.weaningDate)
+            weaningDate: formatDateForInput(litter.weaningDate),
+            weaningConfirmed: litter.weaningConfirmed || false
         });
         setShowAddForm(true);
         setExpandedLitter(null);
@@ -1840,6 +1843,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 stillbornCount: formData.stillbornCount || null,
                 lossesCount: formData.lossesCount || null,
                 weaningDate: formData.weaningDate || null,
+                weaningConfirmed: formData.weaningConfirmed || false,
                 // Extraction flags
                 extractStillbornFromTotal: formData.extractStillbornFromTotal || false,
                 extractLossesFromTotal: formData.extractLossesFromTotal || false,
@@ -1857,6 +1861,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             if (isNewBirth) {
                 syncDamPostBirth(formData.damId_public);
             }
+            // Backend recomputes isNursing from weaningConfirmed on every litter save — let other
+            // mounted components (Reproduction tab, dashboards) refresh their own stale copies too.
+            window.dispatchEvent(new Event('animals-changed'));
 
             // Update all linked offspring to have the correct parents.
             // Use allSettled so that offspring the user no longer owns (transferred/sold)
@@ -2656,7 +2663,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 onChange={(e) => setFormData({...formData, weaningDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
-
+                                            <label className="flex items-center gap-2 mt-2 text-xs text-gray-600 dark:text-dark-text-secondary">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!!formData.weaningConfirmed}
+                                                    onChange={(e) => setFormData({...formData, weaningConfirmed: e.target.checked})}
+                                                    className="w-4 h-4"
+                                                />
+                                                Confirm weaning (ends nursing status — use this to record early/late weaning with a custom date instead of "Wean Today")
+                                            </label>
                                         </div>
                                     </div>
 
