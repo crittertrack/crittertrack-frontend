@@ -9,6 +9,8 @@ import {
 import { BreederDirectorySettings } from '../PublicProfile/BreederDirectory';
 import InfoButton from '../shared/InfoButton';
 import { isPushSupported, getPushPermission, subscribeToPush, unsubscribeFromPush, isSubscribedOnThisDevice } from '../../utils/pushNotifications';
+import { Capacitor } from '@capacitor/core';
+import { registerNativePush, isNativePushGranted } from '../../utils/nativePush';
 import { breedingLineTextStyle, breedingLineGlyph } from '../../utils/breedingLineColor';
 import { API_BASE_URL } from '../../utils/apiConfig';
 import { downloadBlob } from '../../utils/nativeDownload';
@@ -331,7 +333,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showStatsTab, setShowStatsTab] = useState(userProfile.showStatsTab ?? true);
     const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
     const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
-    const [pushSupported] = useState(() => isPushSupported());
+    const [isNativePlatform] = useState(() => Capacitor.isNativePlatform());
+    const [pushSupported] = useState(() => isNativePlatform || isPushSupported());
     const [pushSubscribed, setPushSubscribed] = useState(false);
     const [pushBusy, setPushBusy] = useState(false);
     const [pushCategories, setPushCategories] = useState([]);
@@ -501,19 +504,25 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
     useEffect(() => {
         if (activeTab !== 'profile' || !pushSupported) return;
-        isSubscribedOnThisDevice().then(setPushSubscribed).catch(() => {});
+        (isNativePlatform ? isNativePushGranted() : isSubscribedOnThisDevice()).then(setPushSubscribed).catch(() => {});
         apiClient.get('/push/preferences')
             .then(r => {
                 setPushCategories(r.data.categories || []);
                 setPushPreferences(r.data.preferences || {});
             })
             .catch(() => {});
-    }, [activeTab, pushSupported, API_BASE_URL, authToken]);
+    }, [activeTab, pushSupported, isNativePlatform, API_BASE_URL, authToken]);
 
     const handleTogglePushEnabled = async () => {
         setPushBusy(true);
         try {
-            if (pushSubscribed) {
+            if (isNativePlatform) {
+                // OS permission can't be revoked in-app once granted — only offer the enable path here.
+                if (!pushSubscribed) {
+                    await registerNativePush();
+                    setPushSubscribed(await isNativePushGranted());
+                }
+            } else if (pushSubscribed) {
                 await unsubscribeFromPush(authToken, API_BASE_URL);
                 setPushSubscribed(false);
             } else {
@@ -1162,14 +1171,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             <p className="text-sm text-gray-500 dark:text-dark-text-muted">Not supported in this browser. On iPhone/iPad, add CritterTrack to your Home Screen first (Share → Add to Home Screen), then try again from there.</p>
                         ) : (
                             <>
-                                <button
-                                    type="button"
-                                    onClick={handleTogglePushEnabled}
-                                    disabled={pushBusy}
-                                    className={`text-sm font-medium px-3 py-1.5 rounded-md ${pushSubscribed ? 'bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text hover:bg-gray-300' : 'bg-primary-dark text-white hover:bg-primary-darker'}`}
-                                >
-                                    {pushBusy ? 'Please wait…' : pushSubscribed ? 'Disable push notifications on this device' : 'Enable push notifications on this device'}
-                                </button>
+                                {isNativePlatform && pushSubscribed ? (
+                                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Push notifications are enabled on this device. To disable them, use this device's system notification settings for CritterTrack.</p>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={handleTogglePushEnabled}
+                                        disabled={pushBusy}
+                                        className={`text-sm font-medium px-3 py-1.5 rounded-md ${pushSubscribed ? 'bg-gray-200 dark:bg-dark-surface text-gray-800 dark:text-dark-text hover:bg-gray-300' : 'bg-primary-dark text-white hover:bg-primary-darker'}`}
+                                    >
+                                        {pushBusy ? 'Please wait…' : pushSubscribed ? 'Disable push notifications on this device' : 'Enable push notifications on this device'}
+                                    </button>
+                                )}
                                 {pushSubscribed && (
                                     <div className="space-y-2 pl-2">
                                         <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Choose what you want to be notified about:</p>

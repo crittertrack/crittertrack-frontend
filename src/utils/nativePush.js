@@ -25,6 +25,18 @@ export const registerNativePush = async () => {
     }
 };
 
+// Lets UI (Settings > Push Notifications) reflect the OS permission state instead of the
+// Web-Push-only isSubscribedOnThisDevice() check, which is always false in a Capacitor WebView.
+export const isNativePushGranted = async () => {
+    if (!Capacitor.isNativePlatform() || !FIREBASE_CONFIGURED) return false;
+    try {
+        const perm = await PushNotifications.checkPermissions();
+        return perm.receive === 'granted';
+    } catch {
+        return false;
+    }
+};
+
 // Wires up the FCM listeners for this authenticated session. Returns a cleanup function that
 // removes all listeners (call it on logout/unmount).
 export const initNativePushListeners = async (authToken, API_BASE_URL) => {
