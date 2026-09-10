@@ -501,6 +501,9 @@ const App = () => {
 
     // Add Sibling: open blank form pre-filled with same species/birthdate/parents
     const [siblingTemplate, setSiblingTemplate] = React.useState(null);
+    // Bumped to force-remount the sibling form (fresh blank fields) after "Save & Add Another".
+    const [siblingFormKey, setSiblingFormKey] = React.useState(0);
+    const [siblingsAddedCount, setSiblingsAddedCount] = React.useState(0);
     const handleAddSibling = React.useCallback((sourceAnimal) => {
         if (!sourceAnimal) return;
         const birthDate = sourceAnimal.birthDate
@@ -512,6 +515,7 @@ const App = () => {
             fatherId_public: sourceAnimal.fatherId_public || sourceAnimal.sireId_public || null,
             motherId_public: sourceAnimal.motherId_public || sourceAnimal.damId_public || null,
         });
+        setSiblingsAddedCount(0);
         setAnimalToView(null);
     }, [setAnimalToView]);
 
@@ -2302,15 +2306,18 @@ const App = () => {
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
                     <Suspense fallback={<LoadingSpinner />}>
                     <AnimalForm
-                        formTitle={`Add Sibling (${siblingTemplate.species})`}
+                        key={`sibling-${siblingFormKey}`}
+                        formTitle={`Add Sibling (${siblingTemplate.species})${siblingsAddedCount > 0 ? ` \u2014 ${siblingsAddedCount} added` : ''}`}
                         animalToEdit={null}
                         species={siblingTemplate.species}
                         initialValues={siblingTemplate}
-                        onSave={async (...args) => {
-                            await handleSaveAnimalWithRefresh(...args);
-                            setSiblingTemplate(null);
-                        }}
+                        onSave={handleSaveAnimalWithRefresh}
                         onCancel={() => setSiblingTemplate(null)}
+                        onSaveAndAddAnother={() => {
+                            setSiblingsAddedCount(c => c + 1);
+                            setSiblingFormKey(k => k + 1);
+                        }}
+                        addAnotherLabel="Save & Add Another Sibling"
                         onDelete={null}
                         authToken={authToken}
                         showModalMessage={showModalMessage}
