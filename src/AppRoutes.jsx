@@ -515,6 +515,16 @@ export function AppRoutes({
             GENDER_OPTIONS={GENDER_OPTIONS}
             STATUS_OPTIONS={STATUS_OPTIONS}
             AnimalImageUpload={AnimalImageUpload}
+            onHiddenSectionsUpdate={(updatedSpecies, data) => {
+              if (!setUserProfile) return;
+              setUserProfile(prev => prev ? ({
+                ...prev,
+                uiPreferences: {
+                  ...prev.uiPreferences,
+                  hiddenFormSections: { ...(prev.uiPreferences?.hiddenFormSections || {}), [updatedSpecies]: data }
+                }
+              }) : prev);
+            }}
           />
         )
       } />

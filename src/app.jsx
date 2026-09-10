@@ -268,6 +268,19 @@ const App = () => {
     const userProfile = userProfileAuth;
     const setUserProfile = setUserProfileAuth;
     const fetchUserProfile = fetchUserProfileAuth;
+
+    // Keeps local userProfile state in sync right after a Customize-tab hidden-sections save,
+    // so reopening the Animal Form for the same species in this session shows the latest choice
+    // without waiting for a full profile refetch.
+    const handleHiddenSectionsUpdate = useCallback((updatedSpecies, data) => {
+        setUserProfile(prev => prev ? ({
+            ...prev,
+            uiPreferences: {
+                ...prev.uiPreferences,
+                hiddenFormSections: { ...(prev.uiPreferences?.hiddenFormSections || {}), [updatedSpecies]: data }
+            }
+        }) : prev);
+    }, [setUserProfile]);
     
     // Setup idle timeout with auth
     useIdleTimeout(authToken, () => handleLogout(), (title, message) => {
@@ -2274,6 +2287,7 @@ const App = () => {
                                     handleWithdrawTransfer={transferWorkflow.handleWithdrawTransfer}
                                     GENDER_OPTIONS={GENDER_OPTIONS}
                                     STATUS_OPTIONS={STATUS_OPTIONS}
+                                    onHiddenSectionsUpdate={handleHiddenSectionsUpdate}
                                 />
                             ) : (
                                 <Suspense fallback={<LoadingSpinner />}>
@@ -2293,6 +2307,7 @@ const App = () => {
                                         GENDER_OPTIONS={GENDER_OPTIONS}
                                         STATUS_OPTIONS={STATUS_OPTIONS}
                                         AnimalImageUpload={AnimalImageUpload}
+                                        onHiddenSectionsUpdate={handleHiddenSectionsUpdate}
                                     />
                                 </Suspense>
                             )}
@@ -2335,6 +2350,7 @@ const App = () => {
                         GENDER_OPTIONS={GENDER_OPTIONS}
                         STATUS_OPTIONS={STATUS_OPTIONS}
                         AnimalImageUpload={AnimalImageUpload}
+                        onHiddenSectionsUpdate={handleHiddenSectionsUpdate}
                     />
                     </Suspense>
                 </div>

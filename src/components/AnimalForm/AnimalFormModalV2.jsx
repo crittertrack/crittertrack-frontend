@@ -5,7 +5,7 @@ import {
     Lock, Palette, PlusCircle, Save, Tag, Trash2, TreeDeciduous, Egg, Brain, Trophy, FileCheck, Scale, X, User, Heart, Eye, EyeOff, Edit, Users, HeartPulse,
     Hash, Sparkles, Ruler, Sprout, Key, FolderOpen, Globe, Leaf, UtensilsCrossed, Droplets, CheckSquare,
     Thermometer, Feather, Medal, Target, Ban, Package, ScrollText, Link, Unlink, Baby, Bell, Plus, RotateCcw, Camera, Upload, Search, Star, ArrowRight,
-    Loader2, ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, DollarSign,
+    Loader2, ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, DollarSign, Settings, Check,
 } from 'lucide-react';
 import DatePicker from '../DatePicker';
 import themeColors from '../../utils/themeColors';
@@ -26,6 +26,76 @@ import { ANIMAL_FORM_TAB_INFO } from '../../data/animalTabInfo';
 // Appearance fields that use the per-user/per-species dropdown-with-custom-entry pattern
 // (see appearanceOptionsMap / ComboBoxField below).
 const APPEARANCE_DROPDOWN_FIELDS = ['color', 'markings', 'coat', 'earset', 'eyeColor', 'body'];
+
+// Tabs that are always shown and can never be hidden via the Customize tab.
+const MANDATORY_TABS = ['dashboard', 'pedigree', 'gallery'];
+
+// Registry of hideable tabs and their independently-toggleable sections, used by the Customize
+// tab to declutter the form per-species (persisted as uiPreferences.hiddenFormSections).
+const HIDEABLE_TAB_SECTIONS = {
+    identification: [
+        { id: 'identificationNumbers', label: 'Identification Numbers' },
+        { id: 'classification', label: 'Classification' },
+        { id: 'origin', label: 'Origin' },
+        { id: 'tags', label: 'Tags' },
+    ],
+    appearance: [
+        { id: 'appearance', label: 'Appearance' },
+        { id: 'geneticInfo', label: 'Genetic Info' },
+        { id: 'lifeStage', label: 'Life Stage' },
+        { id: 'measurements', label: 'Measurements & Growth Tracking' },
+    ],
+    health: [
+        { id: 'activeMedicalRecords', label: 'Active Medical Records' },
+        { id: 'preventiveCare', label: 'Preventive Care' },
+        { id: 'healthClearances', label: 'Health Clearances & Screening' },
+        { id: 'proceduresDiagnostics', label: 'Procedures & Diagnostics' },
+        { id: 'veterinaryCare', label: 'Veterinary Care' },
+        { id: 'endOfLife', label: 'End of Life' },
+    ],
+    care: [
+        { id: 'nutrition', label: 'Nutrition' },
+        { id: 'enclosure', label: 'Enclosure' },
+        { id: 'environmentNeeds', label: 'Environment Needs' },
+        { id: 'groomingCoatCare', label: 'Grooming & Coat Care' },
+        { id: 'specialRequirements', label: 'Special Requirements & Preferences' },
+        { id: 'animalCareTasks', label: 'Animal Care Tasks' },
+    ],
+    behavior: [
+        { id: 'behaviorTemperament', label: 'Behavior & Temperament' },
+        { id: 'activityTraining', label: 'Activity & Training' },
+        { id: 'workingRoleCertifications', label: 'Working Role & Certifications' },
+        { id: 'knownIssuesSafety', label: 'Known Issues & Safety Concerns' },
+        { id: 'trainingSchedules', label: 'Training Schedules' },
+        { id: 'temperamentAssessment', label: 'Temperament Assessment' },
+        { id: 'specializedTraits', label: 'Specialized Behavioral Traits' },
+    ],
+    breeding: [
+        { id: 'currentReproductiveState', label: 'Current Reproductive State' },
+        { id: 'fertilityStatus', label: 'Fertility Status' },
+        { id: 'reproductiveCycle', label: 'Reproductive Cycle' },
+        { id: 'conceptionMatingHistory', label: 'Conception & Mating History' },
+        { id: 'pregnancyDevelopmentDetails', label: 'Pregnancy/Development Details' },
+        { id: 'reproductiveOutcomes', label: 'Reproductive Outcomes & Nursing' },
+        { id: 'reproductiveHealthProcedures', label: 'Reproductive Health & Procedures' },
+        { id: 'deliveryBreedingHealth', label: 'Delivery & Breeding Health' },
+        { id: 'addBreedingRecord', label: 'Add Breeding Record (Manual Log)' },
+    ],
+    timeline: [
+        { id: 'eventFilters', label: 'Event Filters' },
+        { id: 'milestones', label: 'Milestones' },
+        { id: 'timelineEvents', label: 'Timeline Events' },
+        { id: 'eventAnnotations', label: 'Event Annotations' },
+    ],
+    records: [
+        { id: 'ownershipHistory', label: 'Ownership History' },
+        { id: 'showPerformance', label: 'Show & Performance' },
+        { id: 'salePurchase', label: 'Sale & Purchase' },
+        { id: 'legalDocumentation', label: 'Legal & Documentation' },
+    ],
+};
+
+const HIDEABLE_TAB_IDS = Object.keys(HIDEABLE_TAB_SECTIONS);
 
 const getSpeciesCategory = (species) => {
     if (!species) return 'Other';
@@ -1453,12 +1523,70 @@ const AnimalFormModalV2 = ({
     // animal but keeps the (blank, re-templated) form open for adding another instead
     // of closing — used by the "Add Sibling" flow to add a whole litter at once.
     onSaveAndAddAnother,
-    addAnotherLabel = 'Save & Add Another'
+    addAnotherLabel = 'Save & Add Another',
+    // Optional: called with (species, { tabs, sections }) right after a Customize-tab hidden
+    // sections save succeeds, so the parent can update its own userProfile state and avoid a
+    // stale Customize tab if this modal (or another instance) is reopened before a full profile refetch.
+    onHiddenSectionsUpdate
 }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(false);
     // Tracks which footer submit button triggered this submission ('close' | 'addAnother').
     const submitModeRef = useRef('close');
+    // Per-species hidden tabs/sections (Customize tab) — declutters this form only, never the read-only view.
+    const [hiddenFormSections, setHiddenFormSections] = useState(() => {
+        const stored = userProfile?.uiPreferences?.hiddenFormSections?.[species];
+        return { tabs: stored?.tabs || [], sections: stored?.sections || [] };
+    });
+    const [prefSaveStatus, setPrefSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved'
+    const prefSaveTimeoutRef = useRef(null);
+    const isTabHidden = (tabId) => hiddenFormSections.tabs.includes(tabId);
+    const isSectionHidden = (tabId, sectionId) => hiddenFormSections.sections.includes(`${tabId}.${sectionId}`);
+    const saveHiddenFormSections = useCallback((next) => {
+        setPrefSaveStatus('saving');
+        if (prefSaveTimeoutRef.current) clearTimeout(prefSaveTimeoutRef.current);
+        prefSaveTimeoutRef.current = setTimeout(() => {
+            apiClient.patch('/users/preferences', { hiddenFormSectionsSpecies: species, hiddenFormSections: next })
+                .then(() => {
+                    setPrefSaveStatus('saved'); setTimeout(() => setPrefSaveStatus('idle'), 2000);
+                    if (onHiddenSectionsUpdate) onHiddenSectionsUpdate(species, next);
+                })
+                .catch(() => setPrefSaveStatus('idle'));
+        }, 600);
+    }, [species, onHiddenSectionsUpdate]);
+    const toggleTabHidden = (tabId) => {
+        setHiddenFormSections(prev => {
+            const hidden = prev.tabs.includes(tabId);
+            const next = { ...prev, tabs: hidden ? prev.tabs.filter(t => t !== tabId) : [...prev.tabs, tabId] };
+            saveHiddenFormSections(next);
+            return next;
+        });
+        setActiveTab(current => current === tabId ? 'customize' : current);
+    };
+    const toggleSectionHidden = (tabId, sectionId) => {
+        const key = `${tabId}.${sectionId}`;
+        setHiddenFormSections(prev => {
+            const hidden = prev.sections.includes(key);
+            const next = { ...prev, sections: hidden ? prev.sections.filter(s => s !== key) : [...prev.sections, key] };
+            saveHiddenFormSections(next);
+            return next;
+        });
+    };
+    // Flush a pending debounced save immediately when leaving the Customize tab (e.g. switching
+    // tabs or closing the form) instead of waiting out the debounce and losing the last change.
+    useEffect(() => {
+        if (activeTab !== 'customize' && prefSaveTimeoutRef.current) {
+            clearTimeout(prefSaveTimeoutRef.current);
+            prefSaveTimeoutRef.current = null;
+            apiClient.patch('/users/preferences', { hiddenFormSectionsSpecies: species, hiddenFormSections })
+                .then(() => {
+                    setPrefSaveStatus('saved');
+                    if (onHiddenSectionsUpdate) onHiddenSectionsUpdate(species, hiddenFormSections);
+                })
+                .catch(() => {});
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeTab]);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [assignModalTarget, setAssignModalTarget] = useState(null); // 'breeder' or 'keeper'
     // Contact _id behind a breeder/owner selection with no linked CTUID — a manual contact can't be
@@ -3728,6 +3856,12 @@ const AnimalFormModalV2 = ({
         { id: 'timeline', label: 'Timeline', icon: Clock },
         { id: 'records', label: 'Records', icon: FileText },
     ];
+    // Tabs the user chose to hide for this species stay out of the tab bar entirely; Customize is
+    // always appended last so there's always a way back in to re-enable them.
+    const visibleTabs = [
+        ...TABS.filter(tab => MANDATORY_TABS.includes(tab.id) || !isTabHidden(tab.id)),
+        { id: 'customize', label: 'Customize', icon: Settings },
+    ];
 
     // Species template: prefer the real Species collection category (covers custom species too),
     // falling back to the static category map for species not present in speciesOptions yet.
@@ -3771,7 +3905,7 @@ const AnimalFormModalV2 = ({
                 {/* Tabs */}
                 <div className="bg-[#e1f2f5] dark:bg-dark-card-bg z-10 border-b border-gray-300 dark:border-dark-border px-3 sm:px-6 py-2">
                     <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                        {TABS.map(tab => (
+                        {visibleTabs.map(tab => (
                             <button
                                 key={tab.id}
                                 type="button"
@@ -4003,6 +4137,7 @@ const AnimalFormModalV2 = ({
                         {activeTab === 'identification' && (
                             <div className="space-y-4">
                                 {/* Identification Numbers */}
+                                {!isSectionHidden('identification', 'identificationNumbers') && (
                                 <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
                                     <button type="button" onClick={() => toggleSection('identificationNumbers')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
                                         <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><Hash size={16} className="flex-shrink-0" /> Identification Numbers</h3>
@@ -4100,8 +4235,10 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     )}
                                 </div>
+                                )}
 
                                 {/* Classification */}
+                                {!isSectionHidden('identification', 'classification') && (
                                 <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
                                     <button type="button" onClick={() => toggleSection('classification')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
                                         <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><FolderOpen size={16} className="flex-shrink-0" /> Classification</h3>
@@ -4133,9 +4270,10 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     )}
                                 </div>
+                                )}
 
                                 {/* Origin */}
-                                {!hiddenField('origin') && (
+                                {!hiddenField('origin') && !isSectionHidden('identification', 'origin') && (
                                 <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
                                     <button type="button" onClick={() => toggleSection('origin')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
                                         <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><Globe size={16} className="flex-shrink-0" /> Origin</h3>
@@ -4159,6 +4297,7 @@ const AnimalFormModalV2 = ({
                                 )}
 
                                 {/* Tags */}
+                                {!isSectionHidden('identification', 'tags') && (
                                 <div className="bg-gray-50 dark:bg-dark-surface p-3 rounded-lg border border-gray-200 dark:border-dark-border">
                                     <button type="button" onClick={() => toggleSection('tags')} className="w-full flex justify-between items-center text-left hover:bg-gray-100 dark:hover:bg-dark-surface-hover p-2 rounded transition-colors">
                                         <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary flex items-center gap-1.5"><Tag size={16} className="flex-shrink-0" /> Tags</h3>
@@ -4183,11 +4322,13 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     )}
                                 </div>
+                                )}
                             </div>
                         )}
 
                         {activeTab === 'appearance' && (
                             <div className="space-y-6">
+                                {!isSectionHidden('appearance', 'appearance') && (
                                 <FormSection title="Appearance" icon={<Palette size={16} />} initiallyOpen>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
@@ -4254,9 +4395,13 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
+                                {!isSectionHidden('appearance', 'geneticInfo') && (
                                 <FormSection title="Genetic Info" icon={<Dna size={16} />}>
                                     <GeneticCodeBuilder species={formData.species} gender={formData.gender} value={formData.geneticCode} onChange={(v) => setFormData(p => ({ ...p, geneticCode: v }))} possibleHets={formData.possibleHets} onPossibleHetsChange={(v) => setFormData(p => ({ ...p, possibleHets: v }))} onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)} onSeedAppearance={handleSeedAppearance} />
                                 </FormSection>
+                                )}
+                                {!isSectionHidden('appearance', 'lifeStage') && (
                                 <FormSection title={fieldLabel('lifeStage', 'Life Stage')} icon={<Sprout size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
@@ -4274,6 +4419,8 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
+                                {!isSectionHidden('appearance', 'measurements') && (
                                 <FormSection title="Measurements & Growth Tracking" icon={<Ruler size={16} />}>
                                     <div className="space-y-6">
                                         {/* Current Measurement Display */}
@@ -4512,6 +4659,7 @@ const AnimalFormModalV2 = ({
                                         )}
                                     </div>
                                 </FormSection>
+                                )}
                             </div>
                         )}
 
@@ -4578,6 +4726,7 @@ const AnimalFormModalV2 = ({
 
                         {activeTab === 'health' && (
                             <div className="space-y-4">
+                                {!isSectionHidden('health', 'activeMedicalRecords') && (
                                 <FormSection title={
                                     (() => {
                                         const { status, badgeColor, factors, isOverridden, calculatedStatus } = calculateHealthStatus();
@@ -4876,7 +5025,9 @@ const AnimalFormModalV2 = ({
                                         ))}
                                     </div>}
                                 </FormSection>
+                                )}
 
+                                {!isSectionHidden('health', 'preventiveCare') && (
                                 <FormSection title="Preventive Care" icon={<Shield size={16} />} initiallyOpen>
                                     {/* Vaccinations */}
                                     {!hiddenField('vaccinations') && <div className="space-y-2">
@@ -4954,7 +5105,9 @@ const AnimalFormModalV2 = ({
                                     </div>
                                     </div>
                                 </FormSection>
+                                )}
 
+                                {!isSectionHidden('health', 'healthClearances') && (
                                 <FormSection title="Health Clearances & Screening" icon={<Hospital size={16} />}>
                                     <div className="space-y-4">
                                         {!hiddenField('hipElbowScores') && (
@@ -5038,7 +5191,9 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
 
+                                {!isSectionHidden('health', 'proceduresDiagnostics') && (
                                 <FormSection title="Procedures & Diagnostics" icon={<Microscope size={16} />}>
                                     {/* Medical Procedures */}
                                     <div className="space-y-2">
@@ -5067,7 +5222,9 @@ const AnimalFormModalV2 = ({
                                     {(formData.labResults || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.testName} - {rec.result}</span><button type="button" onClick={() => removeArrayItem('labResults', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
+                                )}
 
+                                {!isSectionHidden('health', 'veterinaryCare') && (
                                 <FormSection title="Veterinary Care" icon={<Stethoscope size={16} />}>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Primary Veterinarian</label>
@@ -5087,7 +5244,9 @@ const AnimalFormModalV2 = ({
                                     {(formData.vetVisits || []).filter(Boolean).map((rec, i) => <div key={i} className="flex justify-between items-start gap-2 text-xs p-1.5 bg-white dark:bg-dark-card-bg rounded border"><span className="flex-1 min-w-0 break-words">{rec.date}: {rec.reason} {rec.notes && `(${rec.notes})`}</span><button type="button" onClick={() => removeArrayItem('vetVisits', i)} className="flex-shrink-0"><Trash2 size={14} className="text-red-500" /></button></div>)}
                                     </div>
                                 </FormSection>
+                                )}
 
+                                {!isSectionHidden('health', 'endOfLife') && (
                                 <FormSection title="End of Life" icon={<Scale size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
@@ -5110,10 +5269,12 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
                             </div>
                         )}
                         {activeTab === 'care' && (
                             <div className="space-y-4">
+                                {!isSectionHidden('care', 'nutrition') && (
                                 <FormSection title="Nutrition" icon={<UtensilsCrossed size={16} />} initiallyOpen>
                                     <div className="space-y-3">
                                         <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
@@ -5350,6 +5511,8 @@ const AnimalFormModalV2 = ({
                                     </div>
 
                                 </FormSection>
+                                )}
+                                {!isSectionHidden('care', 'enclosure') && (
                                 <FormSection title="Enclosure" icon={<Home size={16} />}>
                                     {/* Enclosure Assignment */}
                                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700/60 space-y-2 mb-4">
@@ -5455,8 +5618,10 @@ const AnimalFormModalV2 = ({
                                         )}
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* Environment Needs */}
+                                {!isSectionHidden('care', 'environmentNeeds') && (
                                 <FormSection title="Environment Needs" icon={<Leaf size={16} />}>
                                     <div className="space-y-3">
                                         {/* Lighting */}
@@ -5482,8 +5647,10 @@ const AnimalFormModalV2 = ({
 
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* Grooming & Coat Care */}
+                                {!isSectionHidden('care', 'groomingCoatCare') && (
                                 <FormSection title="Grooming & Coat Care" icon={<Scissors size={16} />}>
                                     <div className="space-y-3">
                                         {/* General Grooming */}
@@ -5524,8 +5691,10 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* Special Requirements */}
+                                {!isSectionHidden('care', 'specialRequirements') && (
                                 <FormSection title="Special Requirements & Preferences" icon={<Heart size={16} />}>
                                     <div className="space-y-3">
                                         {/* Dietary */}
@@ -5561,8 +5730,10 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* Animal Care Tasks (direct, hands-on animal upkeep — shown in Scheduled Care section of the management view) */}
+                                {!isSectionHidden('care', 'animalCareTasks') && (
                                 <FormSection title="Animal Care Tasks" icon={<CheckSquare size={16} />}>
                                     <div className="space-y-3">
                                         <datalist id="care-task-suggestions">
@@ -5627,16 +5798,20 @@ const AnimalFormModalV2 = ({
                                         )}
                                     </div>
                                 </FormSection>
+                                )}
                             </div>
                         )}
                         {activeTab === 'behavior' && (
                             <div className="space-y-4">
+                                {!isSectionHidden('behavior', 'behaviorTemperament') && (
                                 <FormSection title="Behavior & Temperament" icon={<MessageSquare size={16} />} initiallyOpen>
                                     <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Temperament</label><input type="text" name="temperament" value={formData.temperament} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Friendly, skittish, aggressive, calm" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Handling Tolerance</label><input type="text" name="handlingTolerance" value={formData.handlingTolerance} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Enjoys handling, tolerates briefly" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Social Structure</label><textarea name="socialStructure" value={formData.socialStructure} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Lives with 2 cage mates, solitary" /></div>
                                 </FormSection>
+                                )}
 
+                                {!isSectionHidden('behavior', 'activityTraining') && (
                                 <FormSection title="Activity & Training" icon={<Brain size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
@@ -5660,8 +5835,9 @@ const AnimalFormModalV2 = ({
                                         {!hiddenField('freeFlightTrained') && <label className="flex items-center gap-2"><input type="checkbox" name="freeFlightTrained" checked={!!formData.freeFlightTrained} onChange={handleChange} className="form-checkbox h-4 w-4" /> Free-Flight Trained</label>}
                                     </div>
                                 </FormSection>
+                                )}
 
-                                {(!hiddenField('workingRole') || !hiddenField('certifications')) && (
+                                {!isSectionHidden('behavior', 'workingRoleCertifications') && (!hiddenField('workingRole') || !hiddenField('certifications')) && (
                                 <FormSection title="Working Role & Certifications" icon={<Trophy size={16} />}>
                                     <div className="space-y-3">
                                         {!hiddenField('workingRole') && <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Working Role</label><input type="text" name="workingRole" value={formData.workingRole || ''} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Service dog, Therapy dog, Show dog, Guard dog, Working animal" /></div>}
@@ -5670,6 +5846,7 @@ const AnimalFormModalV2 = ({
                                 </FormSection>
                                 )}
 
+                                {!isSectionHidden('behavior', 'knownIssuesSafety') && (
                                 <FormSection title="Known Issues & Safety Concerns" icon={<AlertTriangle size={16} />}>
                                     <div className="space-y-3">
                                         <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
@@ -5700,7 +5877,9 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
 
+                                {!isSectionHidden('behavior', 'trainingSchedules') && (
                                 <FormSection title="Training Schedules" icon={<Brain size={16} />}>
                                     <p className="text-xs text-gray-500 dark:text-dark-text-muted -mt-1">Optional recurring schedules for training/exercise activities — each tracked independently and shown clustered in the Feeding & Care management view.</p>
                                     <div className="space-y-3">
@@ -5742,7 +5921,9 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
 
+                                {!isSectionHidden('behavior', 'temperamentAssessment') && (
                                 <FormSection title="Temperament Assessment (1-5 Scale)" icon={<Brain size={16} />}>
                                     <div className="space-y-3">
                                         <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
@@ -5793,7 +5974,9 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
 
+                                {!isSectionHidden('behavior', 'specializedTraits') && (
                                 <FormSection title="Specialized Behavioral Traits" icon={<Sparkles size={16} />}>
                                     <div className="space-y-3">
                                         <div className="bg-white dark:bg-dark-card-bg p-3 rounded-lg border border-gray-200 dark:border-dark-border space-y-2">
@@ -5828,11 +6011,13 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
                             </div>
                         )}
                         {activeTab === 'breeding' && (
                             <div className="space-y-4">
                                 {/* SECTION 1: Current Reproductive State */}
+                                {!isSectionHidden('breeding', 'currentReproductiveState') && (
                                 <FormSection title="Current Reproductive State" icon={<Heart size={16} />}>
                                     {/* Auto-calculated display */}
                                     <div className="space-y-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/60 rounded-lg mb-3">
@@ -5909,8 +6094,10 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     )}
                                 </FormSection>
+                                )}
 
                                 {/* SECTION 2: Fertility Status */}
+                                {!isSectionHidden('breeding', 'fertilityStatus') && (
                                 <FormSection title="Fertility Status" icon={<Sparkles size={16} />}>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Fertility Status</label>
@@ -5926,9 +6113,10 @@ const AnimalFormModalV2 = ({
                                         </select>
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* SECTION 3: Reproductive Cycle (Conditional) */}
-                                {['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
+                                {!isSectionHidden('breeding', 'reproductiveCycle') && ['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
                                     <FormSection title="Reproductive Cycle" icon={<Activity size={16} />}>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
@@ -5953,7 +6141,7 @@ const AnimalFormModalV2 = ({
                                 )}
 
                                 {/* SECTION 4: Conception & Mating History (Conditional) */}
-                                {['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
+                                {!isSectionHidden('breeding', 'conceptionMatingHistory') && ['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
                                     <FormSection title="Conception & Mating History" icon={<MessageSquare size={16} />}>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
@@ -5973,7 +6161,7 @@ const AnimalFormModalV2 = ({
                                 )}
 
                                 {/* SECTION 5: Pregnancy/Development Details (Conditional, not applicable to males) */}
-                                {formData.gender !== 'Male' && ['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
+                                {!isSectionHidden('breeding', 'pregnancyDevelopmentDetails') && formData.gender !== 'Male' && ['Fertile', 'Subfertile', 'Infertile', 'Unknown'].includes(currentReproductiveState.fertilityStatus) && (
                                     <FormSection title="Pregnancy/Development Details" icon={<AlertTriangle size={16} />}>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
@@ -6002,6 +6190,7 @@ const AnimalFormModalV2 = ({
                                 )}
 
                                 {/* SECTION 6: Reproductive Outcomes & Nursing */}
+                                {!isSectionHidden('breeding', 'reproductiveOutcomes') && (
                                 <FormSection title="Reproductive Outcomes & Nursing" icon={<Trophy size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
@@ -6031,8 +6220,10 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* SECTION 7: Reproductive Health & Procedures */}
+                                {!isSectionHidden('breeding', 'reproductiveHealthProcedures') && (
                                 <FormSection title="Reproductive Health & Procedures" icon={<Leaf size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
@@ -6061,8 +6252,10 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* Delivery & Breeding Health Details */}
+                                {!isSectionHidden('breeding', 'deliveryBreedingHealth') && (
                                 <FormSection title="Delivery & Breeding Health" icon={<Heart size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
@@ -6083,8 +6276,10 @@ const AnimalFormModalV2 = ({
                                         </div>}
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* Original Breeding Records Section (kept for history) */}
+                                {!isSectionHidden('breeding', 'addBreedingRecord') && (
                                 <FormSection title="Add Breeding Record (Manual Log)" icon={<Egg size={16} />} initiallyOpen>
                                     <div className="p-2 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 rounded-lg flex items-start gap-2 mb-1">
                                         <AlertTriangle size={16} className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
@@ -6138,6 +6333,7 @@ const AnimalFormModalV2 = ({
                                     </div>
                                     <button type="button" onClick={addBreedingRecord} className="w-full px-3 py-1.5 bg-primary dark:bg-dark-primary text-black rounded-md text-sm font-medium mt-2">Add Breeding Record</button>
                                 </FormSection>
+                                )}
                             </div>
                         )}
                         {activeTab === 'pedigree' && (() => {
@@ -6315,6 +6511,7 @@ const AnimalFormModalV2 = ({
                         {activeTab === 'timeline' && (
                             <div className="space-y-4">
                                 {/* Event Visibility Toggles */}
+                                {!isSectionHidden('timeline', 'eventFilters') && (
                                 <FormSection title="Event Filters" icon={<Eye size={16} />} initiallyOpen>
                                     <div className="space-y-2">
                                         {[
@@ -6340,8 +6537,10 @@ const AnimalFormModalV2 = ({
                                         ))}
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* Milestones Section */}
+                                {!isSectionHidden('timeline', 'milestones') && (
                                 <FormSection title="Milestones" icon={<Target size={16} />} initiallyOpen>
                                     {(formData.milestones || []).length > 0 && (
                                         <div className="space-y-2 mb-4">
@@ -6427,8 +6626,10 @@ const AnimalFormModalV2 = ({
                                         </button>
                                     </div>
                                 </FormSection>
+                                )}
 
                                 {/* Timeline Events */}
+                                {!isSectionHidden('timeline', 'timelineEvents') && (
                                 <FormSection title="Timeline Events" icon={<Clock size={16} />} initiallyOpen>
                                     {(() => {
                                         const events = aggregateTimelineEvents();
@@ -6533,8 +6734,10 @@ const AnimalFormModalV2 = ({
                                         );
                                     })()}
                                 </FormSection>
+                                )}
 
                                 {/* Add Event Note */}
+                                {!isSectionHidden('timeline', 'eventAnnotations') && (
                                 <FormSection title="Event Annotations" icon={<MessageSquare size={16} />} initiallyOpen={showNoteForm}>
                                     {!showNoteForm ? (
                                         <button
@@ -6589,10 +6792,12 @@ const AnimalFormModalV2 = ({
                                         </div>
                                     )}
                                 </FormSection>
+                                )}
                             </div>
                         )}
                         {activeTab === 'records' && (
                             <div className="space-y-4">
+                                {!isSectionHidden('records', 'ownershipHistory') && (
                                 <FormSection title="Ownership History" icon={<Home size={16} />} initiallyOpen>
                                     {/* Existing entries */}
                                     {(formData.ownershipHistory || []).length > 0 && (
@@ -6712,6 +6917,8 @@ const AnimalFormModalV2 = ({
                                         </button>
                                     </div>
                                 </FormSection>
+                                )}
+                                {!isSectionHidden('records', 'showPerformance') && (
                                 <FormSection title="Show & Performance" icon={<Trophy size={16} />}>
                                     {/* Structured Show Events */}
                                     <div className="space-y-2 mb-4 pb-4 border-b border-gray-200 dark:border-dark-border">
@@ -6751,6 +6958,8 @@ const AnimalFormModalV2 = ({
                                         <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Performance Scores & Assessments</label><textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="2" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" placeholder="e.g., Agility: 9/10, Obedience: 8/10, Temperament: 10/10" /></div>
                                     </div>
                                 </FormSection>
+                                )}
+                                {!isSectionHidden('records', 'salePurchase') && (
                                 <FormSection title="Sale & Purchase" icon={<DollarSign size={16} />}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200 dark:border-dark-border">
                                         <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Purchase Date</label><input type="date" name="purchaseDate" value={formData.purchaseDate} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
@@ -6793,6 +7002,8 @@ const AnimalFormModalV2 = ({
                                         <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">Breeder Buyback Clause</label><textarea name="breederBuybackClause" value={formData.breederBuybackClause} onChange={handleChange} rows="2" placeholder="Details on whether original breeder has right to repurchase or buyback terms" className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                     </div>
                                 </FormSection>
+                                )}
+                                {!isSectionHidden('records', 'legalDocumentation') && (
                                 <FormSection title="Legal & Documentation" icon={<FileCheck size={16} />}>
                                     <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">License Number</label><input type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
                                     <div><label className="block text-xs font-medium text-gray-700 dark:text-dark-text-secondary">License Jurisdiction</label><input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction} onChange={handleChange} className="mt-1 block w-full py-1.5 px-2 text-sm border border-gray-300 dark:border-dark-border rounded-md bg-white dark:bg-dark-card-bg text-gray-900 dark:text-dark-text" /></div>
@@ -6826,6 +7037,58 @@ const AnimalFormModalV2 = ({
                                         </label>
                                     </div>
                                 </FormSection>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'customize' && ( // CUSTOMIZE
+                            <div className="space-y-4">
+                                <div className="flex items-start justify-between gap-3 flex-wrap">
+                                    <div>
+                                        <h3 className="text-base font-semibold text-gray-700 dark:text-dark-text-secondary">Customizing sections for: {formData.species || 'this species'}</h3>
+                                        <p className="text-xs text-gray-500 dark:text-dark-text-muted mt-1 max-w-lg">Hide tabs or sections you don't use for this species. Applies to every animal of this species and syncs across web and the app. Dashboard, Pedigree, and Gallery always stay visible.</p>
+                                    </div>
+                                    <div className="text-xs font-medium flex items-center gap-1.5 flex-shrink-0 h-5">
+                                        {prefSaveStatus === 'saving' && (
+                                            <>
+                                                <Loader2 size={13} className="animate-spin text-gray-400" />
+                                                <span className="text-gray-400 dark:text-dark-text-muted">Saving...</span>
+                                            </>
+                                        )}
+                                        {prefSaveStatus === 'saved' && (
+                                            <>
+                                                <Check size={13} className="text-green-500" />
+                                                <span className="text-green-600 dark:text-green-400">Saved</span>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    {HIDEABLE_TAB_IDS.map(tabId => {
+                                        const tabDef = TABS.find(t => t.id === tabId);
+                                        const tabHidden = isTabHidden(tabId);
+                                        const sections = HIDEABLE_TAB_SECTIONS[tabId] || [];
+                                        return (
+                                            <div key={tabId} className="bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-lg p-3">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input type="checkbox" className="w-4 h-4 flex-shrink-0" checked={!tabHidden} onChange={() => toggleTabHidden(tabId)} />
+                                                    {tabDef && React.createElement(tabDef.icon, { size: 15, className: 'flex-shrink-0 text-gray-500 dark:text-dark-text-muted' })}
+                                                    <span className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary">Show {tabDef?.label || tabId} tab</span>
+                                                </label>
+                                                {!tabHidden && sections.length > 0 && (
+                                                    <div className="mt-2 ml-6 pl-3 border-l-2 border-gray-200 dark:border-dark-border space-y-1.5">
+                                                        {sections.map(sec => (
+                                                            <label key={sec.id} className="flex items-center gap-2 cursor-pointer">
+                                                                <input type="checkbox" className="w-3.5 h-3.5 flex-shrink-0" checked={!isSectionHidden(tabId, sec.id)} onChange={() => toggleSectionHidden(tabId, sec.id)} />
+                                                                <span className="text-xs text-gray-600 dark:text-dark-text-secondary">{sec.label}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
                     </div>
